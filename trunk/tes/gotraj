@@ -1,0 +1,9 @@
+name=../../tes/run/te.fw.a0
+rm $name
+
+/sw/bin/g95 -o $name main.f95 -O3 -cpp -Dtes -Dmean -Dstreamxy -Dstreamr -Dstreamv -Dtracer -Dtime -Dsigma
+
+$name
+
+#time $name > $name.run &
+#tail -f $name.run

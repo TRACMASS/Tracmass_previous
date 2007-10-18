@@ -1,0 +1,9 @@
+name=../../orc/run/op.fw.n0
+rm $name
+
+/Applications/g95-install/bin/i386-apple-darwin8.10.1-g95 -o $name main.f95 -O3 -fendian=big -fno-second-underscore -C -I/Applications/Utilities/netcdf-3.6.2/lib -L/Applications/Utilities/netcdf-3.6.2/lib -lnetcdf -cpp -Dorca -Dstreamxy -Dstreamv -Dtracer -Dtime -Dtempsalt -Dstreamr -Ddesk
+
+#$name
+
+time $name > $name.run &
+#tail -f $name.run

@@ -1,0 +1,10 @@
+name=../../rco/run/ms.05.t1
+rm $name
+
+/Applications/g95-install/bin/i386-apple-darwin8.10.1-g95 -o $name main.f95 -O3 -fendian=big -cpp -Drco -Dmean -Dtempsalt -Dfrsurf -Dstreamxy -Dstreamr -Dstreamv -Dstreamts -Dtime -Dtwodim -Ddesk -Dbiol -Dturb
+
+#$name
+
+time $name > $name.run &
+#tail -f $name.run
+#name=../../rco/run/mu.94.t0
