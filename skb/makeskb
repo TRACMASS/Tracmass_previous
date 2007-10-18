@@ -1,0 +1,50 @@
+# Makes trajectory code
+#
+.SUFFIXES:
+.SUFFIXES: .f95 .o
+#
+OFILES= \
+	../mod_param.o \
+         main.o \
+         ../arclength.o \
+         ../coord.o \
+         ../cross.o \
+         ../interp2.o \
+         ../loop.o \
+         ../pos.o \
+         ../readfieldskb.o \
+         ../vertvel.o \
+         ../writepsi.o 
+ 
+DOPTNS=  \
+                -Dskb \
+                -Dfors \
+                -Dmean \
+                -Dtempsalt \
+                -Dstreamxy \
+                -Dstreamr \
+                -Dstreamv \
+                -Dtracer \
+                -Dtime \
+#
+FC       =  /sw/bin/g95
+#GPP=  cpp $(DOPTNS)
+#
+.F.o : 
+	$(GPP) $(INCLUDE) $< > $*.f
+	$(FC) $*.f
+
+full: $(OFILES)
+	$(LDR)  $(OFILES) -o ../../skb/run/fo.fw.g4
+	touch full
+	
+
+FCFLAGS  = -O3 -cpp
+#CPPFLAGS = -Dcpp
+
+%.o : %.f95
+	$(FC) $(FCFLAGS) -o $@ $<
+
+# Remove intermediate files
+clean:
+#	rm -f *.o

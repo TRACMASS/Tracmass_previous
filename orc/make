@@ -1,0 +1,79 @@
+# Makes trajectory code
+#
+.SUFFIXES:
+.SUFFIXES: .F .o
+#
+OFILES= \
+         coord.o \
+         cross.o \
+         interp2.o \
+         loop.o \
+         pos.o \
+         readfieldorca.o \
+         vertvel.o \
+         writepsi.o 
+ 
+#        -Dmonthly_tracers \
+#        -Dtemporal_winds \
+#        -Dsix_hourly_winds \
+#        -Drotated_met \
+#        -Dpressure_gradient \
+#        -Dsolar_radiation \
+#        -Dppvmix \
+#        -Dk05 \
+#        -Dwrite_profiles_JN \
+#
+DOPTNS= -Don\
+        -DMPI \
+        -DRPT_LEVEL=0 \
+        -Dd_rococo_baltic_coarse \
+        -DJN_mp_fixes \
+        -DLEGION_DIR=\'/mare/jonas/sweclim/rococo_baltic_coarse/legions\'
+ 
+#GPP=	cpp -P $(DOPTNS) -Dshiftr=shiftr
+GPP=    /usr/ccs/lib/cpp -P $(DOPTNS) -Dshiftr=shiftr
+LIBPATH =  
+MPI_ROOT = /mare/jonas/mpich/mpich-1.2.1
+#MPI_ROOT = /ocean/mare/acc/mpich
+MPIF77 = $(MPI_ROOT)/bin/mpif77
+#MPIF77 = $(MPI_ROOT)/lib/solaris/ch_p4/mpif77
+LIBS =  $(sweclim)/lib.hp/unixo.a
+INCLUDE=-I$(MPI_ROOT)/include
+FC =    $(MPIF77) -r8 -i4  -Nl64 -c -O3
+LDR =   $(MPIF77) -r8 -i4  -Nl64
+#
+.F.o : 
+	$(GPP) $(INCLUDE) $< > $*.f
+	$(FC) $*.f
+
+full: $(OFILES)
+	$(LDR) $(LIBPATH) $(OFILES) $(LIBS) -o ../rococo_baltic_coarse/rococo_baltic_coarse_mpi
+	touch full
+	
+
+
+NCINC = /net/navier/hav2/doos/trajec/paleo/netcdf-3.5.0/include
+NCLIB = /net/navier/hav2/doos/trajec/paleo/netcdf-3.5.0/lib
+OS = $(shell uname -s)
+
+FC       = f77
+FCFLAGS  = -O3 -I$(NCINC)
+LDFLAGS  = -lnetcdf  -L$(NCLIB) 
+CPPFLAGS = -DNETCDF -Dtime -Dtempsalt
+
+%.o : %.f
+	$(FC) $(FCFLAGS) -c -o $@ $<
+
+%.o : %.F
+	$(FC) $(FCFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+%.o : %.f90
+	$(F90) $(F90FLAGS) -c -o $@ $<
+
+OBJ = mainloop.o
+
+traj: $(OBJ)
+	$(FC) -o $@  $(OBJ)  $(LDFLAGS) 
+
+clean:
+	rm -f *.o
