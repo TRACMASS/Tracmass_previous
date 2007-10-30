@@ -8,7 +8,7 @@ USE mod_buoyancy
 
 IMPLICIT none
 
-INTEGER ngcm,i,j,n
+INTEGER i,j,n
 call init_params
 call coordinat
 

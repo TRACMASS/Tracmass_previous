@@ -1,8 +1,14 @@
 
-PROJECT	          =rco
-CASE                  =biology
+PROJECT	          =orc
+CASE                  =$(PROJECT)
+INPUT_INT1      =intmin		
+INPUT_INT2      =intrun		#Use 'dummy' if not used.
+
+
+
 PROJECT_FLAG  =-DPROJECT_NAME=\'$(PROJECT)\'
 CASE_FLAG        =-DCASE_NAME=\'$(CASE)\'
+ARG_FLAGS       =-DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 
 MYCFG               =/usr/local/mysql/bin/mysql_config
 MYI_FLAGS         =`$(MYCFG) --cflags` 
@@ -27,7 +33,7 @@ runtraj : $(objects) readfield.o
 	$(FF)  $(MYI_FLAGS) -o runtraj $(objects) readfield.o $(LNK_FLAGS) $(MYL_FLAGS)
 
 %.o : %.f95
-	$(FF)  -fno-underscoring -c -cpp $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG)  $< -o $@
+	$(FF)  -fno-underscoring -c -cpp $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
 
 $(objects) : 
 

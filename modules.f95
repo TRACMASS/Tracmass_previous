@@ -62,7 +62,7 @@ MODULE mod_param
   INTEGER, PARAMETER :: KD=1
 #endif
   
-  INTEGER nff,isec,idir,nqua,num,ist1,ist2,jst1,jst2,kst1,kst2,ncoor,kriva,iter
+  INTEGER nff,isec,idir,nqua,num,ist1,ist2,jst1,jst2,kst1,kst2,ncoor,kriva,iter,ngcm
   REAL*8 tseas,tday,tyear,dtmin,voltr,tstep,dstep,tss,partQuant
   
 ENDMODULE mod_param
