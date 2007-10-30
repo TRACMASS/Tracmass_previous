@@ -3,6 +3,7 @@
 subroutine coordinat
 
 !USE param_variables
+USE mod_param
 USE mod_coord
 USE mod_grid
 IMPLICIT none

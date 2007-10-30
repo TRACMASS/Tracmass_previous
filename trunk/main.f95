@@ -1,5 +1,4 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
-# include "../modules.f95"
+
 PROGRAM main
 USE mod_param
 USE mod_name
@@ -10,8 +9,11 @@ USE mod_buoyancy
 IMPLICIT none
 
 INTEGER ngcm,i,j,n
-
+call init_params
 call coordinat
+
+partQuant=1
+
 
 tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
 
@@ -29,7 +31,7 @@ endif
 ! num=NTRACMAX
  num=partQuant
 elseif(nqua.eq.2) then 
- voltr=partQuant. 
+ voltr=partQuant 
 elseif(nqua.eq.3) then 
  voltr=partQuant
 endif
@@ -65,16 +67,3 @@ stop
 ENDPROGRAM main
 
 !______________ END OF MAIN PROGRAM _______________________________
-
-# include "../loop.f95"
-# include "../vertvel.f95"
-# include "../coord.f95"
-# include "../cross.f95"
-# include "../interp2.f95"
-# include "../pos.f95"
-# include "../arclength.f95"
-# include "../writepsi.f95"
-# include "../writetracer.f95"
-# include "../turb.f95"
-# include "readfield.f95"
-# include "stat.f95"
