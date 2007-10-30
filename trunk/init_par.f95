@@ -15,14 +15,16 @@ subroutine init_params
 #ifdef sediment
   USE mod_orbital
 #endif
-!  implicit none
-  
-  CHARACTER(LEN=23) ::  Project, Case
+  implicit none
+
+  INTEGER :: argint1, argint2, dummy, factor, i,dtstep
+  CHARACTER (LEN=30) :: inparg, argname
+  CHARACTER (LEN=23) ::  Project, Case
   namelist /INITGRIDGRID/ IMT, JMT, KM, JMAX, LBT,NEND
   namelist /INITGRIDNTRAC/ NTRACMAX
   namelist /INITGRIDDATE/ yearmin, yearmax
   namelist /INITGRIDTIME/ ngcm, iter, intmax
-
+  
   namelist /INITRUNTIME/ intmin, intspin, intrun, intstep 
   namelist /INITRUNDATE/  ihour, iday, imon, iyear
   namelist /INITRUNWRITE/ ncoor, kriva, directory, name
@@ -30,9 +32,15 @@ subroutine init_params
 
   Project = PROJECT_NAME
   Case    = CASE_NAME
-
+  
+  if ( (IARGC() .eq. 1 ) .or. (IARGC() .eq. 4 ) )  then
+     call getarg(IARGC(),inparg)
+     Case=inparg
+  end if
+  
+ ! -- Check if there is a time argument and if so, use it.
+  
   print *,trim(Project)//'/'//trim(Case)//'_run.in'
-  stop
   open(8,file=trim(Project)//'/'//trim(Project)//'_grid.in',  &
        status='OLD', delim='APOSTROPHE')
   read(8,nml=INITGRIDGRID)
@@ -47,9 +55,41 @@ subroutine init_params
   read(8,nml=INITRUNWRITE)  
   read(8,nml=INITRUNSEED)
 
-
   dstep=1.d0/dble(iter)
   dtmin=dtstep*tseas
+
+  if ((IARGC() > 1) .and. (IARGC() < 5) )  then
+     call getarg(1,inparg)
+     factor=1
+     argint1=0
+     do i=29,1,-1
+        if (ichar(inparg(i:i)) .ne. 32) then
+           argint1=argint1+(ichar(inparg(i:i))-48)*factor
+           factor=factor*10
+        end if
+     end do
+     ARG_INT1=argint1
+
+     call getarg(2,inparg)
+     factor=1
+     argint2=0
+     do i=29,1,-1
+        if (ichar(inparg(i:i)) .ne. 32) then
+           argint2=argint2+(ichar(inparg(i:i))-48)*factor
+           factor=factor*10
+        end if
+     end do
+     ARG_INT2=argint2
+
+     call getarg(3,inparg)
+     name=inparg
+  end if
+  
+  
+  print *,intmin,intrun,name
+
+
+stop
 
   ! --ist -1 to imt
   if ( ist1 == -1) then 
