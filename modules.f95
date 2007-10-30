@@ -63,7 +63,7 @@ MODULE mod_param
 #endif
   
   INTEGER nff,isec,idir,nqua,num,ist1,ist2,jst1,jst2,kst1,kst2,ncoor,kriva,iter
-  REAL*8 tseas,tday,tyear,dtmin,voltr,tstep,dstep,tss
+  REAL*8 tseas,tday,tyear,dtmin,voltr,tstep,dstep,tss,partQuant
   
 ENDMODULE mod_param
 !_______________________________________________________________________________

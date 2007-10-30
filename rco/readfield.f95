@@ -12,7 +12,7 @@ USE mod_dens
 IMPLICIT none
 
 #ifdef tempsalt
-real tempb(km),saltb(km),rhob(km)
+REAL, ALLOCATABLE, DIMENSION(:) :: tempb, saltb, rhob
 integer kmm
 #endif
 
@@ -21,19 +21,21 @@ integer NLEN,dtts,NSNAPS,NSNAPS_2D,NSNAPS_3D,nd,l_tke,nlength
 parameter (NLEN=29557,NSNAPS_2D=1,NSNAPS_3D=0,nd=43200,NSNAPS=1,nlength=2379)
 parameter (l_tke=0)
 
-integer itt0,year,month,day,hour,minute,second,imt0,jmt0,km0,nt0,NLEN0,NSNAPS0
-integer i,j,k,m,kz,ii,ints2,kk,i0
-integer kmu(imt,jmt)
+integer :: itt0,year,month,day,hour,minute,second
+integer :: imt0,jmt0,km0,nt0,NLEN0,NSNAPS0
+integer ::  i,j,k,m,kz,ii,ints2,kk,i0
+integer,  ALLOCATABLE, DIMENSION(:,:) :: kmu
 
 real*8  ird0,ird20,ird30,ird40,dxa,dya,stlon,stlat,dxdeg,dydeg
 
 real snapd,totsec
 
-real*4 ird,ird2,ird3,ird4,rd2d(imt,jmt),rd1d_a(NSNAPS), rd1d_b(NSNAPS)
-real*4 zdzz(km),dzw(0:km),dxt(imt),dyt(jmt),phi(jmt),phit(jmt),yu(jmt)
-real*4  snap1d(NLEN)
+real*4 ird,ird2,ird3,ird4
+REAL*4, ALLOCATABLE, DIMENSION(:)   :: rd1d_a, rd1d_b, zdzz,dzw,dxt,dyt
+REAL*4, ALLOCATABLE, DIMENSION(:)   :: phi,phit,yu,  snap1d
+REAL*4, ALLOCATABLE, DIMENSION(:,:) :: rd2d
 
-real snap2d(imt,jmt)
+REAL :: snap2d(imt,jmt)
 
 character ofile*20,infile*48,zfile*123,rfile*39
 character*3 a_exp1
@@ -43,6 +45,13 @@ logical around
 integer ittstart,itt
 
 save kmu,dxa,dya
+
+!REAL, ALLOCATABLE, DIMENSION(:) :: tempb(:),saltb(km),rhob(km)
+!integer kmu(imt,jmt)
+!real*4 ird,ird2,ird3,ird4,rd2d(imt,jmt),rd1d_a(NSNAPS), rd1d_b(NSNAPS)
+!real*4 zdzz(km),dzw(0:km),dxt(imt),dyt(jmt),phi(jmt),phit(jmt),yu(jmt)
+!real*4  snap1d(NLEN)
+
 
 !_______________________ update the time counting ________________________________________
 ihour=ihour+6
@@ -401,7 +410,7 @@ close(30)
           tempb(k)=tem(i,j,kk,2)
           saltb(k)=(sal(i,j,kk,2)-35.)/1000.
          enddo
-         call statv(tempb,saltb,rhob,kmm)
+         call statv(tempb,saltb,rhob)
          do k=1,kmm
           kk=km+1-k
           rho(i,j,kk,2)=rhob(k)
