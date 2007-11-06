@@ -1,5 +1,5 @@
 
-PROJECT	          =orc
+PROJECT	          =rco
 CASE                  =$(PROJECT)
 INPUT_INT1      =intmin		
 INPUT_INT2      =intrun		#Use 'dummy' if not used.
@@ -10,11 +10,12 @@ PROJECT_FLAG  =-DPROJECT_NAME=\'$(PROJECT)\'
 CASE_FLAG        =-DCASE_NAME=\'$(CASE)\'
 ARG_FLAGS       =-DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 
-MYCFG               =/usr/local/mysql/bin/mysql_config
-MYI_FLAGS         =`$(MYCFG) --cflags` 
-MYL_FLAGS        =`$(MYCFG) --libs` 
-LIB_DIR              =-L/usr/local/netcdf/lib
-INC_DIR             =-I/usr/local/netcdf/include -I/usr/local/mysql/include
+#MYCFG               =/usr/local/mysql/bin/mysql_config
+#MYI_FLAGS         =`$(MYCFG) --cflags` 
+#MYL_FLAGS        =`$(MYCFG) --libs` 
+
+LIB_DIR              =-L/sw/lib -L/sw/lib/netcdf-g95/lib
+INC_DIR             =-I/sw/include -I/sw/lib/netcdf-g95/include -I/usr/local/mysql/include
 
 ORM_FLAGS=-D$(PROJECT) -Dmean -Dstreamxy  -Dstreamr -Dstreamv -Dtracer \
           -Dtime  -Dtempsalt -ftrace=full -Dmysqlwrite
