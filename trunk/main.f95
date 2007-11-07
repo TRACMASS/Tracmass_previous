@@ -10,11 +10,10 @@ IMPLICIT none
 
 INTEGER i,j,n
 
-!_________________________________________________________________________________________
-
+!____________________________________________________________________________
 print *,'TRACMASS trajectory code starts at'
 call system('date')
-!___________________________ print preprocess options ____________________________________
+!___________________________ print preprocess options _______________________
 #if defined orca
 print *,'ORCA GCM fields'
 #elif defined rco
