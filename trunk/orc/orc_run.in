@@ -27,7 +27,7 @@
   ! name of directory where the files will be written
   directory = '/Volumes/hav3/data/orc/',
   ! name of current trajectory run
-  name      = 'op.fw.n0'/ 
+  name      = 'op.fw.xa'/ 
   ! namep='op.fw.n0'  ! For reruns
   
   

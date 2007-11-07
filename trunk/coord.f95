@@ -24,65 +24,6 @@ data b1,b2,b3,b4/10725.0d0,  10275.0d0, 36.0d0,     13.0d0/
 
 data mois/31,28,31,30,31,30,31,31,30,31,30,31/
 
-!_________________________________________________________________________________________
-
-print *,'TRACMASS trajectory code starts at'
-call system('date')
-!___________________________ print preprocess options ____________________________________
-#if defined orca
-print *,'ORCA GCM fields'
-#elif defined rco
-print *,'RCO GCM fields'
-#elif defined tes
-print *,'ACADEMIC TEST fields'
-#elif defined simp
-print *,'Simpevarp GCM fields'
-#elif defined fors
-print *,'Forsmark GCM fields'
-#elif defined occam66
-print *,'OCCAM 1/4 deg GCM fields'
-#elif defined occam083
-print *,'OCCAM 1/12 deg GCM fields'
-#elif defined sigma
-print *,'GCM with sigma coordinates fields'
-#endif
-
-#if defined tempsalt
-print *,'with temperature and salinity fields'
-#endif
-
-#if defined turb
-print *,'with sub-grid parameterisation'
-#endif
-
-#if defined rerun
-print *,'Rerun in order to store the Lagrangian stream functions in the different basins'
-#endif
-
-#if defined streamxy
-print *,'Lagrangian horizontal stream function stored'
-#endif
-
-#if defined streamv
-print *,'Lagrangian vertical depth stream function stored'
-#endif
-
-#if defined streamr
-#if defined streamts
-print *,'Lagrangian density, temperature and salinity stream function stored'
-#else
-print *,'Lagrangian density stream function stored'
-#endif
-#endif
-
-#if defined streamxy
-print *,'Lagrangian horizontal stream function stored'
-#endif
-
-#if defined tracer
-print *,'Lagrangian trajectory particle tracer stored'
-#endif
-
 !_________________________________ time lengths __________________________________________
 tyear=365.25d0 * 24.d0 * 3600.d0
 tday=24.d0 * 3600.d0
