@@ -1,9 +1,10 @@
 
 module mod_stat
 contains
-  subroutine statv(t, s, rho)
-    
-    REAL, ALLOCATABLE, DIMENSION (:) :: dens_temp, dens_zero, t, s, rho
+  subroutine statv(t, s, rho, kmm)
+
+    REAL*4, ALLOCATABLE, DIMENSION (:) :: dens_temp, dens_zero, t, s, rho
+    INTEGER KMM,k
     
     REAL, PARAMETER ::  a0 = 999.842594
     REAL, PARAMETER ::  a1 =   6.793952e-2
@@ -24,14 +25,14 @@ contains
     
     REAL, PARAMETER :: d0 = 4.8314e-4
     
-    
-    allocate ( dens_temp(8),dens_zero(8) )
-        
-  dens_temp = a0 + (a1 + (a2 + (a3 + (a4 + a5*t)*t)*t)*t)*t
-  dens_zero  = dens_temp + (b0 + (b1 + (b2 + (b3 + b4*t)*t)*t)*t)*s &
-       + (c0 + (c1 + c2*T)*T)*S*sqrt(S) + d0*s**2
+  allocate ( dens_temp(KM),dens_zero(KM) )
+  do k=1,kmm
+  dens_temp(k) = a0 + (a1 + (a2 + (a3 + (a4 + a5*t(k))*t(k))*t(k))*t(k))*t(k)
+  dens_zero(k)  = dens_temp(k) + (b0 + (b1 + (b2 + (b3 + b4*t(k))*t(k))*t(k))*t(k))*s(k) &
+       + (c0 + (c1 + c2*T(k))*T(k))*s(k)*sqrt(S(k)) + d0*s(k)**2
   
-  rho=dens_zero-1000
+  rho(k)=dens_zero(k)-1000.
+  enddo
   
   !  densP0 = sw_dens0(S,T);
   !  K      = sw_seck(S,T,P);

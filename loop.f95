@@ -180,14 +180,18 @@ tstep=dble(intstep)
 !________________ read ocean model data files __________________________
 
 ints=intstart
+print *,'aaaaaaa'
 call readfields   ! initial dataset
+print *,'bbbbbbb'
 ntrac=0
 
 !_____________________ choose set of trajectories _____________________________
 
 #ifdef time 
 do 6000 ints=intstart+intstep,intstart+intrun,intstep  ! time loop
+print *,'ccccccc'
 call readfields
+print *,'ddddddd'
 if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
 #ifdef tracer 
 if(mod(ints,120).eq.0) call writetracer

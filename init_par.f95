@@ -88,8 +88,7 @@ subroutine init_params
   
   print *,intmin,intrun,name
 
-
-stop
+!stop
 
   ! --ist -1 to imt
   if ( ist1 == -1) then 
