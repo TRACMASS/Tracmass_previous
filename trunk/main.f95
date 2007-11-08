@@ -72,8 +72,6 @@ print *,'Lagrangian trajectory particle tracer stored'
 call init_params
 call coordinat
 
-partQuant=1
-
 
 tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
 

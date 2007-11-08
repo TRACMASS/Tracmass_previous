@@ -25,9 +25,9 @@ subroutine readfields
   integer :: itt0,year,month,day,hour,minute,second
   integer :: imt0,jmt0,km0,nt0,NLEN0,NSNAPS0
   integer ::  i,j,k,m,kz,ii,ints2,kk,i0
-  integer,  ALLOCATABLE, DIMENSION(:,:) :: kmu
-  
-  real*8  ird0,ird20,ird30,ird40,dxa,dya,stlon,stlat,dxdeg,dydeg
+!  integer,  ALLOCATABLE, DIMENSION(:,:) :: kmu
+!  integer :: kmu(IMT,JMT)
+  real*8  ird0,ird20,ird30,ird40,stlon,stlat,dxdeg,dydeg
   
   real snapd,totsec
   
@@ -37,7 +37,7 @@ subroutine readfields
   REAL*4, ALLOCATABLE, DIMENSION(:,:) :: rd2d
   
   REAL :: snap2d(imt,jmt)
-  
+
   character ofile*20,infile*48,zfile*123,rfile*39
   character*3 a_exp1
   character*2 a_exp2
@@ -45,18 +45,22 @@ subroutine readfields
   
   integer ittstart,itt
   
-  save kmu,dxa,dya
-  
-  print *,'ss readfield startar',ints
+  REAL*8, SAVE :: dxa,dya
+  INTEGER, SAVE, ALLOCATABLE,  DIMENSION(:,:) :: kmu
+
+!  print *,'readfield startar',ints
   
   if ( .NOT. ALLOCATED(snap1d) ) then
-     allocate ( snap1d(NLEN),rd2d(IMT,JMT),kmu(IMT,JMT) )
+     allocate ( snap1d(NLEN),rd2d(IMT,JMT) )
+!     allocate ( snap1d(NLEN),rd2d(IMT,JMT),kmu(IMT,JMT) )
      allocate ( rd1d_a(NSNAPS),rd1d_b(NSNAPS) )
      allocate ( zdzz(KM),dzw(0:km),dxt(imt) ) 
      allocate ( dyt(jmt),phi(jmt),phit(jmt),yu(jmt) )
      allocate ( tempb(KM), saltb(KM), rhob(KM) )
   end if
-  print *,'readfield startar',ints
+ if ( .not. allocated (kmu) ) then
+     allocate ( kmu(imt,jmt) )
+  end if
  
 !_______________________ update the time counting ________________________________________
 ihour=ihour+6
@@ -179,7 +183,7 @@ dydeg = ird40
 read(30,err=2000) ird0,ird20
 
 read(30,err=2000) rd1d_a,rd1d_b
-print *,'rd1d_a,rd1d_b=',rd1d_a,rd1d_b
+!print *,'rd1d_a,rd1d_b=',rd1d_a,rd1d_b
 !do i=1,NSNAPS
 ! ispvar(i) = rd1d_a(i)
 ! isplev(i) = rd1d_b(i)
@@ -190,7 +194,7 @@ if(ints.eq.intstart) then
 
 stlon1 = ird0
 stlat1 = ird20
-print *,'stlon,stlat=',stlon1,stlat1
+!print *,'stlon,stlat=',stlon1,stlat1
 
 dya=0.005*dy*deg
 dxa=0.005*dx*deg
@@ -350,10 +354,16 @@ do k=1,km
     else
      u(i,j,kk,2)=dya*(snap2d(i,j)+snap2d(i,j-1))*( dz(kk)+0.5*(hs(i,j,2)+hs(i+1,j,2)) )
     endif
+!    if(u(i,j,kk,2).ne.0. .and. ints.eq.2) print *,i,j,kk,u(i,j,kk,2)
   enddo
  enddo
 
 enddo
+
+!if(ints.eq.2) print *,'kmu=',kmu
+
+!if(ints.eq.2) stop 25346
+
 
 ! meridional velocity
 do k=1,km
@@ -427,16 +437,18 @@ do i=1,imt
   enddo
  enddo
 
-print *,'readfield slut',ints
 
-deallocate ( snap1d, rd2d,kmu )
+!deallocate ( snap1d, rd2d,kmu )
+deallocate ( snap1d, rd2d )
 deallocate ( rd1d_a, rd1d_b )
 deallocate ( zdzz,dzw,dxt )
 deallocate ( dyt, phi, phit, yu )
 deallocate ( tempb, saltb, rhob )
 
-      return
-      end subroutine readfields
+!print *,'readfield slut',ints
+
+return
+end subroutine readfields
 #endif
 
 !_______________________________________________________________________

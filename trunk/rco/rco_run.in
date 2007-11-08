@@ -33,9 +33,9 @@
   
   $INITRUNSEED
   ! nff:            1 = Follow trajectories forward
-  !                 2 = Follow trajectories backward
-  !                 3 =  Follow trajectories both ways.
-  nff      = 3,
+  !                -1 = Follow trajectories backward
+  !                 0 =  Follow trajectories both ways.
+  nff      = 1,
   !
   !
   ! isec:           1 = Seed particles meridional(y-z)
@@ -57,13 +57,31 @@
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 1000,  !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 1,  !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.	
-  ist1     = 1,		 
-  ist2     =-1,		 
-  jst1     = 1,		 
-  jst2     =-1,		 
-  kst1     = 1,		 
-  kst2     =-1/		 
+  ist1     = 204,		 
+  ist2     =  -1,		 
+  jst1     = 145,		 
+  jst2     = 220,		 
+  kst1     =   1,		 
+  kst2     =  -1/
+
+  $INITRUNTEMPSALT
+  ! water mass properties with minimum & maximum on temp, salt and density
+  !
+  ! for starting a trajectory (active only with option tempsalt) 
+  tmin0 = -50.,
+  tmax0 =  20.,
+  smin0 =-500.,
+  smax0 = 400.,
+  rmin0 =-100.,
+  rmax0 = 500.,
+  ! for ending a trajectory
+  tmine =  -50.,
+  tmaxe =  400.,
+  smine = -150.,
+  smaxe =  500.,
+  rmine = -100.,
+  rmaxe =  500./ 

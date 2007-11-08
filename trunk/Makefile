@@ -1,5 +1,5 @@
 
-PROJECT	          =rco
+PROJECT	        =rco
 CASE                  =$(PROJECT)
 INPUT_INT1      =intmin		
 INPUT_INT2      =intrun		#Use 'dummy' if not used.
@@ -17,8 +17,8 @@ ARG_FLAGS       =-DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 LIB_DIR              =-L/sw/lib -L/sw/lib/netcdf-g95/lib
 INC_DIR             =-I/sw/include -I/sw/lib/netcdf-g95/include -I/usr/local/mysql/include
 
-ORM_FLAGS=-D$(PROJECT) -Dmean -Dstreamxy  -Dstreamr -Dstreamv -Dtracer \
-          -Dtime  -Dtempsalt -ftrace=full -Dmysqlwrite
+ORM_FLAGS=-D$(PROJECT) -Dmean -Dstreamxy -Dstreamr -Dstreamv -Dtracer \
+          -Dtime -Dtempsalt -ftrace=full -Dmysqlwrite
 
 F90_FLAGS=-O3 -C  -g
 LNK_FLAGS=-lnetcdf -lSystemStubs
