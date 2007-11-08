@@ -29,7 +29,10 @@ subroutine init_params
   namelist /INITRUNDATE/  ihour, iday, imon, iyear
   namelist /INITRUNWRITE/ ncoor, kriva, directory, name
   namelist /INITRUNSEED/ nff, isec, idir, nqua, partQuant, kst1, kst2, ist1, ist2, jst1, jst2, kst1, kst2
-
+#ifdef tempsalt
+  namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
+                             tmine, tmaxe, smine, smaxe, rmine, rmaxe
+#endif
   Project = PROJECT_NAME
   Case    = CASE_NAME
   
@@ -54,6 +57,9 @@ subroutine init_params
   read(8,nml=INITRUNDATE)
   read(8,nml=INITRUNWRITE)  
   read(8,nml=INITRUNSEED)
+#ifdef tempsalt
+  read(8,nml=INITRUNTEMPSALT)
+#endif
 
   dstep=1.d0/dble(iter)
   dtmin=dtstep*tseas

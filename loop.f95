@@ -180,18 +180,14 @@ tstep=dble(intstep)
 !________________ read ocean model data files __________________________
 
 ints=intstart
-print *,'aaaaaaa'
 call readfields   ! initial dataset
-print *,'bbbbbbb'
 ntrac=0
 
 !_____________________ choose set of trajectories _____________________________
 
 #ifdef time 
 do 6000 ints=intstart+intstep,intstart+intrun,intstep  ! time loop
-print *,'ccccccc'
 call readfields
-print *,'ddddddd'
 if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
 #ifdef tracer 
 if(mod(ints,120).eq.0) call writetracer
@@ -269,6 +265,7 @@ elseif(isec.eq.3 .and. idir.eq.0) then
 elseif(isec.eq.4 .and. idir.eq.0) then
  if(KM+1-kmt(ist,jst).gt.kst) goto 600 
  if(u(ib,jb,kb,1)+u(ibm,jb,kb,1)+v(ib,jb,kb,1)+v(ib,jb-1,kb,1).eq.0.) goto 600 
+! if(ints.eq.2) print *,ib,jb,kb,kmt(ist,jst),u(ib,jb,kb,1),u(ibm,jb,kb,1),v(ib,jb,kb,1),v(ib,jb-1,kb,1)
 endif
 
 ! trajectory volume in m3
@@ -314,6 +311,7 @@ ib=ist
 jb=jst
 kb=kst
 
+
 !_____meridional section
 if(isec.eq.1)then
  y1=dble(jb-1) + (dble(ijj)-0.5d0)/dble(ijt) 
@@ -358,6 +356,8 @@ if(temp.lt.tmin0 .or. temp.gt.tmax0 .or. &
  goto 500 
 endif
 #endif
+
+! print *,'nuuu',ibm,x1,ib,jb-1,y1,jb,kb-1,z1,kb
 
 ntrac=ntrac+1  ! the trajectory number
 
