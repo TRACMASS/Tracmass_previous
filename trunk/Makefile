@@ -4,6 +4,8 @@ CASE              = $(PROJECT)
 INPUT_INT1        = intmin		
 INPUT_INT2        = intrun		#Use 'dummy' if not used.
 
+#F95COMPILER          = "g95"
+F95COMPILER          = "gfortran"
 
 
 PROJECT_FLAG      = -DPROJECT_NAME=\'$(PROJECT)\'
@@ -20,15 +22,19 @@ INC_DIR           = -I/sw/include -I/sw/lib/netcdf-g95/include \
 
 ORM_FLAGS         = -D$(PROJECT) -Dmean -Dstreamxy  -Dstreamr -Dstreamv  -Dtracer -Dtime  -Dtempsalt -Dmysqlwrite
 
-F90_FLAGS         =
 LNK_FLAGS         = -lnetcdf -lSystemStubs
 
-GFORTRAN_FLAGS    = -c -integrated-cpp -fno-underscoring  
-G95_FLAGS         = -c -cpp -fendian=big -fno-underscoring 
-FF_FLAGS          = $(GFORTRAN_FLAGS)
+ifeq ($(F95COMPILER),"gfortran")
+	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian   
+	F90_FLAGS        =-fno-underscoring
+	FF               = gfortran $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 
-###FF             = g95 $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
-FF                = gfortran $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
+endif
+ifeq ($(F95COMPILER),"g95")
+	FF_FLAGS = -c -cpp -fendian=big 
+	F90_FLAGS        = -O3 -C  -g  -fno-underscoring
+	FF               = g95 $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
+endif
 CC                = gcc -O  $(INC_DIR)
 
 objects           = modules.o sw_stat.o loop.o vertvel.o coord.o \
