@@ -1,9 +1,5 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
- 
 SUBROUTINE readfields
 
-!#include "/sw/include/netcdf.inc"
-!#include "netcdf.inc"
 USE mod_param
 USE mod_vel
 USE mod_coord
@@ -15,8 +11,6 @@ USE mod_vel
 USE mod_dens
 #endif
 IMPLICIT none
-
-#include "/Applications/Utilities/netcdf-3.6.2/include/netcdf.inc"
 
 INTEGER, PARAMETER :: IMO=722
 
