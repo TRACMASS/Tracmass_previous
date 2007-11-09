@@ -47,7 +47,7 @@ MODULE mod_param
   INTEGER, PARAMETER :: NST=2,NNRJ=8,NTRJ=7
 #endif
 #if defined stat
-  INTEGER, PARAMETER ::  (NST=1)
+  INTEGER, PARAMETER :: NST = 1
 #endif
   
 #if defined streamts
