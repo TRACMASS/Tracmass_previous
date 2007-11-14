@@ -34,7 +34,7 @@ subroutine init_params
                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
 #endif
 
-  namelist /INITRUNEND/ ienw, iene, jens, jenn
+  namelist /INITRUNEND/ ienw, iene, jens, jenn, timax
 
   Project = PROJECT_NAME
   Case    = CASE_NAME
@@ -64,6 +64,7 @@ subroutine init_params
   read(8,nml=INITRUNTEMPSALT)
 #endif
   read(8,nml=INITRUNEND)
+  timax=24.*3600.*timax ! convert time lengths from days to seconds
 
   dstep=1.d0/dble(iter)
   dtmin=dtstep*tseas

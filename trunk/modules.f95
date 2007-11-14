@@ -89,11 +89,12 @@ MODULE mod_grid
 ENDMODULE mod_grid
 !______________________________________________________________________________
 MODULE mod_buoyancy
-  REAL*4 tmin0,tmax0,smin0,smax0,rmin0,rmax0,tmine,tmaxe,smine,smaxe,rmine, rmaxe,timax
+  REAL*4 tmin0,tmax0,smin0,smax0,rmin0,rmax0,tmine,tmaxe,smine,smaxe,rmine,rmaxe
 ENDMODULE mod_buoyancy
 !______________________________________________________________________________
 MODULE mod_domain
   INTEGER ienw,iene,jens,jenn
+  REAL*4 timax
 !  INTEGER, ALLOCATABLE, DIMENSION(:)   :: ienw,iene,jens,jenn
   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: mask
 ENDMODULE mod_domain

@@ -363,7 +363,7 @@ ntrac=ntrac+1  ! the trajectory number
 
 ! selects only one singe trajectory
 #ifdef select
-if(ntrac.ne.131) then 
+if(ntrac.ne.57562) then 
  nrj(ntrac,6)=1
  nout=nout+1
  goto 500
@@ -902,7 +902,11 @@ elseif(ds.eq.dsu) then ! upward exit
 
  scrivi=.false.
  call vertvel(rb,ia,iam,ja,ka)
- if(w(ka).gt.0.d0) then
+ uu=w(ka)
+#ifdef turb    
+ uu=uu+upr(5,2)
+#endif
+ if(uu.gt.0.d0) then
   kb=ka+1
  endif
  z1=dble(ka)
@@ -996,6 +1000,10 @@ if(kmt(ib,jb).eq.0) then
  print *,'ds',dse,dsw,dsn,dss,dsu,dsd
  print *,'dsmin=',ds,dsmin,dtmin,dxyz
  print *,'ntrac=',ntrac
+#ifdef turb
+ print *,'upr=',upr
+#endif
+ stop 5973
 !  goto 1500
  nerror=nerror+1
  nrj(ntrac,6)=1
@@ -1059,9 +1067,6 @@ endif
  do k=1,LBT
 !  if(ienw(k).le.ib .and. ib.le.iene(k) .and. jens(k).le.jb .and. jb.le.jenn(k)  ) then
   if(ienw.le.ib .and. ib.le.iene .and. jens.le.jb .and. jb.le.jenn  ) then
-   print *,ib,jb,kb
-   print *,ienw,iene,jens,jenn
-   stop 45678
    nexit(k)=nexit(k)+1
    goto 3333                                
   endif
