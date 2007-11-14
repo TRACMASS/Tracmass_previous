@@ -39,23 +39,6 @@ do k=1,ka
 #endif
 enddo
 
-
-#ifdef turb 
-#ifndef twodim   
-! Calculates the w' at the top of the box from the divergence of u' and v' in order
-! to respect the continuity equation even for the turbulent velocities
- do k=1,2
-  uu=upr(1,k)  
-  um=upr(2,k)
-  vv=upr(3,k)
-  vm=upr(4,k)
-  upr(5,k) = w(ka-1) - ff * ( uu - um + vv - vm )
-  upr(6,k) = 0.d0
- enddo
-#endif
-#endif
-
-
 #ifdef sediment
 ! Godtyckligt värde på kinetiska energin där wsed inte längre påverkar, 3e6.
 

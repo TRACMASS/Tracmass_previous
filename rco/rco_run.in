@@ -61,7 +61,7 @@
   !                     (partQuant in m3s-1. per particle)
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
-  nqua     = 1, 
+  nqua     = 2, 
   partQuant= 1,  !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
@@ -89,7 +89,8 @@
   smine = -150.,
   smaxe =  500.,
   rmine = -100.,
-  rmaxe =  500./ 
+  rmaxe =  500./
+
 
   $INITRUNEND
   ! defining end sections
@@ -120,7 +121,8 @@
   !        jens(n)=jmt+1
   !        jenn(n)=0
   !        enddo
-  ienw =   0,
-  iene = 203,
-  jens =   0,
-  jenn = 362/ 
+  ienw =     0,
+  iene =   203,
+  jens =     0,
+  jenn =   362,
+  timax =  365./  ! maximum time length of a trajectory in days

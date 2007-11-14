@@ -4,14 +4,15 @@ $INITGRIDGRID
   KM=41,
   JMAX=362,
   LBT=1,
-  NEND=1/       !NEND = LBT +1
+  NEND=2/       !NEND = LBT +1
 
 $INITGRIDNTRAC
   NTRACMAX=20000000/
 
 $INITGRIDTIME
-   ngcm    = 6,                  ! hours between GCM datasets
-   intmax  = 14564/              ! maximum length of RCO fields
+   ngcm    = 6,                 ! hours between GCM datasets
+   iter    = 1,                 ! Number of intermediate time steps between GCM data sets
+   intmax  = 14564/             ! maximum length of RCO fields
 
 $INITGRIDDATE
   yearmin = 1981,
