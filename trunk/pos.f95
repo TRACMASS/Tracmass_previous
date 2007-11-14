@@ -2,8 +2,21 @@
  
 subroutine pos(ijk,ia,ja,ka,r0,r1,ds,rr)
 
-! computes new coordinate (r0 --> r1) of trajectory after time ds
+! computes new position (r0 --> r1) of trajectory after time ds
 ! the new coordinate is still on one of the faces of box at ia,ja,ka
+!
+!  Input:
+!
+!    ijk      : considered direction (i=zonal, 2=meridional, 3=vertical)
+!    ia,ja,ka : original position in integers
+!    r0       : original non-dimensional position in the ijk-directionof particle 
+!                (fractions of a grid box side in the corresponding direction)
+!    rr       : time interpolation constant between 0 and 1 
+!    sp       : crossing time to reach the grid box wall (in units of s/m3)
+!
+!  Output:
+!    
+!    r1       : the new position (coordinate)
 
 USE mod_param
 USE mod_vel
@@ -19,15 +32,6 @@ rg=1.d0-rr
 stop 2567 ! Kolla på gammal traj.F för OCCAM
 #endif
 
-!#ifdef turb
-! if(iim.eq.0) iim=IMT
-! uu=(rg*u(ia  ,ja,ka,NST)+rr*u(ia  ,ja,ka,1))*ff
-! um=(rg*u(ia-1,ja,ka,NST)+rr*u(ia-1,ja,ka,1))*ff
-! vv=(rg*v(ia,ja  ,ka,NST)+rr*v(ia,ja  ,ka,1))*ff
-! vm=(rg*v(ia,ja-1,ka,NST)+rr*v(ia,ja-1,ka,1))*ff
-! en=0.25*sqrt(uu**2+um**2+vv**2+vm**2)
-!#endif
-
 if(ijk.eq.1) then
  ii=ia
  im=ia-1
@@ -35,24 +39,43 @@ if(ijk.eq.1) then
  uu=(rg*u(ia,ja,ka,NST)+rr*u(ia,ja,ka,1))*ff
  um=(rg*u(im,ja,ka,NST)+rr*u(im,ja,ka,1))*ff
 #ifdef turb    
- uu=uu+upr(1)  
- um=um+upr(2)
+ if(r0.ne.dble(ii)) then
+  uu=uu+upr(1,2)  
+ else
+  uu=uu+upr(1,1)  ! add u' from previous iterative time step if on box wall
+ endif
+ if(r0.ne.dble(im)) then
+  um=um+upr(2,2)
+ else
+  um=um+upr(2,1)  ! add u' from previous iterative time step if on box wall
+ endif
 #endif
 elseif(ijk.eq.2) then
  ii=ja
  uu=(rg*v(ia,ja  ,ka,NST)+rr*v(ia,ja  ,ka,1))*ff
  um=(rg*v(ia,ja-1,ka,NST)+rr*v(ia,ja-1,ka,1))*ff
 #ifdef turb    
- uu=uu+upr(3)  
- um=um+upr(4)
+ if(r0.ne.dble(ja  )) then
+  uu=uu+upr(3,2)  
+ else
+  uu=uu+upr(3,1)  ! add u' from previous iterative time step if on box wall
+ endif
+ if(r0.ne.dble(ja-1)) then
+  um=um+upr(4,2)
+ else
+  um=um+upr(4,1)  ! add u' from previous iterative time step if on box wall
+ endif
 #endif
 elseif(ijk.eq.3) then
  ii=ka
  uu=w(ka  )
  um=w(ka-1)
 #ifdef turb    
-! uu=uu*rand(5)
-! um=um*rand(6)
+ if(r0.ne.dble(ka  )) then
+  uu=uu+upr(5,2)  
+ else
+  uu=uu+upr(5,1)  ! add u' from previous iterative time step if on box wall
+ endif
 #endif
 endif
 

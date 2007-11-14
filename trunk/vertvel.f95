@@ -1,6 +1,10 @@
 !23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
 
 subroutine vertvel(rr,ia,iam,ja,ka)
+
+! Computes the vertical velocity by integrating the continuity eq. from the bottom 
+
+
 USE mod_param
 USE mod_vel
 USE mod_turb
@@ -31,17 +35,25 @@ do k=1,ka
  um=rg*u(iam,ja  ,k,NST)+rr*u(iam,ja  ,k,1)
  vv=rg*v(ia ,ja  ,k,NST)+rr*v(ia ,ja  ,k,1)
  vm=rg*v(ia ,ja-1,k,NST)+rr*v(ia ,ja-1,k,1)
-!#ifdef turb    
-!if(k.eq.ka) then
-! uu=uu+upr(1)  
-! um=um+upr(2)
-! vv=vv+upr(3)
-! vm=vm+upr(4)
-!endif
-!#endif
  w(k) = w(k-1) - ff * ( uu - um + vv - vm )
 #endif
 enddo
+
+
+#ifdef turb 
+#ifndef twodim   
+! Calculates the w' at the top of the box from the divergence of u' and v' in order
+! to respect the continuity equation even for the turbulent velocities
+ do k=1,2
+  uu=upr(1,k)  
+  um=upr(2,k)
+  vv=upr(3,k)
+  vm=upr(4,k)
+  upr(5,k) = w(ka-1) - ff * ( uu - um + vv - vm )
+  upr(6,k) = 0.d0
+ enddo
+#endif
+#endif
 
 
 #ifdef sediment

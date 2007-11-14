@@ -53,24 +53,43 @@ if(ijk.eq.1) then
  uu=(rg*u(ia,ja,ka,NST)+rr*u(ia,ja,ka,1))*ff
  um=(rg*u(im,ja,ka,NST)+rr*u(im,ja,ka,1))*ff
 #ifdef turb   
- uu=uu+upr(1)  
- um=um+upr(2)
+ if(r0.ne.dble(ii)) then
+  uu=uu+upr(1,2)  
+ else
+  uu=uu+upr(1,1)  ! add u' from previous iterative time step if on box wall
+ endif
+ if(r0.ne.dble(im)) then
+  um=um+upr(2,2)
+ else
+  um=um+upr(2,1)  ! add u' from previous iterative time step if on box wall
+ endif
 #endif
 elseif(ijk.eq.2) then
  ii=ja
  uu=(rg*v(ia,ja  ,ka,NST)+rr*v(ia,ja  ,ka,1))*ff
  um=(rg*v(ia,ja-1,ka,NST)+rr*v(ia,ja-1,ka,1))*ff
 #ifdef turb    
- uu=uu+upr(3)  
- um=um+upr(4)
+ if(r0.ne.dble(ja  )) then
+  uu=uu+upr(3,2)  
+ else
+  uu=uu+upr(3,1)  ! add u' from previous iterative time step if on box wall
+ endif
+ if(r0.ne.dble(ja-1)) then
+  um=um+upr(4,2)
+ else
+  um=um+upr(4,1)  ! add u' from previous iterative time step if on box wall
+ endif
 #endif
 elseif(ijk.eq.3) then
  ii=ka
  uu=w(ka  )
  um=w(ka-1)
 #ifdef turb   
-! uu=uu*rand(5)
-! um=um*rand(6)
+ if(r0.ne.dble(ka  )) then
+  uu=uu+upr(5,2)  
+ else
+  uu=uu+upr(5,1)  ! add u' from previous iterative time step if on box wall
+ endif
 #endif
 endif
 

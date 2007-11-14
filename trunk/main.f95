@@ -37,7 +37,7 @@ print *,'with temperature and salinity fields'
 #endif
 
 #if defined turb
-print *,'with sub-grid parameterisation'
+print *,'with sub-grid turbulence parameterisation'
 #endif
 
 #if defined rerun
