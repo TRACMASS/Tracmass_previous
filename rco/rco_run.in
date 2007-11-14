@@ -6,9 +6,13 @@
   !
  &INITRUNDATE
   ihour   = -6,
-  iday    = 12,
-  imon    = 5,
-  iyear   = 2005/
+  iday    =  1,
+  imon    =  1,
+  iyear   = 2000/  ! 1981
+  ! musslor
+  !  iday    = 12,
+  !  imon    = 5,
+  !  iyear   = 2005/
   !
   !
   &INITRUNWRITE
@@ -25,7 +29,8 @@
   kriva    = 5,
   !
   ! name of directory where the files will be written
-  directory = '/Volumes/hav4/data/rco/',
+  !directory = '/Volumes/hav4/data/rco/',
+   directory = '/Users/doos/data/rco12/',
   ! name of current trajectory run
   name      = 'ms.05.t1'/ 
   ! namep='fv.fw.aa'  ! For reruns
@@ -42,12 +47,12 @@
   !                 2 = Seed particles zonal(x-z)
   !                 3 = Seed particles horiz(x-y)
   !                 4 = Seed particles in the middle of T-box
-  isec     = 4,
+  isec     = 1,
   !
   ! idir:           1 = follow positive direction (eastward/northward)  
   !                -1 = follow negative direction (westward/southward)
   !                 0 = both directions
-  idir     = 0,
+  idir     = 1,
   !
   ! number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
@@ -62,7 +67,7 @@
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.	
   ist1     = 204,		 
-  ist2     =  -1,		 
+  ist2     = 204,		 
   jst1     = 145,		 
   jst2     = 220,		 
   kst1     =   1,		 
@@ -85,3 +90,37 @@
   smaxe =  500.,
   rmine = -100.,
   rmaxe =  500./ 
+
+  $INITRUNEND
+  ! defining end sections
+  ! Lilla Bält
+  !       ienw(1)=1
+  !       iene(1)=25
+  !       jens(1)=47+1
+  !       jenn(1)=jmt
+  ! Stora Bält
+  !       ienw(2)=26
+  !       iene(2)=36
+  !       jens(2)=33+1
+  !       jenn(2)=jmt
+  ! Öresund 
+  !       ienw(1)=37
+  !       iene(3)=63
+  !       jens(3)=56+1
+  !       jenn(3)=jmt
+  ! utanför Finska viken     ! Finska viken
+  !      ienw(1)=0
+  !      iene(1)=204
+  !      jens(1)=0
+  !      jenn(1)=jmt
+  ! inget stopp alls för musslorna
+  !       do n=1,NEND
+  !        ienw(n)=imt+1
+  !        iene(n)=0
+  !        jens(n)=jmt+1
+  !        jenn(n)=0
+  !        enddo
+  ienw =   0,
+  iene = 203,
+  jens =   0,
+  jenn = 362/ 

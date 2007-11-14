@@ -47,7 +47,7 @@ MODULE mod_param
   INTEGER, PARAMETER :: NST=2,NNRJ=8,NTRJ=7
 #endif
 #if defined stat
-  INTEGER, PARAMETER :: NST = 1
+  INTEGER, PARAMETER ::  (NST=1)
 #endif
   
 #if defined streamts
@@ -93,7 +93,8 @@ MODULE mod_buoyancy
 ENDMODULE mod_buoyancy
 !______________________________________________________________________________
 MODULE mod_domain
-  INTEGER, ALLOCATABLE, DIMENSION(:)   :: ienw,iene,jens,jenn
+  INTEGER ienw,iene,jens,jenn
+!  INTEGER, ALLOCATABLE, DIMENSION(:)   :: ienw,iene,jens,jenn
   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: mask
 ENDMODULE mod_domain
 !______________________________________________________________________________
@@ -112,7 +113,9 @@ MODULE mod_dens
 ENDMODULE mod_dens
 !______________________________________________________________________________
 MODULE mod_turb
-  REAL upr(6)
+#ifdef turb
+  REAL upr(6,2)
+#endif
 ENDMODULE mod_turb
 !______________________________________________________________________________
 MODULE mod_name

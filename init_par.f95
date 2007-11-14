@@ -33,6 +33,9 @@ subroutine init_params
   namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
 #endif
+
+  namelist /INITRUNEND/ ienw, iene, jens, jenn
+
   Project = PROJECT_NAME
   Case    = CASE_NAME
   
@@ -60,6 +63,7 @@ subroutine init_params
 #ifdef tempsalt
   read(8,nml=INITRUNTEMPSALT)
 #endif
+  read(8,nml=INITRUNEND)
 
   dstep=1.d0/dble(iter)
   dtmin=dtstep*tseas
@@ -124,8 +128,8 @@ subroutine init_params
   allocate ( dxdy(imt,jmt), dztb(imt,jmt,kd) )   
   allocate (kmt(imt,jmt), dz(km) )
   ! mod_domain
-  allocate ( ienw (nend),iene (nend) )
-  allocate ( jens (nend),jenn (nend) )
+!  allocate ( ienw (LBT),iene (LBT) )
+!  allocate ( jens (LBT),jenn (LBT) )
   allocate ( mask (imt,jmt) )
   ! mod_vel
   allocate ( u(imt,0:jmax,km,nst), v(imt,0:jmax,km,nst) )

@@ -118,9 +118,11 @@ ofile='d0000000000.snap1'
 write(ofile(2:11),'(i10)') ntime
 
 infile=directory//'2nm_122/'//ofile
-!print *,'ntime=',ntime,infile
 inquire(file=infile//'.gz',exist=around)
-if(.not.around) stop 4555
+if(.not.around) then
+print *,'This file is missing:',infile,ntime
+stop 4555
+endif
 zfile='gunzip -c '//infile//'.gz > '//directory//'tmp/'//name
 !print *,zfile
 CALL system(zfile)

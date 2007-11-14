@@ -20,7 +20,10 @@ LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-g95/lib
 INC_DIR           = -I/sw/include -I/sw/lib/netcdf-g95/include \
                     -I/usr/local/mysql/include
 
-ORM_FLAGS         = -D$(PROJECT) -Dmean -Dstreamxy  -Dstreamr -Dstreamv  -Dtracer -Dtime  -Dtempsalt -Dmysqlwrite
+ORM_FLAGS=-D$(PROJECT) -Dmean -Dstreamxy -Dstreamr -Dstreamv -Dtracer \
+          -Dtime -Dtempsalt -Dmysqlwrite
+
+# -Dturb     Sub-grid paramterisation of the turbulence
 
 LNK_FLAGS         = -lnetcdf -lSystemStubs
 

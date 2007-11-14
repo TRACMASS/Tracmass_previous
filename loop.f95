@@ -282,7 +282,7 @@ if(kb.eq.KM) vol=vol+hs(ib,jb,1)
 vol=vol*dxdy(ib,jb)
 endif
 
-!____________________ number of trajectories for box (ist,jst,kst) _______________________
+!____________________ number of trajectories for box (ist,jst,kst) ____________________
 
 if(nqua.ne.1 .and. nqua.ne.4) num=nint(vol/voltr)
 if(num.eq.0) num=1 ! always at least one trajectory
@@ -626,7 +626,7 @@ endif
 
 800 continue
 
-!___________________  calculate the turb ulent velocities ________________________________
+!___________________  calculate the turb ulent velocities _____________________________
 #ifdef turb
 call turbu(ia,ja,ka,rr)
 #endif
@@ -749,7 +749,7 @@ if(ds.eq.dse) then ! eastward exit
 
  uu=(rbg*u(ia,ja,ka,NST)+rb*u(ia ,ja,ka,1))*ff
 #ifdef turb    
-!uu=uu+upr(1)
+ uu=uu+upr(1,2)
 #endif
  if(uu.gt.0.d0) then
   ib=ia+1
@@ -788,7 +788,7 @@ elseif(ds.eq.dsw) then ! westward exit
 
  uu=(rbg*u(iam,ja,ka,NST)+rb*u(iam,ja,ka,1))*ff
 #ifdef turb    
-! uu=uu+upr(2)
+ uu=uu+upr(2,2)
 #endif
  if(uu.lt.0.d0) then
   ib=iam
@@ -825,7 +825,7 @@ elseif(ds.eq.dsn) then ! northward exit
 
  uu=(rbg*v(ia,ja,ka,NST)+rb*v(ia,ja,ka,1))*ff
 #ifdef turb    
-! uu=uu+upr(3)
+ uu=uu+upr(3,2)
 #endif
  if(uu.gt.0.d0) then
   jb=ja+1
@@ -863,7 +863,7 @@ elseif(ds.eq.dss) then ! southward exit
 
  uu=(rbg*v(ia,ja-1,ka,NST)+rb*v(ia,ja-1,ka,1))*ff
 #ifdef turb    
-! uu=uu+upr(4)
+ uu=uu+upr(4,2)
 #endif
  if(uu.lt.0.d0) then
   jb=ja-1
@@ -1056,8 +1056,12 @@ endif
 
 #elif defined orca || rco || tes || tun || simp || fors
 
- do k=1,NEND-1
-  if(ienw(k).le.ib .and. ib.le.iene(k) .and. jens(k).le.jb .and. jb.le.jenn(k)  ) then
+ do k=1,LBT
+!  if(ienw(k).le.ib .and. ib.le.iene(k) .and. jens(k).le.jb .and. jb.le.jenn(k)  ) then
+  if(ienw.le.ib .and. ib.le.iene .and. jens.le.jb .and. jb.le.jenn  ) then
+   print *,ib,jb,kb
+   print *,ienw,iene,jens,jenn
+   stop 45678
    nexit(k)=nexit(k)+1
    goto 3333                                
   endif
