@@ -642,7 +642,7 @@ if(ts.eq.dble(idint(ts))) tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
 
 if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) )              .or. &
     (scrivi .and. kriva.eq.2                             ) .or. &
-    (kriva.eq.3                                          ) .or. &
+    (kriva.eq.3 .and.ntrac.eq.57562                                         ) .or. &
     (kriva.eq.4 .and. n.eq.1                             ) .or. &
     (kriva.eq.5 .and. (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) ) then
 
@@ -650,7 +650,7 @@ if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) )              .or. &
 #if defined biol
   write(56,566) ntrac,n,x1,y1,z1,tt/3600.,t0/3600.
 #else
-  write(56,566) ntrac,n,x1,y1,z1,tt/3600.,t0/3600.,subvol,temp,salt,dens,arct
+  write(56,566) ntrac,n,x1,y1,z1,tt/60.,t0/3600.,subvol,temp,salt,dens,arct
 #endif
 
 
@@ -749,7 +749,7 @@ if(ds.eq.dse) then ! eastward exit
 
  uu=(rbg*u(ia,ja,ka,NST)+rb*u(ia ,ja,ka,1))*ff
 #ifdef turb    
- uu=uu+upr(1,2)
+! uu=uu+upr(1,2)
 #endif
  if(uu.gt.0.d0) then
   ib=ia+1
@@ -788,7 +788,7 @@ elseif(ds.eq.dsw) then ! westward exit
 
  uu=(rbg*u(iam,ja,ka,NST)+rb*u(iam,ja,ka,1))*ff
 #ifdef turb    
- uu=uu+upr(2,2)
+! uu=uu+upr(2,2)
 #endif
  if(uu.lt.0.d0) then
   ib=iam
@@ -825,7 +825,7 @@ elseif(ds.eq.dsn) then ! northward exit
 
  uu=(rbg*v(ia,ja,ka,NST)+rb*v(ia,ja,ka,1))*ff
 #ifdef turb    
- uu=uu+upr(3,2)
+! uu=uu+upr(3,2)
 #endif
  if(uu.gt.0.d0) then
   jb=ja+1
@@ -863,7 +863,7 @@ elseif(ds.eq.dss) then ! southward exit
 
  uu=(rbg*v(ia,ja-1,ka,NST)+rb*v(ia,ja-1,ka,1))*ff
 #ifdef turb    
- uu=uu+upr(4,2)
+! uu=uu+upr(4,2)
 #endif
  if(uu.lt.0.d0) then
   jb=ja-1
@@ -904,7 +904,7 @@ elseif(ds.eq.dsu) then ! upward exit
  call vertvel(rb,ia,iam,ja,ka)
  uu=w(ka)
 #ifdef turb    
- uu=uu+upr(5,2)
+! uu=uu+upr(5,2)
 #endif
  if(uu.gt.0.d0) then
   kb=ka+1
@@ -999,10 +999,12 @@ if(kmt(ib,jb).eq.0) then
  print *,'xyz',x0,x1,y0,y1,z0,z1
  print *,'ds',dse,dsw,dsn,dss,dsu,dsd
  print *,'dsmin=',ds,dsmin,dtmin,dxyz
+ print *,'tt=',tt,ts
  print *,'ntrac=',ntrac
 #ifdef turb
  print *,'upr=',upr
 #endif
+  write(56,566) ntrac,n,x1,y1,z1,tt/60.,t0/3600.,subvol,temp,salt,dens,arct
  stop 5973
 !  goto 1500
  nerror=nerror+1
