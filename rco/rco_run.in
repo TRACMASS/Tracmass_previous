@@ -22,11 +22,11 @@
   !
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets
-  !                 2 = write each grid-crossing and timne change
+  !                 2 = write each grid-crossing and time change
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva    = 5,
+  kriva    = 3,
   !
   ! name of directory where the files will be written
   !directory = '/Volumes/hav4/data/rco/',
@@ -61,8 +61,8 @@
   !                     (partQuant in m3s-1. per particle)
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
-  nqua     = 2, 
-  partQuant= 1,  !(particles/gridcell or m3s-1/particle or m3/particle)
+  nqua     = 1, 
+  partQuant= 1000,  !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.	
