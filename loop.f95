@@ -642,7 +642,7 @@ if(ts.eq.dble(idint(ts))) tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
 
 if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) )              .or. &
     (scrivi .and. kriva.eq.2                             ) .or. &
-    (kriva.eq.3 .and.ntrac.eq.57562                                         ) .or. &
+    (kriva.eq.3                                          ) .or. &
     (kriva.eq.4 .and. n.eq.1                             ) .or. &
     (kriva.eq.5 .and. (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) ) then
 
@@ -1005,7 +1005,7 @@ if(kmt(ib,jb).eq.0) then
  print *,'upr=',upr
 #endif
   write(56,566) ntrac,n,x1,y1,z1,tt/60.,t0/3600.,subvol,temp,salt,dens,arct
- stop 5973
+! stop 5973
 !  goto 1500
  nerror=nerror+1
  nrj(ntrac,6)=1

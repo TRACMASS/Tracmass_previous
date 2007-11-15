@@ -4,8 +4,8 @@ CASE              = $(PROJECT)
 INPUT_INT1        = intmin		
 INPUT_INT2        = intrun		#Use 'dummy' if not used.
 
-#F95COMPILER          = "g95"
-F95COMPILER          = "gfortran"
+F95COMPILER          = "g95"
+#F95COMPILER          = "gfortran"
 
 
 PROJECT_FLAG      = -DPROJECT_NAME=\'$(PROJECT)\'
