@@ -1,14 +1,14 @@
  &INITRUNTIME
   intmin  = 1,                  ! number of initial datasets 
-  intspin = 144,                ! trajectory release period (timesteps)
-  intrun  = 438000,             ! trajectory run   
+  intspin = 36500,                ! trajectory release period (timesteps)
+  intrun  = 40000,             ! trajectory run   
   intstep = 1/                  ! pos if forward  neg if backward
   !
  &INITRUNDATE
   ihour   = -6,
   iday    =  1,
   imon    =  1,
-  iyear   = 2000/  ! 1981
+  iyear   = 1981/  ! 1981
   ! musslor
   !  iday    = 12,
   !  imon    = 5,
@@ -26,13 +26,13 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva    = 3,
+  kriva    = 0,
   !
   ! name of directory where the files will be written
-  !directory = '/Volumes/hav4/data/rco/',
-   directory = '/Users/doos/data/rco12/',
+  directory = '/Volumes/hav4/data/rco/',
+  ! directory = '/Users/doos/data/rco12/',
   ! name of current trajectory run
-  name      = 'ms.05.t1'/ 
+  name      = 'fi.to.t0'/ 
   ! namep='fv.fw.aa'  ! For reruns
   
   
@@ -61,8 +61,8 @@
   !                     (partQuant in m3s-1. per particle)
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
-  nqua     = 1, 
-  partQuant= 1000,  !(particles/gridcell or m3s-1/particle or m3/particle)
+  nqua     = 2, 
+  partQuant= 100,  !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.	
@@ -125,4 +125,4 @@
   iene =   203,
   jens =     0,
   jenn =   362,
-  timax =  365./  ! maximum time length of a trajectory in days
+  timax =  36500./  ! maximum time length of a trajectory in days
