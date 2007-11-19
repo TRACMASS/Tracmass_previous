@@ -1,14 +1,14 @@
  &INITRUNTIME
   intmin  = 1,                  ! number of initial datasets 
   intspin = 36500,                ! trajectory release period (timesteps)
-  intrun  = 40000,             ! trajectory run   
+  intrun  = 50000,              ! trajectory run   
   intstep = 1/                  ! pos if forward  neg if backward
   !
  &INITRUNDATE
   ihour   = -6,
   iday    =  1,
   imon    =  1,
-  iyear   = 1981/  ! 1981
+  iyear   = 2000/  ! 1981
   ! musslor
   !  iday    = 12,
   !  imon    = 5,
@@ -29,10 +29,10 @@
   kriva    = 0,
   !
   ! name of directory where the files will be written
-  directory = '/Volumes/hav4/data/rco/',
-  ! directory = '/Users/doos/data/rco12/',
+  !directory = '/Volumes/hav4/data/rco/',
+   directory = '/Users/doos/data/rco12/',
   ! name of current trajectory run
-  name      = 'fi.to.t0'/ 
+  name      = 'fi.ba.s1'/ 
   ! namep='fv.fw.aa'  ! For reruns
   
   
@@ -121,8 +121,8 @@
   !        jens(n)=jmt+1
   !        jenn(n)=0
   !        enddo
-  ienw =     0,
-  iene =   203,
-  jens =     0,
-  jenn =   362,
+  ienw(1) =     0,
+  iene(1) =   203,
+  jens(1) =     0,
+  jenn(1) =   362,
   timax =  36500./  ! maximum time length of a trajectory in days

@@ -93,7 +93,7 @@ MODULE mod_buoyancy
 ENDMODULE mod_buoyancy
 !______________________________________________________________________________
 MODULE mod_domain
-  INTEGER ienw,iene,jens,jenn
+  INTEGER ienw(10),iene(10),jens(10),jenn(10)
   REAL*4 timax
 !  INTEGER, ALLOCATABLE, DIMENSION(:)   :: ienw,iene,jens,jenn
   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: mask

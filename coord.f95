@@ -73,14 +73,14 @@ rmin=-2.d0
 rmax=10.d0
 #endif
 
-#if defined fors || simp 
+#if defined for || sim
 dx = 185.2d0/deg
 dy = dx
-#ifdef simp
+#ifdef sim
 stlon1=16.d0+31.d0/60.d0
 stlat1=57.d0+20.d0/60.d0
 #endif
-#ifdef fors
+#ifdef for
 stlon1=17.d0+59.d0/60.d0
 stlat1=60.d0+ 8.d0/60.d0
 #endif
@@ -124,7 +124,7 @@ do j=1,JMT
  rlatt=rlatu-0.5d0*dy
  csu(j)=dcos(rlatu*radian)
  cst(j)=dcos(rlatt*radian)
-#if defined fors || simp 
+#if defined for || sim 
  csu(j)=1.d0
  cst(j)=1.d0
 #endif
@@ -178,7 +178,7 @@ dz( 2)=   11.93642d0
 dz( 1)=   11.99292d0
 #endif
 
-#if defined fors || simp 
+#if defined for || sim 
  dz(39)=2.5d0
  do j=38,9,-1
   dz(j)=5.d0
@@ -222,7 +222,7 @@ enddo
 #endif
 
 
-#if defined occam25 || occ66 || rco || tes || fors || simp 
+#if defined occam25 || occ66 || rco || tes || for || sim 
 do i=1,IMT
  do j=1,JMT
   dxdy(i,j)=dx*cst(j)*dy*deg**2

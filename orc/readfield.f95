@@ -12,14 +12,18 @@ USE mod_dens
 #endif
 IMPLICIT none
 
-INTEGER, PARAMETER :: IMO=722
+!#include "/Applications/Utilities/netcdf-3.6.2/include/netcdf.inc"
+#include "//sw/include/netcdf.inc"
 
 CHARACTER :: dates(62)*17
-CHARACTER(LEN=65) :: rfilu,rfilv,rfilh,rfilr
+!CHARACTER(LEN=65) :: rfilu,rfilv,rfilh,rfilr
 
-REAL :: e1v(IMO,jmt),e1t(IMO,jmt),e2u(IMO,jmt),e2t(IMO,jmt)
+!REAL :: e1v(IMT+2,jmt),e1t(IMT+2,jmt),e2u(IMT+2,jmt),e2t(IMT+2,JMT)
 
-integer i,ip,j,jp,k,kk,nread,ndates,ints2,im
+INTEGER, SAVE :: nread,ndates
+CHARACTER(LEN=65), SAVE :: rfilu,rfilv,rfilh,rfilr
+
+integer i,ip,j,jp,k,kk,ints2,im
 
 integer ncid !output ID index of netCDF file
 integer ierr !error 
@@ -29,9 +33,14 @@ integer startA(1),startB(4),startC(2) !input index vector of position to start r
 integer countA(1),countB(4),countC(2) !input lengths of 'volume' to be retrieved
 integer lenx,leny,lenz,lent,lenz2 !output Length of dimension
 integer p, x1, y1, z1, t1 !?
+
+REAL*4, DIMENSION(KM) :: valsz
+!REAL*4, ALLOCATABLE, DIMENSION(:) :: ssh
+REAL*4, DIMENSION(IMT+2,JMT) :: ssh
+REAL*4, DIMENSION(IMT+2,JMT,KM,1) :: fieldx,fieldy,fieldr
     
-real valsz(km),fieldx(IMO,jmt,km,1),fieldy(IMO,jmt,km,1),fieldr(IMO,jmt,km,1),ssh(IMO,jmt)
-real dzu(IMO,jmt,km),dzv(IMO,jmt,km),dzt(IMO,jmt,km)
+REAL, SAVE, ALLOCATABLE, DIMENSION(:,:) :: e1v,e1t,e2u,e2t
+REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: dzu,dzv,dzt
 
 logical around
 
@@ -52,7 +61,16 @@ logical around
 '20040101_20040402','20040402_20040702','20040702_20041001','20041001_20041231', & ! 2004
 '20050101_20050402','20050402_20050702','20050702_20051001','20051001_20051231'/   ! 2005
 
-save e2u,e1t,e1v,e2t,nread,rfilu,rfilv,rfilh,rfilr,ndates,dzu,dzv,dzt
+!  if ( .NOT. ALLOCATED(valsz) ) then
+!     allocate ( valsz(KM) )
+!     allocate ( ssh(IMT+2,JMT) )
+!     allocate ( fieldx(IMT+2,JMT,KM,1),fieldy(IMT+2,JMT,KM,1),fieldr(IMT+2,JMT,KM,1) )
+!  end if
+
+ if ( .not. allocated (e1v) ) then
+   allocate ( e1v(IMT+2,JMT),e1t(IMT+2,JMT),e2u(IMT+2,JMT),e2t(IMT+2,JMT) )
+   allocate ( dzu(IMT+2,JMT,KM),dzv(IMT+2,JMT,KM),dzt(IMT+2,JMT,KM) )
+ end if
 
 !_____________ swap between datasets ___________________________________
 
@@ -117,7 +135,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=1
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=1
 countB(4)=1
@@ -172,7 +190,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=1
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
@@ -192,7 +210,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=1
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
@@ -208,7 +226,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=1
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
@@ -273,7 +291,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=nread
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
@@ -281,7 +299,7 @@ ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,fieldx)
 if(ierr.ne.0) stop 3798
 
 !print *,'read fields'
-!print *,(fieldx(i,100,1,1),i=1,IMO/3)
+!print *,(fieldx(i,100,1,1),i=1,IMT+2/3)
 
 ierr=NF_CLOSE(ncid)
 
@@ -298,7 +316,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=nread
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
@@ -318,7 +336,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=nread
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
@@ -338,7 +356,7 @@ startB(1)=1
 startB(2)=1
 startB(3)=1
 startB(4)=nread
-countB(1)=IMO
+countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=1
 countB(4)=1
@@ -354,7 +372,7 @@ enddo
 
 !print *,(ssh(i,250),i=1,100)
 !do j=1,jmt
-!print *,j,ssh(1,j),ssh(2,j),ssh(IMO-1,j),ssh(IMO,j)
+!print *,j,ssh(1,j),ssh(2,j),ssh(IMT+2-1,j),ssh(IMT+2,j)
 !enddo
 !stop 4568
 
@@ -435,13 +453,14 @@ do j=2,jmt
   im=i-1
   if(im.eq.0) im=IMT
   do k=1,km
-   if(u(i,j,k,2).ne.0..and. kmt(i,j).eq.0) print *,'u',i,j,k,kmt(i,j),u(i,j,k,2)
-   if(v(i,j,k,2).ne.0..and. kmt(i,j).eq.0) print *,'v',i,j,k,kmt(i,j),v(i,j,k,2)
-   if(u(im,j,k,2).ne.0..and. kmt(i,j).eq.0) print *,'u',im,j,k,kmt(i,j),u(im,j,k,2)
-   if(v(i,j-1,k,2).ne.0..and. kmt(i,j).eq.0) print *,'v',i,j-1,k,kmt(i,j),v(i,j-1,k,2)
+   if(u(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) print *,'u',i,j,k,kmt(i,j),u(i,j,k,2)
+   if(v(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) print *,'v',i,j,k,kmt(i,j),v(i,j,k,2)
+   if(u(im,j  ,k,2).ne.0..and. kmt(i,j).eq.0) print *,'u',im,j,k,kmt(i,j),u(im,j,k,2)
+   if(v(i ,j-1,k,2).ne.0..and. kmt(i,j).eq.0) print *,'v',i,j-1,k,kmt(i,j),v(i,j-1,k,2)
   enddo
  enddo
 enddo
+
 
 return
 end subroutine readfields
