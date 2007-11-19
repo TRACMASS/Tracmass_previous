@@ -20,7 +20,7 @@ print *,'ORCA GCM fields'
 print *,'RCO GCM fields'
 #elif defined tes
 print *,'ACADEMIC TEST fields'
-#elif defined simp
+#elif defined sim
 print *,'Simpevarp GCM fields'
 #elif defined fors
 print *,'Forsmark GCM fields'
@@ -95,7 +95,7 @@ elseif(nqua.eq.3) then
 endif
 
 !mask=-1.  ! define start section with ist1,ist2,jst1,jst2
-open(21,file=directory//'kmt/kmt',form='unformatted')
+open(21,file=directory//'topo/kmt',form='unformatted')
 !open(21,file=directory//'kmt/mask',form='unformatted')
 !open(21,file=directory//'kmt/maskust',form='unformatted')
 !open(21,file=directory//'kmt/maskferrysyd',form='unformatted')
@@ -105,11 +105,11 @@ close(21)
 
 do i=1,IMT
  do j=1,JMT
-  if(mask(i,j).ne.0 .and. mask(i,j).le.4 .and. j.lt.215) mask(i,j)=-1  ! entire shallow Baltic south of 61N
+!  if(mask(i,j).ne.0 .and. mask(i,j).le.4 .and. j.lt.215) mask(i,j)=-1  ! entire shallow Baltic south of 61N
  enddo
 enddo
 
-!mask=-1  ! Finska viken
+mask=-1  ! Finska viken
 
 if(kriva.ne.0) open(56,file=directory//'orm/traj.'//name) ! trajectory path
 open(57,file=directory//'orm/traj.ut.'//name)         ! exit position

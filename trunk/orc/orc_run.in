@@ -14,7 +14,7 @@
   &INITRUNWRITE
   ! ncoor:          0 = output in model coordinates
   !                 1 = output in long/lat coordinates
-  ncoor   = 2,      !Don't ask me...  /bror
+  ncoor   = 0,      
   !
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets
@@ -25,9 +25,10 @@
   kriva    = 0,
   !
   ! name of directory where the files will be written
-  directory = '/Volumes/hav3/data/orc/',
+  !directory = '/Volumes/hav3/data/orc/',
+   directory = '/Users/doos/data/orc12/',
   ! name of current trajectory run
-  name      = 'op.fw.xa'/ 
+  name      = 'op.fw.ha'/ 
   ! namep='op.fw.n0'  ! For reruns
   
   
@@ -61,16 +62,33 @@
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.
-  kst1     = 1,
-  kst2     =-1,
-  ist1     = 1,
-  ist2     =-1,
-  jst1     =252,
-  jst2     =252,
-  kst1     = 1,
-  kst2     =-1/
+kst1=1,
+kst2=-1,
 
-$INITRUNDENS
+!ist1=150   
+!ist2=400
+
+!ist1=120 ! eastern pacific
+!ist2=450
+
+!ist1=52
+!ist2=415
+
+!ist1=250
+!ist2=ist1
+
+ist1=1,
+ist2=-1,
+
+!jst1=254  ! jeq=250
+!jst2=254
+
+!jst1=256  ! jeq=250
+jst1=252,  ! jeq=250
+!jst1=505  ! jeq=250
+jst2=252/
+
+  $INITRUNTEMPSALT
   !-------- Control trajectories by salt and temp ----------------------
   !---------- (active only with option tempsalt) -----------------------
   ! Starting a trajectory
@@ -93,10 +111,10 @@ $INITRUNEND
 ! defining end sections
 !
 ! Atlantic
-  ienw(1)=451,
-  iene(1)=641,
-  jens(1)=0,
-  jenn(1)=jst1/
+!  ienw(1)=451,
+!  iene(1)=641,
+!  jens(1)=0,
+!  jenn(1)=jst1/
 !
 ! western Indian
 !  ienw(2)=641,
@@ -127,3 +145,9 @@ $INITRUNEND
 !  iene(1)=IMT,
 !  jens(1)=419,
 !  jenn(1)=JMT/
+! testar detta
+  ienw =   451,
+  iene =   641,
+  jens =     0,
+  jenn =     1,
+  timax =  36500./  ! maximum time length of a trajectory in days

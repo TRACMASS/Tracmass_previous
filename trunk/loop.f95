@@ -6,7 +6,7 @@ USE mod_name
 USE mod_time
 USE mod_grid
 USE mod_buoyancy
-#if defined rco || fors || simp || orca || tes || tun
+#if defined rco || for || sim || orca || tes || tun
 USE mod_domain
 #endif
 USE mod_vel
@@ -210,7 +210,7 @@ do 600 ist=ist1,ist2
 do 600 jst=jst1,jst2
 do 600 kst=kst1,kst2
 
-#if defined fors || simp 
+#if defined for || sim 
 ! if(mask(ist,jst).eq.-2) goto 600
  if(mask(ist,jst).le.0) goto 600
 #ifdef twodim
@@ -275,7 +275,7 @@ vol=dztb(ib,jb,kb)
 #else
 vol=dz(kb)
 #endif
-#if defined occ66 || orca || fors || simp 
+#if defined occ66 || orca || for || sim 
 if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif
 if(kb.eq.KM) vol=vol+hs(ib,jb,1)
@@ -289,7 +289,7 @@ if(num.eq.0) num=1 ! always at least one trajectory
 ijt=nint(sqrt(float(num)))
 kkt=nint(float(num)/float(ijt))
 subvol=vol/dble(ijt*kkt)
-#if defined  simp || fors
+#if defined  sim || for
 vol=dble(mask(ist,jst))
 if(nqua.eq.5) num=mask(ist,jst)
 if(nqua.eq.6) num=1
@@ -554,7 +554,7 @@ dxyz=dztb(ib,jb,kb)
 #else
 dxyz=dz(kb)
 #endif
-#if defined occ66 || orca || fors || simp 
+#if defined occ66 || orca || for || sim 
 if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif
 if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
@@ -654,7 +654,7 @@ if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) )              .or. &
 #endif
 
 
-#if defined fors || simp 
+#if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined rco 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.0,f10.0,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -1026,7 +1026,7 @@ call arclength(ia,ja,ka,dt,rr,arc)
   arct=arct+arc*0.0001  ! original arc in meters -> 10 km
 #elif defined rco 
   arct=arct+arc*0.001  ! original arc in meters -> km
-#elif defined fors || simp 
+#elif defined for || sim 
   arct=arct+arc*0.001  ! original arc in meters -> km
 #endif
 
@@ -1054,7 +1054,7 @@ else
  goto 4444                                   
 endif
 
-!#elif defined fors  
+!#elif defined for  
 
 !if(mask(ib,jb).eq.-99) then ! stoppa utanför "study area"
 !if(mask(ib,jb).eq.0) then  !stoppa redan utanför reg8
@@ -1064,11 +1064,11 @@ endif
 !goto 4444                                   
 !3333 continue
 
-#elif defined orca || rco || tes || tun || simp || fors
+#elif defined orca || rco || tes || tun || sim || for
 
  do k=1,LBT
 !  if(ienw(k).le.ib .and. ib.le.iene(k) .and. jens(k).le.jb .and. jb.le.jenn(k)  ) then
-  if(ienw.le.ib .and. ib.le.iene .and. jens.le.jb .and. jb.le.jenn  ) then
+  if(ienw(k).le.ib .and. ib.le.iene(k) .and. jens(k).le.jb .and. jb.le.jenn(k)  ) then
    nexit(k)=nexit(k)+1
    goto 3333                                
   endif

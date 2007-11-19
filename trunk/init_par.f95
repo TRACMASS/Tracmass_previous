@@ -20,6 +20,7 @@ subroutine init_params
   INTEGER :: argint1, argint2, dummy, factor, i,dtstep
   CHARACTER (LEN=30) :: inparg, argname
   CHARACTER (LEN=23) ::  Project, Case
+
   namelist /INITGRIDGRID/ IMT, JMT, KM, JMAX, LBT,NEND
   namelist /INITGRIDNTRAC/ NTRACMAX
   namelist /INITGRIDDATE/ yearmin, yearmax
@@ -34,7 +35,12 @@ subroutine init_params
                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
 #endif
 
+
+!  allocate ( ienw (LBT),iene (LBT) )
+!  allocate ( jens (LBT),jenn (LBT) )
+
   namelist /INITRUNEND/ ienw, iene, jens, jenn, timax
+
 
   Project = PROJECT_NAME
   Case    = CASE_NAME
@@ -64,6 +70,11 @@ subroutine init_params
   read(8,nml=INITRUNTEMPSALT)
 #endif
   read(8,nml=INITRUNEND)
+print *,'ienw',ienw
+print *,'iene',iene
+print *,'jens',jens
+print *,'jenn',jenn
+print *,'timax',timax
   timax=24.*3600.*timax ! convert time lengths from days to seconds
 
   dstep=1.d0/dble(iter)
@@ -147,7 +158,7 @@ subroutine init_params
 #endif
   ! mod_streamv
 #ifdef streamv
-  allocate ( stxz(imt,km,lbt), styz(imt,km,lbt) )
+  allocate ( stxz(imt,km,lbt), styz(jmt,km,lbt) )
 #endif
   ! mod_streamr
 #ifdef streamr
