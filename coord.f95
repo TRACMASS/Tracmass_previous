@@ -108,13 +108,20 @@ rmax=30.d0
 
 dr=(rmax-rmin)/dble(MR-1)
 
-#if defined streamts
+#if defined streamts 
 tmin=-2.d0
-tmax=25.d0  !!!!!!!!!!!!!!!!!!!!!!! bör ändras och anpassa till olika modellerna
+#ifdef rco || for || sim  ! Values for the Baltic 
+tmax=25.d0 
 smin= 0.d0
 smax=15.d0
+#else               ! Values for the world ocean but bad for brakish water
+tmax=30.d0 
+smin=20.d0
+smax=40.d0
+#endif
 dtemp=(tmax-tmin)/dble(MR-1)
 dsalt=(smax-smin)/dble(MR-1)
+
 #endif
 
 ! cosines relating to corners of grid box: ...u
