@@ -76,7 +76,7 @@ print *,'Number of intermediate time steps between GCM data sets: iter=',iter
 print 999,name,intstart,intspin,intend,intrun,nff,isec,idir,nqua,num,voltr,&
 tmin0,tmax0,smin0,smax0,rmin0,rmax0,ist1,ist2,jst1,jst2,kst1,kst2
 
-999 format(' name=',a8,' intstart=',i4,' intspin=',i4,' intend=',i7,' intrun=',i7,/,&
+999 format(' name=',a8,' intstart=',i4,' intspin=',i5,' intend=',i7,' intrun=',i7,/,&
       ' nff=',i2,' isec=',i2,' idir=',i4,' nqua=',i2,' num=',i7,&
       ' voltr=',f9.0,/,&
       ' tmin0=',f7.2,' tmax0=',f7.2,' smin0=',f7.2,' smax0=',f7.2,&

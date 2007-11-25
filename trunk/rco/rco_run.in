@@ -1,14 +1,14 @@
  &INITRUNTIME
-  intmin  = 1,                  ! number of initial datasets 
-  intspin = 36500,                ! trajectory release period (timesteps)
-  intrun  = 50000,              ! trajectory run   
-  intstep = 1/                  ! pos if forward  neg if backward
+  intmin  = 1,                                      !number of initial datasets 
+  intspin = 35064, ! (35064=24 yers=total 2nm_122)  !trajectory release period (timesteps)
+  intrun  = 50000,                                  !trajectory run   
+  intstep = 1/                                      !pos if forward  neg if backward
   !
  &INITRUNDATE
   ihour   = -6,
   iday    =  1,
   imon    =  1,
-  iyear   = 2000/  ! 1981
+  iyear   = 1981/  ! first year is 1981, last year is 2005
   ! musslor
   !  iday    = 12,
   !  imon    = 5,
@@ -29,10 +29,11 @@
   kriva    = 0,
   !
   ! name of directory where the files will be written
-  !directory = '/Volumes/hav4/data/rco/',
-   directory = '/Users/doos/data/rco12/',
+  directory = '/Volumes/hav4/data/rco/',
+  ! directory = '/Users/doos/data/rco12/',
   ! name of current trajectory run
-  name      = 'fi.ba.s1'/ 
+  !  name      = 'fi.to.s0'/ 
+  name      = 'fi.ba.t2'/ 
   ! namep='fv.fw.aa'  ! For reruns
   
   
@@ -62,7 +63,7 @@
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 2, 
-  partQuant= 100,  !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 500,  !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.	
