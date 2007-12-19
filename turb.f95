@@ -40,8 +40,23 @@ upr(:,1)=upr(:,2)
 ! Calculates the w' at the top of the box from the divergence of u' and v' in order
 ! to respect the continuity equation even for the turbulent velocities
  do n=1,2
-  upr(5,n) = w(ka-1) - ff * ( upr(1,n) - upr(2,n) + upr(3,n) - upr(4,n) )
+
+!Detta ser ut som en bugg   ! t2
+!  upr(5,n) = w(ka-1) - ff * ( upr(1,n) - upr(2,n) + upr(3,n) - upr(4,n) )
+!  upr(6,n) = 0.d0
+!Detta gör att man bara justerar vertikala hastigheten på ovansidan av boxen ! u2
+!  upr(5,n) = - ff * ( upr(1,n) - upr(2,n) + upr(3,n) - upr(4,n) )
+!  upr(6,n) = 0.d0
+
+!The vertical velocity is calculated from the divergence of the horizontal turbulence !v2
+!The turbulent is evenly spread between the top and bottom of box if not a bottom box
+  if(w(ka-1).eq.0.d0) then
+  upr(5,n) = - ff * ( upr(1,n) - upr(2,n) + upr(3,n) - upr(4,n) )
   upr(6,n) = 0.d0
+  else
+  upr(5,n) = - 0.5d0 * ff * ( upr(1,n) - upr(2,n) + upr(3,n) - upr(4,n) )
+  upr(6,n) = - upr(5,n)
+  endif
  enddo
 #endif
 #endif

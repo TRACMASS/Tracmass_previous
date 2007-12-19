@@ -32,8 +32,8 @@
   directory = '/Volumes/hav4/data/rco/',
   ! directory = '/Users/doos/data/rco12/',
   ! name of current trajectory run
-  !  name      = 'fi.to.s0'/ 
-  name      = 'fi.ba.t2'/ 
+     name      = 'fi.ne.v2'/ 
+  !   name      = 'fi.ne.s2'/ 
   ! namep='fv.fw.aa'  ! For reruns
   
   
@@ -53,7 +53,7 @@
   ! idir:           1 = follow positive direction (eastward/northward)  
   !                -1 = follow negative direction (westward/southward)
   !                 0 = both directions
-  idir     = 1,
+  idir     = -1,
   !
   ! number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
@@ -63,14 +63,23 @@
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 2, 
-  partQuant= 500,  !(particles/gridcell or m3s-1/particle or m3/particle)
+!  partQuant= 500,  !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 50,  !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
-  ! Area where particles are seeded. -1 indicates max value in grid.	
-  ist1     = 204,		 
-  ist2     = 204,		 
-  jst1     = 145,		 
-  jst2     = 220,		 
+  ! Area where particles are seeded. -1 indicates max value in grid.
+  ! Water entering the Gulf of Finland from the Baltic	
+!ist1     = 204,		 
+!ist2     = 204,		 
+!jst1     = 145,		 
+!jst2     = 220,		 
+!kst1     =   1,		 
+!kst2     =  -1/
+! Neva
+  ist1     = 317,		 
+  ist2     = 317,		 
+  jst1     = 170,		 
+  jst2     = 200,		 
   kst1     =   1,		 
   kst2     =  -1/
 

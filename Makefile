@@ -1,6 +1,6 @@
 
 PROJECT	          = rco
-# possible GCMs: rco,occ,orc,sim,for
+# possible PROJECTS i.e. GCMs: rco, occ, orc, sim, for
 CASE              = $(PROJECT)
 INPUT_INT1        = intmin		
 INPUT_INT2        = intrun		#Use 'dummy' if not used.
@@ -22,7 +22,7 @@ INC_DIR           = -I/sw/include -I/sw/lib/netcdf-g95/include \
                     -I/usr/local/mysql/include
 
 ORM_FLAGS=-D$(PROJECT) -Dmean -Dstreamxy -Dstreamr -Dstreamv \
-          -Dtime -Dtempsalt -Dmysqlwrite -Dstreamts
+          -Dtime -Dtempsalt -Dmysqlwrite -Dstreamts -Dturb
 
 # -Dturb     Sub-grid paramterisation of the turbulence
 # -Dselect   Select only one trajectory (for debugging)
