@@ -76,6 +76,11 @@ elseif(ijk.eq.3) then
  else
   uu=uu+upr(5,1)  ! add u' from previous iterative time step if on box wall
  endif
+ if(r0.ne.dble(ka-1)) then
+  uu=uu+upr(6,2)  
+ else
+  uu=uu+upr(6,1)  ! add u' from previous iterative time step if on box wall
+ endif
 #endif
 endif
 
