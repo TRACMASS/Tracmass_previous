@@ -20,6 +20,13 @@ integer ib,jb,kb,ia,ja,ka,ns
 temp=0.5*(tem(ia,ja,ka,ns)+tem(ib,jb,kb,ns))
 salt=0.5*(sal(ia,ja,ka,ns)+sal(ib,jb,kb,ns))
 dens=0.5*(rho(ia,ja,ka,ns)+rho(ib,jb,kb,ns))
+#ifdef ifs
+temp=temp-273.15
+if(temp.lt.-99.98) temp=-99.99
+!salt=0.
+dens=dens/9.81/1000. ! convert geopotential into geopotential height in km
+#endif
+
 return
 end subroutine interp2
 

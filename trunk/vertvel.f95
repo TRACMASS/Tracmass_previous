@@ -35,7 +35,11 @@ do k=1,ka
  um=rg*u(iam,ja  ,k,NST)+rr*u(iam,ja  ,k,1)
  vv=rg*v(ia ,ja  ,k,NST)+rr*v(ia ,ja  ,k,1)
  vm=rg*v(ia ,ja-1,k,NST)+rr*v(ia ,ja-1,k,1)
+#if defined ifs
  w(k) = w(k-1) - ff * ( uu - um + vv - vm )
+#else
+ w(k) = w(k-1) + ff * ( uu - um + vv - vm )
+#endif
 #endif
 enddo
 

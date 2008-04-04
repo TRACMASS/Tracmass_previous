@@ -6,10 +6,12 @@ subroutine coordinat
 USE mod_param
 USE mod_coord
 USE mod_grid
+USE mod_name
 IMPLICIT none
 
 INTEGER i,j,k,kk,mois(12)
 REAL*8 pi,radian,radius,rlatt,rlatu,rmax,smax,tmax
+REAL :: a
 
 #if defined occam25 || occ66
 REAL*8 b1,b2,b3,b4,z
@@ -108,20 +110,21 @@ rmax=30.d0
 
 dr=(rmax-rmin)/dble(MR-1)
 
-#if defined streamts 
+#ifdef streamts 
 tmin=-2.d0
-#ifdef rco || for || sim  ! Values for the Baltic 
+! Values for the Baltic 
+#if defined rco || for || sim  
 tmax=25.d0 
 smin= 0.d0
 smax=15.d0
-#else               ! Values for the world ocean but bad for brakish water
+! Values for the world ocean but bad for brakish water
+#else               
 tmax=30.d0 
 smin=20.d0
 smax=40.d0
 #endif
 dtemp=(tmax-tmin)/dble(MR-1)
 dsalt=(smax-smin)/dble(MR-1)
-
 #endif
 
 ! cosines relating to corners of grid box: ...u
@@ -196,10 +199,6 @@ dz( 1)=   11.99292d0
  dz(1)=20.d0
 #endif
 
-#ifdef tes
-dz=10.
-#endif
-
 #if defined occam25 
 do k=0,KM
  zw(k)=b1*dble(KM-k)+b2*b4*dlog(dcosh((dble(KM-k)-b3)/b4)/dcosh(-b3/b4))
@@ -235,6 +234,79 @@ do i=1,IMT
   dxdy(i,j)=dx*cst(j)*dy*deg**2
  enddo
 enddo
+#endif
+
+#if defined ifs
+! This is in hPA but should perhaps be in Pa i.e. to multiply with 100!!!!!!!!!!!!!
+zw( 0)=0.
+zw( 1)=5.
+zw( 2)=30.
+zw( 3)=75.
+zw( 4)=150.
+zw( 5)=250.
+zw( 6)=350.
+zw( 7)=450.
+zw( 8)=600.
+zw( 9)=775.
+zw(10)=887.5
+zw(11)=962.5 ! but this level is overriten to take account of the surface pressure
+
+do k=1,KM
+ dz(k)=zw(k)-zw(k-1)
+! print *,'k=',k,' dz(k)=',dz(k)
+enddo
+
+dx = 1.125
+dy = 1000000. ! irregular and should be dy(j)
+stlon1=0. 
+stlat1=-90000.
+
+! geopotential height in km
+rmin=0.d0
+rmax=200.d0
+dr=(rmax-rmin)/dble(MR-1)
+! temperature
+tmin=-100.d0
+tmax=50.d0 
+dtemp=(tmax-tmin)/dble(MR-1)
+! specific humidity
+smin= 0.d0
+smax=25.d0
+dsalt=(smax-smin)/dble(MR-1)
+
+! read in the guassian latitude coordinates
+print *,'topo=',directory
+!print *,'topo=',directory//'/topo/ifsn80lat.txt'
+open(12,file=directory//'/topo/ifsn80lat.txt')
+99 format(50x,f9.5)
+do j=1,JMT-1
+read(12,99) a
+phi(j)=-a
+enddo
+phi(0  )=-90. ! add the north pole as a fictive grid point
+phi(JMT)= 90. ! add the south pole as a fictive grid point
+
+do j=1,JMT
+dyt(j)=(phi(j)-phi(j-1))*deg
+!print *,j,phi(j),phi(j-1),dyt(j)
+enddo
+
+do j=1,JMT
+ rlatt=0.5*(phi(j)+phi(j-1))
+ rlatu=phi(j)
+ csu(j)=dcos(rlatu*radian)
+ cst(j)=dcos(rlatt*radian)
+enddo
+
+do i=1,IMT
+ do j=1,JMT
+  dxdy(i,j)=dx*deg*cst(j)*dyt(j)
+ enddo
+enddo
+
+kmt=KM  ! all grid cells are active in an AGCM
+
+
 #endif
 
 return
