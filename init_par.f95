@@ -135,7 +135,7 @@ print *,'timax',timax
   end if
 
   ! mod_coord
-  allocate  ( csu (jmt), cst(jmt), zw(0:km) )       
+  allocate  ( csu (jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km) )       
   ! mod_grid
   allocate ( dxdy(imt,jmt), dztb(imt,jmt,kd) )   
   allocate (kmt(imt,jmt), dz(km) )

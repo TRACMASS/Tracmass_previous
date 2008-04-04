@@ -6,7 +6,7 @@ USE mod_name
 USE mod_time
 USE mod_grid
 USE mod_buoyancy
-#if defined rco || for || sim || orca || tes || tun
+#if defined rco || for || sim || orca || tes || tun || ifs
 USE mod_domain
 #endif
 USE mod_vel
@@ -177,7 +177,7 @@ lbas=1 ! set to 1 if no rerun
 ff=dble(nff)
 tstep=dble(intstep)
 
-!________________ read ocean model data files __________________________
+!________________ read ocean/atmosphere GCM data files __________________________
 
 ints=intstart
 call readfields   ! initial dataset
@@ -186,7 +186,9 @@ ntrac=0
 !_____________________ choose set of trajectories _____________________________
 
 #ifdef time 
+
 do 6000 ints=intstart+intstep,intstart+intrun,intstep  ! time loop
+!print *,'tidsloop',ints,intstart+intstep,intstart+intrun,intstep
 call readfields
 if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
 #ifdef tracer 
@@ -194,6 +196,7 @@ if(mod(ints,120).eq.0) call writetracer
 #endif
 
 !goto 6000 
+!print *,'aaaaaaaa',nff*ints,nff*(intstart+intspin)
 
  if(nff*ints.gt.nff*(intstart+intspin)) then
   ntrac=0
@@ -242,6 +245,7 @@ kb=kst
 if    (isec.eq.1 .and. idir.ne.0) then
  if(idir*ff*u(ist,jst,kst,1).le.0.) goto 600 
  vol=abs(u(ist,jst,kst,1))
+ print *,'vollll',vol,u(ist,jst,kst,1),ist,jst,kst
 elseif(isec.eq.2 .and. idir.ne.0) then
  if(idir*ff*v(ist,jst,kst,1).le.0.) goto 600 
  vol=abs(v(ist,jst,kst,1))
@@ -289,6 +293,7 @@ if(num.eq.0) num=1 ! always at least one trajectory
 ijt=nint(sqrt(float(num)))
 kkt=nint(float(num)/float(ijt))
 subvol=vol/dble(ijt*kkt)
+
 #if defined  sim || for
 vol=dble(mask(ist,jst))
 if(nqua.eq.5) num=mask(ist,jst)
@@ -297,7 +302,11 @@ ijt=nint(sqrt(float(num)))
 kkt=nint(float(num)/float(ijt))
 subvol=vol/dble(ijt*kkt)
 #endif
+
+if(subvol.eq.0.) stop 3956  !?????????????????
 if(subvol.eq.0.) subvol=1.
+
+
 !print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
 
 99 format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
@@ -342,10 +351,11 @@ elseif(isec.eq.4)then
 endif
 
 ibm=ib-1
-if(ibm.eq.0) ibm=IMT                              ! cyclic ocean
-if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)   ! cyclic ocean
+if(ibm.eq.0) ibm=IMT                              ! cyclic ocean/atmosphere
+if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)   ! cyclic ocean/atmosphere
 
 !____ check properties of water mass at initial time  
+#ifndef ifs 
 #ifdef tempsalt 
 !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
@@ -356,8 +366,7 @@ if(temp.lt.tmin0 .or. temp.gt.tmax0 .or. &
  goto 500 
 endif
 #endif
-
-! print *,'nuuu',ibm,x1,ib,jb-1,y1,jb,kb-1,z1,kb
+#endif
 
 ntrac=ntrac+1  ! the trajectory number
 
@@ -538,7 +547,7 @@ print *,'rg=',rg
 goto 1500
 endif
 
-if(ib.eq.1.and.x1.eq.dble(IMT)) x1=0.d0     ! cyclic world ocean
+if(ib.eq.1.and.x1.eq.dble(IMT)) x1=0.d0     ! cyclic world ocean/atmosphere
 x0=x1
 y0=y1
 z0=z1
@@ -647,12 +656,13 @@ if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) )              .or. &
     (kriva.eq.5 .and. (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) ) then
 
  call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+
 #if defined biol
   write(56,566) ntrac,n,x1,y1,z1,tt/3600.,t0/3600.
 #else
-  write(56,566) ntrac,n,x1,y1,z1,tt/60.,t0/3600.,subvol,temp,salt,dens,arct
+  write(56,566) ntrac,n,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,arct
+!  print 566,    ntrac,n,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,arct
 #endif
-
 
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -1019,14 +1029,21 @@ call diffusion(x1,y1,z1,ib,jb,kb,dt,snew,st0,st1)
 
 #endif
 
+!if(n.eq.62878) then
+!print *,'ia',ia,ja,ka
+!print *,'ib',ib,jb,kb
+!print *,'x0',x0,y0,z0
+!print *,'x1',x1,y1,z1
+!print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+!stop 5907
+!endif
+
 !____ calculate arclength of the trajectory path in the box ____________
 
 call arclength(ia,ja,ka,dt,rr,arc)
-#if defined occ66
-  arct=arct+arc*0.0001  ! original arc in meters -> 10 km
-#elif defined rco 
-  arct=arct+arc*0.001  ! original arc in meters -> km
-#elif defined for || sim 
+#if defined occ66 || ifs
+  arct=arct+arc*0.00001  ! original arc in meters -> 100 km
+#else
   arct=arct+arc*0.001  ! original arc in meters -> km
 #endif
 
@@ -1064,7 +1081,8 @@ endif
 !goto 4444                                   
 !3333 continue
 
-#elif defined orca || rco || tes || tun || sim || for
+!#elif defined orca || rco || tes || tun || sim || for || ifs
+#else
 
  do k=1,LBT
 !  if(ienw(k).le.ib .and. ib.le.iene(k) .and. jens(k).le.jb .and. jb.le.jenn(k)  ) then
@@ -1103,7 +1121,8 @@ endif
 nout=nout+1
 
 if(kriva.ne.0 ) then
- write(56,566) ntrac,n,x1,y1,z1,tt/3600.,t0/3600.,subvol,temp,salt,dens,arct
+ call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+ write(56,566) ntrac,n,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,arct
 endif
 
 write(57,566) ntrac,n,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
@@ -1121,7 +1140,7 @@ write(57,566) ntrac,n,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 
 if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. ints.eq.intstart+intrun) then 
  call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
- write(56,566) ntrac,n,x1,y1,z1,tt/3600.,t0/3600.,subvol,temp,salt,dens,arct
+ write(56,566) ntrac,n,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,arct
 ! write(56,566) ntrac,n,x1,y1,z1,tt/3600.,t0/3600.
  !,subvol,temp,salt,dens,arct
 endif
@@ -1137,11 +1156,11 @@ goto 1000
 #ifdef sediment
 print 599,  ints,       ntime,       ntractot,       nout,     nloop,nerror,ntractot-nout,nsed,nsusp,nexit
 599 format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
-            ' nerror=',i4,' in Ocean=',i8,' nsed=',i8, ' nsusp=',i8,' nexit=',9i8)
+            ' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, ' nsusp=',i8,' nexit=',9i8)
 #else
 print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout-nerror,nexit
 599 format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
-           ' nerror=',i4,' in Ocean=',i8,' nexit=',9i8)
+           ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
 #endif
  6000 continue
 
