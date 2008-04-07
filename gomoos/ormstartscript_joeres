@@ -1,0 +1,33 @@
+#!/bin/bash
+
+make clean
+make
+
+declare -a time
+
+time=( 0090 0121 0151 0182 0212 0244 0274 0305 0335 0366 0396 0425 0455 0486 0516 0547 0577 0609 0639 0670 0700 0731 0761 0790 0820 0851 0881 0912 0942 0974 1004 1035 )
+
+timelength=${#time[@]}
+date > log
+for ((i=0;i<$timelength;i=i+2)); 
+  do
+  jd1=${time[${i}]}
+  jd2=${time[${i}+1]}
+
+  table="j"$jd1"R"
+
+  CT1="CREATE TABLE IF NOT EXISTS traj."$table"run  "
+  CT2="(ints INT,ntrac INT,n REAL,x1 REAL,y1 REAL,z1 REAL,tt " 
+  CT3=" REAL,t0 REAL,subvol REAL,temp REAL,salt REAL,dens "
+  CT4=" REAL,arct REAL, ijk REAL, INDEX(ints), INDEX(ntrac), INDEX(ijk) );"
+  CT="$CT1 $CT2 $CT3 $CT4"
+  TR="TRUNCATE traj."$table"run;" 
+  
+  /usr/local/mysql/bin/mysql -D traj -u root -e "$CT"
+  /usr/local/mysql/bin/mysql -D traj -u root -e "$TR"
+
+#  echo $jd1 $jd2 $table".01"
+ ./runtraj $jd1 $jd2 $table".01"
+  echo $jd1 >> log
+  date >> log
+done
