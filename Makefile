@@ -1,6 +1,5 @@
-
-PROJECT	          = ifs
-# possible PROJECTS i.e. GCMs: rco, occ, orc, sim, for, ifs
+PROJECT	          = orc
+# possible PROJECTS i.e. GCMs: rco, occ, orc, sim, for, ifs, gomoos
 CASE              = $(PROJECT)
 INPUT_INT1        = intmin		
 INPUT_INT2        = intrun		#Use 'dummy' if not used.
@@ -17,9 +16,11 @@ ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 #MYI_FLAGS        = `$(MYCFG) --cflags` 
 #MYL_FLAGS        = `$(MYCFG) --libs` 
 
-LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-g95/lib
-INC_DIR           = -I/sw/include -I/sw/lib/netcdf-g95/include \
+LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
+INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include \
                     -I/usr/local/mysql/include
+
+
 
 ORM_FLAGS=-D$(PROJECT) -Dmean -Dstreamxy -Dstreamr -Dstreamv \
           -Dtime -Dtempsalt -Dmysqlwrite -Dstreamts
@@ -28,7 +29,7 @@ ORM_FLAGS=-D$(PROJECT) -Dmean -Dstreamxy -Dstreamr -Dstreamv \
 # -Dselect   Select only one trajectory (for debugging)
 # -Dtracer   Trajectory particles tracer
 
-LNK_FLAGS         = -lnetcdf -lSystemStubs
+LNK_FLAGS         = -lnetcdf -lSystemStubs -lnetcdff
 
 ifeq ($(F95COMPILER),"gfortran")
 	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian   

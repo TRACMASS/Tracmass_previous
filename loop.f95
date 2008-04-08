@@ -1,12 +1,10 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
-
 subroutine loop
   USE mod_param
   USE mod_name
   USE mod_time
   USE mod_grid
   USE mod_buoyancy
-#if defined rco || for || sim || orca || tes || tun || ifs
+#if defined rco || for || sim || orc || tes || tun || ifs || gomoos
   USE mod_domain
 #endif
   USE mod_vel
@@ -26,7 +24,7 @@ subroutine loop
 #ifdef sediment
   USE mod_sed
 #endif
-
+  
   IMPLICIT none
 
 #ifdef stat
@@ -68,7 +66,7 @@ subroutine loop
   iday0=iday
   imon0=imon
   iyear0=iyear
-  !_______________________________ print some run stats ___________________________________
+  !______________________ print some run stats ______________________
 
   print *,'writes trajectories in ',directory
   print *,'Number of intermediate time steps between GCM data sets: iter=',iter
@@ -84,7 +82,7 @@ subroutine loop
        ' ist1=',i4,' ist2=',i4,' jst1=',i4,' jst2=',i4,' kst1=',i2,&
        ' kst2=',i2)
 
-  !______________________________ initialise to zero ______________________________________
+  !_______________________ initialise to zero _______________
   luy=0
   w=0.d0
   nev=0
@@ -125,15 +123,16 @@ subroutine loop
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
 
-  !_________ read in the end positions from an identical previous trajectory run __________
-
+  ! === Read in the end positions from an === 
+  ! === identical previous trajectory run ===
+  
 #ifdef rerun
   open(67,file=directory//'orm/traj.ut.'//namep)
 40 continue
   read(67,566,end=41,err=41) ntrac,n,rlon,rlat,zz
   !if(n.ne.1)       print 566,ntrac,n,rlon,rlat,zz
 
-#ifdef orca
+#ifdef orc
   do k=1,LBT
      if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
         nrj(ntrac,8)=k                               
@@ -143,7 +142,7 @@ subroutine loop
   !if(n.ne.1) print *,ntrac,n,rlon,rlat,zz,nrj(ntrac,8)
 #endif
 
-
+  
 
 #ifdef occ66
   if(rlon.eq.293.) then
@@ -170,18 +169,19 @@ subroutine loop
   lbas=1 ! set to 1 if no rerun
 #endif
 
-  !________________________________________________________________________________________
-
+  !==========================================================
+  !==========================================================
+  
   ff=dble(nff)
   tstep=dble(intstep)
-
-  !________________ read ocean/atmosphere GCM data files __________________________
-
+  
+  ! === read ocean/atmosphere GCM data files ===
+  
   ints=intstart
   call readfields   ! initial dataset
   ntrac=0
-
-  !_____________________ choose set of trajectories _____________________________
+  
+  ! === Choose set of trajectories ===
 
 #ifdef time 
 
@@ -225,7 +225,7 @@ subroutine loop
 #ifdef rco
                  if(mask(ist,jst).ne.-1) goto 600
 #endif
-#ifdef orca
+#ifdef orc
                  if(ist.le.0 .or. ist.gt.IMT .or. jst.le.0 .or. jst.gt.JMT) print *,'hoooopsnasa',ist,jst
                  if(mask(ist,jst).ne.-1) goto 600
                  !if(451.lt.ist .and. ist.lt.641) goto 600
@@ -237,8 +237,9 @@ subroutine loop
                  if(ibm.eq.0) ibm=IMT
                  jb=jst
                  kb=kst
-
-                 !_ follow trajectory only if velocity in right direction + sets trajectory transport vol _
+                 
+                 ! follow trajectory only if velocity in right direction + 
+                 ! sets trajectory transport vol _
 
                  if    (isec.eq.1 .and. idir.ne.0) then
                     if(idir*ff*u(ist,jst,kst,1).le.0.) goto 600 
@@ -277,7 +278,7 @@ subroutine loop
 #else
                     vol=dz(kb)
 #endif
-#if defined occ66 || orca || for || sim 
+#if defined occ66 || orc || for || sim 
                     if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif
                     if(kb.eq.KM) vol=vol+hs(ib,jb,1)
@@ -317,8 +318,7 @@ subroutine loop
                        ib=ist
                        jb=jst
                        kb=kst
-
-
+                       
                        !_____meridional section
                        if(isec.eq.1)then
                           y1=dble(jb-1) + (dble(ijj)-0.5d0)/dble(ijt) 
@@ -349,8 +349,9 @@ subroutine loop
                        endif
 
                        ibm=ib-1
-                       if(ibm.eq.0) ibm=IMT                              ! cyclic ocean/atmosphere
-                       if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)   ! cyclic ocean/atmosphere
+                       ! === cyclic ocean/atmosphere === 
+                       if(ibm.eq.0) ibm=IMT
+                       if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)
 
                        !____ check properties of water mass at initial time  
 #ifndef ifs 
@@ -385,9 +386,12 @@ subroutine loop
                           print *,',(intspin-ints)/ints*ntrac=',(intspin-ints)/ints*ntrac
                           goto 1500
                        endif
-                       !      tt=ff*tseas*float(ints-intstart-intstep) !time(sec) rel to start
-                       !      ts=ff*float(ints-intstart-intstep)/tstep !time, fractions of ints
-                       !      ts=float(ints-intstart-intstep)/tstep !time, fractions of ints
+                       !      tt=ff*tseas*float(ints-intstart-intstep) 
+                       !time(sec) rel to start
+                       !      ts=ff*float(ints-intstart-intstep)/tstep 
+                       !time, fractions of ints
+                       !      ts=float(ints-intstart-intstep)/tstep 
+                       !time, fractions of ints
 
                        ts=ff*dble(ints-intstep)/tstep !time, fractions of ints
                        tt=ts*tseas !time(sec) rel to start
@@ -544,8 +548,8 @@ subroutine loop
                           print *,'rg=',rg
                           goto 1500
                        endif
-
-                       if(ib.eq.1.and.x1.eq.dble(IMT)) x1=0.d0     ! cyclic world ocean/atmosphere
+                       ! === Cyclic world ocean/atmosphere === 
+                       if(ib.eq.1.and.x1.eq.dble(IMT)) x1=0.d0
                        x0=x1
                        y0=y1
                        z0=z1
@@ -554,26 +558,26 @@ subroutine loop
                        if(iam.eq.0)iam=IMT
                        ja=jb
                        ka=kb
-
+                       
                        ! T-box volume in m3
 #ifdef sigma
                        dxyz=dztb(ib,jb,kb)
 #else
                        dxyz=dz(kb)
 #endif
-#if defined occ66 || orca || for || sim 
+#if defined occ66 || orc || for || sim 
                        if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif
                        if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
                        dxyz=dxyz*dxdy(ib,jb)
-
+                       
                        if(dxyz.eq.0.) then
                           print *,'dxyz=',dxyz,ntrac,ib,jb,kb,dztb(ib,jb,1),dxdy(ib,jb),rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
                           goto 1500
                        endif
-
+                       
                        !print *,ib,jb,kb,dxyz,dztb(ib,jb,kb),KD
-
+                       
                        !_______  check that coordinates belongs to correct box valuable fordebugging _________
                        if( dble(ib-1).gt.x1 .or. dble(ib).lt.x1 )  then
                           print *,'error i',ib-1,x1,ib,ntrac,ib,jb,kb
@@ -973,7 +977,7 @@ subroutine loop
 
                        !_____________ make sure that trjaectory inside ib,jb,kb box ____________________________
 
-#ifdef orca 
+#ifdef orc 
                        if(y1.eq.dble(JMT)) then ! north fold cyclic
                           x1=722.d0-x1
                           y1=dble(JMT-2)
@@ -1036,20 +1040,18 @@ subroutine loop
                        !stop 5907
                        !endif
 
-                       !____ calculate arclength of the trajectory path in the box ____________
-
+                       
+                       ! === Calculate arclength of the ===
+                       ! === trajectory path in the box ===
                        call arclength(ia,ja,ka,dt,rr,arc)
 #if defined occ66 || ifs
-                       arct=arct+arc*0.00001  ! original arc in meters -> 100 km
+                       arct=arct+arc*0.00001  ! orig arc in meters -> 100 km
 #else
-                       arct=arct+arc*0.001  ! original arc in meters -> km
+                       arct=arct+arc*0.001  ! orig arc in meters -> km
 #endif
-
-                       !_____________ end trajectory if outside chosen domain _________________
-
+                       ! === end trajectory if outside chosen domain ===
 #if defined occam25 || occ66
-
-                       ! stop and select stream function
+                       ! === stop and select stream function ===
                        if( y1.eq.dble(jmax-2) .and. n.ne.1 ) then ! To Northern Boundary
                           nnorth=nnorth+1
                           nexit(1)=nexit(1)+1
@@ -1079,7 +1081,7 @@ subroutine loop
                        !goto 4444                                   
                        !3333 continue
 
-                       !#elif defined orca || rco || tes || tun || sim || for || ifs
+                       !#elif defined orc || rco || tes || tun || sim || for || ifs
 #else
 
                        do k=1,LBT
