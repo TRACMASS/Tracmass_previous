@@ -14,7 +14,7 @@ INTEGER i,j,n
 print *,'TRACMASS trajectory code starts at'
 call system('date')
 !___________________________ print preprocess options _______________________
-#if defined orca
+#if defined orc
 print *,'ORCA GCM fields'
 #elif defined rco
 print *,'RCO GCM fields'
