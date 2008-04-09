@@ -1,50 +1,27 @@
 SUBROUTINE readfields
   
-  use netcdf
+  USE netcdf
+  USE mod_param
+  USE mod_vel
+  USE mod_coord
+  USE mod_time
+  USE mod_grid
+  USE mod_name
+  USE mod_vel
+#ifdef tempsalt
+  USE mod_dens
+#endif
   
   IMPLICIT none
-  
-  !#include "/Applications/Utilities/netcdf-3.6.0-p1/include/netcdf.inc"
-  !#include "/sw/include/netcdf.inc"
-  !#include "netcdf.inc"
-#include "param.h"
-  
-  common/vel/u(imt,0:JMAX,km,NST),v(imt,0:JMAX,km,NST),w(0:km),ff
-  real u,v
-  real*8 w,ff
-  
-  common /coord/dx,dy,deg,stlon1,stlat1,csu(jmt),cst(jmt),zw(0:km)
-  REAL*8        dx,dy,deg,stlon1,stlat1,csu,cst,zw
-  
-  common /grid/dxdy(imt,jmt),dztb(imt,jmt),dz(km),rmin,dr,tmin,dtemp,smin,dsalt,kmt(imt,jmt)
-  REAL*8 dxdy,dztb,dz,rmin,dr,tmin,dtemp,smin,dsalt
-  INTEGER kmt
-  
-#ifdef tempsalt
-  common/dens/ tem(imt,jmt,km,2),sal(imt,jmt,km,2),rho(imt,jmt,km,2)
-  real tem,sal,rho
-  real tempb(km),saltb(km),rhob(km)
-  integer kmm
-#endif
-
-  common/tid/ints,intstart,intend,intrun,intspin,intstep,intmin,intmax
-  integer    ints,intstart,intend,intrun,intspin,intstep,intmin,intmax
-
-  common/namn/name,namep,directory
-  CHARACTER(LEN=30) :: name,namep
-  CHARACTER(LEN=12) :: directory
 
   CHARACTER :: dirdata*10
-  CHARACTER(LEN=63) :: ncFile
+  CHARACTER(len=63), SAVE :: ncFile
   data dirdata/'/data/GOM/'/
   !data dirdata/'/Users/doos/data/abcde/'/
 
-  REAL :: e1v(imt,jmt),e1t(imt,jmt),e2u(imt,jmt),e2t(imt,jmt)
-  
-  REAL :: fort(imt*jmt*2)
+  integer i,im,j,jm,k,kk,ints2
 
-  integer i,im,j,jm,k,kk,nread,ndates,ints2
-
+  INTEGER, SAVE :: nread,ndates
   integer ncid !output ID index of netCDF file
   integer ierr !error 
   integer dimidx,dimidy,dimidz,dimidt !output ID index of dimension
@@ -54,37 +31,43 @@ SUBROUTINE readfields
   integer lenx,leny,lenz,lent,lenz2 !output Length of dimension
   integer p, x1, y1, z1, t1 !?
   integer intpart1,intpart2
-
-  integer u0mask(imt,jmt),u2mask(imt,jmt),v0mask(imt,jmt),v2mask(imt,jmt)
-
-  real valsz(km),NCfieldx(1,imt,jmt,km),NCfieldy(1,imt,jmt,km),NCfieldr(1,imt,jmt,km),ssh(imt,jmt) ,NCfieldkmt(imt,jmt)
-
-#ifdef maine
-  integer :: depth(imt,jmt), mask(imt,jmt)
-  common /sigma/dzu,dzv,dzt
-#endif
-  real dzu(imt,jmt,km),dzv(imt,jmt,km),dzt(imt,jmt,km),ang(imt,jmt)
-  real x_offset,y_offset,temp_offset,salt_offset, ssh_offset
-  real x_scale,y_scale,temp_scale,salt_scale, ssh_scale
-
-
+  
+  INTEGER,       ALLOCATABLE, DIMENSION(:,:)     :: depth, ssh
+  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)     :: mask
+  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)     :: u0mask,u2mask,v0mask,v2mask
+  REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:)     :: e1v,e1t,e2u,e2t,ang
+  REAL,          ALLOCATABLE, DIMENSION(:)       :: valsz,fort
+  REAL,          ALLOCATABLE, DIMENSION(:,:)     :: NCfieldkmt 
+  REAL,          ALLOCATABLE, DIMENSION(:,:,:,:) :: NCfieldx,NCfieldy,NCfieldr 
+  REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:,:)   :: dzu,dzv,dzt
+  
+  REAL :: x_offset,y_offset,temp_offset,salt_offset, ssh_offset
+  REAL :: x_scale,y_scale,temp_scale,salt_scale, ssh_scale
+  
   logical around
-
+  
   real, dimension(22) :: dS = (/ 0.008, 0.008, 0.017, 0.033, 0.067, &
        0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, &
        0.067, 0.067, 0.067, 0.033, 0.017, 0.008, 0.008, 0.000 /)
-
+  
   integer year,month,day
   character*16 :: fileName
   
   real :: pi=3.1416E0
   real :: rad,  radi
-
  
-  save e2u,e1t,e1v,e2t,nread,ncFile,ndates,ang, mask
-  save u0mask,u2mask,v0mask,v2mask
-  !_____________ swap between datasets ___________________________________
+  if ( .NOT. ALLOCATED(ang) ) then
+     allocate ( ang(imt,jmt),mask(imt,jmt),depth(imt,jmt) )
+     allocate ( dzu(imt,jmt,km),dzv(imt,jmt,km),dzt(imt,jmt,km) )
+     allocate ( u0mask(imt,jmt),u2mask(imt,jmt) )
+     allocate ( v0mask(imt,jmt),v2mask(imt,jmt) )
+  end if
+  allocate ( valsz(km),fort(imt*jmt*2) )
+  allocate ( NCfieldx(1,imt,jmt,km),NCfieldy(1,imt,jmt,km) )
+  allocate ( NCfieldr(1,imt,jmt,km),NCfieldkmt(imt,jmt) )
+  allocate ( ssh(imt,jmt) )
 
+  !_____________ swap between datasets ___________________________________
   u(:,:,:,1)=u(:,:,:,2)
   v(:,:,:,1)=v(:,:,:,2)
 #ifdef tempsalt 

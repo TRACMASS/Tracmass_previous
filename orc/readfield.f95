@@ -1,19 +1,19 @@
 SUBROUTINE readfields
 
-USE mod_param
-USE mod_vel
-USE mod_coord
-USE mod_time
-USE mod_grid
-USE mod_name
-USE mod_vel
+  USE netcdf
+  USE mod_param
+  USE mod_vel
+  USE mod_coord
+  USE mod_time
+  USE mod_grid
+  USE mod_name
+  USE mod_vel
+  
+  
 #ifdef tempsalt
 USE mod_dens
 #endif
 IMPLICIT none
-
-!#include "/Applications/Utilities/netcdf-3.6.2/include/netcdf.inc"
-#include "//sw/include/netcdf.inc"
 
 CHARACTER :: dates(62)*17
 !CHARACTER(LEN=65) :: rfilu,rfilv,rfilh,rfilr
@@ -111,15 +111,15 @@ if(ints.eq.intstart) then
  ndates=0
 
 !______________________________ Read ORCA grid horizontal ________________________
-ierr=NF_OPEN(directory//'topo/mesh_hgr.nc',NF_NOWRITE,ncid)
+ierr=NF90_OPEN(directory//'topo/mesh_hgr.nc',NF90_NOWRITE,ncid)
 !ierr=NF_OPEN('/Users/doos/data/orc12/topo/mesh_hgr.nc',NF_NOWRITE,ncid)
 if(ierr.ne.0) stop 3001
 
-ierr=NF_INQ_VARID(ncid,'nav_lev',varidz)
+ierr=NF90_INQ_VARID(ncid,'nav_lev',varidz)
 if(ierr.ne.0) stop 3087
 startA(1)=1
 countA(1)=km
-ierr=NF_GET_VARA_REAL(ncid,varidz,startA,countA,valsz)
+ierr=NF90_GET_VAR(ncid,varidz,valsz,startA,countA)
 if(ierr.ne.0) stop 3100
 zw(0)=0.d0
 !open(77,file='/Users/doos/data/orc12/topo/depthorca5')
@@ -139,30 +139,30 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=1
 countB(4)=1
-ierr=NF_INQ_VARID(ncid,'e1t',varid)
+ierr=NF90_INQ_VARID(ncid,'e1t',varid)
 if(ierr.ne.0) stop 3002
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,e1t)
+ierr=NF90_GET_VAR(ncid,varid,e1t,startB,countB)
 if(ierr.ne.0) stop 3005
 !print *,(e1t(i,jmt-2),i=300,310)
 
-ierr=NF_INQ_VARID(ncid,'e2u',varid)
+ierr=NF90_INQ_VARID(ncid,'e2u',varid)
 if(ierr.ne.0) stop 3010
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,e2u)
+ierr=NF90_GET_VAR(ncid,varid,e2u,startB,countB)
 if(ierr.ne.0) stop 3015
 !do j=1,jmt
 !print *,j,e2u(1,j)
 !enddo
 !stop 4956
 
-ierr=NF_INQ_VARID(ncid,'e2t',varid)
+ierr=NF90_INQ_VARID(ncid,'e2t',varid)
 if(ierr.ne.0) stop 3020
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,e2t)
+ierr=NF90_GET_VAR(ncid,varid,e2t,startB,countB)
 if(ierr.ne.0) stop 3025
 !print *,(e2t(i,jmt-2),i=300,310)
 
-ierr=NF_INQ_VARID(ncid,'e1v',varid)
+ierr=NF90_INQ_VARID(ncid,'e1v',varid)
 if(ierr.ne.0) stop 3030
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,e1v)
+ierr=NF90_GET_VAR(ncid,varid,e1v,startB,countB)
 if(ierr.ne.0) stop 3035
 !print *,(e1v(i,jmt-2),i=300,310)
 !do j=1,jmt
@@ -171,7 +171,7 @@ if(ierr.ne.0) stop 3035
 !stop 4568
 
 ! Close the file up
-ierr=NF_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 if(ierr.ne.0) stop 3040
 
 do i=1,IMT
@@ -181,10 +181,10 @@ do i=1,IMT
 enddo
 
 !______________________________ Read ORCA grid horizontal ________________________
-ierr=NF_OPEN(directory//'topo/mesh_zgr.nc',NF_NOWRITE,ncid)
+ierr=NF90_OPEN(directory//'topo/mesh_zgr.nc',NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 4001
 ! dzt
-ierr=NF_INQ_VARID(ncid,'e3t_ps',varid)
+ierr=NF90_INQ_VARID(ncid,'e3t_ps',varid)
 if(ierr.ne.0) stop 4004
 startB(1)=1
 startB(2)=1
@@ -194,7 +194,7 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,fieldx)
+ierr=NF90_GET_VAR(ncid,varid,fieldx,startB,countB)
 if(ierr.ne.0) stop 4002
 !do i=200,250
 !print *,i,(fieldx(i,1,k,1),k=16,35)
@@ -204,7 +204,7 @@ dzt(:,:,:)=fieldx(:,:,:,1)
 !print *,'dzt',(dzt(200,200,k),k=1,km)
 
 ! dzu
-ierr=NF_INQ_VARID(ncid,'e3u_ps',varid)
+ierr=NF90_INQ_VARID(ncid,'e3u_ps',varid)
 if(ierr.ne.0) stop 4014
 startB(1)=1
 startB(2)=1
@@ -214,13 +214,13 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,fieldx)
+ierr=NF90_GET_VAR(ncid,varid,fieldx,startB,countB)
 if(ierr.ne.0) stop 4012
 dzu(:,:,:)=fieldx(:,:,:,1)
 !print *,'dzu',(dzu(200,200,k),k=1,km)
 
 ! dzv
-ierr=NF_INQ_VARID(ncid,'e3v_ps',varid)
+ierr=NF90_INQ_VARID(ncid,'e3v_ps',varid)
 if(ierr.ne.0) stop 4024
 startB(1)=1
 startB(2)=1
@@ -230,12 +230,12 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,fieldx)
+ierr=NF90_GET_VAR(ncid,varid,fieldx,startB,countB)
 if(ierr.ne.0) stop 4032
 dzv(:,:,:)=fieldx(:,:,:,1)
 !print *,'dzv',(dzv(200,200,k),k=1,km)
 
-ierr=NF_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 if(ierr.ne.0) stop 4031
 
 !stop 4596
@@ -279,12 +279,12 @@ endif
 nread=mod(ints,18)+1
 
 ! zonal velocity
-ierr=NF_OPEN(rfilu,NF_NOWRITE,ncid)
+ierr=NF90_OPEN(rfilu,NF90_NOWRITE,ncid)
 !print *,'rfilu=',rfilu
 if(ierr.ne.0) stop 3750
 
 
-ierr=NF_INQ_VARID(ncid,'vozocrtx',varid) ! the main data fields
+ierr=NF90_INQ_VARID(ncid,'vozocrtx',varid) ! the main data fields
 if(ierr.ne.0) stop 3762
 
 startB(1)=1
@@ -295,21 +295,21 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,fieldx)
+ierr=NF90_GET_VAR(ncid,varid,fieldx,startB,countB)
 if(ierr.ne.0) stop 3798
 
 !print *,'read fields'
 !print *,(fieldx(i,100,1,1),i=1,IMT+2/3)
 
-ierr=NF_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 
 
 ! meridional velocity
 
-ierr=NF_OPEN(rfilv,NF_NOWRITE,ncid)
+ierr=NF90_OPEN(rfilv,NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 3751
 
-ierr=NF_INQ_VARID(ncid,'vomecrty',varid) ! the main data fields
+ierr=NF90_INQ_VARID(ncid,'vomecrty',varid) ! the main data fields
 if(ierr.ne.0) stop 3763
 
 startB(1)=1
@@ -320,16 +320,16 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,fieldy)
+ierr=NF90_GET_VAR(ncid,varid,fieldy,startB,countB)
 if(ierr.ne.0) stop 3799
-ierr=NF_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 
 ! density
 
-ierr=NF_OPEN(rfilr,NF_NOWRITE,ncid)
+ierr=NF90_OPEN(rfilr,NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 3758
 
-ierr=NF_INQ_VARID(ncid,'sigma',varid) ! the main data fields
+ierr=NF90_INQ_VARID(ncid,'sigma',varid) ! the main data fields
 if(ierr.ne.0) stop 3767
 
 startB(1)=1
@@ -340,16 +340,16 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=km
 countB(4)=1
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,fieldr)
+ierr=NF90_GET_VAR(ncid,varid,fieldr,startB,countB)
 if(ierr.ne.0) stop 3799
-ierr=NF_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 
 ! sea surface height
 
-ierr=NF_OPEN(rfilh,NF_NOWRITE,ncid)
+ierr=NF90_OPEN(rfilh,NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 3759
 
-ierr=NF_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
+ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
 if(ierr.ne.0) stop 3763
 
 startB(1)=1
@@ -360,9 +360,9 @@ countB(1)=IMT+2
 countB(2)=jmt
 countB(3)=1
 countB(4)=1
-ierr=NF_GET_VARA_REAL(ncid,varid,startB,countB,ssh)
+ierr=NF90_GET_VAR(ncid,varid,ssh,startB,countB)
 if(ierr.ne.0) stop 3799
-ierr=NF_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 
 do j=1,jmt
  do i=1,IMT
