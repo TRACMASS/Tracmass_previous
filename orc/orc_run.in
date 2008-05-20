@@ -62,8 +62,15 @@
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.
-kst1=1,
-kst2=-1,
+  ist1     = 150,		 
+  ist2     = 400,		 
+  jst1     = 256,		 
+  jst2     = 256,		 
+  kst1     =  -1,		 
+  kst2     =  -1/
+
+!kst1=1,
+!kst2=-1,
 
 !ist1=150   
 !ist2=400
@@ -77,16 +84,16 @@ kst2=-1,
 !ist1=250
 !ist2=ist1
 
-ist1=1,
-ist2=-1,
+!ist1=1,
+!ist2=-1,
 
 !jst1=254  ! jeq=250
 !jst2=254
 
 !jst1=256  ! jeq=250
-jst1=252,  ! jeq=250
+!jst1=252,  ! jeq=250
 !jst1=505  ! jeq=250
-jst2=252/
+!jst2=252/
 
   $INITRUNTEMPSALT
   !-------- Control trajectories by salt and temp ----------------------

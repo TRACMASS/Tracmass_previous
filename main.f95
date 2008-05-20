@@ -29,7 +29,9 @@ print *,'OCCAM 1/4 deg GCM fields'
 #elif defined occam083
 print *,'OCCAM 1/12 deg GCM fields'
 #elif defined sigma
-print *,'GCM with sigma coordinates fields'
+print *,'OGCM with sigma coordinate fields'
+#elif defined atm
+print *,'IFS (AGCM) with atmospheric sigma coordinate fields'
 #endif
 
 #if defined tempsalt
@@ -94,22 +96,23 @@ elseif(nqua.eq.3) then
  voltr=partQuant
 endif
 
-!mask=-1.  ! define start section with ist1,ist2,jst1,jst2
-open(21,file=directory//'topo/kmt',form='unformatted')
-!open(21,file=directory//'kmt/mask',form='unformatted')
-!open(21,file=directory//'kmt/maskust',form='unformatted')
-!open(21,file=directory//'kmt/maskferrysyd',form='unformatted')
-!open(21,file=directory//'kmt/maskferrynord',form='unformatted')
+mask=-1.  ! define start section with ist1,ist2,jst1,jst2
+#ifndef atm || ifs
+!open(21,file=directory//'topo/kmt',form='unformatted')
+open(21,file=directory//'topo/maskust',form='unformatted')
 read(21)mask
 close(21)
+#endif
 
+#if defined rco
 do i=1,IMT
  do j=1,JMT
-!  if(mask(i,j).ne.0 .and. mask(i,j).le.4 .and. j.lt.215) mask(i,j)=-1  ! entire shallow Baltic south of 61N
+  if(mask(i,j).ne.0 .and. mask(i,j).le.4 .and. j.lt.215) mask(i,j)=-1  ! entire shallow Baltic south of 61N
  enddo
 enddo
+#endif
 
-mask=-1  ! Finska viken
+
 
 if(kriva.ne.0) open(56,file=directory//'orm/traj.'//name) ! trajectory path
 open(57,file=directory//'orm/traj.ut.'//name)         ! exit position

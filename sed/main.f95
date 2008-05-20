@@ -18,8 +18,8 @@ common /domain/ienw(NEND),iene(NEND),jens(NEND),jenn(NEND),mask(imt,jmt)
 integer ienw,iene,jens,jenn,mask
 
 #if defined sediment
-common/sed/wsed,rhos,D,critvel,T,c1
-REAL wsed,rhos,D,critvel,T,c1
+common/sed/wsed,rhos,D,critvel,T,cwamp
+REAL wsed,rhos,D,critvel,T,cwamp
 common/orbital/orb(km)
 REAL orb
 #endif
@@ -129,8 +129,8 @@ rhos = 2620
 ! (if sedvel called from main.f95 = constant viscosity used) 
 !      visc = 0.00131
    
-! constant for approximating wave amplitude, a = c1*U(surface)
-c1=20
+! constant for approximating wave amplitude, a = cwamp*U(surface)
+cwamp=20
 
 ! approximative  peak period. Average 4s for Baltic proper
 T=8

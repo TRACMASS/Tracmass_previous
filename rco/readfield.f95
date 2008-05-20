@@ -32,8 +32,10 @@ subroutine readfields
   real snapd,totsec
   
   real*4 ird,ird2,ird3,ird4
-  REAL*4, ALLOCATABLE, DIMENSION(:)   :: rd1d_a, rd1d_b, zdzz,dzw,dxt,dyt
-  REAL*4, ALLOCATABLE, DIMENSION(:)   :: phi,phit,yu,snap1d
+!  REAL*4, ALLOCATABLE, DIMENSION(:)   :: rd1d_a, rd1d_b, zdzz,dzw,dxt,dyt
+  REAL*4, ALLOCATABLE, DIMENSION(:)   :: rd1d_a, rd1d_b, zdzz,dzw,dxt
+!  REAL*4, ALLOCATABLE, DIMENSION(:)   :: phi,phit,yu,snap1d
+  REAL*4, ALLOCATABLE, DIMENSION(:)   :: phit,yu,snap1d
   REAL*4, ALLOCATABLE, DIMENSION(:,:) :: rd2d
   
   REAL :: snap2d(imt,jmt)
@@ -55,7 +57,8 @@ subroutine readfields
 !     allocate ( snap1d(NLEN),rd2d(IMT,JMT),kmu(IMT,JMT) )
      allocate ( rd1d_a(NSNAPS),rd1d_b(NSNAPS) )
      allocate ( zdzz(KM),dzw(0:km),dxt(imt) ) 
-     allocate ( dyt(jmt),phi(jmt),phit(jmt),yu(jmt) )
+     allocate ( phit(jmt),yu(jmt) )
+!     allocate ( dyt(jmt),phi(jmt),phit(jmt),yu(jmt) )
      allocate ( tempb(KM), saltb(KM), rhob(KM) )
   end if
  if ( .not. allocated (kmu) ) then
@@ -444,7 +447,8 @@ do i=1,imt
 deallocate ( snap1d, rd2d )
 deallocate ( rd1d_a, rd1d_b )
 deallocate ( zdzz,dzw,dxt )
-deallocate ( dyt, phi, phit, yu )
+!deallocate ( dyt, phi, phit, yu )
+deallocate ( phit, yu )
 deallocate ( tempb, saltb, rhob )
 
 !print *,'readfield slut',ints
