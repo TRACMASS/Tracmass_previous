@@ -1,18 +1,19 @@
  &INITRUNTIME
   intmin  = 1,                                      !number of initial datasets 
-  intspin = 35064, ! (35064=24 yers=total 2nm_122)  !trajectory release period (timesteps)
+!  intspin = 35064, ! (35064=24 yers=total 2nm_122)  !trajectory release period (timesteps)
+  intspin =     24, ! (=6  *24/ngcm)  !trajectory release period (timesteps)
   intrun  = 50000,                                  !trajectory run   
   intstep = 1/                                      !pos if forward  neg if backward
   !
  &INITRUNDATE
   ihour   = -6,
-  iday    =  1,
-  imon    =  1,
-  iyear   = 1981/  ! first year is 1981, last year is 2005
+  !iday    =  1,
+  !imon    =  1,
+  !iyear   = 1981/  ! first year is 1981, last year is 2005
   ! musslor
-  !  iday    = 12,
-  !  imon    = 5,
-  !  iyear   = 2005/
+    iday    = 12,
+    imon    = 5,
+    iyear   = 2005/
   !
   !
   &INITRUNWRITE
@@ -26,13 +27,14 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva    = 0,
+  kriva    = 1,
   !
   ! name of directory where the files will be written
   directory = '/Volumes/hav4/data/rco/',
   ! directory = '/Users/doos/data/rco12/',
   ! name of current trajectory run
-     name      = 'fi.ne.v2'/ 
+      name      = 'ms.05.t2'/ 
+  !   name      = 'fi.ne.v2'/ 
   !   name      = 'fi.ne.s2'/ 
   ! namep='fv.fw.aa'  ! For reruns
   
@@ -48,12 +50,12 @@
   !                 2 = Seed particles zonal(x-z)
   !                 3 = Seed particles horiz(x-y)
   !                 4 = Seed particles in the middle of T-box
-  isec     = 1,
+  isec     = 4,
   !
   ! idir:           1 = follow positive direction (eastward/northward)  
   !                -1 = follow negative direction (westward/southward)
   !                 0 = both directions
-  idir     = -1,
+  idir     = 0,
   !
   ! number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
@@ -62,9 +64,9 @@
   !                     (partQuant in m3s-1. per particle)
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
-  nqua     = 2, 
+  nqua     = 1, 
 !  partQuant= 500,  !(particles/gridcell or m3s-1/particle or m3/particle)
-  partQuant= 50,  !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 100,  !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.
@@ -76,10 +78,17 @@
 !kst1     =   1,		 
 !kst2     =  -1/
 ! Neva
-  ist1     = 317,		 
-  ist2     = 317,		 
-  jst1     = 170,		 
-  jst2     = 200,		 
+!  ist1     = 317,		 
+!  ist2     = 317,		 
+!  jst1     = 170,		 
+!  jst2     = 200,		 
+!  kst1     =   1,		 
+!  kst2     =  -1/
+! Neva
+  ist1     =   1,		 
+  ist2     =  -1,		 
+  jst1     =   1,		 
+  jst2     =  -1,		 
   kst1     =   1,		 
   kst2     =  -1/
 
@@ -131,8 +140,14 @@
   !        jens(n)=jmt+1
   !        jenn(n)=0
   !        enddo
-  ienw(1) =     0,
-  iene(1) =   203,
-  jens(1) =     0,
-  jenn(1) =   362,
-  timax =  36500./  ! maximum time length of a trajectory in days
+  ienw(1) =  1000,
+  iene(1) =  1000,
+  jens(1) =  1000,
+  jenn(1) =  1000,
+  timax =      21./  ! maximum time length of a trajectory in days
+! Finskaq viken
+!  ienw(1) =     0,
+!  iene(1) =   203,
+!  jens(1) =     0,
+!  jenn(1) =   362,
+!  timax =  36500./  ! maximum time length of a trajectory in days

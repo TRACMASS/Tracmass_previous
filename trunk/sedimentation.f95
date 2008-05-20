@@ -81,9 +81,9 @@ logical res
  
 surfvel=sqrt( ((v(ib,jb,km,1)+v(ib,jb-1,km,1))/(2*dx*deg*cst(jb)*dz(km)))**2+ &
               ((u(ib,jb,km,1)+u(ib-1,jb,km,1))/(2*dy*deg*        dz(km)))**2)
-!alpha=c1*surfvel
+!alpha=cwamp*surfvel
 !uorb=orb(41-kb)*alpha
-uorb=orb(km+1-kb)*c1*surfvel
+uorb=orb(km+1-kb)*cwamp*surfvel
 
 botvel=sqrt( ((v(ib,jb,kb,1)+v(ib,jb-1,kb,1))/(2*dx*deg*cst(jb)*dz(kb)))**2+ &
              ((u(ib,jb,kb,1)+u(ib-1,jb,kb,1))/(2*dy*deg*        dz(kb)))**2)

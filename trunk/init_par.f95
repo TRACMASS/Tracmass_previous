@@ -21,7 +21,7 @@ subroutine init_params
   CHARACTER (LEN=30) :: inparg, argname
   CHARACTER (LEN=23) ::  Project, Case
 
-  namelist /INITGRIDGRID/ IMT, JMT, KM, JMAX, LBT,NEND
+  namelist /INITGRIDGRID/ IMT, JMT, KM, JMAX, LBT, NEND
   namelist /INITGRIDNTRAC/ NTRACMAX
   namelist /INITGRIDDATE/ yearmin, yearmax
   namelist /INITGRIDTIME/ ngcm, iter, intmax
@@ -137,7 +137,12 @@ print *,'timax',timax
   ! mod_coord
   allocate  ( csu (jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km) )       
   ! mod_grid
-  allocate ( dxdy(imt,jmt), dztb(imt,jmt,kd) )   
+#if defined ifs || atm
+  allocate ( dztb(imt,jmt,kd,nst) )   
+#else
+  allocate ( dztb(imt,jmt,kd) )   
+#endif
+  allocate ( dxdy(imt,jmt) )   
   allocate (kmt(imt,jmt), dz(km) )
   ! mod_domain
 !  allocate ( ienw (LBT),iene (LBT) )

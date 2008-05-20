@@ -4,7 +4,7 @@ subroutine loop
   USE mod_time
   USE mod_grid
   USE mod_buoyancy
-#if defined rco || for || sim || orc || tes || tun || ifs || gomoos
+#if defined rco || for || sim || orc || tes || tun || ifs || atm || gomoos
   USE mod_domain
 #endif
   USE mod_vel
@@ -273,7 +273,10 @@ subroutine loop
 
                  ! trajectory volume in m3
                  if(nqua.ge.3) then
-#ifdef sigma
+#if defined ifs || atm
+                    vol=dztb(ib,jb,kb,1)
+#else
+#if defined sigma 
                     vol=dztb(ib,jb,kb)
 #else
                     vol=dz(kb)
@@ -282,6 +285,7 @@ subroutine loop
                     if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif
                     if(kb.eq.KM) vol=vol+hs(ib,jb,1)
+#endif
                     vol=vol*dxdy(ib,jb)
                  endif
 
@@ -354,7 +358,7 @@ subroutine loop
                        if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)
 
                        !____ check properties of water mass at initial time  
-#ifndef ifs 
+#ifndef ifs || atm
 #ifdef tempsalt 
                        !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
                        call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
@@ -560,6 +564,9 @@ subroutine loop
                        ka=kb
                        
                        ! T-box volume in m3
+#if defined ifs || atm
+                       dxyz=rg*dztb(ib,jb,kb,NST)+rr*dztb(ib,jb,kb,1)
+#else
 #ifdef sigma
                        dxyz=dztb(ib,jb,kb)
 #else
@@ -569,10 +576,11 @@ subroutine loop
                        if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif
                        if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+#endif
                        dxyz=dxyz*dxdy(ib,jb)
                        
                        if(dxyz.eq.0.) then
-                          print *,'dxyz=',dxyz,ntrac,ib,jb,kb,dztb(ib,jb,1),dxdy(ib,jb),rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+                          print *,'dxyz=',dxyz,ntrac,ib,jb,kb,dxdy(ib,jb),rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
                           goto 1500
                        endif
                        
@@ -1044,7 +1052,7 @@ subroutine loop
                        ! === Calculate arclength of the ===
                        ! === trajectory path in the box ===
                        call arclength(ia,ja,ka,dt,rr,arc)
-#if defined occ66 || ifs
+#if defined occ66 || ifs || atm
                        arct=arct+arc*0.00001  ! orig arc in meters -> 100 km
 #else
                        arct=arct+arc*0.001  ! orig arc in meters -> km
@@ -1081,7 +1089,7 @@ subroutine loop
                        !goto 4444                                   
                        !3333 continue
 
-                       !#elif defined orc || rco || tes || tun || sim || for || ifs
+                       !#elif defined orc || rco || tes || tun || sim || for || ifs || atm
 #else
 
                        do k=1,LBT

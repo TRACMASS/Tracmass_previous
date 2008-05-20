@@ -56,8 +56,10 @@ MODULE mod_param
   INTEGER, PARAMETER :: LOV=1
 #endif
   
-#if defined sigma
-  INTEGER, PARAMETER :: KD=KM
+#if defined sigma 
+  INTEGER, PARAMETER :: KD=KM   ! does this work?
+#elif defined atm
+  INTEGER, PARAMETER :: KD=11  ! should be KD=KM   
 #else
   INTEGER, PARAMETER :: KD=1
 #endif
@@ -84,7 +86,11 @@ ENDMODULE mod_time
 MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:)      :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)    :: dxdy
+#if defined ifs || atm
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)  :: dztb 
+#else
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:)  :: dztb 
+#endif
   REAL*8 rmin,dr,tmin,dtemp,smin,dsalt
   INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: kmt
 ENDMODULE mod_grid
@@ -151,7 +157,7 @@ ENDMODULE mod_tracer
 !______________________________________________________________________________
 #ifdef sediment
 MODULE mod_sed
-  REAL :: wsed,rhos,D,critvel,T,c1,kincrit
+  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
 ENDMODULE mod_sed
 
 MODULE mod_orbital
