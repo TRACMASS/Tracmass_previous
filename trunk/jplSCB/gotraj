@@ -1,9 +1,0 @@
-name=../../tun/run/a0.fw.a0
-rm $name
-
-/sw/bin/g95 -o $name main.f95 -O3 -C  -I/Applications/Utilities/netcdf-3.6.0-p1/lib -L/Applications/Utilities/netcdf-3.6.0-p1/lib -lnetcdf -cpp  -Dtun -Dsigma -Dmean -Dtempsalt -Dfrsurf -Dstreamxy -Dstreamr -Dstreamv -Dstreamts -Dtime
-
-$name
-
-#time $name > $name.run &
-#tail -f $name.run

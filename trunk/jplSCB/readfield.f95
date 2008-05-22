@@ -1,13 +1,7 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
  
 SUBROUTINE readfields
 
 IMPLICIT none
-
-#include "/Applications/Utilities/netcdf-3.6.0-p1/include/netcdf.inc"
-!#include "/sw/include/netcdf.inc"
-!#include "netcdf.inc"
-#include "../param.h"
 
 INTEGER IMU,JMV,IT
 PARAMETER(IMU=IMT-1,JMV=JMT-1,IT=10)
