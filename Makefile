@@ -72,5 +72,5 @@ jacket.o : ../mysql/jacket.c
 
 .PHONY : clean
 clean :
-	-rm runtraj $(objects) *.mod readfield.o
+	-rm runtraj $(objects) *.mod readfield.o &> /dev/null
 

@@ -25,6 +25,7 @@ subroutine init_params
   namelist /INITGRIDNTRAC/ NTRACMAX
   namelist /INITGRIDDATE/ yearmin, yearmax
   namelist /INITGRIDTIME/ ngcm, iter, intmax
+  namelist /INITGRIDARC/ arcscale
   
   namelist /INITRUNTIME/ intmin, intspin, intrun, intstep 
   namelist /INITRUNDATE/  ihour, iday, imon, iyear
@@ -59,6 +60,7 @@ subroutine init_params
   read(8,nml=INITGRIDNTRAC)
   read(8,nml=INITGRIDTIME)
   read(8,nml=INITGRIDDATE)
+  read(8,nml=INITGRIDARC)
 
   open(8,file=trim(Project)//'/'//trim(Case)//'_run.in',  &
        status='OLD', delim='APOSTROPHE')

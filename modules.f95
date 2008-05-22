@@ -90,8 +90,7 @@ MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)  :: dztb 
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:)  :: dztb 
-#endif
-  REAL*8 rmin,dr,tmin,dtemp,smin,dsalt
+  REAL*8 rmin,dr,tmin,dtemp,smin,dsalt,arcscale
   INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: kmt
 ENDMODULE mod_grid
 !______________________________________________________________________________

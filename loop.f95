@@ -511,7 +511,7 @@ subroutine loop
 
 #endif
 
-                       !__________________________ start loop for each trajectory _____________________________
+                       ! ===  start loop for each trajectory ===
                        scrivi=.false.
 
 1000                   continue
@@ -1052,11 +1052,7 @@ subroutine loop
                        ! === Calculate arclength of the ===
                        ! === trajectory path in the box ===
                        call arclength(ia,ja,ka,dt,rr,arc)
-#if defined occ66 || ifs || atm
-                       arct=arct+arc*0.00001  ! orig arc in meters -> 100 km
-#else
-                       arct=arct+arc*0.001  ! orig arc in meters -> km
-#endif
+                       arct=arct+arc*arcscale  ! orig arc in meters -> 100 km
                        ! === end trajectory if outside chosen domain ===
 #if defined occam25 || occ66
                        ! === stop and select stream function ===
