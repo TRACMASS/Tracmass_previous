@@ -4,7 +4,7 @@ subroutine loop
   USE mod_time
   USE mod_grid
   USE mod_buoyancy
-#if defined rco || for || sim || orc || tes || tun || ifs || atm || gomoos
+#if defined rco || for || sim || orc || tes || tun || ifs || atm || gomoos || jplSCB
   USE mod_domain
 #endif
   USE mod_vel

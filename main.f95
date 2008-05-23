@@ -99,9 +99,9 @@ endif
 mask=-1.  ! define start section with ist1,ist2,jst1,jst2
 #ifndef atm || ifs
 !open(21,file=directory//'topo/kmt',form='unformatted')
-open(21,file=directory//'topo/maskust',form='unformatted')
-read(21)mask
-close(21)
+!open(21,file=directory//'topo/maskust',form='unformatted')
+!read(21)mask
+!close(21)
 #endif
 
 #if defined rco
@@ -114,9 +114,9 @@ enddo
 
 
 
-if(kriva.ne.0) open(56,file=directory//'orm/traj.'//name) ! trajectory path
-open(57,file=directory//'orm/traj.ut.'//name)         ! exit position
-open(58,file=directory//'orm/traj.in.'//name)         ! entrence position
+!if(kriva.ne.0) open(56,file=directory//'orm/traj.'//name) ! trajectory path
+!open(57,file=directory//'orm/traj.ut.'//name)         ! exit position
+!open(58,file=directory//'orm/traj.in.'//name)         ! entrence position
 
 
 !??????????????????????????????????? END ???????????????????????????????
