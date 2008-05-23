@@ -92,15 +92,15 @@ SUBROUTINE readfields
      ncvar   = 'lat'
      start1d = [1]
      count1d = [24]
-     valsz   = getncfield1d()
+     valsz   = get1dfield()
      
      ncvar   = 'lat'
      start2d = [1    ,1  ]
      count2d = [IMT+2,jmt]
-     e1t     = getncfield2d()
+     e1t     = get2dfield()
      
      ncvar   = 'lat'
-     e1t     = getncfield2d()
+     e1t     = get2dfield()
      print *, e1t
 
      ierr=NF90_CLOSE(ncid)
@@ -306,36 +306,18 @@ SUBROUTINE readfields
   enddo
   return
   
+!  #########         #########         #########         #########
+!  #########         #########         #########         #########
+!  #########         #########         #########         #########
+!  #########         #########         #########         #########
+!  #########         #########         #########         #########
+  
 contains
-  function getncfield1d ()
-    REAL, ALLOCATABLE,   DIMENSION(:)       :: getncfield1d
+  function get1dfield ()
+    REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfield
     INTEGER,             DIMENSION(1)       :: d    
     d=count1d+start1d-1
-    allocate ( getncfield1d(d(1)) )
-
-    ierr=NF90_OPEN(trim(ncfile) ,NF90_NOWRITE ,ncid)
-    fileError: if(ierr.ne.0) then
-       print *,'Error when trying to open the file'
-       print *,'   ' ,ncfile
-       print *,'    Error code: ' , ierr
-       stop 3001
-    end if fileError
-    ierr=NF90_INQ_VARID(ncid ,ncvar ,varid)
-    varError: if(ierr.ne.0) then
-       print *,'Error when trying to read the field   ',ncvar
-       print *,'Error code: ' , ierr
-       stop 3001
-    end if varError
-    ierr=NF90_GET_VAR(ncid ,varid ,getncfield1d ,start1d ,count1d)
-    if(ierr.ne.0) stop 3100
-    ierr=NF90_CLOSE(ncid)
-  end function getncfield1d
-
-  function getncfield2d ()
-    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: getncfield2d
-    INTEGER,             DIMENSION(2)       :: d
-    d=count2d+start2d-1
-    allocate ( getncfield2d(d(1),d(2)) )
+    allocate ( get1dfield(d(1)) )
     
     ierr=NF90_OPEN(trim(ncfile) ,NF90_NOWRITE ,ncid)
     fileError: if(ierr.ne.0) then
@@ -350,17 +332,41 @@ contains
        print *,'Error code: ' , ierr
        stop 3001
     end if varError
-    ierr=NF90_GET_VAR(ncid ,varid ,getncfield2d ,start1d ,count1d)
+    ierr=NF90_GET_VAR(ncid ,varid ,get1dfield ,start1d ,count1d)
     if(ierr.ne.0) stop 3100
     ierr=NF90_CLOSE(ncid)
-  end function getncfield2d
+  end function get1dfield
+
+  function get2dfield ()
+    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2dfield
+    INTEGER,             DIMENSION(2)       :: d
+    d=count2d+start2d-1
+    allocate ( get2dfield(d(1),d(2)) )
+    
+    ierr=NF90_OPEN(trim(ncfile) ,NF90_NOWRITE ,ncid)
+    fileError: if(ierr.ne.0) then
+       print *,'Error when trying to open the file'
+       print *,'   ' ,ncfile
+       print *,'    Error code: ' , ierr
+       stop 3001
+    end if fileError
+    ierr=NF90_INQ_VARID(ncid ,ncvar ,varid)
+    varError: if(ierr.ne.0) then
+       print *,'Error when trying to read the field   ',ncvar
+       print *,'Error code: ' , ierr
+       stop 3001
+    end if varError
+    ierr=NF90_GET_VAR(ncid ,varid ,get2dfield ,start1d ,count1d)
+    if(ierr.ne.0) stop 3100
+    ierr=NF90_CLOSE(ncid)
+  end function get2dfield
   
-  function getncfield4d ()
-    REAL, ALLOCATABLE,   DIMENSION(:,:,:,:) :: getncfield4d
+  function get4dfield ()
+    REAL, ALLOCATABLE,   DIMENSION(:,:,:,:) :: get4dfield
     INTEGER,             DIMENSION(4)       :: d
     
     d=count4d+start4d-1
-    allocate ( getncfield4d(d(1),d(2),d(3),d(4)) )
+    allocate ( get4dfield(d(1),d(2),d(3),d(4)) )
 
     ierr=NF90_OPEN(trim(ncfile) ,NF90_NOWRITE ,ncid)
     fileError: if(ierr.ne.0) then
@@ -375,10 +381,10 @@ contains
        print *,'Error code: ' , ierr
        stop 3001
     end if varError
-    ierr=NF90_GET_VAR(ncid ,varid ,getncfield4d ,start1d ,count1d)
+    ierr=NF90_GET_VAR(ncid ,varid ,get4dfield ,start1d ,count1d)
     if(ierr.ne.0) stop 3100
     ierr=NF90_CLOSE(ncid)
-  end function getncfield4d
+  end function get4dfield
   
 
 
