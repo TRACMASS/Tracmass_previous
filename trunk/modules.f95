@@ -90,6 +90,7 @@ MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)  :: dztb 
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:)  :: dztb 
+#endif
   REAL*8 rmin,dr,tmin,dtemp,smin,dsalt,arcscale
   INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: kmt
 ENDMODULE mod_grid
@@ -127,7 +128,7 @@ ENDMODULE mod_turb
 !______________________________________________________________________________
 MODULE mod_name
   CHARACTER(LEN=8) :: name,namep
-  CHARACTER(LEN=23) :: directory
+  CHARACTER(LEN=200) :: directory
 ENDMODULE mod_name
 !______________________________________________________________________________
 MODULE mod_streamxy
