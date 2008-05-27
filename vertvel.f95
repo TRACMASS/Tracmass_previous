@@ -29,16 +29,16 @@ rg=1.d0-rr
 w(0)=0.d0
 do k=1,ka
 #ifdef twodim
- w(k)=0.d0
+   w(k)=0.d0
 #else 
- uu=rg*u(ia ,ja  ,k,NST)+rr*u(ia ,ja  ,k,1)
- um=rg*u(iam,ja  ,k,NST)+rr*u(iam,ja  ,k,1)
- vv=rg*v(ia ,ja  ,k,NST)+rr*v(ia ,ja  ,k,1)
- vm=rg*v(ia ,ja-1,k,NST)+rr*v(ia ,ja-1,k,1)
+   uu=rg*u(ia ,ja  ,k,NST)+rr*u(ia ,ja  ,k,1)
+   um=rg*u(iam,ja  ,k,NST)+rr*u(iam,ja  ,k,1)
+   vv=rg*v(ia ,ja  ,k,NST)+rr*v(ia ,ja  ,k,1)
+   vm=rg*v(ia ,ja-1,k,NST)+rr*v(ia ,ja-1,k,1)
 #if defined ifs
- w(k) = w(k-1) - ff * ( uu - um + vv - vm )
+   w(k) = w(k-1) - ff * ( uu - um + vv - vm )
 #else
- w(k) = w(k-1) + ff * ( uu - um + vv - vm )
+   w(k) = w(k-1) + ff * ( uu - um + vv - vm )
 #endif
 #endif
 enddo
@@ -50,7 +50,7 @@ do k=0,km
    wsedtemp=0.
    kin=(u(ia,ja,k,1)*u(ia,ja,k,1)+v(ia,ja,k,1)*v(ia,ja,k,1))*0.5
    !if (kin.le.3000000) then   !för RCO
-      !wsedtemp=wsed*(3000000-kin)/3000000
+   !wsedtemp=wsed*(3000000-kin)/3000000
    if (kin.le.kincrit) then   !för SKB
       wsedtemp=wsed*(kincrit-kin)/kincrit
    endif

@@ -250,7 +250,6 @@ subroutine loop
                     vol=abs(v(ist,jst,kst,1))
                  elseif(isec.ge.3 .and. idir.ne.0) then
                     call vertvel(1.d0,ib,ibm,jb,kst)
-                    ! print *,kst,w(kst)
                     if(idir*ff*w(kst).le.0.) goto 600 
                     vol=abs(w(kst))
                  elseif(isec.eq.1 .and. idir.eq.0) then 
@@ -645,26 +644,27 @@ subroutine loop
 
 800                    continue
 
-                       !___________________  calculate the turb ulent velocities _____________________________
+                       ! === calculate the turbulent velocities ===
 #ifdef turb
                        call turbu(ia,ja,ka,rr)
 #endif
-                       !___________________  calculate the vertical velocity _________________________________
-
+                       ! === calculate the vertical velocity ===
                        call vertvel(rr,ia,iam,ja,ka)
-
-                       !___________________  write trajectory _________________________________
-
+                       
+                       ! === write trajectory ===                       
 #ifdef tracer
-                       if(ts.eq.dble(idint(ts))) tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
+                       if(ts.eq.dble(idint(ts))) then 
+                          tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
+                       end if
 #endif
-
-                       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) )              .or. &
-                            (scrivi .and. kriva.eq.2                             ) .or. &
-                            (kriva.eq.3                                          ) .or. &
-                            (kriva.eq.4 .and. n.eq.1                             ) .or. &
-                            (kriva.eq.5 .and. (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) ) then
-
+                       
+                       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
+                            (scrivi .and. kriva.eq.2)                .or. &
+                            (kriva.eq.3)                             .or. &
+                            (kriva.eq.4 .and. n.eq.1)                .or. &
+                            (kriva.eq.5 .and. &
+                          (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) ) then
+                          
                           call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
 
 #if defined biol
@@ -683,18 +683,19 @@ subroutine loop
 #endif
 
                        endif
-                       !______________________________________________________________________ 
-                       ! calculate the 3 crossing times over the box 
-                       ! choose the shortest time and calculate the new positions
-                       !
-                       !-- solving the differential equations ---
-                       ! note: 
-                       ! space variables (x,...) are dimensionless 
-                       ! time variables (ds,...) are in seconds/m^3
+                       !_______________________________________________ 
+                       ! calculate the 3 crossing times over the box  ! 
+                       ! choose the shortest time and calculate the   !
+                       ! new positions                                !
+                       !                                              !
+                       !-- solving the differential equations ---     !
+                       ! note:                                        !
+                       ! space variables (x,...) are dimensionless    !
+                       ! time variables (ds,...) are in seconds/m^3   !
 
                        call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal crossing
-                       call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional crossing
-                       call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical crossing
+                       call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! merid. crossing
+                       call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vert. crossing
 
 #ifdef time
                        dsmin=dtmin/dxyz
@@ -971,9 +972,9 @@ subroutine loop
 #ifdef time 
                        elseif( ds.eq.dsc .or. ds.eq.dsmin ) then  ! inter time steping 
                           scrivi=.false.
-                          call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal      crossing 
-                          call pos(2,ia,ja,ka,y0,y1,ds,rr) ! meridional crossing 
-                          call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical   crossing 
+                          call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
+                          call pos(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
+                          call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
                           ! print *,'dsc=',ds,dsc,dsmin,x0,x1
                           ! if(x1.lt.0.d0) x1=x1+real(IMT)
                           ! ib=int(x1)+1
