@@ -84,34 +84,42 @@ MODULE mod_time
 ENDMODULE mod_time
 !______________________________________________________________________________
 MODULE mod_grid
-  REAL*8, ALLOCATABLE, DIMENSION(:)      :: dz
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)    :: dxdy
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
 #if defined ifs || atm
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)  :: dztb 
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: dztb 
 #else
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)  :: dztb 
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dztb 
 #endif
-  REAL*8 rmin,dr,tmin,dtemp,smin,dsalt,arcscale
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: kmt
+  REAL*8                                    :: rmin ,tmin ,smin
+  REAL*8                                    :: dr ,dtemp ,dsalt
+  REAL*8                                    :: arcscale
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt
 ENDMODULE mod_grid
 !______________________________________________________________________________
 MODULE mod_buoyancy
-  REAL*4 tmin0,tmax0,smin0,smax0,rmin0,rmax0,tmine,tmaxe,smine,smaxe,rmine,rmaxe
+  REAL*4                                    :: tmin0 ,tmax0
+  REAL*4                                    :: smin0 ,smax0
+  REAL*4                                    :: rmin0 ,rmax0
+  REAL*4                                    :: tmine ,tmaxe
+  REAL*4                                    :: smine ,smaxe
+  REAL*4                                    :: rmine ,rmaxe
 ENDMODULE mod_buoyancy
 !______________________________________________________________________________
 MODULE mod_domain
-  INTEGER ienw(10),iene(10),jens(10),jenn(10)
-  REAL*4 timax
-!  INTEGER, ALLOCATABLE, DIMENSION(:)   :: ienw,iene,jens,jenn
-  INTEGER, ALLOCATABLE, DIMENSION(:,:) :: mask
+  INTEGER, DIMENSION(10)                    :: ienw ,iene
+  INTEGER, DIMENSION(10)                    :: jens ,jenn
+  REAL*4                                    ::  timax
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
 ENDMODULE mod_domain
 !______________________________________________________________________________
 MODULE mod_vel
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: u,v
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:) ::  hs
-  REAL*8, ALLOCATABLE, DIMENSION(:) :: w
-  REAL*4, DIMENSION(6) :: rand
-  REAL*8 ff
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)   :: u,v
+  !REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: w
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     ::  hs
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: w
+  REAL*4, DIMENSION(6)                      :: rand
+  REAL*8                                    :: ff
 ENDMODULE mod_vel
 !______________________________________________________________________________
 MODULE mod_dens
