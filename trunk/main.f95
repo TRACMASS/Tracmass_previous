@@ -10,10 +10,10 @@ IMPLICIT none
 
 INTEGER i,j,n
 
-!____________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 print *,'TRACMASS trajectory code starts at'
 call system('date')
-!___________________________ print preprocess options _______________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #if defined orc
 print *,'ORCA GCM fields'
 #elif defined rco
@@ -70,7 +70,7 @@ print *,'Lagrangian horizontal stream function stored'
 print *,'Lagrangian trajectory particle tracer stored'
 #endif
 
-!________________________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 call init_params
 call coordinat
 
@@ -78,22 +78,22 @@ call coordinat
 tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
 
 if(intstep.gt.0) then ! forward 
- intstart=intmin          
- intend  =intmax
+   intstart=intmin          
+   intend  =intmax
 elseif(intstep.lt.0) then ! backward
- intstart=intmax
- intend  =intmin
- intspin =-intspin
- intrun  =-intrun    
+   intstart=intmax
+   intend  =intmin
+   intspin =-intspin
+   intrun  =-intrun    
 endif
 
- if(nqua.eq.1) then ! number of trajectories (per time resolution)
-! num=NTRACMAX
- num=partQuant
+if(nqua.eq.1) then ! number of trajectories (per time resolution)
+   ! num=NTRACMAX
+   num=partQuant
 elseif(nqua.eq.2) then 
- voltr=partQuant 
+   voltr=partQuant 
 elseif(nqua.eq.3) then 
- voltr=partQuant
+   voltr=partQuant
 endif
 
 mask=-1.  ! define start section with ist1,ist2,jst1,jst2
@@ -106,25 +106,25 @@ mask=-1.  ! define start section with ist1,ist2,jst1,jst2
 
 #if defined rco
 do i=1,IMT
- do j=1,JMT
-  if(mask(i,j).ne.0 .and. mask(i,j).le.4 .and. j.lt.215) mask(i,j)=-1  ! entire shallow Baltic south of 61N
- enddo
+   do j=1,JMT
+      if(mask(i,j).ne.0 .and. mask(i,j).le.4 .and. j.lt.215) mask(i,j)=-1  ! entire shallow Baltic south of 61N
+   enddo
 enddo
 #endif
 
 
 
-!if(kriva.ne.0) open(56,file=directory//'orm/traj.'//name) ! trajectory path
-!open(57,file=directory//'orm/traj.ut.'//name)         ! exit position
-!open(58,file=directory//'orm/traj.in.'//name)         ! entrence position
+if(kriva.ne.0) open(56,file='/Users/bror/orm/traj.'//name) ! trajectory path
+open(57,file='/Users/bror/orm/traj.ut.'//name)             ! exit position
+open(58,file='/Users/bror/orm/traj.in.'//name)             ! entrence position
 
 
 !??????????????????????????????????? END ???????????????????????????????
 
 ! trajectory loops 
+
 call loop
 
-stop
-ENDPROGRAM main
+end PROGRAM main
 
 !______________ END OF MAIN PROGRAM _______________________________
