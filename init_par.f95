@@ -21,7 +21,7 @@ subroutine init_params
   CHARACTER (LEN=30) :: inparg, argname
   CHARACTER (LEN=23) ::  Project, Case
 
-  namelist /INITGRIDGRID/ IMT, JMT, KM, JMAX, LBT, NEND
+  namelist /INITGRIDGRID/ IMT, JMT, KM, LBT, NEND
   namelist /INITGRIDNTRAC/ NTRACMAX
   namelist /INITGRIDDATE/ yearmin, yearmax
   namelist /INITGRIDTIME/ ngcm, iter, intmax
@@ -72,11 +72,11 @@ subroutine init_params
   read(8,nml=INITRUNTEMPSALT)
 #endif
   read(8,nml=INITRUNEND)
-print *,'ienw',ienw
-print *,'iene',iene
-print *,'jens',jens
-print *,'jenn',jenn
-print *,'timax',timax
+!print *,'ienw',ienw
+!print *,'iene',iene
+!print *,'jens',jens
+!print *,'jenn',jenn
+!print *,'timax',timax
   timax=24.*3600.*timax ! convert time lengths from days to seconds
 
   dstep=1.d0/dble(iter)
@@ -140,9 +140,9 @@ print *,'timax',timax
   allocate  ( csu (jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km) )       
   ! mod_grid
 #if defined ifs || atm
-  allocate ( dztb(imt,jmt,kd,nst) )   
+  allocate ( dztb(imt,jmt,km,nst) )   
 #else
-  allocate ( dztb(imt,jmt,kd) )   
+  allocate ( dztb(imt,jmt,km) )   
 #endif
   allocate ( dxdy(imt,jmt) )   
   allocate (kmt(imt,jmt), dz(km) )
@@ -151,13 +151,14 @@ print *,'timax',timax
 !  allocate ( jens (LBT),jenn (LBT) )
   allocate ( mask (imt,jmt) )
   ! mod_vel
-  allocate ( u(imt,0:jmax,km,nst), v(imt,0:jmax,km,nst) )
-  allocate ( hs(imt,jmax,nst) )
+  allocate ( u(imt,jmt,km,nst), v(imt,jmt,km,nst) )
+  allocate ( hs(imt,jmt,nst) )
   allocate ( w(0:km) )
+  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) )
 
   ! mod_dens
 #ifdef tempsalt
-  allocate ( tem(imt,jmax,km,nst) ,sal(imt,jmax,km,nst), rho(imt,jmax,km,nst) )
+  allocate ( tem(imt,jmt,km,nst) ,sal(imt,jmt,km,nst), rho(imt,jmt,km,nst) )
 #endif
   ! mod_streamxy
 #ifdef streamxy

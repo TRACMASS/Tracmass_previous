@@ -116,7 +116,8 @@ ENDMODULE mod_domain
 MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)   :: u,v
   !REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: w
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     ::  hs
+  REAL,   ALLOCATABLE, DIMENSION(:,:,:)     :: uvel ,vvel 
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: w
   REAL*4, DIMENSION(6)                      :: rand
   REAL*8                                    :: ff
