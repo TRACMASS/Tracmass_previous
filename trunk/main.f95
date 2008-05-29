@@ -77,7 +77,7 @@ call coordinat
 
 tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
 
-if(intstep.gt.0) then ! forward 
+modrundirCond: if(intstep.gt.0) then ! forward 
    intstart=intmin          
    intend  =intmax
 elseif(intstep.lt.0) then ! backward
@@ -85,7 +85,7 @@ elseif(intstep.lt.0) then ! backward
    intend  =intmin
    intspin =-intspin
    intrun  =-intrun    
-endif
+end if modrundirCond
 
 if(nqua.eq.1) then ! number of trajectories (per time resolution)
    ! num=NTRACMAX
