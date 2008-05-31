@@ -37,7 +37,6 @@ print *,'IFS (AGCM) with atmospheric sigma coordinate fields'
 #if defined tempsalt
 print *,'with temperature and salinity fields'
 #endif
-
 #if defined turb
 print *,'with sub-grid turbulence parameterisation'
 #endif
@@ -45,6 +44,10 @@ print *,'with sub-grid turbulence parameterisation'
 #if defined rerun
 print *,'Rerun in order to store the Lagrangian stream functions in the different basins'
 #endif
+
+#if defined twodim                                                          
+print *,'Two-dimensional trajectory, which do not change depth'             
+#endif    
 
 #if defined streamxy
 print *,'Lagrangian horizontal stream function stored'

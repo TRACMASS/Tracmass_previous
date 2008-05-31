@@ -1,4 +1,4 @@
- &INITRUNTIME
+‚¢‚√‚‚π√ß &INITRUNTIME
   intmin  = 1,                                      !number of initial datasets 
 !  intspin = 35064, ! (35064=24 yers=total 2nm_122)  !trajectory release period (timesteps)
   intspin =     24, ! (=6  *24/ngcm)  !trajectory release period (timesteps)
@@ -27,7 +27,7 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva    = 1,
+  kriva    = 0,
   !
   ! name of directory where the files will be written
   directory = '/Volumes/hav4/data/rco/',
@@ -88,9 +88,10 @@
   ist1     =   1,		 
   ist2     =  -1,		 
   jst1     =   1,		 
+
   jst2     =  -1,		 
-  kst1     =   1,		 
-  kst2     =  -1/
+  kst1     =  40,		 
+  kst2     =  41/
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
