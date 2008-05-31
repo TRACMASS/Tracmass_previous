@@ -15,7 +15,7 @@ integer ia,ja,ka,im,jm,n
 
 call random_number(rand)
 rand=2.*rand-1. ! Max. amplitude of turb. (varies with the same aplitude as the mean vel)
-!rand=1.*rand-0.5
+!rand=1.*rand-0.5  ! Reduced amplitude of turb.
 
 rg=1.d0-rr
 
