@@ -51,7 +51,7 @@ subroutine loop
   INTEGER nrj(ntracmax,NNRJ)
   REAL*8 dsc,ts,trj(ntracmax,NTRJ)
   INTEGER ist,jst,kst
-  INTEGER ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas,luy
+  INTEGER ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas
   INTEGER ntrac,nev,nrh0,nout,nloop,nerror,nnorth,ndrake,ngyre,ntractot,nexit(NEND)
   
   REAL*8 rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0
@@ -76,18 +76,15 @@ subroutine loop
   print *,'Interpolation steps in time (iter): ' ,iter
   
   print 999,name,intstart,intspin,intend,intrun,nff,isec,idir,nqua,num,voltr,&
-       tmin0,tmax0,smin0,smax0,rmin0,rmax0,ist1,ist2,jst1,jst2,kst1,kst2
+       tmin0,tmax0,smin0,smax0,rmin0,rmax0
   
 999 format(' name=',a8,' intstart=',i4,' intspin=',i5,' intend=',i7,' intrun=',i7,/,&
          ' nff=',i2,' isec=',i2,' idir=',i4,' nqua=',i2,' num=',i7,&
          ' voltr=',f9.0,/,&
          ' tmin0=',f7.2,' tmax0=',f7.2,' smin0=',f7.2,' smax0=',f7.2,&
-         ' rmin0=',f7.2,' rmax0=',f7.2,/,&
-         ' ist1=',i4,' ist2=',i4,' jst1=',i4,' jst2=',i4,' kst1=',i2,&
-         ' kst2=',i2)
+         ' rmin0=',f7.2,' rmax0=',f7.2)
   
   ! === initialise to zero ===
-  luy=0
   w=0.d0
   nev=0
   nrh0=0
@@ -177,11 +174,8 @@ subroutine loop
   tstep=dble(intstep) 
   ints=intstart
   call readfields   ! initial dataset
+  print *,'Read fields'
   ntrac=0
-  
-
-
-
 
   !==========================================================
   !==========================================================
@@ -201,237 +195,214 @@ subroutine loop
      intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
         ! === Seed particles ===
         ntrac=ntractot
-        luy=0
-        isttLoop: do ist=ist1,ist2 
-           jstLoop: do jst=jst1,jst2
-              kstLoop: do kst=kst1,kst2
 
-
-!!$        ijkstloop: do ijk=1,ijkMax
-!!$           ist=ijkst(ijk,1)
-!!$           jst=ijkst(ijk,2)
-!!$           kst=ijkst(ijk,3)
-!!$           idir=ijkst(ijk,4)
-!!$           isec=ijkst(ijk,5)
-!!$           num=20 !ijkst(ijk,6)
-                 
-#if defined for || sim 
-                 if(mask(ist,jst).le.0) cycle jstLoop
-#ifdef twodim
-                 if(KM.ne.kst) cycle kstLoop
+        ijkstloop: do ijk=1,ijkMax
+           ist  = ijkst(ijk,1)
+           jst  = ijkst(ijk,2)
+           kst  = ijkst(ijk,3)
+           idir = ijkst(ijk,4)
+           isec = ijkst(ijk,5)
+           vol  = 0
+           
+           ib=ist
+           ibm=ib-1
+           if(ibm.eq.0) ibm=IMT
+           jb=jst
+           kb=kst
+                      
+           ! === follow trajectory only if velocity   ===
+           ! === in right direction + sets trajectory === 
+           ! === transport vol.                       ===
+           if    (isec.eq.1 .and. idir.ne.0) then
+              if(idir*ff*u(ist,jst,kst,1).le.0.) cycle ijkstloop  
+              vol=abs(u(ist,jst,kst,1))
+           elseif(isec.eq.2 .and. idir.ne.0) then
+              if(idir*ff*v(ist,jst,kst,1).le.0.) cycle ijkstloop
+              vol=abs(v(ist,jst,kst,1))
+           elseif(isec.ge.3 .and. idir.ne.0) then
+              call vertvel(1.d0,ib,ibm,jb,kst)
+              if(idir*ff*w(kst).le.0.) cycle ijkstloop
+              vol=abs(w(kst))
+           elseif(isec.eq.1 .and. idir.eq.0) then 
+              ! === Should generate trajectories in  ===
+              ! === both directions but doesn't work ===        
+              stop 5978 
+              if(u(ist,jst,kst,1).eq.0.) cycle ijkstloop
+              vol=abs(u(ist,jst,kst,1))
+           elseif(isec.eq.2 .and. idir.eq.0) then
+              stop 5979
+              if(v(ist,jst,kst,1).eq.0.) cycle ijkstloop
+              vol=abs(v(ist,jst,kst,1))
+           elseif(isec.eq.3 .and. idir.eq.0) then
+              call vertvel(1.d0,ib,ibm,jb,kst)
+              if(w(kst).eq.0.) cycle ijkstloop
+              vol=abs(w(kst))
+           elseif(isec.eq.4 .and. idir.eq.0) then
+              if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
+              if(u(ib,jb,kb,1)+u(ibm,jb,kb,1) + & 
+                   v(ib,jb,kb,1)+v(ib,jb-1,kb,1).eq.0.) cycle ijkstloop
+           endif
+                      
+           ! === trajectory volume in m3 ===
+           if(nqua.ge.3 .or. isec.eq.4) then
+#if defined ifs || atm
+              vol=dztb(ib,jb,kb,1)
 #else
-                 if(KM+1-kmt(ist,jst).ne.kst) cycle kstLoop
+#if defined sigma 
+              vol=dztb(ib,jb,kb)
+#else
+              vol=dz(kb)
 #endif
-                 luy=luy+1
+#if defined occ66 || orc || for || sim || multcol
+              if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif
-#ifdef rco
-                 if(mask(ist,jst).ne.-1)  cycle jstLoop
+              if(kb.eq.KM) vol=vol+hs(ib,jb,1)
 #endif
-#ifdef orc
-                 if(ist.le.0 .or. ist.gt.IMT .or. jst.le.0 .or. &
-                      jst.gt.JMT) print *,'hoooopsnasa',ist,jst
-                 if(mask(ist,jst).ne.-1)  cycle jstLoop
-#endif
+              vol=vol*dxdy(ib,jb)
+           endif
+          
+           ! === number of trajectories for box (ist,jst,kst) ===
+           select case (nqua)
+           case (1)
+              num = partQuant
+           case (2)
+              num = vol/partQuant
+           case (3)
+              num = vol/partQuant
+           case (4)
+              num = ijkst(ijk,6)
+           end select
+           if(num.eq.0) num=1 ! always at least one trajectory
+           
+           ijt=nint(sqrt(float(num)))
+           kkt=nint(float(num)/float(ijt))
+           subvol=vol/dble(ijt*kkt)
+           
+           if(subvol.eq.0.) stop 3956  !?????????????????
+           if(subvol.eq.0.) subvol=1.
+           
+99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
+                ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
+           
+           ! === loop over the subboxes of box (ist,jst,kst) ===
+           ijjLoop: do ijj=1,ijt
+              kkkLoop: do kkk=1,kkt
                  
                  ib=ist
-                 ibm=ib-1
-                 if(ibm.eq.0) ibm=IMT
                  jb=jst
                  kb=kst
                  
-                 ! === follow trajectory only if velocity   ===
-                 ! === in right direction + sets trajectory === 
-                 ! === transport vol.                       ===
-                 if    (isec.eq.1 .and. idir.ne.0) then
-                    if(idir*ff*u(ist,jst,kst,1).le.0.) cycle kstLoop  
-                    vol=abs(u(ist,jst,kst,1))
-                 elseif(isec.eq.2 .and. idir.ne.0) then
-                    if(idir*ff*v(ist,jst,kst,1).le.0.) cycle kstLoop
-                    vol=abs(v(ist,jst,kst,1))
-                 elseif(isec.ge.3 .and. idir.ne.0) then
-                    call vertvel(1.d0,ib,ibm,jb,kst)
-                    if(idir*ff*w(kst).le.0.) cycle kstLoop
-                    vol=abs(w(kst))
-                 elseif(isec.eq.1 .and. idir.eq.0) then 
-                    ! === Should generate trajectories in  ===
-                    ! === both directions but doesn't work ===        
-                    stop 5978 
-                    if(u(ist,jst,kst,1).eq.0.) cycle kstLoop
-                    vol=abs(u(ist,jst,kst,1))
-                 elseif(isec.eq.2 .and. idir.eq.0) then
-                    stop 5979
-                    if(v(ist,jst,kst,1).eq.0.) cycle kstLoop
-                    vol=abs(v(ist,jst,kst,1))
-                 elseif(isec.eq.3 .and. idir.eq.0) then
-                    call vertvel(1.d0,ib,ibm,jb,kst)
-                    if(w(kst).eq.0.) cycle kstLoop
-                    vol=abs(w(kst))
-                 elseif(isec.eq.4 .and. idir.eq.0) then
-                    if(KM+1-kmt(ist,jst).gt.kst) cycle kstLoop 
-                    if(u(ib,jb,kb,1)+u(ibm,jb,kb,1) + & 
-                         v(ib,jb,kb,1)+v(ib,jb-1,kb,1).eq.0.) cycle kstLoop
+                 ! === Meridional section ===
+                 if(isec.eq.1)then
+                    y1=dble(jb-1) + (dble(ijj)-0.5d0)/dble(ijt) 
+                    x1=dble(ist) 
+                    if(idir.eq. 1) ib=ist+1
+                    if(idir.eq.-1) ib=ist 
+                    z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
+                    ! === Zonal section      ===
+                 elseif(isec.eq.2)then
+                    x1=dble(ibm) + (dble(ijj)-0.5d0)/dble(ijt)
+                    y1=dble(jst) 
+                    if(idir.eq. 1) jb=jst+1
+                    if(idir.eq.-1) jb=jst 
+                    z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
+                    ! === Vertical section   ===
+                 elseif(isec.eq.3)then
+                    x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
+                    y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
+                    z1=dble(kb)
+                    ! === Spread even inside T-box ===
+                 elseif(isec.eq.4)then
+                    x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
+                    y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
+                    ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
+                    z1=dble(kb-1) + 0.5d0
+                    ! print *,ibm,x1,ib,jb-1,y1,jb,kb-1,z1,kb,ijk
+                    ! stop 4906
                  endif
                  
-                 ! === trajectory volume in m3 ===
-                 if(nqua.ge.3 .or. isec.eq.4) then
-#if defined ifs || atm
-                    vol=dztb(ib,jb,kb,1)
-#else
-#if defined sigma 
-                    vol=dztb(ib,jb,kb)
-#else
-                    vol=dz(kb)
-#endif
-#if defined occ66 || orc || for || sim || multcol
-                    if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
-#endif
-                    if(kb.eq.KM) vol=vol+hs(ib,jb,1)
-#endif
-                    vol=vol*dxdy(ib,jb)
-                 endif
+                 ibm=ib-1
+                 ! === cyclic ocean/atmosphere === 
+                 if(ibm.eq.0) ibm=IMT
+                 if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)
                  
-                 ! === number of trajectories for box (ist,jst,kst) ===
-                 if(nqua.ne.1 .and. nqua.ne.4) num=nint(vol/voltr)
-                 if(num.eq.0) num=1 ! always at least one trajectory
-                 ijt=nint(sqrt(float(num)))
-                 kkt=nint(float(num)/float(ijt))
-                 subvol=vol/dble(ijt*kkt)
-                 
-#if defined  sim || for
-                 vol=dble(mask(ist,jst))
-                 if(nqua.eq.5) num=mask(ist,jst)
-                 if(nqua.eq.6) num=1
-                 ijt=nint(sqrt(float(num)))
-                 kkt=nint(float(num)/float(ijt))
-                 subvol=vol/dble(ijt*kkt)
-#endif
-                 
-                 if(subvol.eq.0.) stop 3956  !?????????????????
-                 if(subvol.eq.0.) subvol=1.
-                 
-99               format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
-                      ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
-                 
-                 ! === loop over the subboxes of box (ist,jst,kst) ===
-                 ijjLoop: do ijj=1,ijt
-                    kkkLoop: do kkk=1,kkt
-                       
-                       ib=ist
-                       jb=jst
-                       kb=kst
-                       
-                       ! === Meridional section ===
-                       if(isec.eq.1)then
-                          y1=dble(jb-1) + (dble(ijj)-0.5d0)/dble(ijt) 
-                          x1=dble(ist) 
-                          if(idir.eq. 1) ib=ist+1
-                          if(idir.eq.-1) ib=ist 
-                          z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-                          ! === Zonal section      ===
-                       elseif(isec.eq.2)then
-                          x1=dble(ibm) + (dble(ijj)-0.5d0)/dble(ijt)
-                          y1=dble(jst) 
-                          if(idir.eq. 1) jb=jst+1
-                          if(idir.eq.-1) jb=jst 
-                          z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-                          ! === Vertical section   ===
-                       elseif(isec.eq.3)then
-                          x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
-                          y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
-                          z1=dble(kb)
-                          ! === Spread even inside T-box ===
-                       elseif(isec.eq.4)then
-                          x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
-                          y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
-                          ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-                          z1=dble(kb-1) + 0.5d0
-                          ! print *,ibm,x1,ib,jb-1,y1,jb,kb-1,z1,kb,luy
-                          ! stop 4906
-                       endif
-                       
-                       ibm=ib-1
-                       ! === cyclic ocean/atmosphere === 
-                       if(ibm.eq.0) ibm=IMT
-                       if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)
-                       
-                       ! === check properties of water- ===
-                       ! === mass at initial time       === 
+                 ! === check properties of water- ===
+                 ! === mass at initial time       === 
 #ifndef ifs || atm
 #ifdef tempsalt 
-                       !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-                       call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
-                       if(temp.lt.tmin0 .or. temp.gt.tmax0 .or. &
-                            salt.lt.smin0 .or. salt.gt.smax0 .or. &
-                            dens.lt.rmin0 .or. dens.gt.rmax0) then
-                          !print *,'outside mass range',temp,salt,dens
-                          cycle kkkLoop 
-                       endif
+                 !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+                 call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
+                 if(temp.lt.tmin0 .or. temp.gt.tmax0 .or. &
+                      salt.lt.smin0 .or. salt.gt.smax0 .or. &
+                      dens.lt.rmin0 .or. dens.gt.rmax0) then
+                    !print *,'outside mass range',temp,salt,dens
+                    cycle kkkLoop 
+                 endif
 #endif
 #endif
-                       
-                       ntrac=ntrac+1  ! the trajectory number
-                       
-                       ! selects only one singe trajectory
+                 
+                 ntrac=ntrac+1  ! the trajectory number
+                 
+                 ! selects only one singe trajectory
 #ifdef select
-                       if(ntrac.ne.57562) then 
-                          nrj(ntrac,6)=1
-                          nout=nout+1
-                          cycle kkkLoop
-                       endif
+                 if(ntrac.ne.57562) then 
+                    nrj(ntrac,6)=1
+                     nout=nout+1
+                    cycle kkkLoop
+                 endif
 #endif
-                       ! === initialise the trajectory iteration number
-                       niter=0 
-                       call errorCheck('ntracGTntracmax',errCode)
-                       
-                       ts=ff*dble(ints-intstep)/tstep !time, fractions of ints
-                       tt=ts*tseas !time(sec) rel to start
-                       
+                 ! === initialise the trajectory iteration number
+                 niter=0 
+                 call errorCheck('ntracGTntracmax',errCode)
+                 
+                 ts=ff*dble(ints-intstep)/tstep !time, fractions of ints
+                 tt=ts*tseas !time(sec) rel to start
+                 
 #ifdef streamv 
-                       sxz=0.
-                       syz=0.
+                 sxz=0.
+                 syz=0.
 #endif
 #ifdef streamr 
-                       syr=0.
-                       sxr=0.
+                 syr=0.
+                 sxr=0.
 #endif
 #ifdef streamxy
-                       sxyx=0.
-                       sxyy=0.
+                 sxyx=0.
+                 sxyy=0.
 #endif
-                       ! === initialise time and ===
-                       ! === store trajectory positions ===
-                       t0=tt
-                       dt=0.d0
-                       arct=0.
-                       
-                       trj(ntrac,1)=x1
-                       trj(ntrac,2)=y1
-                       trj(ntrac,3)=z1
-                       trj(ntrac,4)=tt
-                       trj(ntrac,5)=subvol
-                       trj(ntrac,6)=arct
-                       trj(ntrac,7)=t0
-                       nrj(ntrac,1)=ib
-                       nrj(ntrac,2)=jb
-                       nrj(ntrac,3)=kb
-                       nrj(ntrac,4)=niter
-                       nrj(ntrac,5)=idint(ts)
-                       nrj(ntrac,7)=1
-                       call writedata(10)
-                    end do kkkLoop
-                 end do ijjLoop
-              end do kstLoop
-           end do jstLoop
-        end do isttLoop
+                 ! === initialise time and ===
+                 ! === store trajectory positions ===
+                 t0=tt
+                 dt=0.d0
+                 arct=0.
+                 
+                 trj(ntrac,1)=x1
+                 trj(ntrac,2)=y1
+                 trj(ntrac,3)=z1
+                 trj(ntrac,4)=tt
+                 trj(ntrac,5)=subvol
+                 trj(ntrac,6)=arct
+                 trj(ntrac,7)=t0
+                 nrj(ntrac,1)=ib
+                 nrj(ntrac,2)=jb
+                 nrj(ntrac,3)=kb
+                 nrj(ntrac,4)=niter
+                 nrj(ntrac,5)=idint(ts)
+                 nrj(ntrac,7)=1
+                 call writedata(10)
+              end do kkkLoop
+           end do ijjLoop
+        end do ijkstloop
+        
         ! ===  End of seeding part ===
      end if intspinCond
      ! ntracin
      ntractot=ntrac
      ntrac=0
-        
+     
      if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
      
-  
+     
      !=======================================================
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===
