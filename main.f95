@@ -18,10 +18,10 @@ call writesetup
 call init_seed
 
 
-do i=1,ijkMax
-   print *,ijkst(i,:)
-end do
-stop 666
+!do i=1,ijkMax
+!   print *,ijkst(i,:)
+!end do
+!stop 666
 
 tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
 
@@ -107,12 +107,12 @@ CONTAINS
     print *,'======================================================'
     print *,'=== TRACMASS lagrangian off-line particle tracking ==='
     print *,'------------------------------------------------------'
-    print *,'Start date: '//currDate(1:4)//'-'//currDate(5:6)//'-'//currDate(7:8)
-    print *,'Start time: '//currTime(1:2)// ':'//currTime(3:4)// ':'//currTime(5:6)
-    print *,'Model code: '//trim(GCMname)
-    print *,'Data surce: '//trim(gridName)
-    print *,'Run name  : '//trim(caseName)
-    print *,'          : '//trim(caseDesc)
+    print *,'Start date  : '//currDate(1:4)//'-'//currDate(5:6)//'-'//currDate(7:8)
+    print *,'Start time  : '//currTime(1:2)// ':'//currTime(3:4)// ':'//currTime(5:6)
+    print *,'Model code  : '//trim(GCMname)
+    print *,'Data surce  : '//trim(gridName)
+    print *,'Run name    : '//trim(caseName)
+    print *,'Description : '//trim(caseDesc)
     print *,'------------------------------------------------------'
 #if defined tempsalt
     print *,'with temperature and salinity fields'

@@ -102,8 +102,7 @@ ENDMODULE mod_buoyancy
 MODULE mod_domain
   INTEGER, DIMENSION(10)                    :: ienw ,iene
   INTEGER, DIMENSION(10)                    :: jens ,jenn
-  REAL*4                                    ::  timax
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
+  REAL*4                                    :: timax
 ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel

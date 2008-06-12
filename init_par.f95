@@ -156,8 +156,6 @@ subroutine init_params
   ! mod_domain
 !  allocate ( ienw (LBT),iene (LBT) )
 !  allocate ( jens (LBT),jenn (LBT) )
-  allocate ( mask (imt,jmt) )
-  ! mod_vel
   allocate ( u(imt,jmt,km,nst), v(imt,jmt,km,nst) )
   allocate ( hs(imt,jmt,nst) )
   allocate ( w(0:km) )
