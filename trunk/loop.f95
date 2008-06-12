@@ -4,6 +4,7 @@ subroutine loop
   USE mod_time
   USE mod_grid
   USE mod_buoyancy
+  USE mod_seed
 #if defined rco || for || sim || orc || tes || tun || ifs || atm || gomoos || jplSCB || eccoSOSE || multcol
   USE mod_domain
 #endif
@@ -47,10 +48,8 @@ subroutine loop
   logical res
 #endif
   
-#ifdef time 
   INTEGER nrj(ntracmax,NNRJ)
   REAL*8 dsc,ts,trj(ntracmax,NTRJ)
-#endif
   INTEGER ist,jst,kst
   INTEGER ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas,luy
   INTEGER ntrac,nev,nrh0,nout,nloop,nerror,nnorth,ndrake,ngyre,ntractot,nexit(NEND)
@@ -206,6 +205,15 @@ subroutine loop
         isttLoop: do ist=ist1,ist2 
            jstLoop: do jst=jst1,jst2
               kstLoop: do kst=kst1,kst2
+
+
+!!$        ijkstloop: do ijk=1,ijkMax
+!!$           ist=ijkst(ijk,1)
+!!$           jst=ijkst(ijk,2)
+!!$           kst=ijkst(ijk,3)
+!!$           idir=ijkst(ijk,4)
+!!$           isec=ijkst(ijk,5)
+!!$           num=20 !ijkst(ijk,6)
                  
 #if defined for || sim 
                  if(mask(ist,jst).le.0) cycle jstLoop
