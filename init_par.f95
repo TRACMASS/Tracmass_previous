@@ -1,5 +1,6 @@
 subroutine init_params
   USE mod_param
+  USE mod_seed
   USE mod_coord
   USE mod_grid
   USE mod_name
@@ -30,7 +31,11 @@ subroutine init_params
   namelist /INITRUNTIME/ intmin, intspin, intrun, intstep 
   namelist /INITRUNDATE/  ihour, iday, imon, iyear
   namelist /INITRUNWRITE/ ncoor, kriva, directory, name
-  namelist /INITRUNSEED/ nff, isec, idir, nqua, partQuant, kst1, kst2, ist1, ist2, jst1, jst2, kst1, kst2
+  namelist /INITRUNSEED/ nff ,isec ,idir ,nqua ,partQuant ,seedType &
+       ,kst1 ,kst2 ,ist1 ,ist2 ,jst1 ,jst2 ,kst1 ,kst2 &
+       ,varSeedName ,seedFile
+  namelist /INITGRIDDESC/ GCMname,GCMsource,gridName,gridSource,gridDesc  
+  namelist /INITRUNDESC/  caseName ,caseDesc  
 #ifdef tempsalt
   namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
@@ -43,8 +48,8 @@ subroutine init_params
   namelist /INITRUNEND/ ienw, iene, jens, jenn, timax
 
 
-  Project = PROJECT_NAME
-  Case    = CASE_NAME
+  Project  = PROJECT_NAME
+  Case     = CASE_NAME
   
   if ( (IARGC() .eq. 1 ) .or. (IARGC() .eq. 4 ) )  then
      call getarg(IARGC(),inparg)
@@ -56,6 +61,7 @@ subroutine init_params
   print *,trim(Project)//'/'//trim(Case)//'_run.in'
   open(8,file=trim(Project)//'/'//trim(Project)//'_grid.in',  &
        status='OLD', delim='APOSTROPHE')
+  read(8,nml=INITGRIDDESC)
   read(8,nml=INITGRIDGRID)
   read(8,nml=INITGRIDNTRAC)
   read(8,nml=INITGRIDTIME)
@@ -64,6 +70,7 @@ subroutine init_params
 
   open(8,file=trim(Project)//'/'//trim(Case)//'_run.in',  &
        status='OLD', delim='APOSTROPHE')
+  read(8,nml=INITRUNDESC)
   read(8,nml=INITRUNTIME)
   read(8,nml=INITRUNDATE)
   read(8,nml=INITRUNWRITE)  

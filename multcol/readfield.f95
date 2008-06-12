@@ -16,36 +16,36 @@ SUBROUTINE readfields
   IMPLICIT none
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   ! = Variables for filename generation 
-  CHARACTER                                 :: dates(62)*17
-  CHARACTER (len=200)                       :: dataprefix, dstamp
-  INTEGER                                   :: intpart1 ,intpart2
-  INTEGER                                   :: ndates
-  INTEGER                                   :: yr1 ,mn1 ,dy1
-  INTEGER                                   :: yr2 ,mn2 ,dy2
+  CHARACTER                                  :: dates(62)*17
+  CHARACTER (len=200)                        :: dataprefix, dstamp
+  INTEGER                                    :: intpart1 ,intpart2
+  INTEGER                                    :: ndates
+  INTEGER                                    :: yr1 ,mn1 ,dy1
+  INTEGER                                    :: yr2 ,mn2 ,dy2
   
 
   ! = Loop variables
-  INTEGER                                   :: t ,i ,j ,k ,kk ,tpos
+  INTEGER                                    :: t ,i ,j ,k ,kk ,tpos
   
   ! = Variables used for getfield procedures
-  CHARACTER (len=200)                       :: gridfile ,getfile
-  INTEGER, DIMENSION(1)                     :: start1d  ,count1d
-  INTEGER, DIMENSION(4)                     :: start2d  ,count2d
-  INTEGER, DIMENSION(4)                     :: start3d  ,count3d
-  INTEGER, DIMENSION(4)                     :: start4d  ,count4d
-  INTEGER                                   :: ierr
-  CHARACTER (len=50)                        :: ncvar
+  CHARACTER (len=200)                        :: gridfile ,getfile
+  INTEGER, DIMENSION(1)                      :: start1d  ,count1d
+  INTEGER, DIMENSION(4)                      :: start2d  ,count2d
+  INTEGER, DIMENSION(4)                      :: start3d  ,count3d
+  INTEGER, DIMENSION(4)                      :: start4d  ,count4d
+  INTEGER                                    :: ierr
+  CHARACTER (len=50)                         :: ncvar
   
   ! = ECCO Grid fields
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:)     :: valsz
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: e1v ,e1t ,e2u ,e2t
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: dzu ,dzv ,dzt
-  REAL, DIMENSION(2)                        :: ttest1, ttest2
+  REAL, SAVE, ALLOCATABLE, DIMENSION(:)      :: valsz
+  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1v ,e1t ,e2u ,e2t
+  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:)  :: dzu ,dzv ,dzt
+  REAL, DIMENSION(2)                         :: ttest1, ttest2
   
   ! = Input fields from GCM
-  REAL,       ALLOCATABLE, DIMENSION(:,:)   :: ssh
+  REAL,       ALLOCATABLE, DIMENSION(:,:)    :: ssh
   !REAL,       ALLOCATABLE, DIMENSION(:,:,:) :: uvel ,vvel 
-  REAL,       ALLOCATABLE, DIMENSION(:,:,:) :: fieldr
+  REAL,       ALLOCATABLE, DIMENSION(:,:,:)  :: fieldr
   ! ===   ===   ===
   
   alloCondGrid: if(.not. allocated (e1v)) then

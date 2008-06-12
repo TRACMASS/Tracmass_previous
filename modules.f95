@@ -39,17 +39,11 @@ MODULE mod_param
 !!$  INTEGER, PARAMETER ::  (IMT=249,JMT=258,KM=20,JMAX=JMT,LBT=4)
 !!$  INTEGER, PARAMETER ::  NTRACMAX=100000
 !!$#endif
-!!$  !_______________________________________________________________________
+!!$  !! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 !!$  
   INTEGER, PARAMETER :: MR=1001
   INTEGER            :: NEND
-#if defined time
   INTEGER, PARAMETER :: NST=2,NNRJ=8,NTRJ=7
-#endif
-#if defined stat
-  INTEGER, PARAMETER ::  (NST=1)
-#endif
-  
 #if defined streamts
   INTEGER, PARAMETER :: LOV=3
 #else
@@ -57,32 +51,31 @@ MODULE mod_param
 #endif
   
 #if defined sigma 
-  INTEGER, PARAMETER :: KD=KM   ! does this work?
+  INTEGER, PARAMETER :: KD=KM   !does this work?
 #elif defined atm
-  INTEGER, PARAMETER :: KD=11  ! should be KD=KM   
+  INTEGER, PARAMETER :: KD=11   !should be KD=KM   
 #else
   INTEGER, PARAMETER :: KD=1
 #endif
   
-  INTEGER            :: nff,isec,idir,nqua,num,ist1,ist2,jst1,jst2,kst1,kst2
   INTEGER            :: ncoor,kriva,iter,ngcm
   REAL*8             :: tseas,tday,tyear,dtmin,voltr,tstep,dstep,tss,partQuant
   
 ENDMODULE mod_param
-!_______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_coord
   REAL*8 dx,dy,deg,stlon1,stlat1
   REAL*8, ALLOCATABLE, DIMENSION(:) :: zw
   REAL*8, ALLOCATABLE, DIMENSION(:) :: csu,cst,dyt,phi
   INTEGER idmax(12,1000:3000)
 ENDMODULE mod_coord
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
   INTEGER ints,intstart,intend,intrun,intspin,intstep,intmin,intmax
   INTEGER iyear,imon,iday,ihour,iyear0,imon0,iday0,yearmin,yearmax
   INTEGER*8 ntime
 ENDMODULE mod_time
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
@@ -96,7 +89,7 @@ MODULE mod_grid
   REAL*8                                    :: arcscale
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt
 ENDMODULE mod_grid
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
   REAL*4                                    :: tmin0 ,tmax0
   REAL*4                                    :: smin0 ,smax0
@@ -105,72 +98,86 @@ MODULE mod_buoyancy
   REAL*4                                    :: smine ,smaxe
   REAL*4                                    :: rmine ,rmaxe
 ENDMODULE mod_buoyancy
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_domain
   INTEGER, DIMENSION(10)                    :: ienw ,iene
   INTEGER, DIMENSION(10)                    :: jens ,jenn
   REAL*4                                    ::  timax
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
 ENDMODULE mod_domain
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)   :: u,v
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: u,v
   !REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: w
-  REAL,   ALLOCATABLE, DIMENSION(:,:,:)     :: uvel ,vvel 
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: w
-  REAL*4, DIMENSION(6)                      :: rand
-  REAL*8                                    :: ff
+  REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel 
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
+  REAL*8, ALLOCATABLE, DIMENSION(:)          :: w
+  REAL*4, DIMENSION(6)                       :: rand
+  REAL*8                                     :: ff
 ENDMODULE mod_vel
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_dens
 #ifdef tempsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: tem,sal,rho
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
 ENDMODULE mod_dens
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_turb
 #ifdef turb
   REAL upr(6,2)
 #endif
 ENDMODULE mod_turb
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_name
-  CHARACTER(LEN=8) :: name,namep
-  CHARACTER(LEN=200) :: directory
+  CHARACTER(LEN=8)                           :: name,namep
+  CHARACTER(LEN=200)                         :: directory ,projDesc
+  CHARACTER(LEN=200)                         :: GCMname   ,GCMsource
+  CHARACTER(LEN=200)                         :: gridName  ,gridSource
+  CHARACTER(LEN=200)                         :: gridDesc
+  CHARACTER(LEN=200)                         :: caseName  ,caseDesc
 ENDMODULE mod_name
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_seed
+  INTEGER                                    :: nff,isec,idir,nqua,num
+  INTEGER                                    :: ijk  ,ijkMax
+  INTEGER                                    :: seedType ,varSeedName 
+  INTEGER                                    :: ist1 ,ist2   ,jst1 ,jst2
+  INTEGER                                    :: kst1, kst2
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ijkst
+  CHARACTER(LEN=200)                         :: seedFile
+ENDMODULE mod_seed
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamxy
 #ifdef streamxy
-  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: stxyy, stxyx
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
 #endif
 ENDMODULE mod_streamxy
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamv
 #ifdef streamv
-  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: stxz, styz
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 ENDMODULE mod_streamv
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamr
 #ifdef streamr
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: stxr,styr
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
 #endif
 ENDMODULE mod_streamr
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_tracer
 #ifdef tracer
-  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: tra
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: tra
 #endif
 ENDMODULE mod_tracer
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #ifdef sediment
 MODULE mod_sed
   REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
 ENDMODULE mod_sed
-
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_orbital
   REAL, ALLOCATABLE, DIMENSION(:) :: orb
 ENDMODULE mod_orbital
 #endif
-!______________________________________________________________________________
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
