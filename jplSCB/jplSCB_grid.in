@@ -1,14 +1,14 @@
  &INITGRIDDESC
-  GCMname    = 'OPA',
-  GCMsource  = 'http://www.locean-ipsl.upmc.fr/opa/',
-  gridName   = 'multcol',
-  gridSource = 'Marina Levy',
+  GCMname    = 'ROMS',
+  GCMsource  = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
+  gridName   = 'jplSRC',
+  gridSource = 'http://ourocean.jpl.nasa.gov/SCB/',
   gridDesc   = '1*1 km biogeochemical run in the North Atlantic'/
 
 $INITGRIDGRID	
-  IMT      = 200,
-  JMT      = 200,	
-  KM       = 31,
+  IMT      = 211,
+  JMT      = 111,	
+  KM       = 24,
   LBT      = 5,	
   NEND     = 6/              ! NEND = LBT +1
 
@@ -16,7 +16,7 @@ $INITGRIDNTRAC
   NTRACMAX=7000000/          ! 7*1000*1000 
 
 $INITGRIDTIME
-   ngcm    = 24,            ! (5*24) hours between GCM datasets
+   ngcm    = 1,              ! (5*24) hours between GCM datasets
    iter    = 5,              ! iteration between two gcm data sets
    intmax  = 730/  !10*365/5 ! maximum length of RCO fields
 

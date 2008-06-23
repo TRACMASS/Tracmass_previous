@@ -174,7 +174,6 @@ subroutine loop
   tstep=dble(intstep) 
   ints=intstart
   call readfields   ! initial dataset
-  print *,'Read fields'
   ntrac=0
 
   !==========================================================
@@ -209,7 +208,7 @@ subroutine loop
            if(ibm.eq.0) ibm=IMT
            jb=jst
            kb=kst
-                      
+  
            ! === follow trajectory only if velocity   ===
            ! === in right direction + sets trajectory === 
            ! === transport vol.                       ===
@@ -253,7 +252,7 @@ subroutine loop
 #else
               vol=dz(kb)
 #endif
-#if defined occ66 || orc || for || sim || multcol
+#if defined occ66 || orc || for || sim || multcol || jplSCB
               if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif
               if(kb.eq.KM) vol=vol+hs(ib,jb,1)
@@ -399,10 +398,9 @@ subroutine loop
      ! ntracin
      ntractot=ntrac
      ntrac=0
-     
+
      if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
-     
-     
+          
      !=======================================================
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===
@@ -436,7 +434,6 @@ subroutine loop
            goto 1500
         endif
 #endif 
-        
 #ifdef sediment
         ! === Check if water velocities are === 
         ! === large enough for resuspention ===
@@ -519,7 +516,7 @@ subroutine loop
 #else
            dxyz=dz(kb)
 #endif
-#if defined occ66 || orc || for || sim || multcol 
+#if defined occ66 || orc || for || sim || multcol || jplSCB
            if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif
            if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
@@ -537,7 +534,7 @@ subroutine loop
 #endif
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
-           
+           w=0
            ! === write trajectory ===                       
 #ifdef tracer
            if(ts.eq.dble(idint(ts))) then 
@@ -580,7 +577,6 @@ subroutine loop
               print *,'dt=',dt
               goto 1500
            endif
-           
            ! === if time step makes the integration ===
            ! === exceed the time when fiedls change ===
            if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
@@ -648,7 +644,6 @@ subroutine loop
               stxr(ia,msa,lbas,3)=stxr(ia,msa,lbas,3)+real(subvol*ff)
 #endif
 #endif
-              
            elseif(ds.eq.dsw) then ! westward exit
               
               uu=(rbg*u(iam,ja,ka,NST)+rb*u(iam,ja,ka,1))*ff
@@ -766,6 +761,7 @@ subroutine loop
               
               scrivi=.false.
               call vertvel(rb,ia,iam,ja,ka)
+              w=0
               uu=w(ka)
 #ifdef turb    
               ! uu=uu+upr(5,2)
@@ -785,6 +781,7 @@ subroutine loop
            elseif(ds.eq.dsd) then ! downward exit
               
               call vertvel(rb,ia,iam,ja,ka)
+              w=0
               if(w(ka-1).lt.0.d0) then
                  kb=ka-1
               endif
@@ -818,7 +815,6 @@ subroutine loop
               call pos(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
            endif
-           
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
            
@@ -836,8 +832,13 @@ subroutine loop
            if(ib.gt.IMT) ib=ib-IMT             ! east-west cyclic
            if(y1.ne.dble(idint(y1))) jb=idint(y1)+1
            
-           
-           if( z1.le.dble(KM-kmt(ib,jb)) ) z1=dble(KM-kmt(ib,jb))+0.5d0
+!           print *,z1,km,kmt(ib,jb)
+!           print*,'---'
+           if( z1.le.dble(KM-kmt(ib,jb)) ) then
+!              print *,z1,km,kmt(ib,jb)
+              z1=dble(KM-kmt(ib,jb))+0.5d0
+!              print *,'==='
+           end if
            if( z1.ge.dble(KM) ) then
               z1=dble(KM)-0.5
               kb=KM
@@ -890,7 +891,6 @@ subroutine loop
               nexit(NEND)=nexit(NEND)+1
               exit niterLoop
            endif
-           
            call writedata(18)
         end do niterLoop
 #endif
@@ -1090,6 +1090,12 @@ return
              nloop=nloop+1             
              print *,'====================================='
              print *,'Warning: Particle in infinite loop '
+             print *,'niter:',niter,'nrj:',nrj(ntrac,4)
+             print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
+             print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
+             print *,'x1:',x1,'u:',u(ia-1,ja-1,ka-1,2)
+             print *,'y1:',y1,'v:',v(ia-1,ja-1,ka-1,2)
+             print *,'kb:',kb-1,'z1:',z1
              print *,'-------------------------------------'
              trj(ntrac,1)=x1
              trj(ntrac,2)=y1
