@@ -3,22 +3,32 @@
   caseDesc     = 'Looking at chl growth in lagrangian space'/
  &INITRUNTIME
   ! === Number of initial datasets
-  intmin       = 8126,
+  intmin       = 1,
   !
   ! === Trajectory release period (timesteps)
   intspin      = 5,  !10*365/5
   !
   ! === Trajectory run
-  intrun       = 100,  !1000*365/5-1,
+  intrun       = 1000,  !1000*365/5-1,
   !
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
  &INITRUNDATE
-  ihour        = 0,		! Always zero for orca
-  iday         = -8,
-  imon         = 7,
-  iyear        = 1990/
+  ! === Reference basetime for the velocity field. 
+  !baseHour          = 0,
+  !baseDay           = 13,
+  !baseMon           = 9,
+  !baseYear          = 2007/
+  ! === Start time for this run
+  !startHour         = 0,
+  !startDay          = 1,
+  !startMon          = 1,
+  !startYear         = 2001/
+  ihour          = 0,
+  iday           = 13,
+  imon           = 9,
+  iyear          = 2007/
   !
   !
   &INITRUNWRITE
@@ -34,8 +44,8 @@
   !                 5 = write at chosen intervals
   kriva        = 1,
   !
-  ! === Name of directory where the files will be written
-  directory    = '/Volumes/t2klumpen/projData/multcol/',
+  ! === Name of directory where input fields are stored
+  directory    = '/Volumes/t2klumpen/projData/jplSCB/',
   !
   ! === Name of current trajectory run
   name         = 'multcolTest'/ 
@@ -81,17 +91,17 @@
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list file to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 3, 
+  SeedType = 1, 
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 50,		 
-  ist2         = 60,			  
-  jst1         = 50,		 
-  jst2         = 60,		 
-  kst1         = 24,		 
-  kst2         = 30,
+  ist1         = 30,		 
+  ist2         = 40,			  
+  jst1         = 30,		 
+  jst2         = 40,		 
+  kst1         = 20,		 
+  kst2         = 24,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -126,8 +136,23 @@
 $INITRUNEND
 ! defining end sections
 ! testar detta
-  ienw =   451,
-  iene =   641,
-  jens =     0,
-  jenn =     1,
+  ienw(1) =   1,
+  iene(1) =   2,
+  jens(1) =   1,
+  jenn(1) = 211,
+!
+  ienw(2) = 110,
+  iene(2) = 111,
+  jens(2) =   1,
+  jenn(2) = 211,
+!
+  ienw(3) =   1,
+  iene(3) = 111,
+  jens(3) =   1,
+  jenn(3) =   2,
+
+  ienw(4) =   1,
+  iene(4) = 111,
+  jens(4) = 210,
+  jenn(4) = 211,
   timax =  36500./  ! maximum time length of a trajectory in days

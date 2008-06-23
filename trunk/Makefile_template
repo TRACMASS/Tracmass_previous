@@ -46,6 +46,7 @@ CC                = gcc -O  $(INC_DIR)
 
 objects           = modules.o sw_stat.o loop.o vertvel.o coord.o \
                     cross.o init_par.o interp2.o pos.o arclength.o \
+                    sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o turb.o main.o
 #jacket.o
 

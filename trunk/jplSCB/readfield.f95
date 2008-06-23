@@ -19,7 +19,7 @@ SUBROUTINE readfields
   CHARACTER                                  :: dates(62)*17
   CHARACTER (len=200)                        :: dataprefix, dstamp
   INTEGER                                    :: intpart1 ,intpart2
-  INTEGER                                    :: ndates
+  INTEGER                                    :: ndates ,jdBase
   INTEGER                                    :: yr1 ,mn1 ,dy1
   INTEGER                                    :: yr2 ,mn2 ,dy2
   
@@ -67,16 +67,15 @@ SUBROUTINE readfields
   call datasetswap !Copy field(t+1) to field(t).
 
   ! === update the time counting ===
-  intpart1    = mod(ints-1,5)
-  intpart2    = floor((ints)/5.)+1
+  intpart1    = mod(ints-1,24)
+  intpart2    = floor((ints-1)/24.)
   ndates      = ints-intpart1
-  dstamp      = 'PROD04_IN_20340000_20340000_'
-  
-  call  gdate (2462502+1+ndates   ,yr1 ,mn1 ,dy1)
-  call  gdate (2462502+1+ndates+4 ,yr2 ,mn2 ,dy2)
-  write (dstamp(11:18),'(i4i2.2i2.2)') yr1,mn1,dy1
-  write (dstamp(20:27),'(i4i2.2i2.2)') yr2,mn2,dy2
-  dataprefix  = trim(directory) // '/' // dstamp
+  dstamp      = 'scb_fcst_0000000015.nc'
+  jdBase=jdate(iyear,imon,iday)
+ 
+  call  gdate (jdbase+intpart2 ,yr1 ,mn1 ,dy1)
+  write (dstamp(10:17),'(i4i2.2i2.2)') yr1,mn1,dy1
+  dataprefix  = trim(directory) // '/ROMS/' // dstamp
   tpos        = intpart1+1
   
   ! === initialise ===
@@ -95,13 +94,13 @@ SUBROUTINE readfields
      ! ======================================================
      !    ===  Set up the grid ===
      ! ======================================================
-     getfile  = trim(dataprefix) // 'vomecrty.nc' 
-     start1d  = [ 1]
-     count1d  = [km]
-     ncvar    = 'depthv'
-     zw(1:km) = get1dfield()
-     zw(0)    = 0
-     dz       = zw(km:1:-1)-zw(km-1:0:-1)
+     getfile    = trim(dataprefix)
+     start1d    = [ 1]
+     count1d    = [km]
+     ncvar      = 'depth'
+     zw(0:km-1) = get1dfield()
+     zw(km)     = 2500
+     dz         = zw(km:1:-1)-zw(km-1:0:-1)
      
      !start2d  = [    1,  1, 1, 1]
      !count2d  = [imt+2,jmt, 1, 1] 
@@ -115,9 +114,9 @@ SUBROUTINE readfields
      !e2u      = get2dfield()
      
      ! ### FUSK! ###
-     e2t=2000
+     e2t=1153.4
      e2u=e2t
-     e1t=2000
+     e1t=2226.9
      e1v=e1t
      
      dxdy=e1t*e2t
@@ -140,20 +139,21 @@ SUBROUTINE readfields
   endif initCond   ! === End init section ===
 
   start2d   = [    1,   1, tpos,    1]
-  count2d   = [imt+2, jmt,    1,    1] 
+  count2d   = [imt  , jmt,    1,    1] 
   start3d   = [    1,   1,    1, tpos]
-  count3d   = [imt+2, jmt,   km,    1]
-  getfile   = trim(dataprefix) // 'vozocrtx.nc'
-  ncvar     = 'vozocrtx'
+  count3d   = [imt  , jmt,   km,    1]
+  getfile   = trim(dataprefix)
+  ncvar     = 'u'
   uvel      = get3dfield()
-  getfile   = trim(dataprefix) // 'vomecrty.nc'
-  ncvar     = 'vomecrty'
+  ncvar     = 'v'
   vvel      = get3dfield()
-  !getfile  = trim(dataprefix) // 'sossheig.nc'
-  !ncvar    = 'sossheig'
-  ssh       = 0 !get2dfield()
-  hs(:,:,2) = 0.01*ssh
-
+  ncvar    = 'zeta'
+  ssh       = get2dfield()
+  hs(:,:,2) = ssh
+  
+  where (uvel .eq. -9999) uvel=0
+  where (vvel .eq. -9999) vvel=0
+  where (ssh  .eq. -9999)  ssh=0
 !!$  gridfile = '/Users/bror/KAB042j_5d_' // trim(fstamp) // '_sigma.nc'
 !!$  ncvar    = 'sigma'
 !!$  fieldr   = get3dfield()
@@ -172,13 +172,14 @@ SUBROUTINE readfields
   end do
 
   if(ints.eq.intstart) then
+     kmt=0
      do j=1,jmt
         do i=1,IMT
            do k=1,km
               kk=km+1-k
-!              if(fieldr(i,j,k).ne.0.) kmt(i,j)=k
-              kmt(i,j)=k
-              if(k.ne.kmt(i,j)) dz(kk)=dzt(i,j,k)
+              if(uvel(i,j,k).ne.-9999) kmt(i,j)=k
+              !kmt(i,j)=k
+              !if(k.ne.kmt(i,j)) dz(kk)=dzt(i,j,k)
            enddo
            if(kmt(i,j).ne.0) then
               dztb(i,j,1)=dzt(i,j,kmt(i,j))
@@ -189,7 +190,7 @@ SUBROUTINE readfields
      enddo
   end if
   
-    call printdiagnostics
+!    call printdiagnostics
 
 
 !!$    print *,u(100,100,:,2)
@@ -428,8 +429,9 @@ contains
     !
     !---computes the gregorian calendar date (year,month,day)
     !   given the julian date (jd).
-    !
-    integer jd ,year ,month ,day ,i ,j ,k ,l ,n
+    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
+    INTEGER                                  :: jd ,year ,month ,day
+    INTEGER                                  :: i ,j ,k ,l ,n
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
     l= jd+68569
     n= 4*l/146097
@@ -448,5 +450,21 @@ contains
     
     return
   end subroutine gdate
-  
+
+  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###  
+  INTEGER function jdate (YEAR,MONTH,DAY)
+    !
+    !---COMPUTES THE JULIAN DATE (JD) GIVEN A GREGORIAN CALENDAR
+    !   DATE (YEAR,MONTH,DAY).
+    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
+    INTEGER                                  :: YEAR,MONTH,DAY,I,J,K
+  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+    i     = year
+    j     = month
+    k     = day
+    jdate = K-32075+1461*(I+4800+(J-14)/12)/4+367*(J-2-(J-14)/12*12) &
+         /12-3*((I+4900+(J-14)/12)/100)/4
+    RETURN
+  end function jdate
+
 end subroutine readfields
