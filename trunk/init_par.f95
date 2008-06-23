@@ -22,19 +22,20 @@ subroutine init_params
   CHARACTER (LEN=30) :: inparg, argname
   CHARACTER (LEN=23) ::  Project, Case
 
-  namelist /INITGRIDGRID/ IMT, JMT, KM, LBT, NEND
+  namelist /INITGRIDGRID/  IMT, JMT, KM, LBT, NEND
   namelist /INITGRIDNTRAC/ NTRACMAX
-  namelist /INITGRIDDATE/ yearmin, yearmax
-  namelist /INITGRIDTIME/ ngcm, iter, intmax
-  namelist /INITGRIDARC/ arcscale
+  namelist /INITGRIDDATE/  yearmin, yearmax
+  namelist /INITGRIDTIME/  ngcm, iter, intmax
+  namelist /INITGRIDARC/   arcscale
   
-  namelist /INITRUNTIME/ intmin, intspin, intrun, intstep 
-  namelist /INITRUNDATE/  ihour, iday, imon, iyear
-  namelist /INITRUNWRITE/ ncoor, kriva, directory, name
-  namelist /INITRUNSEED/ nff ,isec ,idir ,nqua ,partQuant ,seedType &
-       ,kst1 ,kst2 ,ist1 ,ist2 ,jst1 ,jst2 ,kst1 ,kst2 &
-       ,varSeedName ,seedFile
-  namelist /INITGRIDDESC/ GCMname,GCMsource,gridName,gridSource,gridDesc  
+  namelist /INITRUNTIME/   intmin, intspin, intrun, intstep 
+  namelist /INITRUNDATE/   ihour, iday, imon, iyear
+  namelist /INITRUNWRITE/  ncoor, kriva ,inDataDir ,outDataDir ,name
+  namelist /INITRUNSEED/   nff ,isec ,idir ,nqua ,partQuant ,seedType &
+                          ,ist1 ,ist2 ,jst1 ,jst2 ,kst1 ,kst2 &
+                          ,varSeedFile ,seedDir ,seedFile
+  namelist /INITGRIDDESC/  GCMname,GCMsource,gridName,gridSource &
+                          ,gridDesc  
   namelist /INITRUNDESC/  caseName ,caseDesc  
 #ifdef tempsalt
   namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
