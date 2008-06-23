@@ -3,7 +3,7 @@
   caseDesc     = 'Looking at chl growth in lagrangian space'/
  &INITRUNTIME
   ! === Number of initial datasets
-  intmin       = 1,
+  intmin       = 114,
   !
   ! === Trajectory release period (timesteps)
   intspin      = 5,  !10*365/5
@@ -44,11 +44,14 @@
   !                 5 = write at chosen intervals
   kriva        = 1,
   !
-  ! === Name of directory where input fields are stored
-  directory    = '/Volumes/t2klumpen/projData/jplSCB/',
+  ! === Directory where input fields are stored
+  inDataDir    = '/Volumes/t2klumpen/projData/jplSCB/',
+  !
+  ! === Directory where output files are saved
+  outDataDir   = '/Users/bror/orm/',
   !
   ! === Name of current trajectory run
-  name         = 'multcolTest'/ 
+  name         = 'jplSCBpartsat'/ 
   !
   ! === Name of rerun file
   !namep       = 'op.fw.n0'
@@ -75,9 +78,9 @@
   ! === Number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
   !                     (partQuant in # particles / gridcell)
-  !                 2 = Each particle reflects water flux at seeding. 
+  !                 2 = Each particle reflects flux at seeding. 
   !                     (partQuant in m3s-1. per particle)
-  !                 3 = Each particle reflects water volume at seeding.
+  !                 3 = Each particle reflects volume at seeding.
   !                     (partQuant in m3 per particle)
   !                 4 = Set number of particles in seed file.
   !                     (partQuant is not used)
@@ -86,12 +89,12 @@
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
   partQuant= 2,     
   !
-  !-------- initial directions all in MODEL COORDINATES -----------------
+  ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
-  !                 2 = Use a list file to define which cells to seed.
+  !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 1, 
+  SeedType = 2, 
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
@@ -106,11 +109,12 @@
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 2 or 3:
-  ! === Use variable seed file name
-  varSeedName  = 1,
+  ! === Use variable seed file name ( constructed as
+  !     /seedpath/seed0000.asc where 0000 is intstart.)
+  varSeedFile  = 1,
+  seedDir      = '/Users/bror/svn/orm/trunk/jplSCB/seedDir',
   !
   ! === Seed filename (or beginning of it)
-  !seedFile     = '/Users/bror/svn/orm/trunk/gomoos/seedfiles/seed0974.asc'/
   seedFile     = '/Users/bror/maskust'/
 
 

@@ -75,7 +75,7 @@ SUBROUTINE readfields
  
   call  gdate (jdbase+intpart2 ,yr1 ,mn1 ,dy1)
   write (dstamp(10:17),'(i4i2.2i2.2)') yr1,mn1,dy1
-  dataprefix  = trim(directory) // '/ROMS/' // dstamp
+  dataprefix  = trim(inDataDir) // '/ROMS/' // dstamp
   tpos        = intpart1+1
   
   ! === initialise ===

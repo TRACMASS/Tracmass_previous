@@ -1,7 +1,7 @@
 
 MODULE mod_param
   INTEGER  :: IMT, JMT, KM, JMAX, LBT, NTRACMAX
-  !__________________________  OCCAM ____________________________________
+  ! ===   OCCAM  === 
 !!$#if defined occ66
 !!$#ifdef mod1
 !!$  INTEGER, PARAMETER ::  IMT1=1440,JMT1=577
@@ -16,7 +16,7 @@ MODULE mod_param
 !!$#endif
 !!$  
 !!$  
-!!$  !__________________________  SKB ______________________________________
+!!$  ! ===   SKB  === 
 !!$#ifdef simp
 !!$  INTEGER, PARAMETER :: IMT=174, JMT=121
 !!$#endif
@@ -28,13 +28,13 @@ MODULE mod_param
 !!$  INTEGER, PARAMETER ::  NTRACMAX=1*100*1000
 !!$#endif
 !!$  
-!!$  !__________________________  TEST ______________________________________
+!!$  ! ===   TEST  === 
 !!$#if defined tes
 !!$  !INTEGER, PARAMETER :: IMT=225,JMT=IMT,KM=10,JMAX=JMT,LBT=4
 !!$  INTEGER, PARAMETER :: IMT=105,JMT=IMT,KM=10,JMAX=JMT,LBT=4
 !!$  INTEGER, PARAMETER :: NTRACMAX=10000
 !!$#endif
-!!$  !__________________________  TUNIS-ROMS ________________________________
+!!$  ! ===   TUNIS-ROMS  === 
 !!$#if defined tun
 !!$  INTEGER, PARAMETER ::  (IMT=249,JMT=258,KM=20,JMAX=JMT,LBT=4)
 !!$  INTEGER, PARAMETER ::  NTRACMAX=100000
@@ -129,7 +129,8 @@ ENDMODULE mod_turb
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_name
   CHARACTER(LEN=8)                           :: name,namep
-  CHARACTER(LEN=200)                         :: directory ,projDesc
+  CHARACTER(LEN=200)                         :: inDataDir ,outDataDir
+  CHARACTER(LEN=200)                         :: projDesc
   CHARACTER(LEN=200)                         :: GCMname   ,GCMsource
   CHARACTER(LEN=200)                         :: gridName  ,gridSource
   CHARACTER(LEN=200)                         :: gridDesc
@@ -139,10 +140,11 @@ ENDMODULE mod_name
 MODULE mod_seed
   INTEGER                                    :: nff,isec,idir,nqua,num
   INTEGER                                    :: ijk  ,ijkMax
-  INTEGER                                    :: seedType ,varSeedName 
+  INTEGER                                    :: seedType ,varSeedFile 
   INTEGER                                    :: ist1 ,ist2   ,jst1 ,jst2
   INTEGER                                    :: kst1, kst2
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ijkst
+  CHARACTER(LEN=200)                         :: seedDir
   CHARACTER(LEN=200)                         :: seedFile
 ENDMODULE mod_seed
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

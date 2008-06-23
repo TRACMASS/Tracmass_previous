@@ -15,7 +15,6 @@ INTEGER i,j,n
 call init_params
 call coordinat
 call writesetup
-call init_seed
 
 
 !do i=1,ijkMax
@@ -35,6 +34,8 @@ elseif(intstep.lt.0) then ! backward
    intrun  =-intrun    
 end if modrundirCond
 
+call init_seed
+
 if(nqua.eq.1) then ! number of trajectories (per time resolution)
    ! num=NTRACMAX
    num=partQuant
@@ -44,15 +45,27 @@ elseif(nqua.eq.3) then
    voltr=partQuant
 endif
 
-if(kriva.ne.0) open(56,file='/Users/bror/orm/traj.'//name) ! trajectory path
-open(57,file='/Users/bror/orm/traj.ut.'//name)             ! exit position
-open(58,file='/Users/bror/orm/traj.in.'//name)             ! entrence position
+#if defined textwrite
+if(kriva.ne.0) then 
+   open(56,file=trim(outDataDir)//name//'_run.asc') ! trajectory path
+end if
+open(57,file=trim(outDataDir)//name//'_out.asc')    ! exit position
+open(58,file=trim(outDataDir)//name//'__in.asc')    ! entrence position
+#endif
 
 
-!??????????????????????????????????? END ???????????????????????????????
+#if defined binwrite
+if(kriva.ne.0) then 
+   open(76,file=trim(outDataDir)//name//'_run.bin' & ! trajectory path
+        ,access='sequential' ,form='unformatted')
+end if
+open(77,file=trim(outDataDir)//name//'_out.bin'    & ! exit position
+     ,access='sequential' ,form='unformatted')
+open(78,file=trim(outDataDir)//name//'__in.bin'    & ! entrence position
+     ,access='sequential' ,form='unformatted')
+#endif
 
-! trajectory loops 
-
+! === Start main loop ===
 call loop
 
 

@@ -72,7 +72,7 @@ subroutine loop
   iyear0=iyear
   ! === print some run stats ===
   
-  print *,'writes trajectories in:      ' ,directory
+  print *,'writes trajectories in:' ,trim(outDataDir)
   print *,'Interpolation steps in time (iter): ' ,iter
   
   print 999,name,intstart,intspin,intend,intrun,nff,isec,idir,nqua,num,voltr,&
@@ -125,7 +125,7 @@ subroutine loop
   !==========================================================
   
 #ifdef rerun
-  open(67,file=directory//'orm/traj.ut.'//namep)
+  open(67,file=trim(outDataDir)//name//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,n,rlon,rlat,zz
   !if(n.ne.1)       print 566,ntrac,n,rlon,rlat,zz
@@ -1128,83 +1128,119 @@ return
 566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
          ,f13.8,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
-
-   xf   = floor(x1)
-   yf   = floor(y1)
-   zf   = floor(z1)
-   
-   vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
-          (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
-
-   select case (sel)
-   case (10)
-      write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol &
-           ,temp,salt,dens
-   case (11)
-      if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
-           (scrivi .and. kriva.eq.2)                .or. &
-           (kriva.eq.3)                             .or. &
-           (kriva.eq.4 .and. niter.eq.1)            .or. &
-           (kriva.eq.5 .and. &
-           (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
-           .or.tt-t0.eq.21.*tday)) ) then
-         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+    
+    xf   = floor(x1)
+    yf   = floor(y1)
+    zf   = floor(z1)
+    
+    vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
+         (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
+    
+#if defined textwrite 
+    select case (sel)
+    case (10)
+       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol &
+            ,temp,salt,dens
+    case (11)
+       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
+            (scrivi .and. kriva.eq.2)                .or. &
+            (kriva.eq.3)                             .or. &
+            (kriva.eq.4 .and. niter.eq.1)            .or. &
+            (kriva.eq.5 .and. &
+            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
+            .or.tt-t0.eq.21.*tday)) ) then
+          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
 #if defined biol
-         write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
+          write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
-         !write(56,566) ntrac,ints,x1,y1,z1, & 
-         ! tt/tday,t0/tday,subvol,temp,salt,dens,arct
-         write(56,566) ntrac,ints,x1,y1,z1, &
-              uvel(xf,yf,zf),vvel(xf,yf,zf) &
-              ,vort,temp,salt,dens,arct
+          !write(56,566) ntrac,ints,x1,y1,z1, & 
+          ! tt/tday,t0/tday,subvol,temp,salt,dens,arct
+          write(56,566) ntrac,ints,x1,y1,z1, &
+               uvel(xf,yf,zf),vvel(xf,yf,zf) &
+               ,vort,temp,salt,dens,arct
 #endif        
-      endif
-   case (13)
-      ! === write sed pos ===
-      write(57,566) ntrac,niter,x1,y1,z1, &
-           tt/tday,t0/tday,subvol,temp,salt,dens 
-   case (14)
-      write(56,566) ntrac,ints,x1,y1,z1, &
-      tt/60.,t0/3600.,subvol,temp,salt,dens,arct
-   case (15)
-      write(57,566) ntrac,ints,x1,y1,z1, &
-           tt/tday,t0/tday,subvol,temp,salt,dens
-   case (16)
-      if(kriva.ne.0 ) then
-         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-         write(56,566) ntrac,ints,x1,y1,z1, &
-              tt/tday,t0/tday,subvol,temp,salt,dens,arct
-      end if
-   case (17)
-      write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-           ,temp,salt,dens  
-   case (18)
-      if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
-           ints.eq.intstart+intrun) then 
-         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-         !write(56,566) ntrac,ints,x1,y1,z1, &
-         !tt/tday,t0/tday,subvol,temp,salt,dens,arct
-         write(56,566) ntrac,ints,x1,y1,z1, & 
-              uvel(xf,yf,zf),vvel(xf,yf,zf),vort,temp,salt,dens,arct
-         ! write(56,566) ntrac,niter,x1,y1,z1,tt/3600.,t0/3600.
-         !,subvol,temp,salt,dens,arct
-      endif
-   case (19)
-      ! === write last sedimentation positions ===
-      open(34,file=directory//'orm/traj.utsed.'//name) 
-      do n=1,ntracmax
-         if(nrj(n,1).ne.0) then
-            write(34,566) n,nrj(n,4),trj(n,1),trj(n,2), & 
-                 trj(n,3),trj(n,4)/tday,trj(n,7)/tday
-         endif
-      enddo
-      close(34)
-   end select
+       endif
+    case (13)
+       ! === write sed pos ===
+       write(57,566) ntrac,niter,x1,y1,z1, &
+            tt/tday,t0/tday,subvol,temp,salt,dens 
+    case (14)
+       write(56,566) ntrac,ints,x1,y1,z1, &
+            tt/60.,t0/3600.,subvol,temp,salt,dens,arct
+    case (15)
+       write(57,566) ntrac,ints,x1,y1,z1, &
+            tt/tday,t0/tday,subvol,temp,salt,dens
+    case (16)
+       if(kriva.ne.0 ) then
+          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+          write(56,566) ntrac,ints,x1,y1,z1, &
+               tt/tday,t0/tday,subvol,temp,salt,dens,arct
+       end if
+    case (17)
+       write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
+            ,temp,salt,dens  
+    case (18)
+       if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
+            ints.eq.intstart+intrun) then 
+          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+          !write(56,566) ntrac,ints,x1,y1,z1, &
+          !tt/tday,t0/tday,subvol,temp,salt,dens,arct
+          write(56,566) ntrac,ints,x1,y1,z1, & 
+               uvel(xf,yf,zf),vvel(xf,yf,zf),vort,temp,salt,dens,arct
+          ! write(56,566) ntrac,niter,x1,y1,z1,tt/3600.,t0/3600.
+          !,subvol,temp,salt,dens,arct
+       endif
+    case (19)
+       ! === write last sedimentation positions ===
+       open(34,file=trim(outDataDir)//name//'_sed.asc') 
+       do n=1,ntracmax
+          if(nrj(n,1).ne.0) then
+             write(34,566) n,nrj(n,4),trj(n,1),trj(n,2), & 
+                  trj(n,3),trj(n,4)/tday,trj(n,7)/tday
+          endif
+       enddo
+       close(34)
+    end select
+#endif    
+#if defined binwrite 
+    select case (sel)
+    case (10)
+       write(78) ntrac,ints,x1,y1,z1
+    case (11)
+       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
+            (scrivi .and. kriva.eq.2)                .or. &
+            (kriva.eq.3)                             .or. &
+            (kriva.eq.4 .and. niter.eq.1)            .or. &
+            (kriva.eq.5 .and. &
+            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
+            .or.tt-t0.eq.21.*tday)) ) then
+          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+          write(76) ntrac,ints,x1,y1,z1
+       end if
+    case (13)
+       write(77) ntrac,ints,x1,y1,z1
+    case (14)
+       write(76) ntrac,ints,x1,y1,z1
+    case (15)
+       write(76) ntrac,ints,x1,y1,z1
+    case (16)
+       if(kriva.ne.0 ) then
+          write(76) ntrac,ints,x1,y1,z1
+       end if
+    case (17)
+       write(77) ntrac,ints,x1,y1,z1
+    case (18)
+       if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
+            ints.eq.intstart+intrun) then 
+          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+          write(76) ntrac,ints,x1,y1,z1
+       endif
+       !case (19)
+    end select
+#endif    
 
- end subroutine writedata
 
-
-
-
+  end subroutine writedata
+  
 end subroutine loop
 
