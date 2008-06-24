@@ -5,7 +5,7 @@
 #------------------------------------------------------------------------
   fl01   = -Dmean           #
   fl02   = -Dtempsalt       # Include temp and salt
-  fl03   = -Dtextwrite      # Write results to textfile
+#  fl03   = -Dtextwrite      # Write results to textfile
   fl04   = -Dbinwrite       # Write results to binaryfile
 #  fl05   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------

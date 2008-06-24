@@ -62,18 +62,26 @@ subroutine init_seed()
            ijkMax=ijkMax+1
         end do findRecl
         allocate (ijkst(ijkMax,6))
-        
-        
+           
         rewind(34)
         read_ijkst: do ijk=1,ijkMax
            read (unit=34, fmt=ijkform) ijkst(ijk,1), ijkst(ijk,2), &
                 ijkst(ijk,3),  ijkst(ijk,4),  ijkst(ijk,5), ijkst(ijk,6)
+
+
+           ijkst(ijk,4)=idir
+           ijkst(ijk,5)=isec
+           ijkst(ijk,6)=-1
+           
         end do read_ijkst
         
         print *,'File name    : '//trim(fullSeedFile)
         print *,'Seed size    : ', ijkMax
      end if chFile
      
+
+
+
   case (3) ! === 2-D Matrix method ===
      allocate ( seedMask(imt ,jmt) )
      if (varSeedFile == 1) then
