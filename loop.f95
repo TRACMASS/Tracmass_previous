@@ -198,7 +198,7 @@ subroutine loop
         ijkstloop: do ijk=1,ijkMax
            ist  = ijkst(ijk,1)
            jst  = ijkst(ijk,2)
-           kst  = ijkst(ijk,3)
+           kst  = 20!ijkst(ijk,3)
            idir = ijkst(ijk,4)
            isec = ijkst(ijk,5)
            vol  = 0
@@ -1118,6 +1118,9 @@ return
   subroutine writedata(sel)
     REAL                                 :: vort
     INTEGER                              :: sel ,xf ,yf ,zf ,n
+    INTEGER, SAVE                        :: recPosIn=0  ,recPosOut=0
+    INTEGER, SAVE                        :: recPosRun=0 ,recPosErr=0
+    REAL                                 :: x14 ,y14 ,z14
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -1203,9 +1206,14 @@ return
     end select
 #endif    
 #if defined binwrite 
-    select case (sel)
+    x14=real(x1,kind=4)
+    y14=real(y1,kind=4)
+    z14=real(z1,kind=4)
+
+    select case (sel)       
     case (10)
-       write(78) ntrac,ints,x1,y1,z1
+       recPosIn = recPosIn+1
+       write(unit=78 ,rec=recPosIn) ntrac,ints,x14,y14,z14
     case (11)
        if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
             (scrivi .and. kriva.eq.2)                .or. &
@@ -1215,29 +1223,74 @@ return
             (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
             .or.tt-t0.eq.21.*tday)) ) then
           call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-          write(76) ntrac,ints,x1,y1,z1
+         recPosRun = recPosRun+1
+          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14       
        end if
     case (13)
-       write(77) ntrac,ints,x1,y1,z1
+       recPosOut = recPosOut+1
+       write(unit=77 ,rec=recPosOut) ntrac,ints,x14,y14,z14   
     case (14)
-       write(76) ntrac,ints,x1,y1,z1
+       recPosRun = recPosRun+1
+       write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
     case (15)
-       write(76) ntrac,ints,x1,y1,z1
+       recPosRun = recPosRun+1
+       write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
     case (16)
        if(kriva.ne.0 ) then
-          write(76) ntrac,ints,x1,y1,z1
+          recPosRun = recPosRun+1
+          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
        end if
     case (17)
-       write(77) ntrac,ints,x1,y1,z1
+       recPosOut = recPosOut+1
+       write(unit=77 ,rec=recPosOut) ntrac,ints,x14,y14,z14   
     case (18)
        if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
             ints.eq.intstart+intrun) then 
           call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-          write(76) ntrac,ints,x1,y1,z1
+          recPosRun = recPosRun+1
+          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
        endif
        !case (19)
     end select
 #endif    
+
+
+!!$#if defined binwrite 
+!!$    select case (sel)
+!!$    case (10)
+!!$       write(78) ntrac,ints,x1,y1,z1
+!!$    case (11)
+!!$       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
+!!$            (scrivi .and. kriva.eq.2)                .or. &
+!!$            (kriva.eq.3)                             .or. &
+!!$            (kriva.eq.4 .and. niter.eq.1)            .or. &
+!!$            (kriva.eq.5 .and. &
+!!$            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
+!!$            .or.tt-t0.eq.21.*tday)) ) then
+!!$          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+!!$          write(76) ntrac,ints,x1,y1,z1
+!!$       end if
+!!$    case (13)
+!!$       write(77) ntrac,ints,x1,y1,z1
+!!$    case (14)
+!!$       write(76) ntrac,ints,x1,y1,z1
+!!$    case (15)
+!!$       write(76) ntrac,ints,x1,y1,z1
+!!$    case (16)
+!!$       if(kriva.ne.0 ) then
+!!$          write(76) ntrac,ints,x1,y1,z1
+!!$       end if
+!!$    case (17)
+!!$       write(77) ntrac,ints,x1,y1,z1
+!!$    case (18)
+!!$       if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
+!!$            ints.eq.intstart+intrun) then 
+!!$          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+!!$          write(76) ntrac,ints,x1,y1,z1
+!!$       endif
+!!$       !case (19)
+!!$    end select
+!!$#endif    
 
 
   end subroutine writedata

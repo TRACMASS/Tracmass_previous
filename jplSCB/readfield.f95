@@ -138,6 +138,9 @@ SUBROUTINE readfields
 
   endif initCond   ! === End init section ===
 
+  print *,dataprefix
+
+
   start2d   = [    1,   1, tpos,    1]
   count2d   = [imt  , jmt,    1,    1] 
   start3d   = [    1,   1,    1, tpos]
@@ -154,6 +157,7 @@ SUBROUTINE readfields
   where (uvel .eq. -9999) uvel=0
   where (vvel .eq. -9999) vvel=0
   where (ssh  .eq. -9999)  ssh=0
+
 !!$  gridfile = '/Users/bror/KAB042j_5d_' // trim(fstamp) // '_sigma.nc'
 !!$  ncvar    = 'sigma'
 !!$  fieldr   = get3dfield()
@@ -221,7 +225,6 @@ SUBROUTINE readfields
   !    ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
   ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
   ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###  
-
 
 
 

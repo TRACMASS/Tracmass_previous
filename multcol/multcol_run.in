@@ -3,32 +3,22 @@
   caseDesc     = 'Looking at chl growth in lagrangian space'/
  &INITRUNTIME
   ! === Number of initial datasets
-  intmin       = 114,
+  intmin       = 8126,
   !
   ! === Trajectory release period (timesteps)
   intspin      = 5,  !10*365/5
   !
   ! === Trajectory run
-  intrun       = 1000,  !1000*365/5-1,
+  intrun       = 100,  !1000*365/5-1,
   !
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
  &INITRUNDATE
-  ! === Reference basetime for the velocity field. 
-  !baseHour          = 0,
-  !baseDay           = 13,
-  !baseMon           = 9,
-  !baseYear          = 2007/
-  ! === Start time for this run
-  !startHour         = 0,
-  !startDay          = 1,
-  !startMon          = 1,
-  !startYear         = 2001/
-  ihour          = 0,
-  iday           = 17,
-  imon           = 9,
-  iyear          = 2007/
+  ihour        = 0,		! Always zero for orca
+  iday         = -8,
+  imon         = 7,
+  iyear        = 1990/
   !
   !
   &INITRUNWRITE
@@ -44,14 +34,11 @@
   !                 5 = write at chosen intervals
   kriva        = 1,
   !
-  ! === Directory where input fields are stored
-  inDataDir    = '/Volumes/t2klumpen/projData/jplSCB/',
-  !
-  ! === Directory where output files are saved
-  outDataDir   = '/Users/bror/orm/',
+  ! === Name of directory where the files will be written
+  directory    = '/Volumes/t2klumpen/projData/multcol/',
   !
   ! === Name of current trajectory run
-  name         = 'jplSCBpartsat'/ 
+  name         = 'multcolTest'/ 
   !
   ! === Name of rerun file
   !namep       = 'op.fw.n0'
@@ -73,14 +60,14 @@
   ! idir:           1 = follow positive direction (eastward/northward)  
   !                -1 = follow negative direction (westward/southward)
   !                 0 = both directions
-  idir         = 1,
+  idir         = 0,
   !
   ! === Number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
   !                     (partQuant in # particles / gridcell)
-  !                 2 = Each particle reflects flux at seeding. 
+  !                 2 = Each particle reflects water flux at seeding. 
   !                     (partQuant in m3s-1. per particle)
-  !                 3 = Each particle reflects volume at seeding.
+  !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   !                 4 = Set number of particles in seed file.
   !                     (partQuant is not used)
@@ -89,34 +76,32 @@
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
   partQuant= 2,     
   !
-  ! === initial directions all in MODEL COORDINATES ===
+  !-------- initial directions all in MODEL COORDINATES -----------------
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
-  !                 2 = Use a list to define which cells to seed.
+  !                 2 = Use a list file to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 2, 
+  SeedType = 3, 
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 30,		 
-  ist2         = 40,			  
-  jst1         = 30,		 
-  jst2         = 40,		 
-  kst1         = 20,		 
-  kst2         = 24,
+  ist1         = 50,		 
+  ist2         = 60,			  
+  jst1         = 50,		 
+  jst2         = 60,		 
+  kst1         = 24,		 
+  kst2         = 30,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 2 or 3:
-  ! === Use variable seed file name ( constructed as
-  !     /seedpath/seed0000.asc where 0000 is intstart.)
-  varSeedFile  = 1,
-  seedDir      = '/Users/bror/svn/orm/trunk/jplSCB/seedDir',
+  ! === Use variable seed file name
+  varSeedName  = 1,
   !
   ! === Seed filename (or beginning of it)
+  !seedFile     = '/Users/bror/svn/orm/trunk/gomoos/seedfiles/seed0974.asc'/
   seedFile     = '/Users/bror/maskust'/
-
 
 
   $INITRUNTEMPSALT
@@ -141,23 +126,8 @@
 $INITRUNEND
 ! defining end sections
 ! testar detta
-  ienw(1) =   1,
-  iene(1) =   2,
-  jens(1) =   1,
-  jenn(1) = 211,
-!
-  ienw(2) = 110,
-  iene(2) = 111,
-  jens(2) =   1,
-  jenn(2) = 211,
-!
-  ienw(3) =   1,
-  iene(3) = 111,
-  jens(3) =   1,
-  jenn(3) =   2,
-
-  ienw(4) =   1,
-  iene(4) = 111,
-  jens(4) = 210,
-  jenn(4) = 211,
+  ienw =   451,
+  iene =   641,
+  jens =     0,
+  jenn =     1,
   timax =  36500./  ! maximum time length of a trajectory in days
