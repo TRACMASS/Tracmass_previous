@@ -1,8 +1,14 @@
+  &INITGRIDDESC
+   GCMname    = 'MITgcm',
+   GCMsource  = 'http://mitgcm.org/',
+   gridName   = 'eccoSOSE',
+   gridSource = 'http://www.mit.edu/%7Emmazloff/SOSE.html',
+   gridDesc   = '1/6 deg run for the Sourhern Ocean with data ass.'/
+
 $INITGRIDGRID
   IMT      = 2160,
   JMT      = 320,
   KM       = 42,
-  JMAX     = 320,
   LBT      = 5,
   NEND     = 6/              ! NEND = LBT +1
 
@@ -21,4 +27,4 @@ $INITGRIDDATE
 
 $INITGRIDARC
    arcscale    = 0.001/                  ! orig arc meters -> km
-!  arcscale    = 0.00001/                ! orig arc meters -> 100 km  occ66 || ifs
+!  arcscale    = 0.00001/                ! orig arc meters -> 100 km 

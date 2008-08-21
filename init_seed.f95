@@ -43,8 +43,8 @@ subroutine init_seed()
   case (2) ! === seedlist method ===   
      print *,'------------------------------------------------------'
      if (varSeedFile == 1) then
-        fileStamp='/seed0000.asc'
-        write (fileStamp(6:9),'(i4.4)') intstart
+        fileStamp='/seed00000000.asc'
+        write (fileStamp(6:13),'(i8.8)') intstart
         fullSeedFile=trim(seedDir) // trim(fileStamp)
         print *,'===  Particles are seeded from a dynamic listfile  ==='
      else
@@ -77,6 +77,13 @@ subroutine init_seed()
         
         print *,'File name    : '//trim(fullSeedFile)
         print *,'Seed size    : ', ijkMax
+     else
+        print *,'======================================================'
+        print *,'*** ERROR!                                         ***'
+        print *,'*** Seed files does not exisit                     ***' 
+        print *,'File name    : '//trim(fullSeedFile)
+        print *,'*** Run terminated.                                ***'
+        stop
      end if chFile
      
 

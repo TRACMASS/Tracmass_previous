@@ -79,14 +79,14 @@ INTEGER ib,jb,kb
 logical res 
 
  
-surfvel=sqrt( ((v(ib,jb,km,1)+v(ib,jb-1,km,1))/(2*dx*deg*cst(jb)*dz(km)))**2+ &
-              ((u(ib,jb,km,1)+u(ib-1,jb,km,1))/(2*dy*deg*        dz(km)))**2)
+surfvel=sqrt( ((vflux(ib,jb,km,1)+vflux(ib,jb-1,km,1))/(2*dx*deg*cst(jb)*dz(km)))**2+ &
+              ((uflux(ib,jb,km,1)+uflux(ib-1,jb,km,1))/(2*dy*deg*        dz(km)))**2)
 !alpha=cwamp*surfvel
 !uorb=orb(41-kb)*alpha
 uorb=orb(km+1-kb)*cwamp*surfvel
 
-botvel=sqrt( ((v(ib,jb,kb,1)+v(ib,jb-1,kb,1))/(2*dx*deg*cst(jb)*dz(kb)))**2+ &
-             ((u(ib,jb,kb,1)+u(ib-1,jb,kb,1))/(2*dy*deg*        dz(kb)))**2)
+botvel=sqrt( ((vflux(ib,jb,kb,1)+vflux(ib,jb-1,kb,1))/(2*dx*deg*cst(jb)*dz(kb)))**2+ &
+             ((uflux(ib,jb,kb,1)+uflux(ib-1,jb,kb,1))/(2*dy*deg*        dz(kb)))**2)
 
 ! 549  format(f9.7 ,'  ',f9.7,' ',f9.7,'  ',f9.7,' ',i8)
 !       write(548,549) surfvel,botvel,uorb,wsed,kb

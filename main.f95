@@ -9,8 +9,9 @@ USE mod_buoyancy
 
 IMPLICIT none
 
-INTEGER i,j,n
-
+INTEGER                                    :: i,j,n
+CHARACTER(LEN=200)                         :: fullWritePref
+CHARACTER(LEN=8)                           :: WriteStamp
 
 call init_params
 call coordinat
@@ -45,37 +46,38 @@ elseif(nqua.eq.3) then
    voltr=partQuant
 endif
 
-#if defined textwrite
-if(kriva.ne.0) then 
-   open(56,file=trim(outDataDir)//name//'_run.asc') ! trajectory path
+writeStamp='00000000'
+write (writeStamp,'(i8.8)') intstart
+
+
+
+if (intminInOutFile.eq.1) then
+   fullWritePref =  trim(outDataDir)//trim(outDataFile)//writeStamp
+else
+   fullWritePref =  trim(outDataDir)//trim(outDataFile)
 end if
-open(57,file=trim(outDataDir)//name//'_out.asc')    ! exit position
-open(58,file=trim(outDataDir)//name//'__in.asc')    ! entrence position
+
+#if defined textwrite
+open(56,file=trim(fullWritePref)//'_run.asc')       ! trajectory path
+open(57,file=trim(fullWritePref)//'_out.asc')       ! exit position
+open(58,file=trim(fullWritePref)//'__in.asc')       ! entrance position
 #endif
 
 #if defined binwrite
-if(kriva.ne.0) then 
-   open(76,file=trim(outDataDir)//name//'_run.bin' &   ! trajectory path
-        ,access='direct' ,form='unformatted' ,recl=20) !
-end if
-open(77,file=trim(outDataDir)//name//'_out.bin'    &   ! exit position
-     ,access='direct' ,form='unformatted' ,recl=20)    !
-open(78,file=trim(outDataDir)//name//'__in.bin'    &   ! entrence position
-     ,access='direct' ,form='unformatted' ,recl=20)    !
+open(76,file=trim(fullWritePref)//'_run.bin' &      ! trajectory path
+     ,access='direct' ,form='unformatted' ,recl=20) !
+open(77,file=trim(fullWritePref)//'_out.bin'    &   ! exit position
+     ,access='direct' ,form='unformatted' ,recl=20) !
+open(78,file=trim(fullWritePref)//'__in.bin'    &   ! entrance position
+     ,access='direct' ,form='unformatted' ,recl=20) !
+open(79,file=trim(fullWritePref)//'_err.bin'    &   ! Error flagged trajs 
+     ,access='direct' ,form='unformatted' ,recl=20) ! 
 #endif
 
-!!$#if defined binwrite
-!!$if(kriva.ne.0) then 
-!!$   open(76,file=trim(outDataDir)//name//'_run.bin' & ! trajectory path
-!!$        ,access='sequential' ,form='unformatted')
-!!$end if
-!!$open(77,file=trim(outDataDir)//name//'_out.bin'    & ! exit position
-!!$     ,access='sequential' ,form='unformatted')
-!!$open(78,file=trim(outDataDir)//name//'__in.bin'    & ! entrence position
-!!$     ,access='sequential' ,form='unformatted')
-!!$#endif
+
 
 ! === Start main loop ===
+
 call loop
 
 
@@ -138,7 +140,7 @@ CONTAINS
     print *,'Description : '//trim(caseDesc)
     print *,'------------------------------------------------------'
 #if defined tempsalt
-    print *,'with temperature and salinity fields'
+    print *,'Temperature and salinity fields included'
 #endif
 #if defined turb
     print *,'with sub-grid turbulence parameterisation'
@@ -149,6 +151,15 @@ CONTAINS
 #if defined twodim                                             
     print *,'Two-dimensional trajectory, which do not change depth'
 #endif
+#if defined full_wflux
+    print *,' 3D   vertival volume flux field.'
+#endif
+#if defined explicit_w
+    print *,'Given vertical velocity.'
+#endif
+
+
+
 #if defined streamxy
     print *,'Lagrangian horizontal stream function stored'
 #endif

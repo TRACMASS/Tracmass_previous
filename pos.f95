@@ -36,8 +36,8 @@ if(ijk.eq.1) then
  ii=ia
  im=ia-1
  if(ii.eq.0) im=IMT
- uu=(rg*u(ia,ja,ka,NST)+rr*u(ia,ja,ka,1))*ff
- um=(rg*u(im,ja,ka,NST)+rr*u(im,ja,ka,1))*ff
+ uu=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff
+ um=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff
 #ifdef turb    
  if(r0.ne.dble(ii)) then
   uu=uu+upr(1,2)  
@@ -52,8 +52,8 @@ if(ijk.eq.1) then
 #endif
 elseif(ijk.eq.2) then
  ii=ja
- uu=(rg*v(ia,ja  ,ka,NST)+rr*v(ia,ja  ,ka,1))*ff
- um=(rg*v(ia,ja-1,ka,NST)+rr*v(ia,ja-1,ka,1))*ff
+ uu=(rg*vflux(ia,ja  ,ka,NST)+rr*vflux(ia,ja  ,ka,1))*ff
+ um=(rg*vflux(ia,ja-1,ka,NST)+rr*vflux(ia,ja-1,ka,1))*ff
 #ifdef turb    
  if(r0.ne.dble(ja  )) then
   uu=uu+upr(3,2)  
@@ -68,8 +68,13 @@ elseif(ijk.eq.2) then
 #endif
 elseif(ijk.eq.3) then
  ii=ka
- uu=w(ka  )
- um=w(ka-1)
+#ifdef full_wflux
+ uu=wflux(ia ,ja ,ka   ,1)
+ um=wflux(ia ,ja ,ka-1 ,1)
+#else
+ uu=wflux(ka  )
+ um=wflux(ka-1)
+#endif
 #ifdef turb    
  if(r0.ne.dble(ka  )) then
   uu=uu+upr(5,2)  
