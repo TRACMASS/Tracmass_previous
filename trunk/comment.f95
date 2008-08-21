@@ -15,15 +15,15 @@
 !                              velocity fields. JAOT Vol. 18, No. 6, 1092-1101.
 !
 ! Units in SI
-! u zonal transport in m3/s (zonal velocity * dy * dz)
-! v meridional transport in m3/s (meridional velocity * dx * dz)
+! uflux zonal transport in m3/s (zonal velocity * dy * dz)
+! vvlux meridional transport in m3/s (meridional velocity * dx * dz)
 ! h sea surface elevation in m
 ! grid coordinates in model index coordinates
 !
 ! the OGCM velocities are interpolated on a C-grid box in and multiplied by the box wall
 ! in order to have transports in m3/s in the zonal, meridional and vertical directions
 !
-!   ja  -------------------v(ia,ja)-------------------
+!   ja  -----------------vflux(ia,ja)-----------------
 !       |                                            |
 !       |                                            |
 !       |                                            |
@@ -33,7 +33,7 @@
 !       |          *                                 |
 !       |                  *                         |
 !       |                         *                  |
-!   u(ia-1,ja)                x         *         u(ia,ja)
+!  uflux(ia-1,ja)                x         *         uflux(ia,ja)
 !       |                  h(ia,ja)         *        |
 !       |                                       *    |
 !       |                                          * |
@@ -43,14 +43,14 @@
 !       |                                            |
 !       |                                            |
 !       |                                            |
-!  ja-1 ------------------v(ia,ja-1)------------------
+!  ja-1 ----------------vflux(ia,ja-1)----------------
 !     ia-1                                          ia
 !
 ! Inside a grid box the zonal transport can be obtinaed by interpolating linearly
-! u(x)=u(ia-1)+(x-x(ia-1))(u(i)-u(ia-1))  where x is in model index coordinates
+! uflux(x)=uflux(ia-1)+(x-x(ia-1))(uflux(i)-uflux(ia-1))  where x is in model index coordinates
 ! Since u=dx/ds => dx/ds + beta*x + delta = 0  where 
-! beta=u(ia-1)-u(ia) 
-! delta=-u(ia-1)-beta*x(ia-1)
+! beta=uflux(ia-1)-uflux(ia) 
+! delta=-uflux(ia-1)-beta*x(ia-1)
 ! ds=dt/(dx*dy*dz) 
 !
 ! The differntial equation can be solved analytically with initial and boundary conditions

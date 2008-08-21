@@ -71,10 +71,61 @@ MODULE mod_coord
 ENDMODULE mod_coord
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
-  INTEGER ints,intstart,intend,intrun,intspin,intstep,intmin,intmax
-  INTEGER iyear,imon,iday,ihour,iyear0,imon0,iday0,yearmin,yearmax
-  INTEGER*8 ntime
+  INTEGER                                   :: ints      ,intstart ,intend
+  INTEGER                                   :: intrun    ,intspin  ,intstep
+  INTEGER                                   :: intmin    ,intmax
+  INTEGER                                   :: baseYear  ,baseMon  ,baseDay
+  INTEGER                                   :: baseHour  ,baseMin  ,baseSec
+  INTEGER                                   :: startYear ,startMon ,startDay
+  INTEGER                                   :: startHour ,startMin ,startSec
+  INTEGER                                   :: iyear     ,imon     ,iday ,ihour
+  INTEGER                                   :: iyear0    ,imon0    ,iday0 
+  INTEGER                                   :: yearmin   ,yearmax
+  INTEGER*8                                 :: ntime
+  INTEGER                                   :: currJD ,startJD ,baseJD
+
+CONTAINS
+  subroutine gdate (jd, year,month,day)
+    !                                                                      
+    !---computes the gregorian calendar date (year,month,day)              
+    !   given the julian date (jd).                                        
+    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
+    INTEGER                                  :: jd ,year ,month ,day
+    INTEGER                                  :: i ,j ,k ,l ,n
+    
+    l= jd+68569
+    n= 4*l/146097
+    l= l-(146097*n+3)/4
+    i= 4000*(l+1)/1461001
+    l= l-1461*i/4+31
+    j= 80*l/2447
+    k= l-2447*j/80
+    l= j/11
+    j= j+2-12*l
+    i= 100*(n-49)+i+l
+    
+    year= i
+    month= j
+    day= k
+    
+    return
+  end subroutine gdate
+
+  INTEGER function jdate (YEAR,MONTH,DAY)
+    !---COMPUTES THE JULIAN DATE (JD) GIVEN A GREGORIAN CALENDAR
+    !   DATE (YEAR,MONTH,DAY).
+    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
+    INTEGER                                  :: YEAR,MONTH,DAY,I,J,K
+    i     = year
+    j     = month
+    k     = day
+    jdate = K-32075+1461*(I+4800+(J-14)/12)/4+367*(J-2-(J-14)/12*12) &
+         /12-3*((I+4900+(J-14)/12)/100)/4
+    RETURN
+  end function jdate
+
 ENDMODULE mod_time
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
@@ -106,11 +157,14 @@ MODULE mod_domain
 ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: u,v
-  !REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: w
-  REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel 
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
+#ifdef full_wflux
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
+#else
+  REAL*8, ALLOCATABLE, DIMENSION(:)          :: wflux
+#endif
+  REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
-  REAL*8, ALLOCATABLE, DIMENSION(:)          :: w
   REAL*4, DIMENSION(6)                       :: rand
   REAL*8                                     :: ff
 ENDMODULE mod_vel
@@ -128,7 +182,8 @@ MODULE mod_turb
 ENDMODULE mod_turb
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_name
-  CHARACTER(LEN=8)                           :: name,namep
+  CHARACTER(LEN=200)                         :: outDataFile
+  INTEGER                                    :: intminInOutFile
   CHARACTER(LEN=200)                         :: inDataDir ,outDataDir
   CHARACTER(LEN=200)                         :: projDesc
   CHARACTER(LEN=200)                         :: GCMname   ,GCMsource

@@ -35,23 +35,27 @@ SUBROUTINE readfields
   REAL, SAVE, ALLOCATABLE, DIMENSION(:)     :: gridDRC ,gridDRF
   REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: gridDXC ,gridDXG
   REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: gridDYC ,gridDYG
-  REAL, DIMENSION(2)                        :: ttest1, ttest2
+  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: hFacW   ,hFacS
+  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: gridRAC
+  REAL, DIMENSION(2)                        :: ttest1  ,ttest2
   
   ! = Input fields from GCM
-  REAL,       ALLOCATABLE, DIMENSION(:,:,:) :: fieldx ,fieldy ,fieldw
+  !REAL,       ALLOCATABLE, DIMENSION(:,:,:) :: fieldx ,fieldy ,fieldw
  
   ! ===   ===   ===
   
   alloCondGrid: if(.not. allocated (gridDRC)) then
-     allocate ( gridDRC(km)      ,gridDRF(km)      )
-     allocate ( gridDXC(imt,jmt) ,gridDXG(imt,jmt) )
-     allocate ( gridDYC(imt,jmt) ,gridDYG(imt,jmt) )
+     allocate ( gridDRC(km)       ,gridDRF(km)       )
+     allocate ( gridDXC(imt,jmt)  ,gridDXG(imt,jmt)  )
+     allocate ( gridDYC(imt,jmt)  ,gridDYG(imt,jmt)  )
+     allocate ( gridRAC(imt,jmt)                     )
+     allocate ( hFacW(imt,jmt,km) ,hFacS(imt,jmt,km) )
   end if alloCondGrid
   
-  alloCondUVW: if(.not. allocated (fieldx)) then
-     allocate ( fieldx(imt,jmt,km) ,fieldy(imt,jmt,km) )
-     allocate ( fieldw(imt,jmt,km) )
-  end if alloCondUVW
+  !alloCondUVW: if(.not. allocated (fieldx)) then
+  !   allocate ( fieldx(imt,jmt,km) ,fieldy(imt,jmt,km) )
+  !   allocate ( fieldw(imt,jmt,km) )
+  !end if alloCondUVW
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
   call datasetswap !Copy field(t+1) to field(t).
@@ -73,13 +77,13 @@ SUBROUTINE readfields
   !print *,'ints=',ints,intstart
   initCond: if(ints.eq.intstart) then
      ! call coordinat
-     hs=0.
-     u=0.
-     v=0.
+     hs    = 0.
+     uflux = 0.
+     vflux = 0.
 #ifdef tempsalt
-     tem=0.
-     sal=0.
-     rho=0.
+     tem   = 0.
+     sal   = 0.
+     rho   = 0.
 #endif
      ndates=0
 
@@ -88,43 +92,45 @@ SUBROUTINE readfields
      ! ======================================================
      start1d  =  1
      count1d  = 42
-     gridfile = trim(directory) // '/GRID/' // 'DRC.data'
+     gridfile = trim(inDataDir) // '/GRID/' // 'DRC.data'
      gridDRC  = get1dfield()
-     gridfile = trim(directory) // '/GRID/' // 'DRF.data'
+     gridfile = trim(inDataDir) // '/GRID/' // 'DRF.data'
      gridDRF  = get1dfield()
      
      start2d  = [   1,  1]
      count2d  = [2160,320]
-     gridfile = trim(directory) // '/GRID/' // 'DXC.data'
+     start3d  = [   1,  1, 1]
+     count3d  = [2160,320,42]
+     gridfile = trim(inDataDir) // '/GRID/' // 'DXC.data'
      gridDXC  = get2dfield()
-     gridfile = trim(directory) // '/GRID/' // 'DXG.data'
+     gridfile = trim(inDataDir) // '/GRID/' // 'RAC.data'
+     gridRAC  = get2dfield()
+     gridfile = trim(inDataDir) // '/GRID/' // 'DXG.data'
      gridDXG  = get2dfield()
-     gridfile = trim(directory) // '/GRID/' // 'DYC.data'
+     gridfile = trim(inDataDir) // '/GRID/' // 'DYC.data'
      gridDYC  = get2dfield()
-     gridfile = trim(directory) // '/GRID/' // 'DXG.data'
+     gridfile = trim(inDataDir) // '/GRID/' // 'DXG.data'
      gridDYG  = get2dfield() 
-     
-     dxdy=gridDXC*gridDYC
-   
-     !     dzt(:,:,:)=
-     !     dzu(:,:,:)=fieldx(:,:,:,1)
-     !     dzv(:,:,:)=fieldx(:,:,:,1)
-     
+     gridfile = trim(inDataDir) // '/GRID/' // 'hFacW.data'
+     hFacW    = get3dfield()
+     gridfile = trim(inDataDir) // '/GRID/' // 'hFacS.data'
+     hFacW    = get3dfield()
+
+     dxdy     = gridDXC*gridDYC
+     dz       = gridDRC
+     kmt      = sum(ceiling(hFacW),3)
   endif initCond   ! === End init section ===
   
-  
-  !  if(mod(ints,18).eq.1) then
-
   fstamp='0000000960'
 
   start3d  = [   1,  1, 1]
   count3d  = [2160,320,42]
-  gridfile = trim(directory) // '/UVW/' // 'UVEL_5dy.' // fstamp // '.data'
-  fieldx   = get3dfield()
-  gridfile = trim(directory) // '/UVW/' // 'VVEL_5dy.' // fstamp // '.data'
-  fieldy   = get3dfield()
-  gridfile = trim(directory) // '/UVW/' // 'WVEL_5dy.' // fstamp // '.data'
-  fieldw   = get3dfield()
+  gridfile = trim(inDataDir) // '/UVW/' // 'UVEL_5dy.' // fstamp // '.data'
+  uvel     = get3dfield()
+  gridfile = trim(inDataDir) // '/UVW/' // 'VVEL_5dy.' // fstamp // '.data'
+  vvel     = get3dfield()
+  gridfile = trim(inDataDir) // '/UVW/' // 'WVEL_5dy.' // fstamp // '.data'
+  wvel   = get3dfield()
 
   !Density not included
   !SSH not included
@@ -132,9 +138,11 @@ SUBROUTINE readfields
   iloop: do i=1,imt
      jloop: do j=1,jmt
         kloop: do k=1,km
-           u(i,j,k,2)=fieldx(i,j,k)*gridDYC(i,j)*gridDRC(k)
-           v(i,j,k,2)=fieldy(i,j,k)*gridDXC(i,j)*gridDRC(k)
-           !w(i,j,k,2)=fieldz(i,j,k)*dxdy(i,j)
+           uflux(i,j,k,2)=uvel(i,j,k)*gridDYG(i,j)*gridDRF(k) !*hFacS(i,j,k)
+           vflux(i,j,k,2)=vvel(i,j,k)*gridDXG(i,j)*gridDRF(k) !*hFacS(i,j,k)
+#ifdef explicit_w
+           wflux(i,j,k,2)=wvel(i,j,k)*gridRAC(i,j)
+#endif
            rho(i,j,k,2)=0
         end do kloop
      enddo jloop
@@ -241,10 +249,10 @@ contains
   subroutine datasetswap
     ! === swap between datasets ===
     hs(:,:,1)=hs(:,:,2)
-    u(:,:,:,1)=u(:,:,:,2)
-    v(:,:,:,1)=v(:,:,:,2)
+    uflux(:,:,:,1)=uflux(:,:,:,2)
+    vflux(:,:,:,1)=vflux(:,:,:,2)
 #ifdef explicit_w
-    w(:,:,:,1)=w(:,:,:,2)
+    wflux(:,:,:,1)=wflux(:,:,:,2)
 #endif
 #ifdef tempsalt
     tem(:,:,:,1)=tem(:,:,:,2)

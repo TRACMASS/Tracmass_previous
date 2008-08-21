@@ -3,32 +3,30 @@
   caseDesc     = 'Looking at chl growth in lagrangian space'/
  &INITRUNTIME
   ! === Number of initial datasets
-  intmin       = 114,
+  intmin       = 58800,
   !
   ! === Trajectory release period (timesteps)
-  intspin      = 5,  !10*365/5
+  intspin      = 1,  !10*365/5
   !
   ! === Trajectory run
-  intrun       = 1000,  !1000*365/5-1,
+  intrun       = 192,
   !
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
  &INITRUNDATE
   ! === Reference basetime for the velocity field. 
-  !baseHour          = 0,
-  !baseDay           = 13,
-  !baseMon           = 9,
-  !baseYear          = 2007/
+  baseSec           = 0,
+  baseMin           = 0,
+  baseHour          = 0,
+  baseDay           = 1,
+  baseMon           = 1,
+  baseYear          = 2001,
   ! === Start time for this run
-  !startHour         = 0,
-  !startDay          = 1,
-  !startMon          = 1,
-  !startYear         = 2001/
-  ihour          = 0,
-  iday           = 17,
-  imon           = 9,
-  iyear          = 2007/
+  startHour         = 0,
+  startDay          = 13,
+  startMon          = 9,
+  startYear         = 0/
   !
   !
   &INITRUNWRITE
@@ -45,16 +43,18 @@
   kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir    = '/Volumes/t2klumpen/projData/jplSCB/',
+  inDataDir       = '/Volumes/t2klumpen/projData/jplSCB/',
   !
   ! === Directory where output files are saved
-  outDataDir   = '/Users/bror/orm/',
+  outDataDir      = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
-  name         = 'jplSCBpartsat'/ 
+  outDataFile     = 'jplSCBpartsat',
   !
+  ! === Should intmin be included to the outfile?
+  intminInOutFile = 1/
   ! === Name of rerun file
-  !namep       = 'op.fw.n0'
+  !namep          = 'op.fw.n0'
   
   
   $INITRUNSEED
@@ -73,7 +73,7 @@
   ! idir:           1 = follow positive direction (eastward/northward)  
   !                -1 = follow negative direction (westward/southward)
   !                 0 = both directions
-  idir         = 1,
+  idir         = 0,
   !
   ! === Number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
@@ -87,7 +87,7 @@
   nqua        = 1, 
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant= 2,     
+  partQuant= 5,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -112,10 +112,10 @@
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 1,
-  seedDir      = '/Users/bror/svn/orm/trunk/jplSCB/seedDir',
+  seedDir      = '/Volumes/t2klumpen/projData/jplSCB/seedDir',
   !
   ! === Seed filename (or beginning of it)
-  seedFile     = '/Users/bror/maskust'/
+  seedFile     = 'seed'/
 
 
 
@@ -146,18 +146,18 @@ $INITRUNEND
   jens(1) =   1,
   jenn(1) = 211,
 !
-  ienw(2) = 110,
-  iene(2) = 111,
-  jens(2) =   1,
-  jenn(2) = 211,
+  ienw(2) =   1,
+  iene(2) = 211,
+  jens(2) = 110,
+  jenn(2) = 111,
 !
   ienw(3) =   1,
   iene(3) = 111,
   jens(3) =   1,
   jenn(3) =   2,
 
-  ienw(4) =   1,
-  iene(4) = 111,
-  jens(4) = 210,
-  jenn(4) = 211,
+  ienw(4) = 210,
+  iene(4) = 211,
+  jens(4) =   1,
+  jenn(4) = 111,
   timax =  36500./  ! maximum time length of a trajectory in days

@@ -1,23 +1,27 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
 
 subroutine cross(ijk,ia,ja,ka,r0,sp,sn,rr)
-
-! subroutine to compute time (sp,sn) when trajectory crosses face of box (ia,ja,ka) 
-! two crossings are considered for each direction:  
-! east and west for longitudinal directions, etc.  
-!
-!  Input:
-!
-!    ijk      : considered direction (i=zonal, 2=meridional, 3=vertical)
-!    ia,ja,ka : original position in integers
-!    r0       : original non-dimensional position in the ijk-directionof particle 
-!                (fractions of a grid box side in the corresponding direction)
-!    rr       : time interpolation constant between 0 and 1 
-!
-!  Output:
-!
-!    sp,sn     : crossing time to reach the grid box wall (in units of s/m3)
-
+  
+  ! subroutine to compute time (sp,sn) when trajectory 
+  ! crosses face of box (ia,ja,ka) 
+  ! two crossings are considered for each direction:  
+  ! east and west for longitudinal directions, etc.  
+  !
+  !  Input:
+  !
+  !  ijk      : considered direction (i=zonal, 2=meridional, 3=vertical)
+  !  ia,ja,ka : original position in integers
+  !  r0       : original non-dimensional position in the 
+  !             ijk-direction of particle 
+  !             (fractions of a grid box side in the 
+  !              corresponding direction)
+  !  rr       : time interpolation constant between 0 and 1 
+  !
+  !
+  !  Output:
+  !
+  !    sp,sn   : crossing time to reach the grid box wall 
+  !              (in units of s/m3)
+  
 
 USE mod_param
 USE mod_vel
@@ -38,10 +42,10 @@ stop 2567 ! Kolla på gammal traj.F för OCCAM
 !#ifdef turb
 ! iim=ia-1
 ! if(iim.eq.0) iim=IMT
-! uu=(rg*u(ia  ,ja,ka,NST)+rr*u(ia  ,ja,ka,1))*ff
-! um=(rg*u(im,ja,ka,NST)+rr*u(ia-1,ja,ka,1))*ff
-! vv=(rg*v(ia,ja  ,ka,NST)+rr*v(ia,ja  ,ka,1))*ff
-! vm=(rg*v(ia,ja-1,ka,NST)+rr*v(ia,ja-1,ka,1))*ff
+! uu=(rg*uflux(ia  ,ja,ka,NST)+rr*uflux(ia  ,ja,ka,1))*ff
+! um=(rg*uflux(im,ja,ka,NST)+rr*uflux(ia-1,ja,ka,1))*ff
+! vv=(rg*vflux(ia,ja  ,ka,NST)+rr*vflux(ia,ja  ,ka,1))*ff
+! vm=(rg*vflux(ia,ja-1,ka,NST)+rr*vflux(ia,ja-1,ka,1))*ff
 ! en=0.25*sqrt(uu**2+um**2+vv**2+vm**2)
 ! print *,'en',en
 !#endif
@@ -50,8 +54,8 @@ if(ijk.eq.1) then
  ii=ia
  im=ia-1
  if(im.eq.0) im=IMT
- uu=(rg*u(ia,ja,ka,NST)+rr*u(ia,ja,ka,1))*ff
- um=(rg*u(im,ja,ka,NST)+rr*u(im,ja,ka,1))*ff
+ uu=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff
+ um=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff
 #ifdef turb   
  if(r0.ne.dble(ii)) then
   uu=uu+upr(1,2)  
@@ -66,8 +70,8 @@ if(ijk.eq.1) then
 #endif
 elseif(ijk.eq.2) then
  ii=ja
- uu=(rg*v(ia,ja  ,ka,NST)+rr*v(ia,ja  ,ka,1))*ff
- um=(rg*v(ia,ja-1,ka,NST)+rr*v(ia,ja-1,ka,1))*ff
+ uu=(rg*vflux(ia,ja  ,ka,NST)+rr*vflux(ia,ja  ,ka,1))*ff
+ um=(rg*vflux(ia,ja-1,ka,NST)+rr*vflux(ia,ja-1,ka,1))*ff
 #ifdef turb    
  if(r0.ne.dble(ja  )) then
   uu=uu+upr(3,2)  
@@ -82,8 +86,14 @@ elseif(ijk.eq.2) then
 #endif
 elseif(ijk.eq.3) then
  ii=ka
- uu=w(ka  )
- um=w(ka-1)
+#ifdef full_wflux
+ uu=wflux(ia ,ja ,ka   ,1)
+ um=wflux(ia ,ja ,ka-1 ,1)
+#else
+ uu=wflux(ka)
+ um=wflux(ka-1)
+#endif
+
 #ifdef turb   
  if(r0.ne.dble(ka  )) then
   uu=uu+upr(5,2)  
@@ -136,5 +146,3 @@ if(sn.le.0.d0) sn=1.d20
 
 return
 end subroutine cross
-
-!________________________________________________________________________________________

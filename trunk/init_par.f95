@@ -29,8 +29,13 @@ subroutine init_params
   namelist /INITGRIDARC/   arcscale
   
   namelist /INITRUNTIME/   intmin, intspin, intrun, intstep 
-  namelist /INITRUNDATE/   ihour, iday, imon, iyear
-  namelist /INITRUNWRITE/  ncoor, kriva ,inDataDir ,outDataDir ,name
+  namelist /INITRUNDATE/   baseSec  ,baseMin  ,baseHour &
+                          ,baseDay  ,baseMon  ,baseYear &
+                          ,startSec ,startMin ,startHour &
+                          ,startDay ,startMon ,startYear &
+                          ,ihour, iday, imon, iyear
+  namelist /INITRUNWRITE/  ncoor, kriva ,inDataDir ,outDataDir &
+                          ,outDataFile ,intminInOutFile
   namelist /INITRUNSEED/   nff ,isec ,idir ,nqua ,partQuant ,seedType &
                           ,ist1 ,ist2 ,jst1 ,jst2 ,kst1 ,kst2 &
                           ,varSeedFile ,seedDir ,seedFile
@@ -91,7 +96,7 @@ subroutine init_params
   dtmin=dtstep*tseas
 
   if ((IARGC() > 1) .and. (IARGC() < 5) )  then
-     call getarg(1,inparg)
+     call getarg(2,inparg)
      factor=1
      argint1=0
      do i=29,1,-1
@@ -102,25 +107,35 @@ subroutine init_params
      end do
      ARG_INT1=argint1
 
-     call getarg(2,inparg)
-     factor=1
-     argint2=0
-     do i=29,1,-1
-        if (ichar(inparg(i:i)) .ne. 32) then
-           argint2=argint2+(ichar(inparg(i:i))-48)*factor
-           factor=factor*10
-        end if
-     end do
-     ARG_INT2=argint2
-
-     call getarg(3,inparg)
-     name=inparg
+!     call getarg(2,inparg)
+!     factor=1
+!     argint2=0
+!     do i=29,1,-1
+!        if (ichar(inparg(i:i)) .ne. 32) then
+!           argint2=argint2+(ichar(inparg(i:i))-48)*factor
+!           factor=factor*10
+!        end if
+!     end do
+!     ARG_INT2=argint2
+  
   end if
-  
-  
-  print *,intmin,intrun,name
 
-!stop
+  baseJD      = jdate(baseYear  ,baseMon  ,baseDay)
+  startJD     = jdate(startYear ,startMon ,startDay)
+  startYearCond: if (startYear .ne. 0) then
+     intmin      = (startJD-baseJD)*ngcm*24
+  end if startYearCond
+  
+  startHourCond: if ( (startHour .ne. 0)  & 
+                 .or. (startMin  .ne. 0)  &
+                 .or. (startSec  .ne. 0) ) then
+     print *,'------------------------------------------------------'
+     print *,'ERROR!'
+     print *,'------------------------------------------------------'
+     print *,'Fractions of day for start values not implemented yet.'
+     print *,'Email Bror (brorfred@gmail.com) to have it fixed.'
+     stop 100
+  end if startHourCond
 
   ! --ist -1 to imt
   if ( ist1 == -1) then 
@@ -157,10 +172,14 @@ subroutine init_params
   ! mod_domain
 !  allocate ( ienw (LBT),iene (LBT) )
 !  allocate ( jens (LBT),jenn (LBT) )
-  allocate ( u(imt,jmt,km,nst), v(imt,jmt,km,nst) )
+  allocate ( uflux(imt,jmt,km,nst), vflux(imt,jmt,km,nst) )
   allocate ( hs(imt,jmt,nst) )
-  allocate ( w(0:km) )
-  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) )
+#ifdef full_wflux
+  allocate ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
+#else
+  allocate ( wflux(0:km) )
+#endif
+  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km))
 
   ! mod_dens
 #ifdef tempsalt

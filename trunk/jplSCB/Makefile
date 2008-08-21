@@ -17,10 +17,14 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #------------------------------------------------------------------------
-#  fl11   = -Dselect         # Select only one trajectory (for debugging)
-#  fl12  = -Dtracer         # Stores a simulated tracer
-#  fl13  = -Dsediment       # Sediment code developed for RCO
-#  fl14  = -Dtwodim         # Uses a two-dimensional velocity field. 
+  fl11  = -Dtwodim         # Turn off vetical velocities.
+#  fl12  = -Dfull_wflux     # Use a full 3D wflux field.
+#  fl13  = -Dexplicit_w     # Use a given vertical velocity.
+#------------------------------------------------------------------------
+#  fl14   = -Dselect         # Select only one trajectory (for debugging)
+#  fl15  = -Dtracer         # Stores a simulated tracer
+#  fl16  = -Dsediment       # Sediment code developed for RCO
+#  fl17  = -Dtwodim         # Uses a two-dimensional velocity field. 
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\

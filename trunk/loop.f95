@@ -5,9 +5,7 @@ subroutine loop
   USE mod_grid
   USE mod_buoyancy
   USE mod_seed
-#if defined rco || for || sim || orc || tes || tun || ifs || atm || gomoos || jplSCB || eccoSOSE || multcol
-  USE mod_domain
-#endif
+  USE mod_domain !Only to be used for every project...
   USE mod_vel
   USE mod_turb
 #ifdef streamxy
@@ -52,12 +50,16 @@ subroutine loop
   REAL*8 dsc,ts,trj(ntracmax,NTRJ)
   INTEGER ist,jst,kst
   INTEGER ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas
-  INTEGER ntrac,nev,nrh0,nout,nloop,nerror,nnorth,ndrake,ngyre,ntractot,nexit(NEND)
+  INTEGER ntrac,nev,nrh0,nout,nloop,nerror
+  INTEGER nnorth,ndrake,ngyre,ntractot,nexit(NEND)
   
   REAL*8 rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0
   REAL*8 ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
   REAL*8 subvol,vol,arc,arct,rr,rb,rg,rbg,uu
   
+  INTEGER                                    :: landError=0
+  REAL                                       :: fullstamp1 ,fullstamp2
+  REAL, DIMENSION(2)                         :: timestamp1 ,timestamp2
   REAL zz
   
   logical scrivi
@@ -66,26 +68,27 @@ subroutine loop
   INTEGER                             :: errCode
 
 
-
+  
   iday0=iday
   imon0=imon
   iyear0=iyear
   ! === print some run stats ===
+  print *,'------------------------------------------------------'  
+  print *,'Traj write dir    :  ' ,trim(outDataDir)
+  print *,'Time interp steps : ' ,iter
   
-  print *,'writes trajectories in:' ,trim(outDataDir)
-  print *,'Interpolation steps in time (iter): ' ,iter
-  
-  print 999,name,intstart,intspin,intend,intrun,nff,isec,idir,nqua,num,voltr,&
+  print 999,intstart,intspin,intrun,intend,nff,isec,idir,nqua,num,voltr,&
        tmin0,tmax0,smin0,smax0,rmin0,rmax0
   
-999 format(' name=',a8,' intstart=',i4,' intspin=',i5,' intend=',i7,' intrun=',i7,/,&
-         ' nff=',i2,' isec=',i2,' idir=',i4,' nqua=',i2,' num=',i7,&
-         ' voltr=',f9.0,/,&
-         ' tmin0=',f7.2,' tmax0=',f7.2,' smin0=',f7.2,' smax0=',f7.2,&
-         ' rmin0=',f7.2,' rmax0=',f7.2)
-  
+999 format(' intstart :',i7,'   intspin :',i7, &
+         /,'   intrun :',i7,'   intend  :',i7, &
+         /,'      nff :',i2,' isec :',i2,'  idir :',i2,' nqua=',i2,' num=',i7,&
+         /,'    voltr : ',f9.0,&
+         /,'    tmin0 : ',f7.2,'  tmax0 : ',f7.2, &
+         /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
+         /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
+
   ! === initialise to zero ===
-  w=0.d0
   nev=0
   nrh0=0
   nout=0
@@ -125,7 +128,7 @@ subroutine loop
   !==========================================================
   
 #ifdef rerun
-  open(67,file=trim(outDataDir)//name//'_rerun.asc')
+  open(67,file=trim(outDataDir)//outDataFile//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,n,rlon,rlat,zz
   !if(n.ne.1)       print 566,ntrac,n,rlon,rlat,zz
@@ -169,19 +172,25 @@ subroutine loop
   !==========================================================
   !=== read ocean/atmosphere GCM data files               ===
   !==========================================================
-
+  print *,'------------------------------------------------------'
+  WRITE (6, FMT="(A)", ADVANCE="NO") ' === Reading initial dataset'
+  call etime(timestamp1,fullstamp1)
   ff=dble(nff)
   tstep=dble(intstep) 
   ints=intstart
   call readfields   ! initial dataset
   ntrac=0
+  call etime(timestamp2,fullstamp2)
+  write (6 , FMT="(A,F5.2,A)") ', done in ' ,(fullstamp2-fullstamp1) ,' sec'
 
   !==========================================================
   !==========================================================
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
+  
   intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
+     
      call readfields
      if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
 #ifdef tracer 
@@ -189,16 +198,15 @@ subroutine loop
 #endif
      
      !=======================================================
-     ! === Seed particles if still in intspin.            ===
+     ! ===    Seed particles if still in intspin.         ===
      !=======================================================
      intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
         ! === Seed particles ===
         ntrac=ntractot
-
         ijkstloop: do ijk=1,ijkMax
            ist  = ijkst(ijk,1)
            jst  = ijkst(ijk,2)
-           kst  = 20!ijkst(ijk,3)
+           kst  = 23!ijkst(ijk,3)
            idir = ijkst(ijk,4)
            isec = ijkst(ijk,5)
            vol  = 0
@@ -212,36 +220,51 @@ subroutine loop
            ! === follow trajectory only if velocity   ===
            ! === in right direction + sets trajectory === 
            ! === transport vol.                       ===
-           if    (isec.eq.1 .and. idir.ne.0) then
-              if(idir*ff*u(ist,jst,kst,1).le.0.) cycle ijkstloop  
-              vol=abs(u(ist,jst,kst,1))
-           elseif(isec.eq.2 .and. idir.ne.0) then
-              if(idir*ff*v(ist,jst,kst,1).le.0.) cycle ijkstloop
-              vol=abs(v(ist,jst,kst,1))
-           elseif(isec.ge.3 .and. idir.ne.0) then
-              call vertvel(1.d0,ib,ibm,jb,kst)
-              if(idir*ff*w(kst).le.0.) cycle ijkstloop
-              vol=abs(w(kst))
-           elseif(isec.eq.1 .and. idir.eq.0) then 
-              ! === Should generate trajectories in  ===
-              ! === both directions but doesn't work ===        
-              stop 5978 
-              if(u(ist,jst,kst,1).eq.0.) cycle ijkstloop
-              vol=abs(u(ist,jst,kst,1))
-           elseif(isec.eq.2 .and. idir.eq.0) then
-              stop 5979
-              if(v(ist,jst,kst,1).eq.0.) cycle ijkstloop
-              vol=abs(v(ist,jst,kst,1))
-           elseif(isec.eq.3 .and. idir.eq.0) then
-              call vertvel(1.d0,ib,ibm,jb,kst)
-              if(w(kst).eq.0.) cycle ijkstloop
-              vol=abs(w(kst))
-           elseif(isec.eq.4 .and. idir.eq.0) then
-              if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
-              if(u(ib,jb,kb,1)+u(ibm,jb,kb,1) + & 
-                   v(ib,jb,kb,1)+v(ib,jb-1,kb,1).eq.0.) cycle ijkstloop
-           endif
-                      
+           idirCond: if (idir .ne. 0) then
+              select case (isec)
+              case (1)
+                 vol=uflux(ist,jst,kst,1)
+              case (2)
+                 vol=vflux(ist,jst,kst,1)
+              case default
+                 call vertvel(1.d0,ib,ibm,jb,kst)
+#ifdef full_wflux
+                 vol=wflux(ist,jst,kst,1)
+#else
+                 vol=wflux(kst)
+#endif
+              end select
+              if (idir*ff*vol.le.0.) cycle ijkstloop
+              vol = abs(vol)
+           else
+              select case (isec)
+              case (1)
+                 ! WARNING
+                 ! Should generate trajectories in 
+                 ! both directions but doesn't work 
+                 stop 5978 
+                 vol=abs(uflux(ist,jst,kst,1))
+              case (2)
+                 stop 5979
+                 vol=abs(vflux(ist,jst,kst,1))
+              case (3)
+                 call vertvel(1.d0,ib,ibm,jb,kst)
+#ifdef full_wflux
+                 vol=abs(wflux(ist,jst,kst,1))
+#else
+                 vol=abs(wflux(kst))
+#endif
+#ifdef twodim
+                 vol = 1
+#endif
+              case(4)
+                 if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
+                 if(uflux(ib,jb,kb,1)+uflux(ibm,jb,kb,1) + & 
+                      vflux(ib,jb,kb,1)+vflux(ib,jb-1,kb,1).eq.0.) cycle ijkstloop
+              end select
+              if(vol.eq.0) cycle ijkstloop
+           end if idirCond
+           
            ! === trajectory volume in m3 ===
            if(nqua.ge.3 .or. isec.eq.4) then
 #if defined ifs || atm
@@ -252,14 +275,14 @@ subroutine loop
 #else
               vol=dz(kb)
 #endif
-#if defined occ66 || orc || for || sim || multcol || jplSCB
+#if defined occ66 || orc || for || sim || multcol || jplSCB || eccoSOSE
               if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif
               if(kb.eq.KM) vol=vol+hs(ib,jb,1)
 #endif
               vol=vol*dxdy(ib,jb)
            endif
-          
+           
            ! === number of trajectories for box (ist,jst,kst) ===
            select case (nqua)
            case (1)
@@ -272,10 +295,10 @@ subroutine loop
               num = ijkst(ijk,6)
            end select
            if(num.eq.0) num=1 ! always at least one trajectory
-           
-           ijt=nint(sqrt(float(num)))
-           kkt=nint(float(num)/float(ijt))
-           subvol=vol/dble(ijt*kkt)
+        
+           ijt    = nint(sqrt(float(num)))
+           kkt    = nint(float(num)/float(ijt))
+           subvol = vol/dble(ijt*kkt)
            
            if(subvol.eq.0.) stop 3956  !?????????????????
            if(subvol.eq.0.) subvol=1.
@@ -292,33 +315,32 @@ subroutine loop
                  kb=kst
                  
                  ! === Meridional section ===
-                 if(isec.eq.1)then
+                 select case(isec)
+                 case (1)
                     y1=dble(jb-1) + (dble(ijj)-0.5d0)/dble(ijt) 
                     x1=dble(ist) 
                     if(idir.eq. 1) ib=ist+1
                     if(idir.eq.-1) ib=ist 
                     z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
                     ! === Zonal section      ===
-                 elseif(isec.eq.2)then
+                 case (2)
                     x1=dble(ibm) + (dble(ijj)-0.5d0)/dble(ijt)
                     y1=dble(jst) 
                     if(idir.eq. 1) jb=jst+1
                     if(idir.eq.-1) jb=jst 
                     z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
                     ! === Vertical section   ===
-                 elseif(isec.eq.3)then
+                 case (3)
                     x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
                     y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
                     z1=dble(kb)
                     ! === Spread even inside T-box ===
-                 elseif(isec.eq.4)then
+                 case (4)
                     x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
                     y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
                     ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
                     z1=dble(kb-1) + 0.5d0
-                    ! print *,ibm,x1,ib,jb-1,y1,jb,kb-1,z1,kb,ijk
-                    ! stop 4906
-                 endif
+                 end select
                  
                  ibm=ib-1
                  ! === cyclic ocean/atmosphere === 
@@ -409,7 +431,6 @@ subroutine loop
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6).eq.1) cycle ntracLoop
         
-        
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
         x1=trj(ntrac,1)
@@ -465,7 +486,6 @@ subroutine loop
 #endif        
         ! ===  start loop for each trajectory ===
         scrivi=.false.
-        
         niterLoop: do        
            niter=niter+1 ! iterative step of trajectory
 #ifdef sediment
@@ -527,14 +547,13 @@ subroutine loop
            call errorCheck('infLoopError'  ,errCode)
            if (errCode.ne.0) cycle ntracLoop
            
-           
            ! === calculate the turbulent velocities ===
 #ifdef turb
-           call turbu(ia,ja,ka,rr)
+           call turbuflux(ia,ja,ka,rr)
 #endif
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
-           w=0
+           
            ! === write trajectory ===                       
 #ifdef tracer
            if(ts.eq.dble(idint(ts))) then 
@@ -577,6 +596,7 @@ subroutine loop
               print *,'dt=',dt
               goto 1500
            endif
+
            ! === if time step makes the integration ===
            ! === exceed the time when fiedls change ===
            if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
@@ -604,7 +624,7 @@ subroutine loop
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
            if(ds.eq.dse) then ! eastward exit 
-              uu=(rbg*u(ia,ja,ka,NST)+rb*u(ia ,ja,ka,1))*ff
+              uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(1,2)
 #endif
@@ -646,7 +666,7 @@ subroutine loop
 #endif
            elseif(ds.eq.dsw) then ! westward exit
               
-              uu=(rbg*u(iam,ja,ka,NST)+rb*u(iam,ja,ka,1))*ff
+              uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(2,2)
 #endif
@@ -683,7 +703,7 @@ subroutine loop
               
            elseif(ds.eq.dsn) then ! northward exit
               
-              uu=(rbg*v(ia,ja,ka,NST)+rb*v(ia,ja,ka,1))*ff
+              uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(3,2)
 #endif
@@ -721,7 +741,7 @@ subroutine loop
               
            elseif(ds.eq.dss) then ! southward exit
               
-              uu=(rbg*v(ia,ja-1,ka,NST)+rb*v(ia,ja-1,ka,1))*ff
+              uu=(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(4,2)
 #endif
@@ -761,8 +781,11 @@ subroutine loop
               
               scrivi=.false.
               call vertvel(rb,ia,iam,ja,ka)
-              w=0
-              uu=w(ka)
+#ifdef full_wflux
+              uu=wflux(ia,ja,ka,1)
+#else
+              uu=wflux(ka)
+#endif
 #ifdef turb    
               ! uu=uu+upr(5,2)
 #endif
@@ -781,10 +804,12 @@ subroutine loop
            elseif(ds.eq.dsd) then ! downward exit
               
               call vertvel(rb,ia,iam,ja,ka)
-              w=0
-              if(w(ka-1).lt.0.d0) then
-                 kb=ka-1
-              endif
+
+#ifdef full_wflux
+              if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
+#else
+              if(wflux(ka-1).lt.0.d0) kb=ka-1
+#endif              
               z1=dble(ka-1)
               call pos(1,ia,ja,ka,x0,x1,ds,rr)  
               call pos(2,ia,ja,ka,y0,y1,ds,rr) 
@@ -910,13 +935,12 @@ subroutine loop
         
         nout=nout+1
         
-        call writedata(16)
         call writedata(17)
         nrj(ntrac,6)=1
      end do ntracLoop
      
 #ifdef sediment
-     print 599,  ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout,nsed,nsusp,nexit
+     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout,nsed,nsusp,nexit
 599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
           ' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, ' nsusp=',i8,' nexit=',9i8)
 #else
@@ -930,13 +954,13 @@ subroutine loop
   
 1500 close(56)
   
-  print *,ntractot,' trajectories calculated'
-  print *,nev,' trajectories evaporated'
-  print *,nout,' trajectories exited the space and time domain'
-  print *,nexit,' trajectories exited through the boundaries'
+  print *,ntractot ,' trajectories calculated'
+  print *,nev      ,' trajectories evaporated'
+  print *,nout     ,' trajectories exited the space and time domain'
+  print *,nexit    ,' trajectories exited through the boundaries'
 #ifdef sediment
-  print *,nsed ,' trajectories sedimented'
-  print *,nsusp,' trajectories resuspended'
+  print *,nsed     ,' trajectories sedimented'
+  print *,nsusp    ,' trajectories resuspended'
   call writedata(19)
   
 #endif
@@ -949,7 +973,7 @@ subroutine loop
   
   call writepsi
   
-  print *,'The very end of tracmass run ',name,' at'
+  print *,'The very end of tracmass run ',outDataFile,' at'
   call system('date')
   
 return
@@ -983,8 +1007,9 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
+       INTEGER                             :: verboseMess = 0
        INTEGER                             :: errCode
-   
+
        errCode=0
        select case (trim(teststr))
        case ('ntracGTntracmax')
@@ -1024,27 +1049,31 @@ return
           endif          
        case ('landError')
           if(kmt(ib,jb).eq.0) then
-             print *,'====================================='
-             print *,'Warning: Trajectory on land'
-             print *,'-------------------------------------'
-             print *,'land',ia,ib,ja,jb,ka,kb,kmt(ia,ja)
-             print *,'xyz',x0,x1,y0,y1,z0,z1
-             print *,'ds',dse,dsw,dsn,dss,dsu,dsd
-             print *,'dsmin=',ds,dsmin,dtmin,dxyz
-             print *,'tt=',tt,ts
-             print *,'ntrac=',ntrac
+             if (verboseMess == 1) then
+                print *,'====================================='
+                print *,'Warning: Trajectory on land'
+                print *,'-------------------------------------'
+                print *,'land',ia,ib,ja,jb,ka,kb,kmt(ia,ja)
+                print *,'xyz',x0,x1,y0,y1,z0,z1
+                print *,'ds',dse,dsw,dsn,dss,dsu,dsd
+                print *,'dsmin=',ds,dsmin,dtmin,dxyz
+                print *,'tt=',tt,ts
+                print *,'ntrac=',ntrac
 #ifdef turb
-             print *,'upr=',upr
+                print *,'upr=',upr
 #endif
-             print *,'-------------------------------------'
-             print *,'The trajectory is killed'
-             print *,'====================================='
+                print *,'-------------------------------------'
+                print *,'The trajectory is killed'
+                print *,'====================================='
+             end if
              call writedata(14)
              nerror=nerror+1
+             landError = landError +1
+             errCode = -40             
+             call writedata(40)
              nrj(ntrac,6)=1
-             errCode = -40
           endif
-       case ('coordboxError')
+          case ('coordboxError')
           ! ===  Check that coordinates belongs to   ===
           ! ===  correct box. Valuable for debugging ===
           if( dble(ib-1).gt.x1 .or. dble(ib).lt.x1 )  then
@@ -1093,8 +1122,8 @@ return
              print *,'niter:',niter,'nrj:',nrj(ntrac,4)
              print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
              print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
-             print *,'x1:',x1,'u:',u(ia-1,ja-1,ka-1,2)
-             print *,'y1:',y1,'v:',v(ia-1,ja-1,ka-1,2)
+             print *,'x1:',x1,'u:',uflux(ia-1,ja-1,ka-1,2)
+             print *,'y1:',y1,'v:',vflux(ia-1,ja-1,ka-1,2)
              print *,'kb:',kb-1,'z1:',z1
              print *,'-------------------------------------'
              trj(ntrac,1)=x1
@@ -1214,8 +1243,9 @@ return
     case (10)
        recPosIn = recPosIn+1
        write(unit=78 ,rec=recPosIn) ntrac,ints,x14,y14,z14
+       return
     case (11)
-       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
+       if( (kriva.eq.1 .and. ts .eq. ints-1) .or. &
             (scrivi .and. kriva.eq.2)                .or. &
             (kriva.eq.3)                             .or. &
             (kriva.eq.4 .and. niter.eq.1)            .or. &
@@ -1223,7 +1253,7 @@ return
             (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
             .or.tt-t0.eq.21.*tday)) ) then
           call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-         recPosRun = recPosRun+1
+          recPosRun = recPosRun+1
           write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14       
        end if
     case (13)
@@ -1235,22 +1265,20 @@ return
     case (15)
        recPosRun = recPosRun+1
        write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
-    case (16)
-       if(kriva.ne.0 ) then
-          recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
-       end if
     case (17)
        recPosOut = recPosOut+1
        write(unit=77 ,rec=recPosOut) ntrac,ints,x14,y14,z14   
     case (18)
-       if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
-            ints.eq.intstart+intrun) then 
-          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-          recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
-       endif
-       !case (19)
+    !   if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
+    !        ints.eq.intstart+intrun) then 
+    !      call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+    !      recPosRun = recPosRun+1
+    !      write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
+    !   endif
+       !   !case (19)
+    case (40)
+       recPosErr=recPosErr+1    
+       write(unit=79 ,rec=recPosErr) ntrac,ints,x14,y14,z14   
     end select
 #endif    
 
@@ -1273,7 +1301,7 @@ return
 !!$    case (13)
 !!$       write(77) ntrac,ints,x1,y1,z1
 !!$    case (14)
-!!$       write(76) ntrac,ints,x1,y1,z1
+!!$       write(76) ntrac,ints,x1,y1,z1§
 !!$    case (15)
 !!$       write(76) ntrac,ints,x1,y1,z1
 !!$    case (16)

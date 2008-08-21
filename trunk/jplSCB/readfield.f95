@@ -19,7 +19,7 @@ SUBROUTINE readfields
   CHARACTER                                  :: dates(62)*17
   CHARACTER (len=200)                        :: dataprefix, dstamp
   INTEGER                                    :: intpart1 ,intpart2
-  INTEGER                                    :: ndates ,jdBase
+  INTEGER                                    :: ndates
   INTEGER                                    :: yr1 ,mn1 ,dy1
   INTEGER                                    :: yr2 ,mn2 ,dy2
   
@@ -67,13 +67,13 @@ SUBROUTINE readfields
   call datasetswap !Copy field(t+1) to field(t).
 
   ! === update the time counting ===
-  intpart1    = mod(ints-1,24)
-  intpart2    = floor((ints-1)/24.)
+  intpart1    = mod(ints,24)
+  intpart2    = floor((ints)/24.)
   ndates      = ints-intpart1
   dstamp      = 'scb_fcst_0000000015.nc'
-  jdBase=jdate(iyear,imon,iday)
- 
-  call  gdate (jdbase+intpart2 ,yr1 ,mn1 ,dy1)
+
+  call  gdate (baseJD+intpart2 ,yr1 ,mn1 ,dy1)
+
   write (dstamp(10:17),'(i4i2.2i2.2)') yr1,mn1,dy1
   dataprefix  = trim(inDataDir) // '/ROMS/' // dstamp
   tpos        = intpart1+1
@@ -81,13 +81,13 @@ SUBROUTINE readfields
   ! === initialise ===
   initCond: if(ints.eq.intstart) then
      ! call coordinat
-     hs=0.
-     u=0.
-     v=0.
+     hs    = 0.
+     uflux = 0.
+     vflux = 0.
 #ifdef tempsalt
-     tem=0.
-     sal=0.
-     rho=0.
+     tem   = 0.
+     sal   = 0.
+     rho   = 0.
 #endif
      ndates=0
      
@@ -102,17 +102,6 @@ SUBROUTINE readfields
      zw(km)     = 2500
      dz         = zw(km:1:-1)-zw(km-1:0:-1)
      
-     !start2d  = [    1,  1, 1, 1]
-     !count2d  = [imt+2,jmt, 1, 1] 
-     !ncvar    = 'e1t'
-     !e1t      = get2dfield()
-     !ncvar    = 'e2t'
-     !e2t      = get2dfield()
-     !ncvar    = 'e1v'
-     !e1v      = get2dfield()
-     !ncvar    = 'e2u'
-     !e2u      = get2dfield()
-     
      ! ### FUSK! ###
      e2t=1153.4
      e2u=e2t
@@ -121,15 +110,6 @@ SUBROUTINE readfields
      
      dxdy=e1t*e2t
      
-     !start3d  = [    1,  1,  1, 1]
-     !count3d  = [imt+2,jmt, km, 1]
-     !ncvar    = 'e3t_ps'
-     !dzt      = get3dfield()
-     !ncvar    = 'e3u_ps'
-     !dzu      = get3dfield()
-     !ncvar    = 'e3v_ps'
-     !dzv      = get3dfield()
-     
      do k=1,km
         dzt(:,:,k)=dz(k)
      end do
@@ -137,9 +117,6 @@ SUBROUTINE readfields
      dzv=dzt
 
   endif initCond   ! === End init section ===
-
-  print *,dataprefix
-
 
   start2d   = [    1,   1, tpos,    1]
   count2d   = [imt  , jmt,    1,    1] 
@@ -158,11 +135,6 @@ SUBROUTINE readfields
   where (vvel .eq. -9999) vvel=0
   where (ssh  .eq. -9999)  ssh=0
 
-!!$  gridfile = '/Users/bror/KAB042j_5d_' // trim(fstamp) // '_sigma.nc'
-!!$  ncvar    = 'sigma'
-!!$  fieldr   = get3dfield()
-!!$  
-
   dzu(1:imt-1,:,1) = dzu(1:imt-1,:,1)+0.5*(hs(1:imt-1,:,2)+hs(2:imt,:,2))
   dzv(:,1:jmt-1,1) = dzv(:,1:jmt-1,1)+0.5*(hs(:,1:jmt-1,2)+hs(:,2:jmt,2))
   dzu(imt,:,1)     = dzu(imt,:,1)    +hs(imt,:,2)
@@ -170,11 +142,11 @@ SUBROUTINE readfields
   
   do k=1,km-1
      kk=km+1-k
-     u(:,:,k,2)    = uvel(:,:,kk) * e2u * dzu(:,:,k)
-     v(:,:,k,2)    = vvel(:,:,kk) * e1v * dzv(:,:,k)
-     rho(:,:,k,2)  = fieldr(:,:,kk)
+     uflux(:,:,k,2)   = uvel(:,:,kk) * e2u * dzu(:,:,k)
+     vflux(:,:,k,2)   = vvel(:,:,kk) * e1v * dzv(:,:,k)
+     rho(:,:,k,2)     = fieldr(:,:,kk)
   end do
-
+  
   if(ints.eq.intstart) then
      kmt=0
      do j=1,jmt
@@ -193,21 +165,7 @@ SUBROUTINE readfields
         enddo
      enddo
   end if
-  
-!    call printdiagnostics
-
-
-!!$    print *,u(100,100,:,2)
-!!$    print *,'====================='  
-!!$    print *,dz
-!!$    print *,'====================='  
-!!$    print *,dzt(100,100,:)-dz
-!!$    print *,'====================='  
-!!$    print *,u(100,100,:,2)/2000/dz
-!!$    print *,'====================='  
-!!$    print *,uvel(100,100,:) 
-!!$    stop
- 
+   
  return
 
 
@@ -387,10 +345,10 @@ contains
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
     ! === swap between datasets ===
     hs(:,:,1)=hs(:,:,2)
-    u(:,:,:,1)=u(:,:,:,2)
-    v(:,:,:,1)=v(:,:,:,2)
+    uflux(:,:,:,1)=uflux(:,:,:,2)
+    vflux(:,:,:,1)=vflux(:,:,:,2)
 #ifdef explicit_w
-    w(:,:,:,1)=w(:,:,:,2)
+    wflux(:,:,:,1)=wflux(:,:,:,2)
 #endif
 #ifdef tempsalt
     tem(:,:,:,1)=tem(:,:,:,2)
@@ -409,65 +367,21 @@ contains
           im=i-1
           if(im.eq.0) im=IMT
           do k=1,km
-             if(u(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'u',i,j,k,kmt(i,j),u(i,j,k,2)
+             if(uflux(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
+                print *,'u',i,j,k,kmt(i,j),uflux(i,j,k,2)
              end if
-             if(v(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'v',i,j,k,kmt(i,j),v(i,j,k,2)
+             if(vflux(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
+                print *,'v',i,j,k,kmt(i,j),vflux(i,j,k,2)
              end if
-             if(u(im,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'u',im,j,k,kmt(i,j),u(im,j,k,2)
+             if(uflux(im,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
+                print *,'u',im,j,k,kmt(i,j),uflux(im,j,k,2)
              end if
-             if(v(i ,j-1,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'v',i,j-1,k,kmt(i,j),v(i,j-1,k,2)
+             if(vflux(i ,j-1,k,2).ne.0..and. kmt(i,j).eq.0) then
+                print *,'v',i,j-1,k,kmt(i,j),vflux(i,j-1,k,2)
              end if
           enddo
        enddo
     enddo
   end subroutine printdiagnostics
-    
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ### 
-  subroutine gdate (jd, year,month,day)
-    !
-    !---computes the gregorian calendar date (year,month,day)
-    !   given the julian date (jd).
-    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
-    INTEGER                                  :: jd ,year ,month ,day
-    INTEGER                                  :: i ,j ,k ,l ,n
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    l= jd+68569
-    n= 4*l/146097
-    l= l-(146097*n+3)/4
-    i= 4000*(l+1)/1461001
-    l= l-1461*i/4+31
-    j= 80*l/2447
-    k= l-2447*j/80
-    l= j/11
-    j= j+2-12*l
-    i= 100*(n-49)+i+l
-    
-    year= i
-    month= j
-    day= k
-    
-    return
-  end subroutine gdate
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###  
-  INTEGER function jdate (YEAR,MONTH,DAY)
-    !
-    !---COMPUTES THE JULIAN DATE (JD) GIVEN A GREGORIAN CALENDAR
-    !   DATE (YEAR,MONTH,DAY).
-    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
-    INTEGER                                  :: YEAR,MONTH,DAY,I,J,K
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    i     = year
-    j     = month
-    k     = day
-    jdate = K-32075+1461*(I+4800+(J-14)/12)/4+367*(J-2-(J-14)/12*12) &
-         /12-3*((I+4900+(J-14)/12)/100)/4
-    RETURN
-  end function jdate
 
 end subroutine readfields
