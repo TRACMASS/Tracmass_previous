@@ -64,7 +64,7 @@ MODULE mod_param
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_coord
-  REAL*8 dx,dy,deg,stlon1,stlat1
+  REAL*8 dx,dy,deg,stlon1,stlat1,grav
   REAL*8, ALLOCATABLE, DIMENSION(:) :: zw
   REAL*8, ALLOCATABLE, DIMENSION(:) :: csu,cst,dyt,phi
   INTEGER idmax(12,1000:3000)
@@ -184,7 +184,7 @@ ENDMODULE mod_turb
 MODULE mod_name
   CHARACTER(LEN=200)                         :: outDataFile
   INTEGER                                    :: intminInOutFile
-  CHARACTER(LEN=200)                         :: inDataDir ,outDataDir
+  CHARACTER(LEN=200)                         :: inDataDir ,outDataDir, name
   CHARACTER(LEN=200)                         :: projDesc
   CHARACTER(LEN=200)                         :: GCMname   ,GCMsource
   CHARACTER(LEN=200)                         :: gridName  ,gridSource

@@ -107,6 +107,7 @@ subroutine loop
   nrj=0
   trj=0.d0
   
+#ifdef stat
 #ifdef streamxy
   sxyy=0.
   sxyx=0.
@@ -119,7 +120,8 @@ subroutine loop
   stxr=0.
   styr=0.
 #endif 
-  
+#endif 
+
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
   
@@ -379,6 +381,7 @@ subroutine loop
                  ts=ff*dble(ints-intstep)/tstep !time, fractions of ints
                  tt=ts*tseas !time(sec) rel to start
                  
+#ifdef stat
 #ifdef streamv 
                  sxz=0.
                  syz=0.
@@ -390,6 +393,7 @@ subroutine loop
 #ifdef streamxy
                  sxyx=0.
                  sxyy=0.
+#endif
 #endif
                  ! === initialise time and ===
                  ! === store trajectory positions ===
@@ -920,6 +924,7 @@ subroutine loop
         end do niterLoop
 #endif
         ! add streamfuction contribution at the end of trajectory for stat
+#ifdef stat
 #ifdef streamxy
         stxyx(:,:,lbas)=stxyx(:,:,lbas)+sxyx(:,:)
         stxyy(:,:,lbas)=stxyy(:,:,lbas)+sxyy(:,:)
@@ -932,7 +937,8 @@ subroutine loop
         stxr(:,:,lbas,:)=stxr(:,:,lbas,:)+sxr(:,:,:)
         styr(:,:,lbas,:)=styr(:,:,lbas,:)+syr(:,:,:)
 #endif  
-        
+#endif
+
         nout=nout+1
         
         call writedata(17)

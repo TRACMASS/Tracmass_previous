@@ -144,7 +144,7 @@ subroutine init_seed()
 #if defined rco
      do i=1,IMT
         do j=1,JMT
-           if(mask(i,j).ne.0 .and. mask(i,j).le.4 .and. j.lt.215) mask(i,j)=-1  ! entire shallow Baltic south of 61N
+           if(seedMask(i,j).ne.0 .and. seedMask(i,j).le.4 .and. j.lt.215) seedMask(i,j)=-1  ! entire shallow Baltic south of 61N
         enddo
      enddo
 #endif
