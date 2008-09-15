@@ -1,4 +1,7 @@
-‚¢‚√‚‚π√ß &INITRUNTIME
+&INITRUNDESC
+  caseName     = 'rcoTest',
+  caseDesc     = 'Looking at interesting things in the Baltic puddle'/
+ &INITRUNTIME
   intmin  = 1,                                      !number of initial datasets 
 !  intspin = 35064, ! (35064=24 yers=total 2nm_122)  !trajectory release period (timesteps)
   intspin =     24, ! (=6  *24/ngcm)  !trajectory release period (timesteps)
@@ -29,11 +32,13 @@
   !                 5 = write at chosen intervals
   kriva    = 0,
   !
-  ! name of directory where the files will be written
-  directory = '/Volumes/hav4/data/rco/',
+  ! === Directory where input fields are stored
+  inDataDir = '/Volumes/hav4/data/rco/',
   ! directory = '/Users/doos/data/rco12/',
-  ! name of current trajectory run
-      name      = 'ms.05.t2'/ 
+  ! === Directory where output files are saved
+  outDataDir   = '/Users/doos/data/rco12/ormO/',
+!  name      = 'ms.05.t2'/ 
+  outDataFile      = 'rcotest'/ 
   !   name      = 'fi.ne.v2'/ 
   !   name      = 'fi.ne.s2'/ 
   ! namep='fv.fw.aa'  ! For reruns
@@ -67,28 +72,36 @@
   nqua     = 1, 
 !  partQuant= 500,  !(particles/gridcell or m3s-1/particle or m3/particle)
   partQuant= 100,  !(particles/gridcell or m3s-1/particle or m3/particle)
+
+  ! === initial directions all in MODEL COORDINATES ===
+  ! Method for seeding particles.
+  ! seedType:       1 = Seed an area defined by ist, jst, and kst.
+  !                 2 = Use a list to define which cells to seed.
+  !                 3 = Use a 2-D mask file.
+  SeedType = 1,
+  ! If seedType = 1, define area where particles are seeded.
+  ! -1 indicates max value in grid.
   !
   !-------- initial directions all in MODEL COORDINATES -----------------
   ! Area where particles are seeded. -1 indicates max value in grid.
   ! Water entering the Gulf of Finland from the Baltic	
-!ist1     = 204,		 
-!ist2     = 204,		 
-!jst1     = 145,		 
-!jst2     = 220,		 
-!kst1     =   1,		 
-!kst2     =  -1/
-! Neva
-!  ist1     = 317,		 
-!  ist2     = 317,		 
-!  jst1     = 170,		 
-!  jst2     = 200,		 
-!  kst1     =   1,		 
-!  kst2     =  -1/
-! Neva
+  ! ist1     = 204,		 
+  ! ist2     = 204,		 
+  ! jst1     = 145,		 
+  ! jst2     = 220,		 
+  ! kst1     =   1,		 
+  ! kst2     =  -1/
+  ! Neva
+  !  ist1     = 317,		 
+  !  ist2     = 317,		 
+  !  jst1     = 170,		 
+  !  jst2     = 200,		 
+  !  kst1     =   1,		 
+  !  kst2     =  -1/
+  ! Neva
   ist1     =   1,		 
   ist2     =  -1,		 
   jst1     =   1,		 
-
   jst2     =  -1,		 
   kst1     =  40,		 
   kst2     =  41/
@@ -141,10 +154,10 @@
   !        jens(n)=jmt+1
   !        jenn(n)=0
   !        enddo
-  ienw(1) =  1000,
-  iene(1) =  1000,
-  jens(1) =  1000,
-  jenn(1) =  1000,
+!  ienw(1) =  1000,
+!  iene(1) =  1000,
+!  jens(1) =  1000,
+!  jenn(1) =  1000,
   timax =      21./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,

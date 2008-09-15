@@ -25,12 +25,16 @@ data b1,b2,b3,b4/10725.0d0,  10275.0d0, 36.0d0,     13.0d0/
 #endif
 
 data mois/31,28,31,30,31,30,31,31,30,31,30,31/
-
-!_________________________________ time lengths __________________________________________
-tyear=365.25d0 * 24.d0 * 3600.d0
+!__________________________________________________________________________________________
+! Earth constants
+radius = 6371229.d0 ! earth radius in metre
+pi = 2.d0 * dasin(1.d0)
+radian = pi/180.d0
+deg=radius*radian ! ~ 111000 metre
+grav=9.81 ! m/s2tyear=365.25d0 * 24.d0 * 3600.d0
 tday=24.d0 * 3600.d0
 
-! month lengths
+! month lengths including leap years
 do i=1000,3000
 do k=1,12
 idmax(k,i)=mois(k)
@@ -38,12 +42,6 @@ enddo
 if((mod(i,4).eq.0 .and. mod(i,100).ne.0) .or.  mod(i,400).eq.0 ) idmax(2,i)=29
 !print *,i,(idmax(k,i),k=1,12)
 enddo
-
-! handling quantities concerning coordinates
-radius = 6371229.d0 ! earth radius
-pi = 2.d0 * dasin(1.d0)
-radian = pi/180.d0
-deg=radius*radian
 
 ! x,y gridsize in degrees
 
@@ -236,7 +234,7 @@ do i=1,IMT
 enddo
 #endif
 
-#if defined ifs
+#if defined ifs || atm
 ! This is in hPA but should perhaps be in Pa i.e. to multiply with 100!!!!!!!!!!!!!
 zw( 0)=0.
 zw( 1)=5.
@@ -256,7 +254,7 @@ do k=1,KM
 ! print *,'k=',k,' dz(k)=',dz(k)
 enddo
 
-dx = 1.125
+dx = 360./float(IMT)
 dy = 1000000. ! irregular and should be dy(j)
 stlon1=0. 
 stlat1=-90000.

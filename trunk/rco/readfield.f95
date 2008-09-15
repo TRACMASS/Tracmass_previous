@@ -85,8 +85,8 @@ ntime=1000000*iyear+10000*imon+100*iday+ihour
 !____________________________ initialise ___________________________
 if(ints.eq.intstart) then
 hs=0.
-u=0.
-v=0.
+uflux=0.
+vflux=0.
 #ifdef tempsalt
 tem=0.
 sal=0.
@@ -103,8 +103,8 @@ endif
        do i=1,imt
         hs(i,j,1)=hs(i,j,2)
         do k=1,km
-         u(i,j,k,1)=u(i,j,k,2)
-         v(i,j,k,1)=v(i,j,k,2)
+         uflux(i,j,k,1)=uflux(i,j,k,2)
+         vflux(i,j,k,1)=vflux(i,j,k,2)
 #ifdef tempsalt
          tem(i,j,k,1)=tem(i,j,k,2)
          sal(i,j,k,1)=sal(i,j,k,2)
@@ -120,22 +120,22 @@ endif
 ofile='d0000000000.snap1'
 write(ofile(2:11),'(i10)') ntime
 
-infile=directory//'2nm_122/'//ofile
+infile=trim(inDataDir)//'2nm_122/'//ofile
 inquire(file=infile//'.gz',exist=around)
 if(.not.around) then
 print *,'This file is missing:',infile,ntime
 stop 4555
 endif
-zfile='gunzip -c '//infile//'.gz > '//directory//'tmp/'//name
+zfile='gunzip -c '//infile//'.gz > '//trim(inDataDir)//'tmp/'//name
 !print *,zfile
 CALL system(zfile)
-rfile=directory//'tmp/'//name
+rfile=trim(inDataDir)//'tmp/'//name
 !print *,'rfile=',rfile
-inquire(file=rfile,exist=around)
+inquire(file=trim(rfile),exist=around)
 if(.not.around) stop 4556
 
 !     === open snap file ===
-open(unit=30,file=rfile,status='old',form='unformatted',err=4000)
+open(unit=30,file=trim(rfile),status='old',form='unformatted',err=4000)
 
 ! start read header:
 !print *,'hej',rfile
@@ -355,9 +355,9 @@ do k=1,km
  do j=2,jmt
   do i=1,imt-1
     if(kk.ne.km) then
-     u(i,j,kk,2)=dya*(snap2d(i,j)+snap2d(i,j-1))*dz(kk)
+     uflux(i,j,kk,2)=dya*(snap2d(i,j)+snap2d(i,j-1))*dz(kk)
     else
-     u(i,j,kk,2)=dya*(snap2d(i,j)+snap2d(i,j-1))*( dz(kk)+0.5*(hs(i,j,2)+hs(i+1,j,2)) )
+     uflux(i,j,kk,2)=dya*(snap2d(i,j)+snap2d(i,j-1))*( dz(kk)+0.5*(hs(i,j,2)+hs(i+1,j,2)) )
     endif
 !    if(u(i,j,kk,2).ne.0. .and. ints.eq.2) print *,i,j,kk,u(i,j,kk,2)
   enddo
@@ -393,9 +393,9 @@ do k=1,km
  do j=1,jmt-1
   do i=2,imt
    if(kk.ne.km) then
-    v(i,j,kk,2)=(snap2d(i,j)+snap2d(i-1,j))*dz(kk)
+    vflux(i,j,kk,2)=(snap2d(i,j)+snap2d(i-1,j))*dz(kk)
    else
-    v(i,j,kk,2)=(snap2d(i,j)+snap2d(i-1,j))*( dz(kk)+0.5*(hs(i,j,2)+hs(i,j+1,2)) )
+    vflux(i,j,kk,2)=(snap2d(i,j)+snap2d(i-1,j))*( dz(kk)+0.5*(hs(i,j,2)+hs(i,j+1,2)) )
    endif
   enddo
  enddo

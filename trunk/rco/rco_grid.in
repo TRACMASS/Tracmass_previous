@@ -1,13 +1,19 @@
+  &INITGRIDDESC
+   GCMname    = 'rco',
+   GCMsource  = 'http://bla.bla/',
+   gridName   = 'rco',
+   gridSource = 'http://bla/bla.html',
+   gridDesc   = '2 minutes run for the Baltic Sea'/
+
 $INITGRIDGRID
   IMT=320,
   JMT=362,
   KM=41,
-  JMAX=362,
   LBT=1,
   NEND=2/       !NEND = LBT +1
 
 $INITGRIDNTRAC
-  NTRACMAX=24000000/
+  NTRACMAX=240000/
 
 $INITGRIDTIME
    ngcm    = 6,                 ! hours between GCM datasets

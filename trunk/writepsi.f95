@@ -18,19 +18,19 @@ IMPLICIT none
 print *,'psi written at ints=',ints
 
 #ifdef streamxy
-open(51,file=trim(directory)//'orm/stxy.'//name,form='unformatted')
+open(51,file=trim(outDataDir)//'orm/stxy.'//name,form='unformatted')
 write(51)stxyy
 write(51)stxyx
 close(51)
 #endif
 #if defined streamv
-open(52,file=trim(directory)//'orm/stv.'//name,form='unformatted')
+open(52,file=trim(outDataDir)//'orm/stv.'//name,form='unformatted')
 write(52)styz
 write(52)stxz
 close(52)
 #endif
 #if defined streamr 
-open(53,file=trim(directory)//'orm/str.'//name,form='unformatted')
+open(53,file=trim(outDataDir)//'orm/str.'//name,form='unformatted')
 write(53)stxr
 write(53)styr
 close(53)
