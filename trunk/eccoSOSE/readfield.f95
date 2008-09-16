@@ -18,6 +18,7 @@ SUBROUTINE readfields
   ! = Variables for filename generation 
   CHARACTER                                 :: dates(62)*17
   INTEGER, SAVE                             :: nread,ndates
+  INTEGER                                   :: timeStepNumber
   CHARACTER(LEN=10), SAVE                   :: fstamp,rfilv,rfilh,rfilr
   logical around
   
@@ -59,19 +60,10 @@ SUBROUTINE readfields
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
   call datasetswap !Copy field(t+1) to field(t).
-  
-  ! === update the time counting ===
-  iday=iday+5
-  if(iday.gt.idmax(imon,iyear)) then
-     iday=iday-idmax(imon,iyear)
-     imon=imon+1
-     if(imon.eq.13) then
-        imon=1
-        iyear=iyear+1
-        ! if kan skrivas här om man vill börja om från iyear0
-     endif
-  endif
-  ntime=10000*iyear+100*imon+iday
+
+  timeStepNumber = 480*ints
+  fstamp='0000000000'
+  write (fstamp,'(i10.10)') timeStepNumber
 
   ! === initialise ===
   !print *,'ints=',ints,intstart
@@ -121,15 +113,15 @@ SUBROUTINE readfields
      kmt      = sum(ceiling(hFacW),3)
   endif initCond   ! === End init section ===
   
-  fstamp='0000000960'
+
 
   start3d  = [   1,  1, 1]
   count3d  = [2160,320,42]
-  gridfile = trim(inDataDir) // '/UVW/' // 'UVEL_5dy.' // fstamp // '.data'
+  gridfile = trim(inDataDir) // '/MITGCM/' // 'UVEL_5dy.' // fstamp // '.data'
   uvel     = get3dfield()
-  gridfile = trim(inDataDir) // '/UVW/' // 'VVEL_5dy.' // fstamp // '.data'
+  gridfile = trim(inDataDir) // '/MITGCM/' // 'VVEL_5dy.' // fstamp // '.data'
   vvel     = get3dfield()
-  gridfile = trim(inDataDir) // '/UVW/' // 'WVEL_5dy.' // fstamp // '.data'
+  gridfile = trim(inDataDir) // '/MITGCM/' // 'WVEL_5dy.' // fstamp // '.data'
   wvel   = get3dfield()
 
   !Density not included
