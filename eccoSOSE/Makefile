@@ -17,9 +17,9 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #------------------------------------------------------------------------
-  fl11  = -Dtwodim         # Turn off vetical velocities.
-#  fl12  = -Dfull_wflux     # Use a full 3D wflux field.
-#  fl13  = -Dexplicit_w     # Use a given vertical velocity.
+#  fl11  = -Dtwodim         # Turn off vetical velocities.
+  fl12  = -Dfull_wflux     # Use a full 3D wflux field.
+  fl13  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
 #  fl14   = -Dselect         # Select only one trajectory (for debugging)
 #  fl15  = -Dtracer         # Stores a simulated tracer
