@@ -16,7 +16,7 @@
   ! musslor
     iday    = 12,
     imon    = 5,
-    iyear   = 2005/
+    iyear   = 1990/
   !
   !
   &INITRUNWRITE
@@ -36,14 +36,11 @@
   inDataDir = '/Volumes/hav4/data/rco/',
   ! directory = '/Users/doos/data/rco12/',
   ! === Directory where output files are saved
-  outDataDir   = '/Users/doos/data/rco12/ormO/',
-!  name      = 'ms.05.t2'/ 
-  outDataFile      = 'rcotest'/ 
-  !   name      = 'fi.ne.v2'/ 
-  !   name      = 'fi.ne.s2'/ 
-  ! namep='fv.fw.aa'  ! For reruns
-  
-  
+  outDataDir   = '/Users/doos/data/rco12/orm/',
+  ! name of current trajectory run
+  outDataFile      = 'aa.00.aa',
+  ! name of ??????????????????????
+  intminInOutFile      = 0/  
   $INITRUNSEED
   ! nff:            1 = Follow trajectories forward
   !                -1 = Follow trajectories backward
@@ -55,12 +52,12 @@
   !                 2 = Seed particles zonal(x-z)
   !                 3 = Seed particles horiz(x-y)
   !                 4 = Seed particles in the middle of T-box
-  isec     = 4,
+  isec     = 1,
   !
   ! idir:           1 = follow positive direction (eastward/northward)  
   !                -1 = follow negative direction (westward/southward)
   !                 0 = both directions
-  idir     = 0,
+  idir     = 1,
   !
   ! number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
@@ -99,12 +96,12 @@
   !  kst1     =   1,		 
   !  kst2     =  -1/
   ! Neva
-  ist1     =   1,		 
-  ist2     =  -1,		 
-  jst1     =   1,		 
-  jst2     =  -1,		 
-  kst1     =  40,		 
-  kst2     =  41/
+  ist1     = 204,		 
+  ist2     = 204,		 
+  jst1     = 145,		 
+  jst2     = 220,		 
+  kst1     =   1,		 
+  kst2     =  -1/
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density

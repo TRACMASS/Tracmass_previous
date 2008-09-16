@@ -41,11 +41,13 @@ contains
 
 
 
-  subroutine statv(t, s, rho, kmm)
+  subroutine statv(t, s, rho, km)
     
+    IMPLICIT NONE
+
     REAL*4, ALLOCATABLE, DIMENSION (:)       :: dens_temp, dens_zero
     REAL*4, ALLOCATABLE, DIMENSION (:)       :: t, s, rho
-    INTEGER                                  :: KMM,k
+    INTEGER                                  :: KM,k
     
     REAL, PARAMETER                          :: a0 = 999.842594
     REAL, PARAMETER                          :: a1 =   6.793952e-2
@@ -65,16 +67,20 @@ contains
     REAL, PARAMETER                          :: c2 = -1.6546e-6
     
     REAL, PARAMETER                          :: d0 = 4.8314e-4
-    
+
+!print *,'allocate=',km
     allocate ( dens_temp(KM),dens_zero(KM) )
-    
-    do k=1,kmm
+!print *,'statv00000=',km,t(km),s(km)
+
+    do k=1,km
        dens_temp(k) = a0+(a1+(a2+(a3+(a4+a5*t(k))*t(k))*t(k))*t(k))*t(k)
        dens_zero(k) = dens_temp(k) &
             + (b0 + (b1 + (b2 + (b3 + b4*t(k))*t(k))*t(k))*t(k))*s(k) &
             + (c0 + (c1 + c2*T(k))*T(k))*s(k)*sqrt(S(k)) + d0*s(k)**2
        rho(k)=dens_zero(k)-1000.
 enddo
+
+!print *,'statv11111111=',km,rho(km)
 
 !  densP0 = sw_dens0(S,T);
 !  K      = sw_seck(S,T,P);

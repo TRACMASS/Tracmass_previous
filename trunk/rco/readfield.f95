@@ -1,15 +1,17 @@
 subroutine readfields
 
   USE mod_param
+  USE mod_vel
   USE mod_coord
   USE mod_time
   USE mod_grid
   USE mod_name
-  USE mod_vel
-  USE mod_dens
   USE mod_stat
   
-  
+#ifdef tempsalt
+  USE mod_dens
+#endif
+
   IMPLICIT none
   
 #ifdef tempsalt
@@ -25,7 +27,7 @@ subroutine readfields
   integer :: itt0,year,month,day,hour,minute,second
   integer :: imt0,jmt0,km0,nt0,NLEN0,NSNAPS0
   integer ::  i,j,k,m,kz,ii,ints2,kk,i0
-!  integer,  ALLOCATABLE, DIMENSION(:,:) :: kmu
+  integer,  ALLOCATABLE, DIMENSION(:,:) :: kmu
 !  integer :: kmu(IMT,JMT)
   real*8  ird0,ird20,ird30,ird40,stlon,stlat,dxdeg,dydeg
   
@@ -48,7 +50,7 @@ subroutine readfields
   integer ittstart,itt
   
   REAL*8, SAVE :: dxa,dya
-  INTEGER, SAVE, ALLOCATABLE,  DIMENSION(:,:) :: kmu
+!  INTEGER, SAVE, ALLOCATABLE,  DIMENSION(:,:) :: kmu
 
 !  print *,'readfield startar',ints
   
@@ -64,6 +66,7 @@ subroutine readfields
  if ( .not. allocated (kmu) ) then
      allocate ( kmu(imt,jmt) )
   end if
+
  
 !_______________________ update the time counting ________________________________________
 ihour=ihour+6
@@ -99,22 +102,21 @@ endif
 
 ! swap between datasets
 
-      do j=1,jmt
-       do i=1,imt
-        hs(i,j,1)=hs(i,j,2)
-        do k=1,km
-         uflux(i,j,k,1)=uflux(i,j,k,2)
-         vflux(i,j,k,1)=vflux(i,j,k,2)
-#ifdef tempsalt
-         tem(i,j,k,1)=tem(i,j,k,2)
-         sal(i,j,k,1)=sal(i,j,k,2)
-         rho(i,j,k,1)=rho(i,j,k,2)
+    ! === swap between datasets ===
+    hs(:,:,1)=hs(:,:,2)
+    uflux(:,:,:,1)=uflux(:,:,:,2)
+    vflux(:,:,:,1)=vflux(:,:,:,2)
+#ifdef explicit_w
+    wflux(:,:,:,1)=wflux(:,:,:,2)
 #endif
-        enddo
-       enddo
-      enddo
+#ifdef tempsalt
+    tem(:,:,:,1)=tem(:,:,:,2)
+    sal(:,:,:,1)=sal(:,:,:,2)
+    rho(:,:,:,1)=rho(:,:,:,2)
+#endif
 
 
+!  print *,'hhhhhhhhhhh',ints
                      
 !     === Create filenames for the snap-files to be used ===
 ofile='d0000000000.snap1'
@@ -126,13 +128,17 @@ if(.not.around) then
 print *,'This file is missing:',infile,ntime
 stop 4555
 endif
-zfile='gunzip -c '//infile//'.gz > '//trim(inDataDir)//'tmp/'//name
+zfile='gunzip -c '//infile//'.gz > '//trim(inDataDir)//'tmp/'//trim(outDataFile)
 !print *,zfile
+!print *,'outDataFile=',outDataFile
+!print *,'trim(outDataFile)=',trim(outDataFile)
 CALL system(zfile)
-rfile=trim(inDataDir)//'tmp/'//name
+rfile=trim(inDataDir)//'tmp/'//trim(outDataFile)
 !print *,'rfile=',rfile
 inquire(file=trim(rfile),exist=around)
 if(.not.around) stop 4556
+
+
 
 !     === open snap file ===
 open(unit=30,file=trim(rfile),status='old',form='unformatted',err=4000)
@@ -173,6 +179,7 @@ read(30) ird
 minute = ird
 read(30) ird
 second = ird
+
 
 read(30) ird0,ird20,ird30
 dtts = ird0
@@ -351,6 +358,7 @@ do k=1,km
    endif
   enddo
  enddo
+
 ! u -> transports
  do j=2,jmt
   do i=1,imt-1
@@ -403,6 +411,7 @@ do k=1,km
 enddo
 
 
+
 goto 9000
 
 2001  continue
@@ -417,23 +426,33 @@ stop 2000
 
 close(30) 
 
+!print *,'nnnnnnnnnnnnnnnn'
+!if(ints.gt.1) stop 494
 
 #ifdef tempsalt
 ! the density
 do i=1,imt
 ! print *,'i=',i
  do j=1,jmt
+! print *,'j=',j,i
   if(kmt(i,j).ne.0) then
    kmm=kmt(i,j)
+! print *,'kmt=',i,j,kmt(i,j)
    do k=1,kmm
+!   print *,'k=',k
     kk=km+1-k
+!   print *,'k=',k,'kk=',kk
     tempb(k)=tem(i,j,kk,2)
-    saltb(k)=(sal(i,j,kk,2)-35.)/1000.
+!    saltb(k)=(sal(i,j,kk,2)-35.)/1000.
     saltb(k)=sal(i,j,kk,2)
     if(saltb(k).lt.0.) saltb(k)=0.
     enddo
+! print *,'tempb=',tempb
+! print *,'saltb=',saltb
+!print *,'ij',i,j
+!print *,'kmm=',kmm
     call statv(tempb,saltb,rhob,kmm)
-!    print *,(rhob(k),k=1,kmm)
+! print *,'statv=',i,j
     do k=1,kmm
      kk=km+1-k
      rho(i,j,kk,2)=rhob(k)
@@ -441,7 +460,12 @@ do i=1,imt
    endif
   enddo
  enddo
+!print *,'777777777777777777'
+!stop 493
+#endif
 
+!print *,'wdfasdgaegaergergerwg'
+!stop 496
 
 !deallocate ( snap1d, rd2d,kmu )
 deallocate ( snap1d, rd2d )
@@ -450,12 +474,13 @@ deallocate ( zdzz,dzw,dxt )
 !deallocate ( dyt, phi, phit, yu )
 deallocate ( phit, yu )
 deallocate ( tempb, saltb, rhob )
+deallocate ( kmu )
 
 !print *,'readfield slut',ints
+!if(ints.gt.1) stop 49678
 
 return
 end subroutine readfields
-#endif
 
 !_______________________________________________________________________
       
