@@ -42,7 +42,7 @@ subroutine readfields
   
   REAL :: snap2d(imt,jmt)
 
-  character ofile*20,infile*48,zfile*123,rfile*39
+  character ofile*20,infile*78,zfile*123,rfile*59
   character*3 a_exp1
   character*2 a_exp2
   logical around
@@ -122,13 +122,14 @@ endif
 ofile='d0000000000.snap1'
 write(ofile(2:11),'(i10)') ntime
 
-infile=trim(inDataDir)//'2nm_122/'//ofile
-inquire(file=infile//'.gz',exist=around)
+infile=trim(inDataDir)//ofile
+!print *,infile
+inquire(file=trim(infile)//'.gz',exist=around)
 if(.not.around) then
 print *,'This file is missing:',infile,ntime
 stop 4555
 endif
-zfile='gunzip -c '//infile//'.gz > '//trim(inDataDir)//'tmp/'//trim(outDataFile)
+zfile='gunzip -c '//trim(infile)//'.gz > '//trim(inDataDir)//'tmp/'//trim(outDataFile)
 !print *,zfile
 !print *,'outDataFile=',outDataFile
 !print *,'trim(outDataFile)=',trim(outDataFile)

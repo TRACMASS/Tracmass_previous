@@ -16,7 +16,7 @@
   ! musslor
     iday    = 12,
     imon    = 5,
-    iyear   = 1990/
+    iyear   = 2000/
   !
   !
   &INITRUNWRITE
@@ -33,7 +33,9 @@
   kriva    = 0,
   !
   ! === Directory where input fields are stored
-  inDataDir = '/Volumes/hav4/data/rco/',
+  ! inDataDir = '/Volumes/hav4/data/rco/',
+  ! inDataDir = '/Users/doos/data/rco12/gcm/',
+  inDataDir = '/Volumes/RESA2/data/rco/2nm_122/',
   ! directory = '/Users/doos/data/rco12/',
   ! === Directory where output files are saved
   outDataDir   = '/Users/doos/data/rco12/orm/',
