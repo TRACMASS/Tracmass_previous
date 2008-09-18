@@ -120,7 +120,7 @@ endif
 
 ! particle diameter in mm: clay 0.0005-0.002, silt 0.002-0.06,
 ! fine sand 0.06-0.2 (medium sand 0.2-0.6, coarse sand 0.6-2, gravel>2)
-D = 0.001
+D = 0.001 --> partdiam
  
 ! density of quartz particle: 2600-2650 g/cm^3, mean value 2620
 rhos = 2620
@@ -133,7 +133,7 @@ rhos = 2620
 cwamp=20
 
 ! approximative  peak period. Average 4s for Baltic proper
-T=8
+T=8  --> twave
 
 ! critical bottom velocity for resuspension
 critvel=0.1

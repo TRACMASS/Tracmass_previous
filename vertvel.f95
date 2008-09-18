@@ -9,8 +9,8 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   USE mod_param
   USE mod_vel
   USE mod_turb
-#if defined sediment
-  USE mod_sediment
+#ifdef sediment
+  USE mod_sed
   USE mod_orbital
   USE mod_grid
 #endif

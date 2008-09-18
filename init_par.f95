@@ -15,6 +15,7 @@ subroutine init_params
   USE mod_tracer
 #ifdef sediment
   USE mod_orbital
+  USE mod_sed
 #endif
   implicit none
 
@@ -45,6 +46,9 @@ subroutine init_params
 #ifdef tempsalt
   namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
+#endif
+#ifdef sediment
+  namelist /INITRUNSEDIMENT/ partdiam, rhos, cwamp, twave, critvel
 #endif
 
 
@@ -84,6 +88,10 @@ subroutine init_params
 #ifdef tempsalt
   read(8,nml=INITRUNTEMPSALT)
 #endif
+#ifdef sediment
+  read(8,nml=INITRUNSEDIMENT)
+#endif
+
   read(8,nml=INITRUNEND)
 !print *,'ienw',ienw
 !print *,'iene',iene

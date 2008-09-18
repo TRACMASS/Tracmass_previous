@@ -1,8 +1,8 @@
+#ifdef sediment
 !23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
-!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !
-! Subroutine to sedimentation model for the Baltic sea. The routine
-! calculates the settling velocity of the particle size modelled.
+! Subroutine of a sedimentation model for the Baltic Sea by Hanna Corell.
+! The routine calculates the settling velocity of the particle size modelled.
 ! The formulas are taken from 
 ! F. Shepard, Submarine Geology, Harper InternationalEdition, 1948
 ! p. Nielsen, Coastla bottom boundary layers ..., World Scientific, 1992
@@ -10,15 +10,15 @@
 !      subroutine sedvel(rhos,D,visc,wsed) ! If called from main.F
 
 subroutine sedvel(temp,dens)  ! If called from loop.F
-USE param_variables
+USE mod_param
 USE mod_sed
 USE mod_orbital
 IMPLICIT none
 
-real g,rho,visc,xny,Dm,temp,dens,a1,a2,a3,a4
+REAL*4   :: grav,rho,visc,xny,Dm,temp,dens,a1,a2,a3,a4
 
-g = 9.81 ! gravity
-Dm = D/1000.0 ! change diameter from mm to m
+grav = 9.81 ! gravity
+Dm = partdiam/1000.0 ! change diameter from mm to m
 a1=0.003869
 a2=0.0248
 a3=0.011607
@@ -28,8 +28,8 @@ a4=0.07440
 ! rho = 1002  ! If called from main.F
 ! temp = 10.
 rho=dens+1000.0  ! If called from loop.F
-if(rho.lt.900) stop 3095
-if(rho.gt.1200) stop 3096
+if(rho.lt.900.) stop 3095
+if(rho.gt.1200.) stop 3096
 
 if (temp.lt.2.5) then
  visc=0.001787
@@ -47,13 +47,14 @@ endif
 
 xny = visc/rho
 
-if (D.gt.0.2) then
- wsed = (-3*xny+SQRT(9*xny**2+g*D**2*((rhos-rho)/rho)*(a1+a2*D)))/(a3+a4*D)
+if (partdiam.gt.0.2) then
+ wsed = (-3*xny+SQRT(9*xny**2+grav*partdiam**2*((rhos-rho)/rho)*(a1+a2*partdiam)))/(a3+a4*partdiam)
  if(wsed.gt.0.) stop 4967
-elseif (D.le.0.2 .and. D.gt.0.) then
+elseif (partdiam.le.0.2 .and. partdiam.gt.0.) then
  wsed = -(1.0/18.0)*((rhos-rho)/visc)*g*(Dm**2) 
-elseif (D.le.0.) then
+elseif (partdiam.le.0.) then
  print*,'illegal diameter'
+ stop 4956
 endif
 
 !print*,rho,rhos,temp,visc,wsed
@@ -65,7 +66,7 @@ end subroutine sedvel
 !______________________________________________________________________________________
 !_Check if water velocities are large enough for resuspention of sedimentated trajectories
 subroutine resusp(res,ib,jb,kb)
-USE param_variables
+USE mod_param
 USE mod_sed
 USE mod_orbital
 USE mod_vel
@@ -74,7 +75,7 @@ USE mod_grid
 IMPLICIT none
 
 
-REAL botvel,uorb,surfvel,kin!kin ska bort
+REAL botvel,uorb,surfvel,kin   !kin ska bort
 INTEGER ib,jb,kb
 logical res 
 
@@ -110,17 +111,18 @@ end subroutine resusp
 ! to short surface waves.
 
 subroutine orbitalv(H)
-USE param_variables
+USE mod_param
 USE mod_sed
 USE mod_orbital
 USE mod_grid
+IMPLICIT none
 
 INTEGER k,l
 REAL dh,omega,pi,grav,H(km),zk(km),zk49(km),zk50(km),test
 
 dh=0.0
 pi = 2.*asin(1.)
-omega=2.*pi/T
+omega=2.*pi/twave
 grav=9.81
 test=0.0 !
 
@@ -152,3 +154,4 @@ print*,'sum of total error iterations 49 and 50 ',test
 
 return
 end subroutine orbitalv
+#endif

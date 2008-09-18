@@ -229,7 +229,8 @@ ENDMODULE mod_tracer
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #ifdef sediment
 MODULE mod_sed
-  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
+!  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
+  REAL :: wsed, partdiam, rhos, cwamp, twave, critvel, kincrit
 ENDMODULE mod_sed
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_orbital

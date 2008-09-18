@@ -831,7 +831,7 @@ subroutine loop
                  nrj(ntrac,1)=ib
                  nrj(ntrac,2)=jb
                  nrj(ntrac,3)=ka
-                 nrj(ntrac,4)=n
+                 nrj(ntrac,4)=niter
                  nrj(ntrac,5)=idint(ts)
                  nrj(ntrac,7)=1
                  !call writedata(13)
