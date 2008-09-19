@@ -77,7 +77,7 @@
   nqua       = 1,
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant  = 1,
+  partQuant  = 4,
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -92,8 +92,8 @@
   !
   ist1     = 900,		 
   ist2     = 1000,		 
-  jst1     = 200,		 
-  jst2     = 200,		 
+  jst1     = 1,		 
+  jst2     = -1,		 
   kst1     =  1,		 
   kst2     =  -1/
 

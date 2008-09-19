@@ -64,14 +64,16 @@ open(58,file=trim(fullWritePref)//'__in.asc')       ! entrance position
 #endif
 
 #if defined binwrite
-open(76,file=trim(fullWritePref)//'_run.bin' &      ! trajectory path
-     ,access='direct' ,form='unformatted' ,recl=20) !
-open(77,file=trim(fullWritePref)//'_out.bin'    &   ! exit position
-     ,access='direct' ,form='unformatted' ,recl=20) !
-open(78,file=trim(fullWritePref)//'__in.bin'    &   ! entrance position
-     ,access='direct' ,form='unformatted' ,recl=20) !
-open(79,file=trim(fullWritePref)//'_err.bin'    &   ! Error flagged trajs 
-     ,access='direct' ,form='unformatted' ,recl=20) ! 
+open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  ! Trajectory path
+     ,access='direct' ,form='unformatted' ,recl=20)   !
+open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  ! Exit position
+     ,access='direct' ,form='unformatted' ,recl=20)   !
+open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &  ! Killed position
+     ,access='direct' ,form='unformatted' ,recl=20)   !
+open(unit=78 ,file=trim(fullWritePref)//'__in.bin' &  ! Entrance position
+     ,access='direct' ,form='unformatted' ,recl=20)   !
+open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  ! Error position 
+     ,access='direct' ,form='unformatted' ,recl=20)   ! 
 #endif
 
 
