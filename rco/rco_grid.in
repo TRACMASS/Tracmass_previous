@@ -1,8 +1,8 @@
   &INITGRIDDESC
    GCMname    = 'rco',
-   GCMsource  = 'http://bla.bla/',
+   GCMsource  = 'rco',
    gridName   = 'rco',
-   gridSource = 'http://bla/bla.html',
+   gridSource = 'rco',
    gridDesc   = '2 minutes run for the Baltic Sea'/
 
 $INITGRIDGRID

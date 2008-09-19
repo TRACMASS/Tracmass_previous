@@ -893,7 +893,7 @@ subroutine loop
            call arclength(ia,ja,ka,dt,rr,arc)
            arct=arct+arc*arcscale  ! orig arc in meters -> 100 km
            ! === end trajectory if outside chosen domain ===
-#if defined occam25 || occ66
+#if defined occ
            ! === stop and select stream function ===
            if( y1.eq.dble(jmt-2) .and. n.ne.1 ) then ! To Northern Boundary
               nnorth=nnorth+1

@@ -51,7 +51,7 @@ if (partdiam.gt.0.2) then
  wsed = (-3*xny+SQRT(9*xny**2+grav*partdiam**2*((rhos-rho)/rho)*(a1+a2*partdiam)))/(a3+a4*partdiam)
  if(wsed.gt.0.) stop 4967
 elseif (partdiam.le.0.2 .and. partdiam.gt.0.) then
- wsed = -(1.0/18.0)*((rhos-rho)/visc)*g*(Dm**2) 
+ wsed = -(1.0/18.0)*((rhos-rho)/visc)*grav*(Dm**2) 
 elseif (partdiam.le.0.) then
  print*,'illegal diameter'
  stop 4956

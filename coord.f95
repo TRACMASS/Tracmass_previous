@@ -13,14 +13,11 @@ INTEGER i,j,k,kk,mois(12)
 REAL*8 pi,radian,radius,rlatt,rlatu,rmax,smax,tmax
 REAL :: a
 
-#if defined occam25 || occ66
+#if defined occ
 REAL*8 b1,b2,b3,b4,z
 #endif
 
-#if defined occam25
-data b1,b2,b3,b4/ 13635.703538701,12023.336474772,15.503284687122,7.2929323809417 /
-#endif
-#if defined occ66
+#if defined occ
 data b1,b2,b3,b4/10725.0d0,  10275.0d0, 36.0d0,     13.0d0/
 #endif
 
@@ -48,7 +45,7 @@ enddo
 rmin=19.d0
 rmax=28.5d0
 
-#if defined occam25 || occ66
+#if defined occ66
 dx = 0.25d0
 dy = 0.25d0
 rmin=19.d0
@@ -197,18 +194,7 @@ dz( 1)=   11.99292d0
  dz(1)=20.d0
 #endif
 
-#if defined occam25 
-do k=0,KM
- zw(k)=b1*dble(KM-k)+b2*b4*dlog(dcosh((dble(KM-k)-b3)/b4)/dcosh(-b3/b4))
- zw(k)=1.d-2*zw(k) 
-enddo
-zw(KM)=0.d0
-do k= 1, KM
- dz(k)  = zw(k-1) - zw(k)
-enddo
-#endif
-
-#if defined occ66
+#if defined occ
 ! depth coord in meters from surface and down (OCCAM def)
 do k=0,KM
  z = k
@@ -226,7 +212,7 @@ enddo
 #endif
 
 
-#if defined occam25 || occ66 || rco || tes || for || sim 
+#if defined occ || rco || tes || for || sim 
 do i=1,IMT
  do j=1,JMT
   dxdy(i,j)=dx*cst(j)*dy*deg**2

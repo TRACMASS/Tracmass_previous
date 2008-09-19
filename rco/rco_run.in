@@ -34,11 +34,11 @@
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Volumes/hav4/data/rco/',
-  ! inDataDir = '/Users/doos/data/rco12/gcm/',
+  ! inDataDir = '/Users/doos/data/rco/gcm/',
   inDataDir = '/Volumes/RESA2/data/rco/2nm_122/',
-  ! directory = '/Users/doos/data/rco12/',
+  ! directory = '/Users/doos/data/rco/',
   ! === Directory where output files are saved
-  outDataDir   = '/Users/doos/data/rco12/orm/',
+  outDataDir   = '/Users/doos/data/rco/orm/',
   ! name of current trajectory run
   outDataFile      = 'aa.00.aa',
   ! name of ??????????????????????

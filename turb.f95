@@ -1,5 +1,5 @@
 #ifdef turb    
-subroutine turbu(ia,ja,ka,rr)
+subroutine turbuflux(ia,ja,ka,rr)
   
   ! computes the paramterised turbulent velocities u' and v' into upr
   
@@ -57,7 +57,7 @@ subroutine turbu(ia,ja,ka,rr)
 #ifdef full_wflux
     localW=wflux(ia,ja,ka-1,1)
 #else
-    localW=w(ka-1)
+    localW=wflux(ka-1)
 #endif
     
     if(localW.eq.0.d0) then
@@ -73,6 +73,6 @@ subroutine turbu(ia,ja,ka,rr)
  
  
  return
-end subroutine turbu
+end subroutine turbuflux
 #endif
 !_______________________________________________________________________
