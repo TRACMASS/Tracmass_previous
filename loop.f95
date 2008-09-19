@@ -57,17 +57,13 @@ subroutine loop
   REAL*8 ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
   REAL*8 subvol,vol,arc,arct,rr,rb,rg,rbg,uu
   
-  INTEGER                                    :: landError=0
-  REAL                                       :: fullstamp1 ,fullstamp2
-  REAL, DIMENSION(2)                         :: timestamp1 ,timestamp2
+  INTEGER                                    :: landError=0 ,boundError=0
   REAL zz
   
   logical scrivi
   
   ! === Error Evaluation ===
   INTEGER                             :: errCode
-
-
   
   iday0=iday
   imon0=imon
@@ -175,15 +171,13 @@ subroutine loop
   !=== read ocean/atmosphere GCM data files               ===
   !==========================================================
   print *,'------------------------------------------------------'
-  WRITE (6, FMT="(A)", ADVANCE="NO") ' === Reading initial dataset'
-  call etime(timestamp1,fullstamp1)
+  call fancyTimer('initialize dataset','start')
   ff=dble(nff)
   tstep=dble(intstep) 
   ints=intstart
   call readfields   ! initial dataset
   ntrac=0
-  call etime(timestamp2,fullstamp2)
-  write (6 , FMT="(A,F5.2,A)") ', done in ' ,(fullstamp2-fullstamp1) ,' sec'
+  call fancyTimer('initialize dataset','stop')
 
   !==========================================================
   !==========================================================
@@ -192,8 +186,11 @@ subroutine loop
   !==========================================================
   
   intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
-     
+
+     call fancyTimer('reading next datafield','start')
      call readfields
+     call fancyTimer('reading next datafield','stop')
+     
      if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
 #ifdef tracer 
      if(mod(ints,120).eq.0) call writetracer
@@ -203,12 +200,14 @@ subroutine loop
      ! ===    Seed particles if still in intspin.         ===
      !=======================================================
      intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+        call fancyTimer('seeding','start')
         ! === Seed particles ===
         ntrac=ntractot
+
         ijkstloop: do ijk=1,ijkMax
            ist  = ijkst(ijk,1)
            jst  = ijkst(ijk,2)
-           kst  = 23!ijkst(ijk,3)
+           kst  = ijkst(ijk,3)
            idir = ijkst(ijk,4)
            isec = ijkst(ijk,5)
            vol  = 0
@@ -421,6 +420,7 @@ subroutine loop
         end do ijkstloop
         
         ! ===  End of seeding part ===
+        call fancyTimer('seeding','stop')
      end if intspinCond
      ! ntracin
      ntractot=ntrac
@@ -432,6 +432,7 @@ subroutine loop
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===
      !=======================================================
+     call fancyTimer('advection','start')
      ntracLoop: do ntrac=1,ntractot-1        
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6).eq.1) cycle ntracLoop
@@ -491,6 +492,7 @@ subroutine loop
 #endif        
         ! ===  start loop for each trajectory ===
         scrivi=.false.
+!             print *,' --- niterLoop  ', ntrac
         niterLoop: do        
            niter=niter+1 ! iterative step of trajectory
 #ifdef sediment
@@ -601,7 +603,6 @@ subroutine loop
               print *,'dt=',dt
               goto 1500
            endif
-
            ! === if time step makes the integration ===
            ! === exceed the time when fiedls change ===
            if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
@@ -847,7 +848,6 @@ subroutine loop
            endif
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
-           
 #ifdef orc 
            if(y1.eq.dble(JMT)) then ! north fold cyclic
               x1=722.d0-x1
@@ -862,12 +862,11 @@ subroutine loop
            if(ib.gt.IMT) ib=ib-IMT             ! east-west cyclic
            if(y1.ne.dble(idint(y1))) jb=idint(y1)+1
            
-!           print *,z1,km,kmt(ib,jb)
-!           print*,'---'
+           call errorCheck('boundError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
+
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
-!              print *,z1,km,kmt(ib,jb)
               z1=dble(KM-kmt(ib,jb))+0.5d0
-!              print *,'==='
            end if
            if( z1.ge.dble(KM) ) then
               z1=dble(KM)-0.5
@@ -877,7 +876,6 @@ subroutine loop
               kb=idint(z1)+1
               if(kb.eq.KM+1) kb=KM  ! ska nog bort
            endif
-           
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            
@@ -887,7 +885,6 @@ subroutine loop
            call diffusion(x1,y1,z1,ib,jb,kb,dt,snew,st0,st1)
            
 #endif
-           
            ! === Calculate arclength of the ===
            ! === trajectory path in the box ===
            call arclength(ia,ja,ka,dt,rr,arc)
@@ -895,7 +892,7 @@ subroutine loop
            ! === end trajectory if outside chosen domain ===
 #if defined occ
            ! === stop and select stream function ===
-           if( y1.eq.dble(jmt-2) .and. n.ne.1 ) then ! To Northern Boundary
+           northbound: if( y1.eq.dble(jmt-2) .and. n.ne.1 ) then
               nnorth=nnorth+1
               nexit(1)=nexit(1)+1
            elseif(x1.eq.dble(idr) .and. ja.lt.94 .and. n.ne.1 ) then ! or to Drake
@@ -906,15 +903,15 @@ subroutine loop
               ! or continue trajectory
            else
               cycle niterLoop                                   
-           endif
+           endif northbound
 #else     
-           do k=1,LBT
+           LBTloop: do k=1,LBT
               if(ienw(k).le.ib .and. ib.le.iene(k) .and. &
                    jens(k).le.jb .and. jb.le.jenn(k)  ) then
                  nexit(k)=nexit(k)+1
                  exit niterLoop                                
               endif
-           enddo
+           enddo LBTLOOP
            ! === stop trajectory if the choosen time or ===
            ! === water mass properties are exceeded     ===
            if(tt-t0.ge.timax) then
@@ -951,11 +948,14 @@ subroutine loop
 599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
           ' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, ' nsusp=',i8,' nexit=',9i8)
 #else
-     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout-nerror,nexit
-599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
-         ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
+!     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout-nerror,nexit
+!599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
+!         ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
 #endif
-     
+
+     call fancyTimer('advection','stop') 
+     print 799 ,ints ,ntractot ,nout ,nerror
+799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4)
      
   end do intsTimeLoop
   
@@ -1054,6 +1054,31 @@ return
              errCode = -39
              stop
           endif          
+
+       case ('boundError')
+          if(ia>imt .or. ib>imt .or. ja>jmt .or. jb>jmt &
+               .or. ia<1 .or. ib<1 .or. ja<1 .or. jb<1) then
+             if (verboseMess == 1) then
+                print *,'====================================='
+                print *,'Warning: Trajectory leaving model area'
+                print *,'-------------------------------------'
+                print *,'iaib',ia,ib,ja,jb,ka,kb
+                print *,'xyz',x0,x1,y0,y1,z0,z1
+                print *,'ds',dse,dsw,dsn,dss,dsu,dsd
+                print *,'dsmin=',ds,dsmin,dtmin,dxyz
+                print *,'tt=',tt,ts
+                print *,'ntrac=',ntrac
+                print *,'-------------------------------------'
+                print *,'The trajectory is killed'
+                print *,'====================================='
+             end if
+             call writedata(19)
+             boundError = boundError +1
+             errCode = -50
+             call writedata(40)
+             nrj(ntrac,6)=1
+          endif
+
        case ('landError')
           if(kmt(ib,jb).eq.0) then
              if (verboseMess == 1) then
@@ -1156,6 +1181,7 @@ return
     INTEGER                              :: sel ,xf ,yf ,zf ,n
     INTEGER, SAVE                        :: recPosIn=0  ,recPosOut=0
     INTEGER, SAVE                        :: recPosRun=0 ,recPosErr=0
+    INTEGER, SAVE                        :: recPosKll=0
     REAL                                 :: x14 ,y14 ,z14
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
@@ -1264,8 +1290,8 @@ return
           write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14       
        end if
     case (13)
-       recPosOut = recPosOut+1
-       write(unit=77 ,rec=recPosOut) ntrac,ints,x14,y14,z14   
+       recPosKll = recPosKll+1
+       write(unit=77 ,rec=recPosKll) ntrac,ints,x14,y14,z14   
     case (14)
        recPosRun = recPosRun+1
        write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
@@ -1283,52 +1309,35 @@ return
     !      write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
     !   endif
        !   !case (19)
+    case (19)
+       recPosOut = recPosOut+1
+       write(unit=75 ,rec=recPosOut) ntrac,ints,x14,y14,z14
     case (40)
        recPosErr=recPosErr+1    
        write(unit=79 ,rec=recPosErr) ntrac,ints,x14,y14,z14   
     end select
 #endif    
 
-
-!!$#if defined binwrite 
-!!$    select case (sel)
-!!$    case (10)
-!!$       write(78) ntrac,ints,x1,y1,z1
-!!$    case (11)
-!!$       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
-!!$            (scrivi .and. kriva.eq.2)                .or. &
-!!$            (kriva.eq.3)                             .or. &
-!!$            (kriva.eq.4 .and. niter.eq.1)            .or. &
-!!$            (kriva.eq.5 .and. &
-!!$            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
-!!$            .or.tt-t0.eq.21.*tday)) ) then
-!!$          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-!!$          write(76) ntrac,ints,x1,y1,z1
-!!$       end if
-!!$    case (13)
-!!$       write(77) ntrac,ints,x1,y1,z1
-!!$    case (14)
-!!$       write(76) ntrac,ints,x1,y1,z1§
-!!$    case (15)
-!!$       write(76) ntrac,ints,x1,y1,z1
-!!$    case (16)
-!!$       if(kriva.ne.0 ) then
-!!$          write(76) ntrac,ints,x1,y1,z1
-!!$       end if
-!!$    case (17)
-!!$       write(77) ntrac,ints,x1,y1,z1
-!!$    case (18)
-!!$       if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
-!!$            ints.eq.intstart+intrun) then 
-!!$          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-!!$          write(76) ntrac,ints,x1,y1,z1
-!!$       endif
-!!$       !case (19)
-!!$    end select
-!!$#endif    
-
-
   end subroutine writedata
-  
+
+
+  subroutine fancyTimer(timerText ,testStr)
+    IMPLICIT NONE
+
+    CHARACTER (len=*)                          :: timerText ,testStr
+    REAL ,SAVE                                 :: fullstamp1 ,fullstamp2
+    REAL ,SAVE ,DIMENSION(2)                   :: timestamp1 ,timestamp2
+    REAL                                       :: timeDiff
+    
+    select case (trim(testStr))
+    case ('start')
+       WRITE (6, FMT="(A)", ADVANCE="NO") ' - Begin '//trim(timerText)
+       call etime(timestamp1,fullstamp1)
+    case ('stop')
+       call etime(timestamp2,fullstamp2)
+       timeDiff=fullstamp2-fullstamp1
+       write (6 , FMT="(A,F5.2,A)") ', done in ' ,timeDiff ,' sec'
+    end select
+  end subroutine fancyTimer
 end subroutine loop
 

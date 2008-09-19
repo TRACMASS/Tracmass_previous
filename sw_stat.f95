@@ -32,14 +32,10 @@ contains
     
     dens   = dens0/(1-(pres/10)/seck)
   end subroutine statvd
+
+
   
-
-
-
 !   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
-
-
 
   subroutine statv(t, s, rho, km)
     
@@ -68,9 +64,7 @@ contains
     
     REAL, PARAMETER                          :: d0 = 4.8314e-4
 
-!print *,'allocate=',km
-    allocate ( dens_temp(KM),dens_zero(KM) )
-!print *,'statv00000=',km,t(km),s(km)
+    allocate ( dens_temp(KM),dens_zero(KM) ,rho(KM) )
 
     do k=1,km
        dens_temp(k) = a0+(a1+(a2+(a3+(a4+a5*t(k))*t(k))*t(k))*t(k))*t(k)

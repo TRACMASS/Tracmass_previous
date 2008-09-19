@@ -113,19 +113,19 @@ SUBROUTINE readfields
      kmt      = sum(ceiling(hFacW),3)
   endif initCond   ! === End init section ===
   
-
-
   start3d  = [   1,  1, 1]
   count3d  = [2160,320,42]
-  gridfile = trim(inDataDir) // '/MITGCM/' // 'UVEL_5dy.' // fstamp // '.data'
+  gridfile = trim(inDataDir)//'/MITGCM/'//'UVEL_5dy.'//fstamp//'.data'
   uvel     = get3dfield()
-  gridfile = trim(inDataDir) // '/MITGCM/' // 'VVEL_5dy.' // fstamp // '.data'
+  gridfile = trim(inDataDir)//'/MITGCM/'//'VVEL_5dy.'//fstamp//'.data'
   vvel     = get3dfield()
-  gridfile = trim(inDataDir) // '/MITGCM/' // 'WVEL_5dy.' // fstamp // '.data'
+  gridfile = trim(inDataDir)//'/MITGCM/'//'WVEL_5dy.'//fstamp//'.data'
   wvel   = get3dfield()
 
   !Density not included
   !SSH not included
+
+  print *,'d'
   
   iloop: do i=1,imt
      jloop: do j=1,jmt
@@ -140,6 +140,8 @@ SUBROUTINE readfields
      enddo jloop
   enddo iloop
   
+  print *,'e'
+
   return
 
 
