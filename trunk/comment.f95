@@ -85,7 +85,7 @@
 ! trj(ntrac,6)=arct length of the trajectory computed by arclength.f
 ! trj(ntrac,7)=t0 initial time in seconds of trajectory
 !
-!__________________________ Array dimensions defined in param.h __________________________
+!__________________________ Array dimensions defined in modules.f95_______________________
 ! IMT= zonal model array dimension
 ! JMT= meridional    "
 ! KM=  vertical      "
@@ -96,26 +96,34 @@
 ! LBT=stream function separation dimension. If LBT>1 one must use Drerun if time dependent
 ! NEND=number of end sections that are defined in main
 ! Stream function dimension with LOV=1 for Ddensity and LOV=3 for Dstreamts
-
-
-
 !_________________________________________________________________________________________
 ! Run the programme with gotraj with the following precompilation options:
 !
-!__________ OGCM possibilities
+!__________ Ocean and atmospheric GCM possibilities
+!
 ! -Dorca        ORCA5/OPA model
-! -Docc66       Occam 66 levles 1/4 deree resolution
+! -Docc         OCCAM 66 levles 1/4 deree resolution
 ! -Drco         RCO model 2 nm
 ! -Dfors        Forsmark model
 ! -Dsimp        Simpevarp model
 ! -Dtes         Test basin with analytical time depenent velocity fields
 ! -Dtun         ROMS GCM for the Med 
-! 
+! -Datm         The AGCM (IFS) from ECMWF, which is part of EC-Earth
+!
+!__________ Time possibilities
 ! -Dtime        Time changing velocity fields
-! -Dstat        Stationary velocity fields
-!
+! -Dstat        Stationary velocity fields (does not work at the moment)
+! -Dtimeanalyt  Analytical time dependent option is based on Vries and Döös (JAOT,2001)  
+!               It has to be reimplemented from old TRACMASS code 
+!_________________________________________________
 ! -Dsediment    Sediment code developed for RCO
+! -Dtwodim      Two-dimensional trajectories, which do not change depth. 
+!               The vertical velocity is simply set to zero.
+! -Drerun       Stores the Lagrangian stream functions as a function of the end
+!               positions that has been calculated in an identical previous trajectory run
+! -Dturb        Adds parameterised sub-grid turbulent velocities u' and v'
 !
+!_______________ Output possibilities
 ! -Dstreamxy    Calculates the barotropic stream function.  
 ! -Dstreamv     Calculates the vertical stream function as a function of depth
 ! -Dstreamr     ------------------------ " ----------------------------- density 
@@ -123,56 +131,11 @@
 ! -Dtempsalt    Calculates the temperature, salinity and the density 
 ! -Ddensity     Calculates only the density along the trajectory.  
 !
-! -Dmean 
-!
-! -Dtracer      Stores a simulated tracer
-!
-! -Drerun       Stores the Lagrangian stream functions as a function of the end
-!               positions that has been calculated in an identical previous trajectory run
+! -Dtracer      Stores trajectory particle positions as a simulated tracer
 !
 !
 !OOOOOOOOOOOOOOOOOOOOOOOOOOO  OLD precompilation options OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-!
-! -Dtwodim: Uses a two-dimensional velocity field. 
-!           surface layer velocity. Trajectory stops when converged.
-!
-! -Deqatl: release trajectories only from the Equator in the Atlantic
-!          Ocean. To be used only with -Dmod1
-!
-! -Dinitone: Trajectories are only generated at the very first time step
-!
-! 
-! -Dinterp1: used for working with NADW. The depth of the 
-! isopycnal 27.625 is it stored in two files 
-! 
-! -Dnome: It stops all the trajectories enetring the Mediterranean Sea. 
-! The variable  imed counts the number of trajectories entering.
-! 
-! -Dupwelling: It is used to calculate the upwelling of NADW. The result
-! is stored in binary format in unit 58, file data.upw
-! 
-! -Dpoints: It is used for release trajectories from a fixed section.
-! 
-! -Dseason: To be used in conjuction with  -Dtime. It will check 
-!           only the change in season.
-! 
 
-!
-! -Deqatl: release trajectories only from the Equator in the Atlantic
-!          Ocean. To be used only with -Dmod1
-!
-! -Dline: it is used for considering only trajectories below a certain value in 
-! latitude (only for model 2)
-! 
-! -Dinterp1: used for working with NADW. The depth of the 
-! isopycnal 27.625 is it stored in two files 
-! (/mare/faggioli/depthtime1.dat, 
-! /mare/faggioli/depthtime2.dat) and it is assigned to unit 85. 
-! The variables read are called  depth1(imt1,jmt1) and  depth2(imt2,jmt2).
-! 
-! -Dnome: It stops all the trajectories enetring the Mediterranean Sea. 
-! The variable  imed counts the number of trajectories entering.
-! 
-! -Dpoints: It is used for release trajectories from a fixed section.
-! 
-
+! -Dmean 
+! -Dfiveday
+! -Dsigma 

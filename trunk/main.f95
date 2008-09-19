@@ -80,48 +80,6 @@ open(79,file=trim(fullWritePref)//'_err.bin'    &   ! Error flagged trajs
 
 call loop
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 CONTAINS
 
   subroutine writesetup
@@ -149,7 +107,7 @@ CONTAINS
     print *,'Rerun in order to store the Lagrangian stream functions in the different basins'
 #endif
 #if defined twodim                                             
-    print *,'Two-dimensional trajectory, which do not change depth'
+    print *,'Two-dimensional trajectories, which do not change depth'
 #endif
 #if defined full_wflux
     print *,' 3D   vertival volume flux field.'
@@ -157,7 +115,12 @@ CONTAINS
 #if defined explicit_w
     print *,'Given vertical velocity.'
 #endif
-
+#if defined sediment                                             
+    print *,'Sedimentation including resuspension activated'
+#endif
+#if defined sediment                                             
+    print *,"Parameterised sub-grid turbulent velocities added"
+#endif
 
 
 #if defined streamxy
