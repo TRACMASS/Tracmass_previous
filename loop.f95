@@ -297,6 +297,7 @@ subroutine loop
            end select
            if(num.eq.0) num=1 ! always at least one trajectory
         
+
            ijt    = nint(sqrt(float(num)))
            kkt    = nint(float(num)/float(ijt))
            subvol = vol/dble(ijt*kkt)
@@ -316,28 +317,28 @@ subroutine loop
                  jb=jst
                  kb=kst
                  
-                 ! === Meridional section ===
                  select case(isec)
                  case (1)
+                    ! === Meridional section ===
                     y1=dble(jb-1) + (dble(ijj)-0.5d0)/dble(ijt) 
                     x1=dble(ist) 
                     if(idir.eq. 1) ib=ist+1
                     if(idir.eq.-1) ib=ist 
                     z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-                    ! === Zonal section      ===
                  case (2)
+                    ! === Zonal section      ===
                     x1=dble(ibm) + (dble(ijj)-0.5d0)/dble(ijt)
                     y1=dble(jst) 
                     if(idir.eq. 1) jb=jst+1
                     if(idir.eq.-1) jb=jst 
                     z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-                    ! === Vertical section   ===
                  case (3)
+                    ! === Vertical section   ===
                     x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
                     y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
                     z1=dble(kb)
-                    ! === Spread even inside T-box ===
                  case (4)
+                    ! === Spread even inside T-box ===
                     x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
                     y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
                     ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
@@ -1149,15 +1150,17 @@ return
        case ('infLoopError')
           if(niter-nrj(ntrac,4).gt.30000) then ! break infinite loops
              nloop=nloop+1             
-             print *,'====================================='
-             print *,'Warning: Particle in infinite loop '
-             print *,'niter:',niter,'nrj:',nrj(ntrac,4)
-             print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
-             print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
-             print *,'x1:',x1,'u:',uflux(ia-1,ja-1,ka-1,2)
-             print *,'y1:',y1,'v:',vflux(ia-1,ja-1,ka-1,2)
-             print *,'kb:',kb-1,'z1:',z1
-             print *,'-------------------------------------'
+             if (verboseMess == 1) then
+                print *,'====================================='
+                print *,'Warning: Particle in infinite loop '
+                print *,'niter:',niter,'nrj:',nrj(ntrac,4)
+                print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
+                print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
+                print *,'x1:',x1,'u:',uflux(ia-1,ja-1,ka-1,2)
+                print *,'y1:',y1,'v:',vflux(ia-1,ja-1,ka-1,2)
+                print *,'kb:',kb-1,'z1:',z1
+                print *,'-------------------------------------'
+             end if
              trj(ntrac,1)=x1
              trj(ntrac,2)=y1
              trj(ntrac,3)=z1
@@ -1198,9 +1201,11 @@ return
     yf   = floor(y1)
     zf   = floor(z1)
     
-    vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
-         (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
-    
+    if ((sel .ne. 19) .and. (sel.ne.40)) then
+       vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
+            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
+    end if
+
 #if defined textwrite 
     select case (sel)
     case (10)
@@ -1278,7 +1283,7 @@ return
        write(unit=78 ,rec=recPosIn) ntrac,ints,x14,y14,z14
        return
     case (11)
-       if( (kriva.eq.1 .and. ts .eq. ints-1) .or. &
+       if( (kriva.eq.1 .and. ts .eq. ints) .or. &
             (scrivi .and. kriva.eq.2)                .or. &
             (kriva.eq.3)                             .or. &
             (kriva.eq.4 .and. niter.eq.1)            .or. &
@@ -1331,7 +1336,7 @@ return
     
     select case (trim(testStr))
     case ('start')
-       WRITE (6, FMT="(A)", ADVANCE="NO") ' - Begin '//trim(timerText)
+       WRITE (6, FMT="(A)", ADVANCE="NO") ,' - Begin '//trim(timerText)
        call etime(timestamp1,fullstamp1)
     case ('stop')
        call etime(timestamp2,fullstamp2)

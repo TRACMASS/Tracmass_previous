@@ -181,7 +181,7 @@ subroutine init_params
 !  allocate ( ienw (LBT),iene (LBT) )
 !  allocate ( jens (LBT),jenn (LBT) )
   allocate ( uflux(imt,jmt,km,nst), vflux(imt,jmt,km,nst) )
-  allocate ( hs(imt,jmt,nst) )
+  allocate ( hs(imt+1,jmt+1,nst) )
 #ifdef full_wflux
   allocate ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
 #else
