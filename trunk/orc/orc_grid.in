@@ -1,8 +1,13 @@
+ &INITGRIDDESC
+   GCMname    = 'OPA',
+   GCMsource  = 'http://www.locean-ipsl.upmc.fr/opa/',
+   gridName   = 'Orca 2',
+   gridSource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+   gridDesc   = '1/2 deg run for the global Ocean.'/
 $INITGRIDGRID
   IMT      = 720,
   JMT      = 511,
   KM       = 46,
-  JMAX     = 511,
   LBT      = 5,
   NEND     = 6/              ! NEND = LBT +1
 
