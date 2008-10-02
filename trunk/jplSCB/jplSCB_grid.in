@@ -1,4 +1,9 @@
- &INITGRIDDESC
+&INITGRIDVER
+  ! === Used to check if this file has the correct syntax
+  gridVerNum  = 1/
+  !
+  !
+&INITGRIDDESC
   GCMname    = 'ROMS',
   GCMsource  = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
   gridName   = 'jplSRC',

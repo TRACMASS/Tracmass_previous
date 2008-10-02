@@ -8,6 +8,7 @@ SUBROUTINE readfields
   USE mod_grid
   USE mod_name
   USE mod_vel
+  USE mod_getfile
   
 #ifdef tempsalt
   USE mod_dens
@@ -29,12 +30,8 @@ SUBROUTINE readfields
   
   ! = Variables used for getfield procedures
   CHARACTER (len=200)                        :: gridfile ,getfile
-  INTEGER, DIMENSION(1)                      :: start1d  ,count1d
-  INTEGER, DIMENSION(4)                      :: start2d  ,count2d
-  INTEGER, DIMENSION(4)                      :: start3d  ,count3d
-  INTEGER, DIMENSION(4)                      :: start4d  ,count4d
   INTEGER                                    :: ierr
-  CHARACTER (len=50)                         :: ncvar
+  CHARACTER (len=50)                         :: varName
   
   ! = ECCO Grid fields
   REAL, SAVE, ALLOCATABLE, DIMENSION(:)      :: valsz
@@ -90,15 +87,18 @@ SUBROUTINE readfields
      rho   = 0.
 #endif
      ndates=0
+
+     start1d  = [ 1]
+     count1d  = [km]
+     start2d  = [    1,   1, tpos,    1]
+     count2d  = [imt  , jmt,    1,    1]
+     start3d  = [    1,   1,    1, tpos]
+     count3d  = [imt  , jmt,   km,    1]
      
      ! ======================================================
      !    ===  Set up the grid ===
      ! ======================================================
-     getfile    = trim(dataprefix)
-     start1d    = [ 1]
-     count1d    = [km]
-     ncvar      = 'depth'
-     zw(0:km-1) = get1dfield()
+     zw(0:km-1) = get1DfieldNC(trim(dataprefix) ,'depth')
      zw(km)     = 2500
      dz         = zw(km:1:-1)-zw(km-1:0:-1)
      
@@ -118,17 +118,9 @@ SUBROUTINE readfields
 
   endif initCond   ! === End init section ===
 
-  start2d   = [    1,   1, tpos,    1]
-  count2d   = [imt  , jmt,    1,    1] 
-  start3d   = [    1,   1,    1, tpos]
-  count3d   = [imt  , jmt,   km,    1]
-  getfile   = trim(dataprefix)
-  ncvar     = 'u'
-  uvel      = get3dfield()
-  ncvar     = 'v'
-  vvel      = get3dfield()
-  ncvar    = 'zeta'
-  ssh       = get2dfield()
+  uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
+  vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
+  ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
   hs(:,:,2) = ssh
   
   where (uvel .eq. -9999) uvel=0
@@ -168,182 +160,12 @@ SUBROUTINE readfields
    
  return
 
-
-
-
-
-
-
-
-
-
-  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  !    ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  !    ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###  
-
-
-
-
-
-
-
-
-
-
+ !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+ 
 contains
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  function get1dfield ()
-    REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfield
-    INTEGER,             DIMENSION(1)       :: d    
-    INTEGER                                 :: varid ,ncid
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    d=count1d(1)+start1d(1)-1
-    allocate ( get1dfield(d(1)) )
-    ierr=NF90_OPEN(trim(getfile) ,NF90_NOWRITE ,ncid)
-    fileError: if(ierr.ne.0) then
-       print *,'Error when trying to open the file'
-       print *,'   ' ,getfile
-       print *,'    Error code: ' , ierr
-       stop 3001
-    end if fileError
-    ierr=NF90_INQ_VARID(ncid ,ncvar ,varid)
-    varError: if(ierr.ne.0) then
-       print *,'Error when trying to read the field   ',ncvar
-       print *,'Error code: ' , ierr
-       stop 3001
-    end if varError
-    ierr=NF90_GET_VAR(ncid ,varid ,get1dfield ,start1d ,count1d)
-    fieldError: if(ierr.ne.0) then 
-       print *,'Error when trying to read the field   ',ncvar
-       print *, 'start1d =  ' ,start1d
-       print *, 'count1d =  ' ,count1d
-       print *,'Error code: ' ,ierr
-       stop
-    end if fieldError
-    ierr=NF90_CLOSE(ncid)
-  end function get1dfield
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  function get2dfield ()
-    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2dfield
-    INTEGER,             DIMENSION(4)       :: d ,dimids ,r
-    INTEGER                                 :: varid ,ncid ,i
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    d=count2d+start2d-1
-    allocate ( get2dfield(d(1),d(2)) )
-    
-    ierr=NF90_OPEN(trim(getfile) ,NF90_NOWRITE ,ncid)
-    fileError: if(ierr.ne.0) then
-       print * ,'Error when trying to open the file'
-       print * ,'       ' ,getfile
-       print * ,'Error: ' ,NF90_STRERROR(ierr)
-       stop
-    end if fileError
-    ierr=NF90_INQ_VARID(ncid ,ncvar ,varid)
-    varError: if(ierr.ne.0) then
-       print * ,'Error when trying to find the field   ',ncvar
-       print * ,'Error: ' ,NF90_STRERROR(ierr)
-       stop
-    end if varError
-    ierr=NF90_GET_VAR(ncid ,varid ,get2dfield ,start2d ,count2d)
-    fieldError: if(ierr.ne.0) then 
-       r=NF90_inquire_variable(ncid, varid, dimids = dimids)
-       do i=1,4
-          r=NF90_inquire_dimension(ncid, dimids(i), len=d(i))
-       end do
-       print * ,'Error when trying to read the field   ',ncvar
-       print * ,'start2d =  ' ,start2d
-       print * ,'count2d =  ' ,count2d
-       print * ,'Dimensions: ' ,d
-       print * ,'Error:      ' ,NF90_STRERROR(ierr)
-       stop
-    end if fieldError
-    ierr=NF90_CLOSE(ncid)
-  end function get2dfield
-
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ### 
-  function get3dfield ()
-    REAL, ALLOCATABLE,   DIMENSION(:,:,:)   :: get3dfield
-    INTEGER,             DIMENSION(4)       :: d,dimids,r
-    INTEGER                                 :: varid ,ncid ,i
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    d=count3d+start3d-1
-    allocate ( get3dfield(d(1),d(2),d(3)) )
-    
-    ierr=NF90_OPEN(trim(getfile) ,NF90_NOWRITE ,ncid)
-    fileError: if(ierr.ne.0) then
-       print * ,'Error when trying to open the file'
-       print * ,'   ' ,trim(getfile)
-       print * ,'Error:      ' ,NF90_STRERROR(ierr)
-       stop
-    end if fileError
-    ierr=NF90_INQ_VARID(ncid ,ncvar ,varid)
-    varError: if(ierr.ne.0) then
-       print * ,'Error when trying to find the field   ',ncvar
-       print * ,'Error:      ' ,NF90_STRERROR(ierr)
-       stop
-    end if varError
-    ierr=NF90_GET_VAR(ncid ,varid ,get3dfield ,start3d ,count3d)
-    fieldError: if(ierr.ne.0) then 
-       r=NF90_inquire_variable(ncid, varid, dimids = dimids)
-       do i=1,4
-          r=NF90_inquire_dimension(ncid, dimids(i), len=d(i))
-       end do
-       print * ,'Error when trying to read the field   ',ncvar
-       print * ,'start3d =   ' ,start3d
-       print * ,'count3d =   ' ,count3d
-       print * ,'Dimensions: ' ,d
-       print * ,'Error:      ' ,NF90_STRERROR(ierr)
-       stop
-    end if fieldError
-    ierr=NF90_CLOSE(ncid)
-  end function get3dfield
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  function get4dfield ()
-    REAL, ALLOCATABLE,   DIMENSION(:,:,:,:) :: get4dfield
-    INTEGER,             DIMENSION(4)       :: d
-    INTEGER                                 :: varid ,ncid
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    d=count4d+start4d-1
-    allocate ( get4dfield(d(1),d(2),d(3),d(4)) )
-
-    ierr=NF90_OPEN(trim(getfile) ,NF90_NOWRITE ,ncid)
-    fileError: if(ierr.ne.0) then
-       print *,'Error when trying to open the file'
-       print *,'   ' ,getfile
-       print *,'    Error code: ' , ierr
-       stop 3001
-    end if fileError
-    ierr=NF90_INQ_VARID(ncid ,ncvar ,varid)
-    varError: if(ierr.ne.0) then
-       print *,'Error when trying to find the field   ',ncvar
-       print *,'Error code: ' , ierr
-       stop 3001
-    end if varError
-    ierr=NF90_GET_VAR(ncid ,varid ,get4dfield ,start1d ,count1d)
-    if(ierr.ne.0) stop 3100
-    ierr=NF90_CLOSE(ncid)
-  end function get4dfield
-
-
-
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  !function get4dfield ()
-  !  REAL, ALLOCATABLE,   DIMENSION(:,:,:,:) :: get4dfield
-  !  INTEGER,             DIMENSION(4)       :: d
-  !end function get4dfield
   
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ### 
   subroutine datasetswap
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    ! === swap between datasets ===
+    
     hs(:,:,1)=hs(:,:,2)
     uflux(:,:,:,1)=uflux(:,:,:,2)
     vflux(:,:,:,1)=vflux(:,:,:,2)
@@ -356,32 +178,4 @@ contains
     rho(:,:,:,1)=rho(:,:,:,2)
 #endif
   end subroutine datasetswap
-
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ### 
-  subroutine printdiagnostics
-    INTEGER                                 :: im
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    do j=2,jmt
-       do i=1,IMT
-          im=i-1
-          if(im.eq.0) im=IMT
-          do k=1,km
-             if(uflux(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'u',i,j,k,kmt(i,j),uflux(i,j,k,2)
-             end if
-             if(vflux(i ,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'v',i,j,k,kmt(i,j),vflux(i,j,k,2)
-             end if
-             if(uflux(im,j  ,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'u',im,j,k,kmt(i,j),uflux(im,j,k,2)
-             end if
-             if(vflux(i ,j-1,k,2).ne.0..and. kmt(i,j).eq.0) then
-                print *,'v',i,j-1,k,kmt(i,j),vflux(i,j-1,k,2)
-             end if
-          enddo
-       enddo
-    enddo
-  end subroutine printdiagnostics
-
 end subroutine readfields

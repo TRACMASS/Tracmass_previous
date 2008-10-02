@@ -19,16 +19,20 @@ subroutine init_params
 #endif
   implicit none
 
-  INTEGER :: argint1, argint2, dummy, factor, i,dtstep
-  CHARACTER (LEN=30) :: inparg, argname
-  CHARACTER (LEN=23) ::  Project, Case
+  INTEGER                                    :: argint1 ,argint2
+  INTEGER                                    :: dummy ,factor ,i ,dtstep
+  INTEGER                                    :: gridVerNum ,runVerNum
+  CHARACTER (LEN=30)                         :: inparg, argname
+  CHARACTER (LEN=23)                         ::  Project, Case
 
+  namelist /INITGRIDVER/   gridVerNum
   namelist /INITGRIDGRID/  IMT, JMT, KM, LBT, NEND
   namelist /INITGRIDNTRAC/ NTRACMAX
   namelist /INITGRIDDATE/  yearmin, yearmax
   namelist /INITGRIDTIME/  ngcm, iter, intmax
   namelist /INITGRIDARC/   arcscale
   
+  namelist /INITRUNVER/    runVerNum
   namelist /INITRUNTIME/   intmin, intspin, intrun, intstep 
   namelist /INITRUNDATE/   baseSec  ,baseMin  ,baseHour &
                           ,baseDay  ,baseMon  ,baseYear &
@@ -66,11 +70,20 @@ subroutine init_params
      Case=inparg
   end if
   
- ! -- Check if there is a time argument and if so, use it.
-  
+  ! -- Check if there is a time argument and if so, use it.
   print *,trim(Project)//'/'//trim(Case)//'_run.in'
   open(8,file=trim(Project)//'/'//trim(Project)//'_grid.in',  &
        status='OLD', delim='APOSTROPHE')
+  ! -- Check if the namefiles has correct version number. 
+  read(8,nml=INITGRIDVER)
+  if (gridVerNum < 1) then
+     print *,'==================== ERROR ===================='
+     print *,'Your grid namefile seems to be out of date.'
+     print *,'Check the version_grig.txt file for changes.'
+     print *,'You have to edit the version number in you grid'
+     print *,'manually when done.'
+     stop
+  end if
   read(8,nml=INITGRIDDESC)
   read(8,nml=INITGRIDGRID)
   read(8,nml=INITGRIDNTRAC)

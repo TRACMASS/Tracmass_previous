@@ -1,29 +1,45 @@
+&INITGRIDVER
+  ! ===	Used to	check if this file has the correct syntax
+  gridVerNum  =	1/
+  !
+  !
  &INITGRIDDESC
-   GCMname    = 'OPA',
-   GCMsource  = 'http://www.locean-ipsl.upmc.fr/opa/',
-   gridName   = 'Orca 2',
-   gridSource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
-   gridDesc   = '1/2 deg run for the global Ocean.'/
+  !
+  GCMname     = 'OPA',
+  GCMsource   = 'http://www.locean-ipsl.upmc.fr/opa/',
+  gridName    = 'Orca 2',
+  gridSource  = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+  gridDesc    = '1/2 deg run for the global Ocean.'/
+  !
+  !
 $INITGRIDGRID
+  !
   IMT      = 720,
   JMT      = 511,
   KM       = 46,
   LBT      = 5,
   NEND     = 6/              ! NEND = LBT +1
-
+  !
+  !
 $INITGRIDNTRAC
+  !
   NTRACMAX=7000000/          ! 7*1000*1000 
-
+  !
+  !
 $INITGRIDTIME
-   ngcm    = 120,            ! (5*24) hours between GCM datasets
-   iter    = 5,              ! iteration between two gcm data sets
-   intmax  = 730/  !10*365/5 ! maximum length of RCO fields
-
-
+  !
+  ngcm    = 120,            ! (5*24) hours between GCM datasets
+  iter    = 5,              ! iteration between two gcm data sets
+  intmax  = 730/  !10*365/5 ! maximum length of RCO fields
+  !
+  !
 $INITGRIDDATE
+  !
   yearmin = 0,
   yearmax = 0/
-
+  !
+  !
 $INITGRIDARC
    arcscale    = 0.001/                  ! orig arc meters -> km
-!  arcscale    = 0.00001/                ! orig arc meters -> 100 km  occ66 || ifs
+!  arcscale    = 0.00001/                ! orig arc meters -> 100 km  
+                                         ! (occ66 || ifs)
