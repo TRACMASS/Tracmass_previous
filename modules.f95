@@ -82,9 +82,18 @@ MODULE mod_time
   INTEGER                                   :: iyear0    ,imon0    ,iday0 
   INTEGER                                   :: yearmin   ,yearmax
   INTEGER*8                                 :: ntime
-  INTEGER                                   :: currJD ,startJD ,baseJD
-
+  INTEGER                                   :: currJDtot ,currJDyr
+  INTEGER                                   :: currYear  ,currMon  ,currDay
+  INTEGER                                   :: startJD   ,baseJD
+  INTEGER                                   :: fieldsPerFile
 CONTAINS
+  subroutine updateClock  
+    USE mod_param
+    currJDtot = (ints-1)*ngcm/24+1
+    call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
+    currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
+  end subroutine updateClock
+  
   subroutine gdate (jd, year,month,day)
     !                                                                      
     !---computes the gregorian calendar date (year,month,day)              
