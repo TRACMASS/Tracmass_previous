@@ -28,15 +28,14 @@ subroutine init_params
   namelist /INITGRIDVER/   gridVerNum
   namelist /INITGRIDGRID/  IMT, JMT, KM, LBT, NEND
   namelist /INITGRIDNTRAC/ NTRACMAX
-  namelist /INITGRIDDATE/  yearmin, yearmax
-  namelist /INITGRIDTIME/  ngcm, iter, intmax
+  namelist /INITGRIDDATE/  yearmin, yearmax, baseSec  ,baseMin  ,baseHour &
+                          ,baseDay  ,baseMon  ,baseYear
+  namelist /INITGRIDTIME/  ngcm, iter, intmax ,fieldsPerFile
   namelist /INITGRIDARC/   arcscale
   
   namelist /INITRUNVER/    runVerNum
   namelist /INITRUNTIME/   intmin, intspin, intrun, intstep 
-  namelist /INITRUNDATE/   baseSec  ,baseMin  ,baseHour &
-                          ,baseDay  ,baseMon  ,baseYear &
-                          ,startSec ,startMin ,startHour &
+  namelist /INITRUNDATE/   startSec ,startMin ,startHour &
                           ,startDay ,startMon ,startYear &
                           ,ihour, iday, imon, iyear
   namelist /INITRUNWRITE/  ncoor, kriva ,inDataDir ,outDataDir &
@@ -144,7 +143,7 @@ subroutine init_params
   baseJD      = jdate(baseYear  ,baseMon  ,baseDay)
   startJD     = jdate(startYear ,startMon ,startDay)
   startYearCond: if (startYear .ne. 0) then
-     intmin      = (startJD-baseJD)*ngcm*24
+     intmin      = (startJD-baseJD)/(ngcm/24)
   end if startYearCond
   
   startHourCond: if ( (startHour .ne. 0)  & 

@@ -29,8 +29,7 @@ SUBROUTINE readfields
   INTEGER                                    :: t ,i ,j ,k ,kk ,tpos
   
   ! = Variables used for getfield procedures
-  CHARACTER (len=200)                        :: gridfile ,getfile
-  INTEGER                                    :: ierr
+  CHARACTER (len=200)                        :: gridFile ,fieldFile
   CHARACTER (len=50)                         :: varName
   
   ! = ECCO Grid fields
@@ -41,8 +40,6 @@ SUBROUTINE readfields
   
   ! = Input fields from GCM
   REAL,       ALLOCATABLE, DIMENSION(:,:)    :: ssh
-  !REAL,       ALLOCATABLE, DIMENSION(:,:,:) :: uvel ,vvel 
-  REAL,       ALLOCATABLE, DIMENSION(:,:,:)  :: fieldr
   ! ===   ===   ===
   
   alloCondGrid: if(.not. allocated (e1v)) then
@@ -56,8 +53,6 @@ SUBROUTINE readfields
   
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt) )
-     !allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) )
-     allocate ( fieldr(imt+2,jmt,km) )
   end if alloCondUVW
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   
@@ -74,26 +69,26 @@ SUBROUTINE readfields
   write (dstamp(10:17),'(i4i2.2i2.2)') yr1,mn1,dy1
   dataprefix  = trim(inDataDir) // '/ROMS/' // dstamp
   tpos        = intpart1+1
+
+  start1d  = [ 1]
+  count1d  = [km]
+  start2d  = [  1 ,   1, tpos,    1]
+  count2d  = [imt , jmt,    1,    1]
+  start3d  = [  1 ,   1,    1, tpos]
+  count3d  = [imt , jmt,   km,    1]
   
   ! === initialise ===
   initCond: if(ints.eq.intstart) then
      ! call coordinat
-     hs    = 0.
-     uflux = 0.
-     vflux = 0.
+     ndates = 0
+     hs     = 0.
+     uflux  = 0.
+     vflux  = 0.
 #ifdef tempsalt
-     tem   = 0.
-     sal   = 0.
-     rho   = 0.
+     tem    = 0.
+     sal    = 0.
+     rho    = 0.
 #endif
-     ndates=0
-
-     start1d  = [ 1]
-     count1d  = [km]
-     start2d  = [    1,   1, tpos,    1]
-     count2d  = [imt  , jmt,    1,    1]
-     start3d  = [    1,   1,    1, tpos]
-     count3d  = [imt  , jmt,   km,    1]
      
      ! ======================================================
      !    ===  Set up the grid ===
@@ -116,6 +111,22 @@ SUBROUTINE readfields
      dzu=dzt
      dzv=dzt
 
+     uvel = get3DfieldNC(trim(dataprefix) ,   'u')
+     kmt  = 0 
+     do j=1,jmt
+        do i=1,IMT
+           do k=1,km
+              kk=km+1-k
+              if(uvel(i,j,k).ne.-9999) kmt(i,j)=k
+           end do
+           if(kmt(i,j).ne.0) then
+              dztb(i,j,1)=dzt(i,j,kmt(i,j))
+           else
+              dztb(i,j,1)=0.
+           endif
+        end do
+     end do
+
   endif initCond   ! === End init section ===
 
   uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
@@ -136,28 +147,8 @@ SUBROUTINE readfields
      kk=km+1-k
      uflux(:,:,k,2)   = uvel(:,:,kk) * e2u * dzu(:,:,k)
      vflux(:,:,k,2)   = vvel(:,:,kk) * e1v * dzv(:,:,k)
-     rho(:,:,k,2)     = fieldr(:,:,kk)
   end do
-  
-  if(ints.eq.intstart) then
-     kmt=0
-     do j=1,jmt
-        do i=1,IMT
-           do k=1,km
-              kk=km+1-k
-              if(uvel(i,j,k).ne.-9999) kmt(i,j)=k
-              !kmt(i,j)=k
-              !if(k.ne.kmt(i,j)) dz(kk)=dzt(i,j,k)
-           enddo
-           if(kmt(i,j).ne.0) then
-              dztb(i,j,1)=dzt(i,j,kmt(i,j))
-           else
-              dztb(i,j,1)=0.
-           endif
-        enddo
-     enddo
-  end if
-   
+
  return
 
  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -166,16 +157,16 @@ contains
   
   subroutine datasetswap
     
-    hs(:,:,1)=hs(:,:,2)
-    uflux(:,:,:,1)=uflux(:,:,:,2)
-    vflux(:,:,:,1)=vflux(:,:,:,2)
+    hs(:,:,1)      = hs(:,:,2)
+    uflux(:,:,:,1) = uflux(:,:,:,2)
+    vflux(:,:,:,1) = vflux(:,:,:,2)
 #ifdef explicit_w
-    wflux(:,:,:,1)=wflux(:,:,:,2)
+    wflux(:,:,:,1) = wflux(:,:,:,2)
 #endif
 #ifdef tempsalt
-    tem(:,:,:,1)=tem(:,:,:,2)
-    sal(:,:,:,1)=sal(:,:,:,2)
-    rho(:,:,:,1)=rho(:,:,:,2)
+    tem(:,:,:,1)   = tem(:,:,:,2)
+    sal(:,:,:,1)   = sal(:,:,:,2)
+    rho(:,:,:,1)   = rho(:,:,:,2)
 #endif
   end subroutine datasetswap
 end subroutine readfields
