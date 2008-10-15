@@ -1,9 +1,9 @@
 
 MODULE mod_getfile
-  INTEGER, DIMENSION(1)                      :: start1d  ,count1d
-  INTEGER, DIMENSION(4)                      :: start2d  ,count2d
-  INTEGER, DIMENSION(4)                      :: start3d  ,count3d
-  INTEGER, DIMENSION(4)                      :: start4d  ,count4d
+  INTEGER, DIMENSION(1)                      :: start1D  ,count1D
+  INTEGER, DIMENSION(4)                      :: start2D  ,count2D ,map2D
+  INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
+  INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
 
   
   
@@ -36,21 +36,41 @@ CONTAINS
   function get2DfieldNC (fieldFile ,varName)
     USE netcdf
     CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2DfieldNC
+    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: tempField ,get2DfieldNC
     INTEGER,             DIMENSION(4)       :: d ,dimids ,r
-    INTEGER                                 :: varid ,ncid ,i
+    INTEGER                                 :: varid ,ncid ,i ,j
     INTEGER                                 :: ierr
   
     d=count2d+start2d-1
-    allocate ( get2DfieldNC(d(1),d(2)) )
+    allocate ( tempField(d(map2D(1)),d(map2D(2))),get2DfieldNC(d(1),d(2)) )
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printREadError(1)
+    if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
-    if(ierr.ne.0) call printREadError(2)
+    if(ierr.ne.0) call printReadError(2)
     ierr=NF90_GET_VAR(ncid ,varid ,get2DfieldNC ,start2d ,count2d)
-    if(ierr.ne.0) call printREadError(3)
+    print *,ierr 
+    !if(ierr.ne.0) call printREadError(3)
+    print *,IERR
+    r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
+    do i=1,4
+       r=NF90_inquire_dimension(ncid, dimids(i), len=d(i)) 
+    end do
+    print * ,'Error when trying to read the field   ',varName
+    print * ,'start2d =  ' ,start2d 
+    print * ,'count2d =  ' ,count2d 
+    print * ,'Dimensions: ' ,d 
+    print * ,'Error:      ' ,NF90_STRERROR(ierr)  
     ierr=NF90_CLOSE(ncid)
+
+    print *,'kuk', count2D+start2D-1
+    print *,shape(tempFile)
+stop
+    forall (i=1:imt,j=1:jmt)
+       get2DfieldNC(i,j)=tempfield(map2D(1),map2D(2))
+    end forall
+
+
   end function get2DfieldNC
 
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

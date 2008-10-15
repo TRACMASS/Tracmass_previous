@@ -10,16 +10,36 @@
   !
   !
   !
+&INITRUNGRID
+  !
+  !==subGrid:       0 = Use full grid.
+  !==               1 = Define subGrid in this file.
+  !==               2 = Define subGrid with sep. file and subGridID.
+  !==               3 = Define subGrid with sep. file and MPI.
+  subGrid      = 1,
+  !
+  ! === Used if SubGrid = 1
+  subGridImin  = 500,
+  subGridImax  = 1000,
+  subGridJmin  = 400,
+  subGridJmax  = 1000,
+  ! === Used if SubGrid = 2 or 3
+  SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
+  ! === Used if SubGrid = 2
+  subGridID    = 1/
+  !
+  !
+  !
 &INITRUNTIME
   !
   ! === Startval for initial dataset          ===
-  intmin  = 50,
+  intmin       = 50,
   ! === Trajectory release period (timesteps) ===
-  intspin = 1,
+  intspin      = 1,
   ! === Number of timesteps for the run.      ===
-  intrun  = 200,
+  intrun       = 200,
   ! === Pos if forward  neg if backward       ===
-  intstep = 1/
+  intstep      = 1/
   !
   !
   !
@@ -27,9 +47,9 @@
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 13,
-  startMon          = 9,
-  startYear         = 1990/
+  startDay          = 1,
+  startMon          = 1,
+  startYear         = 2007/
   !
   !
 &INITRUNWRITE
@@ -47,14 +67,14 @@
   kriva    = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir    = '/Volumes/hav3/data/or5/',
+  inDataDir    = '/projData/hycom/data/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Users/doos/data/orc12/',
   outDataDir   = '/Users/bror/ormOut/',
   !
   ! === name of current trajectory run
-  outDataFile     = 'KAB042j'/
+  outDataFile     = 'hycomTest'/
   ! === Name of rerun file
   ! namep='op.fw.n0'
   !
@@ -64,7 +84,7 @@ $INITRUNSEED
   !
   !==nff:           1 = Follow trajectories forward
   !==               2 = Follow trajectories backward
-  !==               3 =  Follow trajectories both ways.
+  !==               3 = Follow trajectories both ways.
   nff      = 2,
   !==isec:          1 = Seed particles meridional(y-z)
   !==               2 = Seed particles zonal(x-z)
@@ -101,7 +121,7 @@ $INITRUNSEED
   ist2     = 366,		 
   jst1     = 211,
   jst2     = 230,
-  kst1     =  44,		 
+  kst1     =  31,		 
   kst2     =  -1/
   !
   !

@@ -148,6 +148,11 @@ MODULE mod_grid
   REAL*8                                    :: dr ,dtemp ,dsalt
   REAL*8                                    :: arcscale
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt
+  INTEGER                                   :: subGrid     ,subGridID
+  INTEGER                                   :: subGridImin ,subGridImax
+  INTEGER                                   :: subGridJmin ,subGridJmax
+  CHARACTER(LEN=200)                        :: SubGridFile 
+
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
