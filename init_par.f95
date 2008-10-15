@@ -32,8 +32,10 @@ subroutine init_params
                           ,baseDay  ,baseMon  ,baseYear
   namelist /INITGRIDTIME/  ngcm, iter, intmax ,fieldsPerFile
   namelist /INITGRIDARC/   arcscale
-  
+
   namelist /INITRUNVER/    runVerNum
+  namelist /INITRUNGRID/   subGrid ,subGridImin ,subGridImax ,subGridJmin &
+                          ,subGridJmax ,SubGridFile, subGridID
   namelist /INITRUNTIME/   intmin, intspin, intrun, intstep 
   namelist /INITRUNDATE/   startSec ,startMin ,startHour &
                           ,startDay ,startMon ,startYear &
@@ -88,11 +90,31 @@ subroutine init_params
   read(8,nml=INITGRIDNTRAC)
   read(8,nml=INITGRIDTIME)
   read(8,nml=INITGRIDDATE)
+  !=== === ===
   read(8,nml=INITGRIDARC)
-
   open(8,file=trim(Project)//'/'//trim(Case)//'_run.in',  &
        status='OLD', delim='APOSTROPHE')
   read(8,nml=INITRUNDESC)
+  read(8,nml=INITRUNGRID)
+  select case (subGrid)
+  case (0)
+     print *,'Use the Full grid.'     
+     subGridImin =   1
+     subGridJmin =   1
+     subGridImax = imt
+     subGridJmax = jmt
+  case (1)
+     print *,'Use a subgrid: ', subGridImin ,subGridImax &
+          ,subGridJmin ,subGridJmax
+     imt=subGridImax-subGridImin+1
+     jmt=subGridJmax-subGridJmin+1
+  case default
+     print *,'==================== ERROR ===================='
+     print *,'This subGrid selection is not implemented yet.'
+     print *,'subGrid = ' ,subGrid
+     stop
+  end select
+  !=== === ===
   read(8,nml=INITRUNTIME)
   read(8,nml=INITRUNDATE)
   read(8,nml=INITRUNWRITE)  
@@ -105,13 +127,8 @@ subroutine init_params
 #endif
 
   read(8,nml=INITRUNEND)
-!print *,'ienw',ienw
-!print *,'iene',iene
-!print *,'jens',jens
-!print *,'jenn',jenn
-!print *,'timax',timax
-  timax=24.*3600.*timax ! convert time lengths from days to seconds
 
+  timax=24.*3600.*timax ! convert time lengths from days to seconds
   dstep=1.d0/dble(iter)
   dtmin=dtstep*tseas
 
@@ -143,7 +160,7 @@ subroutine init_params
   baseJD      = jdate(baseYear  ,baseMon  ,baseDay)
   startJD     = jdate(startYear ,startMon ,startDay)
   startYearCond: if (startYear .ne. 0) then
-     intmin      = (startJD-baseJD)/(ngcm/24)
+     intmin      = (startJD-baseJD)/(ngcm/24)+1
   end if startYearCond
   
   startHourCond: if ( (startHour .ne. 0)  & 
