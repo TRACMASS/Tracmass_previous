@@ -84,12 +84,12 @@ SUBROUTINE readfields
  
   start1d  = [ 1]
   count1d  = [km]
-  start2d  = [filePos , 1 , subGridJmin ,subGridImin]
-  count2d  = [      1 , 1 , subGridJmax ,subGridImax]
-  map3D    = [      4 , 3 ,  2 ,  1]  
-  start3d  = [filePos , 1 ,  1 ,  1]
-  count3d  = [      1 ,km ,jmt ,imt]
-  map3D    = [      4 , 3 ,  2 ,  1]  
+  start2d  = [filePos , 1 ,subGridJmin ,subGridImin]
+  count2d  = [      1 , 1 ,subGridJmax ,subGridImax]
+  map3D    = [      4 , 3 ,          2 ,          1]  
+  start3d  = [filePos , 1 ,          1 ,          1]
+  count3d  = [      1 ,km ,        jmt ,        imt]
+  map3D    = [      4 , 3 ,          2 ,          1]  
   ! === initialise ===
   initFieldcond: if(ints.eq.intstart) then
      ! call coordinat
@@ -107,6 +107,9 @@ SUBROUTINE readfields
      ! ======================================================
 
      gridFile = trim(inDataDir)//'/uvel/'//trim(dstamp)//'3zu.nc'
+
+     print *,' '
+     print *,gridFile
 
      zw(0:km-1) = get1DfieldNC(trim(gridFile) ,'Depth')
 

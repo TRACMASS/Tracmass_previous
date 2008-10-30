@@ -203,7 +203,6 @@ subroutine loop
         call fancyTimer('seeding','start')
         ! === Seed particles ===
         ntrac=ntractot
-
         ijkstloop: do ijk=1,ijkMax
            ist  = ijkst(ijk,1)
            jst  = ijkst(ijk,2)
@@ -256,8 +255,9 @@ subroutine loop
                  vol=abs(wflux(kst))
 #endif
 #ifdef twodim
-                 vol = 1
+!                 vol = 1
 #endif
+                 vol=1
               case(4)
                  if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
                  if(uflux(ib,jb,kb,1)+uflux(ibm,jb,kb,1) + & 
@@ -1276,23 +1276,22 @@ return
     x14=real(x1,kind=4)
     y14=real(y1,kind=4)
     z14=real(z1,kind=4)
-
     select case (sel)       
     case (10)
        recPosIn = recPosIn+1
        write(unit=78 ,rec=recPosIn) ntrac,ints,x14,y14,z14
        return
     case (11)
-       if( (kriva.eq.1 .and. ts .eq. ints) .or. &
+       if( (kriva.eq.1 .and. ts .eq. ints-1) .or. &
             (scrivi .and. kriva.eq.2)                .or. &
             (kriva.eq.3)                             .or. &
             (kriva.eq.4 .and. niter.eq.1)            .or. &
             (kriva.eq.5 .and. &
             (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
             .or.tt-t0.eq.21.*tday)) ) then
-          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14       
+          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14
        end if
     case (13)
        recPosKll = recPosKll+1

@@ -5,7 +5,7 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
 
-  
+  INTEGER                                 :: ierr  
   
 CONTAINS
 
@@ -17,7 +17,6 @@ CONTAINS
     REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfieldNC
     INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
-    INTEGER                                 :: ierr
   
     d=count1d(1)+start1d(1)-1
     allocate ( get1DfieldNC(d(1)) )
@@ -39,7 +38,6 @@ CONTAINS
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: tempField ,get2DfieldNC
     INTEGER,             DIMENSION(4)       :: d ,dimids ,r
     INTEGER                                 :: varid ,ncid ,i ,j
-    INTEGER                                 :: ierr
   
     d=count2d+start2d-1
     allocate ( tempField(d(map2D(1)),d(map2D(2))),get2DfieldNC(d(1),d(2)) )
@@ -81,7 +79,6 @@ stop
     REAL, ALLOCATABLE,   DIMENSION(:,:,:)   :: get3DfieldNC
     INTEGER,             DIMENSION(4)       :: d,dimids,r
     INTEGER                                 :: varid ,ncid ,i
-    INTEGER                                 :: ierr
 
     d=count3d+start3d-1
     allocate ( get3DfieldNC(d(1),d(2),d(3)) )

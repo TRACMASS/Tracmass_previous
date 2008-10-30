@@ -46,6 +46,7 @@ $INITGRIDDATE
   baseMon        = 1,
   baseYear       = 2007/
   !
+  !
 $INITGRIDARC
    arcscale      = 0.001/         ! orig arc meters -> km
 !  arcscale      = 0.00001/       ! orig arc meters -> 100 km  
