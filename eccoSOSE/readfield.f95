@@ -61,10 +61,10 @@ SUBROUTINE readfields
 
   call datasetswap !Copy field(t+1) to field(t).
 
-  timeStepNumber = 480*ints
+  timeStepNumber = (mod(ints ,145)+1)*480
   fstamp='0000000000'
   write (fstamp,'(i10.10)') timeStepNumber
-
+  
   ! === initialise ===
   !print *,'ints=',ints,intstart
   initCond: if(ints.eq.intstart) then
@@ -109,7 +109,7 @@ SUBROUTINE readfields
      hFacW    = get3dfield()
 
      dxdy     = gridDXC*gridDYC
-     dz       = gridDRC
+     dz       = gridDRC(km:1:-1)
      kmt      = sum(ceiling(hFacW),3)
   endif initCond   ! === End init section ===
   
@@ -124,23 +124,15 @@ SUBROUTINE readfields
 
   !Density not included
   !SSH not included
-
-  print *,'d'
   
-  iloop: do i=1,imt
-     jloop: do j=1,jmt
-        kloop: do k=1,km
-           uflux(i,j,k,2)=uvel(i,j,k)*gridDYG(i,j)*gridDRF(k) !*hFacS(i,j,k)
-           vflux(i,j,k,2)=vvel(i,j,k)*gridDXG(i,j)*gridDRF(k) !*hFacS(i,j,k)
+  kloop: do k=1,km
+     uflux(:,:,km-k+1,2)=uvel(:,:,k)*gridDYG*gridDRF(k) !*hFacS(i,j,k)
+     vflux(:,:,km-k+1,2)=vvel(:,:,k)*gridDXG*gridDRF(k) !*hFacS(i,j,k)
 #ifdef explicit_w
-           wflux(i,j,k,2)=wvel(i,j,k)*gridRAC(i,j)
+     wflux(:,:,km-k+1,2)=wvel(:,:,k)*gridRAC(i,j)
 #endif
-           rho(i,j,k,2)=0
-        end do kloop
-     enddo jloop
-  enddo iloop
-  
-  print *,'e'
+     rho(i,j,k,2)=0
+  end do kloop
 
   return
 
@@ -159,7 +151,7 @@ SUBROUTINE readfields
   !    ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
   !    ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
   ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
-  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###  
+  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
 
 
 
@@ -172,7 +164,7 @@ SUBROUTINE readfields
 
 
 contains
-  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###  
+  ! ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###
   function get1dfield ()
     REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfield
     INTEGER                                 :: d

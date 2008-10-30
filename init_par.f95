@@ -174,6 +174,9 @@ subroutine init_params
      stop 100
   end if startHourCond
 
+  tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
+
+
   ! --ist -1 to imt
   if ( ist1 == -1) then 
      ist1=imt

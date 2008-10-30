@@ -9,7 +9,6 @@
   caseDesc     = 'Using Orca fields for fun and entertainment.'/
   !
   !
-  !
 &INITRUNGRID
   !
   !==subGrid:       0 = Use full grid.
@@ -29,7 +28,6 @@
   subGridID    = 1/
   !
   !
-  !
 &INITRUNTIME
   !
   ! === Startval for initial dataset          ===
@@ -40,7 +38,6 @@
   intrun       = 200,
   ! === Pos if forward  neg if backward       ===
   intstep      = 1/
-  !
   !
   !
 &INITRUNDATE
@@ -77,7 +74,6 @@
   outDataFile     = 'hycomTest'/
   ! === Name of rerun file
   ! namep='op.fw.n0'
-  !
   !
   !
 $INITRUNSEED
