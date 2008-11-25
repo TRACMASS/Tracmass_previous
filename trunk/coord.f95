@@ -32,7 +32,7 @@ grav=9.81 ! m/s2tyear=365.25d0 * 24.d0 * 3600.d0
 tday=24.d0 * 3600.d0
 
 ! month lengths including leap years
-do i=1000,3000
+do i=1900,2100
 do k=1,12
 idmax(k,i)=mois(k)
 enddo
@@ -221,19 +221,7 @@ enddo
 #endif
 
 #if defined ifs || atm
-! This is in hPA but should perhaps be in Pa i.e. to multiply with 100!!!!!!!!!!!!!
-zw( 0)=0.
-zw( 1)=5.
-zw( 2)=30.
-zw( 3)=75.
-zw( 4)=150.
-zw( 5)=250.
-zw( 6)=350.
-zw( 7)=450.
-zw( 8)=600.
-zw( 9)=775.
-zw(10)=887.5
-zw(11)=962.5 ! but this level is overriten to take account of the surface pressure
+zw=9.e10  ! should not be used
 
 do k=1,KM
  dz(k)=zw(k)-zw(k-1)
@@ -241,9 +229,10 @@ do k=1,KM
 enddo
 
 dx = 360./float(IMT)
-dy = 1000000. ! irregular and should be dy(j)
+dy = 180./float(JMT)
 stlon1=0. 
 stlat1=-90000.
+!print *,'e her nu=',dx,dy
 
 ! geopotential height in km
 rmin=0.d0
@@ -258,33 +247,20 @@ smin= 0.d0
 smax=25.d0
 dsalt=(smax-smin)/dble(MR-1)
 
-! read in the guassian latitude coordinates
-print *,'topo=',directory
-!print *,'topo=',directory//'/topo/ifsn80lat.txt'
-open(12,file=directory//'/topo/ifsn80lat.txt')
-99 format(50x,f9.5)
-do j=1,JMT-1
-read(12,99) a
-phi(j)=-a
-enddo
-phi(0  )=-90. ! add the north pole as a fictive grid point
-phi(JMT)= 90. ! add the south pole as a fictive grid point
 
-do j=1,JMT
-dyt(j)=(phi(j)-phi(j-1))*deg
-!print *,j,phi(j),phi(j-1),dyt(j)
+do j=0,JMT
+ phi(j)=-90.+dy*float(j)
+ csu(j)=dcos(phi(j)*radian)
 enddo
 
 do j=1,JMT
  rlatt=0.5*(phi(j)+phi(j-1))
- rlatu=phi(j)
- csu(j)=dcos(rlatu*radian)
  cst(j)=dcos(rlatt*radian)
 enddo
 
 do i=1,IMT
  do j=1,JMT
-  dxdy(i,j)=dx*deg*cst(j)*dyt(j)
+  dxdy(i,j)=dx*deg*cst(j)*dy*deg
  enddo
 enddo
 
@@ -293,6 +269,18 @@ kmt=KM  ! all grid cells are active in an AGCM
 
 #endif
 
+!_________________________________ The ORCA grids _______________________________________
+!#if defined orca2 || orca1 || orca05 || orca025 || orca12 
+
+
+
+!print *,'nuruuuuuuuu'
+
+!stop 3957
+
+
+!#endif
+!________________________________________________________________________________________
 return
 end subroutine coordinat
 

@@ -54,6 +54,8 @@ MODULE mod_param
   INTEGER, PARAMETER :: KD=KM   !does this work?
 #elif defined atm
   INTEGER, PARAMETER :: KD=11   !should be KD=KM   
+#elif defined ifs
+  INTEGER, PARAMETER :: KD=60   !should be KD=KM   
 #else
   INTEGER, PARAMETER :: KD=1
 #endif

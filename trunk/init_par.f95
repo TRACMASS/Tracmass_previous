@@ -160,9 +160,13 @@ subroutine init_params
   baseJD      = jdate(baseYear  ,baseMon  ,baseDay)
   startJD     = jdate(startYear ,startMon ,startDay)
   startYearCond: if (startYear .ne. 0) then
-     intmin      = (startJD-baseJD)/(ngcm/24)+1
+   if(ngcm.ge.24) then 
+    intmin      = (startJD-baseJD)/(ngcm/24)+1
+   else ! this is a quick fix to avoid division by zero when ngcm < 24
+    intmin      = (startJD-baseJD)/(ngcm)+1
+   endif
   end if startYearCond
-  
+print *,'tttt'
   startHourCond: if ( (startHour .ne. 0)  & 
                  .or. (startMin  .ne. 0)  &
                  .or. (startSec  .ne. 0) ) then
@@ -176,6 +180,7 @@ subroutine init_params
 
   tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
 
+print *,'iyear=',iyear
 
   ! --ist -1 to imt
   if ( ist1 == -1) then 
@@ -200,7 +205,7 @@ subroutine init_params
   end if
 
   ! mod_coord
-  allocate  ( csu (jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km) )       
+  allocate  ( csu (0:jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km) )       
   ! mod_grid
 #if defined ifs || atm
   allocate ( dztb(imt,jmt,km,nst) )   
@@ -212,7 +217,7 @@ subroutine init_params
   ! mod_domain
 !  allocate ( ienw (LBT),iene (LBT) )
 !  allocate ( jens (LBT),jenn (LBT) )
-  allocate ( uflux(imt,jmt,km,nst), vflux(imt,jmt,km,nst) )
+  allocate ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
   allocate ( hs(imt+1,jmt+1,nst) )
 #ifdef full_wflux
   allocate ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
