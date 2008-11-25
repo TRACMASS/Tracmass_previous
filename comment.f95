@@ -4,7 +4,7 @@
 !                       Lagrangian trajectory code 
 !                             in fortran 95
 !                                 by
-!      Kristofer Döös, Bror Jönsson, Hanna Kling, Andrew Coward, 
+!      Kristofer Döös, Bror Jönsson, Hanna Corell, Andrew Coward, 
 !             Pedro de Vries, Donatella Faggioli, etc.
 !
 !  Department of Meteorology, Stockholm University (doos@misu.su.se)
@@ -89,19 +89,23 @@
 ! IMT= zonal model array dimension
 ! JMT= meridional    "
 ! KM=  vertical      "
-! JMAX= maximum meridional orm array dimension =JMT if entire model domain is to be used
-! MR= number od density, temperature & salinity levels
+! MR= number of density/pressure, temperature & salinity/specific humidity levels
 ! NTRACMAX= maximum number of trajectories
 ! NST=number of time levels to be stored in centrel memory 1=stationary, 2=time dependent
 ! LBT=stream function separation dimension. If LBT>1 one must use Drerun if time dependent
 ! NEND=number of end sections that are defined in main
-! Stream function dimension with LOV=1 for Ddensity and LOV=3 for Dstreamts
+! LOV=Stream function dimension with LOV=3 for Dstreamts else LOV=1
 !_________________________________________________________________________________________
 ! Run the programme with gotraj with the following precompilation options:
 !
 !__________ Ocean and atmospheric GCM possibilities
 !
-! -Dorca        ORCA5/OPA model
+! -Dorca        NEMO with one of the following ORCA grids
+! -Dorca2       NEMO with 2    degree ORCA2 grid 
+! -Dorca1       NEMO with 1    degree ORCA1 grid
+! -Dorca05      NEMO with 0.5  degree ORCA05 grid
+! -Dorca025     NEMO with 0.25 degree ORCA025 grid
+! -Dorca12      NEMO with 1/12 degree ORCA12 grid
 ! -Docc         OCCAM 66 levles 1/4 deree resolution
 ! -Drco         RCO model 2 nm
 ! -Dfors        Forsmark model
@@ -128,7 +132,8 @@
 ! -Dstreamv     Calculates the vertical stream function as a function of depth
 ! -Dstreamr     ------------------------ " ----------------------------- density 
 !               the latter two have to be used with
-! -Dtempsalt    Calculates the temperature, salinity and the density 
+! -Dtempsalt    Calculates the temperature, salinity and density for the ocean
+!                          and temperature, humidity and pressure for the atmosphere
 ! -Ddensity     Calculates only the density along the trajectory.  
 !
 ! -Dtracer      Stores trajectory particle positions as a simulated tracer

@@ -260,8 +260,8 @@ subroutine loop
                  vol=1
               case(4)
                  if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
-                 if(uflux(ib,jb,kb,1)+uflux(ibm,jb,kb,1) + & 
-                      vflux(ib,jb,kb,1)+vflux(ib,jb-1,kb,1).eq.0.) cycle ijkstloop
+                 if(uflux(ib,jb,kb,1)+uflux(ibm,jb  ,kb,1) + & 
+                    vflux(ib,jb,kb,1)+vflux(ib ,jb-1,kb,1).eq.0.) cycle ijkstloop
               end select
               if(vol.eq.0) cycle ijkstloop
            end if idirCond
@@ -352,7 +352,7 @@ subroutine loop
                  
                  ! === check properties of water- ===
                  ! === mass at initial time       === 
-#ifndef ifs || atm
+#ifndef ifs 
 #ifdef tempsalt 
                  !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
                  call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
@@ -536,7 +536,7 @@ subroutine loop
            ja=jb
            ka=kb
            ! T-box volume in m3
-#if defined ifs || atm
+#if defined ifs 
            dxyz=rg*dztb(ib,jb,kb,NST)+rr*dztb(ib,jb,kb,1)
 #else
 #ifdef sigma
@@ -754,7 +754,9 @@ subroutine loop
 #endif
               if(uu.lt.0.d0) then
                  jb=ja-1
+#ifndef ifs 
                  if(jb.eq.0) stop 34578
+#endif
               endif
               y1=dble(ja-1)
               call pos(1,ia,ja,ka,x0,x1,ds,rr)
@@ -955,8 +957,8 @@ subroutine loop
 #endif
 
      call fancyTimer('advection','stop') 
-     print 799 ,ints ,ntractot ,nout ,nerror
-799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4)
+     print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout
+799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8)
      
   end do intsTimeLoop
   
@@ -1046,7 +1048,7 @@ return
              print *,'ntrac=',ntrac,' ints=', ints
              print *,'ib=',ib,'jb=',jb,'kb=',kb
              print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
-             print *,'dztb=',dztb(ib,jb,kb)
+             print *,'dztb=',dztb(ib,jb,kb,1),dztb(ib,jb,kb,2)
              print *,'rg*hs=',rg*hs(ib,jb,NST)
              print *,'rr*hs=',rr*hs(ib,jb,1)
              print *,'-------------------------------------'
@@ -1186,12 +1188,16 @@ return
     INTEGER, SAVE                        :: recPosRun=0 ,recPosErr=0
     INTEGER, SAVE                        :: recPosKll=0
     REAL                                 :: x14 ,y14 ,z14
+
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined rco 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.0,f10.0 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
+#elif defined ifs
+566 format(i8,i7,f7.2,f7.2,f7.1,f10.0,f10.0 &
+         ,f10.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
          ,f13.8,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -1207,6 +1213,7 @@ return
     end if
 
 #if defined textwrite 
+
     select case (sel)
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol &
@@ -1223,11 +1230,10 @@ return
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
-          !write(56,566) ntrac,ints,x1,y1,z1, & 
-          ! tt/tday,t0/tday,subvol,temp,salt,dens,arct
-          write(56,566) ntrac,ints,x1,y1,z1, &
-               uvel(xf,yf,zf),vvel(xf,yf,zf) &
-               ,vort,temp,salt,dens,arct
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,arct
+          !write(56,566) ntrac,ints,x1,y1,z1, &
+          !     uvel(xf,yf,zf),vvel(xf,yf,zf) &
+          !     ,vort,temp,salt,dens,arct
 #endif        
        endif
     case (13)
@@ -1262,12 +1268,11 @@ return
        endif
     case (19)
        ! === write last sedimentation positions ===
-       open(34,file=trim(outDataDir)//name//'_sed.asc') 
+       open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
        do n=1,ntracmax
-          if(nrj(n,1).ne.0) then
-             write(34,566) n,nrj(n,4),trj(n,1),trj(n,2), & 
-                  trj(n,3),trj(n,4)/tday,trj(n,7)/tday
-          endif
+        if(nrj(n,1).ne.0) then
+         write(34,566) n,nrj(n,4),trj(n,1),trj(n,2),trj(n,3),trj(n,4)/tday,trj(n,7)/tday
+        endif
        enddo
        close(34)
     end select
@@ -1340,7 +1345,7 @@ return
     case ('stop')
        call etime(timestamp2,fullstamp2)
        timeDiff=fullstamp2-fullstamp1
-       write (6 , FMT="(A,F5.2,A)") ', done in ' ,timeDiff ,' sec'
+       write (6 , FMT="(A,F6.1,A)") ', done in ' ,timeDiff ,' sec'
     end select
   end subroutine fancyTimer
 end subroutine loop
