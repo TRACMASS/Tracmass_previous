@@ -264,6 +264,7 @@ do i=1,IMT
  enddo
 enddo
 
+
 kmt=KM  ! all grid cells are active in an AGCM
 
 

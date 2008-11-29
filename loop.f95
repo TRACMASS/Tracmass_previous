@@ -357,8 +357,8 @@ subroutine loop
                  !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
                  call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
                  if(temp.lt.tmin0 .or. temp.gt.tmax0 .or. &
-                      salt.lt.smin0 .or. salt.gt.smax0 .or. &
-                      dens.lt.rmin0 .or. dens.gt.rmax0) then
+                    salt.lt.smin0 .or. salt.gt.smax0 .or. &
+                    dens.lt.rmin0 .or. dens.gt.rmax0) then
                     !print *,'outside mass range',temp,salt,dens
                     cycle kkkLoop 
                  endif
@@ -550,6 +550,7 @@ subroutine loop
            if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
 #endif
            dxyz=dxyz*dxdy(ib,jb)
+           if(dxyz.le.0.) stop 34956
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)
