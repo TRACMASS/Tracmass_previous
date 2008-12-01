@@ -280,8 +280,8 @@ subroutine loop
               if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif
               if(kb.eq.KM) vol=vol+hs(ib,jb,1)
-#endif
               vol=vol*dxdy(ib,jb)
+#endif
            endif
            
            ! === number of trajectories for box (ist,jst,kst) ===
@@ -548,8 +548,8 @@ subroutine loop
            if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif
            if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
-#endif
            dxyz=dxyz*dxdy(ib,jb)
+#endif
            if(dxyz.le.0.) stop 34956
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
@@ -803,7 +803,7 @@ subroutine loop
                  kb=ka+1
               endif
               z1=dble(ka)
-              if(kb.eq.KM+1) then
+              if(kb.eq.KM+1) then  ! prevent "evaporation"
                  nev=nev+1
                  kb=KM
                  z1=dble(KM)-0.5
@@ -958,8 +958,8 @@ subroutine loop
 #endif
 
      call fancyTimer('advection','stop') 
-     print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout
-799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8)
+     print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
+799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,i10)
      
   end do intsTimeLoop
   
@@ -1197,7 +1197,7 @@ return
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.0,f10.0 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined ifs
-566 format(i8,i7,f7.2,f7.2,f7.1,f10.0,f10.0 &
+566 format(i8,i7,f7.2,f7.2,f7.2,f10.0,f10.0 &
          ,f10.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
