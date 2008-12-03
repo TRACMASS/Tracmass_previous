@@ -959,7 +959,7 @@ subroutine loop
 
      call fancyTimer('advection','stop') 
      print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
-799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,i10)
+799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
      
   end do intsTimeLoop
   
