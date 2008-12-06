@@ -41,8 +41,8 @@ contains
     
     IMPLICIT NONE
 
-    REAL*4, ALLOCATABLE, DIMENSION (:)       :: dens_temp, dens_zero
-    REAL*4, ALLOCATABLE, DIMENSION (:)       :: t, s, rho
+!    REAL*4, ALLOCATABLE, DIMENSION (:)       :: dens_temp, dens_zero, rho
+!    REAL*4, ALLOCATABLE, DIMENSION (:)       :: t, s
     INTEGER                                  :: KM,k
     
     REAL, PARAMETER                          :: a0 = 999.842594
@@ -64,7 +64,9 @@ contains
     
     REAL, PARAMETER                          :: d0 = 4.8314e-4
 
-    allocate ( dens_temp(KM),dens_zero(KM) ,rho(KM) )
+!    allocate ( dens_temp(KM),dens_zero(KM) ,rho(KM) )
+    REAL*4 t(KM),s(KM)  
+    REAL*4 dens_temp(KM),dens_zero(KM) ,rho(KM) 
 
     do k=1,km
        dens_temp(k) = a0+(a1+(a2+(a3+(a4+a5*t(k))*t(k))*t(k))*t(k))*t(k)
@@ -72,7 +74,8 @@ contains
             + (b0 + (b1 + (b2 + (b3 + b4*t(k))*t(k))*t(k))*t(k))*s(k) &
             + (c0 + (c1 + c2*T(k))*T(k))*s(k)*sqrt(S(k)) + d0*s(k)**2
        rho(k)=dens_zero(k)-1000.
-enddo
+!print *,'k=',k,rho(k),t(k),s(k)
+     enddo
 
 !print *,'statv11111111=',km,rho(km)
 
