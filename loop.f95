@@ -1049,7 +1049,7 @@ return
              print *,'ntrac=',ntrac,' ints=', ints
              print *,'ib=',ib,'jb=',jb,'kb=',kb
              print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
-             print *,'dztb=',dztb(ib,jb,kb,1),dztb(ib,jb,kb,2)
+             !print *,'dztb=',dztb(ib,jb,kb,1),dztb(ib,jb,kb,2)
              print *,'rg*hs=',rg*hs(ib,jb,NST)
              print *,'rr*hs=',rr*hs(ib,jb,1)
              print *,'-------------------------------------'
@@ -1341,12 +1341,12 @@ return
     
     select case (trim(testStr))
     case ('start')
-       WRITE (6, FMT="(A)", ADVANCE="NO") ,' - Begin '//trim(timerText)
+!       WRITE (6, FMT="(A)", ADVANCE="NO") ,' - Begin '//trim(timerText)
        call etime(timestamp1,fullstamp1)
     case ('stop')
        call etime(timestamp2,fullstamp2)
        timeDiff=fullstamp2-fullstamp1
-       write (6 , FMT="(A,F6.1,A)") ', done in ' ,timeDiff ,' sec'
+!       write (6 , FMT="(A,F6.1,A)") ', done in ' ,timeDiff ,' sec'
     end select
   end subroutine fancyTimer
 end subroutine loop

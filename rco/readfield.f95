@@ -85,6 +85,8 @@ if(ihour.eq.24) then
 endif
 ntime=1000000*iyear+10000*imon+100*iday+ihour
 
+!print *,'tiden=',ntime,iyear,imon,iday,ihour,iyear0
+
 !____________________________ initialise ___________________________
 if(ints.eq.intstart) then
 hs=0.
@@ -95,8 +97,14 @@ tem=0.
 sal=0.
 rho=0.
 #endif
+iyear=startyear
+imon=startMon
+iday=startDay
+ihour=0
 
 endif
+!print *,'tiden eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee=',ntime,iyear,imon,iday,ihour,iyear0
+ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !_______________________________________________________________________
 
@@ -142,12 +150,11 @@ if(.not.around) stop 4556
 
 
 !     === open snap file ===
-open(unit=30,file=trim(rfile),status='old',form='unformatted',err=4000)
+!open(unit=30,file=trim(rfile),status='old',form='unformatted',err=4000,convert='little_endian')
+open(unit=30,file=trim(rfile),status='old',form='unformatted',err=4000,convert='big_endian')
 
 ! start read header:
-!print *,'hej',rfile
 read(30) ird
-!print *,'ird',ird
 itt0 = ird
 read(30) ird
 km0 = ird
@@ -217,6 +224,8 @@ do i=1,imt
   kmt(i,j) = rd2d(i,j)
  enddo
 enddo
+!print *,kmt
+!stop 34956
 
  do i=1,imt-1
   do j=1,jmt-1
@@ -237,6 +246,8 @@ i0=nint(ird)
 !print *,'snap1d',snap1d
 
 read(30,err=2000) snap1d(1:i0)
+
+
 ii=0
 do j=1,jmt
  do i=1,imt
@@ -244,10 +255,12 @@ do j=1,jmt
   if(kmt(i,j).ge.1) then
    ii=ii+1
    hs(i,j,2)=0.01*snap1d(ii) 
-!   print *,i,j,hs(i,j,2),hs(i,j,1)
+!   if(kmt(i,j).ne.41) print *,ii,i,j,kmt(i,j),hs(1,j,2)
   endif
  enddo
 enddo
+
+!print *,'hs'
 
 
 ! ubt
@@ -266,6 +279,7 @@ read(30,err=2000) snap1d(1:i0)
 !enddo
 
 !print *,'ubt'
+
 
 ! vbt
 read(30,err=2000) ird
@@ -292,7 +306,6 @@ do m=4,58
  read(30,err=2000) snap1d(1:i0)
 ! print*,'2d snapshots',m,i0,snap1d(1)
 enddo
-
 
 
 ! temperature
@@ -368,7 +381,7 @@ do k=1,km
     else
      uflux(i,j,kk,2)=dya*(snap2d(i,j)+snap2d(i,j-1))*( dz(kk)+0.5*(hs(i,j,2)+hs(i+1,j,2)) )
     endif
-!    if(u(i,j,kk,2).ne.0. .and. ints.eq.2) print *,i,j,kk,u(i,j,kk,2)
+!    if(uflux(i,j,kk,2).ne.0. .and. ints.eq.2) print *,i,j,kk,uflux(i,j,kk,2)
   enddo
  enddo
 

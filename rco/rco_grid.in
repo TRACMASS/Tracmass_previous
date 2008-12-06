@@ -1,29 +1,50 @@
-  &INITGRIDDESC
-   GCMname    = 'rco',
-   GCMsource  = 'rco',
-   gridName   = 'rco',
-   gridSource = 'rco',
-   gridDesc   = '2 minutes run for the Baltic Sea'/
-
+&INITGRIDVER
+  ! ===	Used to	check if this file has the correct syntax
+  gridVerNum  =	2/
+  !
+  !
+&INITGRIDDESC
+  !
+  GCMname     = 'rco',
+  GCMsource   = 'rco',
+  gridName    = 'rco',
+  gridSource  = 'rco',
+  gridDesc    = 'rco'/
+  !
+  !
 $INITGRIDGRID
-  IMT=320,
-  JMT=362,
-  KM=41,
-  LBT=1,
-  NEND=2/       !NEND = LBT +1
-
+  !
+  IMT      = 320,
+  JMT      = 362, 
+  KM       = 41,
+  LBT      = 1,
+  NEND     = 2/                   ! NEND = LBT +1
+  !
+  !
 $INITGRIDNTRAC
-  NTRACMAX=240000/
-
+  !
+  NTRACMAX=120000/               ! 10*1000*1000 
+  !
+  !
 $INITGRIDTIME
-   ngcm    = 6,                 ! hours between GCM datasets
-   iter    = 1,                 ! Number of intermediate time steps between GCM data sets
-   intmax  = 14564/             ! maximum length of RCO fields
-
+  !
+  ngcm          = 6,            !  hours between GCM datasets
+  iter          = 1,            !  iteration between two gcm data sets
+  intmax        = 14564,          !  maximum length of GCM fields
+  fieldsPerFile = 1/            !
+  !
+  !
 $INITGRIDDATE
-  yearmin = 1981,
-  yearmax = 2004/
-
+  !
+  yearmin        = 1981,
+  yearmax        = 2004,
+  ! === Reference basetime for the velocity field.
+  baseSec        = 0,
+  baseMin        = 0,
+  baseHour       = 0,
+  baseDay        = 1,
+  baseMon        = 1,
+  baseYear       = 1981/
+  !
 $INITGRIDARC
-   arcscale    = 0.001/                  ! orig arc meters -> km
-!  arcscale    = 0.00001/                ! orig arc meters -> 100 km  occ66 || ifs
+  arcscale      = 0.001/         ! orig arc meters -> km
