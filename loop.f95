@@ -245,7 +245,7 @@ subroutine loop
                  stop 5978 
                  vol=abs(uflux(ist,jst,kst,1))
               case (2)
-                 stop 5979
+               !  stop 5979
                  vol=abs(vflux(ist,jst,kst,1))
               case (3)
                  call vertvel(1.d0,ib,ibm,jb,kst)
