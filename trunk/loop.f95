@@ -951,15 +951,24 @@ subroutine loop
      print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout,nsed,nsusp,nexit
 599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
           ' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, ' nsusp=',i8,' nexit=',9i8)
-#else
+
 !     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout-nerror,nexit
 !599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
 !         ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
-#endif
+#elif defined ifs || rco 
+
+     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
+799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
+
+#else
 
      call fancyTimer('advection','stop') 
      print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
-799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
+799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean=',i8)
+
+#endif
+
+
      
   end do intsTimeLoop
   
@@ -984,7 +993,7 @@ subroutine loop
   
   call writepsi
   
-  print *,'The very end of tracmass run ',outDataFile,' at'
+  print *,'The very end of TRACMASS run ',outDataFile,' at'
   call system('date')
   
 return
@@ -1018,7 +1027,7 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verboseMess = 0
+       INTEGER                             :: verboseMess = 1
        INTEGER                             :: errCode
 
        errCode=0
@@ -1153,6 +1162,7 @@ return
        case ('infLoopError')
           if(niter-nrj(ntrac,4).gt.30000) then ! break infinite loops
              nloop=nloop+1             
+             nerror=nerror+1
              if (verboseMess == 1) then
                 print *,'====================================='
                 print *,'Warning: Particle in infinite loop '
