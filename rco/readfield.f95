@@ -1,3 +1,4 @@
+!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
 subroutine readfields
 
   USE mod_param
@@ -19,50 +20,41 @@ subroutine readfields
   integer kmm
 #endif
   
-  integer NLEN,dtts,NSNAPS,NSNAPS_2D,NSNAPS_3D,nd,l_tke,nlength
+!  integer NLEN,NSNAPS,NSNAPS_2D,NSNAPS_3D,nd,l_tke,nlength
   
-  parameter (NLEN=29557,NSNAPS_2D=1,NSNAPS_3D=0,nd=43200,NSNAPS=1,nlength=2379)
-  parameter (l_tke=0)
+!  parameter (NLEN=29557,NSNAPS_2D=1,NSNAPS_3D=0,nd=43200,NSNAPS=1,nlength=2379)
+!  parameter (l_tke=0)
+
+  INTEGER, PARAMETER :: NLEN=29557,NSNAPS_2D=1,NSNAPS_3D=0,nd=43200,NSNAPS=1
+  INTEGER, PARAMETER :: nlength=2379,l_tke=0
   
-  integer :: itt0,year,month,day,hour,minute,second
-  integer :: imt0,jmt0,km0,nt0,NLEN0,NSNAPS0
-  integer ::  i,j,k,m,kz,ii,ints2,kk,i0
-  integer,  ALLOCATABLE, DIMENSION(:,:) :: kmu
-!  integer :: kmu(IMT,JMT)
-  real*8  ird0,ird20,ird30,ird40,stlon,stlat,dxdeg,dydeg
-  
-  real snapd,totsec
-  
-  real*4 ird,ird2,ird3,ird4
-!  REAL*4, ALLOCATABLE, DIMENSION(:)   :: rd1d_a, rd1d_b, zdzz,dzw,dxt,dyt
+  INTEGER :: itt0,year,month,day,hour,minute,second,ittstart,itt,dtts
+  INTEGER :: imt0,jmt0,km0,nt0,NLEN0,NSNAPS0
+  INTEGER ::  i,j,k,m,kz,ii,ints2,kk,i0
+  INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:) :: kmu
+
+  REAL*8 :: ird0,ird20,ird30,ird40,stlon,stlat,dxdeg,dydeg
+  REAL*4 :: snapd,totsec,ird,ird2,ird3,ird4
   REAL*4, ALLOCATABLE, DIMENSION(:)   :: rd1d_a, rd1d_b, zdzz,dzw,dxt
-!  REAL*4, ALLOCATABLE, DIMENSION(:)   :: phi,phit,yu,snap1d
   REAL*4, ALLOCATABLE, DIMENSION(:)   :: phit,yu,snap1d
   REAL*4, ALLOCATABLE, DIMENSION(:,:) :: rd2d
   
-  REAL :: snap2d(imt,jmt)
+  REAL :: snap2d(imt,jmt) ! ??????????????????
 
-  character ofile*20,infile*78,zfile*123,rfile*59
-  character*3 a_exp1
-  character*2 a_exp2
-  logical around
-  
-  integer ittstart,itt
+  CHARACTER ofile*20,infile*78,zfile*123,rfile*59,a_exp1*3,a_exp2*2
+
+  LOGICAL around
   
   REAL*8, SAVE :: dxa,dya
-!  INTEGER, SAVE, ALLOCATABLE,  DIMENSION(:,:) :: kmu
 
-!  print *,'readfield startar',ints
-  
-  if ( .NOT. ALLOCATED(snap1d) ) then
+  alloCondGrid: if(.not. allocated (snap1d)) then
      allocate ( snap1d(NLEN),rd2d(IMT,JMT) )
-!     allocate ( snap1d(NLEN),rd2d(IMT,JMT),kmu(IMT,JMT) )
      allocate ( rd1d_a(NSNAPS),rd1d_b(NSNAPS) )
      allocate ( zdzz(KM),dzw(0:km),dxt(imt) ) 
      allocate ( phit(jmt),yu(jmt) )
-!     allocate ( dyt(jmt),phi(jmt),phit(jmt),yu(jmt) )
      allocate ( tempb(KM), saltb(KM), rhob(KM) )
-  end if
+  end if alloCondGrid
+
  if ( .not. allocated (kmu) ) then
      allocate ( kmu(imt,jmt) )
   end if
@@ -103,7 +95,6 @@ iday=startDay
 ihour=0
 
 endif
-!print *,'tiden eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee=',ntime,iyear,imon,iday,ihour,iyear0
 ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !_______________________________________________________________________
@@ -143,7 +134,6 @@ zfile='gunzip -c '//trim(infile)//'.gz > '//trim(inDataDir)//'tmp/'//trim(outDat
 !print *,'trim(outDataFile)=',trim(outDataFile)
 CALL system(zfile)
 rfile=trim(inDataDir)//'tmp/'//trim(outDataFile)
-!print *,'rfile=',rfile
 inquire(file=trim(rfile),exist=around)
 if(.not.around) stop 4556
 
@@ -260,7 +250,7 @@ do j=1,jmt
  enddo
 enddo
 
-!print *,'hs'
+!print *,'hs',hs
 
 
 ! ubt
@@ -381,16 +371,10 @@ do k=1,km
     else
      uflux(i,j,kk,2)=dya*(snap2d(i,j)+snap2d(i,j-1))*( dz(kk)+0.5*(hs(i,j,2)+hs(i+1,j,2)) )
     endif
-!    if(uflux(i,j,kk,2).ne.0. .and. ints.eq.2) print *,i,j,kk,uflux(i,j,kk,2)
   enddo
  enddo
 
 enddo
-
-!if(ints.eq.2) print *,'kmu=',kmu
-
-!if(ints.eq.2) stop 25346
-
 
 ! meridional velocity
 do k=1,km
@@ -400,7 +384,6 @@ do k=1,km
  if(i0.gt.0) then
   read(30,err=2004) snap1d(1:i0)
  endif
-!print*,'v3',k,i0,snap1d(1)
  ii=0
  do j=1,jmt
   do i=1,imt
@@ -440,33 +423,21 @@ stop 2000
 
 close(30) 
 
-!print *,'nnnnnnnnnnnnnnnn'
-!if(ints.gt.1) stop 494
 
 #ifdef tempsalt
 ! the density
 do i=1,imt
-! print *,'i=',i
  do j=1,jmt
-! print *,'j=',j,i
   if(kmt(i,j).ne.0) then
    kmm=kmt(i,j)
-! print *,'kmt=',i,j,kmt(i,j)
    do k=1,kmm
-!   print *,'k=',k
     kk=km+1-k
-!   print *,'k=',k,'kk=',kk
     tempb(k)=tem(i,j,kk,2)
 !    saltb(k)=(sal(i,j,kk,2)-35.)/1000.
     saltb(k)=sal(i,j,kk,2)
     if(saltb(k).lt.0.) saltb(k)=0.
     enddo
-! print *,'tempb=',tempb
-! print *,'saltb=',saltb
-!print *,'ij',i,j
-!print *,'kmm=',kmm
     call statv(tempb,saltb,rhob,kmm)
-! print *,'statv=',i,j
     do k=1,kmm
      kk=km+1-k
      rho(i,j,kk,2)=rhob(k)
@@ -474,21 +445,16 @@ do i=1,imt
    endif
   enddo
  enddo
-!print *,'777777777777777777'
-!stop 493
 #endif
 
-!print *,'wdfasdgaegaergergerwg'
-!stop 496
 
-!deallocate ( snap1d, rd2d,kmu )
-deallocate ( snap1d, rd2d )
-deallocate ( rd1d_a, rd1d_b )
-deallocate ( zdzz,dzw,dxt )
-!deallocate ( dyt, phi, phit, yu )
-deallocate ( phit, yu )
-deallocate ( tempb, saltb, rhob )
-deallocate ( kmu )
+!deallocate ( snap1d, rd2d )
+!deallocate ( rd1d_a, rd1d_b )
+!deallocate ( zdzz,dzw,dxt )
+!deallocate ( phit, yu )
+!deallocate ( tempb, saltb, rhob )
+!deallocate ( kmu )
+
 
 !print *,'readfield slut',ints
 !if(ints.gt.1) stop 49678
@@ -496,5 +462,5 @@ deallocate ( kmu )
 return
 end subroutine readfields
 
-!_______________________________________________________________________
+!________________________________________________________________________________________
       

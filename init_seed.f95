@@ -100,29 +100,35 @@ subroutine init_seed()
      end if
      inquire(FILE = fullSeedFile, exist=fileexists)
      chFile2d: if (fileexists) then
+
         ijkMax=0
         open(unit=34,file=fullSeedFile,form='unformatted', ACTION = 'READ')
         read(unit=34) seedMask
+
         ijkMax=0
 
-        do i=1,ist
-           do j=1,jst1
-              if (seedMask(i,j) /= 0) ijkMax=ijkMax+1
-           end do
+        do i=1,imt
+         do j=1,jmt
+          do k=kst1,kst2
+           if (seedMask(i,j) /= 0) ijkMax=ijkMax+1
+          end do
+         end do
         end do
+
         allocate (ijkst(ijkMax,6))  
 
-        do i=1,ist
-           do j=1,jst1
-              if (seedMask(i,j) /= 0) THEN
+        ijk=0
+        do i=1,imt
+           do j=1,jmt
+              if (seedMask(i,j) /= 0) then
                  do k=kst1,kst2
+                    ijk=ijk+1
                     ijkst(ijk,1)=i
                     ijkst(ijk,2)=j
                     ijkst(ijk,3)=k
                     ijkst(ijk,4)=idir
                     ijkst(ijk,5)=isec
                     ijkst(ijk,6)=seedMask(i,j)
-                    ijk=ijk+1
                  end do
               end if
            end do

@@ -200,9 +200,11 @@ subroutine loop
      ! ===    Seed particles if still in intspin.         ===
      !=======================================================
      intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+!print *, nff*ints , nff*(intstart+intspin)
         call fancyTimer('seeding','start')
         ! === Seed particles ===
         ntrac=ntractot
+!print *, 'ntrac=',ntrac,ijkMax
         ijkstloop: do ijk=1,ijkMax
            ist  = ijkst(ijk,1)
            jst  = ijkst(ijk,2)
@@ -260,8 +262,10 @@ subroutine loop
                  vol=1
               case(4)
                  if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
-                 if(uflux(ib,jb,kb,1)+uflux(ibm,jb  ,kb,1) + & 
-                    vflux(ib,jb,kb,1)+vflux(ib ,jb-1,kb,1).eq.0.) cycle ijkstloop
+                 vol=abs(uflux(ib,jb,kb,1))+abs(uflux(ibm,jb  ,kb,1)) + & 
+                     abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
+   !              print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
+                 if(vol.eq.0.) cycle ijkstloop
               end select
               if(vol.eq.0) cycle ijkstloop
            end if idirCond
@@ -305,7 +309,7 @@ subroutine loop
            if(subvol.eq.0.) stop 3956  !?????????????????
            if(subvol.eq.0.) subvol=1.
            
-           !print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
+!           print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
 99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
                 ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
            

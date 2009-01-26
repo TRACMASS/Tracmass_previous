@@ -1,13 +1,6 @@
 &INITRUNDESC
   caseName     = 'rcoTest',
   caseDesc     = 'Looking at interesting things in the Baltic puddle'/
- &INITRUNTIME
-  intmin  = 1,                                      !number of initial datasets 
-!  intspin = 35064, ! (35064=24 yers=total 2nm_122)  !trajectory release period (timesteps)
-  intspin =     24, ! (=6  *24/ngcm)  !trajectory release period (timesteps)
-  intrun  = 50000,                                  !trajectory run   
-  intstep = 1/                                      !pos if forward  neg if backward
-  !
 &INITRUNGRID
   !
   !==subGrid:       0 = Use full grid.
@@ -32,20 +25,18 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin = 122, ! one month
+  intspin = 1, ! (=6  *24/ngcm)  !trajectory release period (timesteps)
   !intspin = 1460,
   ! === Number of timesteps for the run.      ===
-  intrun  = 2920,
+  intrun  = 50000,
   ! === Pos if forward  neg if backward       ===
   intstep = 1/
-  !
-  !
   !
 &INITRUNDATE
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 1,
+  startDay          = 2,
   startMon          = 1,
   startYear         = 1981/  ! first year is 1981, last year is 2005
   !
@@ -65,10 +56,12 @@
   !
   ! === Directory where input fields are stored
   !inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
+  !inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
   inDataDir = '/Users/doos/data/rco/gcm/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Volumes/hav4/data/rco/orm/',
+  !outDataDir   = '/Volumes/Resa3/data/rco/orm/',
   outDataDir   = '/Users/doos/data/rco/orm/',
   !
   ! === name of current trajectory run
@@ -84,11 +77,11 @@ $INITRUNSEED
   !==               2 = Seed particles zonal(x-z)
   !==               3 = Seed particles horiz(x-y)
   !==               4 = Seed particles in the middle of T-box
-  isec     = 1,
+  isec     = 4,
   !==idir:          1 = follow positive direction (eastward/northward)  
   !==              -1 = follow negative direction (westward/southward)
   !==               0 = both directions
-  idir     = 1,
+  idir     = 0,
   !
   ! number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
@@ -116,8 +109,15 @@ $INITRUNSEED
   ist2     = 204,		 
   jst1     = 145,		 
   jst2     = 220,		 
-  kst1     =   1,		 
-  kst2     =  -1/
+  kst1     =  38,		 
+  kst2     =  41,
+  varSeedFile = 0,
+  !seedDir     = '/Volumes/hav4/data/rco/topo/',
+  !seedDir     = '/Volumes/Resa3/data/rco/topo/',
+  seedDir     = '/Users/doos/data/rco/topo/',
+  !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
+  !seedFile    = '/Volumes/Resa3/data/rco/topo/maskust' /
+  seedFile    = '/Users/doos/data/rco/topo/maskust' /
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
