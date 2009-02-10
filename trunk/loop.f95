@@ -126,23 +126,22 @@ subroutine loop
   !==========================================================
   
 #ifdef rerun
-  open(67,file=trim(outDataDir)//outDataFile//'_rerun.asc')
+  open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
-  read(67,566,end=41,err=41) ntrac,n,rlon,rlat,zz
-  !if(n.ne.1)       print 566,ntrac,n,rlon,rlat,zz
-  
+  read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
+566 format(i8,i7,f7.2,f7.2,f7.2,f10.0,f10.0 &
+         ,f10.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )  
 #ifdef orc
+
   do k=1,LBT
      if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
         nrj(ntrac,8)=k                               
      endif
   enddo
   if(nrj(ntrac,8).eq.0) stop 7395                               
-#endif
   
-  
-  
-#ifdef occ66
+#elif defined  occ66
+
   if(rlon.eq.293.) then
      nrj(ntrac,8)=3    ! Drake Passage
   elseif(rlat.eq.-47.00) then
@@ -154,6 +153,17 @@ subroutine loop
      print 566,ntrac,n,rlon,rlat,zz
      stop 4957
   endif
+
+  if(rlat.eq.float(jenn(1))) then
+     nrj(ntrac,8)=1    ! Southern boundary
+  elseif(rlat.eq.float(jens(2))) then
+     nrj(ntrac,8)=2    ! Northern boundary 
+  else
+     nrj(ntrac,8)=0
+     print 566,ntrac,niter,rlon,rlat,zz
+     stop 4957
+  endif
+
 #endif
   
   goto 40
@@ -914,8 +924,10 @@ subroutine loop
            endif northbound
 #else     
            LBTloop: do k=1,LBT
-              if(ienw(k).le.ib .and. ib.le.iene(k) .and. &
-                   jens(k).le.jb .and. jb.le.jenn(k)  ) then
+!              if(ienw(k).le.ib .and. ib.le.iene(k) .and. &
+!                 jens(k).le.jb .and. jb.le.jenn(k)  ) then
+              if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
+                 float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
                  exit niterLoop                                
               endif
