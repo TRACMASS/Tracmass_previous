@@ -72,7 +72,7 @@ subroutine init_params
   end if
   
   ! -- Check if there is a time argument and if so, use it.
-  print *,trim(Project)//'/'//trim(Case)//'_run.in'
+  print *,trim(Project)//'/'//trim(Case)//'_grid.in'
   open(8,file=trim(Project)//'/'//trim(Project)//'_grid.in',  &
        status='OLD', delim='APOSTROPHE')
   ! -- Check if the namefiles has correct version number. 
