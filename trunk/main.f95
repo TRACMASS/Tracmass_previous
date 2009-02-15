@@ -58,7 +58,7 @@ end if
 #if defined textwrite
 open(56,file=trim(fullWritePref)//'_run.asc')       ! trajectory path
 open(57,file=trim(fullWritePref)//'_out.asc')       ! exit position
-open(58,file=trim(fullWritePref)//'__in.asc')       ! entrance position
+open(58,file=trim(fullWritePref)//'_in.asc')        ! entrance position
 #endif
 
 #if defined binwrite
@@ -68,7 +68,7 @@ open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  ! Exit position
      ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   !
 open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &  ! Killed position
      ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   !
-open(unit=78 ,file=trim(fullWritePref)//'__in.bin' &  ! Entrance position
+open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  ! Entrance position
      ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   !
 open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  ! Error position 
      ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   ! 
@@ -98,7 +98,11 @@ CONTAINS
     print *,'Description : '//trim(caseDesc)
     print *,'------------------------------------------------------'
 #if defined tempsalt
+#if defined ifs
+    print *,'Temperature and humidity fields included'
+#else
     print *,'Temperature and salinity fields included'
+#endif
 #endif
 #if defined turb
     print *,'with sub-grid turbulence parameterisation'
@@ -133,7 +137,11 @@ CONTAINS
     
 #if defined streamr
 #if defined streamts
+#if defined ifs
+    print *,'Lagrangian density, temperature and humidity stream function stored'
+#else
     print *,'Lagrangian density, temperature and salinity stream function stored'
+#endif
 #else
     print *,'Lagrangian density stream function stored'
 #endif
