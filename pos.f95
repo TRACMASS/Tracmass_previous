@@ -1,7 +1,7 @@
 !23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
  
 subroutine pos(ijk,ia,ja,ka,r0,r1,ds,rr)
-
+!===============================================================================
 ! computes new position (r0 --> r1) of trajectory after time ds
 ! the new coordinate is still on one of the faces of box at ia,ja,ka
 !
@@ -17,6 +17,7 @@ subroutine pos(ijk,ia,ja,ka,r0,r1,ds,rr)
 !  Output:
 !    
 !    r1       : the new position (coordinate)
+!===============================================================================
 
 USE mod_param
 USE mod_vel

@@ -40,7 +40,6 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      vv=rg*vflux(ia ,ja  ,k,NST)+rr*vflux(ia ,ja  ,k,1)
      vm=rg*vflux(ia ,ja-1,k,NST)+rr*vflux(ia ,ja-1,k,1)
 #if defined ifs
-!     wflux(k) = wflux(k-1) + ff * ( uu - um + vv - vm )
      wflux(k) = wflux(k-1) - ff * &
      ( uu - um + vv - vm + (dztb(ia,ja,k,2)-dztb(ia,ja,k,1))/tseas )
 #elif full_wflux

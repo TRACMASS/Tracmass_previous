@@ -154,6 +154,7 @@ subroutine loop
      stop 4957
   endif
 
+#elif defined ifs
   if(rlat.eq.float(jenn(1))) then
      nrj(ntrac,8)=1    ! Southern boundary
   elseif(rlat.eq.float(jens(2))) then
@@ -165,7 +166,8 @@ subroutine loop
   endif
 
 #endif
-  
+!  print 566,ntrac,niter,rlon,rlat,zz
+!  print *,nrj(ntrac,8)  
   goto 40
 41 continue
   
@@ -436,9 +438,12 @@ subroutine loop
         
         ! ===  End of seeding part ===
         call fancyTimer('seeding','stop')
+     ntractot=ntrac
      end if intspinCond
      ! ntracin
-     ntractot=ntrac
+!     ntractot=ntrac  moved inside the intspinCond with the minus bug below
+!     if(nff*ints == nff*(intstart+intspin)) ntractot=ntrac-1
+!print *,'ntractot',ntractot,ntrac
      ntrac=0
 
      if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
@@ -448,7 +453,8 @@ subroutine loop
      !=== a new position for this time step.              ===
      !=======================================================
      call fancyTimer('advection','start')
-     ntracLoop: do ntrac=1,ntractot-1        
+!     ntracLoop: do ntrac=1,ntractot-1  This "minus one" must have been a bug... Kristofer
+     ntracLoop: do ntrac=1,ntractot     
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6).eq.1) cycle ntracLoop
         
@@ -493,7 +499,7 @@ subroutine loop
               ! === kb same as before            ===
               nrj(ntrac,3)=kb
               z1=z1+0.5
-              ! z1=z1+0.1  !resusp lägre i boxen
+              ! z1=z1+0.1  !resusp l?gre i boxen
               trj(ntrac,3)=z1
               ! === change flag to put trajectory back in circulation ===
               nrj(ntrac,6)=0
@@ -564,7 +570,7 @@ subroutine loop
            if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
            dxyz=dxyz*dxdy(ib,jb)
 #endif
-           if(dxyz.le.0.) stop 34956
+!           if(dxyz.le.0.) stop 34956
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)
@@ -929,6 +935,14 @@ subroutine loop
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
+if(  float(jens(k)) .ne. y1 .and. y1 .ne. float(jenn(k))) then
+print *,'ia..=',ia,ib,ja,jb,ka,kb
+print *,'x0..=',x0,x1,y0,y1,z0,z1
+print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+print *,'ntrac=',ntrac, niter
+
+stop 4967
+endif
                  exit niterLoop                                
               endif
            enddo LBTLOOP
@@ -1078,10 +1092,12 @@ return
              print *,'rg*hs=',rg*hs(ib,jb,NST)
              print *,'rr*hs=',rr*hs(ib,jb,1)
              print *,'-------------------------------------'
-             print *,'The run is terminated'
+!             print *,'The run is terminated'
+             print *,'The trajectory is killed'
              print *,'====================================='
              errCode = -39
-             stop
+!             stop
+             nrj(ntrac,6)=1
           endif          
 
        case ('boundError')
