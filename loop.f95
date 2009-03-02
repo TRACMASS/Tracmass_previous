@@ -438,12 +438,9 @@ subroutine loop
         
         ! ===  End of seeding part ===
         call fancyTimer('seeding','stop')
-     ntractot=ntrac
+        ntractot=ntrac
      end if intspinCond
-     ! ntracin
 !     ntractot=ntrac  moved inside the intspinCond with the minus bug below
-!     if(nff*ints == nff*(intstart+intspin)) ntractot=ntrac-1
-!print *,'ntractot',ntractot,ntrac
      ntrac=0
 
      if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
@@ -985,7 +982,7 @@ endif
 !     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout-nerror,nexit
 !599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
 !         ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
-#elif defined ifs || rco 
+#elif defined ifs || rco || tes
 
      print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
 799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
@@ -1235,7 +1232,7 @@ return
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined rco 
+#elif defined rco || tes
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.0,f10.0 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined ifs
