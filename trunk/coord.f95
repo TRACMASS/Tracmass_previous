@@ -92,6 +92,10 @@ stlon1=0.
 stlat1=0.
 rmin=20.d0
 rmax=30.d0
+smin= 0.d0
+smax=40.d0
+tmin= 0.d0
+tmax=30.d0
 #endif
 
 #ifdef tun
@@ -139,7 +143,8 @@ enddo
 ! bottom layer: k=0; surface layer: k=KM and zw=0
 ! dz = layer thickness  
 
-#ifdef rco
+#if defined rco
+
 dz(41)=   3.d0
 dz(40)=   3.d0
 dz(39)=   3.d0
@@ -181,9 +186,9 @@ dz( 4)=   11.65746d0
 dz( 3)=   11.82413d0
 dz( 2)=   11.93642d0
 dz( 1)=   11.99292d0
-#endif
 
-#if defined for || sim 
+#elif defined for || sim 
+
  dz(39)=2.5d0
  do j=38,9,-1
   dz(j)=5.d0
@@ -192,9 +197,20 @@ dz( 1)=   11.99292d0
   dz(j)=10.d0
  enddo
  dz(1)=20.d0
-#endif
 
-#if defined occ
+#elif defined tes 
+
+dz=100.  ! equidistant depthlevels for the test case
+
+ do j=1,JMT
+  rlatu=stlat1+dy*float(j-1)+dy/2. ! at v points
+  rlatt=rlatu-0.5d0*dy            ! at T-points
+  csu(j)=dcos(rlatu*radian)
+  cst(j)=dcos(rlatt*radian)
+ enddo
+
+#elif defined occ
+
 ! depth coord in meters from surface and down (OCCAM def)
 do k=0,KM
  z = k
@@ -209,7 +225,10 @@ do k= 1, KM
 enddo
 !print *,zw
 !print *,dz
+
 #endif
+
+!______________________________________________________________________________________________
 
 
 #if defined occ || rco || tes || for || sim 
