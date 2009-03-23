@@ -1,4 +1,4 @@
-! Compu%tes the length of the trajectory
+! Computes the length of the trajectory
 ! Note that the calculation is not exact 
  
 subroutine arclength(ia,ja,ka,dt,rr,arc)
