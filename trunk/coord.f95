@@ -253,9 +253,9 @@ stlon1=0.
 stlat1=-90000.
 !print *,'e her nu=',dx,dy
 
-! geopotential height in km
+! pressure in hPa
 rmin=0.d0
-rmax=200.d0
+rmax=1100.d0
 dr=(rmax-rmin)/dble(MR-1)
 ! temperature
 tmin=-100.d0
