@@ -1,3 +1,4 @@
+#ifndef timeanalyt 
 
 subroutine cross(ijk,ia,ja,ka,r0,sp,sn,rr)
   
@@ -146,3 +147,4 @@ if(sn.le.0.d0) sn=1.d20
 
 return
 end subroutine cross
+#endif

@@ -53,7 +53,7 @@ subroutine loop
   INTEGER ntrac,nev,nrh0,nout,nloop,nerror
   INTEGER nnorth,ndrake,ngyre,ntractot,nexit(NEND)
   
-  REAL*8 rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0
+  REAL*8 rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0,ss0
   REAL*8 ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
   REAL*8 subvol,vol,arc,arct,rr,rb,rg,rbg,uu
   
@@ -244,6 +244,8 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=wflux(ist,jst,kst,1)
+#elif timeanalyt
+                 vol=wflux(kst,1)
 #else
                  vol=wflux(kst)
 #endif
@@ -265,6 +267,8 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=abs(wflux(ist,jst,kst,1))
+#elif timeanalyt
+                 vol=abs(wflux(kst,1))
 #else
                  vol=abs(wflux(kst))
 #endif
@@ -598,17 +602,28 @@ subroutine loop
            ! space variables (x,...) are dimensionless    !
            ! time variables (ds,...) are in seconds/m^3   !
            !==============================================! 
+#if defined timeanalyt
+dsmin=dtmin/dxyz
+ss0=dble(idint(ts))*tseas/dxyz
+!print *,'dsmin=',dsmin,dtmin,dxyz
+!s0=tt/dxyz
+!ss0=dble(idint(ts))
+           call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz) ! zonal
+           call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz) ! meridional
+           call cross_time(3,ia,ja,ka,z0,dsu,dsd,ts,tt,dsmin,dxyz) ! vertical
+#else
            call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
-           
+#endif
+
            dsmin=dtmin/dxyz
            ds=min(dse,dsw,dsn,dss,dsu,dsd,dsmin)
-           !print *,'min',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+!           print *,'min',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
            if(ds.eq.1.d20 .or.ds.eq.0.d0)then 
               ! === Can not find any path for unknown reasons ===
               print *,'ds cross error',dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
-              print *,ia,ja,ka,x0,y0,z0,rr,ntrac,niter
+              print *,ia,ja,ka,x0,y0,z0,ntrac,niter
               print *,'k=',ka,kb,KM+1-kmt(ia,ja),kmt(ia,ja)
               ! goto 1500
               nerror=nerror+1
@@ -641,7 +656,7 @@ subroutine loop
                  tss=tss+dt/tseas*dble(iter)
               endif
            endif
-           
+ !          print *,'ts=',ts,tss,dt
            ! === time interpolation constant ===
            rbg=dmod(ts,1.d0) 
            rb =1.d0-rbg
@@ -658,8 +673,13 @@ subroutine loop
                  if(ib.gt.IMT) ib=ib-IMT 
               endif
               x1=dble(ia)
+#if defined timeanalyt
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+#else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) 
               call pos(3,ia,ja,ka,z0,z1,ds,rr)
+#endif
               scrivi=.true.
 #ifdef streamxy
               ! === zonal component stream function ===
@@ -699,8 +719,13 @@ subroutine loop
                  ib=iam
               endif
               x1=dble(iam)
+#if defined timeanalyt
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+#else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+#endif
               scrivi=.true.
 #ifdef streamxy
               stxyx(iam,ja,lbas)=stxyx(iam,ja,lbas)-real(subvol*ff) 
@@ -736,8 +761,13 @@ subroutine loop
                  jb=ja+1
               endif
               y1=dble(ja)
-              call pos(1,ia,ja,ka,x0,x1,ds,rr)
-              call pos(3,ia,ja,ka,z0,z1,ds,rr)
+#if defined timeanalyt
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+#else
+              call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
+              call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+#endif
               scrivi=.true.
 #ifdef streamxy
               stxyy(ia,ja,lbas)=stxyy(ia,ja,lbas)+real(subvol*ff)
@@ -777,8 +807,13 @@ subroutine loop
 #endif
               endif
               y1=dble(ja-1)
-              call pos(1,ia,ja,ka,x0,x1,ds,rr)
-              call pos(3,ia,ja,ka,z0,z1,ds,rr)
+#if defined timeanalyt
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+#else
+              call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
+              call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+#endif
               scrivi=.true.
 #ifdef streamxy
               stxyy(ia,ja-1,lbas)=stxyy(ia,ja-1,lbas)-real(subvol*ff)
@@ -810,6 +845,8 @@ subroutine loop
               call vertvel(rb,ia,iam,ja,ka)
 #ifdef full_wflux
               uu=wflux(ia,ja,ka,1)
+#elif timeanalyt
+              uu=wflux(ka,1)
 #else
               uu=wflux(ka)
 #endif
@@ -825,21 +862,32 @@ subroutine loop
                  kb=KM
                  z1=dble(KM)-0.5
               endif
+#if defined timeanalyt
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+#else
               call pos(1,ia,ja,ka,x0,x1,ds,rr)
               call pos(2,ia,ja,ka,y0,y1,ds,rr)
-              
+#endif
            elseif(ds.eq.dsd) then ! downward exit
               
               call vertvel(rb,ia,iam,ja,ka)
 
 #ifdef full_wflux
               if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
+#elif timeanalyt
+              if(wflux(ka-1,1).lt.0.d0) kb=ka-1
 #else
               if(wflux(ka-1).lt.0.d0) kb=ka-1
 #endif              
               z1=dble(ka-1)
-              call pos(1,ia,ja,ka,x0,x1,ds,rr)  
-              call pos(2,ia,ja,ka,y0,y1,ds,rr) 
+#if defined timeanalyt
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+#else
+              call pos(1,ia,ja,ka,x0,x1,ds,rr)
+              call pos(2,ia,ja,ka,y0,y1,ds,rr)
+#endif
 #ifdef sediment
               if(kb.eq.KM-kmt(ia,ja)) then
                  nsed=nsed+1
@@ -863,9 +911,15 @@ subroutine loop
               
            elseif( ds.eq.dsc .or. ds.eq.dsmin ) then  ! inter time steping 
               scrivi=.false.
+#ifdef timeanalyt
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+#else
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
               call pos(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+#endif
            endif
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
@@ -1117,6 +1171,7 @@ return
              call writedata(19)
              boundError = boundError +1
              errCode = -50
+             stop 40962
              call writedata(40)
              nrj(ntrac,6)=1
           endif

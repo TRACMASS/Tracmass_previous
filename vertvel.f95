@@ -26,7 +26,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #endif
   
   real*8 rr,rg,uu,um,vv,vm
-  integer ia,iam,ja,ka,k
+  integer ia,iam,ja,ka,k,n
   
   rg=1.d0-rr
   
@@ -44,11 +44,16 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      ( uu - um + vv - vm + (dztb(ia,ja,k,2)-dztb(ia,ja,k,1))/tseas )
 #elif full_wflux
      wflux(ia,ja,k,1)=wflux(ia,ja,k-1,1) - ff * ( uu - um + vv - vm )
+#elif timeanalyt
+    do n=1,NST
+     wflux(k,n) = wflux(k-1,n) - ff * &
+     ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
+    enddo
 #else
      wflux(k) = wflux(k-1) - ff * ( uu - um + vv - vm )
 #endif
   enddo
-  
+
 #ifdef sediment
   ! === Godtyckligt vaerde paa kinetiska energin ===
   ! === daer wsed inte laengre paaverkar, 3e6.   ===
@@ -64,6 +69,10 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      endif
 #ifdef full_wflux
      wflux(k)=wflux(ia,ja,k,1) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
+#elif timeanalyt
+    do n=1,NST
+     wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
+    enddo
 #else
      wflux(k)=wflux(k) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
 #endif

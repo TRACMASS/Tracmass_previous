@@ -178,7 +178,7 @@ print *,'tttt'
      stop 100
   end if startHourCond
 
-  tseas=1.d0 * real(ngcm)*3600.d0 ! time step between data sets
+  tseas= dble(ngcm)*3600.d0 ! time step between data sets
 
 print *,'iyear=',iyear
 
@@ -221,6 +221,8 @@ print *,'iyear=',iyear
   allocate ( hs(imt+1,jmt+1,nst) )
 #ifdef full_wflux
   allocate ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
+#elif timeanalyt
+  allocate ( wflux(0:km,2) )
 #else
   allocate ( wflux(0:km) )
 #endif
