@@ -97,6 +97,9 @@ CONTAINS
     print *,'Run name    : '//trim(caseName)
     print *,'Description : '//trim(caseDesc)
     print *,'------------------------------------------------------'
+#ifdef timeanalyt 
+    print *,'Analytical time scheme used to solve the differential Eqs.'
+#endif
 #if defined tempsalt
 #if defined ifs
     print *,'Temperature and humidity fields included'

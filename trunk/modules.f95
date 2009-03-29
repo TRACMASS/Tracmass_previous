@@ -174,8 +174,10 @@ ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
-#ifdef full_wflux
+#if defined full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
+#elif defined timeanalyt
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: wflux
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:)          :: wflux
 #endif
