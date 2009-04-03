@@ -36,9 +36,9 @@
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 2,
-  startMon          = 1,
-  startYear         = 1981/  ! first year is 1981, last year is 2005
+  startDay          = 15,
+  startMon          = 10,
+  startYear         = 2003/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE
@@ -56,16 +56,19 @@
   !
   ! === Directory where input fields are stored
   !inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
-  !inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
-  inDataDir = '/Users/doos/data/rco/gcm/',
+  inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
+  !inDataDir = '/Users/doos/data/rco/gcm/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Volumes/hav4/data/rco/orm/',
-  !outDataDir   = '/Volumes/Resa3/data/rco/orm/',
-  outDataDir   = '/Users/doos/data/rco/orm/',
+  outDataDir   = '/Volumes/Resa3/data/rco/orm/',
+  !outDataDir   = '/Users/doos/data/rco/orm/',
   !
   ! === name of current trajectory run
-  outDataFile     = 'hannasmusslor'/
+  !outDataFile     = 'musslor_timeanal4'/
+  outDataFile     = 'musslor_anal_turb_2D7'/
+  !outDataFile     = 'musslor_step_turb_2D7'/
+  ! outDataFile     = 'musslor_timeanal_2D7'/
   !
 $INITRUNSEED
   !
@@ -91,26 +94,33 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 1,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 16,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 3,
+  seedType = 3,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
   !
   ! Neva
-  ist1     = 204,		 
-  ist2     = 204,		 
-  jst1     = 145,		 
-  jst2     = 220,		 
-  kst1     =  38,		 
-  kst2     =  41,
+  !ist1     = 204,		 
+  !ist2     = 204,		 
+  !jst1     = 145,		 
+  !jst2     = 220,		 
+  !kst1     =  38,		 
+  !kst2     =  41, 
+! One singel gridbox
+  ist1     = 141,		 
+  ist2     = 141,		 
+  jst1     = 158,		 
+  jst2     = 158,		 
+  kst1     = 41,		 
+  kst2     = 41,
   varSeedFile = 0,
   !seedDir     = '/Volumes/hav4/data/rco/topo/',
   !seedDir     = '/Volumes/Resa3/data/rco/topo/',

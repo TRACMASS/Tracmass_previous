@@ -244,7 +244,7 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=wflux(ist,jst,kst,1)
-#elif timeanalyt
+#elif defined timeanalyt || timestep
                  vol=wflux(kst,1)
 #else
                  vol=wflux(kst)
@@ -267,7 +267,7 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=abs(wflux(ist,jst,kst,1))
-#elif timeanalyt
+#elif defined timeanalyt || timestep
                  vol=abs(wflux(kst,1))
 #else
                  vol=abs(wflux(kst))
@@ -602,27 +602,31 @@ subroutine loop
            ! space variables (x,...) are dimensionless    !
            ! time variables (ds,...) are in seconds/m^3   !
            !==============================================! 
+           dsmin=dtmin/dxyz
 #if defined timeanalyt
-dsmin=dtmin/dxyz
-ss0=dble(idint(ts))*tseas/dxyz
-!print *,'dsmin=',dsmin,dtmin,dxyz
-!s0=tt/dxyz
-!ss0=dble(idint(ts))
-           call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz) ! zonal
-           call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz) ! meridional
-           call cross_time(3,ia,ja,ka,z0,dsu,dsd,ts,tt,dsmin,dxyz) ! vertical
+           ss0=dble(idint(ts))*tseas/dxyz
+           call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz,rr) ! zonal
+           call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz,rr) ! meridional
+           call cross_time(3,ia,ja,ka,z0,dsu,dsd,ts,tt,dsmin,dxyz,rr) ! vertical
+!           if(min(dse,dsw,dsn,dss,dsu,dsd).eq.1.d20) then
+!            print *,'timestep',dse,dsw,dsn,dss,dsu,dsd
+!           else
+!            print *,'analytical',dse,dsw,dsn,dss,dsu,dsd
+           ! stop 40967
+           ! call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
+           ! call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
+           ! call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+!           endif
 #else
            call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif
-
-           dsmin=dtmin/dxyz
            ds=min(dse,dsw,dsn,dss,dsu,dsd,dsmin)
 !           print *,'min',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
            if(ds.eq.1.d20 .or.ds.eq.0.d0)then 
               ! === Can not find any path for unknown reasons ===
-              print *,'ds cross error',dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
+              print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
               print *,ia,ja,ka,x0,y0,z0,ntrac,niter
               print *,'k=',ka,kb,KM+1-kmt(ia,ja),kmt(ia,ja)
               ! goto 1500
@@ -845,7 +849,7 @@ ss0=dble(idint(ts))*tseas/dxyz
               call vertvel(rb,ia,iam,ja,ka)
 #ifdef full_wflux
               uu=wflux(ia,ja,ka,1)
-#elif timeanalyt
+#elif defined timeanalyt || timestep
               uu=wflux(ka,1)
 #else
               uu=wflux(ka)
@@ -870,12 +874,11 @@ ss0=dble(idint(ts))*tseas/dxyz
               call pos(2,ia,ja,ka,y0,y1,ds,rr)
 #endif
            elseif(ds.eq.dsd) then ! downward exit
-              
               call vertvel(rb,ia,iam,ja,ka)
 
 #ifdef full_wflux
               if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
-#elif timeanalyt
+#elif defined timeanalyt || timestep
               if(wflux(ka-1,1).lt.0.d0) kb=ka-1
 #else
               if(wflux(ka-1).lt.0.d0) kb=ka-1
@@ -925,7 +928,8 @@ ss0=dble(idint(ts))*tseas/dxyz
            ! === is inside ib,jb,kb box    ===
 #ifdef orc 
            if(y1.eq.dble(JMT)) then ! north fold cyclic
-              x1=722.d0-x1
+              x1=722.d0-x1  ! for which orca grid???????? Needs to be generalised
+              stop 40968
               y1=dble(JMT-2)
               jb=JMT-2
            endif
@@ -1080,26 +1084,6 @@ endif
 return
      
      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

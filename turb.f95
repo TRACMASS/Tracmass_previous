@@ -8,7 +8,7 @@ subroutine turbuflux(ia,ja,ka,rr)
   USE mod_turb
   IMPLICIT none
   
-  real*8 uv(6),rr,rg,en,localW
+  real*8 uv(12),rr,rg,en,localW
   integer ia,ja,ka,im,jm,n
   
   call random_number(rand)
@@ -22,14 +22,25 @@ subroutine turbuflux(ia,ja,ka,rr)
   if(im.eq.0) im=IMT
   jm=ja-1
   
+#if defined timestep
   ! time interpolated velocities
   uv(1)=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff ! western u
   uv(2)=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff ! eastern u
   uv(3)=(rg*vflux(ia,ja,ka,NST)+rr*vflux(ia,ja,ka,1))*ff ! northern v
   uv(4)=(rg*vflux(ia,jm,ka,NST)+rr*vflux(ia,jm,ka,1))*ff ! southern v
-  
-  !upr=uv*rand
-  
+#elif defined timeanalyt
+  uv( 1)=uflux(ia,ja,ka,1)*ff ! western u at t-1
+  uv( 2)=uflux(im,ja,ka,1)*ff ! eastern u at t-1
+  uv( 3)=vflux(ia,ja,ka,1)*ff ! northern v at t-1
+  uv( 4)=vflux(ia,jm,ka,1)*ff ! southern v at t-1
+  uv( 7)=uflux(ia,ja,ka,2)*ff ! western u at t
+  uv( 8)=uflux(im,ja,ka,2)*ff ! eastern u at t
+  uv( 9)=vflux(ia,ja,ka,2)*ff ! northern v at t
+  uv(10)=vflux(ia,jm,ka,2)*ff ! southern v at t
+#endif  
+
+! why is this comented so that the velocities are changing at 
+! every gridbox wall istead of remaing the same ??????????????????????????????
   !upr(:,1)=upr(:,2) ! store u' from previous time iteration step
   upr(:,2)=uv(:)*rand(:)
   upr(:,1)=upr(:,2)
@@ -56,6 +67,8 @@ subroutine turbuflux(ia,ja,ka,rr)
 
 #ifdef full_wflux
     localW=wflux(ia,ja,ka-1,1)
+#elif defined timeanalyt || timestep
+    localW=wflux(ka-1,1)
 #else
     localW=wflux(ka-1)
 #endif
@@ -67,6 +80,17 @@ subroutine turbuflux(ia,ja,ka,rr)
        upr(5,n) = - 0.5d0 * ff * ( upr(1,n) - upr(2,n) + upr(3,n) - upr(4,n) )
        upr(6,n) = - upr(5,n)
     endif
+
+#if defined timeanalyt
+    if(localW.eq.0.d0) then
+       upr(11,n) = - ff * ( upr(7,n) - upr(8,n) + upr(9,n) - upr(10,n) )
+       upr(12,n) = 0.d0
+    else
+       upr(11,n) = - 0.5d0 * ff * ( upr(7,n) - upr(8,n) + upr(9,n) - upr(10,n) )
+       upr(12,n) = - upr(11,n)
+    endif
+#endif
+
  enddo
 #endif
 #endif

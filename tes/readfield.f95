@@ -13,11 +13,9 @@ subroutine readfields
   IMPLICIT none
     
  INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
- CHARACTER hour(4)*4,month(12)*2,date(31)*2,year(1989:2009)*4
- REAL*8, SAVE :: dxdeg,dydeg,psi0,t0,omtime,pi,cox,coy,om,co
+ CHARACTER hour(4)*4,month(12)*2,date(31)*2
+ REAL*8, SAVE :: dxdeg,dydeg,omtime,pi,cox,coy,om,co,uwe,dl
 
-data year /'1989','1990','1991','1992','1993','1994','1995','1996','1997','1998','1999',&
-                  '2000','2001','2002','2003','2004','2005','2006','2007','2008','2009'/
 data month /'01','02','03','04','05','06','07','08','09','10','11','12'/
 data date /'01','02','03','04','05','06','07','08','09','10',&
            '11','12','13','14','15','16','17','18','19','20',&
@@ -80,18 +78,15 @@ ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !____ construct format of time to read files _______________________
 
-pi = 2.*asin(1.)
-psi0=100.e6/200.
-t0=pi*float((imt-1)*(jmt-1))*dx*dy*deg**2/(8.*psi0)
-!time=float(ns-1)/float(nstot)*365.25*3600.*24.
-om=2.*pi/(365.25*24.*3600.)
-!omtime=2.*pi*float(ns-1)/float(nstot)
-!omtime=2.*pi*float(mod(ints,10))/float(10)
-omtime=2.*pi*float(ints)/float(100)
+pi = 2.d0*dasin(1.d0)
+omtime=2.d0*pi*dble(ints)/dble(10)
 
 
-cox=0.5+0.5*cos(omtime)
-coy=0.5+0.5*cos(omtime+pi)
+cox=0.5d0+0.5d0*dcos(omtime)
+coy=0.5d0+0.5d0*dcos(omtime+pi)
+
+uwe=-0.2d0
+dl=dble(ints)*0.01d0*pi
 
 !print *,'ints=',ints,co
 
@@ -109,10 +104,10 @@ do k=1,KM
    rho  (i,j,k,2)=(28.-20.)*float(km-k)/float(km) +20.
    dztb (i,j,2)=dz(k)*dxdy(i,j)
 
-   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( cos( pi*float(i-1-imt/2)/float(imt-1) ) *  &
-                                    sin(-pi*float(j-1-jmt/2)/float(jmt-1) )  )
-   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( sin( pi*float(i-1-imt/2)/float(imt-1) ) *  &
-                                    cos( pi*float(j-1-jmt/2)/float(jmt-1) )  )
+   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+                                     dsin(-pi*dble(j-1-jmt/2)/dble(jmt-1) )  + uwe)
+   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( dsin( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+                                     dcos( pi*dble(j-1-jmt/2)/dble(jmt-1) )  )
   enddo
  enddo
 enddo ! enddo k-loop

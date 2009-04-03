@@ -33,7 +33,7 @@ subroutine arclength(ia,ja,ka,dt,rr,arc)
   kkm=ka-1
 #if defined full_wflux
   ww=0.5*( wflux(ia ,ja ,kk ,1) + wflux(ia ,ja ,kkm ,1) )/dxdy(ia,ja)
-#elif defined timeanalyt
+#elif defined timeanalyt || timestep
   ww=0.5*( rg*(wflux(kk,NST)+ wflux(kkm,NST) ) +rr*(wflux(kk,1)+ wflux(kkm,1)) )/dxdy(ia,ja)
 #else  
   ww=0.5*( wflux(kk)            + wflux(kkm)            )/dxdy(ia,ja)
@@ -83,7 +83,7 @@ subroutine arclength(ia,ja,ka,dt,rr,arc)
   kkm=ka-1
 #ifdef  full_wflux
   ww=0.5*( wflux(ia ,ja ,kk ,1) + wflux(ia ,ja ,kkm ,1) )/dxdy(ia,ja)
-#elif defined timeanalyt
+#elif defined timeanalyt || timestep
   ww=0.5*( rg*(wflux(kk,NST)+ wflux(kkm,NST) ) +rr*(wflux(kk,1)+ wflux(kkm,1)) )/dxdy(ia,ja)
 #else  
   ww=0.5*( wflux(kk)            + wflux(kkm)            )/dxdy(ia,ja)

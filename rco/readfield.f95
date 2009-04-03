@@ -206,16 +206,15 @@ stlon1 = ird0
 stlat1 = ird20
 !print *,'stlon,stlat=',stlon1,stlat1
 
-dya=0.005*dy*deg
-dxa=0.005*dx*deg
+!dya=0.005*dydeg
+!dxa=0.005*dxdeg
+
 
 do i=1,imt
  do j=1,jmt
   kmt(i,j) = rd2d(i,j)
  enddo
 enddo
-!print *,kmt
-!stop 34956
 
  do i=1,imt-1
   do j=1,jmt-1
@@ -225,7 +224,13 @@ enddo
 
 call coordinat
 
+dya=0.005*dy*deg  
+dxa=0.005*dx*deg
+
 endif
+
+!print *,'dx=',dxa,dya,dx,dy,deg
+
 
 ! ssh 
 
