@@ -44,7 +44,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      ( uu - um + vv - vm + (dztb(ia,ja,k,2)-dztb(ia,ja,k,1))/tseas )
 #elif full_wflux
      wflux(ia,ja,k,1)=wflux(ia,ja,k-1,1) - ff * ( uu - um + vv - vm )
-#elif timeanalyt
+#elif defined timeanalyt || timestep
     do n=1,NST
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
@@ -69,7 +69,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      endif
 #ifdef full_wflux
      wflux(k)=wflux(ia,ja,k,1) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
-#elif timeanalyt
+#elif defined timeanalyt || timestep
     do n=1,NST
      wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
     enddo

@@ -176,14 +176,14 @@ MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
 #if defined full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
-#elif defined timeanalyt
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: wflux
+#elif defined timeanalyt || timestep
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:)          :: wflux
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
-  REAL*4, DIMENSION(6)                       :: rand
+  REAL*4, DIMENSION(12)                      :: rand
   REAL*8                                     :: ff
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -195,7 +195,7 @@ ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_turb
 #ifdef turb
-  REAL upr(6,2)
+  REAL upr(12,2)
 #endif
 ENDMODULE mod_turb
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

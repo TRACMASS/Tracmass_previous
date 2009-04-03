@@ -99,6 +99,8 @@ CONTAINS
     print *,'------------------------------------------------------'
 #ifdef timeanalyt 
     print *,'Analytical time scheme used to solve the differential Eqs.'
+#elif defined timestep
+    print *,'Time steps with analytical stationary scheme used to solve the differential Eqs.'
 #endif
 #if defined tempsalt
 #if defined ifs
@@ -109,6 +111,8 @@ CONTAINS
 #endif
 #if defined turb
     print *,'with sub-grid turbulence parameterisation'
+#elif defined diffusion
+    print *,'with diffusion parameterisation'
 #endif
 #if defined rerun
     print *,'Rerun in order to store the Lagrangian stream functions in the different basins'

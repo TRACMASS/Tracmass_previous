@@ -40,16 +40,6 @@ um=rg*u2(iim,ja,ka,ns)+rr*u2(iim,ja,ka,nsn)
 stop 2567 ! Kolla på gammal traj.F för OCCAM
 #endif
 
-!#ifdef turb
-! iim=ia-1
-! if(iim.eq.0) iim=IMT
-! uu=(rg*uflux(ia  ,ja,ka,NST)+rr*uflux(ia  ,ja,ka,1))*ff
-! um=(rg*uflux(im,ja,ka,NST)+rr*uflux(ia-1,ja,ka,1))*ff
-! vv=(rg*vflux(ia,ja  ,ka,NST)+rr*vflux(ia,ja  ,ka,1))*ff
-! vm=(rg*vflux(ia,ja-1,ka,NST)+rr*vflux(ia,ja-1,ka,1))*ff
-! en=0.25*sqrt(uu**2+um**2+vv**2+vm**2)
-! print *,'en',en
-!#endif
 
 if(ijk.eq.1) then
  ii=ia
@@ -90,6 +80,9 @@ elseif(ijk.eq.3) then
 #ifdef full_wflux
  uu=wflux(ia ,ja ,ka   ,1)
  um=wflux(ia ,ja ,ka-1 ,1)
+#elif defined timeanalyt || timestep
+ uu=rg*wflux(ka  ,NST)+rr*wflux(ka  ,1)
+ um=rg*wflux(ka-1,NST)+rr*wflux(ka-1,1)
 #else
  uu=wflux(ka)
  um=wflux(ka-1)

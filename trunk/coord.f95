@@ -32,7 +32,7 @@ grav=9.81 ! m/s2tyear=365.25d0 * 24.d0 * 3600.d0
 tday=24.d0 * 3600.d0
 
 ! month lengths including leap years
-do i=1900,2100
+do i=1900,3000
 do k=1,12
 idmax(k,i)=mois(k)
 enddo
@@ -60,7 +60,7 @@ stlat2 = -54.50d0
 #endif
 #endif
 
-#ifdef rco
+#if defined rco
 dx = 1./15.d0
 dy = 1./30.d0
 !stlon1= 9.0d0+0.25d0*dx
@@ -288,6 +288,8 @@ kmt=KM  ! all grid cells are active in an AGCM
 
 
 #endif
+
+!print *,dxdy
 
 !_________________________________ The ORCA grids _______________________________________
 !#if defined orca2 || orca1 || orca05 || orca025 || orca12 

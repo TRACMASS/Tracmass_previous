@@ -221,7 +221,7 @@ print *,'iyear=',iyear
   allocate ( hs(imt+1,jmt+1,nst) )
 #ifdef full_wflux
   allocate ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
-#elif timeanalyt
+#elif defined timeanalyt || timestep
   allocate ( wflux(0:km,2) )
 #else
   allocate ( wflux(0:km) )
