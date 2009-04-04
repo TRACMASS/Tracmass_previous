@@ -36,8 +36,8 @@
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 15,
-  startMon          = 10,
+  startDay          = 1,
+  startMon          = 1,
   startYear         = 2003/  ! first year is 1981, last year is 2005
   !
   !
@@ -66,9 +66,13 @@
   !
   ! === name of current trajectory run
   !outDataFile     = 'musslor_timeanal4'/
-  outDataFile     = 'musslor_anal_turb_2D7'/
+  !outDataFile     = 'musslor_anal_turb_2D7'/
   !outDataFile     = 'musslor_step_turb_2D7'/
-  ! outDataFile     = 'musslor_timeanal_2D7'/
+  !outDataFile     = 'musslor_timeanal_2D7'/
+  outDataFile     = 'musslor_timeanal_3D8'/
+  !outDataFile     = 'musslor_timestep_3D7'/
+  !outDataFile     = 'musslor_step_turb_3D7'/
+  !outDataFile     = 'musslor_anal_turb_3D7'/
   !
 $INITRUNSEED
   !
@@ -198,7 +202,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      21./  ! maximum time length of a trajectory in days
+  timax =      364./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,
