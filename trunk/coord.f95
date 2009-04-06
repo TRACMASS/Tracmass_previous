@@ -2,7 +2,6 @@
 
 subroutine coordinat
 
-!USE param_variables
 USE mod_param
 USE mod_coord
 USE mod_grid
@@ -258,8 +257,8 @@ rmin=0.d0
 rmax=1100.d0
 dr=(rmax-rmin)/dble(MR-1)
 ! temperature
-tmin=-100.d0
-tmax=50.d0 
+tmin=173.d0 ![K]
+tmax=323.d0 ![K]
 dtemp=(tmax-tmin)/dble(MR-1)
 ! specific humidity
 smin= 0.d0

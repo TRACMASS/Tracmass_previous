@@ -582,19 +582,10 @@ USE mod_vel
 IMPLICIT NONE
 
 REAL*8,  PARAMETER ::  PI = 3.14159265358979d0,xilim=3.0d0,xxlim=1.d-7
-INTEGER :: ii,iim,iconfig,i
-REAL*8  :: uu,um,vv,vm,xib,xia,xi00,xi0,xf1,xf,xf2,xin,xibf,xi,xerr,xiaf,ssii,ssiim,dsmin
+INTEGER :: ii,iim,iconfig,i,loop
+REAL*8  :: uu,um,vv,vm,xib,xia,xi00,xi0,xf1,xf,xf2,xin,xibf,xi,xerr,xiaf
 REAL*8  :: aa,bb,ga,s15aef,s15adf,erf0,const,errfun
-
-REAL*8  :: rijk,r0,ss,f0,f1,s0,ss0   ! ska detta vara med eller suddas ut???????????????
-INTEGER loop
-
-!     common /dsmin/ dsmin,pi,xilim,xxlim,nstat(8,2,2),accu(2)
-!     real*8 f0,f1,dsmin,pi,xilim,xxlim
-!     real*8 a,b,const,ga,uu,um,vv,vm
-!     real*8 r0,rijk,s0,ss,ss0,ssii,ssiim,xi0,xi00,xi,xin,xf1,xf2
-!     real*8 xerr,xia,xiaf,xib,xibf,erf0,s15aef,s15adf,errfun
-!     integer ifail
+REAL*8  :: rijk,r0,ss,f0,f1,s0,ss0,ssii,ssiim,dsmin   
 
 aa = -(vv-uu-vm+um)/dsmin
 bb = um-uu
@@ -1022,12 +1013,12 @@ else
        loop=loop+1
        if(loop.eq.90) then
 !        print *, ' loop stop', xi0, xi00, xi, xf
-        if (dabs(xf).gt.100*xxlim) loop=1000
+        if (dabs(xf).gt.100.d0*xxlim) loop=1000
 !         if (xerr.eq.1.d20) loop=1000
         goto 400
        endif
        xin = xi - xf/xf1
-     if ( dabs(xf).gt.100.d0 .or.(xf*xibf.gt.0. .and. (xf1*xibf.lt.0.d0 .or.xin.lt.xia)) ) then
+     if ( dabs(xf).gt.100.d0 .or.(xf*xibf.gt.0.d0 .and. (xf1*xibf.lt.0.d0 .or.xin.lt.xia)) ) then
         xib = xi
         xibf= xf
         xi = 0.5d0*(xi+xia)

@@ -46,24 +46,24 @@ subroutine loop
   logical res
 #endif
   
-  INTEGER nrj(ntracmax,NNRJ)
-  REAL*8 dsc,ts,trj(ntracmax,NTRJ)
-  INTEGER ist,jst,kst
-  INTEGER ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas
-  INTEGER ntrac,nev,nrh0,nout,nloop,nerror
-  INTEGER nnorth,ndrake,ngyre,ntractot,nexit(NEND)
+  INTEGER :: ist,jst,kst
+  INTEGER :: ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas
+  INTEGER :: ntrac,nev,nrh0,nout,nloop,nerror
+  INTEGER :: nnorth,ndrake,ngyre,ntractot,nexit(NEND),nrj(ntracmax,NNRJ)
   
-  REAL*8 rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0,ss0
-  REAL*8 ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-  REAL*8 subvol,vol,arc,arct,rr,rb,rg,rbg,uu
+  REAL*8  :: rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0,ss0
+  REAL*8  :: ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dsc,ts,trj(ntracmax,NTRJ)
+  REAL*8  :: subvol,vol,arc,arct,rr,rb,rg,rbg,uu
   
-  INTEGER                                    :: landError=0 ,boundError=0
+  INTEGER :: landError=0 ,boundError=0
   REAL zz
   
   logical scrivi
   
   ! === Error Evaluation ===
-  INTEGER                             :: errCode
+  INTEGER :: errCode
+
+!_____________________________________________________________________________
   
   iday0=iday
   imon0=imon
@@ -374,8 +374,8 @@ subroutine loop
                  ! === mass at initial time       === 
 #ifndef ifs 
 #ifdef tempsalt 
-                 !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-                 call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
+                 call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+                 !call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
                  if(temp.lt.tmin0 .or. temp.gt.tmax0 .or. &
                     salt.lt.smin0 .or. salt.gt.smax0 .or. &
                     dens.lt.rmin0 .or. dens.gt.rmax0) then
@@ -694,7 +694,8 @@ subroutine loop
               stxz(ia,ka,lbas)=stxz(ia,ka,lbas)+real(subvol*ff)
 #endif
 #ifdef streamr
-              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
               mra=nint((dens-rmin)/dr)+1  
               if(mra.lt.1 ) mra=1
               if(mra.gt.MR) mra=MR
@@ -738,7 +739,8 @@ subroutine loop
               stxz(iam,ka,lbas)=stxz(iam,ka,lbas)-real(subvol*ff)
 #endif
 #ifdef streamr
-              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
               mra=nint((dens-rmin)/dr)+1  
               if(mra.lt.1) mra=1
               if(mra.gt.MR) mra=MR
@@ -781,7 +783,8 @@ subroutine loop
               ! print *,'n',styz(ja,ka,lbas),subvol*ff,ja,ka,lbas
 #endif
 #ifdef streamr
-              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
               mra=nint((dens-rmin)/dr)+1  
               if(mra.lt.1) mra=1
               if(mra.gt.MR) mra=MR
@@ -826,7 +829,8 @@ subroutine loop
               styz(ja-1,ka,lbas)=styz(ja-1,ka,lbas)-real(subvol*ff)
 #endif
 #ifdef streamr 
-              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
               mra=nint((dens-rmin)/dr)+1  
               if(mra.lt.1) mra=1
               if(mra.gt.MR) mra=MR
@@ -1305,7 +1309,8 @@ return
             (kriva.eq.5 .and. &
             (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
             .or.tt-t0.eq.21.*tday)) ) then
-          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
@@ -1327,7 +1332,8 @@ return
             tt/tday,t0/tday,subvol,temp,salt,dens
     case (16)
        if(kriva.ne.0 ) then
-          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
           write(56,566) ntrac,ints,x1,y1,z1, &
                tt/tday,t0/tday,subvol,temp,salt,dens,arct
        end if
@@ -1337,7 +1343,8 @@ return
     case (18)
        if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
             ints.eq.intstart+intrun) then 
-          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
           !write(56,566) ntrac,ints,x1,y1,z1, &
           !tt/tday,t0/tday,subvol,temp,salt,dens,arct
           write(56,566) ntrac,ints,x1,y1,z1, & 
@@ -1373,7 +1380,8 @@ return
             (kriva.eq.5 .and. &
             (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
             .or.tt-t0.eq.21.*tday)) ) then
-          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
+          call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1
           write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14
        end if
