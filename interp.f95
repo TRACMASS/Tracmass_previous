@@ -3,29 +3,25 @@
 
 #ifdef tempsalt
 
-      subroutine interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,ns)
+subroutine interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,ns)
 
 !     computes temperature, salinity, density at position of trajectory
 !     by interpolating data from the center of eight nearest boxes  
 
-USE param_variables
+USE mod_param
 USE mod_dens
 IMPLICIT none
 
-      real*8 x1,y1,z1,ax,ay,az
+REAL*8  :: x1,y1,z1,ax,ay,az
 
-      real tppp,tppm,tpmp,tpmm,tmpp,tmpm,tmmp,tmmm
-      real sppp,sppm,spmp,spmm,smpp,smpm,smmp,smmm
-      real rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
-      real temp,salt,dens
+REAL    :: tppp,tppm,tpmp,tpmm,tmpp,tmpm,tmmp,tmmm
+REAL    :: sppp,sppm,spmp,spmm,smpp,smpm,smmp,smmm
+REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
+REAL    :: temp,salt,dens
 
-      integer ib,jb,kb,ip,im,jp,jm,kp,kn,ns
+INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
 
-#ifdef mod2
-       stop 2567 ! Kolla på gammal traj.F för OCCAM
-#endif
-
-c determining nearest centers of boxes 
+! determining nearest centers of boxes 
       if(x1.le.dble(ib)-dble(.5)) then
        ip=ib
        im=ib-1
@@ -57,17 +53,17 @@ c determining nearest centers of boxes
 
       ax=dble(ip)-x1
       if(ax.gt.100.d0) then
-c       print *,ax,ip,im,x1,ib
+!       print *,ax,ip,im,x1,ib
        ax=ax-dble(imt)
-c       stop 49678
+!       stop 49678
       elseif(ax.lt.-100.d0) then
        ax=ax+dble(imt)
-c       stop 49679
+!       stop 49679
       endif
       ay=(dble(jp)-y1)
       az=(dble(kp)-z1)
 
-c temperature, salinity, density calculation 
+! temperature, salinity, density calculation 
       tppp=tem(ip,jp,kp,ns)
       if(tppp.eq.0.) tppp=tem(ib,jb,kb,ns)
       tppm=tem(ip,jp,kn,ns)
@@ -119,39 +115,35 @@ c temperature, salinity, density calculation
       rmmm=rho(im,jm,kn,ns)
       if(rmmm.eq.0.) rmmm=rho(ib,jb,kb,ns)
 
-      temp=tppp*(1.-ax)*(1.-ay)*(1.-az) 
-     2   + tmpp*    ax *(1.-ay)*(1.-az)
-     3   + tpmp*(1.-ax)*    ay *(1.-az)
-     4   + tmmp*    ax *    ay *(1.-az)
-     5   + tppm*(1.-ax)*(1.-ay)*    az 
-     6   + tmpm*    ax *(1.-ay)*    az
-     7   + tpmm*(1.-ax)*    ay *    az
-     8   + tmmm*    ax *    ay *    az
+      temp=tppp*(1.-ax)*(1.-ay)*(1.-az) &
+        + tmpp*    ax *(1.-ay)*(1.-az) &
+        + tpmp*(1.-ax)*    ay *(1.-az) &
+        + tmmp*    ax *    ay *(1.-az) &
+        + tppm*(1.-ax)*(1.-ay)*    az  &
+        + tmpm*    ax *(1.-ay)*    az  &
+        + tpmm*(1.-ax)*    ay *    az  &
+        + tmmm*    ax *    ay *    az  
  
-      salt=sppp*(1.-ax)*(1.-ay)*(1.-az) 
-     2   + smpp*    ax *(1.-ay)*(1.-az)
-     3   + spmp*(1.-ax)*    ay *(1.-az)
-     4   + smmp*    ax *    ay *(1.-az)
-     5   + sppm*(1.-ax)*(1.-ay)*    az 
-     6   + smpm*    ax *(1.-ay)*    az
-     7   + spmm*(1.-ax)*    ay *    az
-     8   + smmm*    ax *    ay *    az
+      salt=sppp*(1.-ax)*(1.-ay)*(1.-az) & 
+        + smpp*    ax *(1.-ay)*(1.-az) &
+        + spmp*(1.-ax)*    ay *(1.-az) &  
+        + smmp*    ax *    ay *(1.-az) &
+        + sppm*(1.-ax)*(1.-ay)*    az  &
+        + smpm*    ax *(1.-ay)*    az  &
+        + spmm*(1.-ax)*    ay *    az  &
+        + smmm*    ax *    ay *    az  
  
-      dens=rppp*(1.-ax)*(1.-ay)*(1.-az) 
-     2   + rmpp*    ax *(1.-ay)*(1.-az)
-     3   + rpmp*(1.-ax)*    ay *(1.-az)
-     4   + rmmp*    ax *    ay *(1.-az)
-     5   + rppm*(1.-ax)*(1.-ay)*    az 
-     6   + rmpm*    ax *(1.-ay)*    az
-     7   + rpmm*(1.-ax)*    ay *    az
-     8   + rmmm*    ax *    ay *    az
+      dens=rppp*(1.-ax)*(1.-ay)*(1.-az) &
+        + rmpp*    ax *(1.-ay)*(1.-az) &
+        + rpmp*(1.-ax)*    ay *(1.-az) &
+        + rmmp*    ax *    ay *(1.-az) &
+        + rppm*(1.-ax)*(1.-ay)*    az  &
+        + rmpm*    ax *(1.-ay)*    az  &
+        + rpmm*(1.-ax)*    ay *    az  &
+        + rmmm*    ax *    ay *    az
 
-c       print *,tt,ib,jb,kb,ns,tem(ib,jb,kb,ns)
-c       print *,ss,ib,jb,kb,ns,sal(ib,jb,kb,ns)
-c       stop 13456
-
-      return
-      end
+return
+end subroutine interp
 
 #endif
 

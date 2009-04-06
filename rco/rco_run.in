@@ -69,8 +69,8 @@
   !outDataFile     = 'musslor_anal_turb_2D7'/
   !outDataFile     = 'musslor_step_turb_2D7'/
   !outDataFile     = 'musslor_timeanal_2D7'/
-  outDataFile     = 'musslor_timeanal_3D8'/
-  !outDataFile     = 'musslor_timestep_3D7'/
+  !outDataFile     = 'musslor_timeanal_3D8'/
+  outDataFile     = 'musslor_timestep_3D9'/
   !outDataFile     = 'musslor_step_turb_3D7'/
   !outDataFile     = 'musslor_anal_turb_3D7'/
   !
