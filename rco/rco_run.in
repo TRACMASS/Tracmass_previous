@@ -56,24 +56,27 @@
   !
   ! === Directory where input fields are stored
   !inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
-  inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
+  ! inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
+  inDataDir = '/Volumes/Flask1/data/rco/2nm_122/',
   !inDataDir = '/Users/doos/data/rco/gcm/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Volumes/hav4/data/rco/orm/',
-  outDataDir   = '/Volumes/Resa3/data/rco/orm/',
+  !outDataDir   = '/Volumes/Resa3/data/rco/orm/',
+  outDataDir   = '/Volumes/Flask1/data/rco/orm/',
   !outDataDir   = '/Users/doos/data/rco/orm/',
   !
   ! === name of current trajectory run
-  !outDataFile     = 'musslor_timeanal4'/
-  !outDataFile     = 'musslor_anal_turb_2D7'/
-  !outDataFile     = 'musslor_step_turb_2D7'/
-  !outDataFile     = 'musslor_timeanal_2D7'/
-  !outDataFile     = 'musslor_timeanal_3D8'/
-  outDataFile     = 'musslor_timestep_3D9'/
-  !outDataFile     = 'musslor_step_turb_3D7'/
-  !outDataFile     = 'musslor_anal_turb_3D7'/
-  !
+  !outDataFile     = 'xyz_timestep_3D'/
+  !outDataFile     = 'xyz_timeanal_3D'/
+  !outDataFile     = 'xyz_timestep_turb_3D'/
+  !outDataFile     = 'xyz_anal_turb_3D'/
+  !outDataFile     = 'xyz_step_diff_h_3D'/
+  !outDataFile     = 'xyz_step_diff_xl_3D'/
+  outDataFile     = 'aaaa',
+  !outDataFile     = 'enruta_anal_diff_3D3'/
+ !
+  intminInOutFile=0/
 $INITRUNSEED
   !
   !==nff:           1 = Follow trajectories forward
@@ -105,7 +108,7 @@ $INITRUNSEED
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  seedType = 3,
+  seedType = 1,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded.
@@ -119,19 +122,19 @@ $INITRUNSEED
   !kst1     =  38,		 
   !kst2     =  41, 
 ! One singel gridbox
-  ist1     = 141,		 
-  ist2     = 141,		 
-  jst1     = 158,		 
-  jst2     = 158,		 
-  kst1     = 41,		 
-  kst2     = 41,
+  ist1     = 161,		 
+  ist2     = 170,		 
+  jst1     = 161,		 
+  jst2     = 170,		 
+  kst1     =  31,		 
+  kst2     =  40,
   varSeedFile = 0,
   !seedDir     = '/Volumes/hav4/data/rco/topo/',
-  !seedDir     = '/Volumes/Resa3/data/rco/topo/',
-  seedDir     = '/Users/doos/data/rco/topo/',
+  seedDir     = '/Volumes/Flask1/data/rco/topo/',
+  !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
-  !seedFile    = '/Volumes/Resa3/data/rco/topo/maskust' /
-  seedFile    = '/Users/doos/data/rco/topo/maskust' /
+  seedFile    = '/Volumes/Resa3/data/rco/topo/maskust' /
+  !seedFile    = '/Users/doos/data/rco/topo/maskust' /
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
@@ -202,7 +205,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      364./  ! maximum time length of a trajectory in days
+  timax =      2./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,

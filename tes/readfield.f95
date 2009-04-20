@@ -85,7 +85,7 @@ omtime=2.d0*pi*dble(ints)/dble(10)
 cox=0.5d0+0.5d0*dcos(omtime)
 coy=0.5d0+0.5d0*dcos(omtime+pi)
 
-uwe=-0.2d0
+uwe=-0.4d0
 dl=dble(ints)*0.01d0*pi
 
 !print *,'ints=',ints,co
