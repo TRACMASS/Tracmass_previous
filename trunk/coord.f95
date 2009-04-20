@@ -85,8 +85,8 @@ rmax=10.d0
 #endif
 
 #ifdef tes
-dx = 0.5d0
-dy = 0.5d0
+dx = 1./2.d0
+dy = 1./2.d0
 stlon1=0.
 stlat1=0.
 rmin=20.d0
@@ -199,7 +199,7 @@ dz( 1)=   11.99292d0
 
 #elif defined tes 
 
-dz=100.  ! equidistant depthlevels for the test case
+dz=100.  ! equidistant depth levels for the test case
 
  do j=1,JMT
   rlatu=stlat1+dy*float(j-1)+dy/2. ! at v points

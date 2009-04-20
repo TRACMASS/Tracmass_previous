@@ -65,12 +65,21 @@ MODULE mod_param
   
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_precdef		! Precision definitions
+	INTEGER, PARAMETER		:: DP = SELECTED_REAL_KIND(15, 307)
+ENDMODULE mod_precdef
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_coord
   REAL*8 dx,dy,deg,stlon1,stlat1,grav
   REAL*8, ALLOCATABLE, DIMENSION(:) :: zw
   REAL*8, ALLOCATABLE, DIMENSION(:) :: csu,cst,dyt,phi
   INTEGER idmax(12,1000:3000)
 ENDMODULE mod_coord
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_diff
+	INTEGER									:: dummy
+	
+ENDMODULE mod_diff
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
   INTEGER                                   :: ints      ,intstart ,intend

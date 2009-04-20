@@ -1,220 +1,149 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
-subroutine diffusion(x1,y1,z1,ib,jb,kb,dt,snew,st0,st1)
-USE mod_param
 
-IMPLICIT none
-!#include "param.h"
-!#include "part.h"
-!=========================================================================================
-! subroutine which adds a random position to the new trajectory position
-! written by Richard Levine and David Webb
+!===============================================================================
+! Add a small displacement to a particle s.t. it is still in the model area.
+! 
+! Arguments
+! x1, y1, z1 : Current position of the particle. Are updated by the subroutine.
+! ib, jb, kb : Current box for the particle. Are updated by the subroutine.
+! dt : The model time step
 !
-! x1,y1,z1 : original non-dimensional position of particle 
-!            (fractions of a grid box side in the corresponding direction),
-!            and is updated in subroutine to include random element      
-! ib,jb,kb : original position in integers
-! dt       : crossing time of particle through grid-box (in units of seconds)
-! snew     : position of particle within time interval [st0,st1] (in units of seconds/m^3)
-! [st0,st1]: is current time interval for interpolation (in units of seconds/m^3)
+! FELKODER SÄTTS VID BEHOV, FÖRKLARA
 !
-! param.h  : contains grid property definitions
-! part.h   : contains velocity, property & status array definitions for particles
-! ========================================================================================
+!===============================================================================
+SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
+	USE mod_coord
+	USE mod_grid
+	USE mod_param
+	USE mod_precdef
+	
+	implicit none
+ 	INTEGER						:: ib,jb,kb		! Box indices
+ 	INTEGER						:: itno			! Number of iterations
+	REAL						:: xd, yd, zd	! Displacement
+	REAL						:: tmpX, tmpY, tmpZ		! Temporal position
+	INTEGER						:: tmpi, tmpj, tmpk		! Temporal box indices
+	REAL (KIND=DP), INTENT(OUT)	:: x1, y1, z1			! Final position
+	REAL (KIND=DP), INTENT(IN)	:: dt			! Time step
+	LOGICAL						:: tryAgain	! Tells whether to continue displace
 
-REAL*8 xd,yd,zd,xe,ye,ze,x2,y2,z2,um,um0,um1,snew,st0,st1
-REAL*8 ah,az
-common /diffc/   ah,az   
-integer irandom
-common /randomc/ irandom
-               
-integer iloop,ic,jc,kc
-logical ltest
-      
-! horizontal & vertical diff coefficients in m^2/s, which may be set as the same as 
-! those of the OGCM 
-ah = 2.0d2        
-az = 1.0d-4      
+	tryAgain = .FALSE.
+	
+	! Is particle within model area?
+	if(ib>1 .AND. ib<=IMT .AND. jb>1 .AND. jb<=JMT .AND. kb<=KM) then
+		tryAgain = .TRUE.
+	end if
+	if(.NOT. tryAgain) then
+		write(*,*)"========"
+			write(*,*)"Particle outside model area. No diffusion added."
+			write(*,*)"========"
+	end if
+	
+	do while(tryAgain)
+		! displace particle
+		CALL displacement(xd, yd, zd, dt)
+		! Convert to Earth coordinates(?)
+		xd = xd/(dx*cst(jb)*deg)
+		yd = yd/(dy*deg)
+		zd = zd/dz(kb)
+		! Update position temporarily
+		tmpX = x1 + xd
+		tmpY = y1 + yd
+		tmpZ = z1 + zd
+		! Update box number temporarily
+		tmpi = int(tmpX) + 1
+		tmpj = int(tmpY) + 1
+		tmpk = KM - int(tmpZ)
 
-!  check particle location in grid
-if( kb.le.KM .and. ib.gt.1 .and. ib.le.IMT .and. jb.gt.1 .and. jb.le.JMT )then 
- ltest = .true.
- iloop = 0
- do while(ltest)
-  iloop = iloop+1
-	  
-! calculate diffusive component in xd,yd,zd in metres for time-step dt	  
-  call randomstep(dt,xd,yd,zd)
-  xe = xd/(dx*cst(jb)*deg)
-  ye = yd/(dy*deg)
-  ze = zd/dz(kb)
-	  
-! update new position in x2,y2,z2 & ic,jc,kc for checks on particle position
-  x2 = x1+xe
-  y2 = y1+ye
-  z2 = z1+ze
-  ic = int(x2)+1
-  jc = int(y2)+1
-  kc = KM-int(z2)
+		! Check that at the particle level, there is at least one adjacent
+		! open ocean velocity point.
+		if(tmpi>1 .AND. tmpi<=IMT .AND. tmpj>1 .AND. tmpj<=JMT .AND. tmpk>0) then
+		! check that column is deep enough 	
+			if(tmpk<=KM) then		! Borde vi ha med kmu också? För att kunna använda med andra projekt än tes???
+				tryAgain = .FALSE.
+			end if
+		end if
+		
+		! Check if particle is on an open boundary
+		if(tmpi==1 .AND. tmpj>=1 .AND. tmpj<=JMT .AND. tmpk>=1 .AND. &
+		tmpk<=kmt(tmpi, tmpj)) then
+			tryAgain = .FALSE.
+		end if
+		
+		! Slå ihop de två ovanstående ifsatserna? kmu med i första men inte andra...
+		
+		! If tryAgain is still true, the particle is outside model area. The
+		! displacement is not saved, but we make a new try to displace.
+		
+		! "Infinite loop?"
+		if(itno>=10000 .AND. tryAgain) then
+			tryAgain = .FALSE.
+			write(*,*)"========"
+			write(*,*)"Particle stuck in infinite diffusion loop. No diffusion added."
+			write(*,*)"========"
+		end if
+		
+	enddo
+	
+	! Update return position
+	x1 = tmpX
+	y1 = tmpY
+	z1 = tmpZ
+	ib = tmpi
+	jb = tmpj
+	kb = int(tmpZ) + 1
+	
+	! Check the vertical velocity if particle on boundary
+	if(int(z1) == z1) then
+		! Om partikeln är på väg nedåt (mot en låda med lägre index), ändra kb
+		! till det lägre lådindexet.
+	endif
+	
+	
+END SUBROUTINE diffuse
 
-!  check that column is deep enough and that at the particle
-!  level there is at least one adjacent open ocean velocity point.
-  
-  if( ic.gt.1. and. ic.le.IMT .and. jc.gt.1.and.jc.le.JMT.and.kc.gt.0) then
-   if (kc.le.kmt(ic,jc).and.(kc.le.kmu(ic,jc).or.kc.le.kmu(ic-1,jc).or. &
-       kc.le.kmu(ic,jc-1).or.kc.le.kmu(ic-1,jc-1))) ltest=.false.
- endif
-
-!  open boundary
-  if(ic.eq.1.and.jc.ge.1.and.jc.le.jmt.and.kc.gt.0) then
-   if (kc.le.kmt(ic,jc)) ltest = .false.
-  endif
-
-!  If iloop is very large, the particle is almost certainly stuck 
-!  somewhere. Print error message and stop track
- 
-  if(iloop.gt.1000.and.ltest)then
-   pstatus0(itrack) = 10
-   ltest = .false.
-!            write(99,*)'particle ',itrack,' stuck'           
-  endif
- enddo
-
-!  accept new position and update track
- x1 = x2
- y1 = y2
- z1 = z2
- ib = ic
- jb = jc
- kb = int(z1)+1
-
-!  check that vertical velocities still OK if on boundary
- if(z1.eq.int(z1))then
-  um0 = w0(ib,jb,kb-1)
-  um1 = w1(ib,jb,kb-1)
-  um  = um0 + (um1-um0)*(snew-st0)/(st1-st0)
-  if(um.lt.0d0)then
-   kb = kb-1
-  endif
- endif
-
-!  boundaries should be caught below - this is in case anything
-!  is missed (but remember to reset below if track continues)
-
-else
- pstatus0(itrack) = 8
- pstatus(itrack)  = 1
-endif
-
-end subroutine diffusion
-
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
-subroutine randomstep(dt,xd,yd,zd)
-implicit none
-
-
-!  subroutine to calculate the 'diffusion' steps to make in the x, y and z directions 
-!  to represent diffusion effects over a timestep.
+!===============================================================================
+! Calculate a random displacement
+! (sqrt(-4Ah*dt*log(1-q1))*cos(2PIq2),
+!  sqrt(-4Ah*dt*log(1-q1))*sin(2PIq2),
+!  sqrt(-4Av*dt*log(1-q3))*cos(2PIq4))
+! where
+! Av=0.0001, Ah=200, dt is the model time step and q1,q2,q3,q4 are random
+! numbers between 0 and 1.
 !
-!  Input:
-!
-!    dt   -  The length of the timestep in seconds
-!
-!  Parameters:
-!
-!    ah   -  Horizontal diffusion coefficient (units of m^2/s)
-!    az   -  vertical diffusion coefficient (m^2/s)
-!
-!  Output:
-!
-!    xd   - step in x direction (units m)
-!    yd   - step in y direction (units m)
-!    zd   - step in z direction (units m)
-!
-!  Uses:
-!
-!    ran1 - random number generator (produces a uniform distribution between 0.0 and 1.0)
-!
-!========================================================================================
+! Arguments :
+! xd, yd, zd : Variables in which the displacement will be stored
+! dt: Model time step
+!===============================================================================
+SUBROUTINE displacement(xd, yd, zd, dt) 
+	USE mod_precdef
+	
+	REAL						:: Ah, Av, R
+	REAL						:: q1, q2, q3, q4
+	REAL, INTENT(OUT)			:: xd, yd, zd
+	REAL (KIND=DP), INTENT(IN)	:: dt
+	REAL, PARAMETER				:: PI = 3.14159265358979323846
+		
+	Av = 1.0d-4
+	Ah = 2.0d2
+	Av = 1.0d-5
+	Ah = 2.0d1
+	Av = 1.0d-6
+	Ah = 2.0d0
+	Av = 1.0d-7
+	Ah = 2.0d-1
 
-real*8 dt,xd,yd,zd
-real*8 a,radius,pi,theta
-parameter (pi = 3.141592654d0)
-real*8 ran1,qr
+	q1 = rand()		! Så?
+	q2 = rand()
+	q3 = rand()
+	q4 = rand()
 
-real*8  ah,az
-integer irandom
-common /randomc/ irandom
-common /diffc/   ah,az
-
-! horizontal
-qr = dble(ran1(irandom))
-a  = sqrt(4*dt*ah) 
-radius = a*sqrt(-log(dble(1.-qr)))
-theta = dble(2.0d0*pi*ran1(irandom))
-xd = sin(theta)*radius
-yd = cos(theta)*radius
-
-! vertical
-qr = dble(ran1(irandom))
-a  = sqrt(4*dt*az) 
-radius = a*sqrt(-log(dble(1.-qr)))
-theta = dble(2.0d0*pi*ran1(irandom))
-zd = sin(theta)*radius
-
-end subroutine randomstep
-      
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
-     
-function ran1(idum)
-implicit none
-
-!========================================================================================
-!
-! uniform random number generator
-!
-! Input/Output:
-!
-!   idum   - integer seed updated on each call to the routine
-!
-!  Output
-!
-!    ran1  - function returned value.  Real*8 random number in the range 0.0 to 1.0
-!
-!  Based on routine in Numerical Algorithms - itself based on Knuth
-!  and K. Park and K.W. Miller, Comm. of the ACM 31 (1988) P.1192.
-!
-!========================================================================================
-
-real*8  ran1
-integer idum
-integer IA,IM,IQ,IR,NTAB,NDIV
-real*8  AM,EPS,RNMX
-
-parameter(IA=16807,IM=2147483647,IQ=127773,IR=2836,NTAB=32)
-parameter(AM=1./IM,NDIV=1+(IM-1)/NTAB,EPS=1.2e-7,RNMX=1.-EPS)
-
-integer j,k,iv(NTAB),iy
-save iv,iy
-data iv /NTAB*0/, iy /0/
-
-if(idum.le.0.or.iy.eq.0)then
- idum=max(-idum,1)
- do 11 j=NTAB+8,1,-1
-  k=idum/IQ
-  idum=IA*(idum-k*IQ)-IR*k
-  if(idum.lt.0) idum=idum+IM
-  if(j.le.NTAB) iv(j)=idum
- 11 enddo
- iy=iv(1)
-endif
-
-k=idum/IQ
-idum=IA*(idum-k*IQ)-IR*k
-if(idum.lt.0) idum=idum+IM
-j=1+iy/NDIV
-iy=iv(j)
-iv(j)=idum
-
-ran1=min(AM*iy,RNMX)
-
-end function ran1
+	! Horizontal displacements
+	R = sqrt(-4*Ah*dt*log(1-q1))
+	xd = R * cos(2*PI*q2)
+	yd = R * sin(2*PI*q2)
+	
+	! Vertical displacement
+	R = sqrt(-4*Av*dt*log(1-q3))
+	zd = R*cos(2*PI*q4)
+	
+END SUBROUTINE displacement

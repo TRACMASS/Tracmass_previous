@@ -325,7 +325,7 @@ subroutine loop
            if(subvol.eq.0.) stop 3956  !?????????????????
            if(subvol.eq.0.) subvol=1.
            
-!           print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
+ !           print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
 99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
                 ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
            
@@ -965,8 +965,8 @@ subroutine loop
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
 #if defined diffusion     
-           call diffusion(x1,y1,z1,ib,jb,kb,dt,snew,st0,st1)
-           
+!           call diffusion(x1,y1,z1,ib,jb,kb,dt,snew,st0,st1)
+           call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
            ! === Calculate arclength of the ===
            ! === trajectory path in the box ===
