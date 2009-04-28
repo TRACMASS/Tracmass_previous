@@ -1257,7 +1257,7 @@ return
              nrj(ntrac,3)=kb
              nrj(ntrac,4)=niter
              nrj(ntrac,5)=idint(ts)
-             ! nrj(ntrac,6)=1  ! 1=end trajectory
+             nrj(ntrac,6)=1  ! 1=end trajectory
              nrj(ntrac,7)=1
              errCode = -48
           end if
