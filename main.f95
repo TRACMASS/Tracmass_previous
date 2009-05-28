@@ -17,7 +17,6 @@ call init_params
 call coordinat
 call writesetup
 
-
 !do i=1,ijkMax
 !   print *,ijkst(i,:)
 !end do

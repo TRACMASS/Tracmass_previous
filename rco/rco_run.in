@@ -1,6 +1,6 @@
 &INITRUNDESC
   caseName     = 'rcoTest',
-  caseDesc     = 'Looking at interesting things in the Baltic puddle'/
+  caseDesc     = 'Looking at interesting things in the Baltic Sea'/
 &INITRUNGRID
   !
   !==subGrid:       0 = Use full grid.
@@ -25,11 +25,11 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin = 1, ! (=6  *24/ngcm)  !trajectory release period (timesteps)
+  intspin = 1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin = 1460,
-  ! === Number of timesteps for the run.      ===
-  intrun  = 50000,
-  ! === Pos if forward  neg if backward       ===
+  ! === Number of timesteps for the run - stops after this.      ===
+  intrun  = 5000,
+  ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
 &INITRUNDATE
@@ -38,7 +38,7 @@
   startHour         = 0,
   startDay          = 1,
   startMon          = 1,
-  startYear         = 2003/  ! first year is 1981, last year is 2005
+  startYear         = 2002/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE
@@ -55,15 +55,13 @@
   kriva    = 1,
   !
   ! === Directory where input fields are stored
-  !inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
+   inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
   ! inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
-  inDataDir = '/Volumes/Flask1/data/rco/2nm_122/',
   !inDataDir = '/Users/doos/data/rco/gcm/',
   !
   ! === Directory where output files are saved
-  !outDataDir   = '/Volumes/hav4/data/rco/orm/',
-  !outDataDir   = '/Volumes/Resa3/data/rco/orm/',
-  outDataDir   = '/Volumes/Flask1/data/rco/orm/',
+   outDataDir   = '/Volumes/hav4/data/rco/orm/',
+  ! outDataDir   = '/Volumes/Resa3/data/rco/orm/',
   !outDataDir   = '/Users/doos/data/rco/orm/',
   !
   ! === name of current trajectory run
@@ -79,9 +77,9 @@
   intminInOutFile=0/
 $INITRUNSEED
   !
-  !==nff:           1 = Follow trajectories forward
-  !==               2 = Follow trajectories backward
-  !==               3 = Follow trajectories both ways.
+  !==nff:           1 = Follow trajectories forward in time
+  !==               2 = Follow trajectories backward in time
+  !==               3 = Follow trajectories both forward and backward in time.
   nff      = 1,
   !==isec:          1 = Seed particles meridional(y-z)
   !==               2 = Seed particles zonal(x-z)
@@ -101,7 +99,7 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 16,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 1,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -111,7 +109,7 @@ $INITRUNSEED
   seedType = 1,
   !
   ! ===   ===   ===   ===   ===
-  ! If seedType = 1, define area where particles are seeded.
+  ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
   !
   ! Neva
@@ -123,10 +121,10 @@ $INITRUNSEED
   !kst2     =  41, 
 ! One singel gridbox
   ist1     = 161,		 
-  ist2     = 170,		 
+  ist2     = 161,		 
   jst1     = 161,		 
-  jst2     = 170,		 
-  kst1     =  31,		 
+  jst2     = 161,		 
+  kst1     =  40,		 
   kst2     =  40,
   varSeedFile = 0,
   !seedDir     = '/Volumes/hav4/data/rco/topo/',
@@ -205,7 +203,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      2./  ! maximum time length of a trajectory in days
+  timax =      200./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,
