@@ -1276,7 +1276,7 @@ return
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined rco || tes
-566 format(i8,i7,f7.2,f7.2,f7.1,f10.0,f10.0 &
+566 format(i8,i7,f7.2,f7.2,f7.1,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined ifs
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.0,f10.0 &
