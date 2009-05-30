@@ -41,7 +41,7 @@ subroutine readfields
   
   REAL :: snap2d(imt,jmt) ! ??????????????????
 
-  CHARACTER ofile*20,infile*78,zfile*123,rfile*59,a_exp1*3,a_exp2*2
+  CHARACTER ofile*20,infile*78,zfile*193,rfile*99,a_exp1*3,a_exp2*2
 
   LOGICAL around
   
@@ -129,9 +129,6 @@ print *,'This file is missing:',infile,ntime
 stop 4555
 endif
 zfile='gunzip -c '//trim(infile)//'.gz > '//trim(inDataDir)//'tmp/'//trim(outDataFile)
-!print *,zfile
-!print *,'outDataFile=',outDataFile
-!print *,'trim(outDataFile)=',trim(outDataFile)
 CALL system(zfile)
 rfile=trim(inDataDir)//'tmp/'//trim(outDataFile)
 inquire(file=trim(rfile),exist=around)

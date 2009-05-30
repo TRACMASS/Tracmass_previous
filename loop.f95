@@ -1007,7 +1007,7 @@ endif
            enddo LBTLOOP
            ! === stop trajectory if the choosen time or ===
            ! === water mass properties are exceeded     ===
-           if(tt-t0.ge.timax) then
+           if(tt-t0.gt.timax) then
               nexit(NEND)=nexit(NEND)+1
               exit niterLoop
            endif
@@ -1307,8 +1307,7 @@ return
             (kriva.eq.3)                             .or. &
             (kriva.eq.4 .and. niter.eq.1)            .or. &
             (kriva.eq.5 .and. &
-            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
-            .or.tt-t0.eq.21.*tday)) ) then
+            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) ) then
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 !          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
 #if defined biol
