@@ -1,21 +1,12 @@
-PROJECT	          = jplSCB
-# possible PROJECTS i.e. GCMs: rco, occ, orc, sim, for, ifs, gomoos
+PROJECT	          = rco
+# possible PROJECTS i.e. GCMs: rco, occ, orc, sim, for, ifs, gomoos, tes
+# See comment.f95 for description of the PROJECTS
 CASE              = $(PROJECT)
+INPUT_INT1        = intmin		
+INPUT_INT2        = intrun		#Use 'dummy' if not used.
 
 #F95COMPILER        = "g95"
 F95COMPILER        = "gfortran"
-
-
-
-
-
-
-
-PROJMAKE           := $(wildcard $(PROJECT)/Makefile)
-ifneq ($(strip $(PROJMAKE)),)
-	include $(PROJECT)/Makefile
-endif
-
 
 
 PROJECT_FLAG      = -DPROJECT_NAME=\'$(PROJECT)\'
@@ -27,14 +18,20 @@ ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 #MYL_FLAGS        = `$(MYCFG) --libs` 
 
 LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
-INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include \
+INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include
+#INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include \
                     -I/usr/local/mysql/include
+
+# Pre-processing options to be changed...see manual for option descriptions
+#ORM_FLAGS=-D$(PROJECT) -Dmysqlwrite -Dstreamxy -Dstreamr -Dstreamv 
+ORM_FLAGS=-D$(PROJECT) -Dstreamxy -Dstreamr -Dstreamv \
+          -Dtime -Dtempsalt -Dstreamts -Dtextwrite -Dtimestep -Dtwodim -Ddiffusion
 
 LNK_FLAGS         = -lnetcdf -lSystemStubs -lnetcdff
 
 ifeq ($(F95COMPILER),"gfortran")
-	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2   
-	F90_FLAGS        =-fno-underscoring 
+	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian 
+	F90_FLAGS        =-fno-underscoring
 	FF               = gfortran $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 
 endif
@@ -45,11 +42,10 @@ ifeq ($(F95COMPILER),"g95")
 endif
 CC                = gcc -O  $(INC_DIR)
 
-objects           = modules.o init_seed.o sw_stat.o loop.o \
-                    vertvel.o coord.o cross.o init_par.o \
-                    interp2.o pos.o arclength.o \
-                    sw_seck.o sw_pres.o sw_dens0.o \
-                    writepsi.o writetracer.o turb.o main.o
+objects           =  modules.o arclength.o coord.o cross.o init_par.o init_seed.o  \
+                     interp.o loop.o main.o pos.o sedimentation.o  \
+                     sw_stat.o sw_seck.o sw_dens0.o sw_pres.o diffusion.o \
+                     turb.o vertvel.o writepsi.o writetracer.o time_subs.o
 #jacket.o
 
 runtraj : $(objects) readfield.o
@@ -60,20 +56,20 @@ runtraj : $(objects) readfield.o
 
 $(objects) : 
 
-readfield.o:  $(PROJECT)/readfield.f95
-	$(FF) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT)/readfield.f95
+readfield.o:  projects/$(PROJECT)/readfield.f95
+	$(FF) $(FF_FLAGS) $(ORM_FLAGS) projects/$(PROJECT)/readfield.f95
 
 
 #stat.o:  $(PROJECT)/stat.f95
 #	$(FF) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT)/stat.f95
 
-jacket.o : ../mysql/jacket.c
-	$(CC)  -c ../mysql/jacket.c
+#jacket.o : ../mysql/jacket.c
+#	$(CC)  -c ../mysql/jacket.c
 
 #main.o : main.f95 
 #	$(FF) $(FF_FLAGS) $(ORM_FLAGS) main.f95
 
 .PHONY : clean
 clean :
-	-rm runtraj $(objects) *.mod readfield.o &> /dev/null
+	-rm runtraj $(objects) *.mod readfield.o
 
