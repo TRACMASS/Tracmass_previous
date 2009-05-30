@@ -123,12 +123,12 @@ SUBROUTINE displacement(xd, yd, zd, dt)
 	REAL (KIND=DP), INTENT(IN)	:: dt
 	REAL, PARAMETER				:: PI = 3.14159265358979323846
 		
-	Av = 1.0d-4
-	Ah = 2.0d2
-	Av = 1.0d-5
-	Ah = 2.0d1
-	Av = 1.0d-6
-	Ah = 2.0d0
+!	Av = 1.0d-4
+!	Ah = 2.0d2
+!	Av = 1.0d-5
+!	Ah = 2.0d1
+!	Av = 1.0d-6
+!	Ah = 2.0d0
 	Av = 1.0d-7
 	Ah = 2.0d-1
 

@@ -72,8 +72,8 @@ subroutine init_params
   end if
   
   ! -- Check if there is a time argument and if so, use it.
-  print *,trim(Project)//'/'//trim(Case)//'_grid.in'
-  open(8,file=trim(Project)//'/'//trim(Project)//'_grid.in',  &
+!  print *,trim(Project)//'/'//trim(Case)//'_grid.in'
+  open(8,file='projects/'//trim(Project)//'/'//trim(Project)//'_grid.in',  &
        status='OLD', delim='APOSTROPHE')
   ! -- Check if the namefiles has correct version number. 
   read(8,nml=INITGRIDVER)
@@ -92,7 +92,7 @@ subroutine init_params
   read(8,nml=INITGRIDDATE)
   !=== === ===
   read(8,nml=INITGRIDARC)
-  open(8,file=trim(Project)//'/'//trim(Case)//'_run.in',  &
+  open(8,file='projects/'//trim(Project)//'/'//trim(Case)//'_run.in',  &
        status='OLD', delim='APOSTROPHE')
   read(8,nml=INITRUNDESC)
   read(8,nml=INITRUNGRID)

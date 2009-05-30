@@ -28,7 +28,7 @@
   intspin = 1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin = 1460,
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  = 5000,
+  intrun  =9,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -38,7 +38,7 @@
   startHour         = 0,
   startDay          = 1,
   startMon          = 1,
-  startYear         = 2002/  ! first year is 1981, last year is 2005
+  startYear         = 2000/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE
@@ -47,20 +47,22 @@
   ncoor   = 1,  
   !
   ! kriva:          0 = no writing
-  !                 1 = write at time intervals of gcm datasets
-  !                 2 = write each grid-crossing and time change
+  !                 1 = write at time intervals of gcm datasets (each ints)
+  !                 2 = write each grid-crossing (and not time change)
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   kriva    = 1,
   !
   ! === Directory where input fields are stored
-   inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
+  ! inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
   ! inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
-  !inDataDir = '/Users/doos/data/rco/gcm/',
+  ! inDataDir = '/Users/doos/data/rco/gcm/',
+  inDataDir = '../data/rco/2nm_122/',
   !
   ! === Directory where output files are saved
-   outDataDir   = '/Volumes/hav4/data/rco/orm/',
+  !outDataDir   = '/Volumes/hav4/data/rco/orm/',
+   outDataDir   = '../data/rco/data_out/',
   ! outDataDir   = '/Volumes/Resa3/data/rco/orm/',
   !outDataDir   = '/Users/doos/data/rco/orm/',
   !
@@ -121,9 +123,9 @@ $INITRUNSEED
   !kst2     =  41, 
 ! One singel gridbox
   ist1     = 161,		 
-  ist2     = 161,		 
+  ist2     = 183,		 
   jst1     = 161,		 
-  jst2     = 161,		 
+  jst2     = 184,		 
   kst1     =  40,		 
   kst2     =  40,
   varSeedFile = 0,
@@ -203,7 +205,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      200./  ! maximum time length of a trajectory in days
+  timax =      2./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,
