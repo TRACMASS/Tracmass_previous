@@ -623,7 +623,6 @@ subroutine loop
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif
            ds=min(dse,dsw,dsn,dss,dsu,dsd,dsmin)
-!           print *,'min',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
            if(ds.eq.1.d20 .or.ds.eq.0.d0)then 
               ! === Can not find any path for unknown reasons ===
               print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
@@ -854,7 +853,8 @@ subroutine loop
 #ifdef full_wflux
               uu=wflux(ia,ja,ka,1)
 #elif defined timeanalyt || timestep
-              uu=wflux(ka,1)
+!              uu=wflux(ka,1)
+              uu=rbg*wflux(ka,NST)+rb*wflux(ka,1)
 #else
               uu=wflux(ka)
 #endif
@@ -883,7 +883,7 @@ subroutine loop
 #ifdef full_wflux
               if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
 #elif defined timeanalyt || timestep
-              if(wflux(ka-1,1).lt.0.d0) kb=ka-1
+              if(rbg*wflux(ka-1,NST)+rb*wflux(ka-1,1).lt.0.d0) kb=ka-1
 #else
               if(wflux(ka-1).lt.0.d0) kb=ka-1
 #endif              

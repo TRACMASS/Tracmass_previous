@@ -11,7 +11,7 @@ subroutine arclength(ia,ja,ka,dt,rr,arc)
   
   REAL*8 rr,rg,dt,arc,uu,vv,ww
   INTEGER ii,iim,jj,jjm,kk,kkm,ia,ja,ka
-  
+
   rg=1.-rr
   
   ! velocities
@@ -60,7 +60,11 @@ subroutine arclength(ia,ja,ka,dt,rr,arc)
   ! === w ===
   kk=ka
   kkm=ka-1
+#if defined timeanalyt || timestep
+  ww=0.5*( rg*(wflux(kk,NST)+ wflux(kkm,NST) ) +rr*(wflux(kk,1)+ wflux(kkm,1)) )/dxdy(ia,ja)
+#else
   ww=0.5*( wflux(kk)            + wflux(kkm)            )/dxdy(ia,ja)
+#endif
 
 #else
 

@@ -27,22 +27,40 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   
   real*8 rr,rg,uu,um,vv,vm
   integer ia,iam,ja,ka,k,n
-  
+    
   rg=1.d0-rr
-  
   wflux=0.d0
+  
 #ifdef twodim
   return
+  
+! start 3D code
 #else
-  do k=1,ka
+  kloop: do k=1,ka
      uu=rg*uflux(ia ,ja  ,k,NST)+rr*uflux(ia ,ja  ,k,1)
      um=rg*uflux(iam,ja  ,k,NST)+rr*uflux(iam,ja  ,k,1)
      vv=rg*vflux(ia ,ja  ,k,NST)+rr*vflux(ia ,ja  ,k,1)
      vm=rg*vflux(ia ,ja-1,k,NST)+rr*vflux(ia ,ja-1,k,1)
+! start ifs code
 #if defined ifs
-     wflux(k) = wflux(k-1) - ff * &
+#if defined timeanalyt || timestep
+    do n=1,NST
+     wflux(k,n) = wflux(k-1,n) - ff * &
+     ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
+     + (dztb(ia,ja,k,2)-dztb(ia,ja,k,1))/tseas )  ! time change of the mass the in grid box
+!     print *,k,ia,ja,wflux(k,n)
+    enddo
+#else
+  wflux(k) = wflux(k-1) - ff * &
      ( uu - um + vv - vm + (dztb(ia,ja,k,2)-dztb(ia,ja,k,1))/tseas )
-#elif full_wflux
+!     print *,k,ia,ja,wflux(k)
+#endif
+#endif
+!end ifs code
+
+! start ocean code
+#ifndef ifs
+#ifdef  full_wflux
      wflux(ia,ja,k,1)=wflux(ia,ja,k-1,1) - ff * ( uu - um + vv - vm )
 #elif defined timeanalyt || timestep
     do n=1,NST
@@ -52,13 +70,19 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #else
      wflux(k) = wflux(k-1) - ff * ( uu - um + vv - vm )
 #endif
-  enddo
+#endif
+!end ocean code
+  end do kloop
 
-#ifdef sediment
+#endif
+! end 3D code
+
+! start sediment code
+#ifdef sediment  
   ! === Godtyckligt vaerde paa kinetiska energin ===
   ! === daer wsed inte laengre paaverkar, 3e6.   ===
   
-  kloop: do k=0,km
+  k2loop: do k=0,km
      wsedtemp=0.d0
      kin=(uflux(ia,ja,k,1)*uflux(ia,ja,k,1)+ &
           vflux(ia,ja,k,1)*vflux(ia,ja,k,1))*0.5d0
@@ -76,11 +100,11 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #else
      wflux(k)=wflux(k) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
 #endif
-     
-  end do kloop
-#endif
+  end do k2loop
+#endif   
+! end sediment code
   
-#endif
+!#endif
   return
 #endif
 end subroutine vertvel
