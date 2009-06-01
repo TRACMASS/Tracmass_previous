@@ -55,7 +55,7 @@ MODULE mod_param
 #elif defined atm
   INTEGER, PARAMETER :: KD=11   !should be KD=KM   
 #elif defined ifs
-  INTEGER, PARAMETER :: KD=60   !should be KD=KM   
+  INTEGER, PARAMETER :: KD=60   !KD=KM
 #else
   INTEGER, PARAMETER :: KD=1
 #endif

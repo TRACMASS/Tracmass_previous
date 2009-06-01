@@ -89,9 +89,10 @@ open(12,file=trim(inDataDir)//'topo/model_60lev.txt')
 99 format(10x,f12.6,4x,f10.8)
 do k=0,KM
  read(12,99) aa(k),bb(k)
+! print *,k,aa(k)
 enddo
 close(12)
-aa=100.*aa   !  [hPa] -->  [Pa]
+!aa=100.*aa   !  [hPa] -->  [Pa]
 
 endif
 

@@ -65,17 +65,18 @@
   !
   ! === Directory where input fields are stored
   !inDataDir    = '/Users/doos/data/ifs/',
-  !inDataDir    = '/Volumes/vatten/data/ifs/',
-  inDataDir    = '/Volumes/Resa2/data/ifs/',
+  inDataDir    = '/Volumes/vatten/data/ifs/',
+  !inDataDir    = '/Volumes/Resa2/data/ifs/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Users/doos/data/ifs/orm/',
-  !outDataDir   = '/Volumes/vatten/data/ifs/orm/',
-  outDataDir   = '/Volumes/Resa2/data/ifs/orm/',
+  outDataDir   = '/Volumes/vatten/data/ifs/orm/',
+  !outDataDir   = '/Volumes/Resa2/data/ifs/orm/',
   !
   ! === name of current trajectory run
   !outDataFile     = 'era_15N_15S_1snap_r'/
-  outDataFile     = 'era_15S_15N_1snap_r'/
+  !outDataFile     = 'era_15S_15N_1snap_r'/
+  outDataFile     = 'era_15S_15N_test'/
   !outDataFile     = 'era_15S_glob'/
   !
 $INITRUNSEED
