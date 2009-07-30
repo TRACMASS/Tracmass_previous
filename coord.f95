@@ -59,6 +59,11 @@ stlat2 = -54.50d0
 #endif
 #endif
 
+#if defined orc
+dx = 0.25d0  ! this is a quick and dirty fix since it is only used in arclength
+dy = 0.25d0
+#endif
+
 #if defined rco
 dx = 1./15.d0
 dy = 1./30.d0

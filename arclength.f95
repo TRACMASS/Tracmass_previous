@@ -98,6 +98,8 @@ subroutine arclength(ia,ja,ka,dt,rr,arc)
 
   ! arclength
   arc=dsqrt(uu**2 + vv**2 + ww**2 ) * dt
+!  print *,'uu',uu,rg,uflux(ii ,ja,ka,NST),rr,uflux(ii ,ja,ka,1),dy,deg,dz(ka)
+!  stop 9875
 
   return
 end subroutine arclength
