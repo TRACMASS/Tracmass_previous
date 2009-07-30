@@ -166,7 +166,6 @@ subroutine init_params
     intmin      = (startJD-baseJD)/(ngcm)+1
    endif
   end if startYearCond
-print *,'tttt'
   startHourCond: if ( (startHour .ne. 0)  & 
                  .or. (startMin  .ne. 0)  &
                  .or. (startSec  .ne. 0) ) then
@@ -180,7 +179,6 @@ print *,'tttt'
 
   tseas= dble(ngcm)*3600.d0 ! time step between data sets
 
-print *,'iyear=',iyear
 
   ! --ist -1 to imt
   if ( ist1 == -1) then 
@@ -226,7 +224,7 @@ print *,'iyear=',iyear
 #else
   allocate ( wflux(0:km) )
 #endif
-  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km))
+!  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km))
 
   ! mod_dens
 #ifdef tempsalt

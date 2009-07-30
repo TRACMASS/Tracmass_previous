@@ -51,7 +51,7 @@ subroutine loop
   INTEGER :: ntrac,nev,nrh0,nout,nloop,nerror
   INTEGER :: nnorth,ndrake,ngyre,ntractot,nexit(NEND),nrj(ntracmax,NNRJ)
   
-  REAL*8  :: rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0,ss0
+  REAL*8  :: rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0,ss0,dtreg
   REAL*8  :: ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dsc,ts,trj(ntracmax,NTRJ)
   REAL*8  :: subvol,vol,arc,arct,rr,rb,rg,rbg,uu
   
@@ -120,6 +120,7 @@ subroutine loop
 
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
+!  dtmin=tseas/dble(iter)
   
   !==========================================================
   !=== Read in the end positions from an previous run     === 
@@ -513,7 +514,7 @@ subroutine loop
         
 #endif        
         ! ===  start loop for each trajectory ===
-        scrivi=.false.
+        scrivi=.true.
 !             print *,' --- niterLoop  ', ntrac
         niterLoop: do        
            niter=niter+1 ! iterative step of trajectory
@@ -602,21 +603,18 @@ subroutine loop
            ! space variables (x,...) are dimensionless    !
            ! time variables (ds,...) are in seconds/m^3   !
            !==============================================! 
+#if defined regulardt
+           dtreg=dtmin * ( dble(int(tt/tseas*dble(iter))) + 1.d0 - tt/tseas*dble(iter) )
+           dt=dtreg
+           dsmin=dt/dxyz
+#else
            dsmin=dtmin/dxyz
+#endif
 #if defined timeanalyt
            ss0=dble(idint(ts))*tseas/dxyz
            call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz,rr) ! zonal
            call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz,rr) ! meridional
            call cross_time(3,ia,ja,ka,z0,dsu,dsd,ts,tt,dsmin,dxyz,rr) ! vertical
-!           if(min(dse,dsw,dsn,dss,dsu,dsd).eq.1.d20) then
-!            print *,'timestep',dse,dsw,dsn,dss,dsu,dsd
-!           else
-!            print *,'analytical',dse,dsw,dsn,dss,dsu,dsd
-           ! stop 40967
-           ! call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-           ! call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-           ! call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
-!           endif
 #else
            call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
@@ -634,8 +632,19 @@ subroutine loop
               cycle ntracLoop
            endif
            
-           dt=ds*dxyz ! transform ds to dt in seconds
-           if(ds.eq.dsmin) dt=dtmin  ! this makes dt more accurate
+#if defined regulardt
+           if(ds.eq.dsmin) then ! transform ds to dt in seconds
+!            dt=dt  ! this makes dt more accurate
+           else
+            dt=ds*dxyz 
+           endif
+#else
+           if(ds.eq.dsmin) then ! transform ds to dt in seconds
+            dt=dtmin  ! this makes dt more accurate
+           else
+            dt=ds*dxyz 
+           endif
+#endif
            if(dt.lt.0.d0) then
               print *,'dt=',dt
               goto 1500
@@ -651,15 +660,29 @@ subroutine loop
               dsc=ds
            else
               tt=tt+dt
+#if defined regulardt
+              if(dt.eq.dtmin) then
+                 ts=ts+dstep
+                 tss=tss+1.d0
+              elseif(dt.eq.dtreg) then  ! funkar nog inte som det ska
+                 ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
+!                 ts=ts+dtreg/tseas
+                 tss=dble(nint(tss+dt/dtmin))
+              else
+                 ts=ts+dt/tseas
+                 tss=tss+dt/dtmin
+              endif
+#else
               if(dt.eq.dtmin) then
                  ts=ts+dstep
                  tss=tss+1.d0
               else
                  ts=ts+dt/tseas
-                 tss=tss+dt/tseas*dble(iter)
+!                 tss=tss+dt/tseas*dble(iter)
+                 tss=tss+dt/dtmin
               endif
+#endif
            endif
- !          print *,'ts=',ts,tss,dt
            ! === time interpolation constant ===
            rbg=dmod(ts,1.d0) 
            rb =1.d0-rbg
@@ -667,6 +690,7 @@ subroutine loop
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
            if(ds.eq.dse) then ! eastward exit 
+              scrivi=.false.
               uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(1,2)
@@ -683,7 +707,7 @@ subroutine loop
               call pos(2,ia,ja,ka,y0,y1,ds,rr) 
               call pos(3,ia,ja,ka,z0,z1,ds,rr)
 #endif
-              scrivi=.true.
+!              scrivi=.true.
 #ifdef streamxy
               ! === zonal component stream function ===
               stxyx(ia,ja,lbas)=stxyx(ia,ja,lbas)+real(subvol*ff)
@@ -715,6 +739,7 @@ subroutine loop
 #endif
            elseif(ds.eq.dsw) then ! westward exit
               
+              scrivi=.false.
               uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(2,2)
@@ -730,7 +755,7 @@ subroutine loop
               call pos(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-              scrivi=.true.
+!              scrivi=.true.
 #ifdef streamxy
               stxyx(iam,ja,lbas)=stxyx(iam,ja,lbas)-real(subvol*ff) 
 #endif
@@ -758,6 +783,7 @@ subroutine loop
               
            elseif(ds.eq.dsn) then ! northward exit
               
+              scrivi=.false.
               uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(3,2)
@@ -773,7 +799,7 @@ subroutine loop
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-              scrivi=.true.
+!              scrivi=.true.
 #ifdef streamxy
               stxyy(ia,ja,lbas)=stxyy(ia,ja,lbas)+real(subvol*ff)
 #endif
@@ -802,6 +828,7 @@ subroutine loop
               
            elseif(ds.eq.dss) then ! southward exit
               
+              scrivi=.false.
               uu=(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(4,2)
@@ -820,7 +847,7 @@ subroutine loop
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-              scrivi=.true.
+!              scrivi=.true.
 #ifdef streamxy
               stxyy(ia,ja-1,lbas)=stxyy(ia,ja-1,lbas)-real(subvol*ff)
 #endif
@@ -878,6 +905,7 @@ subroutine loop
               call pos(2,ia,ja,ka,y0,y1,ds,rr)
 #endif
            elseif(ds.eq.dsd) then ! downward exit
+              scrivi=.false.
               call vertvel(rb,ia,iam,ja,ka)
 
 #ifdef full_wflux
@@ -917,7 +945,7 @@ subroutine loop
 #endif
               
            elseif( ds.eq.dsc .or. ds.eq.dsmin ) then  ! inter time steping 
-              scrivi=.false.
+              scrivi=.true.
 #ifdef timeanalyt
               call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
               call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
@@ -1044,7 +1072,7 @@ endif
 !     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout-nerror,nexit
 !599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
 !         ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
-#elif defined ifs || rco || tes
+#elif defined ifs || rco || tes || orc
 
      print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
 799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
@@ -1275,11 +1303,11 @@ return
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined rco || tes
+#elif defined rco || tes 
 566 format(i8,i7,f7.2,f7.2,f7.1,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined ifs
-566 format(i8,i7,f7.2,f7.2,f7.2,f10.0,f10.0 &
+#elif defined ifs || orc
+566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.0 &
          ,f10.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
@@ -1291,25 +1319,30 @@ return
     zf   = floor(z1)
     
     if ((sel .ne. 19) .and. (sel.ne.40)) then
-       vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
-            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
+! this requires too much memory
+!       vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
+!            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
     end if
 
 #if defined textwrite 
-
+!print *,'case=',sel,subvol
     select case (sel)
     case (10)
-       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens
+!    print *,ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+
     case (11)
        if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
             (scrivi .and. kriva.eq.2)                .or. &
             (kriva.eq.3)                             .or. &
             (kriva.eq.4 .and. niter.eq.1)            .or. &
             (kriva.eq.5 .and. &
-            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) ) then
+            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) .or. &
+            (.not.scrivi .and. kriva.eq.6)           .or. &
+            (mod(tt-t0,1.).eq.0. .and. kriva.eq.7)                ) then
+#if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-!          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+#endif
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
@@ -1331,8 +1364,9 @@ return
             tt/tday,t0/tday,subvol,temp,salt,dens
     case (16)
        if(kriva.ne.0 ) then
+#if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-!          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+#endif
           write(56,566) ntrac,ints,x1,y1,z1, &
                tt/tday,t0/tday,subvol,temp,salt,dens,arct
        end if
@@ -1342,12 +1376,13 @@ return
     case (18)
        if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
             ints.eq.intstart+intrun) then 
+#if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-!          call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+#endif
           !write(56,566) ntrac,ints,x1,y1,z1, &
           !tt/tday,t0/tday,subvol,temp,salt,dens,arct
-          write(56,566) ntrac,ints,x1,y1,z1, & 
-               uvel(xf,yf,zf),vvel(xf,yf,zf),vort,temp,salt,dens,arct
+!          write(56,566) ntrac,ints,x1,y1,z1, & 
+!               uvel(xf,yf,zf),vvel(xf,yf,zf),vort,temp,salt,dens,arct
           ! write(56,566) ntrac,niter,x1,y1,z1,tt/3600.,t0/3600.
           !,subvol,temp,salt,dens,arct
        endif
