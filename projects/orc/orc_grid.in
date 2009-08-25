@@ -29,9 +29,9 @@ $INITGRIDNTRAC
 $INITGRIDTIME
   !
   ngcm          = 120,            ! (5*24) hours between GCM datasets
-  iter          = 5,              ! iteration between two gcm data sets
-  intmax        = 4,              ! maximum length of GCM fields
-  fieldsPerFile = 1/
+  iter          =   5,            ! iteration between two gcm data sets
+  intmax        =  72,            ! maximum length of GCM fields
+  fieldsPerFile =   1/
   !
   !
 $INITGRIDDATE

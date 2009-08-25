@@ -55,16 +55,16 @@
   kriva    = 1,
   !
   ! === Directory where input fields are stored
-  ! inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
+   inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
   ! inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
   ! inDataDir = '/Users/doos/data/rco/gcm/',
-  inDataDir = '../data/rco/2nm_122/',
+  ! inDataDir = '../data/rco/2nm_122/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Volumes/hav4/data/rco/orm/',
-   outDataDir   = '../data/rco/data_out/',
+  ! outDataDir   = '../data/rco/data_out/',
   ! outDataDir   = '/Volumes/Resa3/data/rco/orm/',
-  !outDataDir   = '/Users/doos/data/rco/orm/',
+   outDataDir   = '/Users/doos/data/rco/data_out/',
   !
   ! === name of current trajectory run
   !outDataFile     = 'xyz_timestep_3D'/
@@ -129,12 +129,12 @@ $INITRUNSEED
   kst1     =  40,		 
   kst2     =  40,
   varSeedFile = 0,
-  !seedDir     = '/Volumes/hav4/data/rco/topo/',
-  seedDir     = '/Volumes/Flask1/data/rco/topo/',
+  seedDir     = '/Volumes/hav4/data/rco/topo/',
+  !seedDir     = '/Volumes/Flask1/data/rco/topo/',
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
-  seedFile    = '/Volumes/Resa3/data/rco/topo/maskust' /
-  !seedFile    = '/Users/doos/data/rco/topo/maskust' /
+  !seedFile    = '/Volumes/Resa3/data/rco/topo/maskust' /
+  seedFile    = '/Users/doos/data/rco/topo/maskust' /
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
@@ -154,7 +154,14 @@ $INITRUNSEED
   rmine = -100.,
   rmaxe =  500./
 
-  $INITRUNSEDIMENT
+  $INITRUNDIFFUSION
+  ! Diffusion paramters
+  ! Horizontal diffusion in m2/s
+  ah=100., !dgl4=1.e4 dgl5=2.e3 dgl3=1000 dgl2=100 dgl1=10 dgl0=1
+  ! Vertical diffusion in m2/s
+  av=0./
+  
+    $INITRUNSEDIMENT
   ! Sedimenation paramters
   !
   ! particle diameter in mm: clay 0.0005-0.002, silt 0.002-0.06,

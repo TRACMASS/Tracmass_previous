@@ -21,7 +21,7 @@ SUBROUTINE readfields
 ! include "/Applications/Utilities/netcdf-3.6.2_old/include/netcdf.inc"
 
   ! = Loop variables
-  INTEGER                                    :: t ,i ,j ,k ,kk ,tpos
+  INTEGER                                    :: t ,i ,j,jp ,k ,kk ,tpos
 
 !  integer p, x1, y1, z1, t1 !?
 
@@ -46,8 +46,9 @@ SUBROUTINE readfields
   REAL*4, ALLOCATABLE, DIMENSION(:,:)        :: ssh
 !  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: rhof
   
-  REAL*4, SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1v,e1t,e2u,e2t
+  REAL*4, SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1t,e2t
 !  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:)  :: dzt
+  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)  :: kmu,kmv
 
 !NET CDF STUFF
 !INTEGER ierr !error 
@@ -59,17 +60,17 @@ INTEGER leny,lenz,lent !output Length of dimension
 !INTEGER ncid, id_x, id_y,id_idta, id_jdta, jpidta, jpjdta  
     INTEGER                                 :: ncid
 
-real*8 tempxy(IMT+2,JMT),tempxyz(IMT+2,JMT,KM)
-REAL temp3d_simp(IMT+2,JMT,KM),temp2d_simp(IMT+2,JMT)
+REAL*8 tempxy(IMT+2,JMT)
+REAL*4 temp3d_simp(IMT+2,JMT,KM),temp2d_simp(IMT+2,JMT),dd
 INTEGER itemp(IMT+2,JMT)
 
   logical around
 
 !  print *,'read boerjar'
   
-  alloCondGrid: if ( .not. allocated (e1v) ) then
-     allocate ( e1v(IMT+2,JMT)    ,e1t(IMT+2,JMT) )
-     allocate ( e2u(IMT+2,JMT)    ,e2t(IMT+2,JMT) )
+  alloCondGrid: if ( .not. allocated (e1t) ) then
+     allocate ( e1t(IMT+2,JMT) , e2t(IMT+2,JMT) )
+     allocate ( kmu(IMT,JMT)    ,kmv(IMT,JMT) )
 !     allocate ( dzt(IMT+2,JMT,KM) )
   end if alloCondGrid
   alloCondUVW: if(.not. allocated (ssh)) then
@@ -124,12 +125,12 @@ do i=1,IMT
   e1t(i,:)=tempxy(i,:)
 enddo
 
-ierr=NF90_INQ_VARID(ncid,'e2u',varid) ! the main data fields
+ierr=NF90_INQ_VARID(ncid,'e2u',varid) ! dyu in meters
 if(ierr.ne.0) stop 3763
 ierr=NF90_GET_VAR(ncid,varid,tempxy,start2d,count2d)
 if(ierr.ne.0) stop 3799
 do i=1,IMT
-  e2u(i,:)=tempxy(i,:)
+  dyu(i,:)=tempxy(i,:)
 enddo
 
 ierr=NF90_INQ_VARID(ncid,'e2t',varid) ! the main data fields
@@ -138,6 +139,7 @@ ierr=NF90_GET_VAR(ncid,varid,tempxy,start2d,count2d)
 if(ierr.ne.0) stop 3799
 do i=1,IMT
   e2t(i,:)=tempxy(i,:)
+  dxdy(i,:) = e1t(i,:) * e2t(i,:)
 enddo
 
 ierr=NF90_INQ_VARID(ncid,'e1v',varid) ! the main data fields
@@ -145,23 +147,48 @@ if(ierr.ne.0) stop 3763
 ierr=NF90_GET_VAR(ncid,varid,tempxy,start2d,count2d)
 if(ierr.ne.0) stop 3799
 do i=1,IMT
-  e1v(i,:)=tempxy(i,:)
+  dxv(i,:)=tempxy(i,:)
 enddo
 ierr=NF90_CLOSE(ncid)
 
-dxdy = e1t * e2t
    
 
 ! The bathymetry
 gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 5751
-ierr=NF90_INQ_VARID(ncid,'mbathy',varid) ! the main data fields
+ierr=NF90_INQ_VARID(ncid,'mbathy',varid) ! kmt field
 if(ierr.ne.0) stop 3763
 ierr=NF90_GET_VAR(ncid,varid,itemp,start2d,count2d)
-ierr=NF90_CLOSE(ncid)
 do i=1,IMT
   kmt(i,:)=itemp(i,:)
+enddo
+
+!ierr=NF90_INQ_VARID(ncid,'nav_lon',varid) ! londitude mesh
+!if(ierr.ne.0) stop 3763
+!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
+!open(21,file=trim(inDataDir)//'topo/long',form='unformatted')
+!write(21) temp2d_simp
+!close(21)
+!
+!ierr=NF90_INQ_VARID(ncid,'nav_lat',varid) ! londitude mesh
+!if(ierr.ne.0) stop 3763
+!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
+!open(21,file=trim(inDataDir)//'topo/lat',form='unformatted')
+!write(21) temp2d_simp
+!close(21)
+
+
+ierr=NF90_CLOSE(ncid)
+
+kmu=0 ; kmv=0
+do j=1,jmt
+jp=j+1
+if(jp.eq.jmt+1) jp=jmt  ! should be north fold instead
+ do i=1,imt
+   kmu(i,j)=min(itemp(i,j),itemp(i+1,j))
+   kmv(i,j)=min(itemp(i,j),itemp(i,jp))
+ enddo
 enddo
 
 !open(21,file=trim(inDataDir)//'topo/kmt',form='unformatted')
@@ -187,7 +214,7 @@ do j=1,JMT
 !   if(k.ne.kmt(i,j)) dz(kk)=dzt(i,j,k)
 !  enddo
   if(kmt(i,j).ne.0) then
-              dztb(i,j,1)=dz(kmt(i,j))
+              dztb(i,j,1)=dz(km+1-kmt(i,j))
            else
               dztb(i,j,1)=0.
            endif
@@ -202,8 +229,8 @@ endif initFieldcond
 
 ! date update
   iday=iday+5
-  if(iday.gt.idmax(imon,iyear)) then
-     iday=iday-idmax(imon,iyear)
+  if(iday.gt.idmax(imon,1999)) then
+     iday=iday-idmax(imon,1999)
      imon=imon+1
      if(imon.eq.13) then
         imon=1
@@ -213,43 +240,59 @@ endif initFieldcond
   endif
 ntime=10000*iyear+100*imon+iday
 ! file names
-dataprefix='/9999/ORCA025-N112_20000105'
-write(dataprefix(20:27),'(i8)') ntime
-write(dataprefix(2:5),'(i4)') iyear
+dataprefix='9999/ORCA025-N112_20000105'
+write(dataprefix(19:26),'(i8)') ntime
+write(dataprefix(1:4),'(i4)') iyear
   fieldFile = trim(inDataDir)//trim(dataprefix)
   
-
+!print *,fieldFile
 
 ! temp, salt and ssh
 temp2d_simp = get2DfieldNC(trim(fieldFile)//'d05T.nc' ,'sossheig')
 do i=1,IMT+1
   hs(i,:,2)=temp2d_simp(i,:)
 enddo
-hs(:,jmt+1,2) =hs(:,1,2)
+hs(:,jmt+1,2) =hs(:,jmt,2)  ! one should use the north fold here instread
 #ifdef tempsalt 
 temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05T.nc' ,'votemper')
+
 #endif
 
 ! u velocity
 temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05U.nc' ,'vozocrtx')
 do i=1,IMT
- do k=1,km-1
-  kk=km+1-k
-  uflux(i,:,k ,2)=temp3d_simp(i,:,kk) * e2u(i,:) * dz(kk)
+ do j=1,JMT
+  do k=1,kmu(i,j)
+   kk=KM+1-k
+   dd = dz(kk) 
+   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
+   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd
+  enddo
  enddo
-  uflux(i,:,km,2)=temp3d_simp(i,:,1 ) * e2u(i,:) * (dz(km) + 0.5*(hs(i,:,2) + hs(i+1,:,2)))
 enddo
+
 ! v velocity
 temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05V.nc' ,'vomecrty')
 do i=1,IMT
- do k=1,km-1
-  kk=km+1-k
-  vflux(i,:,k ,2)=temp3d_simp(i,:,kk) * e1v(i,:) * dz(kk)
+ do j=1,JMT
+  do k=1,kmv(i,j)
+   kk=KM+1-k
+   dd = dz(kk) 
+   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
+   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd
+  enddo
  enddo
-  vflux(i,:,km,2)=temp3d_simp(i,:,1 ) * e2u(i,:) * (dz(km) + 0.5*(hs(i,:,2) + hs(i,:+1,2)))
 enddo
-  
-!  print *,'read slut'
+
+!do j=1,jmt
+! do i=1,imt
+!  do k=1,km
+!   kk=km+1-k
+!   if(kk.gt.kmu(i,j)) uflux(i,j,k,2)=0.
+!   if(kk.gt.kmv(i,j)) vflux(i,j,k,2)=0.
+!  enddo
+! enddo
+!enddo
 
   return
 end subroutine readfields
