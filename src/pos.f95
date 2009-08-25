@@ -79,6 +79,7 @@ elseif(ijk.eq.3) then
  uu=wflux(ka  )
  um=wflux(ka-1)
 #endif
+#ifndef twodim   
 #ifdef turb    
  if(r0.ne.dble(ka  )) then
   uu=uu+upr(5,2)  
@@ -90,6 +91,7 @@ elseif(ijk.eq.3) then
  else
   uu=uu+upr(6,1)  ! add u' from previous iterative time step if on box wall
  endif
+#endif
 #endif
 endif
 

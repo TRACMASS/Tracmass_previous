@@ -11,7 +11,7 @@ subroutine turbuflux(ia,ja,ka,rr)
   real*8 uv(12),rr,rg,en,localW
   integer ia,ja,ka,im,jm,n
   
-  call random_number(rand)
+  call random_number(rand) ! generates a random number between 0 and 1
   rand=2.*rand-1. ! === Max. amplitude of turb. 
                   ! === (varies with the same aplitude as the mean vel)
   !rand=1.*rand-0.5  ! Reduced amplitude of turb.

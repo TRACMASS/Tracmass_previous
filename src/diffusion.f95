@@ -1,3 +1,4 @@
+#ifdef diffusion
 
 !===============================================================================
 ! Add a small displacement to a particle s.t. it is still in the model area.
@@ -29,57 +30,84 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	tryAgain = .FALSE.
 	
 	! Is particle within model area?
-	if(ib>1 .AND. ib<=IMT .AND. jb>1 .AND. jb<=JMT .AND. kb<=KM) then
+	if(ib>=1 .AND. ib<=IMT .AND. jb>=1 .AND. jb<=JMT .AND. KM+1-kmt(ib,jb)<=kb .AND. kb>=1 ) then
 		tryAgain = .TRUE.
+    else
+     stop 86567
 	end if
+!	 print *,'ib,jb,kb',ib,jb,kb,kmt(ib,jb),x1,y1,z1
 	if(.NOT. tryAgain) then
+	 print *,'ib,jb,kb',kmt(ib,jb),ib,jb,kb,x1,y1,z1
 		write(*,*)"========"
 			write(*,*)"Particle outside model area. No diffusion added."
 			write(*,*)"========"
+			stop 3957
 	end if
 	
+	itno=0
 	do while(tryAgain)
-		! displace particle
+	    itno=itno+1
+		! find random displacement 
 		CALL displacement(xd, yd, zd, dt)
-		! Convert to Earth coordinates(?)
-		xd = xd/(dx*cst(jb)*deg)
-		yd = yd/(dy*deg)
-		zd = zd/dz(kb)
+		! Convert to model coordinates
+#ifdef rco
+		xd = xd/(dx*cst(jb)*deg)  
+		yd = yd/(dy*deg)          
+		zd = zd/dz(kb)            !should be replaced for bottom box and include ssh
+#elif orc
+!if(xd.lt.0. .or. yd.lt.0.) print *,'------xdyd=',ib,jb,kb,xd,yd
+!print *,'------xdyd=',xd,yd
+		xd = xd/dxv(ib,jb)  
+		yd = yd/dyu(ib,jb)          
+!print *,'ibjbkb=',xd,yd
+		zd = zd/dz(kb)            !should be replaced for bottom box and include ssh
+#endif
 		! Update position temporarily
 		tmpX = x1 + xd
 		tmpY = y1 + yd
+!print *,'tmpX=',x1,xd,tmpX,y1,yd,tmpY
 		tmpZ = z1 + zd
 		! Update box number temporarily
 		tmpi = int(tmpX) + 1
 		tmpj = int(tmpY) + 1
-		tmpk = KM - int(tmpZ)
+		tmpk = int(tmpZ) + 1
 
-		! Check that at the particle level, there is at least one adjacent
-		! open ocean velocity point.
-		if(tmpi>1 .AND. tmpi<=IMT .AND. tmpj>1 .AND. tmpj<=JMT .AND. tmpk>0) then
-		! check that column is deep enough 	
-			if(tmpk<=KM) then		! Borde vi ha med kmu också? För att kunna använda med andra projekt än tes???
-				tryAgain = .FALSE.
-			end if
-		end if
-		
+! Check that at the particle level, there is at least one adjacent open ocean velocity point.
+#ifdef orc
+! cyclic conditions for global Earth CCMs like ORCA or IFS
+		if(tmpi>IMT) then 
+		 tmpi=tmpi-IMT
+		elseif(tmpi<1) then
+		 tmpi=tmpi+IMT
+		endif
+        if(tmpX>dble(IMT)) then 
+		 tmpX=tmpX-dble(IMT)
+		elseif(tmpX<0.d0) then
+		 tmpX=tmpX+dble(IMT)
+		endif
+		if(tmpj>JMT) tmpj=JMT  ! stop 34956 ! north fold for orca grids
+		if(tmpY>dble(JMT)) tmpY=dble(JMT)-0.1d0  ! stop 34956 ! north fold for orca grids
+#elif rco
 		! Check if particle is on an open boundary
-		if(tmpi==1 .AND. tmpj>=1 .AND. tmpj<=JMT .AND. tmpk>=1 .AND. &
-		tmpk<=kmt(tmpi, tmpj)) then
+		if(tmpi==1 .AND. tmpj>=1 .AND. tmpj<=JMT .AND. .AND. KM+1-kmt(tmpi,tmpj)<=tmpk .AND. tmpk>=1 ) then
 			tryAgain = .FALSE.
 		end if
-		
-		! Slå ihop de två ovanstående ifsatserna? kmu med i första men inte andra...
+#endif
+		! check that column is deep enough 	
+		if( 1<=tmpi .AND. tmpi<=IMT .AND. 1<=tmpj .AND. tmpj<=JMT .AND. KM+1-kmt(tmpi,tmpj)<=tmpk .AND. tmpk>=1 ) then
+            tryAgain = .FALSE. ! if false then a new position for the particle has been found and we exit the loop
+!        print *,'hittat'
+		end if 
 		
 		! If tryAgain is still true, the particle is outside model area. The
 		! displacement is not saved, but we make a new try to displace.
 		
 		! "Infinite loop?"
-		if(itno>=10000 .AND. tryAgain) then
+		if(itno>=100000 .AND. tryAgain) then
 			tryAgain = .FALSE.
-			write(*,*)"========"
-			write(*,*)"Particle stuck in infinite diffusion loop. No diffusion added."
-			write(*,*)"========"
+			write(*,*)"Particle stuck in infinite diffusion loop. No diffusion added.",ib,jb,kb
+			tmpX=x1 ; tmpY=y1 ; tmpZ=z1
+			tmpi=ib ; tmpj=jb ; tmpk=kb 
 		end if
 		
 	enddo
@@ -87,17 +115,14 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	! Update return position
 	x1 = tmpX
 	y1 = tmpY
-	z1 = tmpZ
 	ib = tmpi
 	jb = tmpj
-	kb = int(tmpZ) + 1
-	
-	! Check the vertical velocity if particle on boundary
-	if(int(z1) == z1) then
-		! Om partikeln är på väg nedåt (mot en låda med lägre index), ändra kb
-		! till det lägre lådindexet.
-	endif
-	
+#ifndef twodim   
+	z1 = tmpZ
+	kb = tmpk
+#endif	
+
+!print *,'slut',itno,kmt(ib,jb),ib,jb,kb,x1,y1,z1
 	
 END SUBROUTINE diffuse
 
@@ -106,8 +131,7 @@ END SUBROUTINE diffuse
 ! (sqrt(-4Ah*dt*log(1-q1))*cos(2PIq2),
 !  sqrt(-4Ah*dt*log(1-q1))*sin(2PIq2),
 !  sqrt(-4Av*dt*log(1-q3))*cos(2PIq4))
-! where
-! Av=0.0001, Ah=200, dt is the model time step and q1,q2,q3,q4 are random
+! where Av and Ah are set in run.in, dt is the model time step and q1,q2,q3,q4 are random
 ! numbers between 0 and 1.
 !
 ! Arguments :
@@ -116,23 +140,21 @@ END SUBROUTINE diffuse
 !===============================================================================
 SUBROUTINE displacement(xd, yd, zd, dt) 
 	USE mod_precdef
+	USE mod_diffusion
 	
-	REAL						:: Ah, Av, R
+!	REAL						:: Ah, Av, R
 	REAL						:: q1, q2, q3, q4
 	REAL, INTENT(OUT)			:: xd, yd, zd
 	REAL (KIND=DP), INTENT(IN)	:: dt
 	REAL, PARAMETER				:: PI = 3.14159265358979323846
 		
-!	Av = 1.0d-4
-!	Ah = 2.0d2
-!	Av = 1.0d-5
-!	Ah = 2.0d1
-!	Av = 1.0d-6
-!	Ah = 2.0d0
-	Av = 1.0d-7
-	Ah = 2.0d-1
+! this is set in run.in now
+!	Av = 0.0d0
+!	Ah = 1.0d0  ! dgl0
+!	Ah = 1.0d-2  ! dgl1
+!	Ah = 1.0d2  ! dgl2
 
-	q1 = rand()		! Så?
+	q1 = rand()	
 	q2 = rand()
 	q3 = rand()
 	q4 = rand()
@@ -143,7 +165,14 @@ SUBROUTINE displacement(xd, yd, zd, dt)
 	yd = R * sin(2*PI*q2)
 	
 	! Vertical displacement
+#ifndef twodim   
 	R = sqrt(-4*Av*dt*log(1-q3))
 	zd = R*cos(2*PI*q4)
+#else
+    zd = 0.
+#endif
 	
 END SUBROUTINE displacement
+
+#endif
+
