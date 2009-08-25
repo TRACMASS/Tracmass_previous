@@ -6,6 +6,9 @@ USE mod_name
 USE mod_time 
 USE mod_domain
 USE mod_buoyancy
+#ifdef diffusion
+USE mod_diffusion
+#endif
 
 IMPLICIT none
 
@@ -111,7 +114,7 @@ CONTAINS
 #if defined turb
     print *,'with sub-grid turbulence parameterisation'
 #elif defined diffusion
-    print *,'with diffusion parameterisation'
+    print *,'with diffusion parameterisation, Ah=',ah,'m2/s and Av=',av,'m2/s'
 #endif
 #if defined rerun
     print *,'Rerun in order to store the Lagrangian stream functions in the different basins'

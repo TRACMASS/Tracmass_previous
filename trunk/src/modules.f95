@@ -73,6 +73,7 @@ MODULE mod_coord
   REAL*8 dx,dy,deg,stlon1,stlat1,grav
   REAL*8, ALLOCATABLE, DIMENSION(:) :: zw
   REAL*8, ALLOCATABLE, DIMENSION(:) :: csu,cst,dyt,phi
+  REAL*4, ALLOCATABLE, DIMENSION(:,:) :: dxv,dyu
   INTEGER idmax(12,1000:3000)
 ENDMODULE mod_coord
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -253,6 +254,12 @@ MODULE mod_tracer
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: tra
 #endif
 ENDMODULE mod_tracer
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+#ifdef diffusion
+MODULE mod_diffusion
+  REAL :: ah, av
+ENDMODULE mod_diffusion
+#endif
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #ifdef sediment
 MODULE mod_sed

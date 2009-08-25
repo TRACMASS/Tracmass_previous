@@ -13,6 +13,9 @@ subroutine init_params
   USE mod_streamv
   USE mod_streamr
   USE mod_tracer
+#ifdef diffusion
+  USE mod_diffusion
+#endif
 #ifdef sediment
   USE mod_orbital
   USE mod_sed
@@ -51,6 +54,9 @@ subroutine init_params
 #ifdef tempsalt
   namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
+#endif
+#ifdef diffusion
+  namelist /INITRUNDIFFUSION/ ah, av
 #endif
 #ifdef sediment
   namelist /INITRUNSEDIMENT/ partdiam, rhos, cwamp, twave, critvel
@@ -121,6 +127,9 @@ subroutine init_params
   read(8,nml=INITRUNSEED)
 #ifdef tempsalt
   read(8,nml=INITRUNTEMPSALT)
+#endif
+#ifdef diffusion
+  read(8,nml=INITRUNDIFFUSION)
 #endif
 #ifdef sediment
   read(8,nml=INITRUNSEDIMENT)
@@ -203,7 +212,7 @@ subroutine init_params
   end if
 
   ! mod_coord
-  allocate  ( csu (0:jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km) )       
+  allocate  ( csu (0:jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km), dxv(imt+2,jmt), dyu(imt+2,jmt) )      
   ! mod_grid
 #if defined ifs || atm
   allocate ( dztb(imt,jmt,km,nst) )   
