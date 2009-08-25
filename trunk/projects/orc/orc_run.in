@@ -26,9 +26,8 @@
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
   intspin = 1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
-  !intspin = 1460,
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  =9,
+  intrun  =47,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -57,8 +56,6 @@
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
-  ! inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
-  ! inDataDir = '/Users/doos/data/rco/gcm/',
   inDataDir = '/Users/doos/data/orca/orca025/',
   !
   ! === Directory where output files are saved
@@ -68,13 +65,9 @@
   !outDataDir   = '/Users/doos/data/rco/orm/',
   !
   ! === name of current trajectory run
-  !outDataFile     = 'xyz_timestep_3D'/
-  !outDataFile     = 'xyz_timeanal_3D'/
-  !outDataFile     = 'xyz_timestep_turb_3D'/
-  !outDataFile     = 'xyz_anal_turb_3D'/
-  !outDataFile     = 'xyz_step_diff_h_3D'/
   !outDataFile     = 'xyz_step_diff_xl_3D'/
-  outDataFile     = 'aaa1',
+!  outDataFile      = 'dgl6',!ah=10000
+  outDataFile      = 'dgl7',!ah=8000
   !outDataFile     = 'enruta_anal_diff_3D3'/
  !
   intminInOutFile=0/
@@ -102,14 +95,14 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 1,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 2,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  seedType = 1,
+  seedType = 3,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded (started).
@@ -123,18 +116,17 @@ $INITRUNSEED
   !kst1     =  38,		 
   !kst2     =  41, 
 ! One singel gridbox
-  ist1     = 400,		 
-  ist2     = 500,		 
-  jst1     = 400,		 
-  jst2     = 400,		 
+  ist1     = 1,		 
+  ist2     = 1440,		 
+  jst1     = 501,		 
+  jst2     = 501,		 
   kst1     =  64,		 
   kst2     =  64,
   varSeedFile = 0,
-  !seedDir     = '/Volumes/hav4/data/rco/topo/',
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
-  seedFile    = '/Users/doos/data/orca/orca025/topo' /
-  !seedFile    = '/Users/doos/data/rco/topo/maskust' /
+  seedFile    = '/Users/doos/data/orca/orca025/topo/mask1010' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/mask100100' /
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
@@ -154,6 +146,13 @@ $INITRUNSEED
   rmine = -100.,
   rmaxe =  500./
 
+  $INITRUNDIFFUSION
+  ! Diffusion paramters
+  ! Horizontal diffusion in m2/s
+  ah=8000., !dgl4=1.e4 dgl5=2.e3 dgl3=1000 dgl2=100 dgl1=10 dgl0=1
+  ! Vertical diffusion in m2/s
+  av=0./
+  
   $INITRUNSEDIMENT
   ! Sedimenation paramters
   !
@@ -205,7 +204,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      100./  ! maximum time length of a trajectory in days
+  timax =      280./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,
