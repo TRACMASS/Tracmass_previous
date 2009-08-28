@@ -28,7 +28,7 @@
   intspin = 1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin = 1460,
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  =9,
+  intrun  =1000,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -73,7 +73,7 @@
   !outDataFile     = 'xyz_anal_turb_3D'/
   !outDataFile     = 'xyz_step_diff_h_3D'/
   !outDataFile     = 'xyz_step_diff_xl_3D'/
-  outDataFile     = 'aaaa',
+  outDataFile     = 'dba4',
   !outDataFile     = 'enruta_anal_diff_3D3'/
  !
   intminInOutFile=0/
@@ -101,7 +101,7 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 1,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 2,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -126,8 +126,8 @@ $INITRUNSEED
   ist2     = 183,		 
   jst1     = 161,		 
   jst2     = 184,		 
-  kst1     =  40,		 
-  kst2     =  40,
+  kst1     =  41,		 
+  kst2     =  41,
   varSeedFile = 0,
   seedDir     = '/Volumes/hav4/data/rco/topo/',
   !seedDir     = '/Volumes/Flask1/data/rco/topo/',
@@ -157,7 +157,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=100., !dgl4=1.e4 dgl5=2.e3 dgl3=1000 dgl2=100 dgl1=10 dgl0=1
+  ah=2000., !dgl4=1.e4 dgl5=2.e3 dgl3=1000 dgl2=100 dgl1=10 dgl0=1
   ! Vertical diffusion in m2/s
   av=0./
   
@@ -212,7 +212,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      2./  ! maximum time length of a trajectory in days
+  timax =      180./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,
