@@ -1,4 +1,4 @@
-
+#ifdef tempsalt
 subroutine interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,ns)
 
   ! === interpolation of the temperature, salinity, ===
@@ -29,5 +29,5 @@ subroutine interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,ns)
   
   return
 end subroutine interp2
-
+#endif
 

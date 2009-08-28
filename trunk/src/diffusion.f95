@@ -89,7 +89,7 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 		if(tmpY>dble(JMT)) tmpY=dble(JMT)-0.1d0  ! stop 34956 ! north fold for orca grids
 #elif rco
 		! Check if particle is on an open boundary
-		if(tmpi==1 .AND. tmpj>=1 .AND. tmpj<=JMT .AND. .AND. KM+1-kmt(tmpi,tmpj)<=tmpk .AND. tmpk>=1 ) then
+		if(tmpi==1 .AND. tmpj>=1 .AND. tmpj<=JMT .AND. KM+1-kmt(tmpi,tmpj)<=tmpk .AND. tmpk>=1 ) then
 			tryAgain = .FALSE.
 		end if
 #endif

@@ -5,9 +5,9 @@
 #------------------------------------------------------------------------
   fl01   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
 #  fl01   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
-  fl19   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+#  fl19   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-#  fl02   = -Dtempsalt       # Include temp and salt
+  fl02   = -Dtempsalt       # Include temp and salt
   fl03   = -Dtextwrite      # Write results to textfile
 #  fl04   = -Dbinwrite       # Write results to binaryfile
 #  fl05   = -Dmysqlwrite     # Write results to mysql
@@ -27,9 +27,9 @@
 #  fl14  = -Dselect         # Select only one trajectory (for debugging)
 #  fl15  = -Dtracer         # Stores a simulated tracer
 #  fl16  = -Dsediment       # Sediment code developed for RCO
-  fl17  = -Dtwodim         # Uses a two-dimensional velocity field. 
-#  fl18  = -Dturb           # Adds subgrid turbulent velocities 
-#   fl18  = -Ddiffusion      # Adds a diffusion on trajectory
+   fl17  = -Dtwodim         # Uses a two-dimensional velocity field. 
+#   fl18  = -Dturb           # Adds subgrid turbulent velocities 
+   fl18  = -Ddiffusion      # Adds a diffusion on trajectory
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\
