@@ -66,8 +66,10 @@
   !
   ! === name of current trajectory run
   !outDataFile     = 'xyz_step_diff_xl_3D'/
-!  outDataFile      = 'dgl6',!ah=10000
-  outDataFile      = 'dgl7',!ah=8000
+  !  outDataFile      = 'dgl6',!ah=10000
+  !  outDataFile      = 'dgl7',!ah=8000
+  !outDataFile      = 'dol3',!ah=1000 med u=v=0
+  outDataFile      = 'dol7',!ah=8000 med u=v=0
   !outDataFile     = 'enruta_anal_diff_3D3'/
  !
   intminInOutFile=0/
