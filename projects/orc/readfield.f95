@@ -284,6 +284,8 @@ do i=1,IMT
  enddo
 enddo
 
+uflux=0.0001 ; vflux=0.0001  ! special case with no verlocities
+
 !do j=1,jmt
 ! do i=1,imt
 !  do k=1,km
