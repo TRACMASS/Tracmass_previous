@@ -148,18 +148,13 @@ SUBROUTINE displacement(xd, yd, zd, dt)
 	REAL (KIND=DP), INTENT(IN)	:: dt
 	REAL, PARAMETER				:: PI = 3.14159265358979323846
 		
-! this is set in run.in now
-!	Av = 0.0d0
-!	Ah = 1.0d0  ! dgl0
-!	Ah = 1.0d-2  ! dgl1
-!	Ah = 1.0d2  ! dgl2
-
+! random generated numbers between 0 and 1
 	q1 = rand()	
 	q2 = rand()
 	q3 = rand()
 	q4 = rand()
 
-	! Horizontal displacements
+! Horizontal displacements
 	R = sqrt(-4*Ah*dt*log(1-q1))
 	xd = R * cos(2*PI*q2)
 	yd = R * sin(2*PI*q2)

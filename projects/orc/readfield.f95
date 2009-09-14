@@ -151,8 +151,6 @@ do i=1,IMT
 enddo
 ierr=NF90_CLOSE(ncid)
 
-   
-
 ! The bathymetry
 gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
@@ -163,6 +161,12 @@ ierr=NF90_GET_VAR(ncid,varid,itemp,start2d,count2d)
 do i=1,IMT
   kmt(i,:)=itemp(i,:)
 enddo
+
+do i=1,IMT
+print *,i,kmt(i,JMT),kmt(IMT+4-i,JMT-2),kmt(i,JMT)-kmt(IMT+4-i,JMT-2)
+enddo
+
+
 
 !ierr=NF90_INQ_VARID(ncid,'nav_lon',varid) ! londitude mesh
 !if(ierr.ne.0) stop 3763
@@ -205,7 +209,7 @@ do k=1,km
  zw(k)=zw(k)+zw(k-1)
 ! print *,k,zw(k),kk,dz(kk)
 end do
-
+!stop 3057
 ! Bottom box not implemented yet
 do j=1,JMT
  do i=1,IMT
@@ -250,9 +254,13 @@ write(dataprefix(1:4),'(i4)') iyear
 ! temp, salt and ssh
 temp2d_simp = get2DfieldNC(trim(fieldFile)//'d05T.nc' ,'sossheig')
 do i=1,IMT+1
-  hs(i,:,2)=temp2d_simp(i,:)
+do j=1,JMT
+  hs(i,j,2)=temp2d_simp(i,j)
 enddo
-hs(:,jmt+1,2) =hs(:,jmt,2)  ! one should use the north fold here instread
+enddo
+do i=4,IMT+1
+hs(i,jmt+1,2) =hs(IMT+4-i,jmt-3,2)  !  north fold 
+enddo
 #ifdef tempsalt 
 temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05T.nc' ,'votemper')
 
@@ -284,7 +292,7 @@ do i=1,IMT
  enddo
 enddo
 
-uflux=0.0001 ; vflux=0.0001  ! special case with no verlocities
+!uflux=0.0001 ; vflux=0.0001  ! special case with no verlocities
 
 !do j=1,jmt
 ! do i=1,imt

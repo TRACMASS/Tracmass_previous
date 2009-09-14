@@ -945,16 +945,16 @@ subroutine loop
 #endif
               
            elseif( ds.eq.dsc .or. ds.eq.dsmin ) then  ! inter time steping 
-              scrivi=.true.
+            scrivi=.true.
 #ifdef timeanalyt
-              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+             call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+             call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+             call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
 #else
-              call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-              call pos(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
+             call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
+             call pos(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
 #ifndef twodim   
-              call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+             call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
 #endif
 #endif
            endif
@@ -963,10 +963,16 @@ subroutine loop
 #ifdef orc 
            if(y1.eq.dble(JMT)) then ! north fold cyclic
 !              x1=722.d0-x1  this was set for orca05 
-              x1=dble(IMT+4)-x1  ! general like this?????
-	          ib=IMT+4-ib       
-              y1=dble(JMT-2)
+             ! x1=dble(IMT+4)-x1  ! general like this?????   errors with ntrac=8101,8102
+	         ! ib=IMT+4-ib       
+              x1=dble(IMT+4)-x1  
+              if(x1.ne.dble(idint(x1))) then
+               ib=idint(x1)+1
+              else
+               ib=idint(x1)
+              endif
               jb=JMT-2
+              y1=dble(jb)
            endif
 #endif           
            if(x1.lt.0.d0) x1=x1+dble(IMT)      ! east-west cyclic
@@ -977,18 +983,35 @@ subroutine loop
            
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-
+! if trajectory under bottom of ocean then put in middle of deepest layer (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
               z1=dble(KM-kmt(ib,jb))+0.5d0
            end if
+! if trajectory above sea level then put back in the middle of shallowest layer
            if( z1.ge.dble(KM) ) then
               z1=dble(KM)-0.5d0
               kb=KM
            endif
+! sets the right level for the corresponding trajectory depth
            if(z1.ne.dble(idint(z1))) then
               kb=idint(z1)+1
               if(kb.eq.KM+1) kb=KM  ! ska nog bort
            endif
+! problems if trajectory in the exact location of a corner
+!           if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
+!           print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
+!           ia=idint(x1)
+!           ja=idint(y1)
+!           print *,kmt(ia,ja+1),kmt(ia+1,ja+1)
+!           print *,kmt(ia,ja  ),kmt(ia+1,ja  )
+!           stop 43956
+! puts back trajectory to original position
+!           x1=x0
+!           y1=y0
+!           ib=idint(x1)+1
+!           jb=idint(y1)+1
+!           endif
+           
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            
@@ -1270,12 +1293,16 @@ return
              if (verboseMess == 1) then
                 print *,'====================================='
                 print *,'Warning: Particle in infinite loop '
+                print *,'ntrac:',ntrac
                 print *,'niter:',niter,'nrj:',nrj(ntrac,4)
                 print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
                 print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
-                print *,'x1:',x1,'u:',uflux(ia-1,ja-1,ka-1,2)
-                print *,'y1:',y1,'v:',vflux(ia-1,ja-1,ka-1,2)
-                print *,'kb:',kb-1,'z1:',z1
+                print *,'ia=',ia,' ib=',ib,' ja=',ja,' jb=',jb,' ka=',ka,' kb=',kb
+                print *,'x1=',x1,' x0=',x0,' y1=',y1,' y0=',y0,' z1=',z1,' z0=',z0
+                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
+                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
+                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,NST)+rb*vflux(ia,ja  ,ka,1))*ff
+                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
                 print *,'-------------------------------------'
              end if
              trj(ntrac,1)=x1
