@@ -962,24 +962,25 @@ subroutine loop
            ! === is inside ib,jb,kb box    ===
 #ifdef orc 
            if(y1.eq.dble(JMT)) then ! north fold cyclic
-!              x1=722.d0-x1  this was set for orca05 
-             ! x1=dble(IMT+4)-x1  ! general like this?????   errors with ntrac=8101,8102
-	         ! ib=IMT+4-ib       
-              x1=dble(IMT+4)-x1  
-              if(x1.ne.dble(idint(x1))) then
-               ib=idint(x1)+1
-              else
-               ib=idint(x1)
-              endif
-              jb=JMT-2
-              y1=dble(jb)
+            x1=dble(IMT+4)-x1    
+            if(x1.ne.dble(idint(x1))) then
+             ib=idint(x1)+1
+            else
+             ib=idint(x1)
+            endif
+            jb=JMT-1
+            y1=dble(jb-1)
+!              if(ntrac.eq.16715) print *,'ffffffffffffffffold for', ntrac
+!              if(ntrac.eq.16715) print *,ia,ib,ja,jb
+!              if(ntrac.eq.16715) print *,x0,x1,y0,y1
+            x0=x1 ; y0=y1 ; ia=ib ; ja=jb  ! make sure the f-fold is also made for the previous point
            endif
 #endif           
-           if(x1.lt.0.d0) x1=x1+dble(IMT)      ! east-west cyclic
-           if(x1.gt.dble(IMT)) x1=x1-dble(IMT) ! east-west cyclic
-           if(x1.ne.dble(idint(x1))) ib=idint(x1)+1
-           if(ib.gt.IMT) ib=ib-IMT             ! east-west cyclic
-           if(y1.ne.dble(idint(y1))) jb=idint(y1)+1
+           if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
+           if(x1.gt.dble(IMT)) x1=x1-dble(IMT)      ! east-west cyclic
+           if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! make sure the index corresponds to the right grid cell
+           if(ib.gt.IMT) ib=ib-IMT                  ! east-west cyclic
+           if(y1.ne.dble(idint(y1))) jb=idint(y1)+1 ! make sure the index corresponds to the right grid cell
            
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
@@ -987,7 +988,7 @@ subroutine loop
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
               z1=dble(KM-kmt(ib,jb))+0.5d0
            end if
-! if trajectory above sea level then put back in the middle of shallowest layer
+! if trajectory above sea level then put back in the middle of shallowest layer (evaporation)
            if( z1.ge.dble(KM) ) then
               z1=dble(KM)-0.5d0
               kb=KM
@@ -995,22 +996,18 @@ subroutine loop
 ! sets the right level for the corresponding trajectory depth
            if(z1.ne.dble(idint(z1))) then
               kb=idint(z1)+1
-              if(kb.eq.KM+1) kb=KM  ! ska nog bort
+              if(kb.eq.KM+1) kb=KM  ! (should perhaps be removed)
            endif
 ! problems if trajectory in the exact location of a corner
-!           if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
-!           print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
+           if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
+           print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
 !           ia=idint(x1)
 !           ja=idint(y1)
 !           print *,kmt(ia,ja+1),kmt(ia+1,ja+1)
 !           print *,kmt(ia,ja  ),kmt(ia+1,ja  )
+           print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
 !           stop 43956
-! puts back trajectory to original position
-!           x1=x0
-!           y1=y0
-!           ib=idint(x1)+1
-!           jb=idint(y1)+1
-!           endif
+           endif
            
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
@@ -1341,7 +1338,7 @@ return
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.0 &
          ,f10.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined orc
-566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.0 &
+566 format(i8,i7,2f8.2,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
@@ -1359,10 +1356,8 @@ return
     end if
 
 #if defined textwrite 
-!print *,'case=',sel,subvol
     select case (sel)
     case (10)
-!    print *,ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
     case (11)
        if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
@@ -1380,9 +1375,6 @@ return
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,arct
-          !write(56,566) ntrac,ints,x1,y1,z1, &
-          !     uvel(xf,yf,zf),vvel(xf,yf,zf) &
-          !     ,vort,temp,salt,dens,arct
 #endif        
        endif
     case (13)

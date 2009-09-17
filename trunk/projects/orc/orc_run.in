@@ -72,7 +72,7 @@
   !outDataFile      = 'dol3',!ah=1000 med u=v=0
   !outDataFile      = 'dol7',!ah=8000 med u=v=0
   !outDataFile     = 'no_k63_3D_gl1'/
-   outDataFile     = 'no_k63_2D_gl0'/
+   outDataFile     = 'no_k63_3D_gl0'/
  !
   intminInOutFile=0/
 $INITRUNSEED

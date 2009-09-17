@@ -5,7 +5,7 @@
 #------------------------------------------------------------------------
    fl01   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
 #  fl01   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
-#  fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+  fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
 #  fl03   = -Dtempsalt       # Include temp and salt
    fl04   = -Dtextwrite      # Write results to textfile
@@ -20,7 +20,7 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #------------------------------------------------------------------------
-#   fl12  = -Dtwodim         # Turn off vertical velocities.
+#  fl12  = -Dtwodim         # Turn off vertical velocities.
 #  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
