@@ -6,7 +6,7 @@ subroutine cross(ijk,ia,ja,ka,r0,sp,sn,rr)
   ! crosses face of box (ia,ja,ka) 
   ! two crossings are considered for each direction:  
   ! east and west for longitudinal directions, etc.  
-  !
+  ! 
   !  Input:
   !
   !  ijk      : considered direction (i=zonal, 2=meridional, 3=vertical)
