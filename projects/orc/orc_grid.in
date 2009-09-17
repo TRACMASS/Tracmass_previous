@@ -23,7 +23,7 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=200000/               ! 7*1000*1000 
+  NTRACMAX=100000/               ! 7*1000*1000 
   !
   !
 $INITGRIDTIME
