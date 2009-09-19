@@ -52,8 +52,8 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-  !kriva    = 2,
-  kriva    = 3,
+  kriva    = 2,
+  !kriva    = 3,
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
@@ -72,7 +72,7 @@
   !outDataFile      = 'dol3',!ah=1000 med u=v=0
   !outDataFile      = 'dol7',!ah=8000 med u=v=0
   !outDataFile     = 'no_k63_3D_gl1'/
-   outDataFile     = 'no_k63_3D_gl0'/
+   outDataFile     = 'no_k62_2D_gl0'/
  !
   intminInOutFile=0/
 $INITRUNSEED
@@ -124,8 +124,8 @@ $INITRUNSEED
   ist2     = 1440,		 
   jst1     = 501,		 
   jst2     = 501,		 
-  kst1     =  63,		 
-  kst2     =  63,
+  kst1     =  62,		 
+  kst2     =  62,
   varSeedFile = 0,
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /

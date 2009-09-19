@@ -142,7 +142,6 @@ SUBROUTINE displacement(xd, yd, zd, dt)
 	USE mod_precdef
 	USE mod_diffusion
 	
-!	REAL						:: Ah, Av, R
 	REAL						:: q1, q2, q3, q4
 	REAL, INTENT(OUT)			:: xd, yd, zd
 	REAL (KIND=DP), INTENT(IN)	:: dt

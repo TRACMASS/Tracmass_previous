@@ -165,22 +165,4 @@ end PROGRAM main
 
 !______________ END OF MAIN PROGRAM _______________________________
 
-!!$#if defined orc
-!!$print *,'ORCA GCM fields'
-!!$#elif defined rco
-!!$print *,'RCO GCM fields'
-!!$#elif defined tes
-!!$print *,'ACADEMIC TEST fields'
-!!$#elif defined sim
-!!$print *,'Simpevarp GCM fields'
-!!$#elif defined fors
-!!$print *,'Forsmark GCM fields'
-!!$#elif defined occam66
-!!$print *,'OCCAM 1/4 deg GCM fields'
-!!$#elif defined occam083
-!!$print *,'OCCAM 1/12 deg GCM fields'
-!!$#elif defined sigma
-!!$print *,'OGCM with sigma coordinate fields'
-!!$#elif defined atm
-!!$print *,'IFS (AGCM) with atmospheric sigma coordinate fields'
-!!$#endif
+
