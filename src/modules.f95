@@ -63,6 +63,9 @@ MODULE mod_param
   INTEGER            :: ncoor,kriva,iter,ngcm
   REAL*8             :: tseas,tday,tyear,dtmin,voltr,tstep,dstep,tss,partQuant
   
+  REAL*8, PARAMETER :: UNDEF=1.d20
+
+  
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_precdef		! Precision definitions

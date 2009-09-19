@@ -130,8 +130,6 @@ subroutine loop
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
-566 format(i8,i7,f7.2,f7.2,f7.2,f10.0,f10.0 &
-         ,f10.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )  
 #ifdef orc
 
   do k=1,LBT
@@ -251,7 +249,7 @@ subroutine loop
                  vol=wflux(kst)
 #endif
               end select
-              if (idir*ff*vol.le.0.) cycle ijkstloop
+              if (idir*ff*vol.le.0.d0) cycle ijkstloop
               vol = abs(vol)
            else
               select case (isec)
@@ -282,7 +280,7 @@ subroutine loop
                  vol=abs(uflux(ib,jb,kb,1))+abs(uflux(ibm,jb  ,kb,1)) + & 
                      abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
    !              print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
-                 if(vol.eq.0.) cycle ijkstloop
+                 if(vol.eq.0.d0) cycle ijkstloop
               end select
               if(vol.eq.0) cycle ijkstloop
            end if idirCond
@@ -323,8 +321,8 @@ subroutine loop
            kkt    = nint(float(num)/float(ijt))
            subvol = vol/dble(ijt*kkt)
            
-           if(subvol.eq.0.) stop 3956  !?????????????????
-           if(subvol.eq.0.) subvol=1.
+           if(subvol.eq.0.d0) stop 3956  !?????????????????
+           if(subvol.eq.0.d0) subvol=1.d0
            
  !           print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
 99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
@@ -421,7 +419,7 @@ subroutine loop
                  ! === store trajectory positions ===
                  t0=tt
                  dt=0.d0
-                 arct=0.
+                 arct=0.d0
                  
                  trj(ntrac,1)=x1
                  trj(ntrac,2)=y1
@@ -500,7 +498,7 @@ subroutine loop
               ! === resuspension to bottom layer ===
               ! === kb same as before            ===
               nrj(ntrac,3)=kb
-              z1=z1+0.5
+              z1=z1+0.5d0
               ! z1=z1+0.1  !resusp l?gre i boxen
               trj(ntrac,3)=z1
               ! === change flag to put trajectory back in circulation ===
@@ -620,8 +618,8 @@ subroutine loop
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif
-           ds=min(dse,dsw,dsn,dss,dsu,dsd,dsmin)
-           if(ds.eq.1.d20 .or.ds.eq.0.d0)then 
+           ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
+           if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
               ! === Can not find any path for unknown reasons ===
               print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
               print *,ia,ja,ka,x0,y0,z0,ntrac,niter
@@ -664,7 +662,7 @@ subroutine loop
               if(dt.eq.dtmin) then
                  ts=ts+dstep
                  tss=tss+1.d0
-              elseif(dt.eq.dtreg) then  ! funkar nog inte som det ska
+              elseif(dt.eq.dtreg) then  
                  ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
 !                 ts=ts+dtreg/tseas
                  tss=dble(nint(tss+dt/dtmin))
@@ -677,7 +675,7 @@ subroutine loop
                  ts=ts+dstep
                  tss=tss+1.d0
               else
-                 ts=ts+dt/tseas
+                 ts =ts +dt/tseas
                  tss=tss+dt/tseas*dble(iter)
 !                 tss=tss+dt/dtmin
               endif
@@ -689,7 +687,7 @@ subroutine loop
            
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
-           if(ds.eq.dse) then ! eastward exit 
+           if(ds.eq.dse) then ! eastward grid-cell exit 
               scrivi=.false.
               uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
 #ifdef turb    
@@ -737,7 +735,7 @@ subroutine loop
               stxr(ia,msa,lbas,3)=stxr(ia,msa,lbas,3)+real(subvol*ff)
 #endif
 #endif
-           elseif(ds.eq.dsw) then ! westward exit
+           elseif(ds.eq.dsw) then ! westward grid-cell exit
               
               scrivi=.false.
               uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
@@ -781,7 +779,7 @@ subroutine loop
 #endif
 #endif
               
-           elseif(ds.eq.dsn) then ! northward exit
+           elseif(ds.eq.dsn) then ! northward grid-cell exit
               
               scrivi=.false.
               uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
@@ -826,7 +824,7 @@ subroutine loop
 #endif
 #endif
               
-           elseif(ds.eq.dss) then ! southward exit
+           elseif(ds.eq.dss) then ! southward grid-cell exit
               
               scrivi=.false.
               uu=(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
@@ -873,7 +871,7 @@ subroutine loop
 #endif
 #endif
               
-           elseif(ds.eq.dsu) then ! upward exit
+           elseif(ds.eq.dsu) then ! upward grid-cell exit
               
               scrivi=.false.
               call vertvel(rb,ia,iam,ja,ka)
@@ -895,7 +893,7 @@ subroutine loop
               if(kb.eq.KM+1) then  ! prevent "evaporation"
                  nev=nev+1
                  kb=KM
-                 z1=dble(KM)-0.5
+                 z1=dble(KM)-0.5d0
               endif
 #if defined timeanalyt
               call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
@@ -904,7 +902,7 @@ subroutine loop
               call pos(1,ia,ja,ka,x0,x1,ds,rr)
               call pos(2,ia,ja,ka,y0,y1,ds,rr)
 #endif
-           elseif(ds.eq.dsd) then ! downward exit
+           elseif(ds.eq.dsd) then ! downward grid-cell exit
               scrivi=.false.
               call vertvel(rb,ia,iam,ja,ka)
 
@@ -944,8 +942,15 @@ subroutine loop
               endif
 #endif
               
-           elseif( ds.eq.dsc .or. ds.eq.dsmin ) then  ! inter time steping 
+           elseif( ds.eq.dsc .or. ds.eq.dsmin) then  ! shortest time is the time-steping 
             scrivi=.true.
+! If there is no spatial solution, which should correspond to a convergence zone
+            if(dse.eq.UNDEF .and. dsw.eq.UNDEF .and. dsn.eq.UNDEF .and. & 
+               dss.eq.UNDEF .and. dsu.eq.UNDEF .and. dsd.eq.UNDEF) then
+               x1=x0 ; y1=y0 ; z1=z0 ! let the particle remain in a static position from previuos iteration
+               ib=ia ; jb=ja ; kb=ka  
+! If there is at least one spatial solution but the shortest cross time is the time step
+            else
 #ifdef timeanalyt
              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
@@ -957,11 +962,12 @@ subroutine loop
              call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
 #endif
 #endif
+		    endif
            endif
-           ! === make sure that trajectory ===
-           ! === is inside ib,jb,kb box    ===
+
 #ifdef orc 
-           if(y1.eq.dble(JMT)) then ! north fold cyclic
+! north fold cyclic ORCA grid (only tested with ORCA025)
+           if(y1.eq.dble(JMT)) then 
             x1=dble(IMT+4)-x1    
             if(x1.ne.dble(idint(x1))) then
              ib=idint(x1)+1
@@ -970,12 +976,12 @@ subroutine loop
             endif
             jb=JMT-1
             y1=dble(jb-1)
-!              if(ntrac.eq.16715) print *,'ffffffffffffffffold for', ntrac
-!              if(ntrac.eq.16715) print *,ia,ib,ja,jb
-!              if(ntrac.eq.16715) print *,x0,x1,y0,y1
             x0=x1 ; y0=y1 ; ia=ib ; ja=jb  ! make sure the f-fold is also made for the previous point
            endif
 #endif           
+
+           ! === make sure that trajectory ===
+           ! === is inside ib,jb,kb box    ===
            if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
            if(x1.gt.dble(IMT)) x1=x1-dble(IMT)      ! east-west cyclic
            if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! make sure the index corresponds to the right grid cell
@@ -986,7 +992,7 @@ subroutine loop
            if (errCode.ne.0) cycle ntracLoop
 ! if trajectory under bottom of ocean then put in middle of deepest layer (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
-              z1=dble(KM-kmt(ib,jb))+0.5d0
+               z1=dble(KM-kmt(ib,jb))+0.5d0
            end if
 ! if trajectory above sea level then put back in the middle of shallowest layer (evaporation)
            if( z1.ge.dble(KM) ) then
@@ -998,15 +1004,28 @@ subroutine loop
               kb=idint(z1)+1
               if(kb.eq.KM+1) kb=KM  ! (should perhaps be removed)
            endif
-! problems if trajectory in the exact location of a corner
+! problems if trajectory is in the exact location of a corner
            if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
-           print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
-!           ia=idint(x1)
-!           ja=idint(y1)
-!           print *,kmt(ia,ja+1),kmt(ia+1,ja+1)
-!           print *,kmt(ia,ja  ),kmt(ia+1,ja  )
-           print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-!           stop 43956
+            print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
+            print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+            stop 34957
+! corner problems may be solved the following way but should really not happen at all
+            if(ds.eq.dse .or. ds.eq.dsw) then
+             if(y1.ne.y0) then
+              y1=y0 ; jb=ja
+             else
+              y1=dble(jb)-0.5d0
+             endif
+            elseif(ds.eq.dsn .or. ds.eq.dss) then
+             if(y1.ne.y0) then
+              x1=x0 ; ib=ia 
+             else
+              x1=dble(ib)-0.5d0
+             endif
+            else
+             x1=dble(ib)-0.5d0
+             y1=dble(jb)-0.5d0
+            endif
            endif
            
            call errorCheck('landError', errCode)
@@ -1021,7 +1040,7 @@ subroutine loop
            ! === Calculate arclength of the ===
            ! === trajectory path in the box ===
            call arclength(ia,ja,ka,dt,rr,arc)
-           arct=arct+arc*arcscale  ! orig arc in meters -> 100 km
+           arct=arct+arc*arcscale  ! original arc in meters but scaled by arcscale in grid.in
            ! === end trajectory if outside chosen domain ===
 #if defined occ
            ! === stop and select stream function ===
@@ -1044,14 +1063,13 @@ subroutine loop
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
-if(  float(jens(k)) .ne. y1 .and. y1 .ne. float(jenn(k))) then
-print *,'ia..=',ia,ib,ja,jb,ka,kb
-print *,'x0..=',x0,x1,y0,y1,z0,z1
-print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-print *,'ntrac=',ntrac, niter
-
-stop 4967
-endif
+                 if(  float(jens(k)) .ne. y1 .and. y1 .ne. float(jenn(k))) then
+				   print *,'ia..=',ia,ib,ja,jb,ka,kb
+			 	   print *,'x0..=',x0,x1,y0,y1,z0,z1
+				   print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+				   print *,'ntrac=',ntrac, niter
+				   stop 4967
+				 endif
                  exit niterLoop                                
               endif
            enddo LBTLOOP
@@ -1170,7 +1188,7 @@ return
           endif
           
        case ('dxyzError')
-          if(dxyz.eq.0.) then
+          if(dxyz.eq.0.d0) then
              print *,'====================================='
              print *,'ERROR: dxyz is zero'
              print *,'-------------------------------------'
@@ -1250,7 +1268,7 @@ return
              print *,'ERROR: Particle overshoot in i direction'
              print *,'----------------------------------------'
              print *,ib-1,x1,ib,ntrac,ib,jb,kb
-             x1=dble(ib-1)+0.5
+             x1=dble(ib-1)+0.5d0
              ib=idint(x1)+1
              print *,'error i',ib-1,x1,ib,ntrac,ib,jb,kb
              print *,y1,z1
@@ -1365,9 +1383,9 @@ return
             (kriva.eq.3)                             .or. &
             (kriva.eq.4 .and. niter.eq.1)            .or. &
             (kriva.eq.5 .and. &
-            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday.or.tt-t0.eq.21.*tday)) .or. &
+            (tt-t0.eq.7.d0*tday.or.tt-t0.eq.14.d0*tday.or.tt-t0.eq.21.d0*tday)) .or. &
             (.not.scrivi .and. kriva.eq.6)           .or. &
-            (mod(tt-t0,1.).eq.0. .and. kriva.eq.7)                ) then
+            (dmod(tt-t0,1.d0).eq.0.d0 .and. kriva.eq.7)                ) then
 #if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif

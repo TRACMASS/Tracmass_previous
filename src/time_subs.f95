@@ -61,8 +61,8 @@ s0=tt/dxyz
 ss0=dble(idint(ts))*tseas/dxyz
 rr=1.d0-rg
 
-sp=1.d20 ; sn=1.d20
-loop=0 ; rijk=0.d0 ; ss=1.d20 ; f0=0.d0 ; f1=0.d0
+sp=UNDEF ; sn=UNDEF
+loop=0 ; rijk=0.d0 ; ss=UNDEF ; f0=0.d0 ; f1=0.d0
 
 if(ijk.eq.1) then
  ii=ia
@@ -167,16 +167,16 @@ aa = -(vv-uu-vm+um)
 ! translate direction and positions for old to new tracmass
       if (rijk.eq.dble(ii)) then
        sp=ss-s0
-       sn=1.d20
+       sn=UNDEF
       elseif(rijk.eq.dble(iim)) then
        sn=ss-s0
-       sp=1.d20
+       sp=UNDEF
       else
-       sp=1.d20
-       sn=1.d20
+       sp=UNDEF
+       sn=UNDEF
       endif
-      if(sp.eq.0.d0) sp=1.d20
-      if(sn.eq.0.d0) sn=1.d20
+      if(sp.eq.0.d0) sp=UNDEF
+      if(sn.eq.0.d0) sn=UNDEF
 return
 end subroutine cross_time
 !_______________________________________________________________________
@@ -515,7 +515,7 @@ xibf=xf
 !      print *, ' loop stop', xi0, xi00, xi, xf, ntrac, loop
       if (dabs(xf).gt.100*xxlim) loop=1000
 !      print *, 'loopnr', abs(xf),xxlim,100*xxlim, loop
-!       if (xerr.eq.1.d20) loop=1000
+!       if (xerr.eq.UNDEF) loop=1000
       goto 200
      endif
      xin = xi - xf/xf1
@@ -541,12 +541,12 @@ xibf=xf
      elseif ( dabs(xf).gt.xxlim*dabs(xf1*(xi-xi0)).and. dabs(xf).lt.ssii ) then
 ! as long as the error can be reduced and the accuracy in the computed
 ! time (ss) is not the same as the one for xi: continue the iterations
-      xerr = 1.d20
+      xerr = UNDEF
       ssii = dabs(xf)
       ssiim= xi
       goto 100
      endif
-     if (xerr.eq.1.d20) xi = ssiim
+     if (xerr.eq.UNDEF) xi = ssiim
 
      endif
 200   continue
@@ -745,7 +745,7 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
      if(loop.eq.80) then
 !      print *, ' loop stop', xi0, xi00, xi, xf
       if (dabs(xf).gt.100*xxlim) loop=1000
-!       if (xerr.eq.1.d20) loop=1000
+!       if (xerr.eq.UNDEF) loop=1000
       goto 300
      endif
      xf1 = xf1+xf1
@@ -770,12 +770,12 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
      elseif ( dabs(xf).gt.xxlim*dabs(xf1*(xi-xi0)).and. dabs(xf).lt.ssii ) then
 ! as long as the error can be reduced and the accuracy in the computed
 ! time (ss) is not the same as the one for xi: continue the iterations
-      xerr = 1.d20
+      xerr = UNDEF
       ssii = dabs(xf)
       ssiim= xi
       goto 200
      endif
-     if (xerr.eq.1.d20) xi = ssiim
+     if (xerr.eq.UNDEF) xi = ssiim
 
      endif
 300   continue
@@ -875,7 +875,7 @@ else
         else
           ss= s0 + (dble(ii)-r0)/(uu-um*(f0-1.)) 
         endif
-        if (ss.le.0.d0) ss=1.d20
+        if (ss.le.0.d0) ss=UNDEF
         return
       endif
     endif
@@ -888,7 +888,7 @@ else
         else
           ss= s0 + (dble(iim)-r0)/(f0*um)
         endif
-        if (ss.le.0.d0) ss=1.d20
+        if (ss.le.0.d0) ss=UNDEF
       endif
     endif
 !   ssii = dsmin+dsmin
@@ -1014,7 +1014,7 @@ else
        if(loop.eq.90) then
 !        print *, ' loop stop', xi0, xi00, xi, xf
         if (dabs(xf).gt.100.d0*xxlim) loop=1000
-!         if (xerr.eq.1.d20) loop=1000
+!         if (xerr.eq.UNDEF) loop=1000
         goto 400
        endif
        xin = xi - xf/xf1
@@ -1036,12 +1036,12 @@ else
        elseif ( dabs(xf).gt.xxlim*dabs(xf1*(xi-xi0)).and. dabs(xf).lt.ssii ) then
 ! as long as the error can be reduced and the accuracy in the computed
 ! time (ss) is not the same as the one for xi: continue the iterations
-        xerr = 1.d20
+        xerr = UNDEF
         ssii = dabs(xf)
         ssiim= xi
         goto 100
        endif
-       if (xerr.eq.1.d20) xi = ssiim
+       if (xerr.eq.UNDEF) xi = ssiim
 
        endif
 400     continue

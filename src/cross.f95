@@ -111,16 +111,16 @@ if(uu.gt.0.d0 .and. r0.ne.dble(ii)) then
   if(ba.gt.0.d0) then
   sp=-1.d0/(um-uu)*( dlog(uu) - dlog(ba) )
   else
-   sp=1.d20
+   sp=UNDEF
   endif
  else
   sp=(dble(ii)-r0)/uu
  endif
 else
- sp=1.d20
+ sp=UNDEF
 endif
 
-if(sp.le.0.d0) sp=1.d20
+if(sp.le.0.d0) sp=UNDEF
 
 ! west, south or downward crossing
 if(um.lt.0.d0 .and. r0.ne.dble(ii-1)) then
@@ -129,16 +129,16 @@ if(um.lt.0.d0 .and. r0.ne.dble(ii-1)) then
   if(ba.gt.0.d0) then
    sn=-1.d0/(um-uu)*( dlog(-um) - dlog(ba)  )
   else
-   sn=1.d20
+   sn=UNDEF
   endif
  else
   sn=(dble(ii-1)-r0)/uu
  endif
 else
- sn=1.d20
+ sn=UNDEF
 endif
 
-if(sn.le.0.d0) sn=1.d20
+if(sn.le.0.d0) sn=UNDEF
 
 return
 end subroutine cross
