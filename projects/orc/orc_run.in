@@ -72,7 +72,8 @@
   !outDataFile      = 'dol3',!ah=1000 med u=v=0
   !outDataFile      = 'dol7',!ah=8000 med u=v=0
   !outDataFile     = 'no_k63_3D_gl1'/
-   outDataFile     = 'no_k62_2D_gl0'/
+  ! outDataFile     = 'd3_k62_2D_gl0'/
+   outDataFile     = 'd10_k62_2D_gl0'/
  !
   intminInOutFile=0/
 $INITRUNSEED
@@ -153,7 +154,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=8000., !dgl4=1.e4 dgl5=2.e3 dgl3=1000 dgl2=100 dgl1=10 dgl0=1
+  ah=10., 
   ! Vertical diffusion in m2/s
   av=0./
   

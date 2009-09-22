@@ -20,15 +20,15 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #------------------------------------------------------------------------
-  fl12  = -Dtwodim         # Turn off vertical velocities.
+   fl12  = -Dtwodim         # Turn off vertical velocities.
 #  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
 #  fl15  = -Dselect         # Select only one trajectory (for debugging)
 #  fl16  = -Dtracer         # Stores a simulated tracer
 #  fl17  = -Dsediment       # Sediment code developed for RCO
-#  fl18  = -Dturb           # Adds subgrid turbulent velocities 
-#  fl18  = -Ddiffusion      # Adds a diffusion on trajectory
+#   fl18  = -Dturb           # Adds subgrid turbulent velocities 
+  fl18  = -Ddiffusion      # Adds a diffusion on trajectory
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\

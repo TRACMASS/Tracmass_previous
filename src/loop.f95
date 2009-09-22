@@ -70,8 +70,9 @@ subroutine loop
   iyear0=iyear
   ! === print some run stats ===
   print *,'------------------------------------------------------'  
-  print *,'Traj write dir    :  ' ,trim(outDataDir)
-  print *,'Time interp steps : ' ,iter
+  print *,'Files written in directory                  :  ' ,trim(outDataDir)
+  print *,'with file names starting with               :  ' ,trim(outDataFile)
+  print *,'Time periods (steps) between two GCM fields : ' ,iter
   
   print 999,intstart,intspin,intrun,intend,nff,isec,idir,nqua,num,voltr,&
        tmin0,tmax0,smin0,smax0,rmin0,rmax0
@@ -1006,9 +1007,9 @@ subroutine loop
            endif
 ! problems if trajectory is in the exact location of a corner
            if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
-            print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
-            print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-            stop 34957
+!            print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
+!            print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+!            stop 34957
 ! corner problems may be solved the following way but should really not happen at all
             if(ds.eq.dse .or. ds.eq.dsw) then
              if(y1.ne.y0) then
@@ -1040,7 +1041,10 @@ subroutine loop
            ! === Calculate arclength of the ===
            ! === trajectory path in the box ===
            call arclength(ia,ja,ka,dt,rr,arc)
+!           print *,arct,arc,arcscale
            arct=arct+arc*arcscale  ! original arc in meters but scaled by arcscale in grid.in
+!           print *,ntrac,arct,arc,arcscale
+!           if(ntrac.gt.50) stop 3956
            ! === end trajectory if outside chosen domain ===
 #if defined occ
            ! === stop and select stream function ===

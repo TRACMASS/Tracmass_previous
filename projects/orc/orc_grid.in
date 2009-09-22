@@ -47,6 +47,4 @@ $INITGRIDDATE
   baseYear       = 2000/
   !
 $INITGRIDARC
-   arcscale      = 0.001/         ! orig arc meters -> km
-!  arcscale      = 0.00001/       ! orig arc meters -> 100 km  
-                                  ! (occ66 || ifs)
+   arcscale      = 0.00001/       ! orig arc meters -> 100 km  

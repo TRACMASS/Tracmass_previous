@@ -160,6 +160,7 @@ CONTAINS
 #if defined tracer
     print *,'Lagrangian trajectory particle tracer stored'
 #endif
+
   end subroutine writesetup
 end PROGRAM main
 

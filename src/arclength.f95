@@ -86,16 +86,18 @@ subroutine arclength(ia,ja,ka,dt,rr,arc)
   kk=ka
   kkm=ka-1
 #ifdef  full_wflux
-  ww=0.5*( wflux(ia ,ja ,kk ,1) + wflux(ia ,ja ,kkm ,1) )/dxdy(ia,ja)
+  ww=0.5d0*( wflux(ia ,ja ,kk ,1) + wflux(ia ,ja ,kkm ,1) )/dxdy(ia,ja)
 #elif defined timeanalyt || timestep
-  ww=0.5*( rg*(wflux(kk,NST)+ wflux(kkm,NST) ) +rr*(wflux(kk,1)+ wflux(kkm,1)) )/dxdy(ia,ja)
+  ww=0.5d0*( rg*(wflux(kk,NST)+ wflux(kkm,NST) ) +rr*(wflux(kk,1)+ wflux(kkm,1)) )/dxdy(ia,ja)
 #else  
-  ww=0.5*( wflux(kk)            + wflux(kkm)            )/dxdy(ia,ja)
+  ww=0.5d0*( wflux(kk)            + wflux(kkm)            )/dxdy(ia,ja)
 #endif
 
 #endif
 
-
+#ifdef twodim
+ww=0.
+#endif
   ! arclength
   arc=dsqrt(uu**2 + vv**2 + ww**2 ) * dt
 !  print *,'uu',uu,rg,uflux(ii ,ja,ka,NST),rr,uflux(ii ,ja,ka,1),dy,deg,dz(ka)
