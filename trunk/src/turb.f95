@@ -8,11 +8,18 @@ subroutine turbuflux(ia,ja,ka,rr)
   USE mod_turb
   IMPLICIT none
   
-  real*8 uv(12),rr,rg,en,localW
-  integer ia,ja,ka,im,jm,n
+  REAL*8         :: uv(12),rr,rg,en,localW
+  REAL*4         :: qran(12)
+  INTEGER        :: ia,ja,ka,im,jm,n
+
+!  call random_number(qran) ! generates a random number between 0 and 1
   
-  call random_number(rand) ! generates a random number between 0 and 1
-  rand=2.*rand-1. ! === Max. amplitude of turb. 
+! random generated numbers between 0 and 1
+do n=1,12
+ qran(n)=rand()
+enddo
+	
+  qran=2.*qran-1. ! === Max. amplitude of turbulence with random numbers between -1 and 1
                   ! === (varies with the same aplitude as the mean vel)
   !rand=1.*rand-0.5  ! Reduced amplitude of turb.
   
@@ -39,11 +46,19 @@ subroutine turbuflux(ia,ja,ka,rr)
   uv(10)=vflux(ia,jm,ka,2)*ff ! southern v at t
 #endif  
 
-! why is this comented so that the velocities are changing at 
-! every gridbox wall istead of remaing the same ??????????????????????????????
-  !upr(:,1)=upr(:,2) ! store u' from previous time iteration step
-  upr(:,2)=uv(:)*rand(:)
-  upr(:,1)=upr(:,2)
+!   upr(:,1)=upr(:,2) ! store u' from previous time iteration step
+   
+! multiply the time interpolated velocities by random numbers
+   
+! 4 different random velocities at the 4 walls
+!   upr(:,2)=uv(:)*rand(:) 
+! or same random velocities at the eastern and western as well as nothern and southern
+  upr(1,2)=uv(1)*qran(1)
+  upr(2,2)=uv(2)*qran(1)
+  upr(3,2)=uv(3)*qran(3)
+  upr(4,2)=uv(4)*qran(3)
+
+  upr(:,1)=upr(:,2) ! impose same velocities for t-1 and t (this is more stabel but why? K.Döös)
   
 #ifdef turb 
 #ifndef twodim   

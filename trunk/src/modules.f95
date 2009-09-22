@@ -196,7 +196,6 @@ MODULE mod_vel
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
-  REAL*4, DIMENSION(12)                      :: rand
   REAL*8                                     :: ff
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
