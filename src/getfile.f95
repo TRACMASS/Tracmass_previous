@@ -47,26 +47,29 @@ CONTAINS
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2)
     ierr=NF90_GET_VAR(ncid ,varid ,get2DfieldNC ,start2d ,count2d)
-!    print *,ierr 
+    print *,ierr 
     !if(ierr.ne.0) call printREadError(3)
 !    print *,IERR
     r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
     do i=1,4
        r=NF90_inquire_dimension(ncid, dimids(i), len=d(i)) 
     end do
-!    print * ,'Error when trying to read the field   ',varName
+    print * ,'Error when trying to read the field   ',varName
 !    print * ,'start2d =  ' ,start2d 
 !    print * ,'count2d =  ' ,count2d 
 !    print * ,'Dimensions: ' ,d 
 !    print * ,'Error:      ' ,NF90_STRERROR(ierr)  
     ierr=NF90_CLOSE(ncid)
 
-!    print *,'kuk', count2D+start2D-1
-!    print *,shape(tempFile)
+    print *,'kuk', count2D+start2D-1
+    print *,shape(tempFile)
 !stop
+    print *,'fitta', map2D(1),map2D(2)
+
     forall (i=1:imt,j=1:jmt)
        get2DfieldNC(i,j)=tempfield(map2D(1),map2D(2))
     end forall
+    print *,'qwdf'
 
 
   end function get2DfieldNC
