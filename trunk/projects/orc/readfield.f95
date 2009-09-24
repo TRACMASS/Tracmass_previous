@@ -1,6 +1,5 @@
 SUBROUTINE readfields
 
-!  USE io_ezcdf
   USE netcdf
   USE mod_param
   USE mod_vel
@@ -16,9 +15,6 @@ SUBROUTINE readfields
   USE mod_dens
 #endif
   IMPLICIT none
-! INCLUDE 'netcdf.inc'
-! INCLUDE '/sw/lib/netcdf-gfortran/include/netcdf.inc'
-! include "/Applications/Utilities/netcdf-3.6.2_old/include/netcdf.inc"
 
   ! = Loop variables
   INTEGER                                    :: t ,i ,j,jp ,k ,kk !,tpos
@@ -41,33 +37,44 @@ SUBROUTINE readfields
  ! INTEGER                                    :: yr2 ,mn2 ,dy2
   
 
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)        :: ssh
-  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1t,e2t,botbox(:,:,:)
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: ssh
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)       :: temp3d_simp
+!  REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: temp2d_simp
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)         :: temp2d_doub
+  
+  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: botbox
+  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)   :: e1t,e2t
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)  :: kmu,kmv
+  REAL*4 :: temp2d_simp(IMT+2,JMT)
+  INTEGER itemp(IMT+2,JMT)
 
 !NET CDF STUFF
-INTEGER :: dimidx,dimidy,dimidz,dimidt !output ID index of dimension
-INTEGER :: varid,varidx,varidy,varidz,varidt !output ID index of variable
-INTEGER :: startA(1),startB(4),startC(2) !input index vector of position to start reading
-INTEGER :: countA(1),countB(4),countC(2) !input lengths of 'volume' to be retrieved
-INTEGER :: leny,lenz,lent !output Length of dimension
-INTEGER :: ncid
+!  INTEGER :: dimidx,dimidy,dimidz,dimidt !output ID index of dimension
+  INTEGER :: varid !,varidx,varidy,varidz,varidt !output ID index of variable
+!  INTEGER :: startA(1),startB(4),startC(2) !input index vector of position to start reading
+!  INTEGER :: countA(1),countB(4),countC(2) !input lengths of 'volume' to be retrieved
+!  INTEGER :: leny,lenz,lent !output Length of dimension
+  INTEGER :: ncid
 
-REAL*8 temp2d_doub(IMT+2,JMT)  !,temp3d_doub(IMT+2,JMT,KM)
-REAL*4 temp3d_simp(IMT+2,JMT,KM),temp2d_simp(IMT+2,JMT)
+!REAL*8 temp2d_doub(IMT+2,JMT)  !,temp3d_doub(IMT+2,JMT,KM)
+!REAL*4 temp3d_simp(IMT+2,JMT,KM)
+!REAL*4 temp2d_simp(IMT+2,JMT)
 REAL*4 dd
-INTEGER itemp(IMT+2,JMT)
 
 LOGICAL around
+
+ ! SAVE   :: botbox
+
   
-  alloCondGrid: if ( .not. allocated (e1t) ) then
-     allocate ( e1t(IMT+2,JMT) , e2t(IMT+2,JMT), botbox(IMT,JMT,3) )
+  alloCondGrid: if ( .not. allocated (botbox) ) then
+     allocate (  botbox(IMT,JMT,3) )
      allocate ( kmu(IMT,JMT)    ,kmv(IMT,JMT) )
   end if alloCondGrid
   alloCondUVW: if(.not. allocated (ssh)) then
-     allocate ( ssh(imt,jmt) )
+     allocate ( ssh(imt,jmt),temp3d_simp(IMT+2,JMT,KM), temp2d_doub(IMT+2,JMT)   )
+     allocate ( e1t(IMT+2,JMT) , e2t(IMT+2,JMT) )
   end if alloCondUVW
-  
+    
   start1d  = [ 1]
   count1d  = [km]
   start2d  = [  1   ,   1,    1,    1]
@@ -84,8 +91,6 @@ LOGICAL around
   sal(:,:,:,1)=sal(:,:,:,2)
   rho(:,:,:,1)=rho(:,:,:,2)
 #endif
-
-
 
   ! === initialise ===
   initFieldcond: if(ints.eq.intstart) then
@@ -141,6 +146,7 @@ do i=1,IMT
 enddo
 ierr=NF90_CLOSE(ncid)
 
+
 ! The bathymetry
 gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
@@ -152,7 +158,9 @@ ierr=NF90_GET_VAR(ncid,varid,itemp,start2d,count2d)
 do i=1,IMT
   kmt(i,:)=itemp(i,:)
 enddo
+
 kmu=0 ; kmv=0
+
 do j=1,jmt
 jp=j+1
 if(jp.eq.jmt+1) jp=jmt  ! should be north fold instead
@@ -246,7 +254,7 @@ do j=1,JMT
   endif
  enddo
 enddo
-     
+
 iday=startDay-5
 imon=startMon
 iyear=startYear
@@ -271,15 +279,22 @@ write(dataprefix(19:26),'(i8)') ntime
 write(dataprefix(1:4),'(i4)') iyear
   fieldFile = trim(inDataDir)//trim(dataprefix)
   
-!print *,fieldFile
-
 ! temp, salt and ssh
-temp2d_simp = get2DfieldNC(trim(fieldFile)//'d05T.nc' ,'sossheig')
+!temp2d_simp = get2DfieldNC(trim(fieldFile)//'d05T.nc' ,'sossheig')
+
+ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
+ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
+if(ierr.ne.0) stop 3763
+ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
+if(ierr.ne.0) stop 3799
+ierr=NF90_CLOSE(ncid)
+
 do i=1,IMT+1
 do j=1,JMT
   hs(i,j,2)=temp2d_simp(i,j)
 enddo
 enddo
+
 do i=4,IMT+1
 hs(i,jmt+1,2) =hs(IMT+4-i,jmt-3,2)  !  north fold 
 enddo
@@ -332,6 +347,10 @@ enddo
 !  enddo
 ! enddo
 !enddo
+
+
+     deallocate ( ssh , temp3d_simp, temp2d_doub, e1t , e2t)
+
 
   return
 end subroutine readfields

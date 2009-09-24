@@ -10,10 +10,10 @@
   subGrid      = 0,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 500,
-  subGridImax  = 1000,
-  subGridJmin  = 400,
-  subGridJmax  = 1000,
+  subGridImin  = 100,
+  subGridImax  = 1440,
+  subGridJmin  = 1,
+  subGridJmax  = 1021,
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
   ! === Used if SubGrid = 2
@@ -73,7 +73,8 @@
   !outDataFile      = 'dol7',!ah=8000 med u=v=0
   !outDataFile     = 'no_k63_3D_gl1'/
   ! outDataFile     = 'd3_k62_2D_gl0'/
-   outDataFile     = 'd10_k62_2D_gl0'/
+   outDataFile     = 'd6000_k62_2D_gl0'/
+  ! outDataFile     = 'aaaaa'/
  !
   intminInOutFile=0/
 $INITRUNSEED
@@ -154,7 +155,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=10., 
+  ah=6000., 
   ! Vertical diffusion in m2/s
   av=0./
   
