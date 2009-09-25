@@ -48,24 +48,20 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	do while(tryAgain)
 	    itno=itno+1
 		! find random displacement 
-		CALL displacement(xd, yd, zd, dt)
-		! Convert to model coordinates
+		CALL displacement(xd, yd, zd, ib, jb, kb, dt)
+		! Convert displacement from meters to model coordinates
 #ifdef rco
 		xd = xd/(dx*cst(jb)*deg)  
 		yd = yd/(dy*deg)          
 		zd = zd/dz(kb)            !should be replaced for bottom box and include ssh
 #elif orc
-!if(xd.lt.0. .or. yd.lt.0.) print *,'------xdyd=',ib,jb,kb,xd,yd
-!print *,'------xdyd=',xd,yd
 		xd = xd/dxv(ib,jb)  
 		yd = yd/dyu(ib,jb)          
-!print *,'ibjbkb=',xd,yd
 		zd = zd/dz(kb)            !should be replaced for bottom box and include ssh
 #endif
 		! Update position temporarily
 		tmpX = x1 + xd
 		tmpY = y1 + yd
-!print *,'tmpX=',x1,xd,tmpX,y1,yd,tmpY
 		tmpZ = z1 + zd
 		! Update box number temporarily
 		tmpi = int(tmpX) + 1
@@ -138,14 +134,25 @@ END SUBROUTINE diffuse
 ! xd, yd, zd : Variables in which the displacement will be stored
 ! dt: Model time step
 !===============================================================================
-SUBROUTINE displacement(xd, yd, zd, dt) 
+SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt) 
 	USE mod_precdef
 	USE mod_diffusion
+#ifdef ellipticdiffusion
+	USE mod_param
+	USE mod_grid
+#endif
+	IMPLICIT NONE
+
 	
-	REAL						:: q1, q2, q3, q4
+	REAL						:: q1, q2, q3, q4, R
 	REAL, INTENT(OUT)			:: xd, yd, zd
 	REAL (KIND=DP), INTENT(IN)	:: dt
-	REAL, PARAMETER				:: PI = 3.14159265358979323846
+!	REAL, PARAMETER				:: PI = 3.14159265358979323846
+ 	INTEGER						:: ib,jb,kb		! Box indices
+#ifdef ellipticdiffusion 	
+	REAL*8						:: Rx, Ry,grdx,grdy, grad, theta, xx, yy
+ 	INTEGER						:: ip,im,jp,jm
+#endif
 		
 ! random generated numbers between 0 and 1
 	q1 = rand()	
@@ -153,19 +160,67 @@ SUBROUTINE displacement(xd, yd, zd, dt)
 	q3 = rand()
 	q4 = rand()
 
-! Horizontal displacements
+! Horizontal displacements in meters
 	R = sqrt(-4*Ah*dt*log(1-q1))
 	xd = R * cos(2*PI*q2)
 	yd = R * sin(2*PI*q2)
-	
-	! Vertical displacement
+		
+	! Vertical displacement in meters
 #ifndef twodim   
 	R = sqrt(-4*Av*dt*log(1-q3))
 	zd = R*cos(2*PI*q4)
 #else
     zd = 0.
 #endif
-	
+
+#ifdef ellipticdiffusion
+!_______________________________________________________________________________
+! The diffusion is here set on an ellipse instead of a circle
+! so that the diffusion is higher along the isobaths and weaker
+! in the perpendicular direction (up/downhill)
+
+ip=ib+1
+if(ip.eq.IMT+1) ip=1
+im=ib-1
+if(im.eq.0) im=IMT
+jp=jb+1
+if(jp.eq.JMT+1) jp=JMT
+jm=jb-1
+if(jm.eq.0) jm=1
+
+grdx=float(kmt(ip,jb)-kmt(im,jb)) ! zonal      depth gradient (zw should be used)
+grdy=float(kmt(ib,jp)-kmt(ib,jm)) ! meridional depth gradient
+grad=dsqrt(grdx**2+grdy**2)       ! total depth gradient
+
+! angle between the eastward direction and 
+! the constant depth direction (=0 if only meridional slope)
+if(grad .eq.0.) then
+ theta=0
+else
+! theta=dasin(grdx/grad)
+ theta=dasin(grdx/grad)
+endif
+
+! elliptic horizontal distribution of the diffusion
+grad=dabs(grad)+1.d0
+!grad=amin1(10.d0,grad) ! gives slightly higher relative dispersion
+grad=amin1(5.d0,grad)
+xx=xd*grad
+yy=yd/grad
+
+
+! coordinate transformation to put the diffusion on an 
+! ellipse with the maxium diffusion along the isobaths
+xd= xx*dcos(theta)-yy*dsin(theta)
+yd=-xx*dsin(theta)+yy*dcos(theta)
+
+!print *,ib,jb,grdx,grdy,grad,theta*180./pi,xd,xx,yd,yy
+
+
+!if(jb.gt.400) stop 3096
+!_______________________________________________________________________________
+#endif
+
 END SUBROUTINE displacement
 
 #endif
