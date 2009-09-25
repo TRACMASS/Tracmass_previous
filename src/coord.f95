@@ -9,7 +9,7 @@ USE mod_name
 IMPLICIT none
 
 INTEGER i,j,k,kk,mois(12)
-REAL*8 pi,radian,radius,rlatt,rlatu,rmax,smax,tmax
+REAL*8 radian,radius,rlatt,rlatu,rmax,smax,tmax
 REAL :: a
 
 #if defined occ
@@ -24,7 +24,6 @@ data mois/31,28,31,30,31,30,31,31,30,31,30,31/
 !__________________________________________________________________________________________
 ! Earth constants
 radius = 6371229.d0 ! earth radius in metre
-pi = 2.d0 * dasin(1.d0)
 radian = pi/180.d0
 deg=radius*radian ! ~ 111000 metre
 grav=9.81 ! m/s2tyear=365.25d0 * 24.d0 * 3600.d0

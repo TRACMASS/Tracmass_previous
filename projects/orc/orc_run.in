@@ -73,7 +73,7 @@
   !outDataFile      = 'dol7',!ah=8000 med u=v=0
   !outDataFile     = 'no_k63_3D_gl1'/
   ! outDataFile     = 'd3_k62_2D_gl0'/
-   outDataFile     = 'd6000_k62_2D_gl0'/
+   outDataFile     = 'd1000_k62_2D_b10'/
   ! outDataFile     = 'aaaaa'/
  !
   intminInOutFile=0/
@@ -155,7 +155,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=6000., 
+  ah=1000., 
   ! Vertical diffusion in m2/s
   av=0./
   
