@@ -73,7 +73,7 @@
   !outDataFile      = 'dol7',!ah=8000 med u=v=0
   !outDataFile     = 'no_k63_3D_gl1'/
   ! outDataFile     = 'd3_k62_2D_gl0'/
-   outDataFile     = 'd1000_k62_2D_b10'/
+   outDataFile     = 'd1000_k62_2D_d0'/
   ! outDataFile     = 'aaaaa'/
  !
   intminInOutFile=0/
@@ -131,7 +131,8 @@ $INITRUNSEED
   varSeedFile = 0,
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
-  seedFile    = '/Users/doos/data/orca/orca025/topo/mask1010' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/mask1010' /
+  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift005' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/mask100100' /
 
   $INITRUNTEMPSALT

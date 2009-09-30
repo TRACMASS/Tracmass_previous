@@ -208,7 +208,6 @@ grad=amin1(5.d0,grad)
 xx=xd*grad
 yy=yd/grad
 
-
 ! coordinate transformation to put the diffusion on an 
 ! ellipse with the maxium diffusion along the isobaths
 xd= xx*dcos(theta)-yy*dsin(theta)
