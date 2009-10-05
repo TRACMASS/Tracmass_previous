@@ -1,5 +1,8 @@
 
 MODULE mod_getfile
+  USE mod_param
+  USE netcdf
+  
   INTEGER, DIMENSION(1)                      :: start1D  ,count1D
   INTEGER, DIMENSION(4)                      :: start2D  ,count2D ,map2D
   INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
@@ -12,7 +15,6 @@ CONTAINS
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
   function get1DfieldNC (fieldFile ,varName)
-    USE netcdf
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfieldNC
     INTEGER,             DIMENSION(1)       :: d    
@@ -22,121 +24,67 @@ CONTAINS
     allocate ( get1DfieldNC(d(1)) )
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printREadError(1)    
+    if(ierr.ne.0) call printReadError(1)    
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
-    if(ierr.ne.0) call printREadError(2)
+    if(ierr.ne.0) call printReadError(2)
     ierr=NF90_GET_VAR(ncid ,varid ,get1DfieldNC ,start1d ,count1d)
-    if(ierr.ne.0) call printREadError(3)
+    if(ierr.ne.0) call printReadError(3)
     ierr=NF90_CLOSE(ncid)
   end function get1dfieldNC
 
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
   function get2DfieldNC (fieldFile ,varName)
-    USE netcdf
     CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: tempField ,get2DfieldNC
-    INTEGER,             DIMENSION(4)       :: d ,dimids ,r
-    INTEGER                                 :: varid ,ncid ,i ,j
-  
-    d=count2d+start2d-1
-    allocate ( tempField(d(map2D(1)),d(map2D(2))),get2DfieldNC(d(1),d(2)) )
+    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2DfieldNC
+    INTEGER,             DIMENSION(4)       :: d, s, c, dimids
+    INTEGER                                 :: varid ,ncid
+
+    start2d = start2d(map2d)
+    count2d = count2d(map2d)
+    s = start3d(map3d)
+    c = count3d(map3d)
+    d = c + s - 1
+    allocate ( get2DfieldNC(d(1),d(2)) )
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2)
-    ierr=NF90_GET_VAR(ncid ,varid ,get2DfieldNC ,start2d ,count2d)
-    print *,ierr 
-    !if(ierr.ne.0) call printREadError(3)
-!    print *,IERR
+    ierr=NF90_GET_VAR(ncid ,varid ,get2DfieldNC, start2d, count2d )
+    if(ierr.ne.0) call printREadError(3)
     r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
-    do i=1,4
-       r=NF90_inquire_dimension(ncid, dimids(i), len=d(i)) 
-    end do
-    print * ,'Error when trying to read the field   ',varName
-!    print * ,'start2d =  ' ,start2d 
-!    print * ,'count2d =  ' ,count2d 
-!    print * ,'Dimensions: ' ,d 
-!    print * ,'Error:      ' ,NF90_STRERROR(ierr)  
     ierr=NF90_CLOSE(ncid)
-
-    print *,'kuk', count2D+start2D-1
-    print *,shape(tempFile)
-!stop
-    print *,'fitta', map2D(1),map2D(2)
-
-    forall (i=1:imt,j=1:jmt)
-       get2DfieldNC(i,j)=tempfield(map2D(1),map2D(2))
-    end forall
-    print *,'qwdf'
-
-
   end function get2DfieldNC
   
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
-  function get2D_double (fieldFile ,varName)
-    USE netcdf
+  function get3DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: tempField ,get2D_double
-    INTEGER,             DIMENSION(4)       :: d ,dimids ,r
-    INTEGER                                 :: varid ,ncid ,i ,j
+    REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: field
+    REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: get3dfieldNC
+    INTEGER,             DIMENSION(4)       :: d, s, c
+    INTEGER                                 :: varid ,ncid
+    INTEGER                                 :: i,j,k
   
-    d=count2d+start2d-1
-    print *,'d=',d
-    allocate ( tempField(d(map2D(1)),d(map2D(2))),get2D_double(d(1),d(2)) )
+    s = start3d(map3d)
+    c = count3d(map3d)
+    d = c + s - 1
+    allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) ) 
 
-    ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
+    ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
+    print *,trim(fieldFile)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2)
-    ierr=NF90_GET_VAR(ncid ,varid ,get2D_double ,start2d ,count2d)
-    print *,ierr 
-    !if(ierr.ne.0) call printREadError(3)
-    print *,'fff',IERR
-    r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
-    print *,'r',r,ncid, varid
-    print *,'dimids',dimids
-    do i=1,4
-       r=NF90_inquire_dimension(ncid, dimids(i), len=d(i)) 
+    ierr=NF90_GET_VAR(ncid ,varid ,field, s)
+    if(ierr.ne.0) call printReadError(3)
+    do k=1,km
+       do i=1,imt
+          get3DfieldNC(i,:,k) = field(:,i,k)
+       end do
     end do
-    print * ,'Error when trying to read the field   ',varName
-    print * ,'start2d =  ' ,start2d 
-    print * ,'count2d =  ' ,count2d 
-    print * ,'Dimensions: ' ,d 
-    print * ,'Error:      ' ,NF90_STRERROR(ierr)  
-    ierr=NF90_CLOSE(ncid)
 
-    print *,'kuk som en f', count2D+start2D-1
-    print *,shape(tempFile)
-!stop
-    forall (i=1:imt,j=1:jmt)
-       get2D_double(i,j)=tempfield(map2D(1),map2D(2))
-    end forall
-
-
-  end function get2D_double
-
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
-  function get3DfieldNC (fieldFile ,varName)
-    USE netcdf
-    CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL, ALLOCATABLE,   DIMENSION(:,:,:)   :: get3DfieldNC
-    INTEGER,             DIMENSION(4)       :: d,dimids,r
-    INTEGER                                 :: varid ,ncid ,i
-
-    d=count3d+start3d-1
-    allocate ( get3DfieldNC(d(1),d(2),d(3)) )
-
-    ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printREadError(1)
-    ierr=NF90_INQ_VARID(ncid ,varName ,varid)
-    if(ierr.ne.0) call printREadError(1)
-    ierr=NF90_GET_VAR(ncid ,varid ,get3DfieldNC ,start3d ,count3d)
-    if(ierr.ne.0) call printREadError(1)
-    ierr=NF90_CLOSE(ncid)
   end function get3DfieldNC
 
 
@@ -154,7 +102,7 @@ CONTAINS
        print *,'    Error: ' , NF90_STRERROR(ierr)
        stop 
     case (2)
-       print *,'Error when trying to read the field   ',ncvar
+       print *,'Error when trying to open the field   ',ncvar
        print *,'    Error: ' , NF90_STRERROR(ierr)
        stop 
     case (3)
