@@ -1,6 +1,6 @@
 #ifdef diffusion
 
-!===============================================================================
+!============================================================================
 ! Add a small displacement to a particle s.t. it is still in the model area.
 ! 
 ! Arguments
@@ -10,7 +10,7 @@
 !
 ! FELKODER SÄTTS VID BEHOV, FÖRKLARA
 !
-!===============================================================================
+!============================================================================
 SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	USE mod_coord
 	USE mod_grid
@@ -135,12 +135,12 @@ END SUBROUTINE diffuse
 ! dt: Model time step
 !===============================================================================
 SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt) 
-	USE mod_precdef
-	USE mod_diffusion
-	USE mod_param
-	USE mod_grid
-	IMPLICIT NONE
-
+  USE mod_precdef
+  USE mod_diffusion
+  USE mod_param
+  USE mod_grid
+  IMPLICIT NONE
+  
 	
 	REAL						:: q1, q2, q3, q4, R
 	REAL, INTENT(OUT)			:: xd, yd, zd

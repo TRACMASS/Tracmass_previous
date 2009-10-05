@@ -75,7 +75,6 @@ MODULE mod_coord
   REAL*8 dx,dy,deg,stlon1,stlat1,grav
   REAL*8, ALLOCATABLE, DIMENSION(:) :: zw
   REAL*8, ALLOCATABLE, DIMENSION(:) :: csu,cst,dyt,phi
-  REAL*4, ALLOCATABLE, DIMENSION(:,:) :: dxv,dyu
   INTEGER idmax(12,1000:3000)
 ENDMODULE mod_coord
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -151,12 +150,14 @@ ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
+  REAL, ALLOCATABLE, DIMENSION(:,:)         :: dxv, dyu
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu, dzv, dzt, kmask
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
 #if defined ifs || atm
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: dztb 
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: dztb
 #else
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dztb 
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dztb
 #endif
   REAL*8                                    :: rmin ,tmin ,smin
   REAL*8                                    :: dr ,dtemp ,dsalt
@@ -166,7 +167,6 @@ MODULE mod_grid
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
   CHARACTER(LEN=200)                        :: SubGridFile 
-
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy

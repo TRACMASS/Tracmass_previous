@@ -5,18 +5,18 @@
   !
  &INITGRIDDESC
   !
-  GCMname     = 'HYCOM',
-  GCMsource   = 'http://www.hycom.org/',
-  gridName    = 'HYCOM GLBa0.0',
-  gridSource  = 'http://www.hycom.org',
-  gridDesc    = '1/12 deg run for the global Ocean.'/
+  GCMname     = 'Community Climate System Model CCSM/POP',
+  GCMsource   = 'http://www.ccsm.ucar.edu/models/ccsm3.0/pop/',
+  gridName    = 'Scott Doney CSMBGC 3deg runs',
+  gridSource  = 'http://www.whoi.edu/sbl/liteSite.do?litesiteid=23412&articleId=35629',
+  gridDesc    = '3.5 deg run for the global Ocean.'/
   !
   !
 $INITGRIDGRID
   !
-  IMT      = 3298,
-  JMT      = 4500,
-  KM       = 33,
+  IMT      = 116,
+  JMT      = 100,
+  KM       = 25,
   LBT      = 5,
   NEND     = 6/                   ! NEND = LBT +1
   !
@@ -31,7 +31,7 @@ $INITGRIDTIME
   ngcm          = 24,             ! (5*24) hours between GCM datasets
   iter          = 5,              ! iteration between two gcm data sets
   intmax        = 365,            ! maximum length of RCO fields
-  fieldsPerFile = 1/
+  fieldsPerFile = 31/
   !
   !
 $INITGRIDDATE
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 2007/
+  baseYear       = 2004/
   !
   !
 $INITGRIDARC

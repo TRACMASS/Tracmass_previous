@@ -212,7 +212,9 @@ subroutine init_params
   end if
 
   ! mod_coord
-  allocate  ( csu (0:jmt), cst(jmt), dyt(jmt), phi(0:jmt), zw(0:km), dxv(imt+2,jmt), dyu(imt+2,jmt) )      
+  allocate ( csu (0:jmt), cst(jmt)  ) 
+  allocate ( phi(0:jmt),   zw(0:km) ) 
+  allocate ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt), dzt(imt+2,jmt,km) ) 
   ! mod_grid
 #if defined ifs || atm
   allocate ( dztb(imt,jmt,km,nst) )   
@@ -233,7 +235,7 @@ subroutine init_params
 #else
   allocate ( wflux(0:km) )
 #endif
-!  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km))
+  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km))
 
   ! mod_dens
 #ifdef tempsalt

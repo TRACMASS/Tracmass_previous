@@ -1,89 +1,84 @@
-
 PROGRAM main
-USE mod_param
-USE mod_seed
-USE mod_name
-USE mod_time 
-USE mod_domain
-USE mod_buoyancy
+ 
+  USE mod_param
+  USE mod_seed
+  USE mod_name
+  USE mod_time 
+  USE mod_domain
+  USE mod_buoyancy
 #ifdef diffusion
-USE mod_diffusion
+  USE mod_diffusion
 #endif
+  
+  IMPLICIT none
+  INTEGER                                    :: i,j,n
+  CHARACTER(LEN=200)                         :: fullWritePref
+  CHARACTER(LEN=8)                           :: WriteStamp
 
-IMPLICIT none
+  call init_params
+  call coordinat
+  call writesetup
 
-INTEGER                                    :: i,j,n
-CHARACTER(LEN=200)                         :: fullWritePref
-CHARACTER(LEN=8)                           :: WriteStamp
-
-call init_params
-call coordinat
-call writesetup
-
-!do i=1,ijkMax
-!   print *,ijkst(i,:)
-!end do
-!stop 666
-
-modrundirCond: if(intstep.gt.0) then ! forward 
-   intstart=intmin          
-   intend  =intmax
-elseif(intstep.lt.0) then ! backward
-   intstart=intmax
-   intend  =intmin
-   intspin =-intspin
-   intrun  =-intrun    
-end if modrundirCond
-
-call init_seed
-
-if(nqua.eq.1) then ! number of trajectories (per time resolution)
-   ! num=NTRACMAX
-   num=partQuant
-elseif(nqua.eq.2) then 
-   voltr=partQuant 
-elseif(nqua.eq.3) then 
-   voltr=partQuant
-endif
-
-writeStamp='00000000'
-write (writeStamp,'(i8.8)') intstart
-
-
-
-if (intminInOutFile.eq.1) then
-   fullWritePref =  trim(outDataDir)//trim(outDataFile)//writeStamp
-else
-   fullWritePref =  trim(outDataDir)//trim(outDataFile)
-end if
-
+  modrundirCond: if(intstep.gt.0) then ! forward 
+     intstart=intmin          
+     intend  =intmax
+  elseif(intstep.lt.0) then ! backward
+     intstart=intmax
+     intend  =intmin
+     intspin =-intspin
+     intrun  =-intrun    
+  end if modrundirCond
+  
+  call init_seed
+  
+  if(nqua.eq.1) then ! number of trajectories (per time resolution)
+     ! num=NTRACMAX
+     num=partQuant
+  elseif(nqua.eq.2) then 
+     voltr=partQuant 
+  elseif(nqua.eq.3) then 
+     voltr=partQuant
+  endif
+  
+  writeStamp='00000000'
+  write (writeStamp,'(i8.8)') intstart
+  
+  
+  
+  if (intminInOutFile.eq.1) then
+     fullWritePref =  trim(outDataDir)//trim(outDataFile)//writeStamp
+  else
+     fullWritePref =  trim(outDataDir)//trim(outDataFile)
+  end if
+  
 #if defined textwrite
-open(56,file=trim(fullWritePref)//'_run.asc')       ! trajectory path
-open(57,file=trim(fullWritePref)//'_out.asc')       ! exit position
-open(58,file=trim(fullWritePref)//'_in.asc')        ! entrance position
+  open(56,file=trim(fullWritePref)//'_run.asc')       ! trajectory path
+  open(57,file=trim(fullWritePref)//'_out.asc')       ! exit position
+  open(58,file=trim(fullWritePref)//'_in.asc')        ! entrance position
 #endif
-
+  
 #if defined binwrite
-open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  ! Trajectory path
-     ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   !
-open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  ! Exit position
-     ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   !
-open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &  ! Killed position
-     ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   !
-open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  ! Entrance position
-     ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   !
-open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  ! Error position 
-     ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')   ! 
+  open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  ! Trajectory path  !
+     ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')      !
+  open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  ! Exit position    !
+       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
+  open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &  ! Killed position  !
+       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
+  open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  ! Entrance position !
+       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
+  open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  ! Error position   !
+       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    ! 
 #endif
-
-
-
-! === Start main loop ===
-
-call loop
-
+  
+  ! === Setup grid ===
+  call setupgrid
+  
+  ! === Start main loop ===
+  
+  call loop
+  
 CONTAINS
-
+  
   subroutine writesetup
     character (len=15)                           :: currDate ,currTime
     

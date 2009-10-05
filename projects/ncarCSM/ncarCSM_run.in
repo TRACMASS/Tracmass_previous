@@ -5,8 +5,8 @@
   !
 &INITRUNDESC
   !
-  caseName     = 'orcaGlobal',
-  caseDesc     = 'Using Orca fields for fun and entertainment.'/
+  caseName     = 'CSMBGCGlobal',
+  caseDesc     = 'Testing CSM fields for fun and entertainment.'/
   !
   !
 &INITRUNGRID
@@ -15,13 +15,13 @@
   !==               1 = Define subGrid in this file.
   !==               2 = Define subGrid with sep. file and subGridID.
   !==               3 = Define subGrid with sep. file and MPI.
-  subGrid      = 1,
+  subGrid      = 0,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 500,
-  subGridImax  = 1000,
-  subGridJmin  = 400,
-  subGridJmax  = 1000,
+  subGridImin  = 1,
+  subGridImax  = 116,
+  subGridJmin  = 1,
+  subGridJmax  = 100,
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
   ! === Used if SubGrid = 2
@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps) ===
   intspin      = 1,
   ! === Number of timesteps for the run.      ===
-  intrun       = 200,
+  intrun       = 2000,
   ! === Pos if forward  neg if backward       ===
   intstep      = 1/
   !
@@ -45,8 +45,8 @@
   ! === Start time for this run
   startHour         = 0,
   startDay          = 1,
-  startMon          = 1,
-  startYear         = 2007/
+  startMon          = 3,
+  startYear         = 2004/
   !
   !
 &INITRUNWRITE
@@ -64,14 +64,14 @@
   kriva    = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir    = '/projData/hycom/data/',
+  inDataDir    = '/projData/CSMBGC/Ar_run/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Users/doos/data/orc12/',
   outDataDir   = '/Users/bror/ormOut/',
   !
   ! === name of current trajectory run
-  outDataFile     = 'hycomTest'/
+  outDataFile     = 'csmTest'/
   ! === Name of rerun file
   ! namep='op.fw.n0'
   !
@@ -81,7 +81,7 @@ $INITRUNSEED
   !==nff:           1 = Follow trajectories forward
   !==               2 = Follow trajectories backward
   !==               3 = Follow trajectories both ways.
-  nff      = 2,
+  nff      = 3,
   !==isec:          1 = Seed particles meridional(y-z)
   !==               2 = Seed particles zonal(x-z)
   !==               3 = Seed particles horiz(x-y)
@@ -100,7 +100,7 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 5,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 10,    !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -113,11 +113,11 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
   !
-  ist1     = 216,		 
-  ist2     = 366,		 
-  jst1     = 211,
-  jst2     = 230,
-  kst1     =  31,		 
+  ist1     = 50,		 
+  ist2     = 70,		 
+  jst1     = 50,
+  jst2     = 70,
+  kst1     =  1,		 
   kst2     =  -1/
   !
   !
@@ -182,8 +182,8 @@ $INITRUNEND
 !  jens(1)=419,
 !  jenn(1)=JMT/
 ! testar detta
-  ienw =   451,
-  iene =   641,
-  jens =     0,
-  jenn =     1,
+  ienw =   10,
+  iene =   90,
+  jens =   10,
+  jenn =   90,
   timax =  36500./  ! maximum time length of a trajectory in days
