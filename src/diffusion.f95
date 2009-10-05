@@ -137,10 +137,8 @@ END SUBROUTINE diffuse
 SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt) 
 	USE mod_precdef
 	USE mod_diffusion
-#ifdef ellipticdiffusion
 	USE mod_param
 	USE mod_grid
-#endif
 	IMPLICIT NONE
 
 	

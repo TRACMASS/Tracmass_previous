@@ -312,7 +312,7 @@ do i=1,IMT
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
    if(k.eq.kmu(i,j)) dd = botbox(i,j,1)
-   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd
+   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * 1.5
   enddo
  enddo
 enddo
@@ -326,7 +326,7 @@ do i=1,IMT
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
    if(k.eq.kmv(i,j)) dd = botbox(i,j,2)
-   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd
+   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * 1.5
   enddo
  enddo
 enddo
