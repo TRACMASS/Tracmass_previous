@@ -135,19 +135,20 @@ END SUBROUTINE diffuse
 ! dt: Model time step
 !===============================================================================
 SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt) 
-  USE mod_precdef
-  USE mod_diffusion
-  USE mod_param
-  USE mod_grid
-  IMPLICIT NONE
-  
+	USE mod_precdef
+	USE mod_diffusion
+	USE mod_param
+#ifdef anisodiffusion
+	USE mod_grid
+#endif
+	IMPLICIT NONE
 	
 	REAL						:: q1, q2, q3, q4, R
 	REAL, INTENT(OUT)			:: xd, yd, zd
 	REAL (KIND=DP), INTENT(IN)	:: dt
 !	REAL, PARAMETER				:: PI = 3.14159265358979323846
  	INTEGER						:: ib,jb,kb		! Box indices
-#ifdef ellipticdiffusion 	
+#ifdef anisodiffusion 	
 	REAL*8						:: Rx, Ry,grdx,grdy, grad, theta, xx, yy
  	INTEGER						:: ip,im,jp,jm
 #endif
@@ -171,7 +172,7 @@ SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt)
     zd = 0.
 #endif
 
-#ifdef ellipticdiffusion
+#ifdef anisodiffusion
 !_______________________________________________________________________________
 ! The diffusion is here set on an ellipse instead of a circle
 ! so that the diffusion is higher along the isobaths and weaker

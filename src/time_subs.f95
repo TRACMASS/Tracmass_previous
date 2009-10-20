@@ -189,7 +189,7 @@ USE mod_grid
 USE mod_turb
 IMPLICIT NONE
 
-REAL*8,  PARAMETER ::  PI = 3.14159265358979d0,xilim=3.0d0,xxlim=1.d-7
+REAL*8,  PARAMETER ::  xilim=3.0d0,xxlim=1.d-7
 INTEGER :: ijk,ia,ja,ka,iim,iil,ii
 REAL*8  :: uu,um,vv,vm,xi,xi0,const,ga,erf0,aa,bb,daw0,r0,r1,dsmin,dxyz,tt,ts,rijk
 REAL*8  :: s15aff,dawson,s15adf,s15aef,errfun
@@ -581,7 +581,7 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
-REAL*8,  PARAMETER ::  PI = 3.14159265358979d0,xilim=3.0d0,xxlim=1.d-7
+REAL*8,  PARAMETER ::  xilim=3.0d0,xxlim=1.d-7
 INTEGER :: ii,iim,iconfig,i,loop
 REAL*8  :: uu,um,vv,vm,xib,xia,xi00,xi0,xf1,xf,xf2,xin,xibf,xi,xerr,xiaf
 REAL*8  :: aa,bb,ga,s15aef,s15adf,erf0,const,errfun
@@ -1082,8 +1082,9 @@ end function dawson
 
 function errfun (const,erf0,r0,xi0,xi)
 
+USE mod_param
  IMPLICIT NONE
- REAL*8,  PARAMETER :: PI = 3.14159265358979d0,xilim=3.0d0
+ REAL*8,  PARAMETER :: xilim=3.0d0
  REAL*8  :: errfun,const,erf0,r0,xi0,xi,erf,s15aef,s15adf,hh0,hh
  INTEGER :: i
 
@@ -1127,8 +1128,8 @@ function s15aff(x)
 ! Returns Dawson's integral for any real x.
 ! From http://imf.ing.ucv.ve/_1numerical_recipe/Fortran77/f6-10.pdf
 
+USE mod_param
 IMPLICIT NONE
-REAL*8,  PARAMETER :: PI = 3.14159265358979d0
 INTEGER, PARAMETER ::  NMAX=6  ! Denna ska kollas och testas med högre värden
 REAL*8,  PARAMETER ::  H=0.4d0,A1=2.d0/3.d0,A2=0.4d0,A3=2.d0/7.d0
 
