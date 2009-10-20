@@ -39,49 +39,42 @@ MODULE mod_param
 !!$  INTEGER, PARAMETER ::  (IMT=249,JMT=258,KM=20,JMAX=JMT,LBT=4)
 !!$  INTEGER, PARAMETER ::  NTRACMAX=100000
 !!$#endif
-!!$  !! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 !!$  
-  INTEGER, PARAMETER :: MR=1001
-  INTEGER            :: NEND
-  INTEGER, PARAMETER :: NST=2,NNRJ=8,NTRJ=7
-#if defined streamts
-  INTEGER, PARAMETER :: LOV=3
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+  INTEGER, PARAMETER                        :: MR=1001
+  INTEGER                                   :: NEND
+  INTEGER, PARAMETER                        :: NST=2,NNRJ=8,NTRJ=7
+#ifdef streamts
+  INTEGER, PARAMETER                        :: LOV=3
 #else
-  INTEGER, PARAMETER :: LOV=1
+  INTEGER, PARAMETER                        :: LOV=1
 #endif
-  
-#if defined sigma 
-  INTEGER, PARAMETER :: KD=KM   !does this work?
-#elif defined atm
-  INTEGER, PARAMETER :: KD=11   !should be KD=KM   
-#elif defined ifs
-  INTEGER, PARAMETER :: KD=60   !KD=KM
-#else
-  INTEGER, PARAMETER :: KD=1
-#endif
-  
-  INTEGER            :: ncoor,kriva,iter,ngcm
-  REAL*8             :: tseas,tday,tyear,dtmin,voltr,tstep,dstep,tss,partQuant
-  
-  REAL*8, PARAMETER :: UNDEF=1.d20 , PI = 3.14159265358979323846d0
-  
+  INTEGER                                   :: ncoor,kriva,iter,ngcm
+  REAL*8                                    :: tseas,tday,tyear,dtmin,voltr
+  REAL*8                                    :: tstep,dstep,tss,partQuant
+  REAL*8, PARAMETER                         :: UNDEF=1.d20 
+  REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
 ENDMODULE mod_param
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_precdef		! Precision definitions
-	INTEGER, PARAMETER		:: DP = SELECTED_REAL_KIND(15, 307)
+  INTEGER, PARAMETER		         :: DP = SELECTED_REAL_KIND(15, 307)
 ENDMODULE mod_precdef
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_coord
-  REAL*8 dx,dy,deg,stlon1,stlat1,grav
-  REAL*8, ALLOCATABLE, DIMENSION(:) :: zw
-  REAL*8, ALLOCATABLE, DIMENSION(:) :: csu,cst,dyt,phi
+  REAL*8                                    :: dx,dy
+  REAL*8                                    :: deg,stlon1,stlat1,grav
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
   INTEGER idmax(12,1000:3000)
 ENDMODULE mod_coord
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_diff
-	INTEGER									:: dummy
-	
+	INTEGER                             :: dummy	
 ENDMODULE mod_diff
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
   INTEGER                                   :: ints      ,intstart ,intend
@@ -145,20 +138,18 @@ CONTAINS
          /12-3*((I+4900+(J-14)/12)/100)/4
     RETURN
   end function jdate
-
 ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
-  REAL, ALLOCATABLE, DIMENSION(:,:)         :: dxv, dyu
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu, dzv, dzt, kmask
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
-#if defined ifs || atm
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: dztb
-#else
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dztb
-#endif
+#ifdef zgrid3Dt 
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
+#elif zgrid3D
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt
+#endif /*zgrid3Dt*/
   REAL*8                                    :: rmin ,tmin ,smin
   REAL*8                                    :: dr ,dtemp ,dsalt
   REAL*8                                    :: arcscale
@@ -220,6 +211,7 @@ MODULE mod_name
   CHARACTER(LEN=200)                         :: gridDesc
   CHARACTER(LEN=200)                         :: caseName  ,caseDesc
 ENDMODULE mod_name
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_seed
   INTEGER                                    :: nff,isec,idir,nqua,num
@@ -231,45 +223,55 @@ MODULE mod_seed
   CHARACTER(LEN=200)                         :: seedDir
   CHARACTER(LEN=200)                         :: seedFile
 ENDMODULE mod_seed
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamxy
 #ifdef streamxy
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
 #endif
 ENDMODULE mod_streamxy
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamv
 #ifdef streamv
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 ENDMODULE mod_streamv
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamr
 #ifdef streamr
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
 #endif
 ENDMODULE mod_streamr
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_tracer
 #ifdef tracer
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: tra
 #endif
 ENDMODULE mod_tracer
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #ifdef diffusion
 MODULE mod_diffusion
-  REAL :: ah, av
+  REAL                                       :: ah, av
 ENDMODULE mod_diffusion
 #endif
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #ifdef sediment
 MODULE mod_sed
-!  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
-  REAL :: wsed, partdiam, rhos, cwamp, twave, critvel, kincrit
+  !  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
+  REAL                                       :: wsed, partdiam
+  REAL                                       :: rhos, cwamp, twave
+  REAL                                       :: critvel, kincrit
 ENDMODULE mod_sed
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_orbital
-  REAL, ALLOCATABLE, DIMENSION(:) :: orb
+  REAL, ALLOCATABLE, DIMENSION(:)            :: orb
 ENDMODULE mod_orbital
 #endif
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

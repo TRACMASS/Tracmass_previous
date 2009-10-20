@@ -5,15 +5,15 @@ subroutine loop
   USE mod_grid
   USE mod_buoyancy
   USE mod_seed
-  USE mod_domain !Only to be used for every project...
+  USE mod_domain !Only to be used by every project...
   USE mod_vel
   USE mod_turb
 #ifdef tracer
   USE mod_tracer
-#endif
+#endif /*tracer*/
 #ifdef sediment
   USE mod_sed
-#endif
+#endif /*sediment*/
   
   IMPLICIT none
     
@@ -23,7 +23,7 @@ subroutine loop
 #if defined sediment
   INTEGER nsed,nsusp
   logical res
-#endif
+#endif /*sediment*/
   
   INTEGER :: ist,jst,kst
   INTEGER :: ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas
@@ -78,7 +78,7 @@ subroutine loop
 #ifdef sediment
   nsed=0
   nsusp=0
-#endif
+#endif /*sediment*/
   
   nrj=0
   trj=0.d0
@@ -127,7 +127,7 @@ subroutine loop
      nrj(ntrac,8)=0
      print 566,ntrac,niter,rlon,rlat,zz
      stop 4957
-  endif
+  endif /*orc*/
 
 #endif
 !  print 566,ntrac,niter,rlon,rlat,zz
@@ -141,7 +141,7 @@ subroutine loop
   
 #else
   lbas=1 ! set to 1 if no rerun
-#endif
+#endif /*rerun*/
   
   !==========================================================
   !=== read ocean/atmosphere GCM data files               ===
@@ -170,7 +170,7 @@ subroutine loop
      if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
 #ifdef tracer 
      if(mod(ints,120).eq.0) call writetracer
-#endif
+#endif /*tracer*/
      
      !=======================================================
      ! ===    Seed particles if still in intspin.         ===
@@ -208,11 +208,11 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=wflux(ist,jst,kst,1)
-#elif defined timeanalyt || timestep
+#elif timeanalyt || timestep
                  vol=wflux(kst,1)
-#else
+#else 
                  vol=wflux(kst)
-#endif
+#endif /*full_wflux*/
               end select
               if (idir*ff*vol.le.0.d0) cycle ijkstloop
               vol = abs(vol)
@@ -231,14 +231,14 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=abs(wflux(ist,jst,kst,1))
-#elif defined timeanalyt || timestep
+#elif  timeanalyt || timestep
                  vol=abs(wflux(kst,1))
 #else
                  vol=abs(wflux(kst))
-#endif
+#endif /*full_wflux*/
 #ifdef twodim
 !                 vol = 1
-#endif
+#endif /*twodim*/
                  vol=1
               case(4)
                  if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
@@ -252,21 +252,21 @@ subroutine loop
            
            ! === trajectory volume in m3 ===
            if(nqua.ge.3 .or. isec.eq.4) then
-#if defined ifs || atm
+#ifdef zgrid3Dt
               vol=dzt(ib,jb,kb,1)
-#else
-#if defined sigma 
+#elif  zgrid3D
               vol=dzt(ib,jb,kb)
-#else
+#elif  zgrid1D
               vol=dz(kb)
 #endif
-#if defined occ66 || orc || for || sim || multcol || jplSCB || eccoSOSE
-              if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
-#endif
+#ifdef varbottombox
+              if(kb.eq.KM+1-kmt(ib,jb) ) vol=dzt(ib,jb,1)
+#endif /*varbottombox*/
+#ifdef freesurface
               if(kb.eq.KM) vol=vol+hs(ib,jb,1)
               vol=vol*dxdy(ib,jb)
-#endif
-           endif
+#endif /*freesurface*/
+           end if
            
            ! === number of trajectories for box (ist,jst,kst) ===
            select case (nqua)
@@ -346,7 +346,7 @@ subroutine loop
                     !print *,'outside mass range',temp,salt,dens
                     cycle kkkLoop 
                  endif
-#endif
+#endif /*tempsalt*/
 #endif
                  
                  ntrac=ntrac+1  ! the trajectory number
@@ -358,7 +358,7 @@ subroutine loop
                      nout=nout+1
                     cycle kkkLoop
                  endif
-#endif
+#endif /*select*/
                  ! === initialise the trajectory iteration number
                  niter=0 
                  call errorCheck('ntracGTntracmax',errCode)
@@ -404,7 +404,6 @@ subroutine loop
      !=== a new position for this time step.              ===
      !=======================================================
      call fancyTimer('advection','start')
-!     ntracLoop: do ntrac=1,ntractot-1  This "minus one" must have been a bug... Kristofer
      ntracLoop: do ntrac=1,ntractot     
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6).eq.1) cycle ntracLoop
@@ -432,7 +431,7 @@ subroutine loop
            print *,'nrj(ntrac,:)=',nrj(ntrac,:)
            goto 1500
         endif
-#endif 
+#endif /*rerun*/
 #ifdef sediment
         ! === Check if water velocities are === 
         ! === large enough for resuspention ===
@@ -461,7 +460,7 @@ subroutine loop
            endif
         endif
         
-#endif        
+#endif  /*sediment*/      
         ! ===  start loop for each trajectory ===
         scrivi=.true.
 !             print *,' --- niterLoop  ', ntrac
@@ -470,7 +469,7 @@ subroutine loop
 #ifdef sediment
            ! Find settling velocity for active gridbox ===
            call sedvel(temp,dens) 
-#endif
+#endif /*sediment*/
            ! === change velocity fields &  === 
            ! === store trajectory position ===
            if( niter.ne.1 .and. tss.eq.dble(iter) &
@@ -507,20 +506,20 @@ subroutine loop
            ja=jb
            ka=kb
            ! T-box volume in m3
-#if defined ifs 
+#ifdef zgrid3Dt 
            dxyz=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
-#else
-#ifdef sigma
+#elif  zgrid3D
            dxyz=dzt(ib,jb,kb)
 #else
            dxyz=dz(kb)
-#endif
-#if defined occ66 || orc || for || sim || multcol || jplSCB
+#endif /zgrid3Dt*/
+#ifdef varbottombox
            if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dzt(ib,jb,1)
-#endif
+#endif /*varbottombox*/
+#ifdef freesurface
            if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
            dxyz=dxyz*dxdy(ib,jb)
-#endif
+#endif /*freesurface*/
 !           if(dxyz.le.0.) stop 34956
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
@@ -530,7 +529,7 @@ subroutine loop
            ! === calculate the turbulent velocities ===
 #ifdef turb
            call turbuflux(ia,ja,ka,rr)
-#endif
+#endif /*turb*/
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
            
@@ -539,7 +538,7 @@ subroutine loop
            if(ts.eq.dble(idint(ts))) then 
               tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
            end if
-#endif
+#endif /*tracer*/
            call writedata(11)
            
            !==============================================! 
@@ -552,14 +551,14 @@ subroutine loop
            ! space variables (x,...) are dimensionless    !
            ! time variables (ds,...) are in seconds/m^3   !
            !==============================================! 
-#if defined regulardt
+#ifdef regulardt
            dtreg=dtmin * ( dble(int(tt/tseas*dble(iter))) + 1.d0 - tt/tseas*dble(iter) )
            dt=dtreg
            dsmin=dt/dxyz
 #else
            dsmin=dtmin/dxyz
-#endif
-#if defined timeanalyt
+#endif /*regulardt*/ 
+#ifdef timeanalyt
            ss0=dble(idint(ts))*tseas/dxyz
            call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz,rr) ! zonal
            call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz,rr) ! meridional
@@ -568,7 +567,7 @@ subroutine loop
            call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
-#endif
+#endif /*timeanalyt*/
            ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
            if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
               ! === Can not find any path for unknown reasons ===
@@ -581,7 +580,7 @@ subroutine loop
               cycle ntracLoop
            endif
            
-#if defined regulardt
+#ifdef regulardt
            if(ds.eq.dsmin) then ! transform ds to dt in seconds
 !            dt=dt  ! this makes dt more accurate
            else
@@ -593,7 +592,7 @@ subroutine loop
            else
             dt=ds*dxyz 
            endif
-#endif
+#endif /*regulardt*/
            if(dt.lt.0.d0) then
               print *,'dt=',dt
               goto 1500
@@ -643,7 +642,7 @@ subroutine loop
               uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(1,2)
-#endif
+#endif /*turb*/
               if(uu.gt.0.d0) then
                  ib=ia+1
                  if(ib.gt.IMT) ib=ib-IMT 
@@ -682,7 +681,7 @@ subroutine loop
               uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
 #ifdef turb    
               ! uu=uu+upr(3,2)
-#endif
+#endif /*turb*/
               if(uu.gt.0.d0) then
                  jb=ja+1
               endif
@@ -907,16 +906,17 @@ subroutine loop
            LBTloop: do k=1,LBT
 !              if(ienw(k).le.ib .and. ib.le.iene(k) .and. &
 !                 jens(k).le.jb .and. jb.le.jenn(k)  ) then
+              print *, ienw, x1, iene
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
                  if(  float(jens(k)) .ne. y1 .and. y1 .ne. float(jenn(k))) then
-				   print *,'ia..=',ia,ib,ja,jb,ka,kb
-			 	   print *,'x0..=',x0,x1,y0,y1,z0,z1
-				   print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-				   print *,'ntrac=',ntrac, niter
-				   stop 4967
-				 endif
+                    print *,'ia..=',ia,ib,ja,jb,ka,kb
+                    print *,'x0..=',x0,x1,y0,y1,z0,z1
+                    print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+                    print *,'ntrac=',ntrac, niter
+                    stop 4967
+                 endif
                  exit niterLoop                                
               endif
            enddo LBTLOOP
