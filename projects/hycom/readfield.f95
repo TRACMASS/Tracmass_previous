@@ -17,10 +17,10 @@ SUBROUTINE readfields
 
   ! = Loop variables
   INTEGER                                    :: t ,i ,j ,k ,kk ,tpos
-
-  integer dimidx,dimidy,dimidz,dimidt !output ID index of dimension
+  INTEGER                                    :: fileInts
+  integer dimidx,dimidy,dimidz,dimidt       !output ID index of dimension
   integer varid,varidx,varidy,varidz,varidt !output ID index of variable
-  integer lenx,leny,lenz,lent,lenz2 !output Length of dimension
+  integer lenx,leny,lenz,lent,lenz2         !output Length of dimension
   integer p, x1, y1, z1, t1 !?
 
   ! = Variables for filename generation
@@ -40,15 +40,15 @@ SUBROUTINE readfields
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: rhof
 
   REAL, ALLOCATABLE, DIMENSION(:,:)    :: gridLat ,gridLon  
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1v,e1t,e2u,e2t
+  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1v,gridDX,e2u,gridDY
   REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:)  :: dzu,dzv,dzt
   
   logical around
   
   alloCondGrid: if ( .not. allocated (e1v) ) then
      allocate ( gridLat(IMT,JMT) ,gridLon(IMT,JMT) )
-     allocate ( e1v(IMT+2,JMT)    ,e1t(IMT+2,JMT) )
-     allocate ( e2u(IMT+2,JMT)    ,e2t(IMT+2,JMT) )
+     allocate ( e1v(IMT+2,JMT)    ,gridDX(IMT+2,JMT) )
+     allocate ( e2u(IMT+2,JMT)    ,gridDY(IMT+2,JMT) )
      allocate ( dzu(IMT+2,JMT,KM) ,dzv(IMT+2,JMT,KM),dzt(IMT+2,JMT,KM) )
   end if alloCondGrid
   alloCondUVW: if(.not. allocated (ssh)) then
@@ -67,29 +67,27 @@ SUBROUTINE readfields
   rho(:,:,:,1)=rho(:,:,:,2)
 #endif
   
-
+  
   call updateClock
   ! === update the time counting ===
-  filePos = mod((ints-1),fieldsPerFile)+1
-  fileJD  = mod(floor(real((ints-1))/real(fieldsPerFile))+2,4)+1
-  subYr   = mod(floor(real(ints-1)/real(fieldsPerFile)),4)+1
-  dstamp  = 'archv.0000_000_00_'
-  
-  write (dstamp( 7:10),'(i4.4)') currYear
+  if (currJDyr==366) currJDyr=365
+
+  filePos  = mod((ints),fieldsPerFile)+1
+  dstamp   = 'archv.2007_000_00_'
+
+!  write (dstamp( 7:10),'(i4.4)') currYear
   write (dstamp(12:14),'(i3.3)') currJDyr
   dataprefix  = trim(inDataDir) // '/data/'
   tpos        = intpart1
- 
-!  print *,ints, filePos ,fileJD ,currYear ,currMon ,currDay ,currJDyr,trim(dstamp)
- 
-  start1d  = [ 1]
-  count1d  = [km]
-  start2d  = [filePos , 1 ,subGridJmin ,subGridImin]
-  count2d  = [      1 , 1 ,subGridJmax ,subGridImax]
-  map3D    = [      4 , 3 ,          2 ,          1]  
-  start3d  = [filePos , 1 ,          1 ,          1]
-  count3d  = [      1 ,km ,        jmt ,        imt]
-  map3D    = [      4 , 3 ,          2 ,          1]  
+  
+  start1D  = [ 1]
+  count1D  = [km]
+  start2D  = [subGridImin ,subGridJmin , 1 ,1]
+  count2D  = [        imt ,        jmt , 1 ,1]
+  map2D    = [          1 ,          2 , 3 ,4]  
+  start3D  = [subGridImin ,subGridJmin , 1 ,1]
+  count3D  = [        imt ,        jmt ,km ,1]
+  map3D    = [          1 ,          2 , 3 ,4]  
   ! === initialise ===
   initFieldcond: if(ints.eq.intstart) then
      ! call coordinat
@@ -108,85 +106,88 @@ SUBROUTINE readfields
 
      gridFile = trim(inDataDir)//'/uvel/'//trim(dstamp)//'3zu.nc'
 
-     print *,' '
-     print *,gridFile
-
-     zw(0:km-1) = get1DfieldNC(trim(gridFile) ,'Depth')
-
+     zw(0:km-1)  = get1DfieldNC(trim(gridFile) ,'Depth')
      do k=1,km
-        kk=km+1-k
-        dz(kk)=zw(k)-zw(k-1) 
-        ! print *,k,zw(k),kk,dz(kk)
+        kk       = km+1-k
+        dz(kk)   = zw(k)-zw(k-1) 
      end do
+     dz(1)       = dz (2)
 
-     dz(1) = dz (2)
+     gridLat     = get2DfieldNC(trim(gridFile) ,'Latitude')
+     gridLon     = get2DfieldNC(trim(gridFile) ,'Longitude')
 
-     gridLat  = get2DfieldNC(trim(gridFile) ,'Latitude')
-     gridLon  = get2DfieldNC(trim(gridFile) ,'Longitude')
-     
-     print *,shape(gridLat)
-     print *,gridLon
-     !forall (i=1:imt ,j=1:jmt)
-     !   spherdist(lon1,lat1,lon2,lat2)
-     
-
-
-     stop 666
-     e2t  = get2DfieldNC(trim(gridFile) ,'e2t')
-     e1v  = get2DfieldNC(trim(gridFile) ,'e1v')
-     dxdy = e1t * e2t
-   
-     gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
-     dzt  = get3DfieldNC(trim(gridFile) ,'e3t_ps')
-     dzu  = get3DfieldNC(trim(gridFile) ,'e3u_ps')
-     dzv  = get3DfieldNC(trim(gridFile) ,'e3v_ps')
+     do i=1,imt-1
+        do j=1,jmt-1
+           gridDY(i,j) = spherdist(gridLon(i,j) ,gridLat(i,j) &
+                ,gridLon(i,j+1) ,gridLat(i,j+1))
+            gridDX(i,j) = spherdist(gridLon(i,j) ,gridLat(i,j) &
+                 ,gridLon(i+1,j) ,gridLat(i+1,j))
+         end do
+      end do
 
 
-     
 
-     fieldFile = trim(inDataDir)//dataprefix
-     rhof = get3DfieldNC(trim(fieldFile)//'_sigma.nc'  ,'sigma')
-     do j=1,jmt
-        do i=1,IMT
-           do k=1,km
-              kk=km+1-k
-              if(rhof(i,j,k).ne.0.) kmt(i,j)=k
-              if(k.ne.kmt(i,j)) dz(kk)=dzt(i,j,k)
-           enddo
-           if(kmt(i,j).ne.0) then
-              dztb(i,j,1)=dzt(i,j,kmt(i,j))
-           else
-              dztb(i,j,1)=0.
-           endif
-        enddo
-     enddo
-     
+
+      gridDX(:,jmt)   = gridDX(:,jmt-1)
+      gridDY(:,jmt)   = gridDY(:,jmt-1)
+      gridDX(imt,:)   = gridDX(imt-1,:)
+      gridDY(imt-1:imt,:)   = gridDY(imt-3:imt-2,:)
+      gridDY(imt,jmt) = gridDY(imt-1,jmt-1)
+      
+      e1v        = gridDX
+      e2u        = gridDY
+      dxdy       = gridDX*gridDY
+
+      uvel     = get3DfieldNC(trim(gridFile) ,'u')
+
+      do j=1,jmt
+         do i=1,IMT
+            do k=1,km
+               kk=km+1-k
+               if(uvel(i,j,k)<10000.) kmt(i,j)=k
+               !if(k.ne.kmt(i,j)) dz(kk)=dzt(i,j,k)
+            enddo
+            if(kmt(i,j).ne.0) then
+               dztb(i,j,1)=dzt(i,j,kmt(i,j))
+            else
+               dztb(i,j,1)=0.
+            endif
+         enddo
+      enddo
+      
   endif initFieldcond
   
-  fieldFile = trim(inDataDir)//'/data/'
-  
-  uvel = get3DfieldNC(trim(fieldFile)//'uvel/'//dataprefix//'3zu.nc' ,'u')
-  uvel = get3DfieldNC(trim(fieldFile)//'_grid_V.nc' ,'vomecrty')
-  rhof = get3DfieldNC(trim(fieldFile)//'_sigma.nc'  ,'sigma')
-  ssh  = get2DfieldNC(trim(fieldFile)//'_SSH.nc'    ,'sossheig')
 
+  fieldFile = trim(inDataDir)//'/uvel/'//trim(dstamp)//'3zu.nc'
+  uvel = get3DfieldNC(trim(fieldFile) ,'u')
+  where (uvel>10000) uvel=0
+  fieldFile = trim(inDataDir)//'/vvel/'//trim(dstamp)//'3zv.nc'
+  vvel = get3DfieldNC(trim(fieldFile) ,'v')
+  where (vvel>10000) vvel=0
+ 
   hs(:,:,2) = 0.01*ssh
   hs(imt+1,:,2) =hs(1,:,2)
   hs(:,jmt+1,2) =hs(:,1,2)
 
-  do k=1,km-1
+  do k=1,km
      kk=km+1-k
-     uflux(:,:,k,2) = uvel(:,:,kk) * e2u(:,:) * dzu(:,:,kk)
-     vflux(:,:,k,2) = vvel(:,:,kk) * e1v(:,:) * dzv(:,:,kk)
-     rho  (:,:,k,2) = rhof(:,:,kk)
+     uflux(:,:,k,2) = uvel(:,:,kk) * e2u(:,:) * dz(k) !dzu(:,:,kk)
+     vflux(:,:,k,2) = vvel(:,:,kk) * e1v(:,:) * dz(k) !dzv(:,:,kk)
+   !  rho  (:,:,k,2) = rhof(:,:,kk)
   end do
 
   uflux(:,:,km,2) = uvel(:,:,1) * e2u * (dzu(:,:,1) & 
        + 0.5*(hs(:,:,2) + hs(2:imt+1,:,2)))
   vflux(:,:,km,2) = vvel(:,:,1) * e1v * (dzv(:,:,1) & 
        + 0.5*(hs(:,:,2) + hs(:,2:jmt+1,2)))
-  rho(:,:,km,2)   = rhof(:,:,1)
+  !rho(:,:,km,2)   = rhof(:,:,1)
   
+!  print *,uvel(100,100,1),vvel(100,100,1),gridDX(100,100),gridDY(100,100),dz(33)
+!  print *,uvel(100,100,1)*gridDX(
+!  stop
+
+
+
   return
 
 

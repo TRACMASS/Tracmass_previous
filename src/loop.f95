@@ -261,7 +261,7 @@ subroutine loop
               vol=dz(kb)
 #endif /*zgrid*/
 #ifdef varbottombox
-              if(kb.eq.KM+1-kmt(ib,jb) ) vol=dzt(ib,jb,1)
+              if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
               if(kb.eq.KM) vol=vol+hs(ib,jb,1)

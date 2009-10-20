@@ -1,46 +1,7 @@
 
 MODULE mod_param
-  INTEGER  :: IMT, JMT, KM, JMAX, LBT, NTRACMAX
-  ! ===   OCCAM  === 
-!!$#if defined occ66
-!!$#ifdef mod1
-!!$  INTEGER, PARAMETER ::  IMT1=1440,JMT1=577
-!!$  INTEGER, PARAMETER ::  IMT=IMT1,JMT=JMT1
-!!$#endif
-!!$#ifdef mod2 
-!!$  INTEGER, PARAMETER ::  IMT2=438,JMT2=434
-!!$#endif
-!!$  INTEGER, PARAMETER ::  KM=66,JMAX=250,LBT=3
-!!$  INTEGER, PARAMETER ::  IDR=1171,JEQ=313
-!!$  INTEGER, PARAMETER ::  NTRACMAX=3*1000*1000
-!!$#endif
-!!$  
-!!$  
-!!$  ! ===   SKB  === 
-!!$#ifdef simp
-!!$  INTEGER, PARAMETER :: IMT=174, JMT=121
-!!$#endif
-!!$#ifdef fors
-!!$  INTEGER, PARAMETER ::  IMT=241,JMT=241
-!!$#endif
-!!$#if defined fors || simp 
-!!$  INTEGER, PARAMETER ::  KM=39,JMAX=JMT,LBT=4
-!!$  INTEGER, PARAMETER ::  NTRACMAX=1*100*1000
-!!$#endif
-!!$  
-!!$  ! ===   TEST  === 
-!!$#if defined tes
-!!$  !INTEGER, PARAMETER :: IMT=225,JMT=IMT,KM=10,JMAX=JMT,LBT=4
-!!$  INTEGER, PARAMETER :: IMT=105,JMT=IMT,KM=10,JMAX=JMT,LBT=4
-!!$  INTEGER, PARAMETER :: NTRACMAX=10000
-!!$#endif
-!!$  ! ===   TUNIS-ROMS  === 
-!!$#if defined tun
-!!$  INTEGER, PARAMETER ::  (IMT=249,JMT=258,KM=20,JMAX=JMT,LBT=4)
-!!$  INTEGER, PARAMETER ::  NTRACMAX=100000
-!!$#endif
-!!$  
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+  INTEGER                                   :: IMT, JMT, KM
+  INTEGER                                   :: JMAX, LBT, NTRACMAX
   INTEGER, PARAMETER                        :: MR=1001
   INTEGER                                   :: NEND
   INTEGER, PARAMETER                        :: NST=2,NNRJ=8,NTRJ=7
@@ -150,6 +111,11 @@ MODULE mod_grid
 #elif zgrid3D
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt
 #endif /*zgrid3Dt*/
+#ifdef varbottombox 
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
+#endif /*varbottombox*/
+
+
   REAL*8                                    :: rmin ,tmin ,smin
   REAL*8                                    :: dr ,dtemp ,dsalt
   REAL*8                                    :: arcscale
@@ -274,4 +240,79 @@ MODULE mod_orbital
 ENDMODULE mod_orbital
 #endif
 
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ! ===   OCCAM  === 
+!!$#if defined occ66
+!!$#ifdef mod1
+!!$  INTEGER, PARAMETER ::  IMT1=1440,JMT1=577
+!!$  INTEGER, PARAMETER ::  IMT=IMT1,JMT=JMT1
+!!$#endif
+!!$#ifdef mod2 
+!!$  INTEGER, PARAMETER ::  IMT2=438,JMT2=434
+!!$#endif
+!!$  INTEGER, PARAMETER ::  KM=66,JMAX=250,LBT=3
+!!$  INTEGER, PARAMETER ::  IDR=1171,JEQ=313
+!!$  INTEGER, PARAMETER ::  NTRACMAX=3*1000*1000
+!!$#endif
+!!$  
+!!$  
+!!$  ! ===   SKB  === 
+!!$#ifdef simp
+!!$  INTEGER, PARAMETER :: IMT=174, JMT=121
+!!$#endif
+!!$#ifdef fors
+!!$  INTEGER, PARAMETER ::  IMT=241,JMT=241
+!!$#endif
+!!$#if defined fors || simp 
+!!$  INTEGER, PARAMETER ::  KM=39,JMAX=JMT,LBT=4
+!!$  INTEGER, PARAMETER ::  NTRACMAX=1*100*1000
+!!$#endif
+!!$  
+!!$  ! ===   TEST  === 
+!!$#if defined tes
+!!$  !INTEGER, PARAMETER :: IMT=225,JMT=IMT,KM=10,JMAX=JMT,LBT=4
+!!$  INTEGER, PARAMETER :: IMT=105,JMT=IMT,KM=10,JMAX=JMT,LBT=4
+!!$  INTEGER, PARAMETER :: NTRACMAX=10000
+!!$#endif
+!!$  ! ===   TUNIS-ROMS  === 
+!!$#if defined tun
+!!$  INTEGER, PARAMETER ::  (IMT=249,JMT=258,KM=20,JMAX=JMT,LBT=4)
+!!$  INTEGER, PARAMETER ::  NTRACMAX=100000
+!!$#endif
+!!$  
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

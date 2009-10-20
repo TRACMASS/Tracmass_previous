@@ -221,6 +221,9 @@ subroutine init_params
 #elif  zgrid3D
   allocate ( dzt(imt,jmt,km) )   
 #endif /*zgrid3Dt*/
+#ifdef varbottombox
+  allocate ( dztb(imt,jmt,nst) )   
+#endif /*varbottombox*/
   allocate ( dxdy(imt,jmt) )   
   allocate (kmt(imt,jmt), dz(km) )
   ! mod_domain

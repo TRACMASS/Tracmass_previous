@@ -4,7 +4,7 @@
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
   fl01   = -Dmean           #
-  fl02   = -Dtempsalt       # Include temp and salt
+#  fl02   = -Dtempsalt       # Include temp and salt
 #  fl03   = -Dtextwrite      # Write results to textfile
   fl04   = -Dbinwrite       # Write results to binaryfile
 #  fl05   = -Dmysqlwrite     # Write results to mysql
@@ -17,7 +17,7 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #------------------------------------------------------------------------
-#  fl11  = -Dtwodim         # Turn off vetical velocities.
+  fl11  = -Dtwodim         # Turn off vetical velocities.
 #  fl12  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl13  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
