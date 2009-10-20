@@ -259,7 +259,7 @@ subroutine loop
               vol=dzt(ib,jb,kb)
 #elif  zgrid1D
               vol=dz(kb)
-#endif
+#endif /*zgrid*/
 #ifdef varbottombox
               if(kb.eq.KM+1-kmt(ib,jb) ) vol=dzt(ib,jb,1)
 #endif /*varbottombox*/
