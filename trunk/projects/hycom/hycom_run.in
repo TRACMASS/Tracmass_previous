@@ -18,10 +18,10 @@
   subGrid      = 1,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 500,
-  subGridImax  = 1000,
-  subGridJmin  = 400,
-  subGridJmax  = 1000,
+  subGridImin  = 1600,
+  subGridImax  = 2400,
+  subGridJmin  =  800,
+  subGridJmax  = 1300,
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
   ! === Used if SubGrid = 2
@@ -35,10 +35,11 @@
   ! === Trajectory release period (timesteps) ===
   intspin      = 1,
   ! === Number of timesteps for the run.      ===
-  intrun       = 200,
+  intrun       = 1095,
   ! === Pos if forward  neg if backward       ===
-  intstep      = 1/
-  !
+  intstep      = 1,
+  ! === Loop velocity fields in necessary     ===
+  loopTime     = 1/
   !
 &INITRUNDATE
   !
@@ -71,7 +72,7 @@
   outDataDir   = '/Users/bror/ormOut/',
   !
   ! === name of current trajectory run
-  outDataFile     = 'hycomTest'/
+  outDataFile     = 'hycom2Dim19'/
   ! === Name of rerun file
   ! namep='op.fw.n0'
   !
@@ -113,12 +114,12 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
   !
-  ist1     = 216,		 
-  ist2     = 366,		 
-  jst1     = 211,
-  jst2     = 230,
-  kst1     =  31,		 
-  kst2     =  -1/
+  ist1     = 250,		 
+  ist2     = 600,		 
+  jst1     = 300,
+  jst2     = 400,
+  kst1     =  14,		 
+  kst2     =  19/
   !
   !
 $INITRUNTEMPSALT
@@ -144,46 +145,20 @@ $INITRUNTEMPSALT
   !
   !
 $INITRUNEND
-! defining end sections
-!
-! Atlantic
-!  ienw(1)=451,
-!  iene(1)=641,
-!  jens(1)=0,
-!  jenn(1)=jst1/
-!
-! western Indian
-!  ienw(2)=641,
-!  iene(2)=imt+1,
-!  jens(2)=0,
-!  jenn(2)=jst1/
-!
-! eastern Indian
-!  ienw(3)=0,
-!  iene(3)=50,
-!  jens(3)=0,
-!  jenn(3)=jst1/
-!
-! western boundary Pacific
-!  ienw(4)=50,
-!  iene(4)=120,
-!  jens(4)=0,
-!  jenn(4)=jst1/
-!
-! interior Pacific
-!  ienw(5)=120,
-!  iene(5)=450,
-!  jens(5)=0,
-!  jenn(5)=jst1/
-!
-! Bering strait
-!  ienw(1)=1,
-!  iene(1)=IMT,
-!  jens(1)=419,
-!  jenn(1)=JMT/
-! testar detta
-  ienw =   451,
-  iene =   641,
-  jens =     0,
-  jenn =     1,
+  ienw(1)=0,
+  iene(1)=800,
+  jens(1)=0,
+  jenn(1)=3,
+  ienw(2)=0,
+  iene(2)=800,
+  jens(2)=497,
+  jenn(2)=500,
+  ienw(3)=0,
+  iene(3)=3,
+  jens(3)=0,
+  jenn(3)=500,
+  ienw(4)=797,
+  iene(4)=800,
+  jens(4)=0,
+  jenn(4)=500,
   timax =  36500./  ! maximum time length of a trajectory in days

@@ -3,9 +3,9 @@
   INPUT_INT1        = intmin   # Variables set from command line
   INPUT_INT2        = intrun   # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-  fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
+# fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
 #  fl01   = -Dtimeanalyt    # Stationary time scheme 
-#  fl02   = -Dregulardt     # Regular time steps with -Dtimestep
+  fl02   = -Dregulardt     # Regular time steps with -Dtimestep
 #------------------------------------------------------------------------
   fl03   = -Dtempsalt       # Include temp and salt
   fl04   = -Dtextwrite      # Write results to textfile

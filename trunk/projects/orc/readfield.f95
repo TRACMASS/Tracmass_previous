@@ -257,9 +257,9 @@ end do
 do j=1,JMT
  do i=1,IMT
   if(kmt(i,j).ne.0) then
-   dzt(i,j,1)=botbox(i,j,3)
+   dztb(i,j,1)=botbox(i,j,3)
   else
-   dzt(i,j,1)=0.
+   dztb(i,j,1)=0.
   endif
  enddo
 enddo
