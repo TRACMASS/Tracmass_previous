@@ -1,4 +1,4 @@
-
+# Makfile for orc
 #========================================================================
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
@@ -19,20 +19,31 @@
 #  fl11  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
+   fl12  = -Dinitxyt        # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-   fl12  = -Dtwodim         # Turn off vertical velocities.
-#  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
-#  fl14  = -Dexplicit_w     # Use a given vertical velocity.
+   fl13  = -Dtwodim         # Turn off vertical velocities.
+#  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
+#  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-#  fl15  = -Dselect         # Select only one trajectory (for debugging)
-#  fl16  = -Dtracer         # Stores a simulated tracer
-#  fl17  = -Dsediment       # Sediment code developed for RCO
-#   fl18  = -Dturb           # Adds subgrid turbulent velocities 
-  fl18  = -Ddiffusion      # Adds a diffusion on trajectory
-  fl19  = -Dellipticdiffusion      # Adds a diffusion on trajectory
+   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
+   fl17  = -Dfreesurface    # Variable bottom box to match actual depth
+   fl18  = -Dzvec1D         # Cell depths defined as vector (for z-coord?)
+#  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+#  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+#------------------------------------------------------------------------
+#  fl20  = -Dselect         # Select only one trajectory (for debugging)
+#  fl21  = -Dtracer         # Stores a simulated tracer
+#  fl22  = -Dsediment       # Sediment code developed for RCO
+#------------------------------------------------------------------------
+#  fl23  = -Dturb           # Adds subgrid turbulent velocities 
+#  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+#  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+#  fl26  = -Dcoarse         # Adds a diffusion on trajectory
 #========================================================================
 
-ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\
-			$(fl07)$(fl08)$(fl09)$(fl10)$(fl11)$(fl12)\
-			$(fl13)$(fl14)$(fl15)$(fl16)$(fl17)$(fl18)\
-			$(fl19)$(fl20)$(fl21)$(fl22)$(fl23)$(fl24)\
+ORM_FLAGS= -D$(PROJECT) \
+$(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)$(fl07)$(fl08)$(fl09)$(fl10)\
+$(fl11)$(fl12)$(fl13)$(fl14)$(fl15)$(fl16)$(fl17)$(fl18)$(fl19)$(fl20)\
+$(fl21)$(fl22)$(fl23)$(fl24)$(fl25)$(fl26)$(fl27)$(fl28)$(fl29)$(fl30)\
+
+# Var bottom to be used by occ66 || orc || for || sim || multcol || jplSCB || eccoSOSE

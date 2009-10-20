@@ -25,9 +25,10 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin = 1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  intspin =73, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  !intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  =47,
+  intrun  =112,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -56,8 +57,8 @@
   !kriva    = 3,
   !
   ! === Directory where input fields are stored
-  ! inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
-  inDataDir = '/Users/doos/data/orca/orca025/',
+  !inDataDir = '/Volumes/Resa4/data/orca025/',
+   inDataDir = '/Users/doos/data/orca/orca025/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Volumes/hav4/data/rco/orm/',
@@ -66,11 +67,22 @@
   !outDataDir   = '/Users/doos/data/rco/orm/',
   !
   ! === name of current trajectory run
-  ! outDataFile     = 'no_k62_2D_m15'/
-   outDataFile     = 'd200_k62_2D_m15'/
-  ! outDataFile     = 'd1000_k62_2D_c1'/
-  ! outDataFile     = 'tu_k62_2D_d0'/
- !
+  ! outDataFile     = 'no_k62_2D_a8'/
+  ! outDataFile     = 'tu_k62_2D_a8'/
+  ! outDataFile     = 'd150_k62_2D_c8'/
+  ! outDataFile     = 'd201_k62_2D_d8'/
+  ! outDataFile     = 'd200_k62_2D_c8'/
+  ! outDataFile     = 'd200_k62_2D_m12'/
+  ! outDataFile     = 'test'/
+  !outDataFile     = 'no_k62_2D_m12'/
+  ! outDataFile     = 'no_16_a8'/
+  ! outDataFile     = 'tu_16_a8'/
+  ! outDataFile     = 'c200_16_a8'/
+  !outDataFile     = 'no_16_m20'/
+   outDataFile     = 'test'/
+  !outDataFile      = 'dol3',!ah=1000 med u=v=0
+  !outDataFile      = 'dol7',!ah=8000 med u=v=0
+  !
   intminInOutFile=0/
 $INITRUNSEED
   !
@@ -96,7 +108,8 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 2,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  !partQuant= 2,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 16,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -127,7 +140,7 @@ $INITRUNSEED
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/mask1010' /
-  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift005' /
+  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift005b' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/mask100100' /
 
   $INITRUNTEMPSALT
@@ -206,7 +219,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      280./  ! maximum time length of a trajectory in days
+  timax =      200./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,

@@ -65,15 +65,22 @@ LOGICAL around
 
  ! SAVE   :: botbox
 
+       print *,'a'
+
   
   alloCondGrid: if ( .not. allocated (botbox) ) then
      allocate (  botbox(IMT,JMT,3) )
      allocate ( kmu(IMT,JMT)    ,kmv(IMT,JMT) )
   end if alloCondGrid
+         print *,'aa'
+
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt),temp3d_simp(IMT+2,JMT,KM), temp2d_doub(IMT+2,JMT)   )
      allocate ( e1t(IMT+2,JMT) , e2t(IMT+2,JMT) )
   end if alloCondUVW
+  
+       print *,'bb'
+
     
   start1d  = [ 1]
   count1d  = [km]
@@ -107,6 +114,8 @@ LOGICAL around
      ! ======================================================
      !    ===  Set up the grid ===
      ! ======================================================
+     
+     print *,'dd'
 
 gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
 
@@ -248,9 +257,9 @@ end do
 do j=1,JMT
  do i=1,IMT
   if(kmt(i,j).ne.0) then
-   dztb(i,j,1)=botbox(i,j,3)
+   dzt(i,j,1)=botbox(i,j,3)
   else
-   dztb(i,j,1)=0.
+   dzt(i,j,1)=0.
   endif
  enddo
 enddo

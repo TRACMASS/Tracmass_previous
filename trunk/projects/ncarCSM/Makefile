@@ -1,4 +1,4 @@
-
+# Makfile for orc
 #========================================================================
   INPUT_INT1        = intmin   # Variables set from command line
   INPUT_INT2        = intrun   # Use 'dummy' if not used.   
@@ -26,8 +26,8 @@
 #------------------------------------------------------------------------
   fl15  = -Dvarbottombox   # Variable bottom box to match actual depth
   fl16  = -Dfreesurface    # Variable bottom box to match actual depth
-#  fl17  = -Dzvec1D         # Cell depths defined as vector
-  fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+  fl17  = -Dzvec1D         # Cell depths defined as vector
+#  fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
 #  fl17  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
 #  fl18  = -Dselect         # Select only one trajectory (for debugging)

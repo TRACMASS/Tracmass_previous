@@ -96,7 +96,8 @@ subroutine loop
 40 continue
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
 #ifdef orc
-
+566 format(i8,i7,2f8.2,f6.2,2f10.2 &
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
   do k=1,LBT
      if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
         nrj(ntrac,8)=k                               

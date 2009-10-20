@@ -104,7 +104,7 @@ subroutine init_seed()
         ijkMax=0
         open(unit=34,file=fullSeedFile,form='unformatted', ACTION = 'READ')
         read(unit=34) seedMask
-
+        close(34)
         ijkMax=0
 
         do i=1,imt

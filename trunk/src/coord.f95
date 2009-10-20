@@ -35,6 +35,11 @@ do k=1,12
 idmax(k,i)=mois(k)
 enddo
 if((mod(i,4).eq.0 .and. mod(i,100).ne.0) .or.  mod(i,400).eq.0 ) idmax(2,i)=29
+!#if defined orc
+! do k=1,12  ! Julian days
+!  idmax(k,i)=idmax(k-1,i)+idmax(k,i)
+! enddo
+!#endif
 !print *,i,(idmax(k,i),k=1,12)
 enddo
 
