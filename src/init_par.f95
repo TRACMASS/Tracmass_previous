@@ -214,18 +214,18 @@ subroutine init_params
   ! mod_coord
   allocate ( csu (0:jmt), cst(jmt)  ) 
   allocate ( phi(0:jmt),   zw(0:km) ) 
-  allocate ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt), dzt(imt+2,jmt,km) ) 
+  allocate ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
   ! mod_grid
-#if defined ifs || atm
-  allocate ( dztb(imt,jmt,km,nst) )   
-#else
-  allocate ( dztb(imt,jmt,km) )   
-#endif
+#ifdef zgrid3Dt
+  allocate ( dzt(imt,jmt,km,nst) )   
+#elif  zgrid3D
+  allocate ( dzt(imt,jmt,km) )   
+#endif /*zgrid3Dt*/
   allocate ( dxdy(imt,jmt) )   
   allocate (kmt(imt,jmt), dz(km) )
   ! mod_domain
-!  allocate ( ienw (LBT),iene (LBT) )
-!  allocate ( jens (LBT),jenn (LBT) )
+  !allocate ( ienw (LBT),iene (LBT) )
+  !allocate ( jens (LBT),jenn (LBT) )
   allocate ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
   allocate ( hs(imt+1,jmt+1,nst) )
 #ifdef full_wflux
