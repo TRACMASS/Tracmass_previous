@@ -515,7 +515,7 @@ subroutine loop
            dxyz=dz(kb)
 #endif /zgrid3Dt*/
 #ifdef varbottombox
-           if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dzt(ib,jb,1)
+           if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
            if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
@@ -907,7 +907,7 @@ subroutine loop
            LBTloop: do k=1,LBT
 !              if(ienw(k).le.ib .and. ib.le.iene(k) .and. &
 !                 jens(k).le.jb .and. jb.le.jenn(k)  ) then
-              print *, ienw, x1, iene
+!              print *, ienw, x1, iene
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1

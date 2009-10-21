@@ -9,17 +9,18 @@ SUBROUTINE readfields
   USE mod_name
   USE mod_vel
   USE mod_getfile
-  
+  use mod_seed
 
 #ifdef tempsalt
   USE mod_dens
 #endif
   IMPLICIT none
+  
+  INTEGER, PARAMETER :: IJKMAX2=281,NTID=73
 
   ! = Loop variables
-  INTEGER                                    :: t ,i ,j,jp ,k ,kk !,tpos
-
-!  integer p, x1, y1, z1, t1 !?
+  INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm,ipp,jmm,jpp
+  INTEGER, SAVE                                :: n  
 
   ! = Variables used for getfield procedures
   CHARACTER (len=200)                        :: gridFile ,fieldFile
@@ -39,48 +40,32 @@ SUBROUTINE readfields
 
   REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: ssh
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)       :: temp3d_simp
-!  REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: temp2d_simp
   REAL*8, ALLOCATABLE, DIMENSION(:,:)         :: temp2d_doub
   
   REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: botbox
   REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)   :: e1t,e2t
-  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)  :: kmu,kmv
+  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: kmu,kmv
+  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: ntimask
   REAL*4 :: temp2d_simp(IMT+2,JMT)
   INTEGER itemp(IMT+2,JMT)
-
-!NET CDF STUFF
-!  INTEGER :: dimidx,dimidy,dimidz,dimidt !output ID index of dimension
-  INTEGER :: varid !,varidx,varidy,varidz,varidt !output ID index of variable
-!  INTEGER :: startA(1),startB(4),startC(2) !input index vector of position to start reading
-!  INTEGER :: countA(1),countB(4),countC(2) !input lengths of 'volume' to be retrieved
-!  INTEGER :: leny,lenz,lent !output Length of dimension
-  INTEGER :: ncid
-
-!REAL*8 temp2d_doub(IMT+2,JMT)  !,temp3d_doub(IMT+2,JMT,KM)
-!REAL*4 temp3d_simp(IMT+2,JMT,KM)
-!REAL*4 temp2d_simp(IMT+2,JMT)
-REAL*4 dd
+  INTEGER :: varid, ncid
+  REAL*4 dd,dmult
 
 LOGICAL around
 
  ! SAVE   :: botbox
 
-       print *,'a'
-
   
   alloCondGrid: if ( .not. allocated (botbox) ) then
      allocate (  botbox(IMT,JMT,3) )
      allocate ( kmu(IMT,JMT)    ,kmv(IMT,JMT) )
+     allocate ( ntimask(NTID,IJKMAX) )
   end if alloCondGrid
-         print *,'aa'
 
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt),temp3d_simp(IMT+2,JMT,KM), temp2d_doub(IMT+2,JMT)   )
      allocate ( e1t(IMT+2,JMT) , e2t(IMT+2,JMT) )
   end if alloCondUVW
-  
-       print *,'bb'
-
     
   start1d  = [ 1]
   count1d  = [km]
@@ -115,8 +100,6 @@ LOGICAL around
      !    ===  Set up the grid ===
      ! ======================================================
      
-     print *,'dd'
-
 gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
 
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
@@ -130,7 +113,7 @@ do i=1,IMT
 enddo
 
 ierr=NF90_INQ_VARID(ncid,'e2u',varid) ! dyu in meters
-if(ierr.ne.0) stop 3763
+if(ierr.ne.0) stop 3764
 ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
 if(ierr.ne.0) stop 3799
 do i=1,IMT
@@ -138,7 +121,7 @@ do i=1,IMT
 enddo
 
 ierr=NF90_INQ_VARID(ncid,'e2t',varid) ! the main data fields
-if(ierr.ne.0) stop 3763
+if(ierr.ne.0) stop 3765
 ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
 if(ierr.ne.0) stop 3799
 do i=1,IMT
@@ -147,7 +130,7 @@ do i=1,IMT
 enddo
 
 ierr=NF90_INQ_VARID(ncid,'e1v',varid) ! the main data fields
-if(ierr.ne.0) stop 3763
+if(ierr.ne.0) stop 3766
 ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
 if(ierr.ne.0) stop 3799
 do i=1,IMT
@@ -155,13 +138,12 @@ do i=1,IMT
 enddo
 ierr=NF90_CLOSE(ncid)
 
-
 ! The bathymetry
 gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 5751
 ierr=NF90_INQ_VARID(ncid,'mbathy',varid) ! kmt field
-if(ierr.ne.0) stop 3763
+if(ierr.ne.0) stop 3767
 ierr=NF90_GET_VAR(ncid,varid,itemp,start2d,count2d)
 
 do i=1,IMT
@@ -178,7 +160,6 @@ if(jp.eq.jmt+1) jp=jmt  ! should be north fold instead
    kmv(i,j)=min(itemp(i,j),itemp(i,jp))
  enddo
 enddo
-
 
 !botbox=0.
 !! layer thickness at u points
@@ -211,6 +192,7 @@ enddo
 !enddo
 !enddo
 
+
 open(21,file=trim(inDataDir)//'topo/botbox',form='unformatted')
 !write(21) botbox
 read(21) botbox
@@ -242,7 +224,6 @@ ierr=NF90_CLOSE(ncid)
 !stop 4985
 
 
-
 ! Depth coordinates
 zw(0)    = 0.d0
 zw(1:km) = get1DfieldNC(trim(gridFile) ,'e3t_0')
@@ -264,6 +245,14 @@ do j=1,JMT
  enddo
 enddo
 
+#ifdef initxyt
+! Time for individual start positions
+if(ijkmax.ne.IJKMAX2) stop 4396
+open(84,file='/Users/doos/data/orca/orca025/topo/masktime005b',form='unformatted')
+ read(84) ntimask
+close(84)
+#endif
+
 iday=startDay-5
 imon=startMon
 iyear=startYear
@@ -281,7 +270,10 @@ endif initFieldcond
         ! if kan skrivas här om man vill börja om från iyear0
      endif
   endif
+iyear=2000 ! quick and dirty fix for years
 ntime=10000*iyear+100*imon+iday
+n=n+1 ! quick and dirty fix to be generalised
+
 ! file names
 dataprefix='9999/ORCA025-N112_20000105'
 write(dataprefix(19:26),'(i8)') ntime
@@ -293,7 +285,7 @@ write(dataprefix(1:4),'(i4)') iyear
 
 ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
-if(ierr.ne.0) stop 3763
+if(ierr.ne.0) stop 3768
 ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
 if(ierr.ne.0) stop 3799
 ierr=NF90_CLOSE(ncid)
@@ -310,10 +302,18 @@ enddo
 #ifdef tempsalt 
 temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05T.nc' ,'votemper')
 
-#endif
+#endif     
+
+dmult=1.  ! amplification of the velocity amplitude by simple multiplication
 
 ! u velocity
-temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05U.nc' ,'vozocrtx')
+!temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05U.nc' ,'vozocrtx')
+gridFile = trim(fieldFile)//'d05U.nc'
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5751
+ierr=NF90_INQ_VARID(ncid,'vozocrtx',varid) 
+if(ierr.ne.0) stop 3769
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 do i=1,IMT
  do j=1,JMT
   do k=1,kmu(i,j)
@@ -321,13 +321,19 @@ do i=1,IMT
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
    if(k.eq.kmu(i,j)) dd = botbox(i,j,1)
-   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * 1.5
+   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
   enddo
  enddo
 enddo
 
 ! v velocity
-temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05V.nc' ,'vomecrty')
+!temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05V.nc' ,'vomecrty')
+gridFile = trim(fieldFile)//'d05V.nc'
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5751
+ierr=NF90_INQ_VARID(ncid,'vomecrty',varid) ! kmt field
+if(ierr.ne.0) stop 3770
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 do i=1,IMT
  do j=1,JMT
   do k=1,kmv(i,j)
@@ -335,15 +341,186 @@ do i=1,IMT
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
    if(k.eq.kmv(i,j)) dd = botbox(i,j,2)
-   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * 1.5
+   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
   enddo
  enddo
 enddo
 
-!do i=4,IMT+1
-!print *,i,temp3d_simp(i,JMT,1),temp3d_simp(IMT+4-i,JMT-3,1),temp3d_simp(i,JMT,1)+temp3d_simp(IMT+4-i,JMT-3,1)
-!print *,i,vflux(i,JMT,KM,2),vflux(IMT+4-i,JMT-3,KM,2),vflux(i,JMT,KM,2)+vflux(IMT+4-i,JMT-3,KM,2)
+
+#ifdef coarse
+
+temp3d_simp=0.
+! 2x2 grid cells into one for U
+do i=2,IMT,2
+ im=i-1
+ ip=i+1
+ if(im.lt.1  ) im=im+IMT
+ if(ip.gt.IMT) ip=ip-IMT
+ do j=1,JMT-1,2
+  jm=j-1
+  jp=j+1
+  if(jm.lt.1  ) jm=1
+  if(jp.gt.JMT) jp=JM
+  do k=1,KM
+   temp3d_simp(im,j ,k)=0.5*( uflux(im,j,k,2) + uflux(im,jp,k,2) )    ! mean on western wall
+   temp3d_simp(im,jp,k)=temp3d_simp(im,j,k)							  ! mean on western wall
+   temp3d_simp(ip,j ,k)=0.5*( uflux(ip,j,k,2) + uflux(ip,jp,k,2) )    ! mean on eastern wall
+   temp3d_simp(ip,jp,k)=temp3d_simp(ip,j,k)							  ! mean on eastern wall
+   temp3d_simp(i ,j ,k)=0.5*(temp3d_simp(im,j,k)+temp3d_simp(ip,j,k)) ! linear interpolation in the middle
+   temp3d_simp(i ,jp,k)=temp3d_simp(i,j,k)							  ! linear interpolation in the middle
+     enddo
+ enddo
+enddo
+
+! 4x4 grid cells into one for U
+!do i=2,IMT-1,4  ! kolla att detta funkar
+! im =i-1
+! imm=i-2
+! ip =i+1
+! ipp=i+2
+! if(im .lt.1  ) im =im +IMT
+! if(imm.lt.1  ) imm=imm+IMT
+! if(ip .gt.IMT) ip =ip -IMT
+! if(ipp.gt.IMT) ipp=ipp-IMT
+!! print *,imm,im,i,ip,ipp
+! do j=2,JMT-2,4 ! kolla att detta räcker JMT-1 kanske
+!  jm=j-1
+!  jmm=j-2
+!  jp=j+1
+!  jpp=j+2
+!  if(jm .lt.1  ) jm =1
+!  if(jmm.lt.1  ) jmm=1
+!  if(jp .gt.JMT) jp =JMT
+!  if(jpp.gt.JMT) jpp=JMT
+!!  if(i.eq.2) print *,jm,j,jp,jpp
+!  do k=1,KM
+!   temp3d_simp(imm,j  ,k)=0.25*(uflux(imm,jm,k,2)+uflux(imm,j,k,2)+uflux(imm,jp,k,2)+uflux(imm,jpp,k,2)) ! western
+!   temp3d_simp(imm,jm ,k)=temp3d_simp(imm,j,k)							  
+!   temp3d_simp(imm,jp ,k)=temp3d_simp(imm,j,k)							 
+!   temp3d_simp(imm,jpp,k)=temp3d_simp(imm,j,k)		
+!					  
+!   temp3d_simp(ipp,j  ,k)=0.25*(uflux(ipp,jm,k,2)+uflux(ipp,j,k,2)+uflux(ipp,jp,k,2)+uflux(ipp,jpp,k,2)) ! eastern
+!   temp3d_simp(ipp,jm ,k)=temp3d_simp(ipp,j,k)							  
+!   temp3d_simp(ipp,jp ,k)=temp3d_simp(ipp,j,k)							
+!   temp3d_simp(ipp,jpp,k)=temp3d_simp(ipp,j,k)							    
+!
+!   temp3d_simp(im,j  ,k)=0.75*temp3d_simp(imm,j,k)+0.25*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
+!   temp3d_simp(im,jm ,k)=temp3d_simp(im,j,k)							  
+!   temp3d_simp(im,jp ,k)=temp3d_simp(im,j,k)							  
+!   temp3d_simp(im,jpp,k)=temp3d_simp(im,j,k)	
+!
+!   temp3d_simp(i,j  ,k)=0.5*temp3d_simp(imm,j,k)+0.5*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
+!   temp3d_simp(i,jm ,k)=temp3d_simp(i,j,k)							  
+!   temp3d_simp(i,jp ,k)=temp3d_simp(i,j,k)							  
+!   temp3d_simp(i,jpp,k)=temp3d_simp(i,j,k)	
+!
+!   temp3d_simp(ip,j  ,k)=0.25*temp3d_simp(imm,j,k)+0.75*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
+!   temp3d_simp(ip,jm ,k)=temp3d_simp(ip,j,k)							  
+!   temp3d_simp(ip,jp ,k)=temp3d_simp(ip,j,k)							  
+!   temp3d_simp(ip,jpp,k)=temp3d_simp(ip,j,k)	
+!  enddo
+! enddo
 !enddo
+! put back into velocity field array
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmu(i,j)
+   kk=KM+1-k
+   uflux(i,j,kk,2)=temp3d_simp(i,j,kk) 
+  enddo
+ enddo
+enddo
+
+
+temp3d_simp=0.
+! 2x2 grid cells into one for V
+do i=1,IMT,2
+ im=i-1
+ ip=i+1
+ if(im.lt.1  ) im=im+IMT
+ if(ip.gt.IMT) ip=ip-IMT
+ do j=2,JMT-1,2
+  jm=j-1
+  jp=j+1
+  if(jm.lt.1  ) jm=1
+  if(jp.gt.JMT) jp=JMT
+  do k=1,KM
+   temp3d_simp(i ,jm,k)=0.5*( vflux(i,jm,k,2) + vflux(ip,jm,k,2) )    ! mean on southern wall
+   temp3d_simp(ip,jm,k)=temp3d_simp(i,jm,k)						      ! mean on southern wall
+   temp3d_simp(i ,jp,k)=0.5*( vflux(i,jp,k,2) + vflux(ip,jp,k,2) )    ! mean on northern wall
+   temp3d_simp(ip,jp,k)=temp3d_simp(i,jp,k)						      ! mean on northern wall
+   temp3d_simp(i ,j ,k)=0.5*(temp3d_simp(i,jm,k)+temp3d_simp(i,jp,k)) ! linear interpolation in the middle
+   temp3d_simp(ip,j ,k)=temp3d_simp(i,j,k)							  ! linear interpolation in the middle
+     enddo
+ enddo
+enddo
+
+! 4x4 grid cells into one for V
+!do i=1,IMT,4
+! im =i-1
+! imm=i-2
+! ip =i+1
+! ipp=i+2
+! if(im .lt.1  ) im =im +IMT
+! if(imm.lt.1  ) imm=imm+IMT
+! if(ip .gt.IMT) ip =ip -IMT
+! if(ipp.gt.IMT) ipp=ipp-IMT
+! do j=3,JMT-2,4
+!  jm=j-1
+!  jmm=j-2
+!  jp=j+1
+!  jpp=j+2
+!  if(jm .lt.1  ) jm =1
+!  if(jmm.lt.1  ) jmm=1
+!  if(jp .gt.JMT) jp =JMT
+!  if(jpp.gt.JMT) jpp=JMT
+!  do k=1,KM
+!   temp3d_simp(i  ,jmm,k)=0.25*(vflux(im,jmm,k,2)+vflux(i,jmm,k,2)+vflux(ip,jmm,k,2)+vflux(ipp,jmm,k,2)) ! southern
+!   temp3d_simp(im ,jmm,k)=temp3d_simp(i,jmm,k)							  
+!   temp3d_simp(ip ,jmm,k)=temp3d_simp(i,jmm,k)							 
+!   temp3d_simp(ipp,jmm,k)=temp3d_simp(i,jmm,k)							  
+!   temp3d_simp(i  ,jpp,k)=0.25*(vflux(im,jpp,k,2)+vflux(i,jpp,k,2)+vflux(ip,jpp,k,2)+vflux(ipp,jpp,k,2)) ! eastern
+!   temp3d_simp(im ,jpp,k)=temp3d_simp(i,jpp,k)							  
+!   temp3d_simp(ip ,jpp,k)=temp3d_simp(i,jpp,k)							
+!   temp3d_simp(ipp,jpp,k)=temp3d_simp(i,jpp,k)							    
+!
+!   temp3d_simp(i  ,jm ,k)=0.75*temp3d_simp(i,jmm,k)+0.25*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
+!   temp3d_simp(im ,jm ,k)=temp3d_simp(i,jm,k)							  
+!   temp3d_simp(ip ,jm ,k)=temp3d_simp(i,jm,k)							  
+!   temp3d_simp(ipp,jm ,k)=temp3d_simp(i,jm,k)	
+!
+!   temp3d_simp(i  ,j  ,k)=0.5*temp3d_simp(i,jmm,k)+0.5*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
+!   temp3d_simp(im ,j  ,k)=temp3d_simp(i,j,k)							  
+!   temp3d_simp(ip ,j  ,k)=temp3d_simp(i,j,k)							  
+!   temp3d_simp(ipp,j  ,k)=temp3d_simp(i,j,k)	
+!
+!   temp3d_simp(i  ,jp ,k)=0.25*temp3d_simp(i,jmm,k)+0.75*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
+!   temp3d_simp(im ,jp ,k)=temp3d_simp(i,jp,k)							  
+!   temp3d_simp(ip ,jp ,k)=temp3d_simp(i,jp,k)							  
+!   temp3d_simp(ipp,jp ,k)=temp3d_simp(i,jp,k)	
+!   
+!  enddo
+! enddo
+!enddo
+
+! put back into velocity field array
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmv(i,j)
+   kk=KM+1-k
+   vflux(i,j,kk,2)=temp3d_simp(i,j,kk) 
+  enddo
+ enddo
+enddo
+
+#endif
+
+
+#ifdef initxyt
+ijkst(:,5)=ntimask(n,:)
+#endif
+
+
 !stop 4967
 !uflux=0.0001 ; vflux=0.0001  ! special case with no verlocities
 
@@ -356,7 +533,6 @@ enddo
 !  enddo
 ! enddo
 !enddo
-
 
      deallocate ( ssh , temp3d_simp, temp2d_doub, e1t , e2t)
 
