@@ -47,12 +47,12 @@ subroutine vertvel(rr,ia,iam,ja,ka)
     do n=1,NST
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
-     + (dztb(ia,ja,k,2)-dztb(ia,ja,k,1))/tseas )  ! time change of the mass the in grid box
+     + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))/tseas )  ! time change of the mass the in grid box
 !     print *,k,ia,ja,wflux(k,n)
     enddo
 #else
   wflux(k) = wflux(k-1) - ff * &
-     ( uu - um + vv - vm + (dztb(ia,ja,k,2)-dztb(ia,ja,k,1))/tseas )
+     ( uu - um + vv - vm + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))/tseas )
 !     print *,k,ia,ja,wflux(k)
 #endif
 #endif
