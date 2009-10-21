@@ -100,7 +100,7 @@ endif
 !  hs(:,:,1)=hs(:,:,2)
   uflux(:,:,:,1)=uflux(:,:,:,2)
   vflux(:,:,:,1)=vflux(:,:,:,2)
-  dztb(:,:,:,1)=dztb(:,:,:,2)
+  dzt(:,:,:,1)=dzt(:,:,:,2)
 #ifdef tempsalt 
   tem(:,:,:,1)=tem(:,:,:,2)
   sal(:,:,:,1)=sal(:,:,:,2)
@@ -186,12 +186,12 @@ do k=1,KM
    sal  (i,j,l,2)=0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm))
    pp=0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm))
    rho  (i,j,l,2)=0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit
-   dztb (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit*dxdy(i,j)
+   dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit*dxdy(i,j)
 
    uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg
    vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(jj)
 
-!   if(k.eq.1) print *,i,j,uflux(i,j,k,2),vflux(i,j,k,2),dztb(i,j,k,2)
+!   if(k.eq.1) print *,i,j,uflux(i,j,k,2),vflux(i,j,k,2),dzt(i,j,k,2)
   enddo
  enddo
 !stop 4067
