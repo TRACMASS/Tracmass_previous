@@ -80,12 +80,9 @@ elseif(ijk.eq.3) then
 #ifdef full_wflux
  uu=wflux(ia ,ja ,ka   ,1)
  um=wflux(ia ,ja ,ka-1 ,1)
-#elif defined timeanalyt || timestep
+#else
  uu=rg*wflux(ka  ,NST)+rr*wflux(ka  ,1)
  um=rg*wflux(ka-1,NST)+rr*wflux(ka-1,1)
-#else
- uu=wflux(ka)
- um=wflux(ka-1)
 #endif
 
 #ifndef twodim   

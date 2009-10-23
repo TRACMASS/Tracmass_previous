@@ -1,4 +1,4 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
+! This subroutine is not updated anymore and will be replaced by the TRACMASS manual
 !                                  
 !                                TRACMASS
 !                       Lagrangian trajectory code 

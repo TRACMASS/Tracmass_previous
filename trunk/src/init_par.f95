@@ -233,10 +233,8 @@ subroutine init_params
   allocate ( hs(imt+1,jmt+1,nst) )
 #ifdef full_wflux
   allocate ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
-#elif defined timeanalyt || timestep
-  allocate ( wflux(0:km,2) )
 #else
-  allocate ( wflux(0:km) )
+  allocate ( wflux(0:km,2) )
 #endif
   allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km))
 

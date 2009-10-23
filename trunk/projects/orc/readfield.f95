@@ -270,15 +270,17 @@ endif initFieldcond
         ! if kan skrivas här om man vill börja om från iyear0
      endif
   endif
-iyear=2000 ! quick and dirty fix for years
+!iyear=2000 ! quick and dirty fix for years
 ntime=10000*iyear+100*imon+iday
 n=n+1 ! quick and dirty fix to be generalised
 
 ! file names
-dataprefix='9999/ORCA025-N112_20000105'
+ dataprefix='xxxx/ORCA025-N112_xxxxxxxx'
 write(dataprefix(19:26),'(i8)') ntime
 write(dataprefix(1:4),'(i4)') iyear
   fieldFile = trim(inDataDir)//trim(dataprefix)
+  
+!  print *,'fieldFile=',fieldFile
   
 ! temp, salt and ssh
 !temp2d_simp = get2DfieldNC(trim(fieldFile)//'d05T.nc' ,'sossheig')

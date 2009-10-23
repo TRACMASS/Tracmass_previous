@@ -145,10 +145,8 @@ MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
 #if defined full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
-#elif defined timeanalyt || timestep
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
 #else
-  REAL*8, ALLOCATABLE, DIMENSION(:)          :: wflux
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
