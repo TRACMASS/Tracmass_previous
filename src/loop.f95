@@ -209,10 +209,8 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=wflux(ist,jst,kst,1)
-#elif timeanalyt || timestep
-                 vol=wflux(kst,1)
 #else 
-                 vol=wflux(kst)
+                 vol=wflux(kst,1)
 #endif /*full_wflux*/
               end select
               if (idir*ff*vol.le.0.d0) cycle ijkstloop
@@ -232,10 +230,8 @@ subroutine loop
                  call vertvel(1.d0,ib,ibm,jb,kst)
 #ifdef full_wflux
                  vol=abs(wflux(ist,jst,kst,1))
-#elif  timeanalyt || timestep
-                 vol=abs(wflux(kst,1))
 #else
-                 vol=abs(wflux(kst))
+                 vol=abs(wflux(kst,1))
 #endif /*full_wflux*/
 #ifdef twodim
 !                 vol = 1
@@ -721,11 +717,8 @@ subroutine loop
               call vertvel(rb,ia,iam,ja,ka)
 #ifdef full_wflux
               uu=wflux(ia,ja,ka,1)
-#elif defined timeanalyt || timestep
-!              uu=wflux(ka,1)
-              uu=rbg*wflux(ka,NST)+rb*wflux(ka,1)
 #else
-              uu=wflux(ka)
+              uu=rbg*wflux(ka,NST)+rb*wflux(ka,1)
 #endif
 #ifdef turb    
               ! uu=uu+upr(5,2)
@@ -752,10 +745,8 @@ subroutine loop
 
 #ifdef full_wflux
               if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
-#elif defined timeanalyt || timestep
-              if(rbg*wflux(ka-1,NST)+rb*wflux(ka-1,1).lt.0.d0) kb=ka-1
 #else
-              if(wflux(ka-1).lt.0.d0) kb=ka-1
+              if(rbg*wflux(ka-1,NST)+rb*wflux(ka-1,1).lt.0.d0) kb=ka-1
 #endif              
               z1=dble(ka-1)
 #if defined timeanalyt

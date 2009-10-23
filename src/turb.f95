@@ -82,10 +82,8 @@ enddo
 
 #ifdef full_wflux
     localW=wflux(ia,ja,ka-1,1)
-#elif defined timeanalyt || timestep
-    localW=wflux(ka-1,1)
 #else
-    localW=wflux(ka-1)
+    localW=wflux(ka-1,1)
 #endif
     
     if(localW.eq.0.d0) then

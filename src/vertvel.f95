@@ -43,18 +43,11 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      vm=rg*vflux(ia ,ja-1,k,NST)+rr*vflux(ia ,ja-1,k,1)
 ! start ifs code
 #if defined ifs
-#if defined timeanalyt || timestep
     do n=1,NST
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
      + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))/tseas )  ! time change of the mass the in grid box
-!     print *,k,ia,ja,wflux(k,n)
     enddo
-#else
-  wflux(k) = wflux(k-1) - ff * &
-     ( uu - um + vv - vm + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))/tseas )
-!     print *,k,ia,ja,wflux(k)
-#endif
 #endif
 !end ifs code
 
@@ -62,13 +55,11 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #ifndef ifs
 #ifdef  full_wflux
      wflux(ia,ja,k,1)=wflux(ia,ja,k-1,1) - ff * ( uu - um + vv - vm )
-#elif defined timeanalyt || timestep
+#else
     do n=1,NST
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
     enddo
-#else
-     wflux(k) = wflux(k-1) - ff * ( uu - um + vv - vm )
 #endif
 #endif
 !end ocean code
@@ -92,13 +83,11 @@ subroutine vertvel(rr,ia,iam,ja,ka)
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
 #ifdef full_wflux
-     wflux(k)=wflux(ia,ja,k,1) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
-#elif defined timeanalyt || timestep
-    do n=1,NST
-     wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
-    enddo
+     wflux(k)=wflux(ia,ja,k,1) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
 #else
-     wflux(k)=wflux(k) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 *cst(jb)
+    do n=1,NST
+     wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
+    enddo
 #endif
   end do k2loop
 #endif   

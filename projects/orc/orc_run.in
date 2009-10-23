@@ -79,7 +79,7 @@
   ! outDataFile     = 'tu_16_a8'/
   ! outDataFile     = 'c200_16_a8'/
   !outDataFile     = 'no_16_m20'/
-   outDataFile     = 'test'/
+   outDataFile     = 'test2'/
   !outDataFile      = 'dol3',!ah=1000 med u=v=0
   !outDataFile      = 'dol7',!ah=8000 med u=v=0
   !
