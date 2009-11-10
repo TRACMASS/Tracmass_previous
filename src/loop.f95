@@ -320,8 +320,8 @@ subroutine loop
                     z1=dble(kb)
                  case (4)
                     ! === Spread even inside T-box ===
-                    x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
-                    y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
+                    x1=dble(ibm ) + 0.25d0*(dble(ijj)-0.5d0)/dble(ijt)
+                    y1=dble(jb-1) + 0.25d0*(dble(kkk)-0.5d0)/dble(kkt) 
                     ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
                     z1=dble(kb-1) + 0.5d0
                  end select

@@ -14,9 +14,9 @@
   !
 $INITGRIDGRID
   !
-  IMT      = 1440,
-  JMT      = 1021,
-  KM       = 64,
+  IMT      = 1440,  ! orca1=360 ; orca025=1440
+  JMT      = 1021,  ! orca1=292 ; orca025=1021
+  KM       = 64,   ! orca1=orca025=64
   LBT      = 1,
   NEND     = 2/                   ! NEND = LBT +1
   !
