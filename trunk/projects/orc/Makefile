@@ -27,7 +27,7 @@
 #------------------------------------------------------------------------
    fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
    fl17  = -Dfreesurface    # Variable bottom box to match actual depth
-   fl18  = -Dzvec1D         # Cell depths defined as vector (for z-coord?)
+   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
 #  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
 #  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
@@ -36,9 +36,10 @@
 #  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
 #  fl23  = -Dturb           # Adds subgrid turbulent velocities 
-#  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
-#  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
-#  fl26  = -Dcoarse         # Adds a diffusion on trajectory
+#   fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+#   fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+#  fl26  = -Dcoarse         # Makes the velocity coarser 
+#   fl27  = -Dorca1         # Makes the velocity coarser 
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \

@@ -16,7 +16,12 @@ SUBROUTINE readfields
 #endif
   IMPLICIT none
   
-  INTEGER, PARAMETER :: IJKMAX2=281,NTID=73
+  INTEGER, PARAMETER :: NTID=73
+#ifdef orca1
+  INTEGER, PARAMETER :: IJKMAX2=254
+#else
+  INTEGER, PARAMETER :: IJKMAX2=281
+#endif
 
   ! = Loop variables
   INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm,ipp,jmm,jpp
@@ -53,7 +58,7 @@ SUBROUTINE readfields
 
 LOGICAL around
 
- ! SAVE   :: botbox
+!REAL*8 temp3d_doub(IMT+2,JMT,KM) ! to be used when botbox is written
 
   
   alloCondGrid: if ( .not. allocated (botbox) ) then
@@ -171,7 +176,7 @@ enddo
 !if(kmu(i,j).ne.0) botbox(i,j,1)=temp3d_doub(i,j,kmu(i,j))
 !enddo
 !enddo
-
+!
 !! layer thickness at v points
 !ierr=NF90_INQ_VARID(ncid,'e3v',varid)
 !if(ierr.ne.0) stop 3763
@@ -181,7 +186,7 @@ enddo
 !if(kmv(i,j).ne.0) botbox(i,j,2)=temp3d_doub(i,j,kmv(i,j))
 !enddo
 !enddo
-
+!
 !! layer thickness at T points
 !ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
 !if(ierr.ne.0) stop 3763
@@ -247,8 +252,11 @@ enddo
 
 #ifdef initxyt
 ! Time for individual start positions
-if(ijkmax.ne.IJKMAX2) stop 4396
-open(84,file='/Users/doos/data/orca/orca025/topo/masktime005b',form='unformatted')
+if(ijkmax.ne.IJKMAX2) then
+ print *,ijkmax,IJKMAX2
+ stop 4396
+endif
+open(84,file=trim(inDataDir)//'topo/masktime005b',form='unformatted')
  read(84) ntimask
 close(84)
 #endif
@@ -275,15 +283,21 @@ ntime=10000*iyear+100*imon+iday
 n=n+1 ! quick and dirty fix to be generalised
 
 ! file names
+#ifdef orca1
+ dataprefix='xxxx/ORCA1-N202_xxxxxxxx'
+write(dataprefix(17:24),'(i8)') ntime
+write(dataprefix(1:4),'(i4)') iyear
+#else
  dataprefix='xxxx/ORCA025-N112_xxxxxxxx'
 write(dataprefix(19:26),'(i8)') ntime
 write(dataprefix(1:4),'(i4)') iyear
+#endif
+
   fieldFile = trim(inDataDir)//trim(dataprefix)
-  
-!  print *,'fieldFile=',fieldFile
-  
+    
 ! temp, salt and ssh
 !temp2d_simp = get2DfieldNC(trim(fieldFile)//'d05T.nc' ,'sossheig')
+!print *,trim(fieldFile)//'d05T.nc'
 
 ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
@@ -352,77 +366,129 @@ enddo
 #ifdef coarse
 
 temp3d_simp=0.
-! 2x2 grid cells into one for U
-do i=2,IMT,2
- im=i-1
- ip=i+1
- if(im.lt.1  ) im=im+IMT
- if(ip.gt.IMT) ip=ip-IMT
- do j=1,JMT-1,2
-  jm=j-1
-  jp=j+1
-  if(jm.lt.1  ) jm=1
-  if(jp.gt.JMT) jp=JM
-  do k=1,KM
-   temp3d_simp(im,j ,k)=0.5*( uflux(im,j,k,2) + uflux(im,jp,k,2) )    ! mean on western wall
-   temp3d_simp(im,jp,k)=temp3d_simp(im,j,k)							  ! mean on western wall
-   temp3d_simp(ip,j ,k)=0.5*( uflux(ip,j,k,2) + uflux(ip,jp,k,2) )    ! mean on eastern wall
-   temp3d_simp(ip,jp,k)=temp3d_simp(ip,j,k)							  ! mean on eastern wall
-   temp3d_simp(i ,j ,k)=0.5*(temp3d_simp(im,j,k)+temp3d_simp(ip,j,k)) ! linear interpolation in the middle
-   temp3d_simp(i ,jp,k)=temp3d_simp(i,j,k)							  ! linear interpolation in the middle
-     enddo
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmu(i,j)
+   kk=KM+1-k
+   temp3d_simp(i,j,kk)=uflux(i,j,kk,2)
+  enddo
  enddo
 enddo
 
-! 4x4 grid cells into one for U
-!do i=2,IMT-1,4  ! kolla att detta funkar
-! im =i-1
-! imm=i-2
-! ip =i+1
-! ipp=i+2
-! if(im .lt.1  ) im =im +IMT
-! if(imm.lt.1  ) imm=imm+IMT
-! if(ip .gt.IMT) ip =ip -IMT
-! if(ipp.gt.IMT) ipp=ipp-IMT
-!! print *,imm,im,i,ip,ipp
-! do j=2,JMT-2,4 ! kolla att detta räcker JMT-1 kanske
+uflux(:,:,:,2)=0.
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmu(i,j)
+   kk=KM+1-k
+   uflux(i,j,kk,2)=temp3d_simp(i,j,kk)
+  enddo
+ enddo
+enddo
+
+! 2x2 grid cells into one for U
+!do i=2,IMT,2
+! im=i-1
+! ip=i+1
+! if(im.lt.1  ) im=im+IMT
+! if(ip.gt.IMT) ip=ip-IMT
+! do j=1,JMT,2
 !  jm=j-1
-!  jmm=j-2
 !  jp=j+1
-!  jpp=j+2
-!  if(jm .lt.1  ) jm =1
-!  if(jmm.lt.1  ) jmm=1
-!  if(jp .gt.JMT) jp =JMT
-!  if(jpp.gt.JMT) jpp=JMT
-!!  if(i.eq.2) print *,jm,j,jp,jpp
+!  if(jm.lt.1  ) jm=1
+!  if(jp.gt.JMT) jp=JMT
 !  do k=1,KM
-!   temp3d_simp(imm,j  ,k)=0.25*(uflux(imm,jm,k,2)+uflux(imm,j,k,2)+uflux(imm,jp,k,2)+uflux(imm,jpp,k,2)) ! western
-!   temp3d_simp(imm,jm ,k)=temp3d_simp(imm,j,k)							  
-!   temp3d_simp(imm,jp ,k)=temp3d_simp(imm,j,k)							 
-!   temp3d_simp(imm,jpp,k)=temp3d_simp(imm,j,k)		
-!					  
-!   temp3d_simp(ipp,j  ,k)=0.25*(uflux(ipp,jm,k,2)+uflux(ipp,j,k,2)+uflux(ipp,jp,k,2)+uflux(ipp,jpp,k,2)) ! eastern
-!   temp3d_simp(ipp,jm ,k)=temp3d_simp(ipp,j,k)							  
-!   temp3d_simp(ipp,jp ,k)=temp3d_simp(ipp,j,k)							
-!   temp3d_simp(ipp,jpp,k)=temp3d_simp(ipp,j,k)							    
-!
-!   temp3d_simp(im,j  ,k)=0.75*temp3d_simp(imm,j,k)+0.25*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
-!   temp3d_simp(im,jm ,k)=temp3d_simp(im,j,k)							  
-!   temp3d_simp(im,jp ,k)=temp3d_simp(im,j,k)							  
-!   temp3d_simp(im,jpp,k)=temp3d_simp(im,j,k)	
-!
-!   temp3d_simp(i,j  ,k)=0.5*temp3d_simp(imm,j,k)+0.5*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
-!   temp3d_simp(i,jm ,k)=temp3d_simp(i,j,k)							  
-!   temp3d_simp(i,jp ,k)=temp3d_simp(i,j,k)							  
-!   temp3d_simp(i,jpp,k)=temp3d_simp(i,j,k)	
-!
-!   temp3d_simp(ip,j  ,k)=0.25*temp3d_simp(imm,j,k)+0.75*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
-!   temp3d_simp(ip,jm ,k)=temp3d_simp(ip,j,k)							  
-!   temp3d_simp(ip,jp ,k)=temp3d_simp(ip,j,k)							  
-!   temp3d_simp(ip,jpp,k)=temp3d_simp(ip,j,k)	
+!   temp3d_simp(im,j ,k)=0.5*( uflux(im,j,k,2) + uflux(im,jp,k,2) )    ! mean on western wall
+!   temp3d_simp(im,jp,k)=temp3d_simp(im,j,k)				     	      ! mean on western wall
+!   temp3d_simp(ip,j ,k)=0.5*( uflux(ip,j,k,2) + uflux(ip,jp,k,2) )    ! mean on eastern wall
+!   temp3d_simp(ip,jp,k)=temp3d_simp(ip,j,k)						      ! mean on eastern wall
+!   temp3d_simp(i ,j ,k)=0.5*(temp3d_simp(im,j,k)+temp3d_simp(ip,j,k)) ! linear interpolation in the middle
+!   temp3d_simp(i ,jp,k)=temp3d_simp(i,j,k)						      ! linear interpolation in the middle
 !  enddo
 ! enddo
 !enddo
+
+
+
+! 3x3 grid cells into one for U
+!do i=3,IMT,3
+! im =i-1
+! imm=i-2
+! ip =i+1
+! if(im .lt.1  ) im =im +IMT
+! if(imm.lt.1  ) imm=imm+IMT
+! if(ip .gt.IMT) ip =ip -IMT
+! do j=1,JMT,3
+!  jm =j-1
+!  jp =j+1
+!  if(jm .lt.1  ) jm =1
+!  if(jp .gt.JMT) jp =JMT
+!  do k=1,KM
+!   temp3d_simp(imm,j ,k)=(uflux(imm,jm,k,2)+uflux(imm,j,k,2)+uflux(imm,jp,k,2))/3. ! western
+!   temp3d_simp(imm,jm,k)=temp3d_simp(imm,j,k)							  
+!   temp3d_simp(imm,jp,k)=temp3d_simp(imm,j,k)							 
+!					  
+!   temp3d_simp(ip ,j ,k)=(uflux(ip ,jm,k,2)+uflux(ip ,j,k,2)+uflux(ip ,jp,k,2))/3. ! eastern
+!   temp3d_simp(ip ,jm,k)=temp3d_simp(ip ,j,k)							  
+!   temp3d_simp(ip ,jp,k)=temp3d_simp(ip ,j,k)							
+!
+!   temp3d_simp(im ,j ,k)=2./3.*temp3d_simp(imm,j,k)+1./3.*temp3d_simp(ip,j,k) ! linear interpolation in the middle
+!   temp3d_simp(im ,jm,k)=temp3d_simp(i,j,k)							  
+!   temp3d_simp(im ,jp,k)=temp3d_simp(i,j,k)							  
+!
+!   temp3d_simp(ip ,j ,k)=1./3.*temp3d_simp(imm,j,k)+2./3.*temp3d_simp(ip,j,k) ! linear interpolation in the middle
+!   temp3d_simp(ip ,jm,k)=temp3d_simp(ip,j,k)							  
+!   temp3d_simp(ip ,jp,k)=temp3d_simp(ip,j,k)							  
+!  enddo
+! enddo
+!enddo
+
+
+! 4x4 grid cells into one for U
+do i=3,IMT,4
+ im =i-1
+ imm=i-2
+ ip =i+1
+ ipp=i+2
+ if(im .lt.1  ) im =im +IMT
+ if(imm.lt.1  ) imm=imm+IMT
+ if(ip .gt.IMT) ip =ip -IMT
+ if(ipp.gt.IMT) ipp=ipp-IMT
+ do j=2,JMT,4
+  jm =j-1
+  jp =j+1
+  jpp=j+2
+  if(jm .lt.1  ) jm =1
+  if(jp .gt.JMT) jp =JMT
+  if(jpp.gt.JMT) jpp=JMT
+  do k=1,KM
+   temp3d_simp(imm,j  ,k)=0.25*(uflux(imm,jm,k,2)+uflux(imm,j,k,2)+uflux(imm,jp,k,2)+uflux(imm,jpp,k,2)) ! western
+   temp3d_simp(imm,jm ,k)=temp3d_simp(imm,j,k)							  
+   temp3d_simp(imm,jp ,k)=temp3d_simp(imm,j,k)							 
+   temp3d_simp(imm,jpp,k)=temp3d_simp(imm,j,k)		
+					  
+   temp3d_simp(ipp,j  ,k)=0.25*(uflux(ipp,jm,k,2)+uflux(ipp,j,k,2)+uflux(ipp,jp,k,2)+uflux(ipp,jpp,k,2)) ! eastern
+   temp3d_simp(ipp,jm ,k)=temp3d_simp(ipp,j,k)							  
+   temp3d_simp(ipp,jp ,k)=temp3d_simp(ipp,j,k)							
+   temp3d_simp(ipp,jpp,k)=temp3d_simp(ipp,j,k)							    
+
+   temp3d_simp(im ,j  ,k)=0.75*temp3d_simp(imm,j,k)+0.25*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
+   temp3d_simp(im ,jm ,k)=temp3d_simp(im,j,k)							  
+   temp3d_simp(im ,jp ,k)=temp3d_simp(im,j,k)							  
+   temp3d_simp(im ,jpp,k)=temp3d_simp(im,j,k)	
+
+   temp3d_simp(i  ,j  ,k)=0.5*temp3d_simp(imm,j,k)+0.5*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
+   temp3d_simp(i  ,jm ,k)=temp3d_simp(i,j,k)							  
+   temp3d_simp(i  ,jp ,k)=temp3d_simp(i,j,k)							  
+   temp3d_simp(i  ,jpp,k)=temp3d_simp(i,j,k)	
+
+   temp3d_simp(ip ,j  ,k)=0.25*temp3d_simp(imm,j,k)+0.75*temp3d_simp(ipp,j,k) ! linear interpolation in the middle
+   temp3d_simp(ip ,jm ,k)=temp3d_simp(ip,j,k)							  
+   temp3d_simp(ip ,jp ,k)=temp3d_simp(ip,j,k)							  
+   temp3d_simp(ip ,jpp,k)=temp3d_simp(ip,j,k)	
+  enddo
+ enddo
+enddo
+
 ! put back into velocity field array
 do i=1,IMT
  do j=1,JMT
@@ -433,77 +499,134 @@ do i=1,IMT
  enddo
 enddo
 
+!___________ v
+
 
 temp3d_simp=0.
-! 2x2 grid cells into one for V
-do i=1,IMT,2
- im=i-1
- ip=i+1
- if(im.lt.1  ) im=im+IMT
- if(ip.gt.IMT) ip=ip-IMT
- do j=2,JMT-1,2
-  jm=j-1
-  jp=j+1
-  if(jm.lt.1  ) jm=1
-  if(jp.gt.JMT) jp=JMT
-  do k=1,KM
-   temp3d_simp(i ,jm,k)=0.5*( vflux(i,jm,k,2) + vflux(ip,jm,k,2) )    ! mean on southern wall
-   temp3d_simp(ip,jm,k)=temp3d_simp(i,jm,k)						      ! mean on southern wall
-   temp3d_simp(i ,jp,k)=0.5*( vflux(i,jp,k,2) + vflux(ip,jp,k,2) )    ! mean on northern wall
-   temp3d_simp(ip,jp,k)=temp3d_simp(i,jp,k)						      ! mean on northern wall
-   temp3d_simp(i ,j ,k)=0.5*(temp3d_simp(i,jm,k)+temp3d_simp(i,jp,k)) ! linear interpolation in the middle
-   temp3d_simp(ip,j ,k)=temp3d_simp(i,j,k)							  ! linear interpolation in the middle
-     enddo
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmv(i,j)
+   kk=KM+1-k
+   temp3d_simp(i,j,kk)=vflux(i,j,kk,2)
+  enddo
  enddo
 enddo
 
-! 4x4 grid cells into one for V
-!do i=1,IMT,4
-! im =i-1
-! imm=i-2
-! ip =i+1
-! ipp=i+2
-! if(im .lt.1  ) im =im +IMT
-! if(imm.lt.1  ) imm=imm+IMT
-! if(ip .gt.IMT) ip =ip -IMT
-! if(ipp.gt.IMT) ipp=ipp-IMT
-! do j=3,JMT-2,4
+vflux(:,:,:,2)=0.
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmv(i,j)
+   kk=KM+1-k
+   vflux(i,j,kk,2)=temp3d_simp(i,j,kk)
+  enddo
+ enddo
+enddo
+
+! 2x2 grid cells into one for V
+!do i=1,IMT-1,2
+! im=i-1
+! ip=i+1
+! if(im.lt.1  ) im=im+IMT
+! if(ip.gt.IMT) ip=ip-IMT
+! do j=2,JMT-1,2
 !  jm=j-1
-!  jmm=j-2
 !  jp=j+1
-!  jpp=j+2
-!  if(jm .lt.1  ) jm =1
-!  if(jmm.lt.1  ) jmm=1
-!  if(jp .gt.JMT) jp =JMT
-!  if(jpp.gt.JMT) jpp=JMT
+!  if(jm.lt.1  ) jm=1
+!  if(jp.gt.JMT) jp=JMT
 !  do k=1,KM
-!   temp3d_simp(i  ,jmm,k)=0.25*(vflux(im,jmm,k,2)+vflux(i,jmm,k,2)+vflux(ip,jmm,k,2)+vflux(ipp,jmm,k,2)) ! southern
-!   temp3d_simp(im ,jmm,k)=temp3d_simp(i,jmm,k)							  
-!   temp3d_simp(ip ,jmm,k)=temp3d_simp(i,jmm,k)							 
-!   temp3d_simp(ipp,jmm,k)=temp3d_simp(i,jmm,k)							  
-!   temp3d_simp(i  ,jpp,k)=0.25*(vflux(im,jpp,k,2)+vflux(i,jpp,k,2)+vflux(ip,jpp,k,2)+vflux(ipp,jpp,k,2)) ! eastern
-!   temp3d_simp(im ,jpp,k)=temp3d_simp(i,jpp,k)							  
-!   temp3d_simp(ip ,jpp,k)=temp3d_simp(i,jpp,k)							
-!   temp3d_simp(ipp,jpp,k)=temp3d_simp(i,jpp,k)							    
-!
-!   temp3d_simp(i  ,jm ,k)=0.75*temp3d_simp(i,jmm,k)+0.25*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
-!   temp3d_simp(im ,jm ,k)=temp3d_simp(i,jm,k)							  
-!   temp3d_simp(ip ,jm ,k)=temp3d_simp(i,jm,k)							  
-!   temp3d_simp(ipp,jm ,k)=temp3d_simp(i,jm,k)	
-!
-!   temp3d_simp(i  ,j  ,k)=0.5*temp3d_simp(i,jmm,k)+0.5*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
-!   temp3d_simp(im ,j  ,k)=temp3d_simp(i,j,k)							  
-!   temp3d_simp(ip ,j  ,k)=temp3d_simp(i,j,k)							  
-!   temp3d_simp(ipp,j  ,k)=temp3d_simp(i,j,k)	
-!
-!   temp3d_simp(i  ,jp ,k)=0.25*temp3d_simp(i,jmm,k)+0.75*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
-!   temp3d_simp(im ,jp ,k)=temp3d_simp(i,jp,k)							  
-!   temp3d_simp(ip ,jp ,k)=temp3d_simp(i,jp,k)							  
-!   temp3d_simp(ipp,jp ,k)=temp3d_simp(i,jp,k)	
-!   
+!   temp3d_simp(i ,jm,k)=0.5*( vflux(i,jm,k,2) + vflux(ip,jm,k,2) )     ! mean on southern wall
+!   temp3d_simp(ip,jm,k)=temp3d_simp(i,jm,k)						       ! mean on southern wall
+!   temp3d_simp(i ,jp,k)=0.5*( vflux(i,jp,k,2) + vflux(ip,jp,k,2) )     ! mean on northern wall
+!   temp3d_simp(ip,jp,k)=temp3d_simp(i,jp,k)						       ! mean on northern wall
+!   temp3d_simp(i ,j ,k)=0.5*(temp3d_simp(i,jm,k)+temp3d_simp(i,jp,k))  ! linear interpolation in the middle
+!   temp3d_simp(ip,j ,k)=temp3d_simp(i,j,k)							   ! linear interpolation in the middle
 !  enddo
 ! enddo
 !enddo
+
+
+! 3x3 grid cells into one for V
+!do i=2,IMT-1,3
+! im =i-1
+! ip =i+1
+! if(im .lt.1  ) im =im +IMT
+! if(ip .gt.IMT) ip =ip -IMT
+! if(ipp.gt.IMT) ipp=ipp-IMT
+! do j=3,JMT-1,3
+!  jmm=j-2
+!  jm =j-1
+!  jp =j+1
+!  if(jmm.lt.1  ) jmm=1
+!  if(jm .lt.1  ) jm =1
+!  if(jp .gt.JMT) jp =JMT
+!  do k=1,KM
+!   temp3d_simp(i  ,jmm,k)=1./3.*(vflux(im,jmm,k,2)+vflux(i,jmm,k,2)+vflux(ip,jmm,k,2)) ! southern
+!   temp3d_simp(im ,jmm,k)=temp3d_simp(i,jmm,k)							  
+!   temp3d_simp(ip ,jmm,k)=temp3d_simp(i,jmm,k)							 
+!					  
+!   temp3d_simp(i  ,jp ,k)=1./3.*(vflux(im,jp,k,2)+vflux(i,jp,k,2)+vflux(ip,jp,k,2)) ! northern
+!   temp3d_simp(im ,jp ,k)=temp3d_simp(i,jp ,k)							  
+!   temp3d_simp(ip ,jp ,k)=temp3d_simp(i,jp ,k)							
+!
+!   temp3d_simp(i  ,jm ,k)=2./3.*temp3d_simp(i,jmm,k)+1./3.*temp3d_simp(i,jp,k) ! linear interpolation in the middle
+!   temp3d_simp(im ,jm ,k)=temp3d_simp(i,jm,k)							  
+!   temp3d_simp(ip ,jm ,k)=temp3d_simp(i,jm,k)							  
+!
+!   temp3d_simp(i  ,j  ,k)=1./3.*temp3d_simp(i,jmm,k)+2./3.*temp3d_simp(i,jp,k) ! linear interpolation in the middle
+!   temp3d_simp(im ,j  ,k)=temp3d_simp(i,j,k)							  
+!   temp3d_simp(ip ,j  ,k)=temp3d_simp(i,j,k)							  
+!					  
+!  enddo
+! enddo
+!enddo
+
+! 4x4 grid cells into one for V
+do i=2,IMT-1,4
+ im =i-1
+ imm=i-2
+ ip =i+1
+ ipp=i+2
+ if(im .lt.1  ) im =im +IMT
+ if(imm.lt.1  ) imm=imm+IMT
+ if(ip .gt.IMT) ip =ip -IMT
+ if(ipp.gt.IMT) ipp=ipp-IMT
+ do j=3,JMT-2,4
+  jm =j-1
+  jmm=j-2
+  jp =j+1
+  jpp=j+2
+  if(jm .lt.1  ) jm =1
+  if(jmm.lt.1  ) jmm=1
+  if(jp .gt.JMT) jp =JMT
+  if(jpp.gt.JMT) jpp=JMT
+  do k=1,KM
+   temp3d_simp(i  ,jmm,k)=0.25*(vflux(im,jmm,k,2)+vflux(i,jmm,k,2)+vflux(ip,jmm,k,2)+vflux(ipp,jmm,k,2)) ! southern
+   temp3d_simp(im ,jmm,k)=temp3d_simp(i,jmm,k)							  
+   temp3d_simp(ip ,jmm,k)=temp3d_simp(i,jmm,k)							 
+   temp3d_simp(ipp,jmm,k)=temp3d_simp(i,jmm,k)		
+					  
+   temp3d_simp(i  ,jpp,k)=0.25*(vflux(im,jpp,k,2)+vflux(i,jpp,k,2)+vflux(ip,jpp,k,2)+vflux(ipp,jpp,k,2)) ! northern
+   temp3d_simp(im ,jpp,k)=temp3d_simp(i,jpp,k)							  
+   temp3d_simp(ip ,jpp,k)=temp3d_simp(i,jpp,k)							
+   temp3d_simp(ipp,jpp,k)=temp3d_simp(i,jpp,k)							    
+
+   temp3d_simp(i  ,jm ,k)=0.75*temp3d_simp(i,jmm,k)+0.25*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
+   temp3d_simp(im ,jm ,k)=temp3d_simp(i,jm,k)							  
+   temp3d_simp(ip ,jm ,k)=temp3d_simp(i,jm,k)							  
+   temp3d_simp(ipp,jm ,k)=temp3d_simp(i,jm,k)	
+
+   temp3d_simp(i  ,j  ,k)=0.5*temp3d_simp(i,jmm,k)+0.5*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
+   temp3d_simp(im ,j  ,k)=temp3d_simp(i,j,k)							  
+   temp3d_simp(ip ,j  ,k)=temp3d_simp(i,j,k)							  
+   temp3d_simp(ipp,j  ,k)=temp3d_simp(i,j,k)	
+
+   temp3d_simp(i  ,jp ,k)=0.25*temp3d_simp(i,jmm,k)+0.75*temp3d_simp(i,jpp,k) ! linear interpolation in the middle
+   temp3d_simp(im ,jp ,k)=temp3d_simp(i,jp,k)							  
+   temp3d_simp(ip ,jp ,k)=temp3d_simp(i,jp,k)							  
+   temp3d_simp(ipp,jp ,k)=temp3d_simp(i,jp,k)	
+  enddo
+ enddo
+enddo
 
 ! put back into velocity field array
 do i=1,IMT
@@ -514,6 +637,7 @@ do i=1,IMT
   enddo
  enddo
 enddo
+
 
 #endif
 

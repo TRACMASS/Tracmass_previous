@@ -22,7 +22,7 @@ enddo
   qran=2.*qran-1. ! === Max. amplitude of turbulence with random numbers between -1 and 1
                   ! === (varies with the same aplitude as the mean vel)
   !rand=1.*rand-0.5  ! Reduced amplitude of turb.
-  
+    
   rg=1.d0-rr
   
   im=ia-1
@@ -58,7 +58,7 @@ enddo
   upr(3,2)=uv(3)*qran(3)
   upr(4,2)=uv(4)*qran(3)
 
-  upr(:,1)=upr(:,2) ! impose same velocities for t-1 and t (this is more stabel but why? K.Döös)
+!  upr(:,1)=upr(:,2) ! impose same velocities for t-1 and t (this is more stabel but why? K.Döös)
   
 #ifdef turb 
 #ifndef twodim   

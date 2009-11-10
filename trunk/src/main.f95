@@ -110,6 +110,9 @@ CONTAINS
     print *,'with sub-grid turbulence parameterisation'
 #elif defined diffusion
     print *,'with diffusion parameterisation, Ah=',ah,'m2/s and Av=',av,'m2/s'
+#if defined anisodiffusion
+    print *,'with anisotropic elliptic diffusion along the isopleths'
+#endif
 #endif
 #if defined rerun
     print *,'Rerun in order to store the Lagrangian stream functions in the different basins'

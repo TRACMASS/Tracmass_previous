@@ -149,7 +149,7 @@ SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt)
 !	REAL, PARAMETER				:: PI = 3.14159265358979323846
  	INTEGER						:: ib,jb,kb		! Box indices
 #ifdef anisodiffusion 	
-	REAL*8						:: Rx, Ry,grdx,grdy, grad, theta, xx, yy
+	REAL*8						:: Rx, Ry, grdx, grdy, grad, theta, xx, yy
  	INTEGER						:: ip,im,jp,jm
 #endif
 		
