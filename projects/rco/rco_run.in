@@ -123,9 +123,9 @@ $INITRUNSEED
   !kst2     =  41, 
 ! One singel gridbox
   ist1     = 161,		 
-  ist2     = 183,		 
-  jst1     = 161,		 
-  jst2     = 184,		 
+  ist2     = 161,		 
+  jst1     = 170,		 
+  jst2     = 170,		 
   kst1     =  41,		 
   kst2     =  41,
   varSeedFile = 0,

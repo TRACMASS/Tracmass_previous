@@ -36,10 +36,9 @@
 #  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
 #  fl23  = -Dturb           # Adds subgrid turbulent velocities 
-#   fl24  = -Ddiffusion      # Adds a diffusion on trajectory
-#   fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
-#  fl26  = -Dcoarse         # Makes the velocity coarser 
-#   fl27  = -Dorca1         # Makes the velocity coarser 
+   fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+   fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+#  fl27  = -Dorca1          # Makes the velocity coarser 
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \
