@@ -61,19 +61,23 @@
    inDataDir = '/Users/doos/data/orca/orca025/',
   !
   ! === Directory where output files are saved
-  outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
+  ! outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
+   outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
+  ! outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
   ! outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
   !
   ! === name of current trajectory run
+  ! outDataFile     = 'no_2_b0'/
+  ! outDataFile     = 'tu_25_b0'/
+  !outDataFile     = 'an300_2_b0'/
+  !outDataFile     = 'di1000_25_b0'/
   ! outDataFile     = 'no_25_c4'/
    outDataFile     = 'no_25_b1'/
   ! outDataFile     = 'tu_25_b0'/
   !outDataFile     = 'an10_25_b0'/
   ! outDataFile     = 'di50_25_b0'/
   ! outDataFile     = 'test'/
-  !outDataFile     = 'no_16_m20'/
-  !outDataFile      = 'dol3',!ah=1000 med u=v=0
-  !outDataFile      = 'dol7',!ah=8000 med u=v=0
+  ! outDataFile      = 'dol3',!ah=1000 med u=v=0
   !
   intminInOutFile=0/
 $INITRUNSEED
@@ -100,7 +104,7 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   nqua     = 1, 
-  partQuant= 25,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  partQuant= 2,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -156,7 +160,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=50., 
+  ah=300., 
   ! Vertical diffusion in m2/s
   av=0./
   
