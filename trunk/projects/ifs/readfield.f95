@@ -129,7 +129,7 @@ endif
 
 ! first from u,v,temperature and geopotential from the sprectral gird
 !string='wgrib '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
-string='/Volumes/hav1/Applications/wgrib/wgribb '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
+string='/Applications/wgrib/wgribb '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > wgrib_log.txt'
 
 call system(string)
 ! read
