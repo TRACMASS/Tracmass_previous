@@ -27,7 +27,7 @@ subroutine loop
   
   INTEGER :: ist,jst,kst
   INTEGER :: ib,jb,kb,k,ijt,kkt,ijj,kkk,niter,ia,ja,iam,ibm,ka,i,j,m,l,lbas
-  INTEGER :: ntrac,nev,nrh0,nout,nloop,nerror
+  INTEGER :: ntrac,nrh0,nout,nloop,nerror !,nev
   INTEGER :: nnorth,ndrake,ngyre,ntractot,nexit(NEND),nrj(ntracmax,NNRJ)
   
   REAL*8  :: rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0,ss0,dtreg
@@ -65,7 +65,7 @@ subroutine loop
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
 
   ! === initialise to zero ===
-  nev=0
+!  nev=0
   nrh0=0
   nout=0
   nloop=0
@@ -728,7 +728,7 @@ subroutine loop
               endif
               z1=dble(ka)
               if(kb.eq.KM+1) then  ! prevent "evaporation"
-                 nev=nev+1
+!                 nev=nev+1
                  kb=KM
                  z1=dble(KM)-0.5d0
               endif
@@ -937,13 +937,14 @@ subroutine loop
 !         ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
 #elif defined ifs || rco || tes || orc
 
-     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
-799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
+     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout !,nev
+799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8)
+!799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
 
 #else
 
      call fancyTimer('advection','stop') 
-     print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout,nev
+     print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout !,nev
 799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean=',i8)
 
 #endif
@@ -955,7 +956,7 @@ subroutine loop
 1500 close(56)
   
   print *,ntractot ,' trajectories calculated'
-  print *,nev      ,' trajectories evaporated'
+!  print *,nev      ,' trajectories evaporated'
   print *,nout     ,' trajectories exited the space and time domain'
   print *,nexit    ,' trajectories exited through the boundaries'
 #ifdef sediment
