@@ -129,7 +129,7 @@ endif
 
 ! first from u,v,temperature and geopotential from the sprectral gird
 !string='wgrib '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
-string='/Applications/wgrib/wgribb '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > wgrib_log.txt'
+string=trim(inDataDir)//'era/wgribb '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
 
 call system(string)
 ! read
@@ -174,7 +174,7 @@ do k=1,KM
   enddo
 
 ! vh(:,NY)=0.  ! sets velocity to zero at North pole ??????????????????
-
+! vh(:,NY-1)=0.
 ! A-grid -> C-grid & store in matrixes
  do j=1,JMT
   jj=j+1

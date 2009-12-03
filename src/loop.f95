@@ -95,9 +95,10 @@ subroutine loop
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
-#ifdef orc
+
 566 format(i8,i7,2f8.2,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+#ifdef orc
   do k=1,LBT
      if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
         nrj(ntrac,8)=k                               
@@ -251,6 +252,7 @@ subroutine loop
            if(nqua.ge.3 .or. isec.eq.4) then
 #ifdef zgrid3Dt
               vol=dzt(ib,jb,kb,1)
+ 
 #elif  zgrid3D
               vol=dzt(ib,jb,kb)
 #elif  zgrid1D
@@ -282,7 +284,7 @@ subroutine loop
            ijt    = nint(sqrt(float(num)))
            kkt    = nint(float(num)/float(ijt))
            subvol = vol/dble(ijt*kkt)
-           
+                      
            if(subvol.eq.0.d0) stop 3956  !?????????????????
            if(subvol.eq.0.d0) subvol=1.d0
            
@@ -1178,7 +1180,7 @@ return
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined ifs 
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.0 &
-         ,f15.0,f6.1,f6.2,f8.2,f6.0,8e8.1 )
+         ,f15.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined orc
 566 format(i8,i7,2f8.2,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )

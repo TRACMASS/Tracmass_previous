@@ -36,7 +36,7 @@ stop 2567 ! Kolla på gammal traj.F för OCCAM
 if(ijk.eq.1) then
  ii=ia
  im=ia-1
- if(ii.eq.0) im=IMT
+ if(im.eq.0) im=IMT
  uu=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff
  um=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff
 #ifdef turb    
