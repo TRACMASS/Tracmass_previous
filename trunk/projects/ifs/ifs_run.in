@@ -32,9 +32,9 @@
   intspin = 1,    ! one single snapshot
   !intspin = 12,    ! 3 days
   !intspin = 122, ! one month
-  !intspin = 1460,
+  !intspin = 1460, !one year
   ! === Number of timesteps for the run.      ===
-  intrun  = 5840,
+  intrun  = 1,
   ! === Pos if forward  neg if backward       ===
   intstep = 1/
   !
@@ -61,24 +61,23 @@
   !==               3 = write at each iteration (all the time)
   !==               4 = write only start and end positions
   !==               5 = write at chosen intervals
-  kriva    = 4,
+  kriva    = 3,
   !
   ! === Directory where input fields are stored
   !inDataDir    = '/Users/doos/data/ifs/',
-  inDataDir    = '/Volumes/vatten/data/ifs/',
+  inDataDir    = '/Users/Jocke/Public/data/',
   !inDataDir     = '/Users/Jocke/Public/data/'
   !inDataDir    = '/Volumes/Resa2/data/ifs/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Users/doos/data/ifs/orm/',
-  !outDataDir    = '/Users/Jocke/Public/data/era/utdata/'
-  outDataDir   = '/Volumes/vatten/data/ifs/orm/',
+  outDataDir   = '/Users/Jocke/Public/data/era/utdata/',
   !outDataDir   = '/Volumes/Resa2/data/ifs/orm/',
   !
   ! === name of current trajectory run
   !outDataFile     = 'era_15N_15S_1snap_r'/
-  !outDataFile     = 'era_15S_15N_1snap_r'/
-  outDataFile     = 'era_nh_eq_test'/
+  !outDataFile     = 'era_35N_35S_1year'/
+  outDataFile     = 'era_nh_eq_1snap'/
   !outDataFile     = 'era_15S_glob'/
   !
 $INITRUNSEED
@@ -119,11 +118,11 @@ $INITRUNSEED
   ! -1 indicates max value in grid.
   !
   ist1     =   1,		 
-  ist2     =  -1,		 
-  jst1     =  73,
+  ist2     =   -1,		 
+  jst1     =  140,
   jst2     =  144,
   kst1     =   1,		 
-  kst2     =  -1/
+  kst2     =   -1/
   !
   !
 $INITRUNTEMPSALT
