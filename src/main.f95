@@ -55,6 +55,7 @@ PROGRAM main
   open(56,file=trim(fullWritePref)//'_run.asc')       ! trajectory path
   open(57,file=trim(fullWritePref)//'_out.asc')       ! exit position
   open(58,file=trim(fullWritePref)//'_in.asc')        ! entrance position
+  open(59,file=trim(fullWritePref)//'_err.asc')       ! Error position
 #endif
   
 #if defined binwrite
@@ -67,7 +68,7 @@ PROGRAM main
   open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  ! Entrance position !
        ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
   open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  ! Error position   !
-       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    ! 
+       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
 #endif
   
   ! === Setup grid ===
@@ -161,7 +162,5 @@ CONTAINS
 
   end subroutine writesetup
 end PROGRAM main
-
-!______________ END OF MAIN PROGRAM _______________________________
 
 

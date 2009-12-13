@@ -83,7 +83,6 @@ CONTAINS
     year= i
     month= j
     day= k
-    
     return
   end subroutine gdate
 

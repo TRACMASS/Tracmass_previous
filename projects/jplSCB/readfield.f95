@@ -35,7 +35,7 @@ SUBROUTINE readfields
   ! = ECCO Grid fields
   REAL, SAVE, ALLOCATABLE, DIMENSION(:)      :: valsz
   REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1v ,e1t ,e2u ,e2t
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:)  :: dzu ,dzv ,dzt
+  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:)  :: dzu ,dzv
   REAL, DIMENSION(2)                         :: ttest1, ttest2
   
   ! = Input fields from GCM
@@ -48,7 +48,6 @@ SUBROUTINE readfields
      allocate ( e2u(imt+2,jmt)   ,e2t(imt+2,jmt) )
      allocate ( dzu(imt+2,jmt,km) )
      allocate ( dzv(imt+2,jmt,km) )
-     allocate ( dzt(imt+2,jmt,km) )
   end if alloCondGrid
   
   alloCondUVW: if(.not. allocated (ssh)) then
@@ -62,20 +61,30 @@ SUBROUTINE readfields
   intpart1    = mod(ints,24)
   intpart2    = floor((ints)/24.)
   ndates      = ints-intpart1
-  dstamp      = 'scb_fcst_0000000015.nc'
+  dstamp      = 'scb_das_0000000015.nc'
 
   call  gdate (baseJD+intpart2 ,yr1 ,mn1 ,dy1)
 
-  write (dstamp(10:17),'(i4i2.2i2.2)') yr1,mn1,dy1
+  write (dstamp(9:16),'(i4i2.2i2.2)') yr1,mn1,dy1
   dataprefix  = trim(inDataDir) // '/ROMS/' // dstamp
   tpos        = intpart1+1
 
-  start1d  = [ 1]
-  count1d  = [km]
-  start2d  = [  1 ,   1, tpos,    1]
-  count2d  = [imt , jmt,    1,    1]
-  start3d  = [  1 ,   1,    1, tpos]
-  count3d  = [imt , jmt,   km,    1]
+!  start1d  = [ 1]
+!  count1d  = [km]
+!  start2d  = [  1 ,   1, tpos,    1]
+!  count2d  = [imt , jmt,    1,    1]
+!  start3d  = [  1 ,   1,    1, tpos]
+!  count3d  = [imt , jmt,   km,    1]
+  
+  start1d  = [  1]
+  count1d  = [ km]
+  !Order is     t    k            i            j
+  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
+  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
+  map2d    = [  1 ,  4 ,          3 ,          2]  
+  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
+  count3d  = [  1 , km ,subGridImax ,subGridJmax]
+  map3d    = [  3 ,  4 ,          2 ,          1]   
   
   ! === initialise ===
   initCond: if(ints.eq.intstart) then
@@ -133,6 +142,8 @@ SUBROUTINE readfields
   vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
   ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
   hs(:,:,2) = ssh
+
+  print *,uvel
   
   where (uvel .eq. -9999) uvel=0
   where (vvel .eq. -9999) vvel=0

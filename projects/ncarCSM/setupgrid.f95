@@ -49,7 +49,7 @@ SUBROUTINE setupgrid
   !Order is     t    k            i            j
   start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
   count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-  map2d    = [  4 ,  3 ,          1 ,          2]  
+  map2d    = [  4 ,  3 ,          2 ,          1]  
   start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
   count3d  = [  1 , km ,subGridImax ,subGridJmax]
   map3d    = [  4 ,  3 ,          2 ,          1]  
@@ -58,10 +58,10 @@ SUBROUTINE setupgrid
   gridFileZ  = trim(inDataDir)//'grid_cell_z.nc'
   
   dz   = get1DfieldNC(trim(gridFileZ)  ,'dz')  / 100.
-  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
   dyu  = get2DfieldNC(trim(gridFileXY) ,'DYU') / 100.
+  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
   dxdy = dxv * dyu
-
+ 
   dzt = 0
   kmask  = get3DfieldNC(trim(gridFileZ) ,'SALT')
   do j=1,jmt
