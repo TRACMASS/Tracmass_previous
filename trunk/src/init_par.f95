@@ -165,7 +165,7 @@ subroutine init_params
 !     ARG_INT2=argint2
   
   end if
-
+ 
   baseJD      = jdate(baseYear  ,baseMon  ,baseDay)
   startJD     = jdate(startYear ,startMon ,startDay)
   startYearCond: if (startYear .ne. 0) then

@@ -143,47 +143,9 @@ $INITRUNTEMPSALT
   rmaxe      =  500./
   !
   !
-$INITRUNEND
-! defining end sections
-!
-! Atlantic
-!  ienw(1)=451,
-!  iene(1)=641,
-!  jens(1)=0,
-!  jenn(1)=jst1/
-!
-! western Indian
-!  ienw(2)=641,
-!  iene(2)=imt+1,
-!  jens(2)=0,
-!  jenn(2)=jst1/
-!
-! eastern Indian
-!  ienw(3)=0,
-!  iene(3)=50,
-!  jens(3)=0,
-!  jenn(3)=jst1/
-!
-! western boundary Pacific
-!  ienw(4)=50,
-!  iene(4)=120,
-!  jens(4)=0,
-!  jenn(4)=jst1/
-!
-! interior Pacific
-!  ienw(5)=120,
-!  iene(5)=450,
-!  jens(5)=0,
-!  jenn(5)=jst1/
-!
-! Bering strait
-!  ienw(1)=1,
-!  iene(1)=IMT,
-!  jens(1)=419,
-!  jenn(1)=JMT/
-! testar detta
-  ienw =   10,
-  iene =   90,
-  jens =   10,
-  jenn =   90,
+$INITRUNEND	
+  ienw(1) =   10,	
+  iene(1) =   90,	
+  jens(1) =   10,	
+  jenn(1) =   90,	
   timax =  36500./  ! maximum time length of a trajectory in days

@@ -511,7 +511,7 @@ subroutine loop
            dxyz=dzt(ib,jb,kb)
 #else
            dxyz=dz(kb)
-#endif /zgrid3Dt*/
+#endif /*zgrid3Dt*/
 #ifdef varbottombox
            if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
@@ -900,17 +900,17 @@ subroutine loop
            LBTloop: do k=1,LBT
 !              if(ienw(k).le.ib .and. ib.le.iene(k) .and. &
 !                 jens(k).le.jb .and. jb.le.jenn(k)  ) then
-!              print *, ienw, x1, iene
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
-                 if(  float(jens(k)) .ne. y1 .and. y1 .ne. float(jenn(k))) then
-                    print *,'ia..=',ia,ib,ja,jb,ka,kb
-                    print *,'x0..=',x0,x1,y0,y1,z0,z1
-                    print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-                    print *,'ntrac=',ntrac, niter
-                    stop 4967
-                 endif
+                 
+                 !if(  float(jens(k)) .ne. y1 .and. y1 .ne. float(jenn(k))) then
+     !               print *,'ia..=',ia,ib,ja,jb,ka,kb
+     !               print *,'x0..=',x0,x1,y0,y1,z0,z1
+     !               print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+     !               print *,'ntrac=',ntrac, niter
+     !               stop 4967
+     !            endif
                  exit niterLoop                                
               endif
            enddo LBTLOOP
@@ -1029,7 +1029,7 @@ return
              print *,'The trajectory is killed'
              print *,'====================================='
              errCode = -39
-!             stop
+             call writedata(40)
              nrj(ntrac,6)=1
           endif          
 
@@ -1246,7 +1246,7 @@ return
        if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
             ints.eq.intstart+intrun) then 
 #if defined tempsalt
-           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+          call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif
           !write(56,566) ntrac,ints,x1,y1,z1, &
           !tt/tday,t0/tday,subvol,temp,salt,dens,arct
@@ -1261,9 +1261,13 @@ return
        do n=1,ntracmax
         if(nrj(n,1).ne.0) then
          write(34,566) n,nrj(n,4),trj(n,1),trj(n,2),trj(n,3),trj(n,4)/tday,trj(n,7)/tday
-        endif
+      endif
        enddo
        close(34)
+    case (40)
+       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
+            ,temp,salt,dens  
+
     end select
 #endif    
 #if defined binwrite 
