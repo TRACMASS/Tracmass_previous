@@ -5,9 +5,21 @@ subroutine loop
   USE mod_grid
   USE mod_buoyancy
   USE mod_seed
-  USE mod_domain !Only to be used by every project...
+  USE mod_domain
   USE mod_vel
   USE mod_turb
+#ifdef tracer
+  USE mod_tracer
+#endif /*tracer*/
+#ifdef streamxy
+  USE mod_streamxy
+#endif /*streamxy*/
+#ifdef streamv
+  USE mod_streamv
+#endif /*streamv*/
+#ifdef streamr
+  USE mod_streamr
+#endif /*streamr*/
 #ifdef tracer
   USE mod_tracer
 #endif /*tracer*/
@@ -16,6 +28,16 @@ subroutine loop
 #endif /*sediment*/
   
   IMPLICIT none
+
+#ifdef streamxy
+  REAL sxyy(IMT,JMT),sxyx(IMT,JMT)
+#endif /*streamxy*/
+#ifdef streamv
+  REAL sxz(JMT,KM),syz(JMT,KM)
+#endif /*streamv*/
+#ifdef streamr
+  REAL sxr(IMT,MR,LOV),syr(JMT,MR,LOV)
+#endif /*streamr*/
     
   INTEGER mra,mta,msa
   REAL temp,salt,dens
@@ -83,6 +105,20 @@ subroutine loop
   nrj=0
   trj=0.d0
   
+#ifdef streamxy
+  sxyy=0.
+  sxyx=0.
+#endif /*streamxy*/
+#ifdef streamv
+  stxz=0.
+  styz=0.
+#endif /*streamv*/
+#ifdef streamr
+  stxr=0.
+  styr=0.
+#endif /*streamr*/
+
+
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
 !  dtmin=tseas/dble(iter)
@@ -364,6 +400,22 @@ subroutine loop
                  
                  ts=ff*dble(ints-intstep)/tstep !time, fractions of ints
                  tt=ts*tseas !time(sec) rel to start
+
+#ifdef streamv
+                 sxz=0.
+                 syz=0.
+#endif /*streamv*/
+#ifdef streamr
+                 syr=0.
+                 sxr=0.
+#endif /*streamr*/
+#ifdef streamxy
+                 sxyx=0.
+                 sxyy=0.
+#endif
+
+
+
                  
                  ! === initialise time and ===
                  ! === store trajectory positions ===
@@ -653,8 +705,37 @@ subroutine loop
 #else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) 
               call pos(3,ia,ja,ka,z0,z1,ds,rr)
-#endif
+#endif /*timeanalyt*/
 !              scrivi=.true.
+#ifdef streamxy
+              ! === zonal component stream function ===
+              stxyx(ia,ja,lbas)=stxyx(ia,ja,lbas)+real(subvol*ff)
+#endif /*streamxy*/
+#ifdef streamv
+              ! === overturning "z" stream function ===
+              stxz(ia,ka,lbas)=stxz(ia,ka,lbas)+real(subvol*ff)
+#endif /*streamv*/
+#ifdef streamr
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+              mra=nint((dens-rmin)/dr)+1
+              if(mra.lt.1 ) mra=1
+              if(mra.gt.MR) mra=MR
+              ! === overturn "rho" stream function  ===
+              stxr(ia,mra,lbas,1)=stxr(ia,mra,lbas,1)+real(subvol*ff)
+#ifdef streamts
+              mta=(temp-tmin)/dtemp+1
+              if(mta.lt.1 ) mta=1
+              if(mta.gt.MR) mta=MR
+              msa=(salt-smin)/dsalt+1
+              if(msa.lt.1 ) msa=1
+              if(msa.gt.MR) msa=MR
+              ! === overturn "temp" stream function ===
+              stxr(ia,mta,lbas,2)=stxr(ia,mta,lbas,2)+real(subvol*ff)
+              ! === overturn "salt" stream function ===
+              stxr(ia,msa,lbas,3)=stxr(ia,msa,lbas,3)+real(subvol*ff)
+#endif /*streamts*/
+#endif /*streamr*/
            elseif(ds.eq.dsw) then ! westward grid-cell exit
               
               scrivi=.false.
@@ -674,6 +755,30 @@ subroutine loop
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
 !              scrivi=.true.      
+#ifdef streamxy
+              stxyx(iam,ja,lbas)=stxyx(iam,ja,lbas)-real(subvol*ff)
+#endif /*streamxy*/
+#ifdef streamv
+              stxz(iam,ka,lbas)=stxz(iam,ka,lbas)-real(subvol*ff)
+#endif /*streamv*/
+#ifdef streamr
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+              mra=nint((dens-rmin)/dr)+1
+              if(mra.lt.1) mra=1
+              if(mra.gt.MR) mra=MR
+              stxr(iam,mra,lbas,1)=stxr(iam,mra,lbas,1)-real(subvol*ff)
+#ifdef streamts
+              mta=nint((temp-tmin)/dtemp)+1
+              if(mta.lt.1 ) mta=1
+              if(mta.gt.MR) mta=MR
+              msa=nint((salt-smin)/dsalt)+1
+              if(msa.lt.1 ) msa=1
+              if(msa.gt.MR) msa=MR
+              stxr(iam,mta,lbas,2)=stxr(iam,mta,lbas,2)-real(subvol*ff)
+              stxr(iam,msa,lbas,3)=stxr(iam,msa,lbas,3)-real(subvol*ff)
+#endif /*streamts*/
+#endif /*streamr*/
            elseif(ds.eq.dsn) then ! northward grid-cell exit
               
               scrivi=.false.
@@ -692,6 +797,31 @@ subroutine loop
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
+#ifdef streamxy
+              stxyy(ia,ja,lbas)=stxyy(ia,ja,lbas)+real(subvol*ff)
+#endif /*streamxy*/
+#ifdef streamv
+              styz(ja,ka,lbas)=styz(ja,ka,lbas)+real(subvol*ff)
+              ! print *,'n',styz(ja,ka,lbas),subvol*ff,ja,ka,lbas
+#endif /*streamv*/
+#ifdef streamr
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
+              mra=nint((dens-rmin)/dr)+1
+              if(mra.lt.1) mra=1
+              if(mra.gt.MR) mra=MR
+              styr(ja,mra,lbas,1)=styr(ja,mra,lbas,1)+real(subvol*ff)
+#ifdef streamts
+              mta=nint((temp-tmin)/dtemp)+1
+              if(mta.lt.1 ) mta=1
+              if(mta.gt.MR) mta=MR
+              msa=nint((salt-smin)/dsalt)+1
+              if(msa.lt.1 ) msa=1
+              if(msa.gt.MR) msa=MR
+              styr(ja,mta,lbas,2)=styr(ja,mta,lbas,2)+real(subvol*ff)
+              styr(ja,msa,lbas,3)=styr(ja,msa,lbas,3)+real(subvol*ff)
+#endif /*streamts*/
+#endif /*steamr*/
            elseif(ds.eq.dss) then ! southward grid-cell exit
               
               scrivi=.false.
@@ -713,6 +843,31 @@ subroutine loop
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
+#ifdef streamxy
+              stxyy(ia,ja-1,lbas)=stxyy(ia,ja-1,lbas)-real(subvol*ff)
+#endif /*streamxy*/
+#ifdef streamv
+              styz(ja-1,ka,lbas)=styz(ja-1,ka,lbas)-real(subvol*ff)
+#endif /*streamv*/
+#ifdef streamr
+              call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)              
+              mra=nint((dens-rmin)/dr)+1
+              if(mra.lt.1) mra=1
+              if(mra.gt.MR) mra=MR
+              styr(ja-1,mra,lbas,1)=styr(ja-1,mra,lbas,1)-real(subvol*ff)
+#ifdef streamts
+              mta=nint((temp-tmin)/dtemp)+1
+              if(mta.lt.1 ) mta=1
+              if(mta.gt.MR) mta=MR
+              msa=nint((salt-smin)/dsalt)+1
+              if(msa.lt.1 ) msa=1
+              if(msa.gt.MR) msa=MR
+              styr(ja-1,mta,lbas,2)=styr(ja-1,mta,lbas,2)-real(subvol*ff)
+              styr(ja-1,msa,lbas,3)=styr(ja-1,msa,lbas,3)-real(subvol*ff)
+#endif /streamts*/
+#endif /*streamr*/
+
            elseif(ds.eq.dsu) then ! upward grid-cell exit
               
               scrivi=.false.
@@ -923,6 +1078,21 @@ subroutine loop
            call writedata(18)
         end do niterLoop
 #endif
+
+        ! add streamfuction contribution at the end of trajectory for stat
+#ifdef streamxy
+        stxyx(:,:,lbas)=stxyx(:,:,lbas)+sxyx(:,:)
+        stxyy(:,:,lbas)=stxyy(:,:,lbas)+sxyy(:,:)
+#endif /*streamxy*/
+#ifdef streamv
+        stxz(:,:,lbas)=stxz(:,:,lbas)+sxz(:,:)
+        styz(:,:,lbas)=styz(:,:,lbas)+syz(:,:)
+#endif /*streamv*/
+#ifdef streamr
+        stxr(:,:,lbas,:)=stxr(:,:,lbas,:)+sxr(:,:,:)
+        styr(:,:,lbas,:)=styr(:,:,lbas,:)+syr(:,:,:)
+#endif /*streamr*/
+
         nout=nout+1
         
         call writedata(17)
