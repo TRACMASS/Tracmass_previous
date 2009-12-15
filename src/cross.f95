@@ -137,10 +137,6 @@ endif
 
 if(sn.le.0.d0) sn=UNDEF
 
-#ifdef ifs
-if(ijk.eq.3.and.ii.eq.km) sp=UNDEF
-#endif
-
 return
 end subroutine cross
 #endif
