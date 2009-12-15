@@ -41,6 +41,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      um=rg*uflux(iam,ja  ,k,NST)+rr*uflux(iam,ja  ,k,1)
      vv=rg*vflux(ia ,ja  ,k,NST)+rr*vflux(ia ,ja  ,k,1)
      vm=rg*vflux(ia ,ja-1,k,NST)+rr*vflux(ia ,ja-1,k,1)
+
 ! start ifs code
 #if defined ifs
     do n=1,NST
@@ -48,6 +49,8 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
      + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))/tseas )  ! time change of the mass the in grid box
     enddo
+    ! make sure there is no wflux through the surface or top of atmosphere
+    if(k.eq.KM.or.k.eq.0) wflux(k,n) = 0.d0
 #endif
 !end ifs code
 
@@ -64,6 +67,11 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #endif
 !end ocean code
   end do kloop
+
+#ifdef ifs
+wflux(0,:) = 0.d0
+wflux(km,:) = 0.d0
+#endif
 
 #endif
 ! end 3D code

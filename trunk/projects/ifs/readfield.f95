@@ -127,9 +127,10 @@ if(.not.around) then
 endif
 
 
-! first from u,v,temperature and geopotential from the sprectral gird
-!string='wgrib '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
-string=trim(inDataDir)//'era/wgribb '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
+! Read in data from the A-grid using wgrib
+! Download wgrib source from ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib/wgrib.c
+! Compile binary file with gcc -o wgrib wgrib.c and put in inDataDir
+string=trim(inDataDir)//'wgrib '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
 
 call system(string)
 ! read
