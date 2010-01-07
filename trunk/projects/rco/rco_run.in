@@ -108,7 +108,7 @@ $INITRUNSEED
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  seedType = 1,
+  seedType = 3,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded (started).

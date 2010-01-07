@@ -7,6 +7,7 @@ subroutine init_params
   USE mod_time 
   USE mod_domain
   USE mod_vel
+  USE mod_traj
   USE mod_dens
   USE mod_buoyancy
   USE mod_streamxy
@@ -236,8 +237,8 @@ subroutine init_params
 #else
   allocate ( wflux(0:km,2) )
 #endif
-  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km))
-
+  allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
+  allocate ( trj(ntracmax,NTRJ) )
   ! mod_dens
 #ifdef tempsalt
   allocate ( tem(imt,jmt,km,nst) ,sal(imt,jmt,km,nst), rho(imt,jmt,km,nst) )

@@ -152,6 +152,10 @@ MODULE mod_vel
   REAL*8                                     :: ff
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_traj
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)    :: trj
+ENDMODULE mod_traj
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_dens
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho

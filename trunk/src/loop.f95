@@ -7,6 +7,7 @@ subroutine loop
   USE mod_seed
   USE mod_domain
   USE mod_vel
+  USE mod_traj
   USE mod_turb
 #ifdef tracer
   USE mod_tracer
@@ -53,7 +54,7 @@ subroutine loop
   INTEGER :: nnorth,ndrake,ngyre,ntractot,nexit(NEND),nrj(ntracmax,NNRJ)
   
   REAL*8  :: rlon,rlat,x1,y1,z1,x0,y0,z0,tt,dt,dxyz,t0,ss0,dtreg
-  REAL*8  :: ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dsc,ts,trj(ntracmax,NTRJ)
+  REAL*8  :: ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dsc,ts !,trj(ntracmax,NTRJ) moved to modules
   REAL*8  :: subvol,vol,arc,arct,rr,rb,rg,rbg,uu
   
   INTEGER :: landError=0 ,boundError=0
@@ -128,20 +129,22 @@ subroutine loop
   !==========================================================
   
 #ifdef rerun
+  print *,'rerun with initial points from ',trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
+!  print 566,ntrac,niter,rlon,rlat,zz
 
-566 format(i8,i7,2f8.2,f6.2,2f10.2 &
-         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #ifdef orc
-  do k=1,LBT
-     if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
-        nrj(ntrac,8)=k                               
-     endif
-  enddo
+!  do k=1,LBT
+!     if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
+!        nrj(ntrac,8)=k                               
+!     endif
+!  enddo
+  nrj(ntrac,8)=1                               
   if(nrj(ntrac,8).eq.0) stop 7395                               
-  
+566 format(i8,i7,2f9.3,f6.2,2f10.2 &
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined  occ66
 
   if(rlon.eq.293.) then
@@ -166,13 +169,14 @@ subroutine loop
      print 566,ntrac,niter,rlon,rlat,zz
      stop 4957
   endif /*orc*/
-
+566 format(i8,i7,2f8.2,f6.2,2f10.2 &
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #endif
 !  print 566,ntrac,niter,rlon,rlat,zz
 !  print *,nrj(ntrac,8)  
   goto 40
 41 continue
-  
+  print 566,ntrac,niter,rlon,rlat,zz
   do ntrac=1,ntracmax
      if(nrj(ntrac,8).eq.0) nrj(ntrac,6)=1 
   enddo
@@ -226,6 +230,7 @@ subroutine loop
            idir = ijkst(ijk,4)
            isec = ijkst(ijk,5)
            vol  = 0
+!           print *,'ijk=',ijk,idir,isec,nqua,ist,jst,kst, ijkst(ijk,6)
            
            ib=ist
            ibm=ib-1
@@ -280,12 +285,18 @@ subroutine loop
                      abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
    !              print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
                  if(vol.eq.0.d0) cycle ijkstloop
+              case(5)
+                 if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
+                 vol=abs(uflux(ib,jb,kb,1))+abs(uflux(ibm,jb  ,kb,1)) + & 
+                     abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
+!                 print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
+                 if(vol.eq.0.d0) cycle ijkstloop
               end select
               if(vol.eq.0) cycle ijkstloop
            end if idirCond
            
            ! === trajectory volume in m3 ===
-           if(nqua.ge.3 .or. isec.eq.4) then
+           if(nqua.ge.3 .or. isec.ge.4) then
 #ifdef zgrid3Dt
               vol=dzt(ib,jb,kb,1)
  
@@ -303,6 +314,8 @@ subroutine loop
 #endif /*freesurface*/
            end if
            
+!           print *,'vol=',vol
+           
            ! === number of trajectories for box (ist,jst,kst) ===
            select case (nqua)
            case (1)
@@ -311,10 +324,12 @@ subroutine loop
               num = vol/partQuant
            case (3)
               num = vol/partQuant
-           case (4)
+           case (5)
               num = ijkst(ijk,6)
+!              print *,'num=',num,ijk,ijkst(ijk,:)
+!              if(ijk.eq.12) stop 3967
            end select
-           if(num.eq.0) num=1 ! always at least one trajectory
+           if(num.eq.0 .and. nqua.ne.5) num=1 ! always at least one trajectory
         
 
            ijt    = nint(sqrt(float(num)))
@@ -322,9 +337,9 @@ subroutine loop
            subvol = vol/dble(ijt*kkt)
                       
            if(subvol.eq.0.d0) stop 3956  !?????????????????
-           if(subvol.eq.0.d0) subvol=1.d0
+!           if(subvol.eq.0.d0) subvol=1.d0
            
- !           print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
+!            print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
 99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
                 ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
            
@@ -360,8 +375,18 @@ subroutine loop
                     ! === Spread even inside T-box ===
                     x1=dble(ibm ) + 0.25d0*(dble(ijj)-0.5d0)/dble(ijt)
                     y1=dble(jb-1) + 0.25d0*(dble(kkk)-0.5d0)/dble(kkt) 
-                    ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-                    z1=dble(kb-1) + 0.5d0
+                    ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt) ! spread verticaly
+                    z1=dble(kb-1) + 0.5d0                         ! or on a fixed depth
+                 case (5)
+                    if(isec.ne.nqua .or. nqua.ne.5 .or.ijt.ne.1 .or.kkt.ne.1) stop 8461
+                    ! === Start particles from exact positions set by a file read in readfield 
+                    ! === (works only for orc at the moment)
+!                    trj(ijk,1)=dble(ibm ) + 0.25d0*(dble(ijj)-0.5d0)/dble(ijt)
+!                    trj(ijk,2)=dble(jb-1) + 0.25d0*(dble(kkk)-0.5d0)/dble(kkt) 
+!                    trj(ijk,3)=dble(kb-1) + 0.5d0   
+                    x1=trj(ijk,1)
+                    y1=trj(ijk,2) 
+                    z1=trj(ijk,3)
                  end select
                  
                  ibm=ib-1
@@ -385,6 +410,7 @@ subroutine loop
 #endif
                  
                  ntrac=ntrac+1  ! the trajectory number
+!                 print *,'ntrac=',ntrac,ijk
                  
                  ! selects only one singe trajectory
 #ifdef select
@@ -1352,7 +1378,9 @@ return
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.0 &
          ,f15.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined orc
-566 format(i8,i7,2f8.2,f6.2,2f10.2 &
+!566 format(i8,i7,2f8.2,f6.2,2f10.2 &
+!         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &

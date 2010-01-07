@@ -53,8 +53,8 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
+  !kriva    = 2,
   kriva    = 2,
-  !kriva    = 3,
   !
   ! === Directory where input fields are stored
   !inDataDir = '/Users/doos/data/orca/orca1/',
@@ -67,14 +67,10 @@
   ! outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
   !
   ! === name of current trajectory run
-  ! outDataFile     = 'no_2_b0'/
-  ! outDataFile     = 'tu_25_b0'/
-  !outDataFile     = 'an300_2_b0'/
-  !outDataFile     = 'di1000_25_b0'/
-  ! outDataFile     = 'no_25_c4'/
-   outDataFile     = 'no_25_b1'/
-  ! outDataFile     = 'tu_25_b0'/
-  !outDataFile     = 'an10_25_b0'/
+  ! outDataFile     = 'di1800_d025_a0'/
+   outDataFile     = 'an1000_d025_a0'/
+  ! outDataFile     = 'no_d025_a0'/
+  ! outDataFile     = 'tu_d025_a0'/
   ! outDataFile     = 'di50_25_b0'/
   ! outDataFile     = 'test'/
   ! outDataFile      = 'dol3',!ah=1000 med u=v=0
@@ -90,7 +86,8 @@ $INITRUNSEED
   !==               2 = Seed particles zonal(x-z)
   !==               3 = Seed particles horiz(x-y)
   !==               4 = Seed particles in the middle of T-box
-  isec     = 4,
+  !==               5 = Seed particles from given exact positions read in ?????
+  isec     = 5,
   !==idir:          1 = follow positive direction (eastward/northward)  
   !==              -1 = follow negative direction (westward/southward)
   !==               0 = both directions
@@ -103,8 +100,9 @@ $INITRUNSEED
   !                     (partQuant in m3s-1. per particle)
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
-  nqua     = 1, 
-  partQuant= 2,     !(particles/gridcell or m3s-1/particle or m3/particle)
+  !                 5 = particles set by seedfile (isec==nqua==5)
+  nqua     = 5, 
+  partQuant= 1,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -126,18 +124,21 @@ $INITRUNSEED
   !kst2     =  41, 
 ! One singel gridbox
   ist1     = 1,		 
-  ist2     = 1440,		 
-  jst1     = 501,		 
-  jst2     = 501,		 
-  kst1     =  62,		 
-  kst2     =  62,
+  ist2     =-1,		 
+  jst1     = 1,		 
+  jst2     =-1,		 
+  kst1     =61,		 
+  kst2     =61,
   varSeedFile = 0,
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/mask1010' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/seedrifter_005.asc' /
   !seedFile    = '/Users/doos/data/orca/orca1/topo/maskdrift005b' /
-  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift005b' /
-  !seedFile    = '/Users/doos/data/orca/orca025/topo/mask100100' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_005' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_010' /
+  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_025' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/mask100100' / ! 2*94 trajectories
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
@@ -160,7 +161,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=300., 
+  ah=1000., 
   ! Vertical diffusion in m2/s
   av=0./
   
@@ -215,7 +216,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      200./  ! maximum time length of a trajectory in days
+  timax =       40./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,
