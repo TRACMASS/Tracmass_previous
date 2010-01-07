@@ -19,9 +19,9 @@
 #  fl11  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
-   fl12  = -Dinitxyt        # Start trajectories at given positions and times
+   fl12  = -Dinitxyt       # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-   fl13  = -Dtwodim         # Turn off vertical velocities.
+#   fl13  = -Dtwodim         # Turn off vertical velocities.
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
@@ -36,8 +36,8 @@
 #  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
 #  fl23  = -Dturb           # Adds subgrid turbulent velocities 
-   fl24  = -Ddiffusion      # Adds a diffusion on trajectory
-   fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #  fl27  = -Dorca1          # Makes the velocity coarser 
 #========================================================================
 

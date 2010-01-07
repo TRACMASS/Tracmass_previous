@@ -194,7 +194,7 @@ grad=dsqrt(grdx**2+grdy**2)       ! total depth gradient
 ! angle between the eastward direction and 
 ! the constant depth direction (=0 if only meridional slope)
 if(grad .eq.0.) then
- theta=0
+ theta=0.d0
 else
 ! theta=dasin(grdx/grad)
  theta=dasin(grdx/grad)
