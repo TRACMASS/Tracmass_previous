@@ -9,42 +9,42 @@ subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,ts,tt,dsmin,dxyz,rr)
   !
   !  Input:
   !
-  !  ijk      : considered direction (i=zonal, 2=meridional, 3=vertical)
-  !  ia,ja,ka : original position in integers
-  !  r0       : original non-dimensional position in the 
+  !  ijk      : Considered direction (i=zonal, 2=meridional, 3=vertical)
+  !  ia,ja,ka : Original position in integers
+  !  r0       : Original non-dimensional position in the 
   !             ijk-direction of particle 
-  !             (fractions of a grid box side in the 
-  !              corresponding direction)
-  !  ts       : 
-  !  tt       : 
-  !  dsmin    : 
-  !  dxyz     : 
-  !  rr       : time interpolation constant between 0 and 1 
+  !               (fractions of a grid box side in the 
+  !                corresponding direction)
+  !  ts       : Model dataset time step of trajectory
+  !  tt       : Time in seconds of the trajectory relative to the code start 
+  !  dsmin    : Timestep in sec divided by Volume of the grid-cell
+  !  dxyz     : Volume of current grid-cell
+  !  rr       : Time interpolation constant between 0 and 1 
   !
   !
   !  Output:
   !
   !    sp,sn   : crossing time to reach the grid box wall 
   !              (in units of s/m3)
-
-! computation of time (ss) at crossing for a>0, a<0 and a=0
-! using knowledge of possible sign changes of velocities inside gridbox,
-! the direction (rijk) (east/west or north/south or up/down) is determined
-! except for boxes containing land points, solutions are traced until 
-! the end of a season, so sometimes trajectories do not end on an edge! 
-! depending on velocities there may be no solution in both directions 
-! ss0(+dsmin): start(end) of season; s=s0: xi=xi0; s=ss: xi=xin
-! numerical computation of root:
-! let f(xi) = 0 be the root to be computed giving the time ss
-! given some value x.neq.xi, it follows that
-! 0 = f(xi) = (Taylor expansion) f(x) + (xi-x)*f'(x)
-! with f' being the derivative of f (---> velocity)
-! this gives the iteration method: xi_(n+1) = xi_n - f(xi_n)/f'(xi_n)
-! choose initial value xi00 and use direction rijk for boundary condition 
-! iteration variable xi_n is optimized during calculations for situations
-! that would degrade convergency
-! first, the accuracy parameter xxlim is used for minimizing f(x); then,
-! xxlim is used to minimize the numerical error in the time variable ss 
+  !
+  ! computation of time (ss) at crossing for a>0, a<0 and a=0
+  ! using knowledge of possible sign changes of velocities inside gridbox,
+  ! the direction (rijk) (east/west or north/south or up/down) is determined
+  ! except for boxes containing land points, solutions are traced until 
+  ! the end of a season, so sometimes trajectories do not end on an edge! 
+  ! depending on velocities there may be no solution in both directions 
+  ! ss0(+dsmin): start(end) of season; s=s0: xi=xi0; s=ss: xi=xin
+  ! numerical computation of root:
+  ! let f(xi) = 0 be the root to be computed giving the time ss
+  ! given some value x.neq.xi, it follows that
+  ! 0 = f(xi) = (Taylor expansion) f(x) + (xi-x)*f'(x)
+  ! with f' being the derivative of f (---> velocity)
+  ! this gives the iteration method: xi_(n+1) = xi_n - f(xi_n)/f'(xi_n)
+  ! choose initial value xi00 and use direction rijk for boundary condition 
+  ! iteration variable xi_n is optimized during calculations for situations
+  ! that would degrade convergency
+  ! first, the accuracy parameter xxlim is used for minimizing f(x); then,
+  ! xxlim is used to minimize the numerical error in the time variable ss 
 
 USE mod_param
 USE mod_vel
@@ -182,6 +182,32 @@ end subroutine cross_time
 !_______________________________________________________________________
 
 subroutine pos_time(ijk,ia,ja,ka,r0,r1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+  ! subroutine to compute  the new position (r0) of the trajectory 
+  !
+  !  Input:
+  !
+  !  ijk      : Considered direction (i=zonal, 2=meridional, 3=vertical)
+  !  ia,ja,ka : Original position in integers
+  !  r0       : Original non-dimensional position in the 
+  !             ijk-direction of particle 
+  !               (fractions of a grid box side in the 
+  !                corresponding direction)
+  !  ts       : Model dataset time step of trajectory
+  !  tt       : Time in seconds of the trajectory relative to the code start 
+  !  dsmin    : Timestep in sec divided by Volume of the grid-cell
+  !  dxyz     : Volume of current grid-cell
+  !  ss0      : dble(idint(ts))*tseas/dxyz
+  !  ds       : Min time to face crossing calc in cross
+  !  rr       : Time interpolation constant between 0 and 1 
+  !
+  !
+  !  Output:
+  !
+  !  r1       : New non-dimensional position in the 
+  !             ijk-direction of particle 
+  !               (fractions of a grid box side in the 
+  !                corresponding direction)
+  !
 
 USE mod_param
 USE mod_vel
