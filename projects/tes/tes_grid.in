@@ -17,8 +17,8 @@ $INITGRIDGRID
   IMT      = 100,
   JMT      = 100,  ! one less than the original data
   KM       = 10,
-  LBT      = 2,
-  NEND     = 3/                   ! NEND = LBT +1
+  LBT      = 1,
+  NEND     = 2/                   ! NEND = LBT +1
   !
   !
 $INITGRIDNTRAC

@@ -116,12 +116,14 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
   !
-  ist1     =  95,		 
-  ist2     =  95,		 
-  jst1     =  25,
-  jst2     =  25,
-  kst1     =   5,		 
-  kst2     =   5/
+  ist1     =   1,		 
+  ist2     =  -1,		 
+  jst1     =   1,
+  jst2     =  -1,
+  kst1     =   1,		 
+  kst2     =  -1/
+!  varSeedFile = 0,
+!  seedFile    = 'mask?' /
   !
   !
 $INITRUNTEMPSALT
@@ -144,14 +146,37 @@ $INITRUNTEMPSALT
   smaxe      =  500.,
   rmine      = -100.,
   rmaxe      =  500./
+
+$INITRUNDIFFUSION
+  ! Diffusion paramters
+  ! Horizontal diffusion in m2/s
+  ah=2000., 
+  ! Vertical diffusion in m2/s
+  av=0./
+  
+$INITRUNSEDIMENT
+  ! Sedimenation paramters
   !
+  ! particle diameter in mm: clay 0.0005-0.002, silt 0.002-0.06,
+  ! fine sand 0.06-0.2 (medium sand 0.2-0.6, coarse sand 0.6-2, gravel>2)
+  partdiam=0.001, 
   !
+  ! density of quartz particle: 2600-2650 g/cm^3, mean value 2620
+  rhos=2620., 
+  !
+  ! constant for approximating wave amplitude, a = cwamp*U(surface)
+  cwamp=20.,
+  ! approximative  peak period. Average 4s for Baltic proper
+  twave=8.,
+  ! critical bottom velocity for resuspension
+  critvel=0.1/
+
 $INITRUNEND
 ! defining end sections
-  ienw =     -1,-1,
-  iene =   500,500,
-  jens =   500,500,
-  jenn =   500,500,
+!  ienw =     -1,-1,
+!  iene =   500,500,
+!  jens =   500,500,
+!  jenn =   500,500,
   timax =730./  ! maximum time length of a trajectory in days
 
 
