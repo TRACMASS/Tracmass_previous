@@ -204,7 +204,6 @@ subroutine loop
   !==========================================================
   
   intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
-
      call fancyTimer('reading next datafield','start')
      call readfields
      call fancyTimer('reading next datafield','stop')
@@ -326,8 +325,6 @@ subroutine loop
               num = vol/partQuant
            case (5)
               num = ijkst(ijk,6)
-!              print *,'num=',num,ijk,ijkst(ijk,:)
-!              if(ijk.eq.12) stop 3967
            end select
            if(num.eq.0 .and. nqua.ne.5) num=1 ! always at least one trajectory
         
@@ -336,13 +333,14 @@ subroutine loop
            kkt    = nint(float(num)/float(ijt))
            subvol = vol/dble(ijt*kkt)
                       
-           if(subvol.eq.0.d0) stop 3956  !?????????????????
+!            print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
+99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f12.0, &
+                ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
+                
+            if(subvol.eq.0.d0) stop 3956  !?????????????????
 !           if(subvol.eq.0.d0) subvol=1.d0
            
-!            print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
-99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
-                ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
-           
+
            ! === loop over the subboxes of box (ist,jst,kst) ===
            ijjLoop: do ijj=1,ijt
               kkkLoop: do kkk=1,kkt

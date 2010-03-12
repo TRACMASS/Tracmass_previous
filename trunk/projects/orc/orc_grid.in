@@ -23,7 +23,7 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=20000/               ! 7*1000*1000 
+  NTRACMAX=4000/               ! 7*1000*1000 
   !
   !
 $INITGRIDTIME
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 2000/
+  baseYear       = 1996/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! orig arc meters -> 100 km  

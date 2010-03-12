@@ -102,6 +102,7 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 		if(itno>=100000 .AND. tryAgain) then
 			tryAgain = .FALSE.
 			write(*,*)"Particle stuck in infinite diffusion loop. No diffusion added.",ib,jb,kb
+			stop 34956
 			tmpX=x1 ; tmpY=y1 ; tmpZ=z1
 			tmpi=ib ; tmpj=jb ; tmpk=kb 
 		end if
@@ -140,6 +141,7 @@ SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt)
 	USE mod_param
 #ifdef anisodiffusion
 	USE mod_grid
+	USE mod_coord
 #endif
 	IMPLICIT NONE
 	
@@ -149,7 +151,7 @@ SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt)
 !	REAL, PARAMETER				:: PI = 3.14159265358979323846
  	INTEGER						:: ib,jb,kb		! Box indices
 #ifdef anisodiffusion 	
-	REAL*8						:: Rx, Ry, grdx, grdy, grad, theta, xx, yy
+	REAL*8						:: Rx, Ry, grdx, grdy, grad, theta, elip, xx, yy, hp, hm
  	INTEGER						:: ip,im,jp,jm
 #endif
 		
@@ -187,33 +189,73 @@ if(jp.eq.JMT+1) jp=JMT
 jm=jb-1
 if(jm.eq.0) jm=1
 
+
+! just depth gradient
 grdx=float(kmt(ip,jb)-kmt(im,jb)) ! zonal      depth gradient (zw should be used)
 grdy=float(kmt(ib,jp)-kmt(ib,jm)) ! meridional depth gradient
+
+! inverse depth gradient (just coriolis missing to do the potential vorticity)
+!zw(0)=0.1d0 ! avoid divsion by zero for land
+! depth gradient
+!grdx= zw(kmt(ip,jb)) - zw(kmt(im,jb)) ! zonal      depth gradient (zw should be used)
+!grdy= zw(kmt(ib,jp)) - zw(kmt(ib,jm)) ! zonal      depth gradient (zw should be used)
+! vortcity gradient without f
+!grdx= 1.d0/zw(kmt(ip,jb)) - 1.d0/zw(kmt(im,jb)) ! zonal      depth gradient (zw should be used)
+!grdy= 1.d0/zw(kmt(ib,jp))- 1.d0/zw(kmt(ib,jm)) ! meridional      depth gradient (zw should be used)
+! 1/h gradients with smoothing
+!zonal
+!hp= (zw(kmt(ib,jb))+zw(kmt(ib,jp))+zw(kmt(ip,jp))+zw(kmt(ip,jb))+zw(kmt(ip,jm))+zw(kmt(ib,jm)))/6.d0
+!if(hp.eq.0.) hp=1.d0
+!hm= (zw(kmt(ib,jb))+zw(kmt(ib,jm))+zw(kmt(im,jm))+zw(kmt(im,jb))+zw(kmt(im,jp))+zw(kmt(im,jp)))/6.d0
+!if(hm.eq.0.) hm=1.d0
+!grdx= 1.d0/hp - 1.d0/hm   
+!!meridional   
+!hp= (zw(kmt(ib,jb))+zw(kmt(im,jb))+zw(kmt(im,jp))+zw(kmt(ib,jp))+zw(kmt(ip,jp))+zw(kmt(ip,jb)))/6.d0
+!if(hp.eq.0.) hp=1.d0
+!hm= (zw(kmt(ib,jb))+zw(kmt(ib,jm))+zw(kmt(im,jm))+zw(kmt(im,jb))+zw(kmt(im,jp))+zw(kmt(im,jp)))/6.d0
+!if(hm.eq.0.) hm=1.d0
+!grdy= 1.d0/hp - 1.d0/hm  
+
+
 grad=dsqrt(grdx**2+grdy**2)       ! total depth gradient
+! sätt kanske till noll om det finns ngn landpunkt ?????
+
+!print *,'grad=',grdx,grdy
+!print *,'grdx=',grdx,kmt(ip,jb),kmt(im,jb)
+!print *,'grdy=',grdy,kmt(ib,jp),kmt(ib,jm)
+
 
 ! angle between the eastward direction and 
 ! the constant depth direction (=0 if only meridional slope)
-if(grad .eq.0.) then
- theta=0.d0
+if(grad.eq.0.d0) then
+! theta=0.d0 + pi/2.d0
+ theta=0.d0 
 else
-! theta=dasin(grdx/grad)
- theta=dasin(grdx/grad)
+! theta=dasin(grdx/grad) +pi/2.d0 ! varför 90 grader mer? ny2
+ theta=dasin(grdx/grad) ! ny1 
 endif
 
 ! elliptic horizontal distribution of the diffusion
-grad=dabs(grad)+1.d0
-!grad=amin1(10.d0,grad) ! gives slightly higher relative dispersion
-grad=amin1(5.d0,grad)
-xx=xd*grad
-yy=yd/grad
+!elip=dabs(1.d2*grad)+1.d0 ! för 1/h
+!elip=dabs(1.d-2*grad)+1.d0 ! för h
+elip=dabs(grad)+1.d0 ! för h
+
+!elip=amin1(10.d0,grad) ! gives slightly higher relative dispersion 
+elip=amin1(5.d0,elip) ! 
+
+!print *,'elip=',elip,grad,theta
+
+!The circular disk is stretched into an elliptic disk 
+! with unchanges surface area by
+xx=xd*elip
+yy=yd/elip  
 
 ! coordinate transformation to put the diffusion on an 
 ! ellipse with the maxium diffusion along the isobaths
 xd= xx*dcos(theta)-yy*dsin(theta)
 yd=-xx*dsin(theta)+yy*dcos(theta)
 
-!print *,ib,jb,grdx,grdy,grad,theta*180./pi,xd,xx,yd,yy
-
+!print *,'theta=',theta*180./pi,elip,grdx/grad
 
 !if(jb.gt.400) stop 3096
 !_______________________________________________________________________________

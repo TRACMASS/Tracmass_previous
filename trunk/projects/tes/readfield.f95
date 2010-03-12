@@ -14,7 +14,7 @@ subroutine readfields
     
  INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
  CHARACTER hour(4)*4,month(12)*2,date(31)*2
- REAL*8, SAVE :: dxdeg,dydeg,omtime,pi,cox,coy,om,co,uwe,dl
+ REAL*8, SAVE :: dxdeg,dydeg,omtime,cox,coy,om,co,uwe,dl
 
 data month /'01','02','03','04','05','06','07','08','09','10','11','12'/
 data date /'01','02','03','04','05','06','07','08','09','10',&
@@ -78,7 +78,6 @@ ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !____ construct format of time to read files _______________________
 
-pi = 2.d0*dasin(1.d0)
 omtime=2.d0*pi*dble(ints)/dble(10)
 
 
@@ -90,6 +89,7 @@ dl=dble(ints)*0.01d0*pi
 
 !print *,'ints=',ints,co
 
+
 !co=0.
 
 !C-grid & store in matrixes
@@ -99,9 +99,11 @@ do k=1,KM
   do i=1,IMT
    im=i-1
    if(im.eq.0) im=IMT
+#ifdef tempsalt 
    tem  (i,j,k,2)=20.*float(k)/float(km)
    sal  (i,j,k,2)=30.
    rho  (i,j,k,2)=(28.-20.)*float(km-k)/float(km) +20.
+#endif
    dztb (i,j,2)=dz(k)*dxdy(i,j)
 
    uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
@@ -118,8 +120,8 @@ enddo
 
 !stop 39567
 
-!print *,'uv1=',uflux(95,16,5,1),vflux(95,16,5,1),ints
-!print *,'uv2=',uflux(95,16,5,2),vflux(95,16,5,2),ints
+print *,'uv1=',uflux(95,16,5,1),vflux(95,16,5,1),ints
+print *,'uv2=',uflux(95,16,5,2),vflux(95,16,5,2),ints
 
 return
 end subroutine readfields

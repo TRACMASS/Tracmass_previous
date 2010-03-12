@@ -14,17 +14,10 @@ SUBROUTINE readfields
 
 #ifdef tempsalt
   USE mod_dens
+  USE mod_stat
 #endif
   IMPLICIT none
   
-  INTEGER, PARAMETER :: NTID=73
-#ifdef orca1
-  INTEGER, PARAMETER :: IJKMAX2=254
-#else
-!  INTEGER, PARAMETER :: IJKMAX2=1978 ! for distmax=0.05 and 32 days
-!  INTEGER, PARAMETER :: IJKMAX2=3568 ! for distmax=0.10 and 32 days
-  INTEGER, PARAMETER :: IJKMAX2=8380 ! for distmax=0.10 and 32 days
-#endif
 
   ! = Loop variables
   INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm,ipp,jmm,jpp,ntrac, l
@@ -32,33 +25,45 @@ SUBROUTINE readfields
 
   ! = Variables used for getfield procedures
   CHARACTER (len=200)                        :: gridFile ,fieldFile
-!  CHARACTER (len=50)                         :: varName
-!  INTEGER                                   :: start1d, count1d
- ! INTEGER, DIMENSION(2)                     :: start2d, count2d
- ! INTEGER, DIMENSION(3)                     :: start3d, count3d
   
     ! = Variables for filename generation
-!  CHARACTER                                  :: dates(62)*17
   CHARACTER (len=200)                        :: dataprefix !, dstamp
-!  INTEGER                                    :: intpart1 ,intpart2 ,subYr
-!  INTEGER                                    :: filePos ,fileJD ,subYrD
-!  INTEGER                                    :: yr1 ,mn1 ,dy1
- ! INTEGER                                    :: yr2 ,mn2 ,dy2
-  
 
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: ssh
+#ifdef orca1
+  INTEGER, PARAMETER :: IMTG=???,JMTG=???
+#else
+  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021
+#endif
+
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: ssh, temp2d_simp
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)       :: temp3d_simp
   REAL*8, ALLOCATABLE, DIMENSION(:,:)         :: temp2d_doub
   
-  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: botbox
-  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)   :: e1t,e2t
+  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: botbox !,rhom
+  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)   :: e1t,e2t !,rhom
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: kmu,kmv
+#ifdef initxyt
+  INTEGER, PARAMETER :: NTID=73
+!#ifdef orca1
+!  INTEGER, PARAMETER :: IJKMAX2=254
+!#else
+!  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.05 and 32 days
+!  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.10 and 32 days
+  INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
+!#endif
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
   REAL*4 , SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
-  REAL*4 :: temp2d_simp(IMT+2,JMT)
-  INTEGER itemp(IMT+2,JMT)
-  INTEGER :: varid, ncid
+#endif
+!  REAL*4 :: temp2d_simp(IMT,JMT)
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)         :: itemp
+!  INTEGER itemp(IMT,JMT)
+  INTEGER :: varid, ncid, idzrho(IMT,JMT)
   REAL*4 dd,dmult
+  
+#ifdef tempsalt
+ REAL*4, ALLOCATABLE, DIMENSION(:) :: tempb, saltb, rhob, depthb,latb
+ integer kmm
+#endif
 
 LOGICAL around
 
@@ -66,22 +71,29 @@ LOGICAL around
 
   
   alloCondGrid: if ( .not. allocated (botbox) ) then
-     allocate (  botbox(IMT,JMT,3) )
+     allocate (  botbox(IMTG,JMTG,3) ) ! , rhom(IMT,JMT) 
      allocate ( kmu(IMT,JMT)    ,kmv(IMT,JMT) )
+#ifdef initxyt
      allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(NTID,IJKMAX2,3) )
+#endif
   end if alloCondGrid
 
   alloCondUVW: if(.not. allocated (ssh)) then
-     allocate ( ssh(imt,jmt),temp3d_simp(IMT+2,JMT,KM), temp2d_doub(IMT+2,JMT)   )
-     allocate ( e1t(IMT+2,JMT) , e2t(IMT+2,JMT) )
+     allocate ( ssh(imt,jmt),temp3d_simp(IMT,JMT,KM), temp2d_doub(IMT,JMT), temp2d_simp(IMT,JMT), itemp(IMT,JMT)   )
+     allocate ( e1t(IMT,JMT) , e2t(IMT,JMT) )
+#ifdef tempsalt
+     allocate ( tempb(KM), saltb(KM), rhob(KM), depthb(KM), latb(KM))
+#endif
   end if alloCondUVW
-    
-  start1d  = [ 1]
-  count1d  = [km]
-  start2d  = [  1   ,   1,    1,    1]
-  count2d  = [imt+2 , jmt,    1,    1]
-  start3d  = [  1   ,   1,    1,    1]
-  count3d  = [imt+2 , jmt,   km,    1]
+
+  start1D  = [ 1]
+  count1D  = [km]
+  start2D  = [subGridImin ,subGridJmin , 1 ,1]
+  count2D  = [      imt,        jmt , 1 ,1]
+  map2D    = [          1 ,          2 , 3 ,4]  
+  start3D  = [subGridImin ,subGridJmin , 1 ,1]
+  count3D  = [      imt,        jmt ,km ,1]
+  map3D    = [          1 ,          2 , 3 ,4]  
   
     ! === swap between datasets ===
   hs(:,:,1)=hs(:,:,2)
@@ -104,6 +116,8 @@ LOGICAL around
      sal    = 0.
      rho    = 0.
 #endif
+     ntempus=0
+!     rhom=0.
 
      ! ======================================================
      !    ===  Set up the grid ===
@@ -165,7 +179,9 @@ do j=1,jmt
 jp=j+1
 if(jp.eq.jmt+1) jp=jmt  ! should be north fold instead
  do i=1,imt
-   kmu(i,j)=min(itemp(i,j),itemp(i+1,j))
+ ip=i+1
+ if(ip.eq.IMT+1) ip=1
+   kmu(i,j)=min(itemp(i,j),itemp(ip,j))
    kmv(i,j)=min(itemp(i,j),itemp(i,jp))
  enddo
 enddo
@@ -243,11 +259,19 @@ do k=1,km
 ! print *,k,zw(k),kk,dz(kk)
 end do
 
+!i=500 ; j=500
+!print *,'subGridImin',subGridImin,subGridJmin,imt,jmt
+!print *,'i+subGridImin-1,j+subGridJmin-1',i+subGridImin-1,j+subGridJmin-1
+!print *,'kmt',kmt(i,j)
+!print *,botbox(i+subGridImin-1,j+subGridJmin-1,1)
+!print *,botbox(i+subGridImin-1,j+subGridJmin-1,2)
+!print *,botbox(i+subGridImin-1,j+subGridJmin-1,3)
+!stop 3957
 ! Bottom box 
 do j=1,JMT
  do i=1,IMT
   if(kmt(i,j).ne.0) then
-   dztb(i,j,1)=botbox(i,j,3)
+   dztb(i,j,1)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
   else
    dztb(i,j,1)=0.
   endif
@@ -260,6 +284,7 @@ enddo
 !open(84,file=trim(inDataDir)//'topo/masktime_32_005',form='unformatted')
 !open(84,file=trim(inDataDir)//'topo/masktime_32_010',form='unformatted')
 open(84,file=trim(inDataDir)//'topo/masktime_32_025',form='unformatted')
+!open(84,file=trim(inDataDir)//'topo/masktime_orca1_32_025',form='unformatted')
 ! read(84) ntimask
  read(84) trajinit
 close(84)
@@ -311,8 +336,7 @@ write(dataprefix(1:4),'(i4)') iyear
   fieldFile = trim(inDataDir)//trim(dataprefix)
     
 ! temp, salt and ssh
-!temp2d_simp = get2DfieldNC(trim(fieldFile)//'d05T.nc' ,'sossheig')
-!print *,trim(fieldFile)//'d05T.nc'
+print *,trim(fieldFile)//'d05T.nc'
 
 ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
@@ -321,37 +345,131 @@ ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
 if(ierr.ne.0) stop 3799
 ierr=NF90_CLOSE(ncid)
 
-do i=1,IMT+1
 do j=1,JMT
-  hs(i,j,2)=temp2d_simp(i,j)
-enddo
+ do i=1,IMT+1
+  ip=i
+  if(ip.eq.IMT+1) ip=1
+  hs(i,j,2)=temp2d_simp(ip,j)
+ enddo
 enddo
 
 do i=4,IMT+1
-hs(i,jmt+1,2) =hs(IMT+4-i,jmt-3,2)  !  north fold 
+ hs(i,jmt+1,2) =hs(IMT+4-i,jmt-3,2)  !  north fold 
 enddo
+
 #ifdef tempsalt 
-temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05T.nc' ,'votemper')
+
+! Read the net downward heat flux
+!ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
+!ierr=NF90_INQ_VARID(ncid,'sohefldo',varid) ! the main data fields
+!if(ierr.ne.0) stop 3768
+!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
+!if(ierr.ne.0) stop 3799
+!ierr=NF90_CLOSE(ncid)
+!!rhom=rhom+temp2d_simp
+!rhom=temp2d_simp
+
+
+! Temperature
+gridFile = trim(fieldFile)//'d05T.nc'
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5751
+ierr=NF90_INQ_VARID(ncid,'votemper',varid) 
+if(ierr.ne.0) stop 3769
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+if(ierr.ne.0) stop 3799
+ierr=NF90_CLOSE(ncid)
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmt(i,j)
+   kk=KM+1-k
+   tem(i,j,kk,2)=temp3d_simp(i,j,k)
+  enddo
+ enddo
+enddo
+
+   
+! Temperature
+!gridFile = trim(fieldFile)//'d05T.nc'
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5751
+ierr=NF90_INQ_VARID(ncid,'vosaline',varid) 
+if(ierr.ne.0) stop 3769
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+if(ierr.ne.0) stop 3799
+ierr=NF90_CLOSE(ncid)
+do i=1,IMT
+ do j=1,JMT
+  do k=1,kmt(i,j)
+   kk=KM+1-k
+   sal(i,j,kk,2)=temp3d_simp(i,j,k)
+!   print *,i,j,k,sal(i,j,kk,2)
+  enddo
+ enddo
+enddo
+
+kmm=KM
+depthb=0.
+do j=1,JMT
+ latb=-80+0.25*float(j+subGridJmin-1)
+ do i=1,IMT
+  do k=1,kmt(i,j)
+   kk=KM+1-k
+   tempb(k)=tem(i,j,kk,2)
+   saltb(k)=sal(i,j,kk,2)
+  enddo
+  call statvd(tempb, saltb, rhob ,kmm ,depthb ,latb)
+  do k=1,kmt(i,j)
+   kk=KM+1-k
+   rho(i,j,kk,2)=rhob(k)-1000.
+!   rhom(i,j,k)=rhom(i,j,k)+rho(i,j,kk,2)
+  enddo
+ enddo
+enddo
+
+!if(ints.eq.intstart+intend-1) then
+!print *,'write rho',ints,intstart,intend,intend+intstart-1,trim(inDataDir)//'rho0_1year'
+!rhom=rhom/float(intend)
+!if(ints.eq.intstart) open(38,file=trim(inDataDir)//'dzrho',form='unformatted')
+!write(38) rhom
+!close(38)
+!print *,rhom
+!endif
+if(ints.eq.intstart) open(38,file=trim(inDataDir)//'dzrho_1996',form='unformatted')
+idzrho=0
+do i=1,IMT
+ do j=1,JMT
+!  do k=KM,1,-1
+!   if(rho(i,j,k,2).ge.27.9) idzrho(i,j)=k
+!  enddo
+  do k=2,KM
+   if(rho(i,j,k-1,2).ge.27.9 .and. rho(i,j,k,2).le.27.9) idzrho(i,j)=KM+1-k
+  enddo
+ enddo
+enddo
+write(38) idzrho
+
 
 #endif     
 
 dmult=1.  ! amplification of the velocity amplitude by simple multiplication
 
 ! u velocity
-!temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05U.nc' ,'vozocrtx')
 gridFile = trim(fieldFile)//'d05U.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 5751
 ierr=NF90_INQ_VARID(ncid,'vozocrtx',varid) 
 if(ierr.ne.0) stop 3769
 ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+if(ierr.ne.0) stop 3799
+ierr=NF90_CLOSE(ncid)
 do i=1,IMT
  do j=1,JMT
   do k=1,kmu(i,j)
    kk=KM+1-k
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
-   if(k.eq.kmu(i,j)) dd = botbox(i,j,1)
+   if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
    uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
   enddo
  enddo
@@ -365,13 +483,15 @@ if(ierr.ne.0) stop 5751
 ierr=NF90_INQ_VARID(ncid,'vomecrty',varid) ! kmt field
 if(ierr.ne.0) stop 3770
 ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+if(ierr.ne.0) stop 3799
+ierr=NF90_CLOSE(ncid)
 do i=1,IMT
  do j=1,JMT
   do k=1,kmv(i,j)
    kk=KM+1-k
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
-   if(k.eq.kmv(i,j)) dd = botbox(i,j,2)
+   if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
    vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
   enddo
  enddo
@@ -404,25 +524,19 @@ do ntrac=1,ijkmax
   ijkst(ntrac,6)=0
  endif
 enddo
-!print *,'jjj=',ntempus,j
 #endif
 
 
-!if(ntempus.eq.2) stop 4967
-!uflux=0.0001 ; vflux=0.0001  ! special case with no verlocities
+!uflux=0.0001 ; vflux=0.0001  ! special case with no velocities
 
-!do j=1,jmt
-! do i=1,imt
-!  do k=1,km
-!   kk=km+1-k
-!   if(kk.gt.kmu(i,j)) uflux(i,j,k,2)=0.
-!   if(kk.gt.kmv(i,j)) vflux(i,j,k,2)=0.
-!  enddo
-! enddo
-!enddo
+! multiply the velocity field by a constant
+!uflux=1.3*uflux
+!vflux=1.3*vflux
 
-     deallocate ( ssh , temp3d_simp, temp2d_doub, e1t , e2t)
 
+     deallocate ( ssh , temp3d_simp, temp2d_doub, temp2d_simp, itemp )
+     deallocate ( e1t , e2t )
+     deallocate ( tempb, saltb, rhob, depthb, latb )
 
   return
 end subroutine readfields

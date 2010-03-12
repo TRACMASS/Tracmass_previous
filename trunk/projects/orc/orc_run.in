@@ -7,13 +7,13 @@
   !==               1 = Define subGrid in this file.
   !==               2 = Define subGrid with sep. file and subGridID.
   !==               3 = Define subGrid with sep. file and MPI.
-  subGrid      = 0,
+  subGrid      = 1,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 100,
-  subGridImax  = 1440,
-  subGridJmin  = 1,
-  subGridJmax  = 1021,
+  subGridImin  = 601,
+  subGridImax  = 1200,
+  subGridJmin  = 601,
+  subGridJmax  = 1000,
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
   ! === Used if SubGrid = 2
@@ -25,8 +25,8 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin =73, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
-  !intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  !intspin =73, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   ! === Number of timesteps for the run - stops after this.      ===
   intrun  =112,
   ! === "1" if forward in time  "-1" if backward in time      ===
@@ -36,9 +36,9 @@
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 5,
-  startMon          = 1,
-  startYear         = 2000/  ! first year is 1981, last year is 2005
+  startDay          = 29,
+  startMon          = 6,
+  startYear         = 1996/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE
@@ -57,23 +57,22 @@
   kriva    = 2,
   !
   ! === Directory where input fields are stored
-  !inDataDir = '/Users/doos/data/orca/orca1/',
+  ! inDataDir = '/Users/doos/data/orca/orca1/',
    inDataDir = '/Users/doos/data/orca/orca025/',
+  ! inDataDir = '/Volumes/vatten/data/orca025/',
   !
   ! === Directory where output files are saved
-  ! outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
    outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
   ! outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
-  ! outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
   !
   ! === name of current trajectory run
-  ! outDataFile     = 'di1800_d025_a0'/
-   outDataFile     = 'an1000_d025_a0'/
-  ! outDataFile     = 'no_d025_a0'/
+  ! outDataFile     = 'di1000_d025_a0'/
+  ! outDataFile     = 'an2000_d025_ny9'/
+  ! outDataFile     = 'no_d025_2D_180'/
   ! outDataFile     = 'tu_d025_a0'/
-  ! outDataFile     = 'di50_25_b0'/
-  ! outDataFile     = 'test'/
-  ! outDataFile      = 'dol3',!ah=1000 med u=v=0
+  ! outDataFile     = 'di4000_d025_m13'/
+    outDataFile     = 'norske1996'/
+  ! outDataFile      = 'di4000_d025_k64',!ah=4000 med u=v=0
   !
   intminInOutFile=0/
 $INITRUNSEED
@@ -87,7 +86,7 @@ $INITRUNSEED
   !==               3 = Seed particles horiz(x-y)
   !==               4 = Seed particles in the middle of T-box
   !==               5 = Seed particles from given exact positions read in ?????
-  isec     = 5,
+  isec     = 4,
   !==idir:          1 = follow positive direction (eastward/northward)  
   !==              -1 = follow negative direction (westward/southward)
   !==               0 = both directions
@@ -101,7 +100,7 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   !                 5 = particles set by seedfile (isec==nqua==5)
-  nqua     = 5, 
+  nqua     = 1, 
   partQuant= 1,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
@@ -109,7 +108,7 @@ $INITRUNSEED
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  seedType = 3,
+  seedType = 1,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded (started).
@@ -123,18 +122,18 @@ $INITRUNSEED
   !kst1     =  38,		 
   !kst2     =  41, 
 ! One singel gridbox
-  ist1     = 1,		 
-  ist2     =-1,		 
-  jst1     = 1,		 
-  jst2     =-1,		 
-  kst1     =61,		 
-  kst2     =61,
+  ist1     =512, ! 1,		 
+  ist2     =542, !-1,		 
+  jst1     =247, ! 1,		 
+  jst2     =293, !-1,		 
+  kst1     =1,  !61,		 
+  kst2     =61,  !61,
   varSeedFile = 0,
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/mask1010' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/seedrifter_005.asc' /
-  !seedFile    = '/Users/doos/data/orca/orca1/topo/maskdrift005b' /
+  !seedFile    = '/Users/doos/data/orca/orca1/topo/maskdrift_orca1_32_025' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_005' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_010' /
   seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_025' /
@@ -148,20 +147,20 @@ $INITRUNSEED
   tmax0 =  20.,
   smin0 =-500.,
   smax0 = 400.,
-  rmin0 =-100.,
-  rmax0 = 500.,
+  rmin0 =27.89,
+  rmax0 =27.91,
   ! for ending a trajectory
   tmine =  -50.,
   tmaxe =  400.,
   smine = -150.,
   smaxe =  500.,
   rmine = -100.,
-  rmaxe =  500./
+  rmaxe =  5000./
 
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=1000., 
+  ah=2000., 
   ! Vertical diffusion in m2/s
   av=0./
   
@@ -216,7 +215,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =       40./  ! maximum time length of a trajectory in days
+  timax =      365./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,
