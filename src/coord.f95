@@ -215,7 +215,6 @@ dz=100.  ! equidistant depth levels for the test case
   rlatt=rlatu-0.5d0*dy            ! at T-points
   csu(j)=dcos(rlatu*radian)
   cst(j)=dcos(rlatt*radian)
-  
  enddo
  
 #elif defined occ

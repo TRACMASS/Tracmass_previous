@@ -313,7 +313,7 @@ subroutine loop
 #endif /*freesurface*/
            end if
            
-!           print *,'vol=',vol
+           print *,'vol=',vol
            
            ! === number of trajectories for box (ist,jst,kst) ===
            select case (nqua)
@@ -724,8 +724,8 @@ subroutine loop
               endif
               x1=dble(ia)
 #if defined timeanalyt
-              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) 
               call pos(3,ia,ja,ka,z0,z1,ds,rr)
@@ -761,7 +761,6 @@ subroutine loop
 #endif /*streamts*/
 #endif /*streamr*/
            elseif(ds.eq.dsw) then ! westward grid-cell exit
-              
               scrivi=.false.
               uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
 #ifdef turb    
@@ -772,8 +771,8 @@ subroutine loop
               endif
               x1=dble(iam)
 #if defined timeanalyt
-              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -815,8 +814,8 @@ subroutine loop
               endif
               y1=dble(ja)
 #if defined timeanalyt
-              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -861,8 +860,8 @@ subroutine loop
               endif
               y1=dble(ja-1)
 #if defined timeanalyt
-              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -914,8 +913,8 @@ subroutine loop
                  z1=dble(KM)-0.5d0
               endif
 #if defined timeanalyt
-              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr)
               call pos(2,ia,ja,ka,y0,y1,ds,rr)
@@ -931,8 +930,8 @@ subroutine loop
 #endif              
               z1=dble(ka-1)
 #if defined timeanalyt
-              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr)
               call pos(2,ia,ja,ka,y0,y1,ds,rr)
@@ -960,25 +959,26 @@ subroutine loop
               
            elseif( ds.eq.dsc .or. ds.eq.dsmin) then  ! shortest time is the time-steping 
             scrivi=.true.
+#ifdef timeanalyt
+             call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+             call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+             call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#else           
 ! If there is no spatial solution, which should correspond to a convergence zone
             if(dse.eq.UNDEF .and. dsw.eq.UNDEF .and. dsn.eq.UNDEF .and. & 
-               dss.eq.UNDEF .and. dsu.eq.UNDEF .and. dsd.eq.UNDEF) then
+               dss.eq.UNDEF .and. dsu.eq.UNDEF .and. dsd.eq.UNDEF ) then
                x1=x0 ; y1=y0 ; z1=z0 ! let the particle remain in a static position from previuos iteration
                ib=ia ; jb=ja ; kb=ka  
 ! If there is at least one spatial solution but the shortest cross time is the time step
             else
-#ifdef timeanalyt
-             call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-             call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
-             call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
-#else
+
              call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
              call pos(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
 #ifndef twodim   
              call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
 #endif
-#endif
 		    endif
+#endif
            endif
 
 #ifdef orc 
@@ -1369,8 +1369,11 @@ return
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined rco || tes 
+#elif defined rco 
 566 format(i8,i7,f7.2,f7.2,f7.1,2f10.2 &
+         ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
+#elif defined tes 
+566 format(i8,i7,f8.3,f8.3,f7.3,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined ifs 
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.0 &

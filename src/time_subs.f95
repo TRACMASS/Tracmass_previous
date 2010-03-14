@@ -59,7 +59,8 @@ REAL*8  :: f0,f1,dzs,dzu1,dzu2,rijk,s0,ss0,rr,rg
 
 s0=tt/dxyz
 ss0=dble(idint(ts))*tseas/dxyz
-rr=1.d0-rg
+rg=1.d0-rr
+
 
 sp=UNDEF ; sn=UNDEF
 loop=0 ; rijk=0.d0 ; ss=UNDEF ; f0=0.d0 ; f1=0.d0
@@ -223,8 +224,10 @@ REAL*8  :: f0,f1,dzs,dzu1,dzu2,s0,ss,ss0,ds,rr,rg
 
 s0=tt/dxyz-ds
 ss=ts*tseas/dxyz
-rr=1.d0-rg
+!rr=1.d0-rg
+rg=1.d0-rr
 f0=0.d0 ; f1=0.d0
+
 
 if(ijk.eq.1) then
  ii=ia
@@ -1166,7 +1169,7 @@ SAVE init,c
 DATA init/0/ !  Flag is 0 if we need to initialize, else 1.
 
 init=0
-pisqin=1./dsqrt(pi)
+pisqin=1.d0/dsqrt(pi)
 
 if(init.eq.0) then
  init=1
