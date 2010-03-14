@@ -67,7 +67,6 @@ endif
 !  hs(:,:,1)=hs(:,:,2)
   uflux(:,:,:,1)=uflux(:,:,:,2)
   vflux(:,:,:,1)=vflux(:,:,:,2)
-  dztb(:,:,1)=dztb(:,:,2)
 #ifdef tempsalt 
   tem(:,:,:,1)=tem(:,:,:,2)
   sal(:,:,:,1)=sal(:,:,:,2)
@@ -78,11 +77,14 @@ ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !____ construct format of time to read files _______________________
 
-omtime=2.d0*pi*dble(ints)/dble(10)
+omtime=2.d0*pi*dble(ints)/dble(2)
 
 
 cox=0.5d0+0.5d0*dcos(omtime)
-coy=0.5d0+0.5d0*dcos(omtime+pi)
+!coy=0.5d0+0.5d0*dcos(omtime+pi)
+
+!cox=1.d0  ! stationary
+
 
 uwe=-0.4d0
 dl=dble(ints)*0.01d0*pi
@@ -104,12 +106,14 @@ do k=1,KM
    sal  (i,j,k,2)=30.
    rho  (i,j,k,2)=(28.-20.)*float(km-k)/float(km) +20.
 #endif
-   dztb (i,j,2)=dz(k)*dxdy(i,j)
 
-   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
-                                     dsin(-pi*dble(j-1-jmt/2)/dble(jmt-1) )  + uwe)
-   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( dsin( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
-                                     dcos( pi*dble(j-1-jmt/2)/dble(jmt-1) )  )
+!   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+!                                     dsin(-pi*dble(j-1-jmt/2)/dble(jmt-1) )  + uwe)
+!   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( dsin( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+!                                     dcos( pi*dble(j-1-jmt/2)/dble(jmt-1) )  )
+                                     
+   uflux(i,j,k,2)=-cox*dy*deg*dz(k)*dble(j-1-jmt/2)/dble(jmt-1)
+   vflux(i,j,k,2)= cox*dx*deg*dz(k)*dble(i-1-imt/2)/dble(imt-1)
   enddo
  enddo
 enddo ! enddo k-loop
@@ -120,8 +124,10 @@ enddo
 
 !stop 39567
 
-print *,'uv1=',uflux(95,16,5,1),vflux(95,16,5,1),ints
-print *,'uv2=',uflux(95,16,5,2),vflux(95,16,5,2),ints
+!print *,'uv1=',uflux(95,16,5,1),vflux(95,16,5,1),ints
+!print *,'uv2=',uflux(95,16,5,2),vflux(95,16,5,2),ints
+
+!print *,dztb
 
 return
 end subroutine readfields
