@@ -336,7 +336,7 @@ write(dataprefix(1:4),'(i4)') iyear
   fieldFile = trim(inDataDir)//trim(dataprefix)
     
 ! temp, salt and ssh
-print *,trim(fieldFile)//'d05T.nc'
+!print *,trim(fieldFile)//'d05T.nc'
 
 ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
@@ -389,7 +389,7 @@ do i=1,IMT
 enddo
 
    
-! Temperature
+! Salinity
 !gridFile = trim(fieldFile)//'d05T.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 5751
@@ -536,7 +536,9 @@ enddo
 
      deallocate ( ssh , temp3d_simp, temp2d_doub, temp2d_simp, itemp )
      deallocate ( e1t , e2t )
+#ifdef tempsalt
      deallocate ( tempb, saltb, rhob, depthb, latb )
+#endif
 
   return
 end subroutine readfields

@@ -3,11 +3,11 @@
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-   fl01   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
-#  fl01   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
-   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+#   fl01   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
+  fl01   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
+#   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-   fl03   = -Dtempsalt       # Include temp and salt
+#   fl03   = -Dtempsalt       # Include temp and salt
    fl04   = -Dtextwrite      # Write results to textfile
 #  fl05   = -Dbinwrite       # Write results to binaryfile
 #  fl06   = -Dmysqlwrite     # Write results to mysql
@@ -19,9 +19,9 @@
 #  fl11  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
-#   fl12  = -Dinitxyt       # Start trajectories at given positions and times
+   fl12  = -Dinitxyt       # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-#   fl13  = -Dtwodim         # Turn off vertical velocities.
+   fl13  = -Dtwodim         # Turn off vertical velocities.
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------

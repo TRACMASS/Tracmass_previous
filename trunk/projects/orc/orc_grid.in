@@ -23,13 +23,13 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=4000/               ! 7*1000*1000 
+  NTRACMAX=20000/               ! 7*1000*1000 
   !
   !
 $INITGRIDTIME
   !
   ngcm          = 120,            ! (5*24) hours between GCM datasets
-  iter          =  20,            ! iteration between two gcm data sets
+  iter          =  1,            ! iteration between two gcm data sets
   intmax        =  73,            ! maximum length of GCM fields
   fieldsPerFile =   1/
   !
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 1996/
+  baseYear       = 2000/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! orig arc meters -> 100 km  
