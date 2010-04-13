@@ -312,9 +312,7 @@ subroutine loop
               vol=vol*dxdy(ib,jb)
 #endif /*freesurface*/
            end if
-           
-           print *,'vol=',vol
-           
+                      
            ! === number of trajectories for box (ist,jst,kst) ===
            select case (nqua)
            case (1)
@@ -670,6 +668,7 @@ subroutine loop
 #endif /*regulardt*/
            if(dt.lt.0.d0) then
               print *,'dt=',dt
+              stop 49673
               goto 1500
            endif
            ! === if time step makes the integration ===
@@ -1247,7 +1246,7 @@ return
              call writedata(19)
              boundError = boundError +1
              errCode = -50
-!             stop 40962
+             stop 40962
              call writedata(40)
              nrj(ntrac,6)=1
           endif

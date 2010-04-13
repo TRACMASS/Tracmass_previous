@@ -77,13 +77,15 @@ ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !____ construct format of time to read files _______________________
 
-omtime=2.d0*pi*dble(ints)/dble(2)
-
+!omtime=2.d0*pi*dble(ints)/dble(2)
+omtime=dble(ints)/dble(5)+1.
+!omtime=2.d0*pi*dble(ints)/dble(1000)
+!print *,'omtime',ints,omtime
 
 cox=0.5d0+0.5d0*dcos(omtime)
-!coy=0.5d0+0.5d0*dcos(omtime+pi)
+coy=0.5d0+0.5d0*dcos(omtime+pi)
 
-!cox=1.d0  ! stationary
+!cox=0.d0  ! stationary
 
 
 uwe=-0.4d0
@@ -107,16 +109,37 @@ do k=1,KM
    rho  (i,j,k,2)=(28.-20.)*float(km-k)/float(km) +20.
 #endif
 
-!   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
-!                                     dsin(-pi*dble(j-1-jmt/2)/dble(jmt-1) )  + uwe)
-!   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( dsin( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
-!                                     dcos( pi*dble(j-1-jmt/2)/dble(jmt-1) )  )
-                                     
-   uflux(i,j,k,2)=-cox*dy*deg*dz(k)*dble(j-1-jmt/2)/dble(jmt-1)
-   vflux(i,j,k,2)= cox*dx*deg*dz(k)*dble(i-1-imt/2)/dble(imt-1)
+! time evolving oscilating field
+   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+                                     dsin(-pi*dble(j-1-jmt/2)/dble(jmt-1) )  + uwe &
+                                     + dcos(omtime)                                )
+   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( dsin( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+                                     dcos( pi*dble(j-1-jmt/2)/dble(jmt-1) )        &
+                                     + dsin(omtime)                                )
+! Circular stationary field
+!   uflux(i,j,k,2)=-cox*dy*deg*dz(k)*dble(j-1-jmt/2)/dble(jmt-1) 
+!   vflux(i,j,k,2)= cox*dx*deg*dz(k)*dble(i-1-imt/2)/dble(imt-1)
+
+! Spatially constant field which oscilates in time
+!   uflux(i,j,k,2)=dy*deg*dz(k)*(dcos(omtime)-0.01  +dcos(omtime/pi))
+!   vflux(i,j,k,2)=dx*deg*dz(k)*(dsin(omtime)-0.001 +dsin(omtime/pi))
+   
+!   uflux(i,j,k,2)=dy*deg*dz(k)*(-0.01  +dcos(omtime/pi))
+!   vflux(i,j,k,2)=dx*deg*dz(k)*(-0.001 +dsin(omtime/pi))
+   
+!   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( -0.05 +omtime/5000.+ dcos(omtime) + 0.5*dsin(omtime*2.) + 2.*dsin(omtime*10.))
+!   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( -0.025 + dsin(omtime) + 0.5*dcos(omtime*2.) + 0.5*dcos(omtime/2))
+
+
+
+
   enddo
  enddo
 enddo ! enddo k-loop
+
+! zero at north and south boundaries 
+vflux(:,0  ,:,:)=0.
+vflux(:,JMT,:,:)=0.
 
 do j=jmt,1,-10
 !print *,(uflux(i,j,2,2),i=1,imt,10)

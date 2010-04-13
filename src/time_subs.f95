@@ -55,6 +55,7 @@ IMPLICIT NONE
 INTEGER :: iim,loop,iil,ii,ijk,ia,ja,ka
 REAL*8  :: uu,um,vv,vm,ss,aa,r0,sp,sn,dsmin,ts,tt,dxyz
 REAL*8  :: f0,f1,dzs,dzu1,dzu2,rijk,s0,ss0,rr,rg
+REAL*8,  PARAMETER ::  EPS=1.d-10
 !_______________________________________________________________________________
 
 s0=tt/dxyz
@@ -154,15 +155,18 @@ elseif(ijk.eq.3) then
 endif
 
 aa = -(vv-uu-vm+um)
-
 ! ----- a > 0
-     if (aa.gt.0.d0) then
+!     if (aa.gt.0.d0) then
+     if (aa.gt.EPS) then
       call apos (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
 ! ----- a < 0      
-     elseif (aa.lt.0.d0) then
+     elseif (aa.lt.-EPS) then
+!     elseif (aa.lt.0.d0) then
       call amin (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
 ! ----- a = 0 
-     elseif (aa.eq.0.d0) then
+!     elseif (aa.eq.0.d0) then
+      else
+      if (aa.ne.0.d0) print *,'anil eps=',aa
       call anil (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
      endif
 ! translate direction and positions for old to new tracmass
@@ -424,7 +428,7 @@ else
 endif
 const = 2.d0*const/dsqrt(2.d0*aa)
 daw0 = s15aff(xi0)     !  daw0 = s15aff(xi0, ifail)
-! ''velocity'' at xi0
+! 'velocity' at xi0
 xf1 = const -(xi0+xi0)*(r0+ga)    
 
 ! 2) ii direction (four velocity configurations at edge)
@@ -620,6 +624,7 @@ aa = -(vv-uu-vm+um)/dsmin
 bb = um-uu
 xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
 
+
 ! 1) ii or iim ---> land point 
      if (uu.eq.0.d0 .and. vv.eq.0.d0) then
       rijk = dble(iim)
@@ -661,7 +666,7 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
 !stop 5906
       erf0 = -s15aef(xi0)
      endif
-! minus-''velocity'' at xi0
+! minus-velocity at xi0
      xf1 = xi0*(r0+ga)-(const/dsqrt(pi)) 
 
 ! 2) ii direction (four velocity configurations at edge)
@@ -716,6 +721,7 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
      if (ssiim.le.0.d0 .or. ssiim.ge.1.d0) then
       if (um.gt.0.d0 .or. vm.gt.0.d0) then
 ! 3a) configuration: +++ no solution
+!     print *,'3a no solution'
        return
       else
 ! 3b) configuration: ---
@@ -778,6 +784,7 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
       goto 300
      endif
      xf1 = xf1+xf1
+     if(xf1.eq.0.) stop 59785
      xin = xi - xf/xf1
      if ( dabs(xf).gt.100.d0 .or.(xf*xibf.gt.0.d0 .and. (xf1*xibf.gt.0.d0 .or.xin.gt.xia)) )then
       xib = xi
@@ -790,6 +797,7 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
      else
       xi = xin      
      endif
+!     stop 49567
      xf2= errfun (const,erf0,r0+ga,xi0,xi)
      xf1= xi*xf2-(const/dsqrt(pi))
      xf = xf2-ga-rijk
@@ -1122,6 +1130,7 @@ if (xi0.gt.xilim) then ! complementary error function
 elseif(xi0.lt.-xilim) then
  erf  = -s15adf(-xi)
 else
+! if(xi.ne.0.) stop 3956
  erf  = -s15aef(xi) ! error function
 endif
 
@@ -1240,7 +1249,6 @@ if(x.lt.a+1.d0) then ! Use the series representation.
  gammp=gamser
 else ! Use the continued fraction representation
  call gcf(gammcf,a,x,gln)
-! print *,'call gcf1',gammcf,a,x,gln
  gammp=1.d0-gammcf ! and take its complement.
 endif
 
@@ -1263,13 +1271,13 @@ REAL*8  :: a,gammcf,gln,x,an,b,c,d,del,h,gammln
 INTEGER :: i
 
 gln=gammln(a)
-b=x+1.d0-a   ! Set up for evaluating continued fraction by modied
+b=x+1.d0-a   ! Set up for evaluating continued fraction by modied
 c=1.d0/FPMIN !Lentz's method (x5.2) with b0 = 0.
 d=1.d0/b
 h=d
 
 do i=1,ITMAX  ! Iterate to convergence.
- an=-i*(i-a)
+ an=-dble(i)*(dble(i)-a)
  b=b+2.d0
  d=an*d+b
  if(dabs(d).lt.FPMIN) d=FPMIN
@@ -1281,7 +1289,8 @@ do i=1,ITMAX  ! Iterate to convergence.
  if(dabs(del-1.d0).lt.EPS) goto 1
 enddo
  
-print *, 'a too large, ITMAX too small in gcf',dabs(del-1.d0),EPS
+print *, 'a too large, ITMAX too small in gcf',dabs(del-1.d0),EPS,del
+print *,'cd=',an
 stop 43957
 1 gammcf=exp(-x+a*dlog(x)-gln)*h  ! Put factors in front.
 
@@ -1316,7 +1325,7 @@ do j=1,6
 enddo 
 
 gammln=tmp+dlog(stp*ser/x)
-
+ 
 return
 
 end function gammln
