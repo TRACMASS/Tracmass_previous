@@ -143,12 +143,16 @@ elseif(ijk.eq.3) then
   dzs= dz(km)+rg*hs(ia,ja,NST)+rr*hs(ia,ja,1)
   dzu1=dz(km)+hs(ia,ja,2)
   dzu2=dz(km)+hs(ia,ja,1)
+  if(dabs(dzu1).le.eps) stop 4956
+  if(dabs(dzu2).le.eps) stop 4957
   f0=dzs/dzu1
   f1=dzs/dzu2
   uu=uu*f0
   um=um*f0
   vv=vv*f1
   vm=vm*f1
+  if(dabs(f0).le.eps) stop 4958
+  if(dabs(f1).le.eps) stop 4959
   f0=1.d0/f0
   f1=1.d0/f1
  endif 
@@ -225,6 +229,7 @@ INTEGER :: ijk,ia,ja,ka,iim,iil,ii
 REAL*8  :: uu,um,vv,vm,xi,xi0,const,ga,erf0,aa,bb,daw0,r0,r1,dsmin,dxyz,tt,ts,rijk
 REAL*8  :: s15aff,dawson,s15adf,s15aef,errfun
 REAL*8  :: f0,f1,dzs,dzu1,dzu2,s0,ss,ss0,ds,rr,rg
+REAL*8,  PARAMETER ::  EPS=1.d-10
 
 s0=tt/dxyz-ds
 ss=ts*tseas/dxyz
@@ -310,26 +315,34 @@ elseif(ijk.eq.3) then
   dzs= dz(km)+rg*hs(ia,ja,NST)+rr*hs(ia,ja,1)
   dzu1=dz(km)+hs(ia,ja,NST)
   dzu2=dz(km)+hs(ia,ja,1  )
+  if(dabs(dzu1).le.eps) stop 4966
+  if(dabs(dzu2).le.eps) stop 4967
   f0=dzs/dzu1
   f1=dzs/dzu2
   uu=uu*f0
   um=um*f0
   vv=vv*f1
   vm=vm*f1
+  if(dabs(f0).le.eps) stop 4968
+  if(dabs(f1).le.eps) stop 4969
   f0=1.d0/f0
   f1=1.d0/f1
  endif 
 endif
 
+if(dabs(dsmin).le.eps) stop 4981
 aa = -(vv-uu-vm+um)/dsmin
 bb = um-uu
 
+
+if(aa.ne.0.d0) then
 if(f0.eq.0.d0) then
  ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)
  const = (um*vv-uu*vm)/(vv-uu-vm+um)
 else
  ga = -dble(iim) + (f1*vm-f0*um)/(vv-uu-vm+um)
  const = (f0*um*(vv-vm)+f1*vm*(um-uu))/(vv-uu-vm+um)
+endif
 endif
 
 if (aa.gt.0.d0) then
@@ -381,6 +394,7 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
+REAL*8,  PARAMETER ::  EPS=1.d-10
 REAL*8,  PARAMETER ::  xxlim=1.d-7
 INTEGER :: ii,iim,iconfig,i,loop
 REAL*8  :: uu,um,vv,vm,xi0,xin,ssii,ssiim,xerr,xf1,xi,xi00,xia,xib,xibf
@@ -551,6 +565,7 @@ xibf=xf
 !       if (xerr.eq.UNDEF) loop=1000
       goto 200
      endif
+     if(dabs(xf1).le.eps) stop 4992
      xin = xi - xf/xf1
      if ( dabs(xf).gt.100.d0 .or.(xf*xibf.gt.0.d0 .and.(xf1*xibf.lt.0.d0 .or.xin.lt.xia)) ) then
       xib = xi
@@ -614,6 +629,7 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
+REAL*8,  PARAMETER ::  EPS=1.d-10
 REAL*8,  PARAMETER ::  xilim=3.0d0,xxlim=1.d-7
 INTEGER :: ii,iim,iconfig,i,loop
 REAL*8  :: uu,um,vv,vm,xib,xia,xi00,xi0,xf1,xf,xf2,xin,xibf,xi,xerr,xiaf
@@ -643,12 +659,16 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
      if (f0.eq.0.d0) then
       ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)
       const = (um*vv-uu*vm)/(vv-uu-vm+um)
+     if(dabs(uu-vv).le.eps) stop 4993
       ssii = uu/(uu-vv)
+     if(dabs(um-vm).le.eps) stop 4994
       ssiim= um/(um-vm)
      else
       ga = -dble(iim) + (f1*vm-f0*um)/(vv-uu-vm+um)
       const = (f0*um*(vv-vm)+f1*vm*(um-uu))/(vv-uu-vm+um)
+     if(dabs(uu-vv+um*(f0-1.d0)+vm*(1.-f1)).le.eps) stop 4995
       ssii = (uu+um*(f0-1.d0))/(uu-vv+um*(f0-1.d0)+vm*(1.-f1))
+     if(dabs(f0*um-f1*vm).le.eps) stop 4996
       ssiim= f0*um/(f0*um-f1*vm)
      endif
      const = const*sqrt(pi/(-2.d0*aa))
@@ -847,6 +867,7 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
+REAL*8,  PARAMETER ::  EPS=1.d-10
 REAL*8,  PARAMETER :: xxlim=1.d-7
 INTEGER :: ii,iim
 REAL*8  :: aa,bb,ga,dsmin,uu,um,vv,vm,ss,ssii,ssiim
@@ -874,6 +895,7 @@ if (aa.eq.0.d0) then
      endif
      return
    else
+     if(dabs(bb).le.eps) stop 4537
      ga = -(f0*um+aa*dble(iim))/bb -ss0
      if (s0+ga.ge.0.d0) then
        if (bb.gt.0.d0) then
