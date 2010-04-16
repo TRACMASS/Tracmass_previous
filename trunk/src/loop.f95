@@ -641,6 +641,9 @@ subroutine loop
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
+#ifdef twodim   
+           dsu=UNDEF ; dsd=UNDEF
+#endif
            ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
            if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
               ! === Can not find any path for unknown reasons ===
@@ -724,7 +727,9 @@ subroutine loop
               x1=dble(ia)
 #if defined timeanalyt
               call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#endif
 #else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) 
               call pos(3,ia,ja,ka,z0,z1,ds,rr)
@@ -771,7 +776,9 @@ subroutine loop
               x1=dble(iam)
 #if defined timeanalyt
               call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#endif
 #else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -814,7 +821,9 @@ subroutine loop
               y1=dble(ja)
 #if defined timeanalyt
               call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#endif
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -860,7 +869,9 @@ subroutine loop
               y1=dble(ja-1)
 #if defined timeanalyt
               call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#endif
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -961,7 +972,9 @@ subroutine loop
 #ifdef timeanalyt
              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#ifndef twodim   
              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+#endif
 #else           
 ! If there is no spatial solution, which should correspond to a convergence zone
             if(dse.eq.UNDEF .and. dsw.eq.UNDEF .and. dsn.eq.UNDEF .and. & 

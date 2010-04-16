@@ -36,8 +36,8 @@
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 6, !5,
-  startMon          = 11, !1,
+  startDay          = 5, !5,
+  startMon          = 1, !1,
   startYear         = 2000/  ! first year is 1981, last year is 2005
   !
   !
@@ -70,7 +70,8 @@
   ! outDataFile     = 'no_d025_2D_180'/
   ! outDataFile     = 'tu_d025_a0'/
   ! outDataFile     = 'di4000_d025_m13'/
-   outDataFile     = 'analyt'/
+   outDataFile     = 'analyt2'/
+  ! outDataFile     = 'test'/
   ! outDataFile      = 'di4000_d025_k64',!ah=4000 med u=v=0
   !
   intminInOutFile=0/
@@ -142,14 +143,14 @@ $INITRUNSEED
   ! water mass properties with minimum & maximum on temp, salt and density
   !
   ! for starting a trajectory (active only with option tempsalt) 
-  tmin0 = -50.,
-  tmax0 =  20.,
+  tmin0 =-500.,
+  tmax0 = 200.,
   smin0 =-500.,
   smax0 = 400.,
   rmin0 =-100.,
   rmax0 = 500.,
   ! for ending a trajectory
-  tmine =  -50.,
+  tmine = -500.,
   tmaxe =  400.,
   smine = -150.,
   smaxe =  500.,

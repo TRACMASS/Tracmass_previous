@@ -13,7 +13,7 @@ subroutine init_seed()
   LOGICAL                                    :: fileexists
   INTEGER                                    :: i,j,k,ist,jst,kst
   INTEGER                                    :: filestat
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seedMask
+  INTEGER*4, ALLOCATABLE, DIMENSION(:,:)     :: seedMask
   select case (seedType)
      
   case (1) ! === ist, jst, kst method ===

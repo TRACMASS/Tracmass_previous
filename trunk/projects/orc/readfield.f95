@@ -57,7 +57,7 @@ SUBROUTINE readfields
 !  REAL*4 :: temp2d_simp(IMT,JMT)
   INTEGER, ALLOCATABLE, DIMENSION(:,:)         :: itemp
 !  INTEGER itemp(IMT,JMT)
-  INTEGER :: varid, ncid, idzrho(IMT,JMT)
+  INTEGER :: varid, ncid !, idzrho(IMT,JMT)
   REAL*4 dd,dmult
   
 #ifdef tempsalt
@@ -320,8 +320,9 @@ endif initFieldcond
   endif
 !iyear=2000 ! quick and dirty fix for years
 ntime=10000*iyear+100*imon+iday
-ntempus=ntempus+1 ! quick and dirty fix to be generalised
-
+!ntempus=ntempus+1 ! quick and dirty fix to be generalised
+ntempus=ints
+!print *,'ntempus=',ints,ntempus,ntime
 ! file names
 #ifdef orca1
  dataprefix='xxxx/ORCA1-N202_xxxxxxxx'
@@ -435,19 +436,21 @@ enddo
 !close(38)
 !print *,rhom
 !endif
-if(ints.eq.intstart) open(38,file=trim(inDataDir)//'dzrho_1996',form='unformatted')
-idzrho=0
-do i=1,IMT
- do j=1,JMT
-!  do k=KM,1,-1
-!   if(rho(i,j,k,2).ge.27.9) idzrho(i,j)=k
+
+! Norske havet
+!if(ints.eq.intstart) open(38,file=trim(inDataDir)//'dzrho_1996',form='unformatted')
+!idzrho=0
+!do i=1,IMT
+! do j=1,JMT
+!!  do k=KM,1,-1
+!!   if(rho(i,j,k,2).ge.27.9) idzrho(i,j)=k
+!!  enddo
+!  do k=2,KM
+!   if(rho(i,j,k-1,2).ge.27.9 .and. rho(i,j,k,2).le.27.9) idzrho(i,j)=KM+1-k
 !  enddo
-  do k=2,KM
-   if(rho(i,j,k-1,2).ge.27.9 .and. rho(i,j,k,2).le.27.9) idzrho(i,j)=KM+1-k
-  enddo
- enddo
-enddo
-write(38) idzrho
+! enddo
+!enddo
+!write(38) idzrho
 
 
 #endif     
