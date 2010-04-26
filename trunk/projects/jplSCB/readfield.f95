@@ -15,7 +15,7 @@ SUBROUTINE readfields
 #endif
   
   IMPLICIT none
-  ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+  ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   ! = Variables for filename generation 
   CHARACTER                                  :: dates(62)*17
   CHARACTER (len=200)                        :: dataprefix, dstamp
@@ -53,7 +53,7 @@ SUBROUTINE readfields
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt) )
   end if alloCondUVW
-  ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+  ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   
   call datasetswap !Copy field(t+1) to field(t).
 
@@ -162,12 +162,13 @@ SUBROUTINE readfields
 
  return
 
- !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+ !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
  
 contains
+
   
   subroutine datasetswap
-    
     hs(:,:,1)      = hs(:,:,2)
     uflux(:,:,:,1) = uflux(:,:,:,2)
     vflux(:,:,:,1) = vflux(:,:,:,2)
@@ -180,4 +181,6 @@ contains
     rho(:,:,:,1)   = rho(:,:,:,2)
 #endif
   end subroutine datasetswap
+
+
 end subroutine readfields

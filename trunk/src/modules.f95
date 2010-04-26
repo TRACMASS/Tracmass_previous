@@ -102,7 +102,7 @@ ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
 #ifdef zgrid3Dt 
@@ -118,7 +118,7 @@ MODULE mod_grid
   REAL*8                                    :: rmin ,tmin ,smin
   REAL*8                                    :: dr ,dtemp ,dsalt
   REAL*8                                    :: arcscale
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
