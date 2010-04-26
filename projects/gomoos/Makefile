@@ -1,31 +1,47 @@
+# Makfile for orc
+#========================================================================
+  INPUT_INT1        = intmin   # Variables set from command line
+  INPUT_INT2        = intrun   # Use 'dummy' if not used.   
+#------------------------------------------------------------------------
+# fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
+#  fl01   = -Dtimeanalyt    # Stationary time scheme 
+  fl02   = -Dregulardt     # Regular time steps with -Dtimestep
+#------------------------------------------------------------------------
+  fl03   = -Dtempsalt       # Include temp and salt
+  fl04   = -Dtextwrite      # Write results to textfile
+#  fl05   = -Dbinwrite      # Write results to binaryfile
+#  fl06   = -Dmysqlwrite    # Write results to mysql
+#------------------------------------------------------------------------
+#  fl07  = -Dstreamxy       # Calculates the barotropic stream function.
+#  fl08  = -Dstreamr        #    vertical stream function, z=density
+#  fl09  = -Dstreamts       #    vertical stream function, z=???
+#  fl10  = -Dstreamv        #    vertical stream function, z=depth
+#  fl11  = -Drerun          # Stores the Lagrangian stream functions as a
+                            # function of the end positions that has been
+                            # calculated in an identical previous run.   
+#------------------------------------------------------------------------
+  fl12  = -Dtwodim         # Turn off vetical velocities.
+#  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
+#  fl14  = -Dexplicit_w     # Use a given vertical velocity.
+#------------------------------------------------------------------------
+  fl15  = -Dvarbottombox   # Variable bottom box to match actual depth
+  fl16  = -Dfreesurface    # Variable bottom box to match actual depth
+#  fl17  = -Dzvec1D         # Cell depths defined as vector
+  fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+#  fl17  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+#------------------------------------------------------------------------
+#  fl18  = -Dselect         # Select only one trajectory (for debugging)
+#  fl19  = -Dtracer         # Stores a simulated tracer
+#  fl20  = -Dsediment       # Sediment code developed for RCO
+#------------------------------------------------------------------------
+#  fl21  = -Dturb           # Adds subgrid turbulent velocities 
+#  fl22  = -Ddiffusion      # Adds a diffusion on trajectory
+#========================================================================
 
+ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\
+			$(fl07)$(fl08)$(fl09)$(fl10)$(fl11)$(fl12)\
+			$(fl13)$(fl14)$(fl15)$(fl16)$(fl17)$(fl18)\
+			$(fl19)$(fl20)$(fl21)$(fl22)$(fl23)$(fl24)\
+			$(fl25)$(fl26)$(fl27)$(fl28)$(fl29)$(fl30)\
 
-MYCFG=/usr/local/mysql/bin/mysql_config
-MYI_FLAGS=`$(MYCFG) --cflags` 
-MYL_FLAGS=`$(MYCFG) --libs` 
-LIB_DIR=-L/usr/local/netcdf/lib
-INC_DIR=-I/usr/local/netcdf/include -I/usr/local/mysql/include
-
-ORM_FLAGS=-Dmaine -Dmean -Dstreamxy  -Dstreamr -Dstreamv -Dtracer \
-          -Dtime  -Dtempsalt -ftrace=full -Dmysqlwrite
-
-F90_FLAGS=-O3 -C  -g
-LNK_FLAGS=-lnetcdf -lSystemStubs
-
-FF = /sw/bin/g95 $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
-CC = gcc -O  $(INC_DIR)
-
-objects = main.o jacket.o
-
-runtraj : $(objects)
-	$(FF)  $(MYI_FLAGS) -o runtraj $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
-
-main.o : main.f95 
-	$(FF)  -fno-underscoring -c -cpp $(ORM_FLAGS) main.f95
-
-jacket.o : ../mysql/jacket.c
-	$(CC) -c ../mysql/jacket.c
-
-.PHONY : clean
-clean :
-	-rm runtraj $(objects)
+# Var bottom to be used by occ66 || orc || for || sim || multcol || jplSCB || eccoSOSE

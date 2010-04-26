@@ -33,54 +33,88 @@ SUBROUTINE setupgrid
   !  dyu -
   ! -------------------------------------------------------------
 
-
-
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
+  REAL,          ALLOCATABLE, DIMENSION(:)   :: valsz,fort
+  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: mask
+  REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:) :: e1v,e1t,e2u,e2t
+  CHARACTER (len=200)                        :: gridfile
 
-
-! === Template for setting up grids. Move the code from readfile.f95
-
-! ===
-
-
-!!$  CHARACTER (len=200)                        :: gridFileXY, gridFileZ
-!!$  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: kmask
-!!$
-!!$  alloCondGrid: if ( .not. allocated (kmask) ) then
-!!$     allocate ( kmask(IMT+2,JMT,KM) )
-!!$  end if alloCondGrid
+  allocate ( valsz(km),fort(imt*jmt*2) )
+  allocate ( depth(imt,jmt), ang(imt,jmt),  mask(imt,jmt)  )
+  call coordinat
+   
+  start1d  = [  1]
+  count1d  = [ km]
+  !Order is     t    k            i            j
+  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
+  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
+  map2d    = [  1 ,  4 ,          3 ,          2]  
+  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
+  count3d  = [  1 , km ,subGridImax ,subGridJmax]
+  map3d    = [  3 ,  4 ,          2 ,          1]   
+  gridfile = trim(inDataDir) // 'grid.cdf'
+  
+  ! === Read  and setup horizontal Grid===
+  OPEN(41,FILE=trim(inDataDir) // 'fort.41')
+  READ(41,*) fort
+  dyu(1:imt,:) = reshape(fort(1:imt*jmt),(/ imt, jmt/) )
+  dxv(1:imt,:) = reshape(fort(imt*jmt+1:imt*jmt*2),(/ imt, jmt/) )
+  dxdy = dyu * dxv
+  ang  = get2DfieldNC(trim(gridfile) , 'ang')
+    
+  ! === Load the bathymetry ===
+  depth = int(floor(get2DfieldNC(trim(gridfile) , 'depth')))
+  mask = 1
+  do i=1,imt
+     do j=1,jmt
+        if (depth(i,j) .lt. 0) then
+           depth(i,j)=0
+           mask(i,j)=0
+        end if
+     end do
+  end do
+  kmt = depth
+    
+  !============================
+  !===== Read in uv-masks =====
+  !============================
+  
+!!$  ierr=nf90_OPEN('/data/GOM/uvmasks.cdf',nf90_NOWRITE,ncid)
+!!$  if(ierr.ne.0) stop 5001
 !!$  
-!!$  start1d  = [  1]
-!!$  count1d  = [ km]
-!!$  !Order is     t    k            i            j
-!!$  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-!!$  map2d    = [  4 ,  3 ,          1 ,          2]  
-!!$  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count3d  = [  1 , km ,subGridImax ,subGridJmax]
-!!$  map3d    = [  4 ,  3 ,          2 ,          1]  
+!!$  startB(1)=1
+!!$  startB(2)=1
+!!$  startB(3)=1
+!!$  startB(4)=1
+!!$  countB(1)=imt
+!!$  countB(2)=jmt
+!!$  countB(3)=km
+!!$  countB(4)=1
 !!$  
-!!$  gridFileXY = trim(inDataDir)//'grid_cell_xy.nc'
-!!$  gridFileZ  = trim(inDataDir)//'grid_cell_z.nc'
+!!$  ! === Load the masks ===
+!!$  ierr=nf90_INQ_VARID(ncid,'u0mask',varid)
+!!$  if(ierr.ne.0) stop 5002
+!!$  ierr=NF90_GET_VAR (ncid,varid,u0mask)
+!!$  if(ierr.ne.0) stop 5003
+!!$  u0mask=-(u0mask-1)*9999
 !!$  
-!!$  dz   = get1DfieldNC(trim(gridFileZ)  ,'dz')  / 100.
-!!$  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
-!!$  dyu  = get2DfieldNC(trim(gridFileXY) ,'DYU') / 100.
-!!$  dxdy = dxv * dyu
-!!$
-!!$  dzt = 0
-!!$  kmask  = get3DfieldNC(trim(gridFileZ) ,'SALT')
-!!$  do j=1,jmt
-!!$     do i=1,imt
-!!$        do k=1,km
-!!$           kk=km+1-k
-!!$           if(kmask(i,j,k) .le. 1000.) then
-!!$              kmt(i,j)=k
-!!$              dzt(i,j,k) = dz(kk)
-!!$           end if
-!!$        enddo
-!!$     enddo
-!!$  enddo
-
+!!$  ierr=nf90_INQ_VARID(ncid,'u2mask',varid)
+!!$  if(ierr.ne.0) stop 5012
+!!$  ierr=NF90_GET_VAR (ncid,varid,u2mask)
+!!$  if(ierr.ne.0) stop 5013
+!!$  u2mask=(u2mask-1)*9999
+!!$  
+!!$  ierr=nf90_INQ_VARID(ncid,'v0mask',varid)
+!!$  if(ierr.ne.0) stop 5022
+!!$  ierr=NF90_GET_VAR (ncid,varid,v0mask)
+!!$  if(ierr.ne.0) stop 5023
+!!$  v0mask=-(v0mask-1)*9999
+!!$  
+!!$  ierr=nf90_INQ_VARID(ncid,'v2mask',varid)
+!!$  if(ierr.ne.0) stop 5032
+!!$  ierr=NF90_GET_VAR (ncid,varid,v2mask)
+!!$  if(ierr.ne.0) stop 5033
+!!$  v2mask=(v2mask-1)*9999
+  
 end SUBROUTINE setupgrid
