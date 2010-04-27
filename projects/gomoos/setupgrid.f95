@@ -46,10 +46,13 @@ SUBROUTINE setupgrid
    
   start1d  = [  1]
   count1d  = [ km]
-  !Order is     t    k            i            j
-  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-  map2d    = [  1 ,  4 ,          3 ,          2]  
+
+
+  start2d  = [ subGridImin, subGridJmin, 1 ,1]
+  count2d  = [ subGridImax, subGridJmax, 1 ,1]
+  !Order is   t  k  i  j
+  map2d    = [0, 0, 1, 2]
+
   start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
   count3d  = [  1 , km ,subGridImax ,subGridJmax]
   map3d    = [  3 ,  4 ,          2 ,          1]   
@@ -61,60 +64,15 @@ SUBROUTINE setupgrid
   dyu(1:imt,:) = reshape(fort(1:imt*jmt),(/ imt, jmt/) )
   dxv(1:imt,:) = reshape(fort(imt*jmt+1:imt*jmt*2),(/ imt, jmt/) )
   dxdy = dyu * dxv
-  ang  = get2DfieldNC(trim(gridfile) , 'ang')
+  ang  = get2DfieldNC(trim(gridfile) , 'ang')  / 180 * pi
     
   ! === Load the bathymetry ===
   depth = int(floor(get2DfieldNC(trim(gridfile) , 'depth')))
   mask = 1
-  do i=1,imt
-     do j=1,jmt
-        if (depth(i,j) .lt. 0) then
-           depth(i,j)=0
-           mask(i,j)=0
-        end if
-     end do
-  end do
-  kmt = depth
-    
-  !============================
-  !===== Read in uv-masks =====
-  !============================
-  
-!!$  ierr=nf90_OPEN('/data/GOM/uvmasks.cdf',nf90_NOWRITE,ncid)
-!!$  if(ierr.ne.0) stop 5001
-!!$  
-!!$  startB(1)=1
-!!$  startB(2)=1
-!!$  startB(3)=1
-!!$  startB(4)=1
-!!$  countB(1)=imt
-!!$  countB(2)=jmt
-!!$  countB(3)=km
-!!$  countB(4)=1
-!!$  
-!!$  ! === Load the masks ===
-!!$  ierr=nf90_INQ_VARID(ncid,'u0mask',varid)
-!!$  if(ierr.ne.0) stop 5002
-!!$  ierr=NF90_GET_VAR (ncid,varid,u0mask)
-!!$  if(ierr.ne.0) stop 5003
-!!$  u0mask=-(u0mask-1)*9999
-!!$  
-!!$  ierr=nf90_INQ_VARID(ncid,'u2mask',varid)
-!!$  if(ierr.ne.0) stop 5012
-!!$  ierr=NF90_GET_VAR (ncid,varid,u2mask)
-!!$  if(ierr.ne.0) stop 5013
-!!$  u2mask=(u2mask-1)*9999
-!!$  
-!!$  ierr=nf90_INQ_VARID(ncid,'v0mask',varid)
-!!$  if(ierr.ne.0) stop 5022
-!!$  ierr=NF90_GET_VAR (ncid,varid,v0mask)
-!!$  if(ierr.ne.0) stop 5023
-!!$  v0mask=-(v0mask-1)*9999
-!!$  
-!!$  ierr=nf90_INQ_VARID(ncid,'v2mask',varid)
-!!$  if(ierr.ne.0) stop 5032
-!!$  ierr=NF90_GET_VAR (ncid,varid,v2mask)
-!!$  if(ierr.ne.0) stop 5033
-!!$  v2mask=(v2mask-1)*9999
+  where (depth<0) 
+     depth = 0
+     mask = 0
+  end where
+  kmt = 22 * mask
   
 end SUBROUTINE setupgrid

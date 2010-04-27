@@ -37,22 +37,33 @@ CONTAINS
   function get2DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2DfieldNC
+    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: field
     INTEGER,             DIMENSION(4)       :: d, s, c, dimids
     INTEGER                                 :: varid ,ncid
-
-    s = start3d(map3d)
-    c = count3d(map3d)
-    d = c + s - 1
-    allocate ( get2DfieldNC(d(1),d(2)) )
-
+    
+    s = start2d(map2d)
+    c = count2d(map2d)
+    d = start2d + count2d - 1 
+    
+    allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
+    
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2)
-    ierr=NF90_GET_VAR(ncid ,varid ,get2DfieldNC, s, c)
+    ierr=NF90_GET_VAR(ncid ,varid , field, start2d, count2d)
     if(ierr.ne.0) call printREadError(3)
     r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
     ierr=NF90_CLOSE(ncid)
+
+    if ( map3d(3) > map3d(4) ) then
+       get2DfieldNC(1:imt,:) = field
+    else
+       do i = 1,imt
+          get2DfieldNC(i,:) = field(:,i)
+       end do
+    end if
+
   end function get2DfieldNC
   
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -70,11 +81,9 @@ CONTAINS
     d = c + s - 1
     allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) ) 
 
-   
-    print *,fieldFile
-    print *,map3d
-    print *,s
-    print *,c
+    !print *,map3d
+    !print *,s
+    !print *,c
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
@@ -82,11 +91,15 @@ CONTAINS
     ierr=NF90_GET_VAR(ncid ,varid ,field, s, c)
     if(ierr.ne.0) call printReadError(3)
 
-    do k=1,km
-       do i=1,imt
-          get3DfieldNC(i,:,k) = field(:,i,k)
+    if ( map3d(1) == 3 .and. map3d(2) == 4 .and. map3d(3) == 2 ) then
+       get3DfieldNC = field
+    else
+       do k=1,km
+          do i=1,imt
+             get3DfieldNC(i,:,k) = field(:,i,k)
+          end do
        end do
-    end do
+    end if
     ierr=NF90_CLOSE(ncid)
 
   end function get3DfieldNC
@@ -113,6 +126,11 @@ CONTAINS
        print *,'Error when trying to read the field   ',ncvar
        print *, 'start1d =  ' ,start1d
        print *, 'count1d =  ' ,count1d
+       print *, 'start2d =  ' ,start2d
+       print *, 'count2d =  ' ,count2d
+       print *, 'start3d =  ' ,start3d
+       print *, 'count3d =  ' ,count3d
+
        print *,'Error:      ' ,NF90_STRERROR(ierr)
        stop
        
