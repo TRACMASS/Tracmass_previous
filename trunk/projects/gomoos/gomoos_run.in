@@ -106,24 +106,24 @@
   nqua        = 1, 
   !
   ! === Particles seeded (part/cell or m3s-1/part or m3/part)
-  partQuant= 50,     
+  partQuant= 5,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 1, 
+  SeedType = 2, 
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 30,		 
-  ist2         = 40,			  
-  jst1         = 30,		 
-  jst2         = 40,		 
+  ist1         = 60,		 
+  ist2         = 70,			  
+  jst1         = 20,		 
+  jst2         = 30,		 
   kst1         = 20,		 
-  kst2         = 24,
+  kst2         = 22,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -131,7 +131,7 @@
   ! === Use variable seed file name ( constructed as
   !     /seedDir/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 1,
-  seedDir      = '/Users/bror/svn/projects/jplSCB/seedDir',
+  seedDir      = '/Volumes/keronHD2/gomoosOrm/seedfiles',
   !
   ! === Seed filename (or beginning of it)
   seedFile     = 'seed'/

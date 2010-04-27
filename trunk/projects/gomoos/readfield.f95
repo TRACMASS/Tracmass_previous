@@ -17,7 +17,7 @@ SUBROUTINE readfields
   
   IMPLICIT none
 
-  CHARACTER(len=63), SAVE                    :: ncFile
+  CHARACTER(len=63), SAVE                    :: ncFile, maskfile
   integer                                    :: i,im,j,jm,k,kk,ints2
   INTEGER, SAVE                              :: nread,ndates
   integer                                    :: intpart1,intpart2
@@ -45,10 +45,16 @@ SUBROUTINE readfields
        0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, &
        0.067, 0.067, 0.067, 0.033, 0.017, 0.008, 0.008, 0.000 /)
   
-  if ( .NOT. ALLOCATED(ang) ) then
-     allocate ( dzu(imt,jmt,km),dzv(imt,jmt,km),dzt(imt,jmt,km) )
+  if ( .NOT. ALLOCATED(dzu) ) then
+     allocate ( dzu(imt,jmt,km),dzv(imt,jmt,km) )
      allocate ( u0mask(imt,jmt),u2mask(imt,jmt) )
      allocate ( v0mask(imt,jmt),v2mask(imt,jmt) )
+
+     maskfile= trim(inDataDir) // 'uvmasks.cdf'
+     u0mask = - ( get2DfieldNC(trim(maskfile) ,'u0mask') - 1) * 9999
+     u2mask =   ( get2DfieldNC(trim(maskfile) ,'u2mask') - 1) * 9999
+     v0mask = - ( get2DfieldNC(trim(maskfile) ,'v0mask') - 1) * 9999
+     v2mask =   ( get2DfieldNC(trim(maskfile) ,'v2mask') - 1) * 9999
   end if
   allocate ( ssh(imt,jmt) )
 
@@ -70,13 +76,8 @@ SUBROUTINE readfields
   nread = mod(ints/5,18) + 1
 
   ! === Velocities ===
-
-  print *,'kalle'  
-
-  uvel =  get3DfieldNC(trim(ncFile), 'u')! * x_scale + x_offset
-  vvel =  get3DfieldNC(trim(ncFile), 'v')! * y_scale + y_offset
-
-  print *,'balle'  
+  uvel =  get3DfieldNC(trim(ncFile), 'u') * x_scale + x_offset
+  vvel =  get3DfieldNC(trim(ncFile), 'v') * y_scale + y_offset
 
   do k=1,km
      uvel(:,:,k) =  uvel(:,:,k) * cos(ang) + vvel(:,:,k)*sin(ang)
@@ -87,37 +88,37 @@ SUBROUTINE readfields
      vvel = -vvel
   end if
 
-!!$  u0: do k=1,km
-!!$     uvel(1,:,:,k)=min(uvel(1,:,:,k),real(u0mask))
-!!$  end do u0
-!!$  u2: do k=1,km
-!!$     uvel(1,:,:,k)=max(uvel(1,:,:,k),real(u2mask))
-!!$  end do u2
-!!$  v0: do k=1,km
-!!$     vvel(1,:,:,k)=min(vvel(1,:,:,k),real(v0mask))
-!!$  end do v0
-!!$  v2: do k=1,km
-!!$     vvel(1,:,:,k)=max(vvel(1,:,:,k),real(v2mask))
-!!$  end do v2
+!!$  mask: do k=1,km
+!!$     uvel(:,:,k) = uvel(:,:,k) * u0mask
+!!$     uvel(:,:,k) = uvel(:,:,k) * u2mask
+!!$     vvel(:,:,k) = vvel(:,:,k) * v0mask
+!!$     vvel(:,:,k) = vvel(:,:,k) * v2mask
+!!$  end do mask
 
+  uvmask: do k=1,km
+     uvel(:,:,k)=min(uvel(:,:,k),real(u0mask))
+     uvel(:,:,k)=max(uvel(:,:,k),real(u2mask))
+     vvel(:,:,k)=min(vvel(:,:,k),real(v0mask))
+     vvel(:,:,k)=max(vvel(:,:,k),real(v2mask))
+  end do uvmask
 
-  sal(:,:,:,2) = get3dfieldNC(trim(ncFile) ,'salt') 
-  sal(:,:,:,2) = sal(:,:,:,2) * salt_scale + salt_offset
-  ssh = get2dfieldNC(trim(ncFile) ,'elev') * ssh_scale + ssh_offset
+  !sal(:,:,:,2) = get3dfieldNC(trim(ncFile) ,'salt') 
+  !sal(:,:,:,2) = sal(:,:,:,2) * salt_scale + salt_offset
+  ssh = get2DfieldNC(trim(ncFile) ,'elev') * ssh_scale + ssh_offset
 
   do  k=1,km
-     dzt(:,:,km-k+1)=dS(k)*(depth(:,:)+ssh(:,:))
+     dzt(:,:,km-k+1) = dS(k) * (depth(:,:) + ssh(:,:))
   end do
-  
+
   do i=1,imt-1
      dzv(i,:,:)=0.5*(dzt(i,:,:)+dzt(i+1,:,:))
   enddo
   dzv(imt,:,:)=dzv(imt-1,:,:)
+
   do j=1,jmt-1
      dzu(:,j,:)=0.5*(dzt(:,j,:)+dzt(:,j+1,:))
   enddo
   dzu(:,jmt,:)=dzu(:,jmt-1,:)
-
   do k=1,km
     kk=km-k+1
     uflux(:,1:80,k,2)  =uvel(:,:,kk) * dyu(:,:) * dzu(:,:,k)

@@ -8,8 +8,8 @@
   fl02   = -Dregulardt     # Regular time steps with -Dtimestep
 #------------------------------------------------------------------------
   fl03   = -Dtempsalt       # Include temp and salt
-  fl04   = -Dtextwrite      # Write results to textfile
-#  fl05   = -Dbinwrite      # Write results to binaryfile
+#  fl04   = -Dtextwrite      # Write results to textfile
+  fl05   = -Dbinwrite      # Write results to binaryfile
 #  fl06   = -Dmysqlwrite    # Write results to mysql
 #------------------------------------------------------------------------
 #  fl07  = -Dstreamxy       # Calculates the barotropic stream function.

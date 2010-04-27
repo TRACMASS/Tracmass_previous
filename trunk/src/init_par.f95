@@ -142,7 +142,27 @@ subroutine init_params
   dstep=1.d0/dble(iter)
   dtmin=dtstep*tseas
 
-  if ((IARGC() > 1) .and. (IARGC() < 5) )  then
+  baseJD      = jdate(baseYear  ,baseMon  ,baseDay)
+  startJD     = jdate(startYear ,startMon ,startDay)
+  startYearCond: if (startYear .ne. 0) then
+     if(ngcm.ge.24) then 
+        intmin      = (startJD-baseJD)/(ngcm/24)+1
+     else ! this is a quick fix to avoid division by zero when ngcm < 24
+        intmin      = (startJD-baseJD)/(ngcm)+1
+     endif
+  end if startYearCond
+  startHourCond: if ( (startHour .ne. 0)  & 
+       .or. (startMin  .ne. 0)  &
+       .or. (startSec  .ne. 0) ) then
+     print *,'------------------------------------------------------'
+     print *,'ERROR!'
+     print *,'------------------------------------------------------'
+     print *,'Fractions of day for start values not implemented yet.'
+     print *,'Email Bror (brorfred@gmail.com) to have it fixed.'
+     stop 100
+  end if startHourCond
+  
+  if ((IARGC() > 1) )  then
      call getarg(2,inparg)
      factor=1
      argint1=0
@@ -153,40 +173,21 @@ subroutine init_params
         end if
      end do
      ARG_INT1=argint1
-
-!     call getarg(2,inparg)
-!     factor=1
-!     argint2=0
-!     do i=29,1,-1
-!        if (ichar(inparg(i:i)) .ne. 32) then
-!           argint2=argint2+(ichar(inparg(i:i))-48)*factor
-!           factor=factor*10
-!        end if
-!     end do
-!     ARG_INT2=argint2
-  
+  end if
+  if ((IARGC() > 2) )  then
+     call getarg(2,inparg)
+     factor=1
+     argint2=0
+     do i=29,1,-1
+        if (ichar(inparg(i:i)) .ne. 32) then
+           argint2=argint2+(ichar(inparg(i:i))-48)*factor
+           factor=factor*10
+        end if
+     end do
+     ARG_INT2=argint2
   end if
  
-  baseJD      = jdate(baseYear  ,baseMon  ,baseDay)
-  startJD     = jdate(startYear ,startMon ,startDay)
-  startYearCond: if (startYear .ne. 0) then
-   if(ngcm.ge.24) then 
-    intmin      = (startJD-baseJD)/(ngcm/24)+1
-   else ! this is a quick fix to avoid division by zero when ngcm < 24
-    intmin      = (startJD-baseJD)/(ngcm)+1
-   endif
-  end if startYearCond
-  startHourCond: if ( (startHour .ne. 0)  & 
-                 .or. (startMin  .ne. 0)  &
-                 .or. (startSec  .ne. 0) ) then
-     print *,'------------------------------------------------------'
-     print *,'ERROR!'
-     print *,'------------------------------------------------------'
-     print *,'Fractions of day for start values not implemented yet.'
-     print *,'Email Bror (brorfred@gmail.com) to have it fixed.'
-     stop 100
-  end if startHourCond
-
+ 
   tseas= dble(ngcm)*3600.d0 ! time step between data sets
 
 
