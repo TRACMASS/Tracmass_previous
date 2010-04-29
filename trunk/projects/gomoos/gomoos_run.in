@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 192,
+  intrun       = 48,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -131,7 +131,7 @@
   ! === Use variable seed file name ( constructed as
   !     /seedDir/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 1,
-  seedDir      = '/Volumes/keronHD2/gomoosOrm/seedfiles',
+  seedDir      = '/projData/gomoosOrm/seedfiles',
   !
   ! === Seed filename (or beginning of it)
   seedFile     = 'seed'/
