@@ -175,7 +175,7 @@ subroutine init_params
      ARG_INT1=argint1
   end if
   if ((IARGC() > 2) )  then
-     call getarg(2,inparg)
+     call getarg(3,inparg)
      factor=1
      argint2=0
      do i=29,1,-1

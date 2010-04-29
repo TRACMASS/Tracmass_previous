@@ -1196,7 +1196,7 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verboseMess = 1
+       INTEGER                             :: verboseMess = 0
        INTEGER                             :: errCode
 
        errCode=0
