@@ -217,11 +217,9 @@ subroutine loop
      ! ===    Seed particles if still in intspin.         ===
      !=======================================================
      intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
-!print *, nff*ints , nff*(intstart+intspin)
         call fancyTimer('seeding','start')
         ! === Seed particles ===
         ntrac=ntractot
-!print *, 'ntrac=',ntrac,ijkMax
         ijkstloop: do ijk=1,ijkMax
            ist  = ijkst(ijk,1)
            jst  = ijkst(ijk,2)
@@ -229,7 +227,6 @@ subroutine loop
            idir = ijkst(ijk,4)
            isec = ijkst(ijk,5)
            vol  = 0
-!           print *,'ijk=',ijk,idir,isec,nqua,ist,jst,kst, ijkst(ijk,6)
            
            ib=ist
            ibm=ib-1
@@ -282,13 +279,11 @@ subroutine loop
                  if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
                  vol=abs(uflux(ib,jb,kb,1))+abs(uflux(ibm,jb  ,kb,1)) + & 
                      abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
-   !              print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
                  if(vol.eq.0.d0) cycle ijkstloop
               case(5)
                  if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
                  vol=abs(uflux(ib,jb,kb,1))+abs(uflux(ibm,jb  ,kb,1)) + & 
                      abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
-!                 print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
                  if(vol.eq.0.d0) cycle ijkstloop
               end select
               if(vol.eq.0) cycle ijkstloop
@@ -324,14 +319,14 @@ subroutine loop
            case (5)
               num = ijkst(ijk,6)
            end select
-           if(num.eq.0 .and. nqua.ne.5) num=1 ! always at least one trajectory
+           if(num.eq.0 .and. nqua.ne.5) num = 1 ! always at least one trajectory
         
 
            ijt    = nint(sqrt(float(num)))
            kkt    = nint(float(num)/float(ijt))
            subvol = vol/dble(ijt*kkt)
                       
-!            print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
+!            print 99,ib,jb,kb,vol,num,ijt,kkt,subvol 
 99         format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f12.0, &
                 ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
                 
@@ -406,7 +401,6 @@ subroutine loop
 #endif
                  
                  ntrac=ntrac+1  ! the trajectory number
-!                 print *,'ntrac=',ntrac,ijk
                  
                  ! selects only one singe trajectory
 #ifdef select
@@ -641,9 +635,6 @@ subroutine loop
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
-#ifdef twodim   
-           dsu=UNDEF ; dsd=UNDEF
-#endif
            ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
            if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
               ! === Can not find any path for unknown reasons ===
@@ -727,9 +718,7 @@ subroutine loop
               x1=dble(ia)
 #if defined timeanalyt
               call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#endif
 #else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) 
               call pos(3,ia,ja,ka,z0,z1,ds,rr)
@@ -776,9 +765,7 @@ subroutine loop
               x1=dble(iam)
 #if defined timeanalyt
               call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#endif
 #else
               call pos(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -821,9 +808,7 @@ subroutine loop
               y1=dble(ja)
 #if defined timeanalyt
               call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#endif
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -833,7 +818,6 @@ subroutine loop
 #endif /*streamxy*/
 #ifdef streamv
               styz(ja,ka,lbas)=styz(ja,ka,lbas)+real(subvol*ff)
-              ! print *,'n',styz(ja,ka,lbas),subvol*ff,ja,ka,lbas
 #endif /*streamv*/
 #ifdef streamr
               call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
@@ -869,9 +853,7 @@ subroutine loop
               y1=dble(ja-1)
 #if defined timeanalyt
               call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#ifndef twodim   
               call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#endif
 #else
               call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
               call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
@@ -972,9 +954,7 @@ subroutine loop
 #ifdef timeanalyt
              call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
              call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#ifndef twodim   
              call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-#endif
 #else           
 ! If there is no spatial solution, which should correspond to a convergence zone
             if(dse.eq.UNDEF .and. dsw.eq.UNDEF .and. dsn.eq.UNDEF .and. & 
@@ -986,13 +966,10 @@ subroutine loop
 
              call pos(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
              call pos(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-#ifndef twodim   
              call pos(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
-#endif
 		    endif
 #endif
            endif
-
 #ifdef orc 
 ! north fold cyclic ORCA grid (only tested with ORCA025)
            if(y1.eq.dble(JMT)) then 
@@ -1020,6 +997,15 @@ subroutine loop
            if (errCode.ne.0) cycle ntracLoop
 ! if trajectory under bottom of ocean then put in middle of deepest layer (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
+               print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb)),kmt(ia,ja),kmt(ib,jb),ntrac
+               print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
+               print *,'ia=',ia,ib,ja,jb,ka,kb
+               print *,'x0=',x0,x1,y0,y1,z0,z1
+               call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
+               call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
+               call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
+               stop 3957
                z1=dble(KM-kmt(ib,jb))+0.5d0
            end if
 ! if trajectory above sea level then put back in the middle of shallowest layer (evaporation)
@@ -1062,16 +1048,12 @@ subroutine loop
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
 #if defined diffusion     
-!           call diffusion(x1,y1,z1,ib,jb,kb,dt,snew,st0,st1)
            call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
            ! === Calculate arclength of the ===
            ! === trajectory path in the box ===
            call arclength(ia,ja,ka,dt,rr,arc)
-!           print *,arct,arc,arcscale
            arct=arct+arc*arcscale  ! original arc in meters but scaled by arcscale in grid.in
-!           print *,ntrac,arct,arc,arcscale
-!           if(ntrac.gt.50) stop 3956
            ! === end trajectory if outside chosen domain ===
 #if defined occ
            ! === stop and select stream function ===

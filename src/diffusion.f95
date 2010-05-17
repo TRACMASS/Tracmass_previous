@@ -8,8 +8,6 @@
 ! ib, jb, kb : Current box for the particle. Are updated by the subroutine.
 ! dt : The model time step
 !
-! FELKODER SÄTTS VID BEHOV, FÖRKLARA
-! bla
 !============================================================================
 SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	USE mod_coord
@@ -76,13 +74,13 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 		elseif(tmpi<1) then
 		 tmpi=tmpi+IMT
 		endif
-        if(tmpX>dble(IMT)) then 
-		 tmpX=tmpX-dble(IMT)
+        if(tmpX>float(IMT)) then 
+		 tmpX=tmpX-float(IMT)
 		elseif(tmpX<0.d0) then
-		 tmpX=tmpX+dble(IMT)
+		 tmpX=tmpX+float(IMT)
 		endif
 		if(tmpj>JMT) tmpj=JMT  ! stop 34956 ! north fold for orca grids
-		if(tmpY>dble(JMT)) tmpY=dble(JMT)-0.1d0  ! stop 34956 ! north fold for orca grids
+		if(tmpY>float(JMT)) tmpY=float(JMT)-0.1d0  ! stop 34956 ! north fold for orca grids
 #elif rco
 		! Check if particle is on an open boundary
 		if(tmpi==1 .AND. tmpj>=1 .AND. tmpj<=JMT .AND. KM+1-kmt(tmpi,tmpj)<=tmpk .AND. tmpk>=1 ) then
@@ -110,6 +108,7 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	enddo
 	
 	! Update return position
+!	if(abs(x1-tmpX).gt.5. .and. abs(x1-tmpX).lt.1000.) print *,x1,tmpX,xd,ib,jb,dxv(ib,jb)
 	x1 = tmpX
 	y1 = tmpY
 	ib = tmpi
@@ -118,6 +117,8 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	z1 = tmpZ
 	kb = tmpk
 #endif	
+
+if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! make sure the index corresponds to the right grid cell
 
 !print *,'slut',itno,kmt(ib,jb),ib,jb,kb,x1,y1,z1
 	

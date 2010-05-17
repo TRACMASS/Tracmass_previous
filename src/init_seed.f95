@@ -110,11 +110,12 @@ subroutine init_seed()
         do i=1,imt
          do j=1,jmt
           do k=kst1,kst2
-           if (seedMask(i,j) /= 0) ijkMax=ijkMax+1
+!           if (seedMask(i,j) /= 0) ijkMax=ijkMax+1
+           if (seedMask(i,j) /= 0) ijkMax=ijkMax+seedMask(i,j)
           end do
          end do
         end do
-
+        
         allocate (ijkst(ijkMax,6))  
 
         ijk=0

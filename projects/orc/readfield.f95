@@ -49,7 +49,13 @@ SUBROUTINE readfields
 !#else
 !  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.05 and 32 days
 !  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.10 and 32 days
-  INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
+!  INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
+
+!  INTEGER, PARAMETER :: IJKMAX2=169 ! for single particle and 1024 days
+  INTEGER, PARAMETER :: IJKMAX2=3305 ! for single particle and 365 days
+!  INTEGER, PARAMETER :: IJKMAX2=34855 ! for single particle and 64 days
+!  INTEGER, PARAMETER :: IJKMAX2=73756 ! for single particle and 32 days
+
 !#endif
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
   REAL*4 , SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
@@ -124,7 +130,7 @@ LOGICAL around
      ! ======================================================
      
 gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
-
+!print *,gridFile
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 3751
 ierr=NF90_INQ_VARID(ncid,'e1t',varid) ! the main data fields
@@ -272,6 +278,7 @@ do j=1,JMT
  do i=1,IMT
   if(kmt(i,j).ne.0) then
    dztb(i,j,1)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
+!   dztb(i,j,1)=dz(KM+1-kmt(i,j))
   else
    dztb(i,j,1)=0.
   endif
@@ -283,9 +290,12 @@ enddo
 
 !open(84,file=trim(inDataDir)//'topo/masktime_32_005',form='unformatted')
 !open(84,file=trim(inDataDir)//'topo/masktime_32_010',form='unformatted')
-open(84,file=trim(inDataDir)//'topo/masktime_32_025',form='unformatted')
+!open(84,file=trim(inDataDir)//'topo/masktime_32_025',form='unformatted')
 !open(84,file=trim(inDataDir)//'topo/masktime_orca1_32_025',form='unformatted')
-! read(84) ntimask
+if(IJKMAX2.eq.169) open(84,file=trim(inDataDir)//'topo/masktime_orca025_1024_single',form='unformatted')
+if(IJKMAX2.eq.3305) open(84,file=trim(inDataDir)//'topo/masktime_orca025_365_single',form='unformatted')
+if(IJKMAX2.eq.34855) open(84,file=trim(inDataDir)//'topo/masktime_orca025_64_single',form='unformatted')
+if(IJKMAX2.eq.73756) open(84,file=trim(inDataDir)//'topo/masktime_orca025_32_single',form='unformatted')
  read(84) trajinit
 close(84)
 j=0
@@ -341,7 +351,10 @@ write(dataprefix(1:4),'(i4)') iyear
 
 ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
-if(ierr.ne.0) stop 3768
+if(ierr.ne.0) then
+print *,ints,trim(fieldFile)//'d05T.nc'
+stop 3768
+endif
 ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
 if(ierr.ne.0) stop 3799
 ierr=NF90_CLOSE(ncid)
@@ -504,21 +517,19 @@ enddo
 #ifdef initxyt
 ! Set the initial trajectory positions
 !ijkst(:,5)=ntimask(ntempus,:)
+if(ntempus.le.NTID) then
 j=0
 do ntrac=1,ijkmax
  if(trajinit(ntempus,ntrac,3).ne.0.) then
-!  j=j+ntimask(ntempus,ntrac,3)
   ijkst(ntrac,4)=0
   ijkst(ntrac,5)=5
-  ijkst(ntrac,6)=1
+  ijkst(ntrac,6)=ijkst(ntrac,6)+1
   do l=1,3
    ijkst(ntrac,l)=trajinit(ntempus,ntrac,l)+1
    trj(ntrac,l)=trajinit(ntempus,ntrac,l)
-!   if(ntrac.eq.12) print *,l,ntrac,float(ijkst(ntrac,l)-1),trj(ntrac,l),float(ijkst(ntrac,l))
-!   if(ntrac.eq.12) print *,ntempus,ntimask(ntempus,ntrac,l)
+!   if(l.eq.1) print *,ntrac,float(ijkst(ntrac,l)-1),trj(ntrac,l),float(ijkst(ntrac,l))
    if(trj(ntrac,l).gt.float(ijkst(ntrac,l)) .or. trj(ntrac,l).lt.float(ijkst(ntrac,l)-1)) then
     print *,l,ntrac,float(ijkst(ntrac,l)-1),trj(ntrac,l),float(ijkst(ntrac,l))
-    !trj(ntrac,l)=float(ijkst(ntrac,l))-0.5
     stop 3946
    endif
   enddo
@@ -527,6 +538,7 @@ do ntrac=1,ijkmax
   ijkst(ntrac,6)=0
  endif
 enddo
+endif
 #endif
 
 
@@ -542,6 +554,8 @@ enddo
 #ifdef tempsalt
      deallocate ( tempb, saltb, rhob, depthb, latb )
 #endif
+
+!print *,'uv',uflux(1157,257,61,2),uflux(1158,257,61,2),vflux(1158,257,61,2),vflux(1158,256,61,2)
 
   return
 end subroutine readfields
