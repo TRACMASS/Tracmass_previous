@@ -19,7 +19,7 @@ function lldist (long,lat)
   ! 30/Dec/2005 - added n-point geodesic computations, based on an algorithm
   !               coded by Jeff Barton at Johns Hopkins APL in an m-file
   !               I looked at at mathworks.com.
-  
+  ! Adding some text.  
   
   pi180        =  pi/180;
   earth_radius = 6378.137;
