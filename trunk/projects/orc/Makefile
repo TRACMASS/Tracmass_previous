@@ -3,9 +3,9 @@
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-#   fl01   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
-  fl01   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
-#   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+   fl01   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
+#  fl01   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
+   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
 #   fl03   = -Dtempsalt       # Include temp and salt
    fl04   = -Dtextwrite      # Write results to textfile
@@ -36,7 +36,7 @@
 #  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
 #  fl23  = -Dturb           # Adds subgrid turbulent velocities 
-#  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #  fl27  = -Dorca1          # Makes the velocity coarser 
 #========================================================================

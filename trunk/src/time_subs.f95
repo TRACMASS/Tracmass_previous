@@ -58,12 +58,16 @@ REAL*8  :: f0,f1,dzs,dzu1,dzu2,rijk,s0,ss0,rr,rg
 REAL*8,  PARAMETER ::  EPS=1.d-10
 !_______________________________________________________________________________
 
+sp=UNDEF ; sn=UNDEF
+
+#ifdef twodim  
+if(ijk.eq.3) return
+#endif 
+
 s0=tt/dxyz
 ss0=dble(idint(ts))*tseas/dxyz
 rg=1.d0-rr
 
-
-sp=UNDEF ; sn=UNDEF
 loop=0 ; rijk=0.d0 ; ss=UNDEF ; f0=0.d0 ; f1=0.d0
 
 if(ijk.eq.1) then
@@ -230,6 +234,14 @@ REAL*8  :: uu,um,vv,vm,xi,xi0,const,ga,erf0,aa,bb,daw0,r0,r1,dsmin,dxyz,tt,ts,ri
 REAL*8  :: s15aff,dawson,s15adf,s15aef,errfun
 REAL*8  :: f0,f1,dzs,dzu1,dzu2,s0,ss,ss0,ds,rr,rg
 REAL*8,  PARAMETER ::  EPS=1.d-10
+
+#ifdef twodim  
+if(ijk.eq.3) then
+r1=r0
+return
+endif
+#endif 
+
 
 s0=tt/dxyz-ds
 ss=ts*tseas/dxyz

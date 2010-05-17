@@ -10,7 +10,7 @@
   subGrid      = 0,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 100,
+  subGridImin  = 1,
   subGridImax  = 1440,
   subGridJmin  = 1,
   subGridJmax  = 1021,
@@ -25,10 +25,10 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin =73, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  intspin =72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  =112,
+  intrun  =200,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -53,12 +53,13 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-  !kriva    = 2,
   kriva    = 2,
+  !kriva    = 3,
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Users/doos/data/orca/orca1/',
    inDataDir = '/Users/doos/data/orca/orca025/',
+  ! inDataDir = '/Volumes/Resa0/data/orca/orca025/',
   !
   ! === Directory where output files are saved
    outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
@@ -70,8 +71,9 @@
   ! outDataFile     = 'no_d025_2D_180'/
   ! outDataFile     = 'tu_d025_a0'/
   ! outDataFile     = 'di4000_d025_m13'/
-   outDataFile     = 'analyt2'/
-  ! outDataFile     = 'test'/
+  ! outDataFile     = 'analyt2'/
+  ! outDataFile     = 'no_sing_365_a0'/
+   outDataFile     = 'di600_sing_365_a0'/
   ! outDataFile      = 'di4000_d025_k64',!ah=4000 med u=v=0
   !
   intminInOutFile=0/
@@ -136,8 +138,10 @@ $INITRUNSEED
   !seedFile    = '/Users/doos/data/orca/orca1/topo/maskdrift_orca1_32_025' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_005' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_010' /
-  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_025' /
-  !seedFile    = '/Users/doos/data/orca/orca025/topo/mask100100' / ! 2*94 trajectories
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_025' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_orca025_1024_single' /
+  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_orca025_365_single' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_orca025_32_single' /
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
@@ -160,7 +164,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=2000., 
+  ah=600., 
   ! Vertical diffusion in m2/s
   av=0./
   
@@ -215,7 +219,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =       40./  ! maximum time length of a trajectory in days
+  timax =      366./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,

@@ -29,9 +29,13 @@ integer ijk,ia,ja,ka,ii,im
 
 rg=1.d0-rr
 
-#ifdef mod2 
-stop 2567 ! Kolla på gammal traj.F för OCCAM
+#ifdef twodim   
+if(ijk.eq.3) then
+ r1=r0
+ return
+endif
 #endif
+
 
 if(ijk.eq.1) then
  ii=ia
@@ -95,12 +99,13 @@ endif
 !
 ! note: consider in future to improve the code below for accuracy 
 ! in case of um-uu = small; also see subroutine cross
-!
 if(um.ne.uu) then
  r1= (r0+(-dble(ii-1) + um/(uu-um))) * dexp( (uu-um)*ds ) + dble(ii-1) - um/(uu-um)
 else
  r1=r0+uu*ds
 endif
+!if(abs(um/(uu-um)).gt.1.d10) print *,'possible precision problem?',um/(uu-um),uu,um,ijk,ia,ja,ka,r0,r1,ds,rr
+
 
 return
 end subroutine pos

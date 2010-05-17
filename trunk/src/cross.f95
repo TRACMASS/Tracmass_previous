@@ -1,4 +1,4 @@
-#ifndef timeanalyt 
+!#ifndef timeanalyt 
 
 subroutine cross(ijk,ia,ja,ka,r0,sp,sn,rr)
   
@@ -106,7 +106,8 @@ if(uu.gt.0.d0 .and. r0.ne.dble(ii)) then
  if(um.ne.uu) then
   ba=(r0+dble(-ii+1)) * (uu-um) + um
   if(ba.gt.0.d0) then
-  sp=-1.d0/(um-uu)*( dlog(uu) - dlog(ba) )
+!   sp=-1.d0/(um-uu)*( dlog(uu) - dlog(ba) )
+   sp=( dlog(ba) - dlog(uu) )/(um-uu)
   else
    sp=UNDEF
   endif
@@ -124,7 +125,8 @@ if(um.lt.0.d0 .and. r0.ne.dble(ii-1)) then
  if(um.ne.uu)then
   ba=-((r0-dble(ii))*(uu-um)+uu) 
   if(ba.gt.0.d0) then
-   sn=-1.d0/(um-uu)*( dlog(-um) - dlog(ba)  )
+!   sn=-1.d0/(um-uu)*( dlog(-um) - dlog(ba)  )
+   sn=( dlog(ba) - dlog(-um)  )/(um-uu)
   else
    sn=UNDEF
   endif
@@ -139,4 +141,4 @@ if(sn.le.0.d0) sn=UNDEF
 
 return
 end subroutine cross
-#endif
+!#endif
