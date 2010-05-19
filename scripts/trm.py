@@ -1,15 +1,26 @@
+import datetime
 
 import numpy as np
 import pylab as pl
+import matplotlib as mpl
 import MySQLdb
 
 class trm:
     """ main class for TRACMASS data manipulation"""
-    def __init__(self,casename,datadir="/Users/bror/ormOut/", 
+    def __init__(self,projname,casename="",datadir="/Users/bror/ormOut/", 
                  ormdir="Users/bror/svn/orm"):
-        self.casename = casename
+        self.projname = projname
+        if len(casename) == 0:
+            self.casename = projname
+        else:
+            self.casename = casename
         self.datadir = datadir
         self.ormdir = ormdir
+        conn = MySQLdb.connect (host = "localhost",
+                                user = "root", passwd = "",
+                                db = "partsat")
+        self.c = conn.cursor ()
+        self.tablename = "partsat.%s%s" % (projname ,casename)
 
     def read_bin(self, filename):
         """ Load binary output from TRACMASS """
@@ -20,13 +31,47 @@ class trm:
                     ]))
         return runvec
 
-    def load_to_mysql(self, ints0=0, ftype="run", stype='bin', filename='', 
-                      db="trm", table="traj"):        
+    def create_table(self):
+        """Create a mysql table  table """
+        itp = " MEDIUMINT NOT NULL "
+        ftp = " FLOAT NOT NULL "
+        CT1 = ( "CREATE TABLE IF NOT EXISTS %s (" % self.tablename )
+        CT2 = "   intstart " + itp + ",ints " + itp + ",ntrac " + itp
+        CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
+        CT4 = "   )"
+        CT  = CT1 + CT2 + CT3 + CT4
+        self.c.execute(CT)
+
+    def create_indexes(self):
+        """Create necessary indexes for the traj table."""
+        indexlist=[("allints" ,"intstart,ints,ntrac"),("ints" ,"ints"),
+                   ("ntrac" ,"ntrac")]
+        for i in indexlist:
+            sql = ("ALTER TABLE %s ADD INDEX %s (%s);" % 
+                   (self.tablename ,i[0],i[1]) )
+            self.c.execute(sql)
+
+    def remove_earlier_data_from_table(self, intstart):
+        self.c.execute("SELECT DISTINCT(intstart) FROM %s;" %self.tablename)
+        if self.c.rowcount > 0:
+            DL = ( "DELETE FROM %s WHERE intstart=%s;" % 
+                   (self.tablename,intstart) )
+            print "Any old posts with intstart=%s deleted." % (intstart)
+        else :
+            DL = "TRUNCATE  TABLE %s;" % self.tablename
+            print "The table %s was truncated." % self.tablename
+            self.create_indexes()
+        self.c.execute(DL)
+
+    def load_to_mysql(self, intstart=0, ftype="run", stype='bin',
+                      filename='', db="trm"):        
         """Load a tracmass output file and add to mysql table"""
-        if ints0 != 0:
-            filename = "%s%08i_%s.%s" % (self.casename,ints0,ftype,stype)
+        self.create_table()
+        self.remove_earlier_data_from_table(intstart)
+        if intstart != 0:
+            filename = "%s%08i_%s.%s" % (self.casename,intstart,ftype,stype)
         else:
-            ints0 = int(filename[-16:-8])
+            intstart = int(filename[-16:-8])
         if filename[-3:] == "bin":
             runtraj = self.read_bin(self.datadir + filename)
         elif filename[-3:] == "asc":
@@ -36,27 +81,31 @@ class trm:
             print "Unknown file format, data file should be .bin or .asc"
             raise
         
-        conn = MySQLdb.connect (host = "localhost",
-                                user = "root",
-                                passwd = "",
-                                db = "trm")        
-        c = conn.cursor ()
         for r in runtraj:
-            c.execute(
-                """INSERT INTO traj (ints0, ntrac, ints, x, y, z)
-                         VALUES (-999, %s, %s, %s, %s, %s)""",
-                tuple(r) )
-        c.execute("UPDATE traj SET ints0=%i WHERE ints0=-999" % ints0)
+            self.c.execute(
+                "INSERT INTO " + self.tablename +
+                " (intstart, ntrac, ints, x, y, z) " + 
+                " VALUES (-999, %s, %s, %s, %s, %s)", tuple(r) )
+        self.c.execute("UPDATE %s SET intstart=%i WHERE intstart=-999" % 
+                       (self.tablename, intstart) )
+
+    def ints_to_iso(self,ints):
+        base_iso = mpl.dates.date2num(datetime.datetime(2004,1,1))
         
 
-        """ Sql commands to create database:
-        CREATE DATABASE trm;
-        CREATE TABLE traj (ints0 INT, ntrac INT, ints INT, 
-                           x FLOAT, y FLOAT, z FLOAT);
-        """
+    def sat_to_mysql(self,intstart,field):
+        """Load field data to a table. """
+        def create_table():
+            """Create a mysql table  table """
+            itp = " MEDIUMINT NOT NULL "
+            ftp = " FLOAT NOT NULL "
+            CT  = ( """CREATE TABLE IF NOT EXISTS %s 
+                       (ints %s,ntrac %s ,x %s 
+                        ,INDEX allints (ints,ntrac) )"""
+                    % (self.tablename + field, itp, itp, ftp) )
+            self.c.execute(CT)
 
-    def sat_to_trajs(self,ints0,field, db="trm", table="traj"):
-        pass
+        create_table()
         
 
 #mpl.dates.num2date(jd30+jd0-1)[0]
@@ -64,10 +113,9 @@ class trm:
 
 def test_insert():
     t = trm('gompom')
-    #t.load_to_mysql(filename="/Users/bror/ormOut/gompom00000033_run.bin")
-    t.load_to_mysql(33)
-    t.load_to_mysql(563)
-
+    #t.load_to_mysql(33)
+    #t.load_to_mysql(563)
+    t.sat_to_mysql(33,'chlor_a')
 
 def grid2ll(latMat ,lonMat ,xVec ,yVec):
     

@@ -995,56 +995,15 @@ subroutine loop
            
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-! if trajectory under bottom of ocean then put in middle of deepest layer (this should however be impossible)
-           if( z1.le.dble(KM-kmt(ib,jb)) ) then
-               print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb)),kmt(ia,ja),kmt(ib,jb),ntrac
-               print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
-               print *,'ia=',ia,ib,ja,jb,ka,kb
-               print *,'x0=',x0,x1,y0,y1,z0,z1
-               call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-               call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-               call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
-               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
-               stop 3957
-               z1=dble(KM-kmt(ib,jb))+0.5d0
-           end if
-! if trajectory above sea level then put back in the middle of shallowest layer (evaporation)
-           if( z1.ge.dble(KM) ) then
-              z1=dble(KM)-0.5d0
-              kb=KM
-           endif
-! sets the right level for the corresponding trajectory depth
-           if(z1.ne.dble(idint(z1))) then
-              kb=idint(z1)+1
-              if(kb.eq.KM+1) kb=KM  ! (should perhaps be removed)
-           endif
-! problems if trajectory is in the exact location of a corner
-           if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
-!            print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
-!            print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-!            stop 34957
-! corner problems may be solved the following way but should really not happen at all
-            if(ds.eq.dse .or. ds.eq.dsw) then
-             if(y1.ne.y0) then
-              y1=y0 ; jb=ja
-             else
-              y1=dble(jb)-0.5d0
-             endif
-            elseif(ds.eq.dsn .or. ds.eq.dss) then
-             if(y1.ne.y0) then
-              x1=x0 ; ib=ia 
-             else
-              x1=dble(ib)-0.5d0
-             endif
-            else
-             x1=dble(ib)-0.5d0
-             y1=dble(jb)-0.5d0
-            endif
-           endif
-           
+
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            
+           call errorCheck('bottomError', errCode)
+           call errorCheck('airborneError', errCode)
+           call errorCheck('corrdepthError', errCode)
+           call errorCheck('cornerError', errCode)
+
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
 #if defined diffusion     
@@ -1349,6 +1308,63 @@ return
              nrj(ntrac,7)=1
              errCode = -48
           end if
+       case ('bottomError')
+          ! if trajectory under bottom of ocean, 
+          ! then put in middle of deepest layer 
+          ! (this should however be impossible)
+           if( z1.le.dble(KM-kmt(ib,jb)) ) then
+              print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb)), &
+                   kmt(ia,ja),kmt(ib,jb),ntrac
+               print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
+               print *,'ia=',ia,ib,ja,jb,ka,kb
+               print *,'x0=',x0,x1,y0,y1,z0,z1
+               call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
+               call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
+               call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
+               stop 3957
+               z1=dble(KM-kmt(ib,jb))+0.5d0
+           end if
+        case ('airborneError')
+           ! if trajectory above sea level,
+           ! then put back in the middle of shallowest layer (evaporation)
+           if( z1.ge.dble(KM) ) then
+              z1=dble(KM)-0.5d0
+              kb=KM
+           endif
+        case ('corrdepthError')
+           ! sets the right level for the corresponding trajectory depth
+           if(z1.ne.dble(idint(z1))) then
+              kb=idint(z1)+1
+              if(kb.eq.KM+1) kb=KM  ! (should perhaps be removed)
+           endif
+           case ('cornerError')
+              ! problems if trajectory is in the exact location of a corner
+           if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
+              !print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
+              !print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+              !stop 34957
+              ! corner problems may be solved the following way 
+              ! but should really not happen at all
+              if(ds.eq.dse .or. ds.eq.dsw) then
+                 if(y1.ne.y0) then
+                    y1=y0 ; jb=ja
+                 else
+                    y1=dble(jb)-0.5d0
+                 endif
+              elseif(ds.eq.dsn .or. ds.eq.dss) then
+                 if(y1.ne.y0) then
+                    x1=x0 ; ib=ia 
+                 else
+                    x1=dble(ib)-0.5d0
+                 endif
+              else
+                 x1=dble(ib)-0.5d0
+                 y1=dble(jb)-0.5d0
+              endif
+           endif
+
+
        end select
   end subroutine errorCheck
 

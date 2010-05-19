@@ -44,7 +44,7 @@ subroutine init_seed()
      print *,'------------------------------------------------------'
      if (varSeedFile == 1) then
         fileStamp='/seed00000000.asc'
-        write (fileStamp(6:13),'(i8.8)') intstart
+        write (fileStamp(6:13),'(i8.8)') intstart/6
         fullSeedFile=trim(seedDir) // trim(fileStamp)
         print *,'===  Particles are seeded from a dynamic listfile  ==='
      else
