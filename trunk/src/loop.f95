@@ -663,7 +663,6 @@ subroutine loop
            if(dt.lt.0.d0) then
               print *,'dt=',dt
               stop 49673
-              goto 1500
            endif
            ! === if time step makes the integration ===
            ! === exceed the time when fiedls change ===
@@ -1226,7 +1225,6 @@ return
                 print *,'The trajectory is killed'
                 print *,'====================================='
              end if
-             call writedata(14)
              nerror=nerror+1
              landError = landError +1
              errCode = -40             
@@ -1331,12 +1329,14 @@ return
            if( z1.ge.dble(KM) ) then
               z1=dble(KM)-0.5d0
               kb=KM
+              errCode = -50
            endif
         case ('corrdepthError')
            ! sets the right level for the corresponding trajectory depth
            if(z1.ne.dble(idint(z1))) then
               kb=idint(z1)+1
               if(kb.eq.KM+1) kb=KM  ! (should perhaps be removed)
+              errCode = -51
            endif
            case ('cornerError')
               ! problems if trajectory is in the exact location of a corner
@@ -1362,10 +1362,9 @@ return
                  x1=dble(ib)-0.5d0
                  y1=dble(jb)-0.5d0
               endif
+              errCode =-52
            endif
-
-
-       end select
+        end select
   end subroutine errorCheck
 
   subroutine writedata(sel)
@@ -1413,10 +1412,10 @@ return
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
     case (11)
-       if( (kriva.eq.1 .and. ts.eq.dble(idint(ts)) ) .or. &
-            (scrivi .and. kriva.eq.2)                .or. &
-            (kriva.eq.3)                             .or. &
-            (kriva.eq.4 .and. niter.eq.1)            .or. &
+       if( (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
+            (scrivi .and. kriva.eq.2)                    .or. &
+            (kriva.eq.3)                                 .or. &
+            (kriva.eq.4 .and. niter.eq.1)                .or. &
             (kriva.eq.5 .and. &
             (tt-t0.eq.7.d0*tday.or.tt-t0.eq.14.d0*tday.or.tt-t0.eq.21.d0*tday)) .or. &
             (.not.scrivi .and. kriva.eq.6)           .or. &
@@ -1489,10 +1488,10 @@ return
        write(unit=78 ,rec=recPosIn) ntrac,ints,x14,y14,z14
        return
     case (11)
-       if( (kriva.eq.1 .and. ts .eq. ints-1) .or. &
-            (scrivi .and. kriva.eq.2)                .or. &
-            (kriva.eq.3)                             .or. &
-            (kriva.eq.4 .and. niter.eq.1)            .or. &
+       if( (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
+            (scrivi .and. kriva.eq.2)                    .or. &
+            (kriva.eq.3)                                 .or. &
+            (kriva.eq.4 .and. niter.eq.1)                .or. &
             (kriva.eq.5 .and. &
             (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
             .or.tt-t0.eq.21.*tday)) ) then
@@ -1504,9 +1503,6 @@ return
     case (13)
        recPosKll = recPosKll+1
        write(unit=77 ,rec=recPosKll) ntrac,ints,x14,y14,z14   
-    case (14)
-       recPosRun = recPosRun+1
-       write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
     case (15)
        recPosRun = recPosRun+1
        write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
