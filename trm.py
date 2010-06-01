@@ -41,8 +41,7 @@ class trm:
 
     def create_table(self):
         """Create a mysql table  table """
-        indexlist=[("allints" ,"intstart,ints,ntrac"),("ints" ,"ints"),
-                   ("ntrac" ,"ntrac")]
+        indexlist=[("ints" ,"ints"),("ntrac" ,"ntrac")]
         indexsql = ""
         for i in indexlist: indexsql += " ,INDEX %s (%s)" % (i[0],i[1])
         itp = " MEDIUMINT NOT NULL "
@@ -50,7 +49,7 @@ class trm:
         CT1 = ( "CREATE TABLE IF NOT EXISTS %s (" % self.tablename )
         CT2 = "   intstart " + itp + ",ints " + itp + ",ntrac " + itp
         CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
-        CT4 = indexsql + "  )"
+        CT4 = " ,PRIMARY KEY (intstart,ints,ntrac) " + indexsql + "  )"
         CT  = CT1 + CT2 + CT3 + CT4
         self.c.execute(CT)
 
@@ -111,10 +110,11 @@ class trm:
         base_iso = mpl.dates.date2num(datetime.datetime(2004,1,1))-1
         return base_iso + ints/6
         
-    def sat_field(self,ints,field):
+    def sat_field(self,field,ints):
         ds = mpl.dates.num2date(self.ints_to_iso(ints))
         box8dir = '/projData/JCOOT_sat_Box8/'
         filepre = "A%i%03i" % (ds.year, ds.timetuple().tm_yday)
+        print filepre
         try:
             satfile = glob.glob(box8dir + filepre + "*")[0]
         except IndexError:
@@ -124,29 +124,37 @@ class trm:
         h = SD(satfile, SDC.READ)
         return h.select('chlor_a')[:]
 
-    def sat_to_db(self,intstart,field):
+    def sat_to_db(self,field,intstart,ints=0):
         """Load field data to a table. """
         def create_table():
             """Create a mysql table  table """
             itp = " MEDIUMINT NOT NULL "
             ftp = " FLOAT NOT NULL "
             CT  = ( """CREATE TABLE IF NOT EXISTS %s 
-                       (ints %s,ntrac %s ,val %s 
-                        ,INDEX allints (ints,ntrac) )"""
-                    % (self.tablename + field, itp, itp, ftp) )
+                       (intstart %s,ints %s,ntrac %s ,val %s 
+                        ,PRIMARY KEY (intstart,ints,ntrac) )"""
+                    % (self.tablename + field, itp, itp, itp, ftp) )
             self.c.execute(CT)
+        if ints == 0:
+            ints = intstart + 1
         create_table()
-        traj = self.trajs(intstart=intstart,ints=intstart+1)
+        traj = self.trajs(intstart=intstart,ints=ints)
+        if not hasattr(traj,'x'):
+            return False
         sati,satj = self.gcmij_to_satij(traj)
-        val = self.sat_field(intstart,field)[satj,sati]
+        val = self.sat_field(field,ints)[satj,sati]
          
         for p in zip(traj.ints[val>=0], traj.ntrac[val>=0], val[val>=0]):
             self.c.execute(
                 "INSERT INTO " + self.tablename + field +
-                " (ints, ntrac, val) VALUES (%s, %s, %s)", p )
+                " (intstart, ints, ntrac, val) VALUES (-999, %s, %s, %s)", p )
+            self.c.execute("UPDATE %s SET intstart=%i WHERE intstart=-999" % 
+                           (self.tablename + field, intstart) )
+
+
             
     def gcmij_to_satij(self,traj):
-        n = pycdf.CDF('/Users/bror/slask/box8_gompom.cdf')
+        n = pycdf.CDF('/Users/bror/svn/modtraj/box8_gompom.cdf')
         igompom = n.var('igompom')[:]
         jgompom = n.var('jgompom')[:]
         ibox8 = n.var('ibox8')[:]
@@ -156,11 +164,15 @@ class trm:
         ann = k.query(zip(traj.x,traj.y),1,1,1,10)
         return ibox8[ann[1]], jbox8[ann[1]]
 
-    def trajs(self,intstart="\'%\'", ints="\'%\'",ntrac="\'%\'"):
+    def trajs(self,intstart=0, ints=0,ntrac=0):
         class traj: pass
-        self.c.execute('SELECT * FROM ' + self.tablename + ' WHERE ' +
-                       ' intstart like %s and ints like %s  and ntrac like %s' 
-                       % (intstart, ints, ntrac) )
+        selstr = ""
+        if intstart != 0: selstr += " intstart=%i and" % intstart
+        if ints != 0:     selstr += " ints=%i and" % ints
+        if ntrac != 0:    selstr += " ntrac=%i" % ntrac
+        selstr = selstr.rstrip("and")
+        self.c.execute('SELECT * FROM %s WHERE %s' % (self.tablename,selstr))
+
         res = zip(*self.c.fetchall())
         if len(res) > 0:
             for n,a in enumerate(['intstart','ints','ntrac','x','y','z']):
@@ -170,21 +182,31 @@ class trm:
 #mpl.dates.num2date(jd30+jd0-1)[0]
 
 
-def import_batchrun(batchfile='batch_ints.asc'):
+def import_batchrun(batchfile='batch_ints_start.asc'):
     tr = trm('gompom')
     file = tr.ormdir + "/projects/gomoos/" + batchfile
     for t in open(file):
         tr.load_to_mysql(int(t))
-    tr_.enable_indexes()
+    tr._enable_indexes()
     #t.load_to_mysql(563)
-    #t.sat_to_mysql(33,'chlor_a')
+    
 
-def batch_sat_to_db(batchfile='batch_ints.asc'):
+def batch_sat_to_db(batchprefix='batch_ints'):
     tr = trm('gompom')
-    file = tr.ormdir + "/projects/gomoos/" + batchfile
-    for t in open(file):
-        tr.sat_to_db(int(t),'chlor_a')
-    tr_.enable_indexes()
+    tr.disable_indexes()
+    file1 = tr.ormdir + "/projects/gomoos/" + batchprefix + "_start.asc"
+    file2 = tr.ormdir + "/projects/gomoos/" + batchprefix + "_end.asc"
+    for t1,t2 in zip(open(file1),open(file2)):
+        print int(t1),int(t2), int(t2)-int(t1) 
+        try:
+            tr.sat_to_db('chlor_a',int(t1),int(t1)+1)
+        except IOError:
+            print "*** File missing! ***"
+        try:
+            tr.sat_to_db('chlor_a',int(t1),int(t2))
+        except IOError:
+            print "*** File missing! ***"
+    tr.enable_indexes()
 
 def test_insert():
     t = trm('gompom')
