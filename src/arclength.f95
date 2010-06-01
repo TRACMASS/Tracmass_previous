@@ -1,7 +1,7 @@
 ! Computes the length of the trajectory
 ! Note that the calculation is not exact 
  
-subroutine arclength(ia,ja,ka,dt,rr,arc)
+subroutine arclength(ia,ja,ka,dt,rr)
   
   USE mod_param
   USE mod_coord
@@ -9,7 +9,7 @@ subroutine arclength(ia,ja,ka,dt,rr,arc)
   USE mod_vel
   IMPLICIT none
   
-  REAL*8 rr,rg,dt,arc,uu,vv,ww
+  REAL*8 rr,rg,dt,uu,vv,ww
   INTEGER ii,iim,jj,jjm,kk,kkm,ia,ja,ka
 
   rg=1.-rr
