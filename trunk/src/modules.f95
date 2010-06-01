@@ -36,6 +36,17 @@ MODULE mod_diff
 	INTEGER                             :: dummy	
 ENDMODULE mod_diff
 
+MODULE mod_loopvars
+  REAL*8                                     :: rr, rb, rg, rbg
+  REAL*8                                     :: ds, dsmin
+  REAL*8                                     :: dse, dsw, dsn, dss
+  REAL*8                                     :: dsu, dsd, dsc
+  LOGICAL                                    :: scrivi
+  REAL*8                                     :: ts,tt
+  REAL*8                                     :: dxyz
+  REAL*8                                     :: ss0
+ENDMODULE mod_loopvars
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
   INTEGER                                   :: ints      ,intstart ,intend
@@ -117,7 +128,7 @@ MODULE mod_grid
 
   REAL*8                                    :: rmin ,tmin ,smin
   REAL*8                                    :: dr ,dtemp ,dsalt
-  REAL*8                                    :: arcscale
+  REAL*8                                    :: arc,arct,arcscale
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
@@ -153,7 +164,8 @@ MODULE mod_vel
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_traj
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)    :: trj
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
 ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_dens
@@ -178,18 +190,6 @@ MODULE mod_name
   CHARACTER(LEN=200)                         :: gridDesc
   CHARACTER(LEN=200)                         :: caseName  ,caseDesc
 ENDMODULE mod_name
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_seed
-  INTEGER                                    :: nff,isec,idir,nqua,num
-  INTEGER                                    :: ijk  ,ijkMax
-  INTEGER                                    :: seedType ,varSeedFile 
-  INTEGER                                    :: ist1 ,ist2   ,jst1 ,jst2
-  INTEGER                                    :: kst1, kst2
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ijkst
-  CHARACTER(LEN=200)                         :: seedDir
-  CHARACTER(LEN=200)                         :: seedFile
-ENDMODULE mod_seed
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamxy

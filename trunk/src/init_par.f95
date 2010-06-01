@@ -239,7 +239,7 @@ subroutine init_params
   allocate ( wflux(0:km,2) )
 #endif
   allocate ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
-  allocate ( trj(ntracmax,NTRJ) )
+  allocate ( trj(ntracmax,NTRJ), nrj(ntracmax,NNRJ) )
   ! mod_dens
 #ifdef tempsalt
   allocate ( tem(imt,jmt,km,nst) ,sal(imt,jmt,km,nst), rho(imt,jmt,km,nst) )

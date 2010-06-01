@@ -11,7 +11,7 @@ subroutine init_seed()
   CHARACTER(LEN=200)                         :: fullSeedFile
   CHARACTER(len=*), parameter                :: ijkform = "(6I6)"
   LOGICAL                                    :: fileexists
-  INTEGER                                    :: i,j,k,ist,jst,kst
+  INTEGER                                    :: i,j,k
   INTEGER                                    :: filestat
   INTEGER*4, ALLOCATABLE, DIMENSION(:,:)     :: seedMask
   select case (seedType)
@@ -142,12 +142,6 @@ subroutine init_seed()
         print *,'Seed size    : ', ijkMax
      end if chFile2d
 
-#ifndef atm || ifs
-        !open(21,file=directory//'topo/kmt',form='unformatted')
-        !open(21,file=directory//'topo/maskust',form='unformatted')
-     !close(21)
-#endif
- 
 #if defined rco
      do i=1,IMT
         do j=1,JMT
