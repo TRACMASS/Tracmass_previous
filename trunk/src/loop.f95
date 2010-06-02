@@ -913,7 +913,7 @@ return
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
     case (11)
-       if( (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 )) .or. &
+       if( (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
             (scrivi .and. kriva.eq.2)                .or. &
             (kriva.eq.3)                             .or. &
             (kriva.eq.4 .and. niter.eq.1)            .or. &
