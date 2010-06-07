@@ -58,8 +58,8 @@
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Users/doos/data/orca/orca1/',
-   inDataDir = '/Users/doos/data/orca/orca025/',
-  ! inDataDir = '/Volumes/Resa0/data/orca/orca025/',
+  ! inDataDir = '/Users/doos/data/orca/orca025/',
+   inDataDir = '/Volumes/Resa0/data/orca/orca025/',
   !
   ! === Directory where output files are saved
    outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
@@ -73,7 +73,7 @@
   ! outDataFile     = 'di4000_d025_m13'/
   ! outDataFile     = 'analyt2'/
   ! outDataFile     = 'no_sing_365_a0'/
-   outDataFile     = 'di600_sing_365_a0'/
+   outDataFile     = 'di600_sing_365_a1'/
   ! outDataFile      = 'di4000_d025_k64',!ah=4000 med u=v=0
   !
   intminInOutFile=0/

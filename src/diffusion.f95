@@ -31,7 +31,8 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	if(ib>=1 .AND. ib<=IMT .AND. jb>=1 .AND. jb<=JMT .AND. KM+1-kmt(ib,jb)<=kb .AND. kb>=1 ) then
 		tryAgain = .TRUE.
     else
-     stop 86567
+     print *,'outside model domain in diffusion',ib,jb,KM+1-kmt(ib,jb),kb
+!     stop 86567
 	end if
 !	 print *,'ib,jb,kb',ib,jb,kb,kmt(ib,jb),x1,y1,z1
 	if(.NOT. tryAgain) then
@@ -39,7 +40,7 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 		write(*,*)"========"
 			write(*,*)"Particle outside model area. No diffusion added."
 			write(*,*)"========"
-			stop 3957
+!			stop 3957
 	end if
 	
 	itno=0

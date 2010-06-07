@@ -820,8 +820,11 @@ return
                call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
                call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
                print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
-               stop 3957
+              nerror=nerror+1
+              nrj(ntrac,6)=1
+!               stop 3957
                z1=dble(KM-kmt(ib,jb))+0.5d0
+              errCode = -49
            end if
         case ('airborneError')
            ! if trajectory above sea level,

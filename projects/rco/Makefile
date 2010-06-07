@@ -24,7 +24,7 @@
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-#   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
+#  fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
    fl17  = -Dfreesurface    # Variable bottom box to match actual depth
    fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
 #  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
@@ -35,8 +35,10 @@
 #  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
 #  fl23  = -Dturb           # Adds subgrid turbulent velocities 
-#   fl24  = -Ddiffusion      # Adds a diffusion on trajectory
-#   fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+#  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+#  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+#------------------------------------------------------------------------
+   fl27   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \
