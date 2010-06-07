@@ -37,8 +37,8 @@
   ! === Start time for this run
   startHour         = 0,
   startDay          = 1,
-  startMon          = 1,
-  startYear         = 2000/  ! first year is 1981, last year is 2005
+  startMon          = 7,
+  startYear         = 2003/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE
@@ -48,22 +48,24 @@
   !
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets (each ints)
-  !                 2 = write each grid-crossing (and not time change)
-  !                 3 = write at each iteration (all the time)
+  !                 2 = write at each time iteration
+  !                 3 = write all the time
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva    = 1,
+  !                 6 = write each spatial grid-crossing 
+  kriva    = 2,
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Volumes/hav4/data/rco/2nm_122/',
-  ! inDataDir = '/Volumes/Resa3/data/rco/2nm_122/',
-  ! inDataDir = '/Users/doos/data/rco/gcm/',
-   inDataDir = '../data/rco/2nm_122/',
+  ! inDataDir = '/Volumes/Resa0/data/rco/2000/',
+   inDataDir = '/Users/doos/data/rco/2003/',
+  ! inDataDir = '../data/rco/2nm_122/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Volumes/hav4/data/rco/orm/',
   ! outDataDir   = '/Volumes/Resa3/data/rco/orm/',
-   outDataDir   = '../data/rco/data_out/',
+   outDataDir   = '/Users/doos/data/rco/data_out/',
+  ! outDataDir   = '../data/rco/data_out/',
   !
   ! === name of current trajectory run
   !outDataFile     = 'xyz_timestep_3D'/
@@ -72,7 +74,7 @@
   !outDataFile     = 'xyz_anal_turb_3D'/
   !outDataFile     = 'xyz_step_diff_h_3D'/
   !outDataFile     = 'xyz_step_diff_xl_3D'/
-  outDataFile     = 'dba4',
+  outDataFile     = 'sthriga_2003_n0',
   !outDataFile     = 'enruta_anal_diff_3D3'/
  !
   intminInOutFile=0/
@@ -121,19 +123,19 @@ $INITRUNSEED
   !kst1     =  38,		 
   !kst2     =  41, 
 ! One singel gridbox
-  ist1     = 161,		 
-  ist2     = 161,		 
-  jst1     = 170,		 
-  jst2     = 170,		 
-  kst1     =  41,		 
-  kst2     =  41,
+  ist1     =  158,		 
+  ist2     =  171,		 
+  jst1     =  127,		 
+  jst2     =  154,		 
+  kst1     =  36,		 
+  kst2     =  36,
   varSeedFile = 0,
-  !seedDir     = '/Volumes/hav4/data/rco/topo/',
-  seedDir     = '../data/rco/topo/',
+  seedDir     = '/Users/doos/data/rco/topo/',
+  !seedDir     = '../data/rco/topo/',
   !seedDir     = '/Users/doos/data/rco/topo/',
-  !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
+  seedFile    = '/Users/doos/data/rco/topo/mask_sthriga0' /
   !seedFile    = '/Volumes/Resa3/data/rco/topo/maskust' /
-  seedFile    = '../data/rco/topo/maskust' /
+  !seedFile    = '../data/rco/topo/maskust' /
 
   $INITRUNTEMPSALT
   ! water mass properties with minimum & maximum on temp, salt and density
@@ -156,7 +158,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=2000., !dgl4=1.e4 dgl5=2.e3 dgl3=1000 dgl2=100 dgl1=10 dgl0=1
+  ah=10., !dgl4=1.e4 dgl5=2.e3 dgl3=1000 dgl2=100 dgl1=10 dgl0=1
   ! Vertical diffusion in m2/s
   av=0./
   
