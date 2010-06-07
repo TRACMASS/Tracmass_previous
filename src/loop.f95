@@ -334,22 +334,9 @@ subroutine loop
            if(iam.eq.0)iam=IMT
            ja=jb
            ka=kb
-           ! T-box volume in m3
-#ifdef zgrid3Dt 
-           dxyz=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
-#elif  zgrid3D
-           dxyz=dzt(ib,jb,kb)
-#else
-           dxyz=dz(kb)
-#endif /*zgrid3Dt*/
-#ifdef varbottombox
-           if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
-#endif /*varbottombox*/
-#ifdef freesurface
-           if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
-           dxyz=dxyz*dxdy(ib,jb)
-#endif /*freesurface*/
-!           if(dxyz.le.0.) stop 34956
+
+           call calc_dxyz
+
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)
@@ -1051,5 +1038,28 @@ return
 !       write (6 , FMT="(A,F6.1,A)") ', done in ' ,timeDiff ,' sec'
     end select
   end subroutine fancyTimer
+
+  subroutine calc_dxyz
+    ! T-box volume in m3
+#ifdef zgrid3Dt 
+    dxyz=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
+#elif  zgrid3D
+    dxyz=dzt(ib,jb,kb)
+#else
+    dxyz=dz(kb)
+#endif /*zgrid3Dt*/
+#ifdef varbottombox
+    if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
+#endif /*varbottombox*/
+#ifdef freesurface
+    if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+    dxyz=dxyz*dxdy(ib,jb)
+#endif /*freesurface*/
+  end subroutine calc_dxyz
+
+
+
+
+
 end subroutine loop
 
