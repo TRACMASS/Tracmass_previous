@@ -252,6 +252,17 @@ subroutine loop
         niter=nrj(ntrac,4)
         ts=dble(nrj(ntrac,5))
         tss=0.d0
+        
+        ! === Write initial data to in.asc file ===
+        ! If t0 = tt (first step) 
+        if(trj(ntrac,4).eq.trj(ntrac,7)) then
+#ifdef tempsalt
+        call interp(nrj(ntrac,1),nrj(ntrac,2),nrj(ntrac,3),&
+        trj(ntrac,1),trj(ntrac,2),trj(ntrac,3),temp,salt,dens,1)
+#endif
+        call writedata(10)
+        endif 
+        
 #ifdef rerun
         lbas=nrj(ntrac,8)
         if(lbas.lt.1 .or.lbas.gt.LBT) then
@@ -876,8 +887,8 @@ return
 566 format(i8,i7,f8.3,f8.3,f7.3,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined ifs 
-566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.0 &
-         ,f15.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.2 &
+         ,f15.0,f6.1,f6.2,f8.2,f6.0,8e8.1 )
 #elif defined orc
 !566 format(i8,i7,2f8.2,f6.2,2f10.2 &
 !         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
