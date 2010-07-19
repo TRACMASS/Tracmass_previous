@@ -23,7 +23,7 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=2000000/               ! 19*1000*1000 ! maximum number of trajectories
+  NTRACMAX=20000000/               ! 19*1000*1000 ! maximum number of trajectories
   !
   !
 $INITGRIDTIME
