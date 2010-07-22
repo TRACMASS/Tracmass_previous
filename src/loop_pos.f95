@@ -3,7 +3,10 @@ module mod_pos
   USE mod_grid
   USE mod_vel
   USE mod_loopvars
-  
+  USE mod_streamxy
+  USE mod_streamv
+  USE mod_streamr
+    
   IMPLICIT none
   
 contains
@@ -14,6 +17,7 @@ contains
     INTEGER                                    :: uu
     INTEGER                                    :: ia, iam, ja, ka
     INTEGER                                    :: ib, jb, kb
+    REAL                                       :: temp,salt,dens
     REAL*8, INTENT(IN)                         :: x0, y0, z0
     REAL*8, INTENT(OUT)                        :: x1, y1, z1
         
@@ -150,7 +154,7 @@ contains
        styr(ja,mta,lbas,2)=styr(ja,mta,lbas,2)+real(subvol*ff)
        styr(ja,msa,lbas,3)=styr(ja,msa,lbas,3)+real(subvol*ff)
 #endif /*streamts*/
-#endif /*steamr*/
+#endif /*streamr*/
     elseif(ds.eq.dss) then ! southward grid-cell exit
        
        scrivi=.false.

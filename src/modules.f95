@@ -45,6 +45,8 @@ MODULE mod_loopvars
   REAL*8                                     :: ts,tt
   REAL*8                                     :: dxyz
   REAL*8                                     :: ss0
+  INTEGER                                    :: lbas
+  REAL*8                                     :: subvol
 ENDMODULE mod_loopvars
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
