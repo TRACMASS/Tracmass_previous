@@ -53,7 +53,7 @@ subroutine loop
   INTEGER                                    :: ia, ja, ka, iam
   INTEGER                                    :: ib, jb, kb, ibm
   INTEGER                                    :: i,  j,  k, l, m
-  INTEGER                                    :: niter, lbas
+  INTEGER                                    :: niter
   INTEGER                                    :: ntrac,nrh0=0
 
   ! Counters
@@ -64,7 +64,7 @@ subroutine loop
   REAL*8                                     :: x0, y0, z0, x1, y1, z1
   REAL*8                                     :: rlon,rlat
   REAL*8                                     :: dt, t0
-  REAL*8                                     :: subvol, dtreg
+  REAL*8                                     :: dtreg
   
   
   ! === Error Evaluation ===
@@ -554,18 +554,18 @@ subroutine loop
 #endif
 
         ! add streamfuction contribution at the end of trajectory for stat
-#ifdef streamxy
-        stxyx(:,:,lbas)=stxyx(:,:,lbas)+sxyx(:,:)
-        stxyy(:,:,lbas)=stxyy(:,:,lbas)+sxyy(:,:)
-#endif /*streamxy*/
-#ifdef streamv
-        stxz(:,:,lbas)=stxz(:,:,lbas)+sxz(:,:)
-        styz(:,:,lbas)=styz(:,:,lbas)+syz(:,:)
-#endif /*streamv*/
-#ifdef streamr
-        stxr(:,:,lbas,:)=stxr(:,:,lbas,:)+sxr(:,:,:)
-        styr(:,:,lbas,:)=styr(:,:,lbas,:)+syr(:,:,:)
-#endif /*streamr*/
+!#ifdef streamxy
+!        stxyx(:,:,lbas)=stxyx(:,:,lbas)+sxyx(:,:)
+!        stxyy(:,:,lbas)=stxyy(:,:,lbas)+sxyy(:,:)
+!#endif /*streamxy*/
+!#ifdef streamv
+!        stxz(:,:,lbas)=stxz(:,:,lbas)+sxz(:,:)
+!        styz(:,:,lbas)=styz(:,:,lbas)+syz(:,:)
+!#endif /*streamv*/
+!#ifdef streamr
+!        stxr(:,:,lbas,:)=stxr(:,:,lbas,:)+sxr(:,:,:)
+!        styr(:,:,lbas,:)=styr(:,:,lbas,:)+syr(:,:,:)
+!#endif /*streamr*/
 
         nout=nout+1
         
