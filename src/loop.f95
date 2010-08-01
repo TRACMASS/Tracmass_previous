@@ -233,7 +233,7 @@ subroutine loop
      !=== a new position for this time step.              ===
      !=======================================================
      call fancyTimer('advection','start')
-     ntracLoop: do ntrac=1,ntractot     
+     ntracLoop: do ntrac=1,ntractot  
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6).eq.1) cycle ntracLoop
         
@@ -269,7 +269,7 @@ subroutine loop
            print *,'lbas=',lbas,'ntrac=',ntrac
            print *,'trj(ntrac,:)=',trj(ntrac,:)
            print *,'nrj(ntrac,:)=',nrj(ntrac,:)
-           goto 1500
+           exit intsTimeLoop
         endif
 #endif /*rerun*/
 #ifdef sediment
@@ -299,7 +299,6 @@ subroutine loop
               cycle ntracLoop 
            endif
         endif
-        
 #endif  /*sediment*/      
         ! ===  start loop for each trajectory ===
         scrivi=.true.
@@ -333,7 +332,7 @@ subroutine loop
            rr=1.d0-rg
            if(rg.lt.0.d0 .or.rg.gt.1.d0) then
               print *,'rg=',rg
-              goto 1500
+              exit intsTimeLoop
            endif
            ! === Cyclic world ocean/atmosphere === 
            if(ib.eq.1.and.x1.eq.dble(IMT)) x1=0.d0
@@ -347,12 +346,11 @@ subroutine loop
            ka=kb
 
            call calc_dxyz
-
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)
            if (errCode.ne.0) cycle ntracLoop
-           
+
            ! === calculate the turbulent velocities ===
 #ifdef turb
            call turbuflux(ia,ja,ka,rr)
@@ -401,67 +399,16 @@ subroutine loop
               print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
               print *,ia,ja,ka,x0,y0,z0,ntrac,niter
               print *,'k=',ka,kb,KM+1-kmt(ia,ja),kmt(ia,ja)
-              ! goto 1500
+              ! exit intsTimeLoop
               nerror=nerror+1
               nrj(ntrac,6)=1
               cycle ntracLoop
-           endif
-           
-#ifdef regulardt
-           if(ds.eq.dsmin) then ! transform ds to dt in seconds
-!            dt=dt  ! this makes dt more accurate
-           else
-            dt=ds*dxyz 
-           endif
-#else
-           if(ds.eq.dsmin) then ! transform ds to dt in seconds
-            dt=dtmin  ! this makes dt more accurate
-           else
-            dt=ds*dxyz 
-           endif
-#endif /*regulardt*/
-           if(dt.lt.0.d0) then
-              print *,'dt=',dt
-              stop 49673
-           endif
-           ! === if time step makes the integration ===
-           ! === exceed the time when fiedls change ===
-           if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
-              dt=dble(idint(ts)+1)*tseas-tt
-              tt=dble(idint(ts)+1)*tseas
-              ts=dble(idint(ts)+1)
-              tss=dble(iter)
-              ds=dt/dxyz
-              dsc=ds
-           else
-              tt=tt+dt
-#if defined regulardt
-              if(dt.eq.dtmin) then
-                 ts=ts+dstep
-                 tss=tss+1.d0
-              elseif(dt.eq.dtreg) then  
-                 ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
-!                 ts=ts+dtreg/tseas
-                 tss=dble(nint(tss+dt/dtmin))
-              else
-                 ts=ts+dt/tseas
-                 tss=tss+dt/dtmin
-              endif
-#else
-              if(dt.eq.dtmin) then
-                 ts=ts+dstep
-                 tss=tss+1.d0
-              else
-                 ts =ts +dt/tseas
-                 tss=tss+dt/tseas*dble(iter)
-!                 tss=tss+dt/dtmin
-              endif
-#endif
-           endif
-           ! === time interpolation constant ===
-           rbg=dmod(ts,1.d0) 
-           rb =1.d0-rbg
-           
+           end if
+
+           call calc_time
+
+
+
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
@@ -532,14 +479,7 @@ subroutine loop
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
-                 
-                 !if(  float(jens(k)) .ne. y1 .and. y1 .ne. float(jenn(k))) then
-     !               print *,'ia..=',ia,ib,ja,jb,ka,kb
-     !               print *,'x0..=',x0,x1,y0,y1,z0,z1
-     !               print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-     !               print *,'ntrac=',ntrac, niter
-     !               stop 4967
-     !            endif
+
                  exit niterLoop                                
               endif
            enddo LBTLOOP
@@ -552,21 +492,6 @@ subroutine loop
            call writedata(18)
         end do niterLoop
 #endif
-
-        ! add streamfuction contribution at the end of trajectory for stat
-!#ifdef streamxy
-!        stxyx(:,:,lbas)=stxyx(:,:,lbas)+sxyx(:,:)
-!        stxyy(:,:,lbas)=stxyy(:,:,lbas)+sxyy(:,:)
-!#endif /*streamxy*/
-!#ifdef streamv
-!        stxz(:,:,lbas)=stxz(:,:,lbas)+sxz(:,:)
-!        styz(:,:,lbas)=styz(:,:,lbas)+syz(:,:)
-!#endif /*streamv*/
-!#ifdef streamr
-!        stxr(:,:,lbas,:)=stxr(:,:,lbas,:)+sxr(:,:,:)
-!        styr(:,:,lbas,:)=styr(:,:,lbas,:)+syr(:,:,:)
-!#endif /*streamr*/
-
         nout=nout+1
         
         call writedata(17)
@@ -599,7 +524,7 @@ subroutine loop
      
   end do intsTimeLoop
   
-1500 close(56)
+  close(56)
   
   print *,ntractot ,' trajectories calculated'
 !  print *,nev      ,' trajectories evaporated'
@@ -1030,26 +955,6 @@ return
 
   end subroutine writedata
 
-
-  subroutine fancyTimer(timerText ,testStr)
-    IMPLICIT NONE
-
-    CHARACTER (len=*)                          :: timerText ,testStr
-    REAL ,SAVE                                 :: fullstamp1 ,fullstamp2
-    REAL ,SAVE ,DIMENSION(2)                   :: timestamp1 ,timestamp2
-    REAL                                       :: timeDiff
-    
-    select case (trim(testStr))
-    case ('start')
-!       WRITE (6, FMT="(A)", ADVANCE="NO") ,' - Begin '//trim(timerText)
-       call etime(timestamp1,fullstamp1)
-    case ('stop')
-       call etime(timestamp2,fullstamp2)
-       timeDiff=fullstamp2-fullstamp1
-!       write (6 , FMT="(A,F6.1,A)") ', done in ' ,timeDiff ,' sec'
-    end select
-  end subroutine fancyTimer
-
   subroutine calc_dxyz
     ! T-box volume in m3
 #ifdef zgrid3Dt 
@@ -1064,13 +969,84 @@ return
 #endif /*varbottombox*/
 #ifdef freesurface
     if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
-    dxyz=dxyz*dxdy(ib,jb)
 #endif /*freesurface*/
+    dxyz=dxyz*dxdy(ib,jb)
   end subroutine calc_dxyz
 
+  subroutine calc_time
+#ifdef regulardt
+           if(ds.eq.dsmin) then ! transform ds to dt in seconds
+!            dt=dt  ! this makes dt more accurate
+           else
+            dt=ds*dxyz 
+           endif
+#else
+           if(ds.eq.dsmin) then ! transform ds to dt in seconds
+            dt=dtmin  ! this makes dt more accurate
+           else
+            dt=ds*dxyz 
+           endif
+#endif /*regulardt*/
+           if(dt.lt.0.d0) then
+              print *,'dt=',dt
+              stop 49673
+           endif
+           ! === if time step makes the integration ===
+           ! === exceed the time when fiedls change ===
+           if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
+              dt=dble(idint(ts)+1)*tseas-tt
+              tt=dble(idint(ts)+1)*tseas
+              ts=dble(idint(ts)+1)
+              tss=dble(iter)
+              ds=dt/dxyz
+              dsc=ds
+           else
+              tt=tt+dt
+#if defined regulardt
+              if(dt.eq.dtmin) then
+                 ts=ts+dstep
+                 tss=tss+1.d0
+              elseif(dt.eq.dtreg) then  
+                 ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
+!                 ts=ts+dtreg/tseas
+                 tss=dble(nint(tss+dt/dtmin))
+              else
+                 ts=ts+dt/tseas
+                 tss=tss+dt/dtmin
+              endif
+#else
+              if(dt.eq.dtmin) then
+                 ts=ts+dstep
+                 tss=tss+1.d0
+              else
+                 ts =ts +dt/tseas
+                 tss=tss+dt/tseas*dble(iter)
+!                 tss=tss+dt/dtmin
+              endif
+#endif
+           end if
+           ! === time interpolation constant ===
+           rbg=dmod(ts,1.d0) 
+           rb =1.d0-rbg
+         end subroutine calc_time
 
+  subroutine fancyTimer(timerText ,testStr)
+    IMPLICIT NONE
 
-
-
+    CHARACTER (len=*)                          :: timerText ,testStr
+    REAL ,SAVE                                 :: fullstamp1 ,fullstamp2
+    REAL ,SAVE ,DIMENSION(2)                   :: timestamp1 ,timestamp2
+    REAL                                       :: timeDiff
+!!$    
+!!$    select case (trim(testStr))
+!!$    case ('start')
+!!$       WRITE (6, FMT="(A)", ADVANCE="NO") ,' - Begin '//trim(timerText)
+!!$       call etime(timestamp1,fullstamp1)
+!!$    case ('stop')
+!!$       call etime(timestamp2,fullstamp2)
+!!$       timeDiff=fullstamp2-fullstamp1
+!!$       write (6 , FMT="(A,F6.1,A)") ', done in ' ,timeDiff ,' sec'
+!!$    end select
+  end subroutine fancyTimer
 end subroutine loop
 
