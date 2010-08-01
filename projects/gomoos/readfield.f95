@@ -76,6 +76,8 @@ SUBROUTINE readfields
   nread = mod(ints/5,18) + 1
 
   ! === Velocities ===
+  !Use  t=1  i=2  j=3  k=4
+  map3d    = [2, 3, 4, 1]   
   uvel =  get3DfieldNC(trim(ncFile), 'u') * x_scale + x_offset
   vvel =  get3DfieldNC(trim(ncFile), 'v') * y_scale + y_offset
 
