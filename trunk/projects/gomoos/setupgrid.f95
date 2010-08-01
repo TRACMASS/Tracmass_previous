@@ -50,14 +50,14 @@ SUBROUTINE setupgrid
 
   start2d  = [ subGridImin, subGridJmin, 1 ,1]
   count2d  = [ subGridImax, subGridJmax, 1 ,1]
-  !Order is   t  k  i  j
-  map2d    = [0, 0, 1, 2]
+  !Use  t=1  i=2  j=3  k=4
+  map2d    = [2, 3, 1, 1]
 
-  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-  count3d  = [  1 , km ,subGridImax ,subGridJmax]
-  map3d    = [  3 ,  4 ,          2 ,          1]   
+  start3d  = [  1, subGridImin, subGridJmin,  1]
+  count3d  = [  1, subGridImax, subGridJmax, km]
+
   gridfile = trim(inDataDir) // 'grid.cdf'
-  
+
   ! === Read  and setup horizontal Grid===
   OPEN(41,FILE=trim(inDataDir) // 'fort.41')
   READ(41,*) fort
@@ -65,7 +65,7 @@ SUBROUTINE setupgrid
   dxv(1:imt,:) = reshape(fort(imt*jmt+1:imt*jmt*2),(/ imt, jmt/) )
   dxdy = dyu * dxv
   ang  = get2DfieldNC(trim(gridfile) , 'ang')  / 180 * pi
-    
+
   ! === Load the bathymetry ===
   depth = int(floor(get2DfieldNC(trim(gridfile) , 'depth')))
   mask = 1
