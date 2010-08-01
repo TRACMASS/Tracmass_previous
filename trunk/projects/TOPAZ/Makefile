@@ -21,7 +21,7 @@
                             # calculated in an identical previous run.   
 #------------------------------------------------------------------------
 #  fl12  = -Dtwodim         # Turn off vetical velocities.
-  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
+#  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
   fl15  = -Dvarbottombox   # Variable bottom box to match actual depth

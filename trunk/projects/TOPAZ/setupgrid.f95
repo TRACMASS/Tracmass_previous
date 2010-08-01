@@ -51,8 +51,8 @@ SUBROUTINE setupgrid
 
   start2d  = [ subGridImin, subGridJmin, 1 ,1]
   count2d  = [ subGridImax, subGridJmax, 1 ,1]
-  !Order is   t  k  i  j
-  map2d    = [0, 0, 2, 1]
+  !Use  i=2,  j=2
+  map2d    = [1, 2, 0, 0]
 
   start3d  = [1, subGridImin, subGridJmin,  1]
   count3d  = [1, subGridImax, subGridJmax, km]
