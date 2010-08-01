@@ -9,7 +9,7 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
   INTEGER                                    :: ncTpos
 
-  INTEGER                                    :: ierr  
+  INTEGER                                    :: ierr, varid,ncid
   
 CONTAINS
 
@@ -40,7 +40,7 @@ CONTAINS
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2DfieldNC
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: field
     INTEGER,             DIMENSION(4)       :: d, s, c, dimids
-    INTEGER                                 :: varid ,ncid
+    INTEGER                                 :: ncid
     
     s = start2d(map2d)
     c = count2d(map2d)
@@ -57,7 +57,7 @@ CONTAINS
     r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
     ierr=NF90_CLOSE(ncid)
 
-    if ( map2d(3) > map2d(4) ) then
+    if ( map2d(2) > map2d(1) ) then
        get2DfieldNC(1:imt,:) = field
     else
        do i = 1,imt
@@ -74,7 +74,6 @@ CONTAINS
     REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: field
     REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: get3dfieldNC
     INTEGER,             DIMENSION(4)       :: d, s, c
-    INTEGER                                 :: varid ,ncid
     INTEGER                                 :: i,j,k
   
     s = start3d(map3d)
@@ -82,7 +81,7 @@ CONTAINS
     d = c + s - 1
 
     allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) )
-    
+
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
@@ -90,7 +89,6 @@ CONTAINS
     ierr=NF90_GET_VAR(ncid ,varid ,field, s, c)
     if(ierr.ne.0) call printReadError(3)
 
-   
     if  (all(map3d == (/1,2,3,4/),DIM=1) ) then
        get3DfieldNC = field
     elseif (all(map3d == (/2,3,4,1/),DIM=1) )  then
@@ -120,13 +118,11 @@ CONTAINS
   end function get3DfieldNC
 
 
-
-
-
   subroutine printReadError(sel)
     USE netcdf
-    INTEGER                                 :: sel
-    
+    INTEGER                                 :: sel, ndims, v,dimln
+    INTEGER, DIMENSION(4)                   :: dimvec
+    CHARACTER(len=20)                       :: dimname
     select case (sel)
     case (1)
        print *,'Error when trying to open the file'
@@ -138,6 +134,7 @@ CONTAINS
        print *,'    Error: ' , NF90_STRERROR(ierr)
        stop 
     case (3)
+
        print *,'Error when trying to read the field   ',ncvar
        print *, 'start1d =  ' ,start1d
        print *, 'count1d =  ' ,count1d
@@ -145,8 +142,14 @@ CONTAINS
        print *, 'count2d =  ' ,count2d
        print *, 'start3d =  ' ,start3d(map3d)
        print *, 'count3d =  ' ,count3d(map3d)
-
+       print *, '-------------------------------------------------'
        print *,'Error:      ' ,NF90_STRERROR(ierr)
+      
+       ierr= nf90_inquire_variable(ncid,varid,ndims=ndims,dimids=dimvec)
+       do v = 1,ndims
+          ierr = nf90_inquire_dimension(ncid, dimvec(v), dimname, dimln)
+          print *,dimname,dimln
+       end do
        stop
        
        !r=NF90_inquire_variable(ncid, varid, dimids = dimids)
