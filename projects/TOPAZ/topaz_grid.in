@@ -5,18 +5,18 @@
   !
 &INITGRIDDESC
   !
-  GCMname    = 'POM',
+  GCMname    = 'MOM4',
   GCMsource  = 'http://www.aos.princeton.edu/WWWPUBLIC/htdocs.pom/',
-  gridName   = 'gomoos',
+  gridName   = 'CM2.1',
   gridSource = 'http://rocky.umeoce.maine.edu/GoMPOM/',
-  gridDesc   = '3.5*3.5 km forcast model for the Gulf of Maine'/
+  gridDesc   = '1°*1° CORE-2 forced global model'/
   !
   !
 $INITGRIDGRID	
   !
-  IMT      = 164,
-  JMT      = 80,	
-  KM       = 22,
+  IMT      = 360,
+  JMT      = 200,	
+  KM       = 50,
   LBT      = 5,	
   NEND     = 6/              ! NEND = LBT +1
   !
@@ -28,9 +28,9 @@ $INITGRIDNTRAC
   !
 $INITGRIDTIME
   !
-  ngcm    = 1,              ! (5*24) hours between GCM datasets
+  ngcm    = 24              ! hours between GCM datasets
   iter    = 5,              ! iteration between two gcm data sets
-  intmax  = 730,  !10*365/5 ! maximum length of RCO fields
+  intmax  = 365,  !10*365/5 ! maximum length of RCO fields
   fieldsPerFile = 8/
   !
   !
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour          = 0,
   baseDay           = 1,
   baseMon           = 1,
-  baseYear          = 2001/
+  baseYear          = 1958/
   !
   !
 $INITGRIDARC

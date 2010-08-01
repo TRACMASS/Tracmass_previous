@@ -7,6 +7,7 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start2D  ,count2D ,map2D
   INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
+  INTEGER                                    :: ncTpos
 
   INTEGER                                    :: ierr  
   
@@ -56,7 +57,7 @@ CONTAINS
     r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
     ierr=NF90_CLOSE(ncid)
 
-    if ( map3d(3) > map3d(4) ) then
+    if ( map2d(3) > map2d(4) ) then
        get2DfieldNC(1:imt,:) = field
     else
        do i = 1,imt
@@ -79,11 +80,9 @@ CONTAINS
     s = start3d(map3d)
     c = count3d(map3d)
     d = c + s - 1
-    allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) ) 
 
-    !print *,map3d
-    !print *,s
-    !print *,c
+    allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) )
+    
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
@@ -91,14 +90,30 @@ CONTAINS
     ierr=NF90_GET_VAR(ncid ,varid ,field, s, c)
     if(ierr.ne.0) call printReadError(3)
 
-    if ( map3d(1) == 3 .and. map3d(2) == 4 .and. map3d(3) == 2 ) then
+   
+    if  (all(map3d == (/1,2,3,4/),DIM=1) ) then
        get3DfieldNC = field
-    else
+    elseif (all(map3d == (/2,3,4,1/),DIM=1) )  then
+       get3DfieldNC = field
+    elseif (all(map3d == (/3,2,4,1/),DIM=1) )  then
        do k=1,km
           do i=1,imt
              get3DfieldNC(i,:,k) = field(:,i,k)
           end do
        end do
+    elseif (all(map3d == (/3,2,4,1/),DIM=1) )  then
+       do k=1,km
+          do i=1,imt
+             get3DfieldNC(i,:,k) = field(:,i,k)
+          end do
+       end do
+    else
+       print *,"ERROR!"
+       print *,"==================================================="
+       print *," This combination of dimensions in the indata file"
+       print *," isn't implemented yet. Please contact"
+       print *," Bror Jonsson (brorfred@gmail.com) for help."
+       stop 999
     end if
     ierr=NF90_CLOSE(ncid)
 
@@ -128,8 +143,8 @@ CONTAINS
        print *, 'count1d =  ' ,count1d
        print *, 'start2d =  ' ,start2d
        print *, 'count2d =  ' ,count2d
-       print *, 'start3d =  ' ,start3d
-       print *, 'count3d =  ' ,count3d
+       print *, 'start3d =  ' ,start3d(map3d)
+       print *, 'count3d =  ' ,count3d(map3d)
 
        print *,'Error:      ' ,NF90_STRERROR(ierr)
        stop
