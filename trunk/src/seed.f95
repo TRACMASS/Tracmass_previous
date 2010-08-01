@@ -1,11 +1,9 @@
 module mod_seed
   
   USE mod_param
-  USE mod_name
   USE mod_time
   USE mod_grid
   USE mod_buoyancy
-  USE mod_domain
   USE mod_vel
   USE mod_traj
   
@@ -20,32 +18,26 @@ module mod_seed
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ijkst
   CHARACTER(LEN=200)                         :: seedDir
   CHARACTER(LEN=200)                         :: seedFile
-  
   INTEGER                                    :: ist,jst,kst
   INTEGER                                    :: ijt,kkt,ijj,kkk
   INTEGER                                    :: ntractot
 
   
-   CONTAINS
+CONTAINS
+
 
   subroutine seed (tt,ts)
-
     INTEGER                                  :: errCode
-
-    INTEGER                                  :: ia, ja, ka, iam
     INTEGER                                  :: ib, jb, kb, ibm
     INTEGER                                  :: i, j, k, l, m
-    INTEGER                                  :: niter
-    INTEGER                                  :: lbas
     INTEGER                                  :: ntrac
-
     REAL*8                                   :: tt,ts
     REAL*8                                   :: x1, y1, z1
     REAL                                     :: temp,salt,dens
-    REAL*8                                   :: vol, subvol!,rr,rb,rg,rbg,uu
+    REAL*8                                   :: vol, subvol
 
     ntrac=ntractot
-    !print *, 'ntrac=',ntrac,ijkMax
+
     ijkstloop: do ijk=1,ijkMax
        ist  = ijkst(ijk,1)
        jst  = ijkst(ijk,2)
@@ -53,17 +45,14 @@ module mod_seed
        idir = ijkst(ijk,4)
        isec = ijkst(ijk,5)
        vol  = 0
-       ! print *,'ijk=',ijk,idir,isec,nqua,ist,jst,kst, ijkst(ijk,6)
-       
        ib=ist
        ibm=ib-1
        if(ibm.eq.0) ibm=IMT
        jb=jst
        kb=kst
-       
-       ! === follow trajectory only if velocity   ===
-       ! === in right direction + sets trajectory === 
-       ! === transport vol.                       ===
+
+       ! === follow trajectory only if velocity in right direction  ===
+       ! === & sets trajectory  transport vol.                      === 
        idirCond: if (idir .ne. 0) then
           select case (isec)
           case (1)
@@ -137,9 +126,7 @@ module mod_seed
         vol=vol*dxdy(ib,jb)
 #endif /*freesurface*/
      end if
-     
-     !           print *,'vol=',vol
-     
+          
      ! === number of trajectories for box (ist,jst,kst) ===
      select case (nqua)
      case (1)
@@ -150,8 +137,6 @@ module mod_seed
         num = vol/partQuant
      case (5)
         num = ijkst(ijk,6)
-        !              print *,'num=',num,ijk,ijkst(ijk,:)
-        !              if(ijk.eq.12) stop 3967
      end select
      if(num.eq.0 .and. nqua.ne.5) num=1 ! always at least one trajectory
      
@@ -160,17 +145,13 @@ module mod_seed
      kkt    = nint(float(num)/float(ijt))
      subvol = vol/dble(ijt*kkt)
      
-     if(subvol.eq.0.d0) stop 3956  !?????????????????
-     !           if(subvol.eq.0.d0) subvol=1.d0
-     
-     !            print 99,ib,jb,kb,vol,num,ijt,kkt,subvol
+     if(subvol.eq.0.d0) stop 3956 
 99   format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
           ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
      
      ! === loop over the subboxes of box (ist,jst,kst) ===
      ijjLoop: do ijj=1,ijt
-        kkkLoop: do kkk=1,kkt
-           
+        kkkLoop: do kkk=1,kkt          
            ib=ist
            jb=jst
            kb=kst
@@ -236,17 +217,13 @@ module mod_seed
            ntrac=ntrac+1  ! the trajectory number
            !                 print *,'ntrac=',ntrac,ijk
            
-           ! selects only one singe trajectory
 #ifdef select
+           ! selects only one singe trajectory
            if(ntrac.ne.57562) then 
               nrj(ntrac,6)=1
               cycle kkkLoop
            endif
 #endif /*select*/
-           ! === initialise the trajectory iteration number
-           niter=0 
-           !call errorCheck('ntracGTntracmax',errCode)
-           
            ts=ff*dble(ints-intstep)/tstep !time, fractions of ints
            tt=ts*tseas !time(sec) rel to start
            
@@ -263,10 +240,9 @@ module mod_seed
            nrj(ntrac,1)=ib
            nrj(ntrac,2)=jb
            nrj(ntrac,3)=kb
-           nrj(ntrac,4)=niter
+           nrj(ntrac,4) = 0
            nrj(ntrac,5)=idint(ts)
            nrj(ntrac,7)=1
-          ! call writedata(10)
         end do kkkLoop
      end do ijjLoop
   end do ijkstloop
