@@ -29,6 +29,7 @@ PROGRAM main
      intrun  =-intrun    
   end if modrundirCond
   
+  call setupgrid
   call init_seed
   
   if(nqua.eq.1) then ! number of trajectories (per time resolution)
@@ -70,9 +71,6 @@ PROGRAM main
   open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  ! Error position   !
        ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
 #endif
-  
-  ! === Setup grid ===
-  call setupgrid
   
   ! === Start main loop ===
   
