@@ -35,12 +35,10 @@ SUBROUTINE setupgrid
 
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
-  REAL,          ALLOCATABLE, DIMENSION(:)   :: valsz,fort
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: mask
   REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:) :: e1v,e1t,e2u,e2t
   CHARACTER (len=200)                        :: gridfile
 
-  allocate ( valsz(km),fort(imt*jmt*2) )
   allocate ( depth(imt,jmt),  mask(imt,jmt)  )
   call coordinat
 
@@ -61,12 +59,26 @@ SUBROUTINE setupgrid
 
   dxv = int(floor(get2DfieldNC(trim(gridfile) , 'dxu')))
   dyu = int(floor(get2DfieldNC(trim(gridfile) , 'dyu')))
+  dxv(1:imt,:) = cshift (dxv(1:imt,:), shift=79, dim=1)
+  dyu(1:imt,:) = cshift (dyu(1:imt,:), shift=79, dim=1)
   dxdy = dxv*dyu
+
+  ! === Set up cell heights ===
   dzt = int(floor(get3DfieldNC(trim(gridfile) , 'dz_t')))
+  dzt = cshift (dzt, shift=79, dim=1)
+
+  do  k=1,km
+     dzt(:,:,km-k+1) =  dzt(:,:,k)
+  end do
+  where (dzt>100000) 
+     dzt = 0
+  end where
 
   ! === Load the bathymetry ===
   depth = int(floor(get2DfieldNC(trim(gridfile) , 'depth_t')))
   kmt = int(floor(get2DfieldNC(trim(gridfile) , 'kmt')))
+  depth = cshift (depth, shift=79, dim=1)
+  kmt = cshift (kmt, shift=79, dim=1)
 
   mask = 1
   where (kmt==0) 
