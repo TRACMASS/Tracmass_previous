@@ -515,8 +515,8 @@ subroutine loop
 #else
 
      call fancyTimer('advection','stop') 
-     print 799 ,ints ,ntractot ,nout ,nerror,ntractot-nout !,nev
-799  format('ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean=',i8)
+     print 799 ,ints ,ntractot-nout ,nout ,nerror,ntractot !,nev
+799  format('ints=',i7,' active=',i10,' out=',i10,' err=',i10,' tot=',i10)
 
 #endif
 
