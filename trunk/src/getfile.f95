@@ -44,8 +44,7 @@ CONTAINS
     
     s = start2d(map2d)
     c = count2d(map2d)
-    d = start2d + count2d - 1 
-    
+    d = start2d + count2d - 1    
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
     
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
@@ -75,11 +74,11 @@ CONTAINS
     REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: get3dfieldNC
     INTEGER,             DIMENSION(4)       :: d, s, c
     INTEGER                                 :: i,j,k
-  
+
+    start3d(1) = ncTpos
     s = start3d(map3d)
     c = count3d(map3d)
     d = c + s - 1
-
     allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) )
 
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
