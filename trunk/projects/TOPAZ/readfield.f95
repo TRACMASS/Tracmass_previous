@@ -20,7 +20,6 @@ SUBROUTINE readfields
   CHARACTER(len=200), SAVE                   :: ncFile, maskfile
   integer                                    :: i,im,j,jm,k,kk,ints2
   INTEGER, SAVE                              :: nread,ndates
-  integer                                    :: intpart1,intpart2
   
   INTEGER,       ALLOCATABLE, DIMENSION(:,:)     :: ssh
   REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:,:)   :: dzu,dzv
@@ -36,18 +35,12 @@ SUBROUTINE readfields
 
   call datasetswap
 
-  intpart1 = mod(ints+1,8)
-  if (intpart1 .eq. 0) then
-     intpart1=8
-  endif
-  intpart2 = floor((ints)/8.)+1
-  ndates   = intpart2
+  ! === NetCDF file and fields ===
   fileName = '22450101.ocean_daily.nc'
   ncFile   = trim(inDataDir)//fileName
-
+  ncTpos = ints - 17459
   inquire(file=ncFile,exist=around)
   if(.not.around) stop 4556
-  nread = mod(ints/5,18) + 1
 
   ! === Velocities ===
   uvel =  get3DfieldNC(trim(ncFile), 'u')
@@ -64,10 +57,6 @@ SUBROUTINE readfields
   !sal(:,:,:,2) = get3dfieldNC(trim(ncFile) ,'salt') 
   !sal(:,:,:,2) = sal(:,:,:,2) * salt_scale + salt_offset
   ssh = 0 !get2DfieldNC(trim(ncFile) ,'elev')
-
-  do  k=1,km
-     dzt(:,:,km-k+1) = depth(:,:) 
-  end do  
 
   do i=1,imt-1
      dzv(i,:,:)=0.5*(dzt(i,:,:)+dzt(i+1,:,:))
