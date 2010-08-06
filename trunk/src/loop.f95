@@ -135,7 +135,8 @@ subroutine loop
   !==========================================================
   
 #ifdef rerun
-  print *,'rerun with initial points from ',trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
+  print *,'rerun with initial points from ', & 
+       trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
@@ -302,7 +303,6 @@ subroutine loop
 #endif  /*sediment*/      
         ! ===  start loop for each trajectory ===
         scrivi=.true.
-!             print *,' --- niterLoop  ', ntrac
         niterLoop: do        
            niter=niter+1 ! iterative step of trajectory
 #ifdef sediment
@@ -377,7 +377,8 @@ subroutine loop
            ! time variables (ds,...) are in seconds/m^3   !
            !==============================================! 
 #ifdef regulardt
-           dtreg=dtmin * ( dble(int(tt/tseas*dble(iter))) + 1.d0 - tt/tseas*dble(iter) )
+           dtreg=dtmin * ( dble(int(tt/tseas*dble(iter))) +  & 
+                1.d0 - tt/tseas*dble(iter) )
            dt=dtreg
            dsmin=dt/dxyz
 #else
@@ -386,8 +387,8 @@ subroutine loop
 #ifdef timeanalyt
            ss0=dble(idint(ts))*tseas/dxyz
            call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz,rr) ! zonal
-           call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz,rr) ! meridional
-           call cross_time(3,ia,ja,ka,z0,dsu,dsd,ts,tt,dsmin,dxyz,rr) ! vertical
+           call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz,rr) ! merid
+           call cross_time(3,ia,ja,ka,z0,dsu,dsd,ts,tt,dsmin,dxyz,rr) ! vert
 #else
            call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
@@ -404,6 +405,8 @@ subroutine loop
               nrj(ntrac,6)=1
               cycle ntracLoop
            end if
+
+
 
            call calc_time
 
@@ -425,7 +428,8 @@ subroutine loop
             endif
             jb=JMT-1
             y1=dble(jb-1)
-            x0=x1 ; y0=y1 ; ia=ib ; ja=jb  ! make sure the f-fold is also made for the previous point
+            ! make sure the f-fold is also made for the previous point:
+            x0=x1 ; y0=y1 ; ia=ib ; ja=jb  
            endif
 #endif           
 
@@ -433,9 +437,9 @@ subroutine loop
            ! === is inside ib,jb,kb box    ===
            if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
            if(x1.gt.dble(IMT)) x1=x1-dble(IMT)      ! east-west cyclic
-           if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! make sure the index corresponds to the right grid cell
+           if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! index for correct cell?
            if(ib.gt.IMT) ib=ib-IMT                  ! east-west cyclic
-           if(y1.ne.dble(idint(y1))) jb=idint(y1)+1 ! make sure the index corresponds to the right grid cell
+           if(y1.ne.dble(idint(y1))) jb=idint(y1)+1 ! index for correct cell?
            
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
@@ -456,14 +460,15 @@ subroutine loop
            ! === Calculate arclength of the ===
            ! === trajectory path in the box ===
            call arclength(ia,ja,ka,dt,rr,arc)
-           arct=arct+arc*arcscale  ! original arc in meters but scaled by arcscale in grid.in
+           arct=arct+arc*arcscale 
            ! === end trajectory if outside chosen domain ===
 #if defined occ
            ! === stop and select stream function ===
            northbound: if( y1.eq.dble(jmt-2) .and. n.ne.1 ) then
               nnorth=nnorth+1
               nexit(1)=nexit(1)+1
-           elseif(x1.eq.dble(idr) .and. ja.lt.94 .and. n.ne.1 ) then ! or to Drake
+           ! or to Drake:
+           elseif(x1.eq.dble(idr) .and. ja.lt.94 .and. n.ne.1 ) then 
               ndrake=ndrake+1
               call writedata(15)
               nexit(2)=nexit(2)+1
@@ -499,35 +504,25 @@ subroutine loop
      end do ntracLoop
      
 #ifdef sediment
-     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout,nsed,nsusp,nexit
-599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
-          ' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, ' nsusp=',i8,' nexit=',9i8)
-
-!     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout-nerror,nexit
-!599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8,' nloop=',i4, &
-!         ' nerror=',i4,' in ocean/atm=',i8,' nexit=',9i8)
+     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout, & 
+          nsed,nsusp,nexit
+599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
+          ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
+          ' nsusp=',i8,' nexit=',9i8)
 #elif defined ifs || rco || tes || orc
-
-     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout !,nev
-799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8)
-!799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8,' nerror=',i4,' in ocean/atm=',i8,' nev=',i10)
-
+     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
+799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
+          ' nerror=',i4,' in ocean/atm=',i8)
 #else
-
      call fancyTimer('advection','stop') 
      print 799 ,ints ,ntractot-nout ,nout ,nerror,ntractot !,nev
 799  format('ints=',i7,' active=',i10,' out=',i10,' err=',i10,' tot=',i10)
-
 #endif
 
-
-     
   end do intsTimeLoop
   
   close(56)
-  
   print *,ntractot ,' trajectories calculated'
-!  print *,nev      ,' trajectories evaporated'
   print *,nout     ,' trajectories exited the space and time domain'
   print *,nexit    ,' trajectories exited through the boundaries'
 #ifdef sediment
@@ -551,6 +546,55 @@ subroutine loop
 return
      
      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -706,12 +750,18 @@ return
                 print *,'niter:',niter,'nrj:',nrj(ntrac,4)
                 print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
                 print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
-                print *,'ia=',ia,' ib=',ib,' ja=',ja,' jb=',jb,' ka=',ka,' kb=',kb
-                print *,'x1=',x1,' x0=',x0,' y1=',y1,' y0=',y0,' z1=',z1,' z0=',z0
-                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
-                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
-                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,NST)+rb*vflux(ia,ja  ,ka,1))*ff
-                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
+                print *,'ia=',ia,' ib=',ib,' ja=',ja,' jb=',jb, & 
+                     ' ka=',ka,' kb=',kb
+                print *,'x1=',x1,' x0=',x0,' y1=',y1,' y0=',y0, & 
+                     ' z1=',z1,' z0=',z0
+                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,NST) + &
+                     rb*uflux(ia ,ja,ka,1))*ff
+                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,NST) + & 
+                     rb*uflux(iam,ja,ka,1))*ff
+                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,NST) + & 
+                     rb*vflux(ia,ja  ,ka,1))*ff
+                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,NST) + & 
+                     rb*vflux(ia,ja-1,ka,1))*ff
                 print *,'-------------------------------------'
              end if
              trj(ntrac,1)=x1
