@@ -27,33 +27,52 @@ class trm:
                                 db = "partsat")
         self.c = conn.cursor ()
         self.tablename = "partsat.%s%s" % (projname ,casename)
+
+        griddir  = '/projData/TOPAZ/1yr_1d/'
+        gridname = '/22450101.ocean_daily.nc' 
+        g = pycdf.CDF(griddir + gridname)
+        lon = g.var('xu_ocean')[:]
+        lat = g.var('yu_ocean')[:]
+        #self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
+        self.llon,self.llat = np.meshgrid(lon, lat)
   
 
-
-    def ijll(self,tS):
+    def ijll(self):
         def interp(M):
-            ifloor = np.floor(tS.y).astype(int)
-            jfloor = np.floor(tS.x).astype(int)
-            iceil  = np.ceil(tS.y).astype(int)
-            jceil  = np.ceil(tS.x).astype(int)
+            ifloor = np.floor(self.y).astype(int)
+            jfloor = np.floor(self.x).astype(int)
+            iceil  = np.ceil(self.y).astype(int)
+            jceil  = np.ceil(self.x).astype(int)
             iceil[iceil==80] = 79
             jceil[jceil==164] = 163
             i1j1 = M[ifloor,jfloor]
             i2j1 = M[iceil, jfloor]
             i1j2 = M[ifloor, jceil]
             
-            idf = (i2j1 - i1j1) * (tS.y-np.floor(tS.y))
-            jdf = (i1j2 - i1j1) * (tS.x-np.floor(tS.x))
+            idf = (i2j1 - i1j1) * (self.y-np.floor(self.y))
+            jdf = (i1j2 - i1j1) * (self.x-np.floor(self.x))
             return i1j1 + (idf+jdf)
-        tS.lon = interp(self.llon)
-        tS.lat = interp(self.llat)
-        return tS
+
+        self.lon = interp(self.llon)
+        self.lat = interp(self.llat)
+        self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
+        self.lon[self.lon> 180] = self.lon[self.lon> 180] - 360
+
+    def dist(self):
+        import lldist
+
+        if not hasattr(self, 'lon'):
+            self.ijll()
+        self.dist = lldist.lldist(self.lon,self.lat)
+        msk = np.zeros([len(self.x)])
+        msk[1:] = self.ntrac[1:]-self.ntrac[:-1]
+        self.dist[msk != 0] = 0
 
     def read_bin(self, filename):
         """ Load binary output from TRACMASS """
         fd = open(filename)
         runvec = np.fromfile(fd,np.dtype([
-                    ('ints','>i4'), ('ntrac','>i4'), 
+                    ('ntrac','>i4'), ('ints','>i4'), 
                     ('x','>f4'), ('y','>f4'), ('z','>f4')
                     ]))
         return runvec
@@ -116,7 +135,10 @@ class trm:
         self.ntrac, self.ints, self.x, self.y, self.z  = unzip(runtraj)
         for tv in tvec:
             self.__dict__[tv] = np.array(self.__dict__[tv])
-
+        ind = np.lexsort((self.ints,self.ntrac))
+        for tv in tvec:
+            self.__dict__[tv] = self.__dict__[tv][ind]
+ 
     def load_to_mysql(self, intstart=0, ftype="run", stype='bin',
                       filename='', db="trm"):        
         """Load a tracmass output file and add to mysql table"""
