@@ -60,13 +60,26 @@ class trm:
 
     def dist(self):
         import lldist
-
         if not hasattr(self, 'lon'):
             self.ijll()
         self.dist = lldist.lldist(self.lon,self.lat)
         msk = np.zeros([len(self.x)])
         msk[1:] = self.ntrac[1:]-self.ntrac[:-1]
         self.dist[msk != 0] = 0
+
+    def field(self,fieldname):
+        t = self.ints - self.ints.min()
+        ifloor = np.floor(self.i).astype(int)
+        jfloor = np.floor(self.y).astype(int)
+        iceil  = np.ceil(self.x).astype(int)
+        jceil  = np.ceil(self.y).astype(int)
+        b1 = fld[t,ifloor,jfloor]
+        b2 = fld[t,iceil,jfloor] - b1
+        b3 = fld[t,ifloor,jceil] - b1
+        b4 = b1 - fld[t,iceil,jfloor] - fld[t,ifloor,jceil] + fld[t,iceil,jceil]
+        x = self.x - ifloor
+        y = self.y - jfloor
+        self.__dict__[fieldname] = b1 + b2*x + b3*y + b4*x*y
 
     def read_bin(self, filename):
         """ Load binary output from TRACMASS """
