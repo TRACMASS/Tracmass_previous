@@ -395,22 +395,12 @@ subroutine loop
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
            ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
-           if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
-              ! === Can not find any path for unknown reasons ===
-              print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
-              print *,ia,ja,ka,x0,y0,z0,ntrac,niter
-              print *,'k=',ka,kb,KM+1-kmt(ia,ja),kmt(ia,ja)
-              ! exit intsTimeLoop
-              nerror=nerror+1
-              nrj(ntrac,6)=1
-              cycle ntracLoop
-           end if
-
-
+          
+           !if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
+           call errorCheck('dsCrossError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
 
            call calc_time
-
-
 
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
@@ -628,19 +618,21 @@ return
           
        case ('dxyzError')
           if(dxyz.eq.0.d0) then
-             print *,'====================================='
-             print *,'ERROR: dxyz is zero'
-             print *,'-------------------------------------'
-             print *,'ntrac=',ntrac,' ints=', ints
-             print *,'ib=',ib,'jb=',jb,'kb=',kb
-             print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
-             !print *,'dztb=',dztb(ib,jb,kb,1),dztb(ib,jb,kb,2)
-             print *,'rg*hs=',rg*hs(ib,jb,NST)
-             print *,'rr*hs=',rr*hs(ib,jb,1)
-             print *,'-------------------------------------'
-!             print *,'The run is terminated'
-             print *,'The trajectory is killed'
-             print *,'====================================='
+             if (verboseMess == 1) then                 
+                print *,'====================================='
+                print *,'ERROR: dxyz is zero'
+                print *,'-------------------------------------'
+                print *,'ntrac=',ntrac,' ints=', ints
+                print *,'ib=',ib,'jb=',jb,'kb=',kb
+                print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
+                !print *,'dztb=',dztb(ib,jb,kb,1),dztb(ib,jb,kb,2)
+                print *,'rg*hs=',rg*hs(ib,jb,NST)
+                print *,'rr*hs=',rr*hs(ib,jb,1)
+                print *,'-------------------------------------'
+                !             print *,'The run is terminated'
+                print *,'The trajectory is killed'
+                print *,'====================================='
+             end if
              errCode = -39
              call writedata(40)
              nrj(ntrac,6)=1
@@ -840,7 +832,19 @@ return
               endif
               errCode = -54
            endif
-           
+        case ('dsCrossError')
+           ! === Can not find any path for unknown reasons ===
+           if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
+              if (verboseMess == 0) then
+                 print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu
+                 print *,dsd,dsmin,dxyz
+                 print *,ia,ja,ka,x0,y0,z0,ntrac,niter
+                 print *,'k=',ka,kb,KM+1-kmt(ia,ja),kmt(ia,ja)
+              end if
+              nerror=nerror+1
+              nrj(ntrac,6)=1
+              errCode = -56
+           end if
         end select
       end subroutine errorCheck
 
