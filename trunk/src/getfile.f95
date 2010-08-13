@@ -41,17 +41,18 @@ CONTAINS
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: field
     INTEGER,             DIMENSION(4)       :: d, s, c, dimids
     INTEGER                                 :: ncid
-    
+
+    start2d(1) = ncTpos   
     s = start2d(map2d)
     c = count2d(map2d)
-    d = start2d + count2d - 1    
+    d =c + s - 1  
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
     
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2)
-    ierr=NF90_GET_VAR(ncid ,varid , field, start2d, count2d)
+    ierr=NF90_GET_VAR(ncid ,varid , field, s, c)
     if(ierr.ne.0) call printREadError(3)
     r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
     ierr=NF90_CLOSE(ncid)

@@ -121,7 +121,8 @@ MODULE mod_grid
 #ifdef zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt,dzu,dzv
+  REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #endif /*zgrid3Dt*/
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
