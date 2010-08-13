@@ -36,10 +36,10 @@ SUBROUTINE setupgrid
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: mask
-  REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:) :: e1v,e1t,e2u,e2t
   CHARACTER (len=200)                        :: gridfile
 
-  allocate ( depth(imt,jmt),  mask(imt,jmt)  )
+  allocate ( dzu(imt,jmt,km),dzv(imt,jmt,km),dzt0surf(imt,jmt) )
+  allocate ( depth(imt,jmt),  mask(imt,jmt) )
   call coordinat
 
   gridfile = trim(inDataDir) // '../grid_spec_cm2_ocean_tripolar.nc'
@@ -47,13 +47,14 @@ SUBROUTINE setupgrid
   start1d  = [  1]
   count1d  = [ km]
 
-  start2d  = [ subGridImin, subGridJmin, 1 ,1]
-  count2d  = [ subGridImax, subGridJmax, 1 ,1]
-  !Use  i=2,  j=2
-  map2d    = [1, 2, 0, 0]
-
+  start2d  = [1, subGridImin, subGridJmin, 1 ]
+  count2d  = [1, subGridImax, subGridJmax, 1 ]
   start3d  = [1, subGridImin, subGridJmin,  1]
   count3d  = [1, subGridImax, subGridJmax, km]
+
+  ncTpos = 1
+  !Use  t=1  i=2  j=3
+  map2d    = [2, 3, 1, 1]
   !Use  t=1  i=2  j=3  k=4
   map3d    = [2, 3, 4, 1]   
 
@@ -66,14 +67,20 @@ SUBROUTINE setupgrid
   ! === Set up cell heights ===
   dzt = int(floor(get3DfieldNC(trim(gridfile) , 'dz_t')))
   dzt = cshift (dzt, shift=79, dim=1)
-
+  dzu = int(floor(get3DfieldNC(trim(gridfile) , 'dz_c')))
+  dzu = cshift (dzu, shift=79, dim=1)
   do  k=1,km
      dzt(:,:,km-k+1) =  dzt(:,:,k)
+     dzu(:,:,km-k+1) =  dzu(:,:,k)
   end do
   where (dzt>100000) 
      dzt = 0
   end where
-
+ where (dzu>100000) 
+     dzu = 0
+  end where
+  dzv = dzu
+  dzt0surf = dzu(:,:,km)
   ! === Load the bathymetry ===
   depth = int(floor(get2DfieldNC(trim(gridfile) , 'depth_t')))
   kmt = int(floor(get2DfieldNC(trim(gridfile) , 'kmt')))

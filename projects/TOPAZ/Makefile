@@ -24,7 +24,7 @@
 #  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-  fl15  = -Dvarbottombox   # Variable bottom box to match actual depth
+#  fl15  = -Dvarbottombox   # Variable bottom box to match actual depth
 #  fl16  = -Dfreesurface    # Variable bottom box to match actual depth
 #  fl17  = -Dzvec1D         # Cell depths defined as vector
   fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)

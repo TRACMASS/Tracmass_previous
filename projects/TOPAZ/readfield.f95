@@ -21,16 +21,12 @@ SUBROUTINE readfields
   integer                                    :: i,im,j,jm,k,kk,ints2
   INTEGER, SAVE                              :: nread,ndates
   
-  INTEGER,       ALLOCATABLE, DIMENSION(:,:)     :: ssh
-  REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:,:)   :: dzu,dzv
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ssh
     
   integer                                    :: year,month,day  
   logical                                    :: around
   character(len=100)                         :: fileName
  
-  if ( .NOT. ALLOCATED(dzu) ) then
-     allocate ( dzu(imt,jmt,km),dzv(imt,jmt,km) )
-  end if
   allocate ( ssh(imt,jmt) )
 
   call datasetswap
@@ -54,25 +50,38 @@ SUBROUTINE readfields
      vvel = 0
   end where 
 
+  !print *,kmt(200:210,32)
+  !print *,uvel(200:210,32,1)
+  !print *,vvel(200:210,32,1)
+
   !sal(:,:,:,2) = get3dfieldNC(trim(ncFile) ,'salt') 
   !sal(:,:,:,2) = sal(:,:,:,2) * salt_scale + salt_offset
-  ssh = 0 !get2DfieldNC(trim(ncFile) ,'elev')
+  !Use  t=1  i=2  j=3  k=4
+  map2d    = [2, 3, 1, 4]
+  hs(:,:,2) = get2DfieldNC(trim(ncFile) ,'eta_t')
 
-  do i=1,imt-1
-     dzv(i,:,:)=0.5*(dzt(i,:,:)+dzt(i+1,:,:))
-  enddo
-  dzv(imt,:,:)=dzv(imt-1,:,:)
+  dzu(:,:,km) = dzt0surf + hs(:,:,2)
+  dzv(:,:,km) = dzt0surf + hs(:,:,2)
 
-  do j=1,jmt-1
-     dzu(:,j,:)=0.5*(dzt(:,j,:)+dzt(:,j+1,:))
-  enddo
-  dzu(:,jmt,:)=dzu(:,jmt-1,:)
   do k=1,km
     kk=km-k+1
-    uflux(:,1:80,k,2)  =uvel(:,:,kk) * dyu(:,:) * dzu(:,:,k)
-    vflux(:,1:80,k,2)  =vvel(:,:,kk) * dxv(:,:) * dzv(:,:,k)
+    uflux(2:imt,2:jmt,k,2)  =  &
+         (uvel(1:imt-1,2:jmt,kk) + uvel(1:imt-1,1:jmt-1,kk))/2 * & 
+         dyu(1:imt-1,2:jmt) * dzt(1:imt-1,2:jmt,k)
+    vflux(2:imt,2:jmt,k,2)  = &
+         (vvel(2:imt,1:jmt-1,kk) + vvel(1:imt-1,1:jmt-1,kk))/2 * & 
+         dxv(2:imt,1:jmt-1) * dzt(2:imt,1:jmt-1,k)
+    uflux(1,2:jmt,k,2) =  &
+         (uvel(1,2:jmt,kk) + uvel(imt,1:jmt-1,kk))/2 * & 
+         dyu(1,2:jmt) * dzt(imt,2:jmt,k)
+    vflux(1,2:jmt,k,2)  = &
+         (vvel(1,1:jmt-1,kk) + vvel(1,1:jmt-1,kk))/2 * & 
+         dxv(1,1:jmt-1) * dzt(1,1:jmt-1,k)
   !  rho(:,1:80,k,2)=NCfieldr(1,:,:,k)
   enddo
+
+
+
 
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   
