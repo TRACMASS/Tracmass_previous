@@ -29,14 +29,14 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin = 10,    ! one single snapshot
+  intspin = 1,    ! one single snapshot
   !intspin = 12,    ! 3 days
   !intspin = 122, ! one month
   !intspin = 1460, !one year
   ! === Number of timesteps for the run.      ===
-  intrun  = 20,
+  intrun  = 2000,
   ! === Pos if forward  neg if backward       ===
-  intstep = 1/
+  intstep = -1/
   !
   !
   !
@@ -46,7 +46,7 @@
   startHour         = 0,
   startDay          = 1,
   startMon          = 01,
-  startYear         = 1994/
+  startYear         = 1995/
   !
   !
 &INITRUNWRITE
@@ -85,7 +85,7 @@ $INITRUNSEED
   !==nff:           1 = Follow trajectories forward
   !==               2 = Follow trajectories backward
   !==               3 = Follow trajectories both ways.
-  nff      = 1,
+  nff      = -1,
   !==isec:          1 = Seed particles meridional(y-z)
   !==               2 = Seed particles zonal(x-z)
   !==               3 = Seed particles horiz(x-y)
@@ -117,12 +117,12 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
   !
-  ist1     =   1,		 
-  ist2     =   -1,		 
-  jst1     =  60,
-  jst2     =  60,
-  kst1     =   1,		 
-  kst2     =   -1/
+  ist1     =   15,		 
+  ist2     =   15,		 
+  jst1     =  70,
+  jst2     =  70,
+  kst1     =  60,		 
+  kst2     =  60/
   !
   !
 $INITRUNTEMPSALT
@@ -151,8 +151,8 @@ $INITRUNEND
 ! defining end sections
   ienw =     -1,-1,
   iene =   500,500,
-  jens =     1,84,
-  jenn =    60,145,
+  jens =     145,145,
+  jenn =    1,1,
   timax =  365000./  ! maximum time length of a trajectory in days
 
 
