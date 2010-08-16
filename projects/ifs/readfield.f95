@@ -46,21 +46,48 @@ data hour /'0000','0600','1200','1800'/
 
 
 !_______________________ update the time counting ________________________________________
- ihour=ihour+6
- if(ihour.eq.24) then
-  ihour=0
-  iday=iday+1
-  if(iday.gt.idmax(imon,iyear)) then
-   iday=1
-   imon=imon+1
-   if(imon.eq.13) then
-    imon=1
-    iyear=iyear+1
-    if(iyear.gt.yearmax) iyear=yearmin ! recycle over gcm outputdata
-   endif
+! ihour=ihour+6
+! if(ihour.eq.24) then
+!  ihour=0
+!  iday=iday+1
+!  if(iday.gt.idmax(imon,iyear)) then
+!   iday=1
+!   imon=imon+1
+!   if(imon.eq.13) then
+!    imon=1
+!    iyear=iyear+1
+!    if(iyear.gt.yearmax) iyear=yearmin ! recycle over gcm outputdata
+!   endif
+!  endif
+! endif
+
+ihour=ihour+int(ff)*ngcm
+if(ihour.ge.24) then
+ ihour=0
+ iday=iday+1
+ if(iday.gt.idmax(imon,iyear)) then
+  iday=1
+  imon=imon+1
+  if(imon.eq.13) then
+   imon=1
+   iyear=iyear+1
   endif
  endif
+elseif(ihour.lt.0) then
+ ihour=18
+ iday=iday-1
+ if(iday.eq.0) then
+  imon=imon-1
+  if(imon.eq.0) then
+   imon=12
+   iyear=iyear-1
+  endif
+  iday=idmax(imon,iyear)
+ endif
+endif
 
+
+ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !____________________________ initialise ________________________________________________
 if(ints.eq.intstart) then
@@ -187,7 +214,7 @@ do k=1,KM
    sal  (i,j,l,2)=0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm))
    pp=0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm))
    rho  (i,j,l,2)=0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit
-   dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit*dxdy(i,j)
+   dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit
 
    uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg
    vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(jj)
