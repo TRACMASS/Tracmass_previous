@@ -18,19 +18,19 @@ subroutine init_seed()
      
   case (1) ! === ist, jst, kst method ===
      allocate (ijkst((kst2-kst1+1)*(jst2-jst1+1)*(ist2-ist1+1),6))
-     ijk=1
+     ijk=0
      if (maxval(kmt) == 0) kmt = 1 
      do i=ist1,ist2
         do j=jst1,jst2
            if (kmt(i,j) .ne. 0) then 
               do k=kst1,kst2
+                 ijk=ijk+1
                  ijkst(ijk,1)=i
                  ijkst(ijk,2)=j
                  ijkst(ijk,3)=k
                  ijkst(ijk,4)=idir
                  ijkst(ijk,5)=isec
                  ijkst(ijk,6)=-1
-                 ijk=ijk+1
               end do
            end if
         end do
