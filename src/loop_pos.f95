@@ -279,10 +279,16 @@ contains
        ! which should correspond to a convergence zone
        if(dse.eq.UNDEF .and. dsw.eq.UNDEF .and. dsn.eq.UNDEF .and. & 
             dss.eq.UNDEF .and. dsu.eq.UNDEF .and. dsd.eq.UNDEF ) then
+          
+          ! move if atmosphere, freeze if ocean
+          ib=ia ; jb=ja ; kb=ka
+#ifdef ifs
+          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
+          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
+          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+#else
           x1=x0 ; y1=y0 ; z1=z0 
-          ! let the particle remain 
-          !in a static position from previuos iteration
-          ib=ia ; jb=ja ; kb=ka  
+#endif  
           ! If there is at least one spatial solution 
           ! but the shortest cross time is the time step
        else
