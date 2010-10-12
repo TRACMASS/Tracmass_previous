@@ -7,7 +7,9 @@ import matplotlib as mpl
 import MySQLdb
 
 import pycdf
-from pyhdf.SD import SD,SDC
+#from pyhdf.SD import SD,SDC
+
+import lldist
 
 class trm:
     """ main class for TRACMASS data manipulation"""
@@ -35,7 +37,6 @@ class trm:
         lat = g.var('yu_ocean')[:]
         #self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
         self.llon,self.llat = np.meshgrid(lon, lat)
-  
 
     def ijll(self):
         def interp(M):
@@ -59,7 +60,6 @@ class trm:
         self.lon[self.lon> 180] = self.lon[self.lon> 180] - 360
 
     def dist(self):
-        import lldist
         if not hasattr(self, 'lon'):
             self.ijll()
         self.dist = lldist.lldist(self.lon,self.lat)
@@ -80,6 +80,12 @@ class trm:
         x = self.x - ifloor
         y = self.y - jfloor
         self.__dict__[fieldname] = b1 + b2*x + b3*y + b4*x*y
+
+
+    def db_addfield(self,tp,fieldname):
+        pass
+        
+    
 
     def read_bin(self, filename):
         """ Load binary output from TRACMASS """
@@ -121,7 +127,7 @@ class trm:
         else :
             DL = "TRUNCATE  TABLE %s;" % self.tablename
             print "The table %s was truncated." % self.tablename
-            self.create_indexes()
+            #self.create_indexes()
         self.c.execute(DL)
 
     def load(self, intstart=0, ftype="run", stype='bin', filename=''):
@@ -151,9 +157,15 @@ class trm:
         ind = np.lexsort((self.ints,self.ntrac))
         for tv in tvec:
             self.__dict__[tv] = self.__dict__[tv][ind]
+        self.x = self.x - 1
+        self.y = self.y - 1
+        self.x[self.x<0] = self.x[self.x<0] + 358
+        assert self.x.min() >= 0
+        assert self.x.max() <= 359
+        assert self.y.min() >= 0
  
-    def load_to_mysql(self, intstart=0, ftype="run", stype='bin',
-                      filename='', db="trm"):        
+    def db_insert(self, intstart=0, ftype="run", stype='bin',
+                   filename='', db="trm"):        
         """Load a tracmass output file and add to mysql table"""
         self.create_table()
         self.remove_earlier_data_from_table(intstart)
@@ -182,11 +194,8 @@ class trm:
         base_iso = mpl.dates.date2num(self.isobase)
         return base_iso + float(ints)/6-1
 
- 
     def trajs(self,intstart=0, ints=0, ntrac=0):
         """ Retrive trajectories from database """
-        class traj: pass
-
         whstr = ""
         if intstart != 0:
             whstr += " intstart = %i AND" % intstart
@@ -200,9 +209,8 @@ class trm:
         res = zip(*self.c.fetchall())
         if len(res) > 0:
             for n,a in enumerate(['intstart','ints','ntrac','x','y','z']):
-                traj.__dict__[a] = np.array(res[n])
-        traj = self.ijll(traj)
-        return traj
+                self.__dict__[a] = np.array(res[n])
+        self.ijll()
 
 def import_batchrun(batchfile='batch_ints_start.asc'):
     tr = trm('gompom')
