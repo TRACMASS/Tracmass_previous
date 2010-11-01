@@ -262,7 +262,7 @@ subroutine loop
         trj(ntrac,1),trj(ntrac,2),trj(ntrac,3),temp,salt,dens,1)
 #endif
         call writedata(10)
-        endif 
+        endif
         
 #ifdef rerun
         lbas=nrj(ntrac,8)
@@ -405,7 +405,6 @@ subroutine loop
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
-
 
 #ifdef orc 
 ! north fold cyclic ORCA grid (only tested with ORCA025)

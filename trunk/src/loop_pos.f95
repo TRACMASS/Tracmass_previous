@@ -3,9 +3,16 @@ module mod_pos
   USE mod_grid
   USE mod_vel
   USE mod_loopvars
+#ifdef streamxy
   USE mod_streamxy
+#endif
+#ifdef streamv
   USE mod_streamv
+#endif
+#ifdef streamr
   USE mod_streamr
+#endif
+  USE mod_psi
     
   IMPLICIT none
   
@@ -41,23 +48,12 @@ contains
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) 
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr)
 #endif /*timeanalyt*/
-       ! scrivi=.true.
-#ifdef streamxy
-       ! === zonal component stream function ===
-       stxyx(ia,ja,lbas)=stxyx(ia,ja,lbas)+real(subvol*ff)
-#endif /*streamxy*/
-#ifdef streamv
-       ! === overturning "z" stream function ===
-       stxz(ia,ka,lbas)=stxz(ia,ka,lbas)+real(subvol*ff)
-#endif /*streamv*/
+       scrivi=.true.
 #ifdef streamr
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       ! call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1 ) mra=1
        if(mra.gt.MR) mra=MR
-       ! === overturn "rho" stream function  ===
-       stxr(ia,mra,lbas,1)=stxr(ia,mra,lbas,1)+real(subvol*ff)
 #ifdef streamts
        mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
@@ -65,12 +61,10 @@ contains
        msa=(salt-smin)/dsalt+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-       ! === overturn "temp" stream function ===
-       stxr(ia,mta,lbas,2)=stxr(ia,mta,lbas,2)+real(subvol*ff)
-       ! === overturn "salt" stream function ===
-       stxr(ia,msa,lbas,3)=stxr(ia,msa,lbas,3)+real(subvol*ff)
 #endif /*streamts*/
 #endif /*streamr*/
+       call savepsi(ia,ja,ka,mra,mta,msa,1,1,real(subvol*ff))
+        
     elseif(ds.eq.dsw) then ! westward grid-cell exit
        scrivi=.false.
        uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
@@ -88,20 +82,12 @@ contains
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-       !              scrivi=.true.      
-#ifdef streamxy
-       stxyx(iam,ja,lbas)=stxyx(iam,ja,lbas)-real(subvol*ff)
-#endif /*streamxy*/
-#ifdef streamv
-       stxz(iam,ka,lbas)=stxz(iam,ka,lbas)-real(subvol*ff)
-#endif /*streamv*/
+       scrivi=.true.      
 #ifdef streamr
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       !              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1) mra=1
        if(mra.gt.MR) mra=MR
-       stxr(iam,mra,lbas,1)=stxr(iam,mra,lbas,1)-real(subvol*ff)
 #ifdef streamts
        mta=nint((temp-tmin)/dtemp)+1
        if(mta.lt.1 ) mta=1
@@ -109,10 +95,10 @@ contains
        msa=nint((salt-smin)/dsalt)+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-       stxr(iam,mta,lbas,2)=stxr(iam,mta,lbas,2)-real(subvol*ff)
-       stxr(iam,msa,lbas,3)=stxr(iam,msa,lbas,3)-real(subvol*ff)
 #endif /*streamts*/
 #endif /*streamr*/
+       call savepsi(iam,ja,ka,mra,mta,msa,1,-1,real(subvol*ff))
+
     elseif(ds.eq.dsn) then ! northward grid-cell exit
        
        scrivi=.false.
@@ -131,19 +117,11 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-#ifdef streamxy
-       stxyy(ia,ja,lbas)=stxyy(ia,ja,lbas)+real(subvol*ff)
-#endif /*streamxy*/
-#ifdef streamv
-       styz(ja,ka,lbas)=styz(ja,ka,lbas)+real(subvol*ff)
-#endif /*streamv*/
 #ifdef streamr
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       !              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1) mra=1
        if(mra.gt.MR) mra=MR
-       styr(ja,mra,lbas,1)=styr(ja,mra,lbas,1)+real(subvol*ff)
 #ifdef streamts
        mta=nint((temp-tmin)/dtemp)+1
        if(mta.lt.1 ) mta=1
@@ -151,10 +129,10 @@ contains
        msa=nint((salt-smin)/dsalt)+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-       styr(ja,mta,lbas,2)=styr(ja,mta,lbas,2)+real(subvol*ff)
-       styr(ja,msa,lbas,3)=styr(ja,msa,lbas,3)+real(subvol*ff)
 #endif /*streamts*/
 #endif /*streamr*/
+       call savepsi(ia,ja,ka,mra,mta,msa,2,1,real(subvol*ff))
+
     elseif(ds.eq.dss) then ! southward grid-cell exit
        
        scrivi=.false.
@@ -165,7 +143,7 @@ contains
        if(uu.lt.0.d0) then
           jb=ja-1
 #ifndef ifs 
-          if(jb.eq.0) stop 34578
+        if(jb.eq.0) stop 34578
 #endif
        endif
        y1=dble(ja-1)
@@ -176,19 +154,11 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-#ifdef streamxy
-       stxyy(ia,ja-1,lbas)=stxyy(ia,ja-1,lbas)-real(subvol*ff)
-#endif /*streamxy*/
-#ifdef streamv
-       styz(ja-1,ka,lbas)=styz(ja-1,ka,lbas)-real(subvol*ff)
-#endif /*streamv*/
 #ifdef streamr
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       !              call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)              
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1) mra=1
        if(mra.gt.MR) mra=MR
-       styr(ja-1,mra,lbas,1)=styr(ja-1,mra,lbas,1)-real(subvol*ff)
 #ifdef streamts
        mta=nint((temp-tmin)/dtemp)+1
        if(mta.lt.1 ) mta=1
@@ -196,10 +166,9 @@ contains
        msa=nint((salt-smin)/dsalt)+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-       styr(ja-1,mta,lbas,2)=styr(ja-1,mta,lbas,2)-real(subvol*ff)
-       styr(ja-1,msa,lbas,3)=styr(ja-1,msa,lbas,3)-real(subvol*ff)
-#endif /streamts*/
+#endif /*streamts*/
 #endif /*streamr*/
+       call savepsi(ia,ja-1,ka,mra,mta,msa,2,-1,real(subvol*ff))
        
     elseif(ds.eq.dsu) then ! upward grid-cell exit
        

@@ -217,7 +217,7 @@ do k=1,KM
    dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit
 
    uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg
-   vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(jj)
+   if(j < JMT) vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(jj)
 
 !   if(k.eq.1) print *,i,j,uflux(i,j,k,2),vflux(i,j,k,2),dzt(i,j,k,2)
   enddo

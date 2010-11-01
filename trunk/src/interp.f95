@@ -20,7 +20,6 @@ REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
 REAL    :: temp,salt,dens
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
-
 ! determining nearest centers of boxes 
       if(x1.le.dble(ib)-dble(.5)) then
        ip=ib
