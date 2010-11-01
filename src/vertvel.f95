@@ -50,7 +50,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))/tseas )  ! time change of the mass the in grid box
     enddo
     ! make sure there is no wflux through the surface or top of atmosphere
-    if(k.eq.KM.or.k.eq.0) wflux(k,n) = 0.d0
+    if(k.eq.KM.or.k.eq.0) wflux(k,:) = 0.d0
 #endif
 !end ifs code
 
