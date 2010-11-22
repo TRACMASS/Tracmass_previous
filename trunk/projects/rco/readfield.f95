@@ -53,7 +53,9 @@ subroutine readfields
      !allocate ( rd1d_a(NSNAPS),rd1d_b(NSNAPS) ,ispvar(NSNAPS), isplev(NSNAPS))
      allocate ( zdzz(KM),dzw(0:km),dxt(imt) ) 
      allocate ( phit(jmt),yu(jmt) )
+#ifdef tempsalt
      allocate ( tempb(KM), saltb(KM), rhob(KM) )
+#endif
   end if alloCondGrid
 
  if ( .not. allocated (kmu) ) then
@@ -322,7 +324,7 @@ do while (got_hs < 1 .or. got_u < km .or. got_v < km &
                         enddo
                 enddo
 
-!print *,'hs',hs
+!hs=0.
 
 #ifdef tempsalt
    else if (ispvar(nvars) == 4) then  ! Potential temperature
@@ -445,6 +447,7 @@ do while (got_hs < 1 .or. got_u < km .or. got_v < km &
                else
                   vflux(i,j,kk,2)=(snap2d(i,j)+snap2d(i-1,j))*&
                        ( dz(kk)+0.5*(hs(i,j,2)+hs(i,j+1,2)) )
+!                       if(dz(kk)-0.5*(hs(i,j,2)+hs(i,j+1,2)).lt.0.) print *,dz(kk),0.5*(hs(i,j,2)+hs(i+1,j,2))
                endif
             enddo
          enddo
