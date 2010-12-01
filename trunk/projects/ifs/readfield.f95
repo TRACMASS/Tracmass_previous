@@ -200,9 +200,9 @@ do k=1,KM
 !   uh(:,j)=uxy(:,jj)
 !   vh(:,j)=vxy(:,jj)
   enddo
-
-! vh(:,NY)=0.  ! sets velocity to zero at North pole ??????????????????
-! vh(:,NY-1)=0.
+ 
+ ! In ERA-Interim data, vh is not zero at NP, but the zonal mean is.
+ vh(:,NY)=0.
 ! A-grid -> C-grid & store in matrixes
  do j=1,JMT
   jj=j+1
@@ -217,9 +217,8 @@ do k=1,KM
    dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit
 
    uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg
-   if(j < JMT) vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(jj)
+   vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j)
 
-!   if(k.eq.1) print *,i,j,uflux(i,j,k,2),vflux(i,j,k,2),dzt(i,j,k,2)
   enddo
  enddo
 !stop 4067
