@@ -43,9 +43,7 @@ PROGRAM main
   
   writeStamp='00000000'
   write (writeStamp,'(i8.8)') intstart
-  
-  
-  
+    
   if (intminInOutFile.eq.1) then
      fullWritePref =  trim(outDataDir)//trim(outDataFile)//writeStamp
   else
@@ -107,7 +105,8 @@ CONTAINS
 #endif
 #if defined turb
     print *,'with sub-grid turbulence parameterisation'
-#elif defined diffusion
+#endif
+#if defined diffusion
     print *,'with diffusion parameterisation, Ah=',ah,'m2/s and Av=',av,'m2/s'
 #if defined anisodiffusion
     print *,'with anisotropic elliptic diffusion along the isopleths'

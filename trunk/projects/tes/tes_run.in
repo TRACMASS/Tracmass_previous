@@ -113,8 +113,8 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
   !
-  ist1     =  50,		 
-  ist2     =  50,		 
+  ist1     =  10,		 
+  ist2     =  10,		 
   jst1     =  50,
   jst2     =  50,
   kst1     =   5,		 

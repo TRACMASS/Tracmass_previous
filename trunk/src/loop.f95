@@ -209,7 +209,6 @@ subroutine loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  
   intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
      call fancyTimer('reading next datafield','start')
      call readfields
@@ -226,7 +225,7 @@ subroutine loop
         dt = 0.d0
         arct = 0.d0
      end if intspinCond
-
+     
      if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
           
      !=======================================================
@@ -350,13 +349,13 @@ subroutine loop
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)
            if (errCode.ne.0) cycle ntracLoop
-
-           ! === calculate the turbulent velocities ===
-#ifdef turb
-           call turbuflux(ia,ja,ka,rr)
-#endif /*turb*/
-           ! === calculate the vertical velocity ===
-           call vertvel(rr,ia,iam,ja,ka)
+!
+!           ! === calculate the turbulent velocities ===
+!#ifdef turb
+!           call turbuflux(ia,ja,ka,rr)
+!#endif /*turb*/
+!           ! === calculate the vertical velocity ===
+!           call vertvel(rr,ia,iam,ja,ka)
            
            ! === write trajectory ===                       
 #ifdef tracer
@@ -384,6 +383,15 @@ subroutine loop
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
+
+
+           ! === calculate the turbulent velocities ===
+#ifdef turb
+           call turbuflux(ia,ja,ka,rr,dt)
+#endif /*turb*/
+           ! === calculate the vertical velocity ===
+           call vertvel(rr,ia,iam,ja,ka)
+
 #ifdef timeanalyt
            ss0=dble(idint(ts))*tseas/dxyz
            call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz,rr) ! zonal
@@ -530,6 +538,7 @@ subroutine loop
   call writepsi
   
   print *,'The very end of TRACMASS run ',outDataFile,' at'
+  call system('tput bel')
   call system('date')
   
 return
