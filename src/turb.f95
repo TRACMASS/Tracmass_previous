@@ -1,17 +1,24 @@
 #ifdef turb    
-subroutine turbuflux(ia,ja,ka,rr)
+subroutine turbuflux(ia,ja,ka,rr,dt)
   
   ! computes the paramterised turbulent velocities u' and v' into upr
   
   USE mod_param
   USE mod_vel
   USE mod_turb
+  USE mod_diffusion
   IMPLICIT none
   
-  REAL*8         :: uv(12),rr,rg,en,localW
-  REAL*4         :: qran(12)
+  REAL*8         :: uv(12),rr,rg,localW,dt !,en
+  REAL*4         :: qran(12),amp
   INTEGER        :: ia,ja,ka,im,jm,n
 
+!amp=Ah/sqrt(dt)
+!amp=Ah/dtmin
+!amp=Ah/sqrt(dtmin)
+amp=Ah/( dtmin**(1./3.) )
+!print *,Ah,dt,amp
+!stop 4967
 !  call random_number(qran) ! generates a random number between 0 and 1
   
 ! random generated numbers between 0 and 1
@@ -19,9 +26,13 @@ do n=1,12
  qran(n)=rand()
 enddo
 	
-  qran=2.*qran-1. ! === Max. amplitude of turbulence with random numbers between -1 and 1
-                  ! === (varies with the same aplitude as the mean vel)
-  !rand=1.*rand-0.5  ! Reduced amplitude of turb.
+!  qran=2.*qran-1. ! === Max. amplitude of turbulence with random numbers between -1 and 1
+                   ! === (varies with the same aplitude as the mean vel)
+  !qran=1.*qran-0.5  ! Reduced amplitude of turb.
+!  qran=4.*qran-2. ! ===  amplitude of turbulence with random numbers between -2 and 2
+!  qran=8.*qran-4. ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
+!  qran=30.*qran-15. ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
+  qran=amp*qran-0.5*amp ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
     
   rg=1.d0-rr
   
@@ -46,7 +57,7 @@ enddo
   uv(10)=vflux(ia,jm,ka,2)*ff ! southern v at t
 #endif  
 
-!   upr(:,1)=upr(:,2) ! store u' from previous time iteration step
+!   upr(:,1)=upr(:,2) ! store u' from previous time iteration step (this makes it unstable!)
    
 ! multiply the time interpolated velocities by random numbers
    
@@ -58,7 +69,7 @@ enddo
   upr(3,2)=uv(3)*qran(3)
   upr(4,2)=uv(4)*qran(3)
 
-!  upr(:,1)=upr(:,2) ! impose same velocities for t-1 and t (this is more stabel but why? K.Döös)
+!  upr(:,1)=upr(:,2) ! impose same velocities for t-1 and t (this makes it unstable! but why? K.Döös)
   
 #ifdef turb 
 #ifndef twodim   

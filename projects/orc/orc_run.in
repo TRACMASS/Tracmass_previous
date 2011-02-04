@@ -25,10 +25,10 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin =72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  intspin =2920, !1460, !72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  =200,
+  intrun  =4000, !200,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -53,28 +53,23 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-  kriva    = 2,
-  !kriva    = 3,
+  kriva    = 1,
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Users/doos/data/orca/orca1/',
   ! inDataDir = '/Users/doos/data/orca/orca025/',
-   inDataDir = '/Volumes/Resa0/data/orca/orca025/',
+  ! inDataDir = '/Volumes/Resa0/data/orca/orca025/',
+  ! inDataDir = '/Volumes/Resa6/data/ORCA025.L75-SLB2-S/',
+   inDataDir = '/Volumes/Resa7/data/ORCA025.L75/',
   !
   ! === Directory where output files are saved
    outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
   ! outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
   !
   ! === name of current trajectory run
-  ! outDataFile     = 'di1000_d025_a0'/
-  ! outDataFile     = 'an2000_d025_ny9'/
-  ! outDataFile     = 'no_d025_2D_180'/
-  ! outDataFile     = 'tu_d025_a0'/
-  ! outDataFile     = 'di4000_d025_m13'/
-  ! outDataFile     = 'analyt2'/
-  ! outDataFile     = 'no_sing_365_a0'/
-   outDataFile     = 'di600_sing_365_a1'/
-  ! outDataFile      = 'di4000_d025_k64',!ah=4000 med u=v=0
+   outDataFile     = 'no_d025_2D_h6_2005_kdr'/
+  ! outDataFile     = 'tu_d025_2D_h3_kdr_i20_ah350'/
+  ! outDataFile     = 'di_d025_2D_h6_kdr_ah2500'/
   !
   intminInOutFile=0/
 $INITRUNSEED
@@ -128,8 +123,8 @@ $INITRUNSEED
   ist2     =-1,		 
   jst1     = 1,		 
   jst2     =-1,		 
-  kst1     =61,		 
-  kst2     =61,
+  kst1     =74, !66,	!61	 
+  kst2     =74, !66, !61
   varSeedFile = 0,
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
@@ -138,9 +133,9 @@ $INITRUNSEED
   !seedFile    = '/Users/doos/data/orca/orca1/topo/maskdrift_orca1_32_025' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_005' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_010' /
-  !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_025' /
+  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_32_025' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_orca025_1024_single' /
-  seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_orca025_365_single' /
+  !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_orca025_365_single' /
   !seedFile    = '/Users/doos/data/orca/orca025/topo/maskdrift_orca025_32_single' /
 
   $INITRUNTEMPSALT
@@ -164,7 +159,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=600., 
+  ah=350., 
   ! Vertical diffusion in m2/s
   av=0./
   
@@ -219,7 +214,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =      366./  ! maximum time length of a trajectory in days
+  timax =       40./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,

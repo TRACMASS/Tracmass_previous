@@ -14,7 +14,8 @@ subroutine init_params
   USE mod_streamv
   USE mod_streamr
   USE mod_tracer
-#ifdef diffusion
+#if defined diffusion || turb 
+!#ifdef diffusion
   USE mod_diffusion
 #endif
 #ifdef sediment
@@ -56,7 +57,8 @@ subroutine init_params
   namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
 #endif
-#ifdef diffusion
+#if defined diffusion || turb 
+!#ifdef diffusion
   namelist /INITRUNDIFFUSION/ ah, av
 #endif
 #ifdef sediment
@@ -129,7 +131,8 @@ subroutine init_params
 #ifdef tempsalt
   read(8,nml=INITRUNTEMPSALT)
 #endif
-#ifdef diffusion
+#if defined diffusion || turb 
+!#ifdef diffusion
   read(8,nml=INITRUNDIFFUSION)
 #endif
 #ifdef sediment
@@ -148,7 +151,7 @@ subroutine init_params
      if(ngcm.ge.24) then 
         intmin      = (startJD-baseJD)/(ngcm/24)+1
      else ! this is a quick fix to avoid division by zero when ngcm < 24
-        intmin      = (startJD-baseJD)/(ngcm)+1
+        intmin      = (startJD-baseJD-ngcm)/(ngcm)+1
      endif
   end if startYearCond
   startHourCond: if ( (startHour .ne. 0)  & 

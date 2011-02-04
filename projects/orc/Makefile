@@ -3,8 +3,8 @@
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-   fl01   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
-#  fl01   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
+   fl01   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
+#  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
    fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
 #   fl03   = -Dtempsalt       # Include temp and salt
@@ -36,9 +36,12 @@
 #  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
 #  fl23  = -Dturb           # Adds subgrid turbulent velocities 
-  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+#  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
-#  fl27  = -Dorca1          # Makes the velocity coarser 
+#------------------------------------------------------------------------
+   fl27  = -Dorca025l75h6          # orca1 or orca025 or orca025l75h6
+#------------------------------------------------------------------------
+   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \
