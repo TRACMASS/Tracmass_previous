@@ -157,11 +157,11 @@ endif
 ! Read in data from the A-grid using wgrib
 ! Download wgrib source from ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib/wgrib.c
 ! Compile binary file with gcc -o wgrib wgrib.c and put in inDataDir
-string=trim(inDataDir)//'wgrib '//trim(fieldFile)//' -o '//trim(inDataDir)//'tmp.bin -d all -bin -nh -V > log.txt'
-
+string=trim(inDataDir)//'wgrib '//trim(fieldFile)//' -o '//trim(inDataDir)//&
+       trim(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
 call system(string)
 ! read
-open(14,form='unformatted',file=trim(inDataDir)//'tmp.bin',access='direct',recl=IMT*145*4,convert='little_endian')
+open(14,form='unformatted',file=trim(inDataDir)//trim(outDataFile)//'.bin',access='direct',recl=IMT*145*4,convert='little_endian')
 
 kk=0
 do k=1,KM
@@ -195,8 +195,8 @@ do k=1,KM
    jj=NY+1-j
    th(:,j)=txy(:,jj)
    qh(:,j)=qxy(:,jj)*1.e3 !  [g/Kg]
-   uh(:,j)=uxy(:,jj)*( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*ph(:,j) )*punit
-   vh(:,j)=vxy(:,jj)*( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*ph(:,j) )*punit
+   uh(:,j)=uxy(:,jj)!*( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*ph(:,j) )*punit
+   vh(:,j)=vxy(:,jj)!*( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*ph(:,j) )*punit
 !   uh(:,j)=uxy(:,jj)
 !   vh(:,j)=vxy(:,jj)
   enddo
@@ -216,8 +216,10 @@ do k=1,KM
    rho  (i,j,l,2)=0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit
    dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit
 
-   uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg
-   vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j)
+   uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg * &
+                  ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(i,jm)) )*punit
+   vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j) * &
+                  ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(im,jj)) )*punit
 
   enddo
  enddo

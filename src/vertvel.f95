@@ -47,10 +47,8 @@ subroutine vertvel(rr,ia,iam,ja,ka)
     do n=1,NST
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
-     + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))/tseas )  ! time change of the mass the in grid box
+     + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))*dxdy(ia,ja)/tseas )  ! time change of the mass the in grid box
     enddo
-    ! make sure there is no wflux through the surface or top of atmosphere
-    if(k.eq.KM.or.k.eq.0) wflux(k,:) = 0.d0
 #endif
 !end ifs code
 
