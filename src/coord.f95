@@ -68,7 +68,7 @@ dx = 0.25d0  ! this is a quick and dirty fix since it is only used in arclength
 dy = 0.25d0
 #endif
 
-#if defined rco
+#if defined rco || baltix
 dx = 1./15.d0
 dy = 1./30.d0
 !stlon1= 9.0d0+0.25d0*dx
