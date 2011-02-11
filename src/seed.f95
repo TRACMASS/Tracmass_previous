@@ -16,6 +16,7 @@ module mod_seed
   INTEGER                                    :: ist1 ,ist2   ,jst1 ,jst2
   INTEGER                                    :: kst1, kst2
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ijkst
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:)     :: seedMask
   CHARACTER(LEN=200)                         :: seedDir
   CHARACTER(LEN=200)                         :: seedFile
   INTEGER                                    :: ist,jst,kst

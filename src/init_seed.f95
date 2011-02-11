@@ -13,7 +13,6 @@ subroutine init_seed()
   LOGICAL                                    :: fileexists
   INTEGER                                    :: i,j,k
   INTEGER                                    :: filestat
-  INTEGER*4, ALLOCATABLE, DIMENSION(:,:)     :: seedMask
   select case (seedType)
      
   case (1) ! === ist, jst, kst method ===
@@ -93,7 +92,7 @@ subroutine init_seed()
 
 
   case (3) ! === 2-D Matrix method ===
-     allocate ( seedMask(imt ,jmt) )
+     allocate ( seedMask(imt ,jmt ,1) )
      if (varSeedFile == 1) then
         fullSeedFile=trim(seedFile) !// trim(inparg1)
         print *,'Variable file name not working!'
@@ -113,8 +112,7 @@ subroutine init_seed()
         do i=1,imt
          do j=1,jmt
           do k=kst1,kst2
-!           if (seedMask(i,j) /= 0) ijkMax=ijkMax+1
-           if (seedMask(i,j) /= 0) ijkMax=ijkMax+seedMask(i,j)
+           if (seedMask(i,j,1) > 0) ijkMax=ijkMax+1
           end do
          end do
         end do
@@ -124,7 +122,7 @@ subroutine init_seed()
         ijk=0
         do i=1,imt
            do j=1,jmt
-              if (seedMask(i,j) /= 0) then
+              if (seedMask(i,j,1) > 0) then
                  do k=kst1,kst2
                     ijk=ijk+1
                     ijkst(ijk,1)=i
@@ -132,7 +130,7 @@ subroutine init_seed()
                     ijkst(ijk,3)=k
                     ijkst(ijk,4)=idir
                     ijkst(ijk,5)=isec
-                    ijkst(ijk,6)=seedMask(i,j)
+                    ijkst(ijk,6)=seedMask(i,j,1)
                  end do
               end if
            end do
@@ -145,14 +143,65 @@ subroutine init_seed()
         print *,'Seed size    : ', ijkMax
      end if chFile2d
 
-#if defined rco
-     do i=1,IMT
-        do j=1,JMT
-           if(seedMask(i,j).ne.0 .and. seedMask(i,j).le.4 .and. j.lt.215) seedMask(i,j)=-1  ! entire shallow Baltic south of 61N
-        enddo
-     enddo
-#endif
+!#if defined rco
+!     do i=1,IMT
+!        do j=1,JMT
+!           if(seedMask(i,j).ne.0 .and. seedMask(i,j).le.4 .and. j.lt.215) seedMask(i,j)=-1  ! entire shallow Baltic south of 61N
+!        enddo
+!     enddo
+!#endif
 
+  case (4) ! === 3-D Matrix method ===
+     allocate ( seedMask(imt ,jmt, km) )
+     if (varSeedFile == 1) then
+        fullSeedFile=trim(seedFile) !// trim(inparg1)
+        print *,'Variable file name not working!'
+        stop
+     else
+        fullSeedFile=trim(seedFile)
+     end if
+     inquire(FILE = fullSeedFile, exist=fileexists)
+     chFile3d: if (fileexists) then
+
+        ijkMax=0
+        open(unit=34,file=fullSeedFile,form='unformatted', ACTION = 'READ')
+        read(unit=34) seedMask
+        close(34)
+        ijkMax=0
+
+        do i=1,imt
+         do j=1,jmt
+          do k=1,km
+           if (seedMask(i,j,k) > 0) ijkMax=ijkMax+1
+          end do
+         end do
+        end do
+        
+        allocate (ijkst(ijkMax,6))  
+
+        ijk=0
+        do i=1,imt
+           do j=1,jmt
+              do k=1,km
+                 if (seedMask(i,j,k) > 0) then
+                    ijk=ijk+1
+                    ijkst(ijk,1)=i
+                    ijkst(ijk,2)=j
+                    ijkst(ijk,3)=k
+                    ijkst(ijk,4)=idir
+                    ijkst(ijk,5)=isec
+                    ijkst(ijk,6)=seedMask(i,j,k)
+                 end if
+              end do
+           end do
+        end do
+
+        
+        print *,'------------------------------------------------------'
+        print *,'=== Particles are seeded according to a listfile   ==='
+        print *,'File name    : '//trim(fullSeedFile)
+        print *,'Seed size    : ', ijkMax
+     end if chFile3d
 
 
 !!$! === From loop.f95 ===
