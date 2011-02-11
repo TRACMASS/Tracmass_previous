@@ -485,6 +485,19 @@ subroutine loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
+           
+           ! === Seedtype 3 or 4 ===
+           if(seedType >= 3) then
+               if(seedType == 3) then
+                   k=(-1)*seedMask(ia,ja,1)
+               elseif(seedType == 4) then
+                   k=(-1)*seedMask(ia,ja,ka)
+               endif
+               if(k > 0) then
+                   nexit(k) = nexit(k)+1
+                   exit niterLoop
+               endif
+           endif
            ! === stop trajectory if the choosen time or ===
            ! === water mass properties are exceeded     ===
            if(tt-t0.gt.timax) then

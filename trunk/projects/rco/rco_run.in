@@ -75,7 +75,7 @@
   !outDataFile     = 'xyz_step_diff_h_3D'/
   !outDataFile     = 'xyz_step_diff_xl_3D'/
   !outDataFile     = 'sthriga_2003_n0',
-  outDataFile     = 'anderstest'/
+  outDataFile     = 'rco_test'/
  !
   intminInOutFile=0/
 $INITRUNSEED
@@ -108,7 +108,8 @@ $INITRUNSEED
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
-  !                 3 = Use a 2-D mask file.
+  !                 3 = Use a 2-D mask file (need to have dims (imt,jmt,1).
+  !                 4 = Use a 3-D mask file (need to have dims (imt,jmt,km). 
   seedType = 3,
   !
   ! ===   ===   ===   ===   ===
