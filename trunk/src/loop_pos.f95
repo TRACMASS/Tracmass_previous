@@ -21,7 +21,7 @@ contains
   subroutine  pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
     
     INTEGER                                    :: mra,mta,msa
-    INTEGER                                    :: uu
+    REAL                                       :: uu
     INTEGER                                    :: ia, iam, ja, ka
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens

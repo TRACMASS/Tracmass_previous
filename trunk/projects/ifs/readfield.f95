@@ -155,9 +155,8 @@ endif
 
 
 ! Read in data from the A-grid using wgrib
-! Download wgrib source from ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib/wgrib.c
-! Compile binary file with gcc -o wgrib wgrib.c and put in inDataDir
-string=trim(inDataDir)//'wgrib '//trim(fieldFile)//' -o '//trim(inDataDir)//&
+! Set a environment variable WGRIB, e.g. export WGRIB=/home/user/bin/wgrib
+string='$WGRIB '//trim(fieldFile)//' -o '//trim(inDataDir)//&
        trim(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
 call system(string)
 ! read
@@ -214,11 +213,11 @@ do k=1,KM
    sal  (i,j,l,2)=0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm))
    pp=0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm))
    rho  (i,j,l,2)=0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit
-   dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit
+   dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit / grav
 
-   uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg * &
+   uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg / grav * &
                   ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(i,jm)) )*punit
-   vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j) * &
+   vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j) / grav * &
                   ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(im,jj)) )*punit
 
   enddo

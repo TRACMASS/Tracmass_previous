@@ -25,10 +25,10 @@
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
+#   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
    fl17  = -Dfreesurface    # Variable bottom box to match actual depth
-   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
-#  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+#   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
+  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
 #  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
 #  fl20  = -Dselect         # Select only one trajectory (for debugging)
@@ -39,9 +39,9 @@
 #  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #------------------------------------------------------------------------
-   fl27  = -Dorca025l75h6          # orca1 or orca025 or orca025l75h6
+   fl27  = -Dorca025          # orca1 or orca025 or orca025l75h6
 #------------------------------------------------------------------------
-   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
+#   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \
