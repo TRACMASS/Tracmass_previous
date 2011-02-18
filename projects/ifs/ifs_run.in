@@ -80,6 +80,8 @@
   outDataFile     = 'era_test'/
   !outDataFile     = 'era_15S_glob'/
   !
+&INITWGRIB
+  wgribDir     = '/home/x_joakj/bin/'
 $INITRUNSEED
   !
   !==nff:           1 = Follow trajectories forward

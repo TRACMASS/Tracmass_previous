@@ -14,9 +14,9 @@
   !
 $INITGRIDGRID
   !
-  IMT      = 1440,  ! orca1=360 ; orca025=1440
+  IMT      = 1442,  ! orca1=360 ; orca025=1440
   JMT      = 1021,  ! orca1=292 ; orca025=1021
-  KM       = 75,    ! orca1=orca025=64 ; orca025l75h6=75
+  KM       = 64,    ! orca1=orca025=64 ; orca025l75h6=75
   LBT      = 1,
   NEND     = 2/                   ! NEND = LBT +1
   !
@@ -28,8 +28,8 @@ $INITGRIDNTRAC
   !
 $INITGRIDTIME
   !
-  ngcm          =    6,            ! (5*24) hours between GCM datasets
-  iter          =   20,            ! iteration between two gcm data sets
+  ngcm          = 5*24,            ! (5*24) hours between GCM datasets
+  iter          =    5,            ! iteration between two gcm data sets
   intmax        = 1460, !1460, !145,2920            ! maximum length of GCM fields
   fieldsPerFile = 1460 / ! 1460 1,2920
   !

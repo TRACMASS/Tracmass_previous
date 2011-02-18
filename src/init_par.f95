@@ -64,6 +64,9 @@ subroutine init_params
 #ifdef sediment
   namelist /INITRUNSEDIMENT/ partdiam, rhos, cwamp, twave, critvel
 #endif
+#ifdef ifs
+  namelist /INITWGRIB/ wgribDir
+#endif
 
 
 !  allocate ( ienw (LBT),iene (LBT) )

@@ -36,9 +36,9 @@
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 5, !5,
-  startMon          = 1, !1,
-  startYear         = 2000/  ! first year is 1981, last year is 2005
+  startDay          = 1, !5,
+  startMon          = 12, !1,
+  startYear         = 1989/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE
@@ -53,21 +53,21 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-  kriva    = 1,
+  kriva    = 0,
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Users/doos/data/orca/orca1/',
   ! inDataDir = '/Users/doos/data/orca/orca025/',
   ! inDataDir = '/Volumes/Resa0/data/orca/orca025/',
   ! inDataDir = '/Volumes/Resa6/data/ORCA025.L75-SLB2-S/',
-   inDataDir = '/Volumes/Resa7/data/ORCA025.L75/',
+   inDataDir = '/nobackup/vagn2/x_maxbe/ORCA025/ORCA025-N112-S/',
   !
   ! === Directory where output files are saved
-   outDataDir   = '/Users/doos/data/orca/orca025/data_out/',
+   outDataDir   = '/nobackup/vagn1/x_joakj/data/orca025/',
   ! outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
   !
   ! === name of current trajectory run
-   outDataFile     = 'no_d025_2D_h6_2005_kdr'/
+   outDataFile     = 'orca_test'/
   ! outDataFile     = 'tu_d025_2D_h3_kdr_i20_ah350'/
   ! outDataFile     = 'di_d025_2D_h6_kdr_ah2500'/
   !
@@ -83,7 +83,7 @@ $INITRUNSEED
   !==               3 = Seed particles horiz(x-y)
   !==               4 = Seed particles in the middle of T-box
   !==               5 = Seed particles from given exact positions read in ?????
-  isec     = 5,
+  isec     = 4,
   !==idir:          1 = follow positive direction (eastward/northward)  
   !==              -1 = follow negative direction (westward/southward)
   !==               0 = both directions
@@ -97,7 +97,7 @@ $INITRUNSEED
   !                 3 = Each particle reflects water volume at seeding.
   !                     (partQuant in m3 per particle)
   !                 5 = particles set by seedfile (isec==nqua==5)
-  nqua     = 5, 
+  nqua     = 1, 
   partQuant= 1,     !(particles/gridcell or m3s-1/particle or m3/particle)
   !
   ! === initial directions all in MODEL COORDINATES ===
@@ -105,7 +105,7 @@ $INITRUNSEED
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  seedType = 3,
+  seedType = 1,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded (started).
@@ -119,12 +119,12 @@ $INITRUNSEED
   !kst1     =  38,		 
   !kst2     =  41, 
 ! One singel gridbox
-  ist1     = 1,		 
-  ist2     =-1,		 
-  jst1     = 1,		 
-  jst2     =-1,		 
-  kst1     =74, !66,	!61	 
-  kst2     =74, !66, !61
+  ist1     = 1000,		 
+  ist2     = 1000,		 
+  jst1     = 580,		 
+  jst2     = 580,		 
+  kst1     = 1, !66,	!61	 
+  kst2     = 1, !66, !61
   varSeedFile = 0,
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
@@ -159,7 +159,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=350., 
+  ah=0., 
   ! Vertical diffusion in m2/s
   av=0./
   
@@ -214,7 +214,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =       40./  ! maximum time length of a trajectory in days
+  timax =       31./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,

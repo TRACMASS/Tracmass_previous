@@ -28,7 +28,7 @@
   intspin = 1, !1460, !72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  =4000, !200,
+  intrun  =20, !200,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -38,7 +38,7 @@
   startHour         = 0,
   startDay          = 5, !5,
   startMon          = 1, !1,
-  startYear         = 1984/  ! first year is 1981, last year is 2005
+  startYear         = 1981/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE

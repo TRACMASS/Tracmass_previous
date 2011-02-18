@@ -26,7 +26,6 @@ data mois/31,28,31,30,31,30,31,31,30,31,30,31/
 radius = 6371229.d0 ! earth radius in metre
 radian = pi/180.d0
 deg=radius*radian ! ~ 111000 metre
-grav=9.81 ! m/s2tyear=365.25d0 * 24.d0 * 3600.d0
 tday=24.d0 * 3600.d0
 
 ! month lengths including leap years
