@@ -116,6 +116,7 @@ ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
   REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
@@ -133,7 +134,7 @@ MODULE mod_grid
   REAL*8                                    :: rmin ,tmin ,smin
   REAL*8                                    :: dr ,dtemp ,dsalt
   REAL*8                                    :: arc,arct,arcscale
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, depth
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu,kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
