@@ -25,10 +25,10 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin =2920, !1460, !72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  intspin = 12, !1460, !72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   ! === Number of timesteps for the run - stops after this.      ===
-  intrun  =4000, !200,
+  intrun  =9999999, !200,
   ! === "1" if forward in time  "-1" if backward in time      ===
   intstep = 1/
   !
@@ -36,9 +36,9 @@
   !
   ! === Start time for this run
   startHour         = 0,
-  startDay          = 1, !5,
-  startMon          = 12, !1,
-  startYear         = 1989/  ! first year is 1981, last year is 2005
+  startDay          = 5, !5,
+  startMon          = 1, !1,
+  startYear         = 2000/  ! first year is 1981, last year is 2005
   !
   !
  &INITRUNWRITE
@@ -53,21 +53,21 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-  kriva    = 0,
+  kriva    = 2,
   !
   ! === Directory where input fields are stored
   ! inDataDir = '/Users/doos/data/orca/orca1/',
-  ! inDataDir = '/Users/doos/data/orca/orca025/',
+  ! inDataDir = '/Users/doos/data/orca/ORCA025.L75/',
   ! inDataDir = '/Volumes/Resa0/data/orca/orca025/',
   ! inDataDir = '/Volumes/Resa6/data/ORCA025.L75-SLB2-S/',
-   inDataDir = '/nobackup/vagn2/x_maxbe/ORCA025/ORCA025-N112-S/',
+   inDataDir = '/Volumes/Resa5/data/ORCA025.L75/',
   !
   ! === Directory where output files are saved
-   outDataDir   = '/nobackup/vagn1/x_joakj/data/orca025/',
+   outDataDir   = '/Users/doos/data/orca/ORCA025.L75/data_out/',
   ! outDataDir   = '/Users/doos/data/orca/orca1/data_out/',
   !
   ! === name of current trajectory run
-   outDataFile     = 'orca_test'/
+   outDataFile     = 'conbelt_s2'/
   ! outDataFile     = 'tu_d025_2D_h3_kdr_i20_ah350'/
   ! outDataFile     = 'di_d025_2D_h6_kdr_ah2500'/
   !
@@ -83,11 +83,11 @@ $INITRUNSEED
   !==               3 = Seed particles horiz(x-y)
   !==               4 = Seed particles in the middle of T-box
   !==               5 = Seed particles from given exact positions read in ?????
-  isec     = 4,
+  isec     = 2,
   !==idir:          1 = follow positive direction (eastward/northward)  
   !==              -1 = follow negative direction (westward/southward)
   !==               0 = both directions
-  idir     = 0,
+  idir     = -1,
   !
   ! number of trajectories can be set by
   ! nqua:           1 = constant number of particles in all boxes
@@ -110,21 +110,20 @@ $INITRUNSEED
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
-  !
-  ! Neva
-  !ist1     = 204,		 
-  !ist2     = 204,		 
-  !jst1     = 145,		 
-  !jst2     = 220,		 
-  !kst1     =  38,		 
-  !kst2     =  41, 
-! One singel gridbox
-  ist1     = 1000,		 
-  ist2     = 1000,		 
-  jst1     = 580,		 
-  jst2     = 580,		 
+  ! 
+  ist1     =  930, !1160,		 
+  ist2     = 1000, !1230,		 
+  jst1     = 352,		 
+  jst2     = 352,		 
   kst1     = 1, !66,	!61	 
-  kst2     = 1, !66, !61
+  kst2     =-1, !66, !61
+  ! f-fold test
+  !  ist1     =  1,		 
+  !  ist2     = -1,		 
+  !  jst1     = 1000,		 
+  !  jst2     = 1000,		 
+  !  kst1     = 1, !66,	!61	 
+  !  kst2     =-1, !66, !61
   varSeedFile = 0,
   !seedDir     = '/Users/doos/data/rco/topo/',
   !seedFile    = '/Volumes/hav4/data/rco/topo/maskust' /
@@ -143,7 +142,7 @@ $INITRUNSEED
   !
   ! for starting a trajectory (active only with option tempsalt) 
   tmin0 =-500.,
-  tmax0 = 200.,
+  tmax0 =   6.,
   smin0 =-500.,
   smax0 = 400.,
   rmin0 =-100.,
@@ -159,7 +158,7 @@ $INITRUNSEED
   $INITRUNDIFFUSION
   ! Diffusion paramters
   ! Horizontal diffusion in m2/s
-  ah=0., 
+  ah=350., 
   ! Vertical diffusion in m2/s
   av=0./
   
@@ -183,16 +182,16 @@ $INITRUNSEED
 
   $INITRUNEND
   ! defining end sections
-  ! Lilla Bält
-  !       ienw(1)=1
-  !       iene(1)=25
-  !       jens(1)=47+1
-  !       jenn(1)=jmt
-  ! Stora Bält
-  !       ienw(2)=26
-  !       iene(2)=36
-  !       jens(2)=33+1
-  !       jenn(2)=jmt
+  ! Atlantic
+         ienw(1)=930
+         iene(1)=1230
+         jens(1)=353
+         jenn(1)=400
+  ! Southern Ocean
+  !       ienw(1)=930
+  !       iene(1)=1230
+  !       jens(1)=340
+  !       jenn(1)=352
   ! Öresund 
   !       ienw(1)=37
   !       iene(3)=63
@@ -214,7 +213,7 @@ $INITRUNSEED
 !  iene(1) =  1000,
 !  jens(1) =  1000,
 !  jenn(1) =  1000,
-  timax =       31./  ! maximum time length of a trajectory in days
+  timax =  9999999999./  ! maximum time length of a trajectory in days
 ! Finskaq viken
 !  ienw(1) =     0,
 !  iene(1) =   203,

@@ -30,6 +30,7 @@ contains
         
     ! === calculate the new positions ===
     ! === of the trajectory           ===    
+    scrivi=.false.
     if(ds.eq.dse) then ! eastward grid-cell exit 
        scrivi=.false.
        uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
@@ -48,7 +49,7 @@ contains
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) 
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr)
 #endif /*timeanalyt*/
-       scrivi=.true.
+!       scrivi=.true.
 #ifdef streamr
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
@@ -82,7 +83,7 @@ contains
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-       scrivi=.true.      
+!       scrivi=.true.      
 #ifdef streamr
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
