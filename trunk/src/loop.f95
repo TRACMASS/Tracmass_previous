@@ -416,18 +416,42 @@ subroutine loop
 
 #ifdef orc 
 ! north fold cyclic ORCA grid (only tested with ORCA025)
-           if(y1.eq.dble(JMT)) then 
-            x1=dble(IMT+4)-x1    
-            if(x1.ne.dble(idint(x1))) then
-             ib=idint(x1)+1
-            else
-             ib=idint(x1)
-            endif
-            jb=JMT-1
-            y1=dble(jb-1)
-            ! make sure the f-fold is also made for the previous point:
-            x0=x1 ; y0=y1 ; ia=ib ; ja=jb  
+           
+            if( y1 == dble(JMT-1) ) then
+              x1 = dble(IMT+3) - x1
+              y1 = dble(JMT-2)
+              ib=idint(x1)
+              jb=JMT-2
+              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+!              print *,'fold',ntrac,niter,x1,y1,z1
+           elseif(y1 > dble(JMT-1)) then
+            print *,ia,ib,x0,x1
+            print *,ja,jb,y0,y1
+            print *,ka,kb,z0,z1
+            print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+            stop 4967
            endif
+           
+           !! North fold ORCA025 and ORCA2                                                                                                                                          
+!           IF ((y1 >= jmt) .and. (( (imt .eq. 1440) .and. (jmt .eq. 1021) ) .or. & 
+!            & ( (imt .eq. 180) .and. (jmt .eq. 149) )  )) THEN
+!              x1 =     imt + 1 - x1
+!              y1 = 2 * jmt - 2 - y1
+!              ib=idint(x1)
+!              jb=idint(y1)
+!              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+!              ENDIF
+           !!                                                                                                                                                                       
+           !! North fold ORCA1 and ORCA05                                                                                                                                           
+!           IF ((y1 >= jmt) .and. (( (imt .eq. 720) .and. (jmt .eq. 511) ) .or. &
+!            & ( (imt .eq. 360) .and. (jmt .eq. 292) )  ))THEN
+!              x1 =     imt - x1
+!              y1 = 2 * jmt - 1 - y1
+!              ib=idint(x1)
+!              jb=idint(y1)
+!              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+!           ENDIF
+
 #endif           
 
            ! === make sure that trajectory ===
@@ -614,7 +638,7 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verboseMess = 0
+       INTEGER                             :: verboseMess = 1
        INTEGER                             :: errCode
 
        errCode=0
@@ -654,7 +678,9 @@ return
                 print *,'The trajectory is killed'
                 print *,'====================================='
              end if
+             nerror=nerror+1
              errCode = -39
+             stop 40961
              call writedata(40)
              nrj(ntrac,6)=1
           endif          
@@ -677,6 +703,7 @@ return
                 print *,'====================================='
              end if
              call writedata(19)
+             nerror=nerror+1
              boundError = boundError +1
              errCode = -50
              stop 40962
@@ -698,6 +725,7 @@ return
                 print *,'hs=',hs(ia,ja,1),hs(ia,ja,2),hs(ib,jb,1),hs(ib,jb,2)
                 print *,'tt=',tt,ts,tt/tday,t0/tday
                 print *,'ntrac=',ntrac
+                print *,'niter=',niter
 #ifdef turb
                 print *,'upr=',upr
 #endif
@@ -710,6 +738,7 @@ return
              errCode = -40             
              call writedata(40)
              nrj(ntrac,6)=1
+             stop 40963
           endif
           case ('coordboxError')
           ! ===  Check that coordinates belongs to   ===
@@ -806,9 +835,10 @@ return
                call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
                call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
                print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
+               print *,'ntrac=',ntrac
               nerror=nerror+1
               nrj(ntrac,6)=1
-!               stop 3957
+               stop 3957
                z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if
@@ -914,14 +944,12 @@ return
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
     case (11)
-       if( (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
-            (scrivi .and. kriva.eq.2)                .or. &
-            (kriva.eq.3)                             .or. &
-            (kriva.eq.4 .and. niter.eq.1)            .or. &
-            (kriva.eq.5 .and. &
-            (tt-t0.eq.7.d0*tday.or.tt-t0.eq.14.d0*tday.or.tt-t0.eq.21.d0*tday)) .or. &
-            (.not.scrivi .and. kriva.eq.6)           .or. &
-            (dmod(tt-t0,1.d0).eq.0.d0 .and. kriva.eq.7)                ) then
+       if(  (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
+            (kriva.eq.2 .and. scrivi                    ) .or. &
+            (kriva.eq.3                                 ) .or. &
+            (kriva.eq.4 .and. niter.eq.1                ) .or. &
+            (kriva.eq.5 .and. dmod(tt-t0,7.d0).eq.0.d0  ) .or. &
+            (kriva.eq.6 .and. .not.scrivi               )        ) then
 #if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif
@@ -990,13 +1018,12 @@ return
        write(unit=78 ,rec=recPosIn) ntrac,ints,x14,y14,z14
        return
     case (11)
-       if( (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
-            (scrivi .and. kriva.eq.2)                .or. &
-            (kriva.eq.3)                             .or. &
-            (kriva.eq.4 .and. niter.eq.1)            .or. &
-            (kriva.eq.5 .and. &
-            (tt-t0.eq.7.*tday.or.tt-t0.eq.14.*tday & 
-            .or.tt-t0.eq.21.*tday)) ) then
+       if(  (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
+            (kriva.eq.2 .and. scrivi                    ) .or. &
+            (kriva.eq.3                                 ) .or. &
+            (kriva.eq.4 .and. niter.eq.1                ) .or. &
+            (kriva.eq.5 .and. dmod(tt-t0,7.d0).eq.0.d0  ) .or. &
+            (kriva.eq.6 .and. .not.scrivi               )        ) then
           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 !         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1

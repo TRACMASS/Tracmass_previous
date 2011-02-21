@@ -20,7 +20,7 @@ SUBROUTINE readfields
   
 
   ! = Loop variables
-  INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm,ipp,jmm,jpp,ntrac, l
+  INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm,ii,jmm,jpp,ntrac, l
   INTEGER                                      :: kbot,ktop
   INTEGER, SAVE                                :: ntempus,ntempusb,nread
 
@@ -33,9 +33,10 @@ SUBROUTINE readfields
 #ifdef orca1
   INTEGER, PARAMETER :: IMTG=???,JMTG=???
 #elif orca025
-  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=KM
+  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=64
 #elif orca025l75h6
-  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=13
+  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=75
+!  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=13
 #endif
 
   REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: ssh, temp2d_simp
@@ -77,7 +78,7 @@ SUBROUTINE readfields
 
 LOGICAL around
 
-!REAL*8 temp3d_doub(IMT+2,JMT,KM) ! to be used when botbox is written
+REAL*8 temp3d_doub(IMT,JMT,KM) ! to be used when botbox is written
 
   
   alloCondGrid: if ( .not. allocated (botbox) ) then
@@ -175,92 +176,7 @@ enddo
 ierr=NF90_CLOSE(ncid)
 gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
 #endif
-
-! The bathymetry
-ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5751
-ierr=NF90_INQ_VARID(ncid,'mbathy',varid) ! kmt field
-if(ierr.ne.0) stop 3767
-ierr=NF90_GET_VAR(ncid,varid,itemp,start2d,count2d)
-
-do i=1,IMT
-  kmt(i,:)=itemp(i,:)
-enddo
-
-kmu=0 ; kmv=0
-
-do j=1,jmt
-jp=j+1
-if(jp.eq.jmt+1) jp=jmt  ! should be north fold instead
- do i=1,imt
- ip=i+1
- if(ip.eq.IMT+1) ip=1
-   kmu(i,j)=min(itemp(i,j),itemp(ip,j),KMM)
-   kmv(i,j)=min(itemp(i,j),itemp(i,jp),KMM)
- enddo
-enddo
-
-!botbox=0.
-!! layer thickness at u points
-!ierr=NF90_INQ_VARID(ncid,'e3u',varid) 
-!if(ierr.ne.0) stop 3763
-!ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-!do i=1,IMT
-!do j=1,JMT
-!if(kmu(i,j).ne.0) botbox(i,j,1)=temp3d_doub(i,j,kmu(i,j))
-!enddo
-!enddo
-!
-!! layer thickness at v points
-!ierr=NF90_INQ_VARID(ncid,'e3v',varid)
-!if(ierr.ne.0) stop 3763
-!ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-!do i=1,IMT
-!do j=1,JMT
-!if(kmv(i,j).ne.0) botbox(i,j,2)=temp3d_doub(i,j,kmv(i,j))
-!enddo
-!enddo
-!
-!! layer thickness at T points
-!ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
-!if(ierr.ne.0) stop 3763
-!ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-!do i=1,IMT
-!do j=1,JMT
-!if(kmt(i,j).ne.0) botbox(i,j,3)=temp3d_doub(i,j,kmt(i,j))
-!enddo
-!enddo
-
-
-open(21,file=trim(inDataDir)//'topo/botbox',form='unformatted')
-!write(21) botbox
-read(21) botbox
-close(21)
-!stop 4966
-
-!ierr=NF90_INQ_VARID(ncid,'nav_lon',varid) ! londitude mesh
-!if(ierr.ne.0) stop 3763
-!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
-!open(21,file=trim(inDataDir)//'topo/long',form='unformatted')
-!write(21) temp2d_simp
-!close(21)
-!
-!ierr=NF90_INQ_VARID(ncid,'nav_lat',varid) ! londitude mesh
-!if(ierr.ne.0) stop 3763
-!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
-!open(21,file=trim(inDataDir)//'topo/lat',form='unformatted')
-!write(21) temp2d_simp
-!close(21)
-
-
-ierr=NF90_CLOSE(ncid)
-
-
-
-!open(21,file=trim(inDataDir)//'topo/kmt',form='unformatted')
-!write(21)kmt
-!close(21)
-!stop 4985
+print *,gridFile
 
 
 ! Depth coordinates
@@ -272,6 +188,145 @@ do k=1,km
  zw(k)=zw(k)+zw(k-1)
 ! print *,k,zw(k),kk,dz(kk)
 end do
+
+
+! The bathymetry
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5751
+ierr=NF90_INQ_VARID(ncid,'mbathy',varid) ! kmt field
+if(ierr.ne.0) stop 3767
+ierr=NF90_GET_VAR(ncid,varid,itemp,start2d,count2d)
+
+kmt=itemp
+!do j=JMT,JMT-100,-1
+!write(6,'(i4,1x,999i1)') j,(kmt(i,j),i=930,1230)
+!enddo
+!stop 3956
+
+botbox=0.
+! layer thickness at T points
+ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
+if(ierr.ne.0) stop 3763
+ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
+do i=1,IMT
+ do j=1,JMT
+  if(kmt(i,j).ne.0) then
+   botbox(i,j,3)=temp3d_doub(i,j,kmt(i,j))
+   if(botbox(i,j,3).eq.0.) then
+    print *,i,j,kmt(i,j),botbox(i,j,3),temp3d_doub(i,j,kmt(i,j))
+    botbox(i,j,3)=dz(km+1-kmt(i,j))
+   endif
+  endif
+ enddo
+enddo
+
+
+
+kmu=0 ; kmv=0
+
+do j=1,JMT
+ jp=j+1
+ if(jp.eq.jmt+1) jp=jmt  ! should be north fold instead
+ do i=1,imt
+  ip=i+1
+  if(ip.eq.IMT+1) ip=1
+  kmu(i,j)=min(kmt(i,j),kmt(ip,j),KMM)
+  kmv(i,j)=min(kmt(i,j),kmt(i,jp),KMM)
+!   if(kmt(i,j).lt.kmt(ip,j)) then ! kmu
+!    kmu(i,j)=kmt(i,j)
+!    botbox(i,j,1)=botbox(i,j,3)
+!   elseif(kmt(i,j).gt.kmt(ip,j)) then
+!    kmu(i,j)=kmt(ip,j)
+!    botbox(i,j,1)=botbox(ip,j,3)
+!   else
+!    kmu(i,j)=kmt(i,j)
+!    botbox(i,j,1)=min(botbox(i,j,3),botbox(ip,j,3))
+!   endif
+!   
+!   if(kmt(i,j).lt.kmt(i,jp)) then ! kmu
+!    kmv(i,j)=kmt(i,j)
+!    botbox(i,j,2)=botbox(i,j,3)
+!   elseif(kmt(i,j).gt.kmt(i,jp)) then
+!    kmv(i,j)=kmt(i,jp)
+!    botbox(i,j,2)=botbox(ip,j,3)
+!   else
+!    kmv(i,j)=kmt(i,j)
+!    botbox(i,j,2)=min(botbox(i,j,3),botbox(i,jp,3))
+!   endif
+   
+   
+ enddo
+enddo
+
+!  north fold 
+do i=4,IMT
+ ii=IMT+4-i
+ kmv(i,JMT)=kmv(ii,JMT-3)
+! botbox(i,JMT,2)=botbox(ii,JMT-3,2)
+enddo
+
+! layer thickness at u points
+ierr=NF90_INQ_VARID(ncid,'e3u',varid) 
+if(ierr.ne.0) stop 3763
+ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
+do i=1,IMT
+do j=1,JMT
+if(kmu(i,j).ne.0) botbox(i,j,1)=temp3d_doub(i,j,kmu(i,j))
+enddo
+enddo
+
+! layer thickness at v points
+ierr=NF90_INQ_VARID(ncid,'e3v',varid)
+if(ierr.ne.0) stop 3763
+ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
+do i=1,IMT
+do j=1,JMT
+if(kmv(i,j).ne.0) botbox(i,j,2)=temp3d_doub(i,j,kmv(i,j))
+enddo
+enddo
+
+
+!open(21,file=trim(inDataDir)//'topo/botbox',form='unformatted')
+!!write(21) botbox
+!read(21) botbox
+!close(21)
+!stop 4966
+
+!ierr=NF90_INQ_VARID(ncid,'nav_lon',varid) ! londitude mesh
+!if(ierr.ne.0) stop 3763
+!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
+!do i=100,1000
+!ii=IMT+4-i
+!print *,i,temp2d_simp(ii,JMT-2)-temp2d_simp(i,JMT)
+!enddo
+!open(21,file=trim(inDataDir)//'topo/long',form='unformatted')
+!write(21) temp2d_simp
+!close(21)
+!
+!ierr=NF90_INQ_VARID(ncid,'nav_lat',varid) ! londitude mesh
+!if(ierr.ne.0) stop 3763
+!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
+!open(21,file=trim(inDataDir)//'topo/lat',form='unformatted')
+!write(21) temp2d_simp
+!close(21)
+
+!do i=100,1000
+!ii=IMT+4-i
+!print *,i,temp2d_simp(ii,JMT-2)-temp2d_simp(i,JMT)
+!enddo
+!stop 3957
+
+ierr=NF90_CLOSE(ncid)
+
+
+
+!open(21,file=trim(inDataDir)//'topo/kmt',form='unformatted')
+!write(21)kmt
+!close(21)
+!stop 4985
+
+
+
 !stop 4956
 
 !i=500 ; j=500
@@ -287,6 +342,10 @@ do j=1,JMT
  do i=1,IMT
   if(kmt(i,j).ne.0) then
    dztb(i,j,1)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
+   if(botbox(i+subGridImin-1,j+subGridJmin-1,3).eq.0.) then
+    print *,i,j,kmt(i,j),botbox(i+subGridImin-1,j+subGridJmin-1,3)
+    stop 4957
+   endif
 !   dztb(i,j,1)=dz(KM+1-kmt(i,j))
   else
    dztb(i,j,1)=0.
@@ -327,9 +386,14 @@ if(j.ne.IJKMAX2) then
 endif
 #endif
 
+ihour=startHour
+iday=startDay
+imon=startMon-2
+if(ngcm.le.24) then
 ihour=24-ngcm
 iday=startDay-5
 imon=startMon
+endif
 iyear=startYear
      
 endif initFieldcond
@@ -339,13 +403,23 @@ endif initFieldcond
 #if defined orca1  || orca025
   iday=iday+5
 #elif orca025l75h6
-  ihour=ihour+ngcm
-  if(ihour.eq.24) then
-   iday=iday+1
-   ihour=0
+  if(ngcm.le.24) then
+   ihour=ihour+ngcm
+   if(ihour.eq.24) then
+    iday=iday+1
+    ihour=0
+   endif
+  else
+   imon=imon+1
+   if(imon.eq.13) then
+    imon=1
+    iyear=iyear+1
+    if(iyear.eq.2007) iyear=2000
+   endif
   endif
 #endif
 
+  if(ngcm.le.24) then
   if(iday.gt.idmax(imon,1999)) then
      iday=iday-idmax(imon,1999)
      imon=imon+1
@@ -354,6 +428,7 @@ endif initFieldcond
         iyear=iyear+1
         ! if kan skrivas här om man vill börja om från iyear0
      endif
+  endif
   endif
 !iyear=2000 ! quick and dirty fix for years
 ntime=10000*iyear+100*imon+iday
@@ -371,13 +446,18 @@ ntime=10000*iyear+100*imon+iday
 #elif orca025l75h6
 !print *,'ngcm=',ngcm
 !stop 3496
- if(ngcm.eq.3) dataprefix='ORCA025.L75-SLB2_3h_19900101_19901231_grid_'
+ if(ngcm.eq.  3) dataprefix='ORCA025.L75-SLB2_3h_19900101_19901231_grid_'
 ! if(ngcm.eq.6) dataprefix='ORCA025.L75-SLB2_6h_19580101_19581231_grid_'
- if(ngcm.eq.6) dataprefix='ORCA025.L75-SLB2_6h_20050101_20051231_grid_'
+ if(ngcm.eq.  6) dataprefix='ORCA025.L75-SLB2_6h_20050101_20051231_grid_'
+ if(ngcm.eq.730) dataprefix='ORCA025.L75-SLB0_730h_19770101_19771231_grid_'
 ! write(dataprefix(19:26),'(i8)') ntime
-! write(dataprefix(1:4),'(i4)') iyear
+ write(dataprefix(23:26),'(i4)') iyear
+ write(dataprefix(32:35),'(i4)') iyear
+! print *,dataprefix
+! stop 4906
 ! fieldFile = trim(inDataDir)//trim(dataprefix)
- fieldFile = trim(inDataDir)//trim(dataprefix)
+ fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
+! print *,fieldFile
   nread=mod(ints-1,intmax)+1
   start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
   start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
@@ -386,9 +466,7 @@ ntime=10000*iyear+100*imon+iday
 #endif
 
     
-! temp, salt and ssh
-!print *,ints,nread,ntempus,trim(fieldFile)//'T.nc'
-
+! Sea surface height
 ierr=NF90_OPEN(trim(fieldFile)//'T.nc',NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
 if(ierr.ne.0) then
@@ -401,28 +479,18 @@ ierr=NF90_CLOSE(ncid)
 
 do j=1,JMT
  do i=1,IMT+1
-  ip=i
-  if(ip.eq.IMT+1) ip=1
-  hs(i,j,2)=temp2d_simp(ip,j)
+  ii=i
+  if(ii.eq.IMT+1) ii=1
+  hs(i,j,2)=temp2d_simp(ii,j)
  enddo
 enddo
 
-do i=4,IMT+1
- hs(i,jmt+1,2) =hs(IMT+4-i,jmt-3,2)  !  north fold 
+do i=4,IMT
+ ii=IMT+4-i
+ hs(i,JMT+1,2)=hs(ii,JMT-3,2)  !  north fold 
 enddo
 
 #ifdef tempsalt 
-
-! Read the net downward heat flux
-!ierr=NF90_OPEN(trim(fieldFile)//'d05T.nc',NF90_NOWRITE,ncid)
-!ierr=NF90_INQ_VARID(ncid,'sohefldo',varid) ! the main data fields
-!if(ierr.ne.0) stop 3768
-!ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
-!if(ierr.ne.0) stop 3799
-!ierr=NF90_CLOSE(ncid)
-!!rhom=rhom+temp2d_simp
-!rhom=temp2d_simp
-
 
 ! Temperature
 gridFile = trim(fieldFile)//'T.nc'
@@ -528,13 +596,15 @@ do i=1,IMT
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
    if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
    uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
-!   print *,i,j,kk,k,uflux(i,j,kk,2)
+!   if(botbox(i+subGridImin-1,j+subGridJmin-1,1).eq.0.) then
+!    print *,i,j,kk,k,uflux(i,j,kk,2)
+!    stop 4967
+!   endif
   enddo
  enddo
 enddo
 
 ! v velocity
-!temp3d_simp = get3DfieldNC(trim(fieldFile)//'d05V.nc' ,'vomecrty')
 gridFile = trim(fieldFile)//'V.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 5751
@@ -543,15 +613,29 @@ if(ierr.ne.0) stop 3770
 ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
 ierr=NF90_CLOSE(ncid)
+
+
+!  north fold 
+do i=4,IMT
+ ii=IMT+4-i
+! vflux(i,JMT,:,2)=-vflux(ii,JMT-3,:,2)
+enddo
+
 do i=1,IMT
  do j=1,JMT
   do k=1,kmv(i,j)
+!  do k=1,KM
    kk=KM+1-k
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
    if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
    vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
 !   if(i.eq.IMT) print *,i,j,kk,k,vflux(i,j,kk,2)
+!   if(botbox(i+subGridImin-1,j+subGridJmin-1,2).eq.0.) then
+!    print *,i,j,kk,k,vflux(i,j,kk,2)
+!    stop 4968
+!   endif
+
   enddo
  enddo
 enddo
