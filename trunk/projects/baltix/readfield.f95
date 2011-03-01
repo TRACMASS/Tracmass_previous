@@ -166,7 +166,7 @@ endif initFieldcond
   endif
   
 ntime=1000000*iyear+10000*imon+100*iday+ihour
-print*,iyear,imon,iday,ihour,ntempus(imon,iday,ihour)
+!print*,iyear,imon,iday,ihour,ntempus(imon,iday,ihour)
 
 ! === 1 Jan at 00:00 is named as 31 Dec 24:00 the previous year ===
 if(imon == 1 .and. iday == 1 .and. ihour == 0) then
@@ -210,7 +210,6 @@ endif
 
 ! === Unzip the T file ===
 fieldFile = trim(inDataDir)//trim(dataprefix)//'T.nc'
-print *,fieldFile
 inquire(file=trim(fieldFile)//'.gz',exist=around)
 if(.not.around) then
 print *,'This file is missing:',fieldFile,ntempus(imon,iday,ihour),iyear,imon,iday,ihour
@@ -226,7 +225,7 @@ if(.not.around) stop 4556
 ierr=NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
 if(ierr.ne.0) then
-print *,ints,trim(fieldFile)//'T.nc'
+!print *,ints,trim(fieldFile)//'T.nc'
 stop 3768
 endif
 ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
