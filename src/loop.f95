@@ -510,11 +510,11 @@ subroutine loop
               endif
            enddo LBTLOOP
            
-           ! === Seedtype 3 or 4 ===
-           if(seedType >= 3) then
-               if(seedType == 3) then
+           ! === Seedtype 4 or 5 ===
+           if(seedType >= 4) then
+               if(seedType == 4) then
                    k=(-1)*seedMask(ia,ja,1)
-               elseif(seedType == 4) then
+               elseif(seedType == 5) then
                    k=(-1)*seedMask(ia,ja,ka)
                endif
                if(k > 0) then
