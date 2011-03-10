@@ -16,6 +16,7 @@ module mod_seed
   INTEGER                                    :: ist1 ,ist2   ,jst1 ,jst2
   INTEGER                                    :: kst1, kst2
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ijkst
+  REAL, ALLOCATABLE, DIMENSION(:,:)          :: xyzst
   INTEGER, ALLOCATABLE, DIMENSION(:,:,:)     :: seedMask
   CHARACTER(LEN=200)                         :: seedDir
   CHARACTER(LEN=200)                         :: seedFile
@@ -40,11 +41,19 @@ CONTAINS
     ntrac=ntractot
 
     ijkstloop: do ijk=1,ijkMax
-       ist  = ijkst(ijk,1)
-       jst  = ijkst(ijk,2)
-       kst  = ijkst(ijk,3)
-       idir = ijkst(ijk,4)
-       isec = ijkst(ijk,5)
+       if(seedType == 3) then
+           ist = int(xyzst(ijk,1))+1
+           jst = int(xyzst(ijk,2))+1
+           kst = int(xyzst(ijk,3))+1
+           idir = int(xyzst(ijk,4))
+           isec = int(xyzst(ijk,5))
+       else
+           ist  = ijkst(ijk,1)
+           jst  = ijkst(ijk,2)
+           kst  = ijkst(ijk,3)
+           idir = ijkst(ijk,4)
+           isec = ijkst(ijk,5)
+       endif
        vol  = 0
        ib=ist
        ibm=ib-1
@@ -137,7 +146,11 @@ CONTAINS
      case (3)
         num = vol/partQuant
      case (5)
-        num = ijkst(ijk,6)
+        if(seedType == 3) then
+            num = 1
+        else
+            num = ijkst(ijk,6)
+        endif
      end select
      if(num.eq.0 .and. nqua.ne.5) num=1 ! always at least one trajectory
      
@@ -194,6 +207,12 @@ CONTAINS
               y1=trj(ijk,2) 
               z1=trj(ijk,3)
            end select
+           
+           if(seedType == 3) then
+              x1 = xyzst(ijk,1)
+              y1 = xyzst(ijk,2)
+              z1 = xyzst(ijk,3)
+           endif
            
            ibm=ib-1
            ! === cyclic ocean/atmosphere === 

@@ -10,6 +10,7 @@ subroutine init_seed()
   CHARACTER(LEN=50)                          :: fileStamp
   CHARACTER(LEN=200)                         :: fullSeedFile
   CHARACTER(len=*), parameter                :: ijkform = "(6I6)"
+  CHARACTER(len=*), PARAMETER                :: xyzform = "(3F8.2,3F6.0)"
   LOGICAL                                    :: fileexists
   INTEGER                                    :: i,j,k
   INTEGER                                    :: filestat
@@ -88,10 +89,59 @@ subroutine init_seed()
         stop
      end if chFile
      
+     
+     
+     
+  case (3) ! === seedlist method ===   
+     print *,'------------------------------------------------------'
+     if (varSeedFile == 1) then
+        fileStamp='/seed00000000.asc'
+        write (fileStamp(6:13),'(i8.8)') intstart/6
+        fullSeedFile=trim(seedDir) // trim(fileStamp)
+        print *,'===  Particles are seeded from a dynamic listfile  ==='
+     else
+        fullSeedFile=trim(seedFile)        
+        print *,'===  Particles are seeded from a given listfile    ==='
+     end if
+     inquire(FILE = fullSeedFile, exist=fileexists)
+     chFile2: if (fileexists) then
+        ijkMax=0
+        open(unit=34,file=fullSeedFile, ACCESS = 'SEQUENTIAL', &
+             FORM = 'FORMATTED', ACTION = 'READ')
+        findRecl2: do
+           read (unit=34, fmt=xyzform,iostat=filestat)
+           if (filestat < 0) exit findRecl2
+           ijkMax=ijkMax+1
+        end do findRecl2
+        
+        allocate (xyzst(ijkMax,6))
+           
+        rewind(34)
+        read_xyzst: do ijk=1,ijkMax
+           read (unit=34, fmt=xyzform) xyzst(ijk,1), xyzst(ijk,2), &
+                xyzst(ijk,3),  xyzst(ijk,4),  xyzst(ijk,5), xyzst(ijk,6)
+
+
+           xyzst(ijk,4)=float(idir)
+           xyzst(ijk,5)=float(isec)
+           xyzst(ijk,6)=float(-1)
+           
+        end do read_xyzst
+        
+        print *,'File name    : '//trim(fullSeedFile)
+        print *,'Seed size    : ', ijkMax
+     else
+        print *,'======================================================'
+        print *,'*** ERROR!                                         ***'
+        print *,'*** Seed files does not exisit                     ***' 
+        print *,'File name    : '//trim(fullSeedFile)
+        print *,'*** Run terminated.                                ***'
+        stop
+     end if chFile2
 
 
 
-  case (3) ! === 2-D Matrix method ===
+  case (4) ! === 2-D Matrix method ===
      allocate ( seedMask(imt ,jmt ,1) )
      if (varSeedFile == 1) then
         fullSeedFile=trim(seedFile) !// trim(inparg1)
@@ -151,7 +201,7 @@ subroutine init_seed()
 !     enddo
 !#endif
 
-  case (4) ! === 3-D Matrix method ===
+  case (5) ! === 3-D Matrix method ===
      allocate ( seedMask(imt ,jmt, km) )
      if (varSeedFile == 1) then
         fullSeedFile=trim(seedFile) !// trim(inparg1)
