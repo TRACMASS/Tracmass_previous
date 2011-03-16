@@ -28,8 +28,8 @@ function lldist (long,lat)
   
   long1 = reshape(long(1:end-1),m,1)*pi180;
   long2 = reshape(long(2:end)  ,m,1)*pi180;
-  lat 1 =  reshape(lat(1:end-1) ,m,1)*pi180;
-  lat2  =  reshape(lat(2:end)   ,m,1)*pi180;
+  lat 1 = reshape(lat(1:end-1) ,m,1)*pi180;
+  lat2  = reshape(lat(2:end)   ,m,1)*pi180;
   
   dlon = long2 - long1; 
   dlat = lat2 - lat1; 
