@@ -42,10 +42,11 @@ CONTAINS
     INTEGER,             DIMENSION(4)       :: d, s, c, dimids
     INTEGER                                 :: ncid
 
-    start2d(1) = ncTpos   
+    start2d(map2d(4)) = ncTpos   
     s = start2d(map2d)
     c = count2d(map2d)
     d =c + s - 1  
+
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
     
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
@@ -54,7 +55,6 @@ CONTAINS
     if(ierr.ne.0) call printReadError(2)
     ierr=NF90_GET_VAR(ncid ,varid , field, s, c)
     if(ierr.ne.0) call printREadError(3)
-    r=NF90_inquire_variable(ncid, varid, dimids = dimids)   
     ierr=NF90_CLOSE(ncid)
 
     if ( map2d(2) > map2d(1) ) then

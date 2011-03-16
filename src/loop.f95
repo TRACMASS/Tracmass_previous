@@ -335,6 +335,7 @@ subroutine loop
            endif
            ! === Cyclic world ocean/atmosphere === 
            if(ib.eq.1.and.x1.eq.dble(IMT)) x1=0.d0
+  
            x0=x1
            y0=y1
            z0=z1
@@ -432,7 +433,7 @@ subroutine loop
             stop 4967
            endif
            
-           !! North fold ORCA025 and ORCA2                                                                                                                                          
+           !! North fold ORCA025 and ORCA2
 !           IF ((y1 >= jmt) .and. (( (imt .eq. 1440) .and. (jmt .eq. 1021) ) .or. & 
 !            & ( (imt .eq. 180) .and. (jmt .eq. 149) )  )) THEN
 !              x1 =     imt + 1 - x1
@@ -441,8 +442,8 @@ subroutine loop
 !              jb=idint(y1)
 !              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
 !              ENDIF
-           !!                                                                                                                                                                       
-           !! North fold ORCA1 and ORCA05                                                                                                                                           
+           !!                                                                                                                                                                      
+           !! North fold ORCA1 and ORCA05
 !           IF ((y1 >= jmt) .and. (( (imt .eq. 720) .and. (jmt .eq. 511) ) .or. &
 !            & ( (imt .eq. 360) .and. (jmt .eq. 292) )  ))THEN
 !              x1 =     imt - x1
@@ -706,7 +707,7 @@ return
              nerror=nerror+1
              boundError = boundError +1
              errCode = -50
-             stop 40962
+             !stop 40962
              call writedata(40)
              nrj(ntrac,6)=1
           endif
@@ -1009,6 +1010,7 @@ return
     end select
 #endif    
 #if defined binwrite 
+
     x14=real(x1,kind=4)
     y14=real(y1,kind=4)
     z14=real(z1,kind=4)
@@ -1024,7 +1026,9 @@ return
             (kriva.eq.4 .and. niter.eq.1                ) .or. &
             (kriva.eq.5 .and. dmod(tt-t0,7.d0).eq.0.d0  ) .or. &
             (kriva.eq.6 .and. .not.scrivi               )        ) then
+#if defined tempsalt
           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+#endif
 !         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1
           write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14
