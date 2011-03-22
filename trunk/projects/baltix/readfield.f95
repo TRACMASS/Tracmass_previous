@@ -242,26 +242,6 @@ do i=4,IMT+1
  hs(i,jmt+1,2) =hs(IMT+4-i,jmt-3,2)  !  north fold 
 enddo
 
-! z-star calculations of the layer thicknesses   e3w(k)* = (H - eta )/(H + eta)  *e3w(k)
-! eller DZ=DZ*×(H+eta)/H 
-do i=1,IMT
- do j=1,JMT
-  do k=1,KM
-   kk=KM+1-k
-   if(kmt(i,j).eq.kk) then
-    dzt(i,j,k,2)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
-    dzt(i,j,k,2)=dzt(i,j,k,2)*( zw(kmt(i,j))+hs(i,j,2) )/zw(kmt(i,j))
-   elseif(kmt(i,j).ne.0) then
-    dzt(i,j,k,2)=dz(k)
-    dzt(i,j,k,2)=dzt(i,j,k,2)*( zw(kmt(i,j))+hs(i,j,2) )/zw(kmt(i,j))
-   else
-    dzt(i,j,k,2)=0.
-   endif
-  enddo
- enddo
-enddo
-
-
 #ifdef tempsalt 
 
 ! Temperature
@@ -321,7 +301,6 @@ enddo
 
 dmult=1.  ! amplification of the velocity amplitude by simple multiplication
 
-
 fieldFile = trim(inDataDir)//trim(dataprefix)//'U.nc'
 inquire(file=trim(fieldFile)//'.gz',exist=around)
 if(.not.around) then
@@ -346,7 +325,12 @@ do i=1,IMT-1
  do j=1,JMT
   do k=1,kmu(i,j)
    kk=KM+1-k
-   dd = 0.5*(dzt(i,j,kk,2)+dzt(i+1,j,kk,2))
+   !dd = 0.5*(dzt(i,j,kk,2)+dzt(i+1,j,kk,2))
+   dd = dz(kk)
+   if(k == kmu(i,j)) dd = min(dztb(i,j,2),dztb(i+1,j,2))
+   if(kmu(i,j) <= 0) dd = 0.
+   dd = dd*( zw(kmt(i,j))+(hs(i,j,2)+hs(i+1,j,2))/2. )/zw(kmt(i,j))
+   !print*,k,kk,kmu(i,j),dz(kk),dztb(i,j,2),dztb(i+1,j,2),dd
    uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
   enddo
  enddo
@@ -377,13 +361,33 @@ do i=1,IMT
  do j=1,JMT-1
   do k=1,kmv(i,j)
    kk=KM+1-k
-   dd = 0.5*(dzt(i,j,kk,2)+dzt(i,j+1,kk,2))
+   !dd = 0.5*(dzt(i,j,kk,2)+dzt(i,j+1,kk,2))
+   dd = dz(kk)
+   if(k == kmv(i,j)) dd = min(dztb(i,j,2),dztb(i,j+1,2))
+   if(kmv(i,j) <= 0) dd = 0.
+   dd = dd*( zw(kmt(i,j))+(hs(i,j,2)+hs(i,j+1,2))/2. )/zw(kmt(i,j))
    vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
   enddo
  enddo
 enddo
 
-
+! z-star calculations of the layer thicknesses dz* = dz (H+eta)/H 
+do i=1,IMT
+ do j=1,JMT
+  do k=1,KM
+   kk=KM+1-k
+   if(kmt(i,j).eq.kk) then
+    dztb(i,j,1)=dztb(i,j,1)*( zw(kmt(i,j))+hs(i,j,2) )/zw(kmt(i,j))
+    dzt(i,j,k,2)=dztb(i,j,1)
+   elseif(kmt(i,j).ne.0) then
+    dzt(i,j,k,2)=dz(k)
+    dzt(i,j,k,2)=dzt(i,j,k,2)*( zw(kmt(i,j))+hs(i,j,2) )/zw(kmt(i,j))
+   else
+    dzt(i,j,k,2)=0.
+   endif
+  enddo
+ enddo
+enddo
 
 #ifdef drifter
 ! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories
