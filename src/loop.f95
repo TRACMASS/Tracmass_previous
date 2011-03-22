@@ -227,13 +227,13 @@ subroutine loop
      end if intspinCond
      
      if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
-          
      !=======================================================
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===
      !=======================================================
      call fancyTimer('advection','start')
      ntracLoop: do ntrac=1,ntractot  
+
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6).eq.1) cycle ntracLoop
         
@@ -364,6 +364,7 @@ subroutine loop
               tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
            end if
 #endif /*tracer*/
+           
            call writedata(11)
            
            !==============================================! 
@@ -414,7 +415,7 @@ subroutine loop
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
-
+           
 #ifdef orc 
 ! north fold cyclic ORCA grid (only tested with ORCA025)
            
@@ -949,7 +950,7 @@ return
             (kriva.eq.2 .and. scrivi                    ) .or. &
             (kriva.eq.3                                 ) .or. &
             (kriva.eq.4 .and. niter.eq.1                ) .or. &
-            (kriva.eq.5 .and. dmod(tt-t0,7.d0).eq.0.d0  ) .or. &
+            (kriva.eq.5 .and. mod(real(tt)-real(t0),3600.).eq.0.d0  ) .or. &
             (kriva.eq.6 .and. .not.scrivi               )        ) then
 #if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 

@@ -130,27 +130,27 @@ SUBROUTINE setupgrid
   
   DEALLOCATE( temp2d_int ) 
   
-  ALLOCATE( temp3d_doub(IMT+2,JMT,KM), botbox(IMT,JMT,3) )
+  ALLOCATE( temp3d_doub(IMT+2,JMT,KM) )!, botbox(IMT,JMT,3) )
   
   ! === dz at u points ===
-  ierr=NF90_INQ_VARID(ncid,'e3u',varid) 
-  if(ierr.ne.0) stop 3763
-  ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-  do i=1,IMT
-      do j=1,JMT
-          if(kmu(i,j).ne.0) botbox(i,j,1)=temp3d_doub(i,j,kmu(i,j))
-      enddo
-  enddo
+  !ierr=NF90_INQ_VARID(ncid,'e3u',varid) 
+  !if(ierr.ne.0) stop 3763
+  !ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
+  !do i=1,IMT
+  !    do j=1,JMT
+  !        if(kmu(i,j).ne.0) botbox(i,j,1)=temp3d_doub(i,j,kmu(i,j))
+  !    enddo
+  !enddo
 
   ! === dz at v points ===
-  ierr=NF90_INQ_VARID(ncid,'e3v',varid)
-  if(ierr.ne.0) stop 3763
-  ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-  do i=1,IMT
-      do j=1,JMT
-          if(kmv(i,j).ne.0) botbox(i,j,2)=temp3d_doub(i,j,kmv(i,j))
-      enddo
-  enddo
+  !ierr=NF90_INQ_VARID(ncid,'e3v',varid)
+  !if(ierr.ne.0) stop 3763
+  !ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
+  !do i=1,IMT
+  !    do j=1,JMT
+  !        if(kmv(i,j).ne.0) botbox(i,j,2)=temp3d_doub(i,j,kmv(i,j))
+  !    enddo
+  !enddo
 
   ! === dz at T points ===
   ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
@@ -158,7 +158,7 @@ SUBROUTINE setupgrid
   ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
   do i=1,IMT
       do j=1,JMT
-          if(kmt(i,j).ne.0) botbox(i,j,3)=temp3d_doub(i,j,kmt(i,j))
+          if(kmt(i,j).ne.0) dztb(i,j,1)=temp3d_doub(i,j,kmt(i,j))
       enddo
   enddo
   
@@ -181,9 +181,7 @@ SUBROUTINE setupgrid
   ! dz is independent of x,y except at bottom
   do j=1,JMT
       do i=1,IMT
-          if(kmt(i,j).ne.0) then
-              dztb(i,j,1)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
-          else
+          if(kmt(i,j).eq.0) then
               dztb(i,j,1)=0.
           endif
       enddo
