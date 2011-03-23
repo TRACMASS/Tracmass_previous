@@ -7,7 +7,7 @@
 #  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
    fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-   fl03   = -Dtempsalt       # Include temp and salt
+#  fl03   = -Dtempsalt       # Include temp and salt
    fl04   = -Dtextwrite      # Write results to textfile
 #  fl05   = -Dbinwrite       # Write results to binaryfile
 #  fl06   = -Dmysqlwrite     # Write results to mysql
@@ -25,10 +25,10 @@
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-#   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
+   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
    fl17  = -Dfreesurface    # Variable bottom box to match actual depth
-#   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
-  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
+#  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
 #  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
 #  fl20  = -Dselect         # Select only one trajectory (for debugging)

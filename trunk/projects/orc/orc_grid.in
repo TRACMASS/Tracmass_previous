@@ -16,22 +16,22 @@ $INITGRIDGRID
   !
   IMT      = 1440,  ! orca1=360 ; orca025=1440
   JMT      = 1021,  ! orca1=292 ; orca025=1021
-  KM       = 75,    ! orca1=orca025=64 ; orca025l75h6=75
-  LBT      = 2,
-  NEND     = 3/                   ! NEND = LBT +1
+  KM       = 64,    ! orca1=orca025=64 ; orca025l75h6=75
+  LBT      = 4,
+  NEND     = 5/                   ! NEND = LBT +1
   !
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=30000/               ! 7*1000*1000 
+  NTRACMAX=20000000/               ! 7*1000*1000 
   !
   !
 $INITGRIDTIME
   !
-  ngcm          =  730,            ! (5*24) hours between GCM datasets
-  iter          =   20,            ! iteration between two gcm data sets
-  intmax        =   12, !1460, !145,2920            ! maximum length of GCM fields
-  fieldsPerFile =   12 / ! 1460 1,2920
+  ngcm          =  120,            ! (5*24) hours between GCM datasets
+  iter          =   1,            ! iteration between two gcm data sets
+  intmax        =   15330, !1460, !145,2920            ! maximum length of GCM fields
+  fieldsPerFile =   1 / ! 1460 1,2920
   !
   !
 $INITGRIDDATE
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 2000/
+  baseYear       = 1980/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! orig arc meters -> 100 km  
