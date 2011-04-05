@@ -1,26 +1,10 @@
-  ! =============================================================
-  !    ===  Set up the grid ===
-  ! =============================================================
-  ! Subroutine for defining the grid of the GCM. Run once
-  ! before the loop starts.
-  ! -------------------------------------------------------------
-  ! The following arrays has to be populated:
-  !
-  !  dxdy - Area of horizontal cell-walls.
-  !  dz   - Height of k-cells in 1 dim. |\
-  !  dzt  - Height of k-cells i 3 dim.  |- Only one is needed
-  !  kmt  - Number of k-cells from surface to seafloor.
-  !
-  ! The following might be needed to calculate
-  ! dxdy, uflux, and vflux
-  !
-  !  dzu - Height of each u-gridcell.
-  !  dzv - Height of each v-gridcell.
-  !  dxv - Longitudinal width of v-gridcell
-  !  dyu - Latitudinal width of u-gridcell
-  ! -------------------------------------------------------------
-
 SUBROUTINE setupgrid
+! =============================================================
+!    ===  Set up the grid ===
+! =============================================================
+! Subroutine for defining the grid of BaltiX. Run once
+! before the loop starts.
+! -------------------------------------------------------------
 
   USE netcdf
   USE mod_param
@@ -59,7 +43,7 @@ SUBROUTINE setupgrid
   ALLOCATE( temp2d_doub(IMT,JMT), e1t(IMT,JMT) )
   
   ! === dx for T points ===
-  gridFile = trim(inDataDir)//'topo/mesh_mask_baltix.nc'
+  gridFile = trim(topoDataDir)//'mesh_mask_baltix.nc'
   ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
   if(ierr.ne.0) stop 3751
   ierr=NF90_INQ_VARID(ncid,'e1t',varid)
@@ -107,7 +91,6 @@ SUBROUTINE setupgrid
   ALLOCATE( temp2d_int(IMT,JMT), kmu(IMT,JMT), kmv(IMT,JMT) )
   
   ! === Bathymetry ===
-  ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
   if(ierr.ne.0) stop 5751
   ierr=NF90_INQ_VARID(ncid,'mbathy',varid) ! kmt field
   if(ierr.ne.0) stop 3767
@@ -119,7 +102,7 @@ SUBROUTINE setupgrid
   kmu=0 ; kmv=0
   do j=1,jmt
       jp=j+1
-      if(jp.eq.jmt+1) jp=jmt  ! should be north fold instead
+      if(jp.eq.jmt+1) jp=jmt
       do i=1,imt
           ip=i+1
           if(ip.eq.IMT+1) ip=1
@@ -130,28 +113,8 @@ SUBROUTINE setupgrid
   
   DEALLOCATE( temp2d_int ) 
   
-  ALLOCATE( temp3d_doub(IMT+2,JMT,KM) )!, botbox(IMT,JMT,3) )
+  ALLOCATE( temp3d_doub(IMT+2,JMT,KM) )
   
-  ! === dz at u points ===
-  !ierr=NF90_INQ_VARID(ncid,'e3u',varid) 
-  !if(ierr.ne.0) stop 3763
-  !ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-  !do i=1,IMT
-  !    do j=1,JMT
-  !        if(kmu(i,j).ne.0) botbox(i,j,1)=temp3d_doub(i,j,kmu(i,j))
-  !    enddo
-  !enddo
-
-  ! === dz at v points ===
-  !ierr=NF90_INQ_VARID(ncid,'e3v',varid)
-  !if(ierr.ne.0) stop 3763
-  !ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-  !do i=1,IMT
-  !    do j=1,JMT
-  !        if(kmv(i,j).ne.0) botbox(i,j,2)=temp3d_doub(i,j,kmv(i,j))
-  !    enddo
-  !enddo
-
   ! === dz at T points ===
   ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
   if(ierr.ne.0) stop 3763

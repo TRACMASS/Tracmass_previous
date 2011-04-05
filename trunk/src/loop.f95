@@ -225,8 +225,10 @@ subroutine loop
         dt = 0.d0
         arct = 0.d0
      end if intspinCond
-     
+
+#ifndef initxyt     
      if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
+#endif
      !=======================================================
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===

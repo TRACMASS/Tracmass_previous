@@ -36,13 +36,11 @@ SUBROUTINE readfields
   REAL*4 dd,dmult,uint,vint,zint
   LOGICAL around
 #ifdef initxyt
-  INTEGER, PARAMETER :: NTID=73
-!  INTEGER, PARAMETER :: IJKMAX2=254
-!  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.05 and 32 days
-!  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.10 and 32 days
-  INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
+  INTEGER, PARAMETER :: NTID=2919
+  !INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
+  INTEGER, PARAMETER :: IJKMAX2=36
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
-  REAL*4 , SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
+  REAL*8 , SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
 #endif  
 
 
@@ -50,7 +48,7 @@ SUBROUTINE readfields
 
 #ifdef initxyt
     alloCondGrid: if ( .not. allocated (ntimask) ) then
-        allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(NTID,IJKMAX2,3) )
+        allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(0:NTID,IJKMAX2,3) )
     end if alloCondGrid
 #endif
 
@@ -115,32 +113,20 @@ end if alloCondUVW
 
 #ifdef initxyt
 ! Time for individual start positions
-
-!open(84,file=trim(inDataDir)//'topo/masktime_32_005',form='unformatted')
-!open(84,file=trim(inDataDir)//'topo/masktime_32_010',form='unformatted')
-if(IJKMAX2.eq.7392) open(84,file=trim(inDataDir)//'topo/masktime_32_025',form='unformatted')
-!open(84,file=trim(inDataDir)//'topo/masktime_orca1_32_025',form='unformatted')
-if(IJKMAX2.eq.169) open(84,file=trim(inDataDir)//'topo/masktime_orca025_1024_single',form='unformatted')
-if(IJKMAX2.eq.3305) open(84,file=trim(inDataDir)//'topo/masktime_orca025_365_single',form='unformatted')
-if(IJKMAX2.eq.34855) open(84,file=trim(inDataDir)//'topo/masktime_orca025_64_single',form='unformatted')
-if(IJKMAX2.eq.73756) open(84,file=trim(inDataDir)//'topo/masktime_orca025_32_single',form='unformatted')
- read(84) trajinit
+if(IJKMAX2.eq.36) then
+    open(84,file='/home/x_joakj/tracmass/files/drifter_segm_start.bin',form='unformatted')
+endif
+read(84) trajinit
 close(84)
 j=0
 do k=1,NTID
  do i=1,IJKMAX2
   if(trajinit(k,i,3).ne.0.) then
    j=j+1
-#if orca025l75h6
-   trajinit(k,i,3)=float(kst2)-0.5
-!   print *,j,trajinit(k,i,:)
-#endif
   endif
  enddo
-! print *,k,j
 enddo
 ijkst=0
-! print *,'ijkmax=',j,IJKMAX2,ijkmax
 if(j.ne.IJKMAX2) then
  stop 4396
 endif
@@ -391,7 +377,7 @@ enddo
 
 #ifdef drifter
 ! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories
-kbot=65 ; ktop=66 ! number of surface layers to integrat over
+kbot=78 ; ktop=80 ! k=78--80 is z=12--18m
 do i=1,imt
  do j=1,jmt
  
@@ -421,41 +407,21 @@ enddo
 
 #ifdef initxyt
 ! Set the initial trajectory positions
-!ijkst(:,5)=ntimask(ntempus,:)
-#ifdef orca025l75h6
-if( mod(ints,24/ngcm*5).eq.1 .or. ints.le.2) ntempus=ntempus+1
-if(ntempus.ne.ntempusb .and. ntempus.le.NTID) then
-ntempusb=ntempus
-!print *,'ints=',ints,' ntempus=',ntempus,' ntempusb=',ntempusb
-#else
-if(ints.le.NTID) then
-#endif
-do ntrac=1,ijkmax
- if(trajinit(ntempus,ntrac,3).ne.0.) then
-  ijkst(ntrac,4)=0
-  ijkst(ntrac,5)=5
-  ijkst(ntrac,6)=ijkst(ntrac,6)+1
-  do l=1,3
-   ijkst(ntrac,l)=trajinit(ntempus,ntrac,l)+1
-   trj(ntrac,l)=trajinit(ntempus,ntrac,l)
-!   if(l.eq.1) print *,ntrac,float(ijkst(ntrac,l)-1),trj(ntrac,l),float(ijkst(ntrac,l))
-   if(trj(ntrac,l).gt.float(ijkst(ntrac,l)) .or. trj(ntrac,l).lt.float(ijkst(ntrac,l)-1)) then
-    print *,l,ntrac,float(ijkst(ntrac,l)-1),trj(ntrac,l),float(ijkst(ntrac,l))
-    stop 3946
-   endif
-  enddo
- else
-  ijkst(ntrac,5)=0
-  ijkst(ntrac,6)=0
- endif
-enddo
-endif
-#ifdef orca025l75h6
-
-#endif
-if( mod(ints,24/ngcm*5).ne.1 .and. ints.gt.2) then
- ijkst=0 
-endif
+ijkmax = IJKMAX2
+    do ntrac=1,ijkmax2
+        if(trajinit(ntempus(imon,iday,ihour),ntrac,3).ne.0.) then
+            ijkst(ntrac,4)=0
+            ijkst(ntrac,5)=5
+            ijkst(ntrac,6)=1
+            do l=1,3
+                ijkst(ntrac,l)=int(trajinit(ntempus(imon,iday,ihour),ntrac,l))+1
+                trj(ntrac,l)=trajinit(ntempus(imon,iday,ihour),ntrac,l)
+            enddo
+        else
+            ijkst(ntrac,5)=0
+            ijkst(ntrac,6)=0
+        endif
+    enddo
 #endif
 
 

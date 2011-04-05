@@ -25,7 +25,7 @@
   ! === Startval for initial dataset          ===
   intmin  = 1,
   ! === Trajectory release period (timesteps) ===
-  intspin = 1, !1460, !72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
+  intspin = 20, !1460, !72, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   !intspin =1, ! (=6  *24/ngcm)  !trajectory release period (timesteps) *
   ! === Number of timesteps for the run - stops after this.      ===
   intrun  =20, !200,
