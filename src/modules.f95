@@ -188,10 +188,7 @@ ENDMODULE mod_turb
 MODULE mod_name
   CHARACTER(LEN=200)                         :: outDataFile
   INTEGER                                    :: intminInOutFile
-  CHARACTER(LEN=200)                         :: inDataDir ,outDataDir
-#ifdef ifs
-  CHARACTER(LEN=200)                         :: wgribDir
-#endif
+  CHARACTER(LEN=200)                         :: inDataDir ,outDataDir, topoDataDir
   CHARACTER(LEN=200)                         :: projDesc
   CHARACTER(LEN=200)                         :: GCMname   ,GCMsource
   CHARACTER(LEN=200)                         :: gridName  ,gridSource

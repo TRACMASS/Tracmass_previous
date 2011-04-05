@@ -45,7 +45,7 @@ subroutine init_params
   namelist /INITRUNDATE/   startSec ,startMin ,startHour &
                           ,startDay ,startMon ,startYear &
                           ,ihour, iday, imon, iyear
-  namelist /INITRUNWRITE/  ncoor, kriva ,inDataDir ,outDataDir &
+  namelist /INITRUNWRITE/  ncoor, kriva ,inDataDir ,outDataDir, topoDataDir &
                           ,outDataFile ,intminInOutFile
   namelist /INITRUNSEED/   nff ,isec ,idir ,nqua ,partQuant ,seedType &
                           ,ist1 ,ist2 ,jst1 ,jst2 ,kst1 ,kst2 &
@@ -63,9 +63,6 @@ subroutine init_params
 #endif
 #ifdef sediment
   namelist /INITRUNSEDIMENT/ partdiam, rhos, cwamp, twave, critvel
-#endif
-#ifdef ifs
-  namelist /INITWGRIB/ wgribDir
 #endif
 
 
