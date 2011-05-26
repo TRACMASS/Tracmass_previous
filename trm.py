@@ -1,4 +1,5 @@
 import datetime
+from datetime import datetime as dtm
 import glob
 
 import numpy as np
@@ -10,6 +11,8 @@ import pycdf
 #from pyhdf.SD import SD,SDC
 
 import lldist
+import projmaps
+from hitta import GrGr
 
 class trm:
     """ main class for TRACMASS data manipulation"""
@@ -30,22 +33,45 @@ class trm:
         self.c = conn.cursor ()
         self.tablename = "partsat.%s%s" % (projname ,casename)
 
-        griddir  = '/projData/TOPAZ/1yr_1d/'
-        gridname = '/22450101.ocean_daily.nc' 
-        g = pycdf.CDF(griddir + gridname)
-        lon = g.var('xu_ocean')[:]
-        lat = g.var('yu_ocean')[:]
-        #self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
-        self.llon,self.llat = np.meshgrid(lon, lat)
-
-    def ijll(self):
+        if projname == 'oscar':
+            import oscar
+            os = oscar.Oscar()
+            self.llat = os.llat
+            self.llon = os.llon
+            self.imt = 1080
+            self.jmt = 480
+        elif projname=="topaz":
+            griddir  = '/projData/TOPAZ/1yr_1d/'
+            gridname = '/22450101.ocean_daily.nc' 
+            g = pycdf.CDF(griddir + gridname)
+            lon = g.var('xu_ocean')[:]
+            lat = g.var('yu_ocean')[:]
+            #self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
+            self.llon,self.llat = np.meshgrid(lon, lat)
+            self.imt = 90
+            self.jmt = 360
+        elif projname=="casco":
+            import casco
+            self.cs = casco.GCM()
+            self.llon = self.cs.llon
+            self.llat = self.cs.llat
+            self.imt = 285
+            self.jmt = 274
+            self.region = "casco"
+            self.landmask = self.cs.get_landmask()
+            self.base_iso = pl.date2num(dtm(2004,1,1))
+        elif projname=="gompom":
+            n = pycdf.CDF(griddir + 'grid.cdf')
+            self.llon = n.var('x')[:]    
+            self.llat = n.var('y')[:]
+            self.base_iso = pl.date2num(dtm(2004,1,1))
+            
+    def ijll(self,ps=None):
         def interp(M):
-            ifloor = np.floor(self.y).astype(int)
-            jfloor = np.floor(self.x).astype(int)
-            iceil  = np.ceil(self.y).astype(int)
-            jceil  = np.ceil(self.x).astype(int)
-            iceil[iceil==80] = 79
-            jceil[jceil==164] = 163
+            ifloor = np.floor(self.y-1).astype(int)
+            jfloor = np.floor(self.x-1).astype(int)
+            iceil  =  np.ceil(self.y-1).astype(int)
+            jceil  =  np.ceil(self.x-1).astype(int)
             i1j1 = M[ifloor,jfloor]
             i2j1 = M[iceil, jfloor]
             i1j2 = M[ifloor, jceil]
@@ -81,11 +107,8 @@ class trm:
         y = self.y - jfloor
         self.__dict__[fieldname] = b1 + b2*x + b3*y + b4*x*y
 
-
     def db_addfield(self,tp,fieldname):
         pass
-        
-    
 
     def read_bin(self, filename):
         """ Load binary output from TRACMASS """
@@ -98,7 +121,7 @@ class trm:
 
     def create_table(self):
         """Create a mysql table  table """
-        itp = " MEDIUMINT NOT NULL "
+        itp = " INT NOT NULL "
         ftp = " FLOAT NOT NULL "
         CT1 = ( "CREATE TABLE IF NOT EXISTS %s (" % self.tablename )
         CT2 = "   intstart " + itp + ",ints " + itp + ",ntrac " + itp
@@ -132,8 +155,6 @@ class trm:
 
     def load(self, intstart=0, ftype="run", stype='bin', filename=''):
         """Load a tracmass output file. Add data to class instance."""
-        def unzip(seq): return zip(*seq)
-        
         if intstart != 0:
             filename = ("%s%08i_%s.%s" %
                         (self.casename,intstart,ftype,stype) )
@@ -141,7 +162,6 @@ class trm:
             print (self.datadir + self.casename +
                                  "*" + ftype)
             print filename
-            #intstart = int(filename[-16:-8])
         if filename[-3:] == "bin":
             runtraj = self.read_bin(self.datadir + filename)
         elif filename[-3:] == "asc":
@@ -151,37 +171,32 @@ class trm:
             print "Unknown file format, data file should be bin or asc"
             raise
         tvec = ['ntrac', 'ints', 'x', 'y', 'z']
-        self.ntrac, self.ints, self.x, self.y, self.z  = unzip(runtraj)
         for tv in tvec:
-            self.__dict__[tv] = np.array(self.__dict__[tv])
-        ind = np.lexsort((self.ints,self.ntrac))
-        for tv in tvec:
-            self.__dict__[tv] = self.__dict__[tv][ind]
+            self.__dict__[tv] = runtraj[:][tv]
         self.x = self.x - 1
         self.y = self.y - 1
-        self.x[self.x<0] = self.x[self.x<0] + 358
-        assert self.x.min() >= 0
-        assert self.x.max() <= 359
-        assert self.y.min() >= 0
- 
+        self.x[self.x<0] = self.x[self.x<0] + self.imt
+        #assert self.x.min() >= 0
+        #assert self.y.min() >= 0
+        assert self.x.min() <= self.imt
+        assert self.y.min() <= self.jmt
+        self.intstart = intstart
+        
     def db_insert(self, intstart=0, ftype="run", stype='bin',
                    filename='', db="trm"):        
         """Load a tracmass output file and add to mysql table"""
         self.create_table()
         self.remove_earlier_data_from_table(intstart)
-        if intstart != 0:
-            filename = "%s%08i_%s.%s" % (self.casename,intstart,ftype,stype)
-        else:
-            intstart = int(filename[-16:-8])
-        if filename[-3:] == "bin":
-            runtraj = self.read_bin(self.datadir + filename)
-        elif filename[-3:] == "asc":
-            print "Not implemented yet."
-            raise
-        else:
-            print "Unknown file format, data file should be .bin or .asc"
-            raise
-        
+        self.load(intstart, ftype=ftype, stype=stype)
+
+        sql = ("INSERT INTO " + self.tablename +
+               " (intstart, ntrac, ints, x, y, z) " + 
+               " VALUES (%s, %s, %s, %s, %s, %s)")
+        self.c.executemany(sql,zip(self.ntrac*0+intstart,
+                                   self.ntrac, self.ints,
+                                   self.x, self.y, self.z))
+
+        """
         for r in runtraj:
             self.c.execute(
                 "INSERT INTO " + self.tablename +
@@ -189,7 +204,7 @@ class trm:
                 " VALUES (-999, %s, %s, %s, %s, %s)", tuple(r) )
         self.c.execute("UPDATE %s SET intstart=%i WHERE intstart=-999" % 
                        (self.tablename, intstart) )
-
+                        """
     def ints2iso(self,ints):
         base_iso = mpl.dates.date2num(self.isobase)
         return base_iso + float(ints)/6-1
@@ -205,12 +220,55 @@ class trm:
             whstr += " ntrac = %i " % ntrac
         whstr = whstr.rstrip("AND")
 
-        self.c.execute('SELECT * FROM %s WHERE %s' %(self.tablename,whstr) )
+        self.c.execute('SELECT * FROM %s WHERE %s' %
+                       (self.tablename,whstr) )
         res = zip(*self.c.fetchall())
         if len(res) > 0:
             for n,a in enumerate(['intstart','ints','ntrac','x','y','z']):
                 self.__dict__[a] = np.array(res[n])
+        #self.ijll()
+
+    def scatter(self,ntrac=None,ints=None,k1=None,k2=None,c="g"):
+        if not hasattr(self,'mp'):
+            self.mp = projmaps.Projmap(self.region)
+            self.xll,self.yll = self.mp(self.llon,self.llat)
+        mask = self.ntrac==self.ntrac
+        if ints:
+            mask = mask & (self.ints==ints)
+        if ntrac:
+            mask = mask & (self.ntrac==ntrac)
+
+        pl.clf()
         self.ijll()
+        x,y = self.mp(self.lon[mask],self.lat[mask])
+
+        self.mp.pcolormesh(self.xll,self.yll,
+                           np.ma.masked_equal(self.landmask,1),cmap=GrGr())
+        xl,yl = self.mp(
+            [self.llon[0,0], self.llon[0,-1], self.llon[-1,-1],
+             self.llon[-1,0],self.llon[0,0]],
+            [self.llat[0,0], self.llat[0,-1], self.llat[-1,-1],
+             self.llat[-1,0], self.llat[0,0]]
+             )
+        self.mp.plot(xl,yl,'0.5')
+
+        if ntrac: self.mp.plot(x,y,'-w',lw=0.5)
+        self.mp.scatter(x,y,5,c)
+        if ints:
+            jd = (self.base_iso +
+                  (float(ints)-
+                   (self.intstart)/8*3600*24)/3600/24 +
+                  self.intstart/8)
+            pl.title(pl.num2date(jd).strftime("%Y-%m-%d %H:%M"))
+        print len(x)
+
+    def movie(self):
+        ints = np.unique(self.ints)
+        for n,i in enumerate(ints):
+            if i/100 == float(i)/100:
+                self.scatter(ints=i)
+                pl.savefig('trm_mov_%06i.png' % n, dpi=100)
+                print i
 
 def import_batchrun(batchfile='batch_ints_start.asc'):
     tr = trm('gompom')
