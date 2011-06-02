@@ -7,7 +7,7 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start2D  ,count2D ,map2D
   INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
-  INTEGER                                    :: ncTpos
+  INTEGER                                    :: ncTpos=0
 
   INTEGER                                    :: ierr, varid,ncid
   
@@ -42,10 +42,16 @@ CONTAINS
     INTEGER,             DIMENSION(4)       :: d, s, c, dimids
     INTEGER                                 :: ncid
 
+    if (ncTpos == 0) then
+       print *,"Error: ncTpos, is not set!"
+       print *,"   ncTpos is used to define which time slice"
+       print *,"   to use in the cdf data file."
+       stop
+    end if
     start2d(map2d(4)) = ncTpos   
     s = start2d(map2d)
     c = count2d(map2d)
-    d =c + s - 1  
+    d = c + s - 1  
 
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
     
@@ -65,6 +71,7 @@ CONTAINS
        end do
     end if
 
+
   end function get2DfieldNC
   
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -76,6 +83,12 @@ CONTAINS
     INTEGER,             DIMENSION(4)       :: d, s, c
     INTEGER                                 :: i,j,k
 
+    if (ncTpos == 0) then
+       print *,"Error: ncTpos, is not set!"
+       print *,"   ncTpos is used to define which time slice"
+       print *,"   to use in the cdf data file."
+       stop
+    end if
     start3d(1) = ncTpos
     s = start3d(map3d)
     c = count3d(map3d)
@@ -152,17 +165,6 @@ CONTAINS
        end do
        stop
        
-       !r=NF90_inquire_variable(ncid, varid, dimids = dimids)
-       !do i=1,4
-       !   r=NF90_inquire_dimension(ncid, dimids(i), len=d(i))
-       !end do
-       !print * ,'Error when trying to read the field   ',varName
-       !print * ,'start2d =  ' ,start2d
-       !print * ,'count2d =  ' ,count2d
-       !print * ,'Dimensions: ' ,d
-       !print * ,'Error:      ' ,NF90_STRERROR(ierr)
-       !stop
-
     end select
   end subroutine printReadError
 end MODULE mod_getfile
