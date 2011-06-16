@@ -112,7 +112,7 @@ end if alloCondUVW
     iyear=startYear
 
 #ifdef initxyt
-! Time for individual start positions
+!____ Time for individual start positions
 if(IJKMAX2.eq.36) then
     open(84,file='/home/x_joakj/tracmass/files/drifter_segm_start.bin',form='unformatted')
 endif
