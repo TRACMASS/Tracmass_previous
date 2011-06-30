@@ -7,7 +7,7 @@
   !
   GCMname    = 'ROMS',
   GCMsource  = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
-  gridName   = 'jplSRC',
+  gridName   = 'jplSCB',
   gridSource = 'http://ourocean.jpl.nasa.gov/SCB/',
   gridDesc   = '1*1 km biogeochemical run in the North Atlantic'/
   !
