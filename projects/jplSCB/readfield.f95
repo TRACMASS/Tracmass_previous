@@ -35,7 +35,6 @@ SUBROUTINE readfields
   ! = ECCO Grid fields
   REAL, SAVE, ALLOCATABLE, DIMENSION(:)      :: valsz
   REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)    :: e1v ,e1t ,e2u ,e2t
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:)  :: dzu ,dzv
   REAL, DIMENSION(2)                         :: ttest1, ttest2
   
   ! = Input fields from GCM
@@ -46,8 +45,6 @@ SUBROUTINE readfields
      allocate ( valsz(km) )
      allocate ( e1v(imt+2,jmt)   ,e1t(imt+2,jmt) )
      allocate ( e2u(imt+2,jmt)   ,e2t(imt+2,jmt) )
-     allocate ( dzu(imt+2,jmt,km) )
-     allocate ( dzv(imt+2,jmt,km) )
   end if alloCondGrid
   
   alloCondUVW: if(.not. allocated (ssh)) then
@@ -68,6 +65,8 @@ SUBROUTINE readfields
   write (dstamp(9:16),'(i4i2.2i2.2)') yr1,mn1,dy1
   dataprefix  = trim(inDataDir) // '/ROMS/' // dstamp
   tpos        = intpart1+1
+
+  print *,dataprefix
 
 !  start1d  = [ 1]
 !  count1d  = [km]
