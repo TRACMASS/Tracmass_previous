@@ -65,25 +65,25 @@ class trm:
             self.llon = n.var('x')[:]    
             self.llat = n.var('y')[:]
             self.base_iso = pl.date2num(dtm(2004,1,1))
+        elif projname=="jplSCB":
+            import jpl
+            self.gcm = jpl.SCB()
+            self.llon = self.gcm.llon
+            self.llat = self.gcm.llat
+            self.imt = 211
+            self.jmt = 111
+            self.region = "scb"
+            self.base_iso = pl.date2num(dtm(2001,1,1))
             
     def ijll(self,ps=None):
-        def interp(M):
-            ifloor = np.floor(self.y-1).astype(int)
-            jfloor = np.floor(self.x-1).astype(int)
-            iceil  =  np.ceil(self.y-1).astype(int)
-            jceil  =  np.ceil(self.x-1).astype(int)
-            i1j1 = M[ifloor,jfloor]
-            i2j1 = M[iceil, jfloor]
-            i1j2 = M[ifloor, jceil]
-            
-            idf = (i2j1 - i1j1) * (self.y-np.floor(self.y))
-            jdf = (i1j2 - i1j1) * (self.x-np.floor(self.x))
-            return i1j1 + (idf+jdf)
+        from scipy.ndimage.interpolation import map_coordinates
 
-        self.lon = interp(self.llon)
-        self.lat = interp(self.llat)
+        self.lon = map_coordinates(self.llon, [self.y,self.x])
+        self.lat = map_coordinates(self.llat, [self.y,self.x])
         self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
         self.lon[self.lon> 180] = self.lon[self.lon> 180] - 360
+        self.lon[self.lon==0] = np.nan
+        self.lat[self.lat==0] = np.nan
 
     def dist(self):
         if not hasattr(self, 'lon'):
