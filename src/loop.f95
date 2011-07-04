@@ -1,4 +1,23 @@
-subroutine loop
+SUBROUTINE loop
+!!------------------------------------------------------------------------------
+!!
+!!
+!!       SUBROUTINE loop:
+!!
+!!          The main loop where new trajectory positions are 
+!!          calculated, i.e. trj and nrj are updated each time step.
+!!          Sets the flags for reruns.
+!!
+!!          Contains subroutines for computing the grid box volume, time,
+!!          and writing data to text-files. 
+!!
+!!          See tracmass manual for schematic of the structure.
+!!
+!!
+!!       Last change: Joakim Kjellsson, 4 July 2011
+!!
+!!
+!!------------------------------------------------------------------------------          
   USE mod_param
   USE mod_name
   USE mod_time
@@ -226,9 +245,6 @@ subroutine loop
         arct = 0.d0
      end if intspinCond
 
-#ifndef initxyt     
-     if(ntractot-nout-nerror.eq.0) exit intsTimeLoop
-#endif
      !=======================================================
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===
@@ -514,18 +530,6 @@ subroutine loop
               endif
            enddo LBTLOOP
            
-           ! === Seedtype 4 or 5 ===
-           if(seedType >= 4) then
-               if(seedType == 4) then
-                   k=(-1)*seedMask(ia,ja,1)
-               elseif(seedType == 5) then
-                   k=(-1)*seedMask(ia,ja,ka)
-               endif
-               if(k > 0) then
-                   nexit(k) = nexit(k)+1
-                   exit niterLoop
-               endif
-           endif
            ! === stop trajectory if the choosen time or ===
            ! === water mass properties are exceeded     ===
            if(tt-t0.gt.timax) then
@@ -948,12 +952,13 @@ return
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
     case (11)
-       if(  (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
-            (kriva.eq.2 .and. scrivi                    ) .or. &
-            (kriva.eq.3                                 ) .or. &
-            (kriva.eq.4 .and. niter.eq.1                ) .or. &
-            (kriva.eq.5 .and. mod(real(tt)-real(t0),3600.).eq.0.d0  ) .or. &
-            (kriva.eq.6 .and. .not.scrivi               )        ) then
+       if(  (kriva == 1 .AND. nrj(ntrac,4) == niter-1   ) .OR. &
+            (kriva == 2 .AND. scrivi                    ) .OR. &
+            (kriva == 3                                 ) .OR. &
+            (kriva == 4 .AND. niter == 1                ) .OR. &
+            (kriva == 5 .AND.                                  &
+          &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .OR. &
+            (kriva == 6 .AND. .not.scrivi               )        ) then
 #if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif

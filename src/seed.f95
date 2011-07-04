@@ -1,274 +1,321 @@
-module mod_seed
+MODULE mod_seed
+!!------------------------------------------------------------------------------
+!!
+!!
+!!       MODULE: mod_seed
+!!
+!!          Defines variables and matrices necessary for initializing
+!!          particles.
+!!
+!!          Populates matrices trj and nrj, containing information of
+!!          all particles. See init_par for allocation of them. 
+!!             trj        - Dimension NTRACMAX x NTRJ
+!!             nrj        - Dimension NTRACMAX x NNRJ
+!!
+!!
+!!
+!!       Last change: Joakim Kjellsson, 21 June 2011
+!!
+!!
+!!------------------------------------------------------------------------------
+!!  
+   USE mod_param
+   USE mod_time
+   USE mod_grid
+   USE mod_buoyancy
+   USE mod_vel
+   USE mod_traj
+   
+   IMPLICIT NONE
   
-  USE mod_param
-  USE mod_time
-  USE mod_grid
-  USE mod_buoyancy
-  USE mod_vel
-  USE mod_traj
-  
-  implicit none
- 
-  !from mod_seed in modules
-  INTEGER                                    :: nff,isec,idir,nqua,num
-  INTEGER                                    :: ijk  ,ijkMax
-  INTEGER                                    :: seedType ,varSeedFile 
-  INTEGER                                    :: ist1 ,ist2   ,jst1 ,jst2
-  INTEGER                                    :: kst1, kst2
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ijkst
-  REAL, ALLOCATABLE, DIMENSION(:,:)          :: xyzst
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:)     :: seedMask
-  CHARACTER(LEN=200)                         :: seedDir
-  CHARACTER(LEN=200)                         :: seedFile
-  INTEGER                                    :: ist,jst,kst
-  INTEGER                                    :: ijt,kkt,ijj,kkk
-  INTEGER                                    :: ntractot
-
+   INTEGER                                    ::    nff,  isec,  idir,         &
+                                               &   nqua,   num,   nsd, nsdMax, &
+                                               & nsdTim,                       &
+                                               & seedPos, seedTime, seedType,  &
+                                               & seedAll, varSeedFile,         &
+                                               & ist1, ist2, jst1, jst2,       &
+                                               & kst1, kst2, tst1, tst2,       &
+                                               & iist, ijst, ikst, jsd, jst,   &
+                                               &  ijt,  ikt,  jjt, jkt, ntractot
+   INTEGER*8                                  :: itim
+   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seed_ijk, seed_set
+   INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
+   REAL*8 , ALLOCATABLE, DIMENSION(:,:)       :: seed_xyz
+   CHARACTER(LEN=200)                         :: seedDir, seedFile, timeFile
+!!
+!!------------------------------------------------------------------------------
   
 CONTAINS
 
 
-  subroutine seed (tt,ts)
-    INTEGER                                  :: errCode
-    INTEGER                                  :: ib, jb, kb, ibm
-    INTEGER                                  :: i, j, k, l, m
-    INTEGER                                  :: ntrac
-    REAL*8                                   :: tt,ts
-    REAL*8                                   :: x1, y1, z1
-    REAL                                     :: temp,salt,dens
-    REAL*8                                   :: vol, subvol
+   SUBROUTINE seed (tt,ts)
 
-    ntrac=ntractot
+!!------------------------------------------------------------------------------
+      
+      INTEGER                                  :: errCode,         &
+                                                & ib, jb, kb, ibm, &
+                                                &  i,  j,  k,   l, &
+                                                &  m, ntrac
+      REAL                                     :: temp,salt,dens
+      REAL*8                                   :: tt, ts,     &
+                                                & x1, y1, z1, &
+                                                & vol, subvol
 
-    ijkstloop: do ijk=1,ijkMax
-       if(seedType == 3) then
-           ist = int(xyzst(ijk,1))+1
-           jst = int(xyzst(ijk,2))+1
-           kst = int(xyzst(ijk,3))+1
-           idir = int(xyzst(ijk,4))
-           isec = int(xyzst(ijk,5))
-       else
-           ist  = ijkst(ijk,1)
-           jst  = ijkst(ijk,2)
-           kst  = ijkst(ijk,3)
-           idir = ijkst(ijk,4)
-           isec = ijkst(ijk,5)
-       endif
-       vol  = 0
-       ib=ist
-       ibm=ib-1
-       if(ibm.eq.0) ibm=IMT
-       jb=jst
-       kb=kst
+!!------------------------------------------------------------------------------
 
-       ! === follow trajectory only if velocity in right direction  ===
-       ! === & sets trajectory  transport vol.                      === 
-       idirCond: if (idir .ne. 0) then
-          select case (isec)
-          case (1)
-             vol=uflux(ist,jst,kst,1)
-          case (2)
-             vol=vflux(ist,jst,kst,1)
-          case default
-             call vertvel(1.d0,ib,ibm,jb,kst)
+      ! --------------------------------------------
+      ! --- Check if ntime is in vector seed_tim ---
+      ! --------------------------------------------
+      IF (seedTime == 2) THEN
+         findTime: DO jsd=1,nsdTim
+            IF (seed_tim(jsd) == ntime) THEN
+               IF (seedAll == 1) THEN
+                  itim = seed_tim(jsd)
+               END IF
+               EXIT findTime
+            ELSE IF (seed_tim(jsd) /= ntime .AND. jsd == nsdTim) THEN
+               RETURN
+            END IF
+         END DO findTime
+      END IF
+      
+      ! ---------------------------------------
+      ! --- Loop over the seed size, nsdMax ---
+      !----------------------------------------
+      startLoop: DO jsd=1,nsdMax
+      
+         iist  = seed_ijk (jsd,1)
+         ijst  = seed_ijk (jsd,2)
+         ikst  = seed_ijk (jsd,3)
+         isec  = seed_set (jsd,1)
+         idir  = seed_set (jsd,2)
+         IF (seedTime == 2 .AND. seedAll == 2) THEN
+            itim  = seed_tim (jsd)
+         END IF
+print*,iist,ijst,ikst,isec,idir,itim
+#ifdef new_seed   
+         ! -------------------------------------------------
+         ! --- Test if it is time to launch the particle ---
+         ! -------------------------------------------------
+         IF ( (seedTime == 1 .AND. (ntime < tst1 .OR. ntime > tst2)) .OR. &
+         &    (seedTime == 2 .AND. ntime /= itim) ) THEN
+            CYCLE startLoop
+         ELSE IF (seedTime /= 1 .AND. seedTime /= 2) THEN
+            PRINT*,'timeStart =',seedTime,' is not a valid configuration!'
+            STOP
+         END IF
+#endif         
+         vol = 0    
+         ib  = iist
+         ibm = ib-1
+         IF (ibm == 0) THEN
+            ibm = IMT
+         END IF
+         jb  = ijst
+         kb  = ikst
+         
+         ! -----------------------------------------------------------
+         ! --- Determine the volume/mass flux through the grid box ---
+         ! -----------------------------------------------------------
+         SELECT CASE (isec)
+         
+            CASE (1)  ! Through eastern meridional-vertical surface
+               vol = uflux (iist,ijst,ikst,1)
+         
+            CASE (2)  ! Through northern zonal-vertical surface
+               vol = vflux (iist,ijst,ikst,1)
+         
+            CASE (3)  ! Through upper zonal-meridional surface
+               CALL vertvel (1.d0,ib,ibm,jb,kb)
 #ifdef full_wflux
-             vol=wflux(ist,jst,kst,1)
+               vol=wflux(ib,jb,kb,1)
+#elif twodim
+               vol=1.
 #else 
-             vol=wflux(kst,1)
-#endif /*full_wflux*/
-          end select
-          if (idir*ff*vol.le.0.d0) cycle ijkstloop
-
-          vol = abs(vol)
-       else
-          select case (isec)
-        case (1)
-           ! WARNING
-           ! Should generate trajectories in 
-           ! both directions but doesn't work 
-           stop 5978 
-           vol=abs(uflux(ist,jst,kst,1))
-        case (2)
-           !  stop 5979
-           vol=abs(vflux(ist,jst,kst,1))
-        case (3)
-           call vertvel(1.d0,ib,ibm,jb,kst)
-#ifdef full_wflux
-           vol=abs(wflux(ist,jst,kst,1))
-#else
-           vol=abs(wflux(kst,1))
-#endif /*full_wflux*/
-#ifdef twodim
-           !                 vol = 1
-#endif /*twodim*/
-           vol=1
-        case(4)
-           if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
-           vol=abs(uflux(ib,jb,kb,1))+abs(uflux(ibm,jb  ,kb,1)) + & 
-                abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
-           !              print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
-           if(vol.eq.0.d0) cycle ijkstloop
-        case(5)
-           if(KM+1-kmt(ist,jst).gt.kst) cycle ijkstloop 
-           vol=abs(uflux(ib,jb,kb,1))+abs(uflux(ibm,jb  ,kb,1)) + & 
-                abs(vflux(ib,jb,kb,1))+abs(vflux(ib ,jb-1,kb,1))
-           !                 print *,'KM..',ib,jb,kb,vol,uflux(ib,jb,kb,1)
-           if(vol.eq.0.d0) cycle ijkstloop
-        end select
-        if(vol.eq.0) cycle ijkstloop
-     end if idirCond
-     
-     ! === trajectory volume in m3 ===
-     if(nqua.ge.3 .or. isec.ge.4) then
+               vol=wflux(kb,1)
+#endif
+         
+            CASE (4 ,5)   ! Total volume/mass transport through grid box
+               IF (KM+1-kmt(iist,ijst) > kb) THEN
+                  CYCLE startLoop
+               ELSE
+                  vol = uflux (ib, jb, kb, 1) + uflux (ibm, jb  , kb, 1) + & 
+                  &     vflux (ib, jb, kb, 1) + vflux (ib , jb-1, kb, 1)
+               ENDIF
+               IF (vol == 0.d0) cycle startLoop
+         
+         END SELECT
+      
+         ! If the particle is forced to move in positive/negative direction
+         IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0) .OR. (vol == 0.) ) THEN
+            CYCLE startLoop
+         ENDIF
+      
+         ! Volume/mass transport needs to be positive   
+         vol = ABS (vol)
+      
+        
+         ! Calculate transport of each individual trajectory
+         IF (nqua == 3 .OR. isec > 4) THEN
 #ifdef zgrid3Dt
-        vol=dzt(ib,jb,kb,1)
- 
+            vol = dzt(ib,jb,kb,1)
 #elif  zgrid3D
-        vol=dzt(ib,jb,kb)
+            vol = dzt(ib,jb,kb)
 #elif  zgrid1D
-        vol=dz(kb)
+            vol = dz(kb)
 #endif /*zgrid*/
 #ifdef varbottombox
-        if(kb.eq.KM+1-kmt(ib,jb) ) vol=dztb(ib,jb,1)
+            IF (kb == KM+1-kmt(ib,jb)) THEN
+               vol = dztb (ib,jb,1)
+            END IF
 #endif /*varbottombox*/
 #ifdef freesurface
-        if(kb.eq.KM) vol=vol+hs(ib,jb,1)
-        vol=vol*dxdy(ib,jb)
+            IF (kb == KM) THEN
+               vol = vol+hs(ib,jb,1)
+            END IF
+            vol = vol*dxdy(ib,jb)
 #endif /*freesurface*/
-     end if
+         END IF
           
-     ! === number of trajectories for box (ist,jst,kst) ===
-     select case (nqua)
-     case (1)
-        num = partQuant
-     case (2)
-        num = vol/partQuant
-     case (3)
-        num = vol/partQuant
-     case (5)
-        if(seedType == 3) then
-            num = 1
-        else
-            num = ijkst(ijk,6)
-        endif
-     end select
-     if(num.eq.0 .and. nqua.ne.5) num=1 ! always at least one trajectory
+         ! Number of trajectories for box (iist,ijst,ikst)
+         SELECT CASE (nqua)
+            CASE (1)
+               num = partQuant
+            CASE (2)
+               num = vol/partQuant
+            CASE (3)
+               num = vol/partQuant
+            CASE (4)
+               num = partQuant
+         END SELECT
+         
+         IF (num == 0 .AND. nqua /= 4) THEN
+            PRINT*,'WARNING: Number of trajectories = 0 !'
+            PRINT*,'         Using num = 1'
+            num=1
+         END IF
      
+         ijt    = NINT (SQRT (FLOAT(num)) ) 
+         ikt    = NINT (FLOAT (num) / FLOAT (ijt))
+         subvol = vol / DBLE (ijt*ikt)
      
-     ijt    = nint(sqrt(float(num)))
-     kkt    = nint(float(num)/float(ijt))
-     subvol = vol/dble(ijt*kkt)
-     
-     if(subvol.eq.0.d0) stop 3956 
-99   format(' ib=',i4,' jb=',i3,' kb=',i2,' vol=',f10.0, &
-          ' num=',i6,' ijt=',i4,' kkt=',i7,' subvol=',f12.0) 
-     
-     ! === loop over the subboxes of box (ist,jst,kst) ===
-     ijjLoop: do ijj=1,ijt
-        kkkLoop: do kkk=1,kkt          
-           ib=ist
-           jb=jst
-           kb=kst
+         IF (subvol == 0.d0) THEN
+            PRINT*,' Transport of particle is zero!!!'
+            PRINT*,' vol =',vol
+            PRINT*,' subvol =',subvol
+            STOP
+         ENDIF
+         
+         ! --------------------------------------------------
+         ! --- Determine start position for each particle ---
+         ! --------------------------------------------------
+         ijjLoop: DO jjt=1,ijt
+            kkkLoop: DO jkt=1,ikt          
+            
+            IF ( ib /= iist ) PRINT*,iist,ib
+            IF ( jb /= ijst ) PRINT*,ijst,jb
+            IF ( kb /= ikst ) PRINT*,ikst,kb
+            ib = iist
+            jb = ijst
+            kb = ikst
+
+            SELECT CASE (isec)
+               CASE (1)   ! Meridional-vertical section
+                  
+                  x1 = DBLE (ib) 
+                  y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
+                  z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
+                  
+                  IF (idir == 1) THEN
+                     ib = iist+1
+                  ELSE IF (idir == -1) THEN
+                     ib=iist 
+                  END IF
+                  
+               CASE (2)   ! Zonal-vertical section
+                  
+                  x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
+                  y1 = DBLE (jb)
+                  z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
+                  
+                  IF (idir == 1) THEN
+                     jb = ijst+1
+                  ELSE IF (idir == -1) THEN
+                     jb = ijst
+                  END IF 
+              
+               CASE (3)   ! Horizontal section
+                  
+                  x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
+                  y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
+                  z1 = DBLE (kb)
+                  
+                  IF (idir == 1) THEN
+                     kb = ikst+1
+                  ELSE IF (idir == -1) THEN
+                     kb = ikst
+                  END IF
+                  
+               CASE (4)   ! Spread even inside box
+                  
+                  x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt) - 0.5d0) / DBLE(ijt)
+                  y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt) - 0.5d0) / DBLE(ikt)
+                  
+                  z1=dble(kb-1) + 0.5d0
+                                 
+               CASE (5)
+                  x1 = seed_xyz (jsd,1)
+                  y1 = seed_xyz (jsd,2) 
+                  z1 = seed_xyz (jsd,3)
+               
+               END SELECT
            
-           select case(isec)
-           case (1)
-              ! === Meridional section ===
-              y1=dble(jb-1) + (dble(ijj)-0.5d0)/dble(ijt) 
-              x1=dble(ist) 
-              if(idir.eq. 1) ib=ist+1
-              if(idir.eq.-1) ib=ist 
-              z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-           case (2)
-              ! === Zonal section      ===
-              x1=dble(ibm) + (dble(ijj)-0.5d0)/dble(ijt)
-              y1=dble(jst) 
-              if(idir.eq. 1) jb=jst+1
-              if(idir.eq.-1) jb=jst 
-              z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt)
-           case (3)
-              ! === Vertical section   ===
-              x1=dble(ibm ) + (dble(ijj)-0.5d0)/dble(ijt)
-              y1=dble(jb-1) + (dble(kkk)-0.5d0)/dble(kkt) 
-              z1=dble(kb)
-           case (4)
-              ! === Spread even inside T-box ===
-              x1=dble(ibm ) + 0.25d0*(dble(ijj)-0.5d0)/dble(ijt)
-              y1=dble(jb-1) + 0.25d0*(dble(kkk)-0.5d0)/dble(kkt) 
-              ! z1=dble(kb-1) + (dble(kkk)-0.5d0)/dble(kkt) ! spread verticaly
-              z1=dble(kb-1) + 0.5d0                         ! or on a fixed depth
-           case (5)
-              if(isec.ne.nqua .or. nqua.ne.5 .or.ijt.ne.1 .or.kkt.ne.1) stop 8461
-              ! === Start particles from exact positions set by a file read in readfield 
-              ! === (works only for orc at the moment)
-              ! trj(ijk,1)=dble(ibm ) + 0.25d0*(dble(ijj)-0.5d0)/dble(ijt)
-              ! trj(ijk,2)=dble(jb-1) + 0.25d0*(dble(kkk)-0.5d0)/dble(kkt) 
-              ! trj(ijk,3)=dble(kb-1) + 0.5d0   
-              x1=trj(ijk,1)
-              y1=trj(ijk,2) 
-              z1=trj(ijk,3)
-           end select
-           
-           if(seedType == 3) then
-              x1 = xyzst(ijk,1)
-              y1 = xyzst(ijk,2)
-              z1 = xyzst(ijk,3)
-           endif
-           
-           ibm=ib-1
-           ! === cyclic ocean/atmosphere === 
-           if(ibm.eq.0) ibm=IMT
-           if(ib.eq.1.and.x1.gt.dble(IMT)) x1=x1-dble(IMT)
-           
-           ! === check properties of water- ===
-           ! === mass at initial time       === 
+           ! ------------------------------------------------------
+           ! --- Check properties of water mass at initial time ---
+           ! ------------------------------------------------------ 
 #ifndef ifs 
 #ifdef tempsalt 
-           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-           !call interp2(ib,jb,kb,ib,jb,kb,temp,salt,dens,1)
-           if(temp.lt.tmin0 .or. temp.gt.tmax0 .or. &
-                salt.lt.smin0 .or. salt.gt.smax0 .or. &
-                dens.lt.rmin0 .or. dens.gt.rmax0) then
-              !print *,'outside mass range',temp,salt,dens
-              cycle kkkLoop 
-           endif
+               CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+               IF (temp < tmin0 .OR. temp > tmax0 .OR. &
+               &   salt < smin0 .OR. salt > smax0 .OR. &
+               &   dens < rmin0 .OR. dens > rmax0      ) THEN
+                  CYCLE kkkLoop 
+               END IF
 #endif /*tempsalt*/
 #endif
-           
-           ntrac=ntrac+1  ! the trajectory number
-           !                 print *,'ntrac=',ntrac,ijk
+               ! Update trajectory numbers
+               ntractot = ntractot+1
+               ntrac = ntractot
            
 #ifdef select
-           ! selects only one singe trajectory
-           if(ntrac.ne.57562) then 
-              nrj(ntrac,6)=1
-              cycle kkkLoop
-           endif
+               ! Selects only one singe trajectory
+               if(ntrac.ne.57562) then 
+                  nrj(ntrac,6)=1
+                  cycle kkkLoop
+               endif
 #endif /*select*/
-           ts=ff*dble(ints-intstep)/tstep !time, fractions of ints
-           tt=ts*tseas !time(sec) rel to start
            
-           ! === initialise time and ===
-           ! === store trajectory positions ===
-       
-           trj(ntrac,1)=x1
-           trj(ntrac,2)=y1
-           trj(ntrac,3)=z1
-           trj(ntrac,4)=tt
-           trj(ntrac,5)=subvol
-           trj(ntrac,6)=0
-           trj(ntrac,7)=tt
-           nrj(ntrac,1)=ib
-           nrj(ntrac,2)=jb
-           nrj(ntrac,3)=kb
-           nrj(ntrac,4) = 0
-           nrj(ntrac,5)=idint(ts)
-           nrj(ntrac,7)=1
-        end do kkkLoop
-     end do ijjLoop
-  end do ijkstloop
+               ! ts - time, fractions of ints
+               ! tt - time [s] rel to start
+               ts = ff * DBLE (ints-intstep) / tstep
+               tt = ts * tseas
+               
+               ! ------------------------------------------------------------
+               ! --- Put the new trajectory into the matrices trj and nrj ---
+               ! ------------------------------------------------------------
+               trj(ntrac,1:7) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
+               nrj(ntrac,1:5) = [ ib, jb, kb,  0, IDINT(ts)]
+               nrj(ntrac,7)=1
+           
+            END DO kkkLoop
+         END DO ijjLoop   
+            
+      END DO startLoop
 
-  ntractot = ntrac
+   END SUBROUTINE seed
 
-end subroutine seed
+END MODULE mod_seed
 
-end module mod_seed
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
