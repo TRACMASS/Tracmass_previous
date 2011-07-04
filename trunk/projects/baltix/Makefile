@@ -20,7 +20,7 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #   fl12  = -Dinitxyt       # Start trajectories at given positions and times
-#------------------------------------------------------------------------		qswde
+#------------------------------------------------------------------------
 #  fl13  = -Dtwodim         # Turn off vertical velocities.
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
@@ -40,6 +40,7 @@
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #------------------------------------------------------------------------
 #   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
+    fl29   = -Dnew_seed      # new version of seed
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \
