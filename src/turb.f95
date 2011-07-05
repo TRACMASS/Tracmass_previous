@@ -22,9 +22,10 @@ amp=Ah/( dtmin**(1./3.) )
 !  call random_number(qran) ! generates a random number between 0 and 1
   
 ! random generated numbers between 0 and 1
-do n=1,12
- qran(n)=rand()
-enddo
+!do n=1,12
+ !qran(n)=rand()
+ CALL RANDOM_NUMBER (qran)
+!enddo
 	
 !  qran=2.*qran-1. ! === Max. amplitude of turbulence with random numbers between -1 and 1
                    ! === (varies with the same aplitude as the mean vel)

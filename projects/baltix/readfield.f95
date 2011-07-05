@@ -1,438 +1,553 @@
 SUBROUTINE readfields
-
-  USE netcdf
-  USE mod_param
-  USE mod_vel
-  USE mod_coord
-  USE mod_time
-  USE mod_grid
-  USE mod_name
-  USE mod_vel
-  USE mod_traj
-  USE mod_getfile
-  use mod_seed
-
+!!------------------------------------------------------------------------------
+!!
+!!
+!!       SUBROUTINE: readfields
+!!
+!!          Needs netcdf and gunzip, since data is compressed in .nc.gz format.
+!!
+!!          Populates the matrices
+!!             uflux          -  zonal volume flux
+!!             vflux          -  meridional volume flux
+!!               dzt          -  depth of each grid box
+!!              dztb          -  depth of bottom grid box
+!!               tem          -  temperature         (if option tempsalt)
+!!               sal          -  salinity            (if option tempsalt)
+!!               rho          -  density             (if option tempsalt)
+!!
+!!
+!!       Last change: Joakim Kjellsson, 5 July 2011
+!!
+!!------------------------------------------------------------------------------
+   USE netcdf
+   USE mod_param
+   USE mod_vel
+   USE mod_coord
+   USE mod_time
+   USE mod_grid
+   USE mod_name
+   USE mod_vel
+   USE mod_traj
+   USE mod_getfile
+   USE mod_seed
 #ifdef tempsalt
-  USE mod_dens
-  USE mod_stat
-#endif
-  IMPLICIT none
-  
-  
-  INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm,ipp,jmm,jpp,ntrac, l
-  INTEGER                                      :: kbot,ktop
-  INTEGER, SAVE                                :: ntempus(1:12,1:31,0:21),ntempusb,nread
-
-  CHARACTER (len=200)                          :: fieldFile,dataprefix,zfile,rfile
-
-  INTEGER, PARAMETER :: IMTG=619,JMTG=523,KMM=84
-  
-  REAL*4,  ALLOCATABLE, DIMENSION(:,:)         :: ssh, temp2d_simp
-  REAL*4,  ALLOCATABLE, DIMENSION(:,:,:)       :: temp3d_simp
-#ifdef tempsalt
-  REAL*4,  ALLOCATABLE, DIMENSION(:)           :: tempb, saltb, rhob, depthb,latb
+   USE mod_dens
+   USE mod_stat
 #endif
 
-  REAL*4 dd,dmult,uint,vint,zint
-  LOGICAL around
-#ifdef initxyt
-  INTEGER, PARAMETER :: NTID=2919
-  !INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
-  INTEGER, PARAMETER :: IJKMAX2=36
-  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
-  REAL*8 , SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
-#endif  
+   IMPLICIT NONE
 
+!!------------------------------------------------------------------------------
 
-! === ALLOCATE READ MATRICES ===
-
-#ifdef initxyt
-    alloCondGrid: if ( .not. allocated (ntimask) ) then
-        allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(0:NTID,IJKMAX2,3) )
-    end if alloCondGrid
-#endif
-
-
-alloCondUVW: if(.not. allocated (ssh)) then
-    allocate ( ssh(imt,jmt),temp3d_simp(IMT,JMT,KMM), temp2d_simp(IMT,JMT))
-#ifdef tempsalt
-    allocate ( tempb(KMM), saltb(KMM), rhob(KMM), depthb(KM), latb(KM))
-#endif
-end if alloCondUVW
-
-  start1D  = [ 1]
-  count1D  = [KM]
-  start2D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count2D  = [         imt,        jmt ,  1 , 1 ]
-  map2D    = [          1 ,          2 ,  3 , 4 ]  
-  start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count3D  = [         imt,        jmt ,KMM , 1 ]
-  map3D    = [          1 ,          2 ,  3 , 4 ]  
-    
-    
-    ! === swap between datasets ===
-  hs(:,:,1)=hs(:,:,2)
-  uflux(:,:,:,1)=uflux(:,:,:,2)
-  vflux(:,:,:,1)=vflux(:,:,:,2)
-  dzt(:,:,:,1)=dzt(:,:,:,2)
-#ifdef tempsalt 
-  tem(:,:,:,1)=tem(:,:,:,2)
-  sal(:,:,:,1)=sal(:,:,:,2)
-  rho(:,:,:,1)=rho(:,:,:,2)
-#endif
-
-  ! === initialise ===
-  initFieldcond: if(ints.eq.intstart) then
-     ! call coordinat
-     hs     = 0.
-     uflux  = 0.
-     vflux  = 0.
-#ifdef tempsalt
-     tem    = 0.
-     sal    = 0.
-     rho    = 0.
-#endif
-     ntempus=89 ; ntempusb=0
-    
-    ! Fill ntempus which is a matrix containing the prefix number for the files
-    ! ntempus is 0 at 1 Jan 03:00 and 2918 at 31 Dec 21:00
-    k=-1
-    do imon=1,12
-        do iday=1,idmax(imon,1999)
-            do ihour=0,21,3
-                ntempus(imon,iday,ihour)=k
-                k=k+1
-            enddo
-        enddo
-    enddo
-
-    ihour=startHour-ngcm
-    iday=startDay
-    imon=startMon
-    iyear=startYear
-
-#ifdef initxyt
-!____ Time for individual start positions __
-if(IJKMAX2.eq.36) then
-    open(84,file='/home/x_joakj/tracmass/files/drifter_segm_start.bin',form='unformatted')
-endif
-read(84) trajinit
-close(84)
-j=0
-do k=1,NTID
- do i=1,IJKMAX2
-  if(trajinit(k,i,3).ne.0.) then
-   j=j+1
-  endif
- enddo
-enddo
-ijkst=0
-if(j.ne.IJKMAX2) then
- stop 4396
-endif
-#endif
-    
-endif initFieldcond
-
-  ! === date update ===
-  ihour=ihour+ngcm
-  if(ihour.eq.24) then
-   iday=iday+1
-   ihour=0
-  endif
-
-  if(iday.gt.idmax(imon,1999)) then
-     iday=iday-idmax(imon,1999)
-     imon=imon+1
-     if(imon.eq.13) then
-        imon=1
-        iyear=iyear+1
-        ! if kan skrivas här om man vill börja om från iyear0
-     endif
-  endif
-  
-ntime=1000000*iyear+10000*imon+100*iday+ihour
-!print*,iyear,imon,iday,ihour,ntempus(imon,iday,ihour)
-
-! === 1 Jan at 00:00 is named as 31 Dec 24:00 the previous year ===
-if(imon == 1 .and. iday == 1 .and. ihour == 0) then
- dataprefix='2919_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
- write(dataprefix(17:20),'(i4)') iyear-1
- write(dataprefix(26:29),'(i4)') iyear-1
-else 
- if(ntempus(imon,iday,ihour).le.9) then
-  dataprefix=   'x_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
-  write(dataprefix(1:1)  ,'(i1)') ntempus(imon,iday,ihour)
-  write(dataprefix(14:17),'(i4)') iyear
-  write(dataprefix(23:26),'(i4)') iyear
- elseif(ntempus(imon,iday,ihour).le.99) then
-  dataprefix=  'xx_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
-  write(dataprefix(1:2),'(i2)') ntempus(imon,iday,ihour)
-  write(dataprefix(15:18),'(i4)') iyear
-  write(dataprefix(24:27),'(i4)') iyear
- elseif(ntempus(imon,iday,ihour).le.999) then
-  dataprefix= 'xxx_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
-  write(dataprefix(1:3),'(i3)') ntempus(imon,iday,ihour)
-  write(dataprefix(16:19),'(i4)') iyear
-  write(dataprefix(25:28),'(i4)') iyear
- elseif(ntempus(imon,iday,ihour).le.9999) then
-  dataprefix='xxxx_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
-  write(dataprefix(1:4),'(i4)') ntempus(imon,iday,ihour)
-  write(dataprefix(17:20),'(i4)') iyear
-  write(dataprefix(26:29),'(i4)') iyear
- else
-  stop 4956
- endif
-endif
-
- fieldFile = trim(inDataDir)//trim(dataprefix)
-!  nread=mod(ints-1,intmax)+1
-  nread=1
-  start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
-  start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
-!#else
-! stop 39573
-!#endif
-
-! === Unzip the T file ===
-fieldFile = trim(inDataDir)//trim(dataprefix)//'T.nc'
-inquire(file=trim(fieldFile)//'.gz',exist=around)
-if(.not.around) then
-print *,'This file is missing:',fieldFile,ntempus(imon,iday,ihour),iyear,imon,iday,ihour
-stop 4555
-endif
-zfile='gzip -c -d '//trim(fieldFile)//'.gz > '//trim(outDataDir)//'tmp/'//trim(outDataFile)
-CALL system(zfile)
-rfile=trim(outDataDir)//'tmp/'//trim(outDataFile)
-inquire(file=trim(rfile),exist=around)
-if(.not.around) stop 4556
-
-! === Open T file ===
-ierr=NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
-ierr=NF90_INQ_VARID(ncid,'sossheig',varid) ! the main data fields
-if(ierr.ne.0) then
-!print *,ints,trim(fieldFile)//'T.nc'
-stop 3768
-endif
-ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
-if(ierr.ne.0) stop 3799
-ierr=NF90_CLOSE(ncid)
-
-do j=1,JMT
- do i=1,IMT
-  hs(i,j,2)=temp2d_simp(i,j)
- enddo
-enddo
-
-do i=4,IMT+1
- hs(i,jmt+1,2) =hs(IMT+4-i,jmt-3,2)  !  north fold 
-enddo
-
-#ifdef tempsalt 
-
-! Temperature
-ierr=NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5752
-ierr=NF90_INQ_VARID(ncid,'votemper',varid) 
-if(ierr.ne.0) stop 3769
-ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
-if(ierr.ne.0) stop 3799
-ierr=NF90_CLOSE(ncid)
-do i=1,IMT
- do j=1,JMT
-  do k=1,kmt(i,j)
-   kk=KM+1-k
-   tem(i,j,kk,2)=temp3d_simp(i,j,k)
-  enddo
- enddo
-enddo
-
+   INTEGER                                      :: ji, jj, jk, ik, ntrac,      &
+   &                                               jhour, jday, jmon, jyear,   &
+   &                                               kbot,ktop, ntempusb,nread
+   INTEGER, PARAMETER                           :: IMTG = 619,                 &
+                                                   JMTG = 523,                 &
+                                                    KMM = 84
+   INTEGER, DIMENSION(1:12,1:31,0:21), SAVE     :: ntempus
    
-! Salinity
-ierr=NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5753
-ierr=NF90_INQ_VARID(ncid,'vosaline',varid) 
-if(ierr.ne.0) stop 3769
-ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
-if(ierr.ne.0) stop 3799
-ierr=NF90_CLOSE(ncid)
-do i=1,IMT
- do j=1,JMT
-  do k=1,kmt(i,j)
-   kk=KM+1-k
-   sal(i,j,kk,2)=temp3d_simp(i,j,k)
-  enddo
- enddo
-enddo
+   REAL*4                                       :: dd,dmult,uint,vint,zint
+   REAL*4,  ALLOCATABLE, DIMENSION(:,:)         :: temp2d_simp
+   REAL*4,  ALLOCATABLE, DIMENSION(:,:,:)       :: temp3d_simp
+#ifdef tempsalt
+   REAL*4,  ALLOCATABLE, DIMENSION(:)           :: tempb, saltb, rhob, &
+   &                                               depthb,latb
+#endif
+   
+   CHARACTER (len=200)                          :: fieldFile, dataprefix,      &
+   &                                               zfile, rfile
+   
+   LOGICAL                                      :: around
 
-depthb=0.
-do j=1,JMT
- latb=-80+0.25*float(j+subGridJmin-1)
- do i=1,IMT
-  do k=1,kmt(i,j)
-   kk=KM+1-k
-   tempb(k)=tem(i,j,kk,2)
-   saltb(k)=sal(i,j,kk,2)
-  enddo
-  call statvd(tempb, saltb, rhob ,KM ,depthb ,latb)
-  do k=1,kmt(i,j)
-   kk=KM+1-k
-   rho(i,j,kk,2)=rhob(k)-1000.
-  enddo
- enddo
-enddo
+!!------------------------------------------------------------------------------
+!!--------------------------- ALLOCATE DATA MATRICES ---------------------------
+!!------------------------------------------------------------------------------
 
+alloCondUVW: IF (.NOT. ALLOCATED (temp2d_simp)) THEN
+      ALLOCATE (temp3d_simp(IMT,JMT,KMM), temp2d_simp(IMT,JMT))
+#ifdef tempsalt
+      ALLOCATE (tempb(KMM), saltb(KMM), rhob(KMM), depthb(KM), latb(KM))
+#endif
+END IF alloCondUVW
+
+!!------------------------------------------------------------------------------
+
+!! Definition of the slices of data to read
+   start1D  = [ 1]
+   count1D  = [KM]
+   start2D  = [subGridImin ,subGridJmin ,  1 , 1 ]
+   count2D  = [         imt,        jmt ,  1 , 1 ]
+   map2D    = [          1 ,          2 ,  3 , 4 ]  
+   start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
+   count3D  = [         imt,        jmt ,KMM , 1 ]
+   map3D    = [          1 ,          2 ,  3 , 4 ]  
+    
+    
+!! Swap between data sets
+   hs(:,:,1)      =  hs(:,:,2)
+   uflux(:,:,:,1) =  uflux(:,:,:,2)
+   vflux(:,:,:,1) =  vflux(:,:,:,2)
+   dzt(:,:,:,1)   =  dzt(:,:,:,2)
+#ifdef tempsalt 
+   tem(:,:,:,1)   =  tem(:,:,:,2)
+   sal(:,:,:,1)   =  sal(:,:,:,2)
+   rho(:,:,:,1)   =  rho(:,:,:,2)
+#endif
+
+!!------------------------------------------------------------------------------
+!!--------------------- IF THIS IS THE FIRST TIME STEP -------------------------
+!!------------------------------------------------------------------------------
+
+  
+   initFieldcond: IF (ints == intstart) THEN
+      
+      hs     = 0.
+      uflux  = 0.
+      vflux  = 0.
+#ifdef tempsalt
+      tem    = 0.
+      sal    = 0.
+      rho    = 0.
+#endif
+      ntempus=89 ; ntempusb=0
+      
+      ! Set date to start date
+      ihour=startHour
+      iday=startDay
+      imon=startMon
+      iyear=startYear
+      
+      ! Fill ntempus which is a matrix containing the prefix number for files
+      ! ntempus is 0 at 1 Jan 03:00 and 2918 at 31 Dec 21:00 (except leap years)
+      ik=-1
+      DO jmon=1,12
+         DO jday=1,idmax(jmon,iyear)
+            DO jhour=0,21,3
+               ntempus(jmon,jday,jhour) = ik
+               ik=ik+1
+            END DO
+         END DO
+      END DO      
+    
+   ELSE
+   
+      ! Update date
+      ihour = ihour + ngcm
+      
+      IF (ihour == 24) THEN
+         iday = iday+1
+         ihour=0
+      END IF
+
+      IF (iday > idmax(imon,iyear)) THEN
+      
+         iday = iday-idmax(imon,iyear)
+         imon = imon+1
+      
+         IF (imon == 13) THEN
+            imon  = 1
+            iyear = iyear+1
+         END IF
+      
+      END IF
+   
+   END IF initFieldcond
+
+!!------------------------------------------------------------------------------
+!!---------------------------- DETERMINE FILE NAME -----------------------------
+!!------------------------------------------------------------------------------
+   
+   ntime=1000000*iyear+10000*imon+100*iday+ihour
+
+   ! === 1 Jan at 00:00 is named as 31 Dec 24:00 the previous year ===
+   IF (imon == 1 .AND. iday == 1 .AND. ihour == 0) THEN
+      
+      IF (idmax (2,iyear) == 29) THEN
+         dataprefix='2927_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
+      ELSE
+         dataprefix='2919_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
+      END IF
+   
+      WRITE (dataprefix(17:20),'(i4)') iyear-1
+      WRITE (dataprefix(26:29),'(i4)') iyear-1
+
+   ELSE 
+      
+      IF (ntempus(imon,iday,ihour) <= 9) THEN
+      
+         dataprefix=   'x_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
+         WRITE (dataprefix(1:1)  ,'(i1)') ntempus(imon,iday,ihour)
+         WRITE (dataprefix(14:17),'(i4)') iyear
+         WRITE (dataprefix(23:26),'(i4)') iyear
+      
+      ELSE IF (ntempus(imon,iday,ihour) <= 99) THEN
+         
+         dataprefix=  'xx_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
+         WRITE (dataprefix(1:2),'(i2)') ntempus(imon,iday,ihour)
+         WRITE (dataprefix(15:18),'(i4)') iyear
+         WRITE (dataprefix(24:27),'(i4)') iyear
+      
+      ELSE IF (ntempus(imon,iday,ihour) <= 999) THEN
+   
+         dataprefix= 'xxx_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
+         WRITE (dataprefix(1:3),'(i3)') ntempus(imon,iday,ihour)
+         WRITE (dataprefix(16:19),'(i4)') iyear
+         WRITE (dataprefix(25:28),'(i4)') iyear
+      
+      ELSE IF (ntempus(imon,iday,ihour) <= 9999) THEN
+         
+         dataprefix='xxxx_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
+         WRITE (dataprefix(1:4),'(i4)') ntempus(imon,iday,ihour)
+         WRITE (dataprefix(17:20),'(i4)') iyear
+         WRITE (dataprefix(26:29),'(i4)') iyear
+      
+      ELSE
+         
+         PRINT*,' This date is not recognized!'
+         PRINT*,' year:',iyear
+         PRINT*,' month:',imon
+         PRINT*,' day:',iday
+         PRINT*,' hour:',ihour
+         STOP
+      
+      END IF
+   
+   END IF
+
+   fieldFile = trim(inDataDir)//trim(dataprefix)
+   nread=1
+   start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
+   start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
+
+!!------------------------------------------------------------------------------
+
+!!------------------------------------------------------------------------------
+!!------------------------ UNZIP AND READ IN DATA ------------------------------
+!!------------------------------------------------------------------------------
+
+   ! Unzip the T file
+   ! T file contains temperature, salinity, and sea surface height
+   
+   fieldFile = trim(inDataDir)//trim(dataprefix)//'T.nc'
+   INQUIRE (file=trim(fieldFile)//'.gz',exist=around)
+   IF (.NOT. around) THEN
+      PRINT*,'This file is missing:',fieldFile
+      STOP
+   END IF
+   
+   zfile = 'gzip -c -d '//trim(fieldFile)//'.gz > '                            &
+   &       //trim(outDataDir)//'tmp/'//trim(outDataFile)
+   CALL system (zfile)
+   
+   rfile = trim(outDataDir)//'tmp/'//trim(outDataFile)
+   INQUIRE (file=trim(rfile),exist=around)
+   IF (.NOT. around) THEN
+      PRINT*,'This file is missing:',rfile
+   END IF
+   
+   ! Open T file
+   ierr = NF90_OPEN (trim (rfile),NF90_NOWRITE,ncid)
+   
+   ! Read SSH
+   ierr = NF90_INQ_VARID (ncid,'sossheig',varid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ierr = NF90_GET_VAR (ncid,varid,temp2d_simp,start2d,count2d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   hs(:,:,2) = temp2d_simp(:,:)
+   
+   do ji=4,IMT+1
+      hs(ji,JMT+1,2) = hs(IMT+4-ji,JMT-3,2)  !  north fold 
+   enddo
+
+#ifdef tempsalt 
+
+   ! Read in temperature
+   ierr=NF90_INQ_VARID(ncid,'votemper',varid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+ 
+   ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   DO ji=1,IMT
+      DO jj=1,JMT
+         DO jk=1,kmt(ji,jj)
+            ik = KM+1-jk
+            tem (ji,jj,ik,2) = temp3d_simp (ji,jj,jk)
+         END DO
+      END DO
+   END DO
+
+   ! Read in salinity
+   ierr = NF90_INQ_VARID(ncid,'vosaline',varid) 
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   DO ji=1,IMT
+      DO jj=1,JMT
+         DO jk=1,kmt(ji,jj)
+            ik=KM+1-jk
+            sal (ji,jj,ik,2) = temp3d_simp (ji,jj,jk)
+         END DO
+      END DO
+   END DO
+   
+   ierr = NF90_CLOSE (ncid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+
+
+   ! Compute density
+   depthb = 0.
+   DO jj=1,JMT
+      latb = -80 + 0.25 * FLOAT (jj+subGridJmin-1)
+      DO ji=1,IMT
+         
+         DO jk=1,kmt(ji,jj)
+            ik=KM+1-jk
+            tempb (jk) = tem (ji,jj,ik,2)
+            saltb (jk) = sal (ji,jj,ik,2)
+         END DO
+         
+         CALL statvd(tempb, saltb, rhob ,KM ,depthb ,latb)
+         
+         DO jk=1,kmt(ji,jj)
+            ik=KM+1-jk
+            rho(ji,jj,ik,2)=rhob(jk)-1000.
+         END DO
+      
+      END DO
+   END DO
 
 #endif     
 
-dmult=1.  ! amplification of the velocity amplitude by simple multiplication
+!!------------------------------------------------------------------------------
 
-fieldFile = trim(inDataDir)//trim(dataprefix)//'U.nc'
-inquire(file=trim(fieldFile)//'.gz',exist=around)
-if(.not.around) then
-print *,'This file is missing:',fieldFile,ntempus,iyear,imon,iday,ihour
-stop 4555
-endif
-zfile='gzip -c -d '//trim(fieldFile)//'.gz > '//trim(outDataDir)//'tmp/'//trim(outDataFile)
-CALL system(zfile)
-rfile=trim(outDataDir)//'tmp/'//trim(outDataFile)
-inquire(file=trim(rfile),exist=around)
-if(.not.around) stop 4556
+   dmult = 1. ! amplification of the velocity amplitude by simple multiplication
 
-! u velocity
-ierr=NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5754
-ierr=NF90_INQ_VARID(ncid,'vozocrtx',varid) 
-if(ierr.ne.0) stop 3769
-ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
-if(ierr.ne.0) stop 3799
-ierr=NF90_CLOSE(ncid)
-do i=1,IMT-1
- do j=1,JMT
-  do k=1,kmu(i,j)
-   kk=KM+1-k
-   !dd = 0.5*(dzt(i,j,kk,2)+dzt(i+1,j,kk,2))
-   dd = dz(kk)
-   if(k == kmu(i,j)) dd = min(dztb(i,j,2),dztb(i+1,j,2))
-   if(kmu(i,j) <= 0) dd = 0.
-   dd = dd*( zw(kmt(i,j))+(hs(i,j,2)+hs(i+1,j,2))/2. )/zw(kmt(i,j))
-   !print*,k,kk,kmu(i,j),dz(kk),dztb(i,j,2),dztb(i+1,j,2),dd
-   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
-  enddo
- enddo
-enddo
+   ! Open U file
 
-! v velocity
-fieldFile = trim(inDataDir)//trim(dataprefix)//'V.nc'
-inquire(file=trim(fieldFile)//'.gz',exist=around)
-if(.not.around) then
-print *,'This file is missing:',fieldFile,ntempus,iyear,imon,iday,ihour
-stop 4555
-endif
-zfile='gzip -c -d '//trim(fieldFile)//'.gz > '//trim(outDataDir)//'tmp/'//trim(outDataFile)
-CALL system(zfile)
-rfile=trim(outDataDir)//'tmp/'//trim(outDataFile)
-inquire(file=trim(rfile),exist=around)
-if(.not.around) stop 4556
+   fieldFile = trim(inDataDir)//trim(dataprefix)//'U.nc'
+   INQUIRE (file=trim(fieldFile)//'.gz',exist=around)
+   IF (.NOT. around) THEN
+      PRINT *,'This file is missing:',fieldFile,ntempus,iyear,imon,iday,ihour
+      STOP
+   END IF
+   
+   zfile = 'gzip -c -d '//trim(fieldFile)//'.gz > '                            &
+   &       //trim(outDataDir)//'tmp/'//trim(outDataFile)
+   CALL system(zfile)
+   rfile=trim(outDataDir)//'tmp/'//trim(outDataFile)
+   INQUIRE (file=trim(rfile),exist=around)
+   IF (.NOT. around) THEN
+      PRINT*,'This file is missing:',rfile
+      STOP
+   END IF
+
+   ierr=NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ! Read U velocity
+   ierr = NF90_INQ_VARID(ncid,'vozocrtx',varid) 
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ierr = NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ierr=NF90_CLOSE(ncid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   DO ji=1,IMT-1
+      DO jj=1,JMT
+         DO jk=1,kmu(ji,jj)
+            ik=KM+1-jk
+            dd = dz(ik)
+            IF (jk == kmu(ji,jj)) THEN
+               dd = MIN (dztb(ji,jj,2),dztb(ji+1,jj,2))
+            ENDIF
+            IF (kmu(ji,jj) <= 0) THEN
+               dd = 0.
+            END IF
+            
+            ! Depth of grid box
+            dd = dd * ( zw(kmt(ji,jj)) + (hs(ji,jj,2) + hs(ji+1,jj,2))/2.      &
+            &         )/zw(kmt(ji,jj))
+            
+            uflux(ji,jj,ik,2) = temp3d_simp(ji,jj,jk) * dyu(ji,jj) * dd * dmult
+         END DO
+      END DO
+   END DO
+
+!-------------------------------------------------------------------------------
+
+   ! Open V file
+   fieldFile = trim(inDataDir)//trim(dataprefix)//'V.nc'
+   INQUIRE (file=trim(fieldFile)//'.gz',exist=around)
+   IF (.NOT. around) THEN
+      PRINT*,'This file is missing:',fieldFile,ntempus,iyear,imon,iday,ihour
+      STOP 4555
+   END IF
+   zfile = 'gzip -c -d '//trim(fieldFile)//'.gz > '                            &
+           //trim(outDataDir)//'tmp/'//trim(outDataFile)
+   CALL system(zfile)
+   rfile=trim(outDataDir)//'tmp/'//trim(outDataFile)
+   INQUIRE (file=trim(rfile),exist=around)
+   IF (.NOT. around) THEN
+      PRINT*,'This file is missing:',rfile
+      STOP 4556
+   END IF
+
+   ierr = NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ! Read V velocity
+   ierr=NF90_INQ_VARID(ncid,'vomecrty',varid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ierr=NF90_CLOSE(ncid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   DO ji=1,IMT
+      DO jj=1,JMT-1
+         DO jk=1,kmv(ji,jj)
+            ik = KM+1-jk
+            dd = dz(ik)
+            IF (jk == kmv(ji,jj)) THEN
+               dd = MIN (dztb(ji,jj,2),dztb(ji,jj+1,2))
+            END IF
+            IF (kmv(ji,jj) <= 0) THEN
+               dd = 0.
+            END IF
+         
+            dd = dd * ( zw(kmt(ji,jj)) + (hs(ji,jj,2) + hs(ji,jj+1,2))/2.      &
+            &         ) / zw(kmt(ji,jj))
+            
+            vflux (ji,jj,ik,2) = temp3d_simp(ji,jj,jk) * dxv(ji,jj) * dd * dmult
+         END DO
+      END DO
+   END DO
+
+!!------------------------------------------------------------------------------
+!!------------------------------------------------------------------------------
 
 
-ierr=NF90_OPEN(trim(rfile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5755
-ierr=NF90_INQ_VARID(ncid,'vomecrty',varid) ! kmt field
-if(ierr.ne.0) stop 3770
-ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
-if(ierr.ne.0) stop 3799
-ierr=NF90_CLOSE(ncid)
-do i=1,IMT
- do j=1,JMT-1
-  do k=1,kmv(i,j)
-   kk=KM+1-k
-   !dd = 0.5*(dzt(i,j,kk,2)+dzt(i,j+1,kk,2))
-   dd = dz(kk)
-   if(k == kmv(i,j)) dd = min(dztb(i,j,2),dztb(i,j+1,2))
-   if(kmv(i,j) <= 0) dd = 0.
-   dd = dd*( zw(kmt(i,j))+(hs(i,j,2)+hs(i,j+1,2))/2. )/zw(kmt(i,j))
-   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
-  enddo
- enddo
-enddo
+   ! Compute z-star coordinates
+   ! Layer thicknesses dz* = dz (H+ssh)/H 
+   DO ji=1,IMT
+      DO jj=1,JMT
+         DO jk=1,KM
+            ik = KM+1-jk
+            IF (kmt(ji,jj) == ik) THEN
+               dztb(ji,jj,1) = dztb(ji,jj,1) * ( zw(kmt(ji,jj))+hs(ji,jj,2) )  &
+               &               / zw(kmt(ji,jj))
+               dzt(ji,jj,jk,2) = dztb(ji,jj,1)
+            ELSE IF (kmt(ji,jj) /= 0) THEN
+               dzt(ji,jj,jk,2) = dz(jk)
+               dzt(ji,jj,jk,2) = dzt(ji,jj,jk,2) *                             &
+               &                 (zw(kmt(ji,jj)) + hs(ji,jj,2)) / zw(kmt(ji,jj))
+            ELSE
+               dzt(ji,jj,jk,2) = 0.
+            END IF
+         END DO
+      END DO
+   END DO
 
-! z-star calculations of the layer thicknesses dz* = dz (H+eta)/H 
-do i=1,IMT
- do j=1,JMT
-  do k=1,KM
-   kk=KM+1-k
-   if(kmt(i,j).eq.kk) then
-    dztb(i,j,1)=dztb(i,j,1)*( zw(kmt(i,j))+hs(i,j,2) )/zw(kmt(i,j))
-    dzt(i,j,k,2)=dztb(i,j,1)
-   elseif(kmt(i,j).ne.0) then
-    dzt(i,j,k,2)=dz(k)
-    dzt(i,j,k,2)=dzt(i,j,k,2)*( zw(kmt(i,j))+hs(i,j,2) )/zw(kmt(i,j))
-   else
-    dzt(i,j,k,2)=0.
-   endif
-  enddo
- enddo
-enddo
+!!------------------------------------------------------------------------------
 
 #ifdef drifter
-! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories
-kbot=78 ; ktop=80 ! k=78--80 is z=12--18m
-do i=1,imt
- do j=1,jmt
- 
-  uint=0. ; vint=0. ; zint=0.
-  if(ktop.eq.KM) zint=hs(i,j,2)
-  do k=kbot,ktop
-   uint=uint+uflux(i,j,k,2) ! integrated transport
-   vint=vint+vflux(i,j,k,2)
-   zint=zint+dz(k)          ! total depth of drougued drifter
-  enddo
-  ! weighted transport for each layer
-  do k=kbot,KM
-   if(k.ne.KM) then
-    uflux(i,j,k,2)=uint*dz(k)/zint 
-    vflux(i,j,k,2)=vint*dz(k)/zint
-   else
-    uflux(i,j,k,2)=uint*(hs(i,j,2)+dz(k))/zint
-    vflux(i,j,k,2)=vint*(hs(i,j,2)+dz(k))/zint
-   endif
-  enddo
-
- enddo
-enddo
+   ! Average velocity/transport over surface drifter drogue depth 
+   ! to simulate drifter trajectories
+   kbot = 78 ; ktop = 80 ! k=78--80 is z=12--18m
+   DO ji=1,IMT
+      DO jj=1,JMT
+         
+         uint=0. ; vint=0. ; zint=0.
+         IF (ktop == KM) THEN
+            zint = hs(ji,jj,2)
+         END IF
+         
+         DO jk=kbot,ktop
+            uint = uint+uflux(ji,jj,jk,2) ! integrated transport
+            vint = vint+vflux(ji,jj,jk,2)
+            zint = zint+dz(jk)            ! total depth of drougued drifter
+         END DO
+   
+         ! weighted transport for each layer
+         DO jk=kbot,KM
+            IF (jk /= KM) THEN
+               uflux(ji,jj,jk,2) = uint*dz(jk)/zint 
+               vflux(ji,jj,jk,2) = vint*dz(jk)/zint
+            ELSE
+               uflux(ji,jj,jk,2) = uint*(hs(ji,jj,2)+dz(jk))/zint
+               vflux(ji,jj,jk,2) = vint*(hs(ji,jj,2)+dz(jk))/zint
+            END IF
+         END DO
+      END DO
+   END DO
 
 #endif
 
-
-#ifdef initxyt
-! Set the initial trajectory positions
-ijkmax = IJKMAX2
-    do ntrac=1,ijkmax2
-        if(trajinit(ntempus(imon,iday,ihour),ntrac,3).ne.0.) then
-            ijkst(ntrac,4)=0
-            ijkst(ntrac,5)=5
-            ijkst(ntrac,6)=1
-            do l=1,3
-                ijkst(ntrac,l)=int(trajinit(ntempus(imon,iday,ihour),ntrac,l))+1
-                trj(ntrac,l)=trajinit(ntempus(imon,iday,ihour),ntrac,l)
-            enddo
-        else
-            ijkst(ntrac,5)=0
-            ijkst(ntrac,6)=0
-        endif
-    enddo
-#endif
-
-
-     deallocate ( ssh , temp3d_simp, temp2d_simp )
+   DEALLOCATE ( temp3d_simp, temp2d_simp )
 #ifdef tempsalt
-     deallocate ( tempb, saltb, rhob, depthb, latb )
+   DEALLOCATE ( tempb, saltb, rhob, depthb, latb )
 #endif
 
+   RETURN
 
-  return
-end subroutine readfields
+
+END SUBROUTINE readfields
+
+!!------------------------------------------------------------------------------
+!!------------------------------------------------------------------------------
 
 
 
