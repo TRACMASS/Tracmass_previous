@@ -92,7 +92,7 @@ CONTAINS
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
-print*,iist,ijst,ikst,isec,idir,itim
+         
 #ifdef new_seed   
          ! -------------------------------------------------
          ! --- Test if it is time to launch the particle ---
@@ -260,10 +260,10 @@ print*,iist,ijst,ikst,isec,idir,itim
                   
                   x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt) - 0.5d0) / DBLE(ijt)
                   y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt) - 0.5d0) / DBLE(ikt)
-                  
-                  z1=dble(kb-1) + 0.5d0
+                  z1 = DBLE (kb-1) + 0.5d0
                                  
                CASE (5)
+                  
                   x1 = seed_xyz (jsd,1)
                   y1 = seed_xyz (jsd,2) 
                   z1 = seed_xyz (jsd,3)
@@ -288,7 +288,7 @@ print*,iist,ijst,ikst,isec,idir,itim
                ntrac = ntractot
            
 #ifdef select
-               ! Selects only one singe trajectory
+               ! Selects only one single trajectory
                if(ntrac.ne.57562) then 
                   nrj(ntrac,6)=1
                   cycle kkkLoop
