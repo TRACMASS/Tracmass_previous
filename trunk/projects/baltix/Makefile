@@ -41,4 +41,4 @@
 #   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
-ORM_FLAGS= -Dbaltix -Dtimestep -Dregulardt -Dtempsalt -Dtextwrite -Dinitxyt -Dtwodim -Dvarbottombox -Dzgrid3Dt -Dturb -Ddrifter -Dnew_seed 
+ORM_FLAGS= -Dbaltix -Dtimestep -Dregulardt -Dtempsalt -Dtextwrite -Dinitxyt -Dtwodim -Dvarbottombox -Dzgrid3Dt -Dturb -Ddrifter

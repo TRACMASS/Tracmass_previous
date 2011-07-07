@@ -560,7 +560,11 @@ SUBROUTINE loop
      print 799 ,ints ,ntractot-nout ,nout ,nerror,ntractot !,nev
 799  format('ints=',i7,' active=',i10,' out=',i10,' err=',i10,' tot=',i10)
 #endif
-
+  
+   IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0) THEN
+      EXIT intsTimeLoop
+   END IF
+  
   end do intsTimeLoop
   
   close(56)

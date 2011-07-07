@@ -263,10 +263,6 @@ END IF alloCondUVW
    END IF
    
    hs(:,:,2) = temp2d_simp(:,:)
-   
-   do ji=4,IMT+1
-      hs(ji,JMT+1,2) = hs(IMT+4-ji,JMT-3,2)  !  north fold 
-   enddo
 
 #ifdef tempsalt 
 
@@ -506,7 +502,7 @@ END IF alloCondUVW
 #ifdef drifter
    ! Average velocity/transport over surface drifter drogue depth 
    ! to simulate drifter trajectories
-   kbot = 78 ; ktop = 80 ! k=78--80 is z=12--18m
+   kbot = 79 ; ktop = 80 ! k=78--80 is z=12--18m
    DO ji=1,IMT
       DO jj=1,JMT
          
