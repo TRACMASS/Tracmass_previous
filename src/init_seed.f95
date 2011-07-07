@@ -31,7 +31,7 @@ SUBROUTINE init_seed()
    CHARACTER(LEN=200)                         :: fullSeedFile
    CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6,i12)", &
                                                & timform = "(42x      ,i12)"
-#ifndef new_seed
+#ifndef baltix
    CHARACTER(LEN=*), PARAMETER                :: ijkform = "(6i6)"
 #else
    CHARACTER(LEN=*), PARAMETER                :: ijkform = "(3i10,  2i6,i12)"
@@ -39,7 +39,7 @@ SUBROUTINE init_seed()
    LOGICAL                                    :: fileexists
 
 !-------------------------------------------------------------------------------
-#ifndef new_seed
+#ifndef baltix
    seedPos = seedType
    seedType = 1
    seedTime = 0
