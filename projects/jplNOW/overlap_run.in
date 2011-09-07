@@ -1,51 +1,32 @@
- &INITRUNVERSION
-  ! === Used to check if this file has the correct syntax
-  runVerNum   = 1/
-  !
-  !
-&INITRUNDESC
-  !	
-  caseName     = 'fullrun',
+ &INITRUNDESC
+  caseName     = 'MultCol',
   caseDesc     = 'Looking at chl growth in lagrangian space'/
-  ! 
-  !
-&INITRUNGRID
-  !
-  !==subGrid:       0 = Use full grid.
-  !==               1 = Define subGrid in this file.
-  !==               2 = Define subGrid with sep. file and subGridID.
-  !==               3 = Define subGrid with sep. file and MPI.
-  subGrid      = 0,
-  !
-  ! === Used if SubGrid = 1
-  subGridImin  = 1,
-  subGridImax  = 116,
-  subGridJmin  = 1,
-  subGridJmax  = 100,
-  ! === Used if SubGrid = 2 or 3
-  SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
-  ! === Used if SubGrid = 2
-  subGridID    = 1/
-  !
-  !
-&INITRUNTIME
-  !
+ &INITRUNTIME
   ! === Number of initial datasets
-  intmin       = 65800,
+  intmin       = 58800,
+  !
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
+  !
   ! === Trajectory run
-  intrun       = 60,
+  intrun       = 192,
+  !
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
-  !
  &INITRUNDATE
-  !
+  ! === Reference basetime for the velocity field. 
+  baseSec           = 0,
+  baseMin           = 0,
+  baseHour          = 0,
+  baseDay           = 1,
+  baseMon           = 1,
+  baseYear          = 2001,
+  ! === Start time for this run
   startHour         = 0,
-  startDay          = 01,
-  startMon          = 11,
-  startYear         = 2008/
+  startDay          = 13,
+  startMon          = 9,
+  startYear         = 0/
   !
   !
   &INITRUNWRITE
@@ -59,16 +40,16 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva        = 5,
+  kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/projData/jplSCB/',
+  inDataDir       = '/Volumes/t2klumpen/projData/jplSCB/',
   !
   ! === Directory where output files are saved
   outDataDir      = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'jplSCBfullrun',
+  outDataFile     = 'jplSCBoverlap',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -106,24 +87,24 @@
   nqua        = 1, 
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant= 9,     
+  partQuant= 2,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 1, 
+  SeedType = 2, 
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 5,		 
-  ist2         = 205,			  
-  jst1         = 5,		 
-  jst2         = 105,		 
-  kst1         = 23,		 
-  kst2         = 23,
+  ist1         = 30,		 
+  ist2         = 40,			  
+  jst1         = 30,		 
+  jst2         = 40,		 
+  kst1         = 20,		 
+  kst2         = 24,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -131,7 +112,7 @@
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 1,
-  seedDir      = '/Users/bror/svn/projects/jplSCB/seedDir',
+  seedDir      = '/Volumes/t2klumpen/projData/jplSCB/seedDir/seed_overlap',
   !
   ! === Seed filename (or beginning of it)
   seedFile     = 'seed'/
@@ -163,20 +144,20 @@ $INITRUNEND
   ienw(1) =   1,
   iene(1) =   2,
   jens(1) =   1,
-  jenn(1) = 111,
+  jenn(1) = 211,
 !
   ienw(2) =   1,
-  iene(2) = 111,
-  jens(2) = 210,
-  jenn(2) = 211,
+  iene(2) = 211,
+  jens(2) = 110,
+  jenn(2) = 111,
 !
   ienw(3) =   1,
-  iene(3) = 211,
+  iene(3) = 111,
   jens(3) =   1,
   jenn(3) =   2,
 
-  ienw(4) = 110,
-  iene(4) = 111,
+  ienw(4) = 210,
+  iene(4) = 211,
   jens(4) =   1,
-  jenn(4) = 211,
+  jenn(4) = 111,
   timax =  36500./  ! maximum time length of a trajectory in days
