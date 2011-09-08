@@ -48,22 +48,23 @@ CONTAINS
        print *,"   to use in the cdf data file."
        stop
     end if
-    start2d(map2d(4)) = ncTpos   
+    start2d(map2d(1)) = ncTpos   
     s = start2d(map2d)
     c = count2d(map2d)
     d = c + s - 1  
 
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
+    field=0; get2dfieldNC=0
     
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2)
-    ierr=NF90_GET_VAR(ncid ,varid , field, s, c)
-    if(ierr.ne.0) call printREadError(3)
+    ierr=NF90_GET_VAR(ncid ,varid , field, s,c)
+    if(ierr.ne.0) call printReadError(3)
     ierr=NF90_CLOSE(ncid)
 
-    if ( map2d(2) > map2d(1) ) then
+    if ( map2d(4) > map2d(3) ) then
        get2DfieldNC(1:imt,:) = field
     else
        do i = 1,imt
@@ -71,8 +72,7 @@ CONTAINS
        end do
     end if
 
-
-  end function get2DfieldNC
+ end function get2DfieldNC
   
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
