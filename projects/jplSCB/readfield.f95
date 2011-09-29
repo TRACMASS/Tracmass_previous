@@ -64,7 +64,7 @@ SUBROUTINE readfields
 
   write (dstamp(9:18),'(i4i2.2i2.2i2.2)') & 
        currYear,currMon,currDay,currHour+3
-  dataprefix  = trim(inDataDir) // '/ROMS/' // dstamp
+  dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
   print *,dataprefix
   ! === initialise ===
