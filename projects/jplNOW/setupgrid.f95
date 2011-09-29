@@ -40,56 +40,24 @@ SUBROUTINE setupgrid
 
 
 ! === Template for setting up grids. Move the code from readfile.f95
+  allocate ( mask(imt,jmt), depth(imt,jmt) )
 
-  start1d  = [  1]
-  count1d  = [ km]
-  !Order is     t    k            i            j 
-  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-  count2d  = [  1 ,  1 ,2,2]! subGridImax ,subGridJmax]
-  map2d    = [  1 ,  4 ,          2 ,          3]
-
-  start3d  = [  1, subGridImin, subGridJmin,  1]
-  count3d  = [  1, subGridImax, subGridJmax, km]
+  !Order is   t  k  i  j 
+  map2d    = [3, 4, 1, 2]
   map3d    = [2, 3, 4, 1]
 
+  ncTpos = 1
+  dxv(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'x_rho')
+  dyu(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'y_rho')
+  dxv(1:imt-1,:) = dxv(2:imt,:)-dxv(1:imt-1,:)
+  dyu(:,1:jmt-1) = dyu(:,2:jmt)-dyu(:,1:jmt-1)
+  dxv(imt:imt+1,:) = dxv(imt-2:imt-1,:)
+  dyu(:,jmt) = dyu(:,jmt-1)
+  dxdy = dyu*dxv
 
-!!$  CHARACTER (len=200)                        :: gridFileXY, gridFileZ
-!!$  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: kmask
-!!$
-!!$  alloCondGrid: if ( .not. allocated (kmask) ) then
-!!$     allocate ( kmask(IMT+2,JMT,KM) )
-!!$  end if alloCondGrid
-!!$  
-!!$  start1d  = [  1]
-!!$  count1d  = [ km]
-!!$  !Order is     t    k            i            j
-!!$  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-!!$  map2d    = [  4 ,  3 ,          1 ,          2]  
-!!$  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count3d  = [  1 , km ,subGridImax ,subGridJmax]
-!!$  map3d    = [  4 ,  3 ,          2 ,          1]  
-!!$  
-!!$  gridFileXY = trim(inDataDir)//'grid_cell_xy.nc'
-!!$  gridFileZ  = trim(inDataDir)//'grid_cell_z.nc'
-!!$  
-!!$  dz   = get1DfieldNC(trim(gridFileZ)  ,'dz')  / 100.
-!!$  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
-!!$  dyu  = get2DfieldNC(trim(gridFileXY) ,'DYU') / 100.
-!!$  dxdy = dxv * dyu
-!!$
-!!$  dzt = 0
-!!$  kmask  = get3DfieldNC(trim(gridFileZ) ,'SALT')
-!!$  do j=1,jmt
-!!$     do i=1,imt
-!!$        do k=1,km
-!!$           kk=km+1-k
-!!$           if(kmask(i,j,k) .le. 1000.) then
-!!$              kmt(i,j)=k
-!!$              dzt(i,j,k) = dz(kk)
-!!$           end if
-!!$        enddo
-!!$     enddo
-!!$  enddo
-
+  depth = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'h')
+  mask = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'mask_rho')
+  kmt = 40 
+  where (mask==0) kmt=0
+  
 end SUBROUTINE setupgrid
