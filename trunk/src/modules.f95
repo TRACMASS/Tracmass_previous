@@ -11,6 +11,7 @@ MODULE mod_param
   INTEGER, PARAMETER                        :: LOV=1
 #endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm
+  INTEGER                                   :: twritetype = 0
   REAL*8                                    :: tseas,tday,tyear,dtmin,voltr
   REAL*8                                    :: tstep,dstep,tss,partQuant
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
@@ -65,14 +66,18 @@ MODULE mod_time
   INTEGER*8                                 :: ntime
   INTEGER                                   :: currJDtot ,currJDyr
   INTEGER                                   :: currYear  ,currMon  ,currDay
+  INTEGER                                   :: currHour, currMin, currSec
   INTEGER                                   :: startJD   ,baseJD
   INTEGER                                   :: fieldsPerFile
 CONTAINS
   subroutine updateClock  
     USE mod_param
-    currJDtot = (ints-1)*ngcm/24+1
+    currJDtot = int((ints-1)*(real(ngcm)/24)+1)
     call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
     currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
+    currHour = int(((ints-intmin)/(24./ngcm)-floor(real(ints-intmin)/ &
+         (24./ngcm)))*24)
+
   end subroutine updateClock
   
   subroutine gdate (jd, year,month,day)
@@ -120,6 +125,7 @@ MODULE mod_grid
   REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
 #ifdef zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D
@@ -200,6 +206,7 @@ ENDMODULE mod_name
 MODULE mod_streamxy
 #ifdef streamxy
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
+  REAL                                       :: sxyy(IMT,JMT),sxyx(IMT,JMT)
 #endif
 ENDMODULE mod_streamxy
 
@@ -207,6 +214,7 @@ ENDMODULE mod_streamxy
 MODULE mod_streamv
 #ifdef streamv
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
+  REAL                                       :: sxz(JMT,KM),syz(JMT,KM)
 #endif
 ENDMODULE mod_streamv
 
@@ -214,6 +222,8 @@ ENDMODULE mod_streamv
 MODULE mod_streamr
 #ifdef streamr
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
+  REAL                                       :: sxr(IMT,MR,LOV)
+  REAL                                       :: syr(JMT,MR,LOV)
 #endif
 ENDMODULE mod_streamr
 
@@ -239,6 +249,9 @@ MODULE mod_sed
   REAL                                       :: wsed, partdiam
   REAL                                       :: rhos, cwamp, twave
   REAL                                       :: critvel, kincrit
+
+  INTEGER                                    :: nsed=0, nsusp=0
+  LOGICAL                                    :: res
 ENDMODULE mod_sed
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

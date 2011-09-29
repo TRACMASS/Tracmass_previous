@@ -58,16 +58,21 @@ PROGRAM main
 #endif
   
 #if defined binwrite
-  open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  ! Trajectory path  !
-     ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')      !
-  open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  ! Exit position    !
-       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
-  open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &  ! Killed position  !
-       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
-  open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  ! Entrance position !
-       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
-  open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  ! Error position   !
-       ,access='direct' ,form='unformatted' ,recl=20 ,status='replace')    !
+  ! Trajectory path
+  open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  
+       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+  ! Exit position 
+  open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  
+       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+  ! Killed position
+  open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &
+       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+  ! Entrance position
+  open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  
+       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+  ! Error position
+  open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  
+       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
 #endif
   
   ! === Start main loop ===

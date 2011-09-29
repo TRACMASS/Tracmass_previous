@@ -270,7 +270,6 @@ SUBROUTINE loop
         niter=nrj(ntrac,4)
         ts=dble(nrj(ntrac,5))
         tss=0.d0
-        
         ! === Write initial data to in.asc file ===
         ! If t0 = tt (first step) 
         if(trj(ntrac,4).eq.trj(ntrac,7)) then
@@ -280,7 +279,7 @@ SUBROUTINE loop
 #endif
         call writedata(10)
         endif
-        
+
 #ifdef rerun
         lbas=nrj(ntrac,8)
         if(lbas.lt.1 .or.lbas.gt.LBT) then
@@ -317,8 +316,8 @@ SUBROUTINE loop
               cycle ntracLoop 
            endif
         endif
-#endif  /*sediment*/      
-        ! ===  start loop for each trajectory ===
+#endif  /*sediment*/    
+          ! ===  start loop for each trajectory ===
         scrivi=.true.
         niterLoop: do        
            niter=niter+1 ! iterative step of trajectory
@@ -368,14 +367,7 @@ SUBROUTINE loop
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)
            if (errCode.ne.0) cycle ntracLoop
-!
-!           ! === calculate the turbulent velocities ===
-!#ifdef turb
-!           call turbuflux(ia,ja,ka,rr)
-!#endif /*turb*/
-!           ! === calculate the vertical velocity ===
-!           call vertvel(rr,ia,iam,ja,ka)
-           
+
            ! === write trajectory ===                       
 #ifdef tracer
            if(ts.eq.dble(idint(ts))) then 
@@ -403,15 +395,12 @@ SUBROUTINE loop
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
-
-
            ! === calculate the turbulent velocities ===
 #ifdef turb
            call turbuflux(ia,ja,ka,rr,dt)
 #endif /*turb*/
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
-
 #ifdef timeanalyt
            ss0=dble(idint(ts))*tseas/dxyz
            call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz,rr) ! zonal
@@ -423,17 +412,15 @@ SUBROUTINE loop
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
            ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
-          
+     
            !if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
 
            call calc_time
-
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
-           
 #ifdef orc 
 ! north fold cyclic ORCA grid (only tested with ORCA025)
            
@@ -443,7 +430,6 @@ SUBROUTINE loop
               ib=idint(x1)
               jb=JMT-2
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-!              print *,'fold',ntrac,niter,x1,y1,z1
            elseif(y1 > dble(JMT-1)) then
             print *,ia,ib,x0,x1
             print *,ja,jb,y0,y1
@@ -451,27 +437,6 @@ SUBROUTINE loop
             print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
             stop 4967
            endif
-           
-           !! North fold ORCA025 and ORCA2
-!           IF ((y1 >= jmt) .and. (( (imt .eq. 1440) .and. (jmt .eq. 1021) ) .or. & 
-!            & ( (imt .eq. 180) .and. (jmt .eq. 149) )  )) THEN
-!              x1 =     imt + 1 - x1
-!              y1 = 2 * jmt - 2 - y1
-!              ib=idint(x1)
-!              jb=idint(y1)
-!              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-!              ENDIF
-           !!                                                                                                                                                                      
-           !! North fold ORCA1 and ORCA05
-!           IF ((y1 >= jmt) .and. (( (imt .eq. 720) .and. (jmt .eq. 511) ) .or. &
-!            & ( (imt .eq. 360) .and. (jmt .eq. 292) )  ))THEN
-!              x1 =     imt - x1
-!              y1 = 2 * jmt - 1 - y1
-!              ib=idint(x1)
-!              jb=idint(y1)
-!              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-!           ENDIF
-
 #endif           
 
            ! === make sure that trajectory ===
@@ -492,7 +457,6 @@ SUBROUTINE loop
            call errorCheck('airborneError', errCode)
            call errorCheck('corrdepthError', errCode)
            call errorCheck('cornerError', errCode)
-
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
 #if defined diffusion     
@@ -650,7 +614,8 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verboseMess = 1
+       INTEGER                             :: verbose = 0
+       INTEGER                             :: strict  = 0
        INTEGER                             :: errCode
 
        errCode=0
@@ -675,7 +640,7 @@ return
           
        case ('dxyzError')
           if(dxyz.eq.0.d0) then
-             if (verboseMess == 1) then                 
+             if (verbose == 1) then                 
                 print *,'====================================='
                 print *,'ERROR: dxyz is zero'
                 print *,'-------------------------------------'
@@ -700,7 +665,7 @@ return
        case ('boundError')
           if(ia>imt .or. ib>imt .or. ja>jmt .or. jb>jmt &
                .or. ia<1 .or. ib<1 .or. ja<1 .or. jb<1) then
-             if (verboseMess == 1) then
+             if (verbose == 1) then
                 print *,'====================================='
                 print *,'Warning: Trajectory leaving model area'
                 print *,'-------------------------------------'
@@ -718,14 +683,14 @@ return
              nerror=nerror+1
              boundError = boundError +1
              errCode = -50
-             !stop 40962
+             if (strict==1) stop
              call writedata(40)
              nrj(ntrac,6)=1
           endif
 
        case ('landError')
           if(kmt(ib,jb).eq.0) then
-             if (verboseMess == 1) then
+             if (verbose == 1) then
                 print *,'====================================='
                 print *,'Warning: Trajectory on land'
                 print *,'-------------------------------------'
@@ -750,7 +715,7 @@ return
              errCode = -40             
              call writedata(40)
              nrj(ntrac,6)=1
-             stop 40963
+             if (strict==1) stop 
           endif
           case ('coordboxError')
           ! ===  Check that coordinates belongs to   ===
@@ -797,7 +762,7 @@ return
           if(niter-nrj(ntrac,4).gt.30000) then ! break infinite loops
              nloop=nloop+1             
 !             nerror=nerror+1
-             if (verboseMess == 1) then
+             if (verbose == 1) then
                 print *,'====================================='
                 print *,'Warning: Particle in infinite loop '
                 print *,'ntrac:',ntrac
@@ -898,7 +863,7 @@ return
         case ('dsCrossError')
            ! === Can not find any path for unknown reasons ===
            if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
-              if (verboseMess == 0) then
+              if (verbose == 0) then
                  print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu
                  print *,dsd,dsmin,dxyz
                  print *,ia,ja,ka,x0,y0,z0,ntrac,niter
@@ -918,6 +883,7 @@ return
     INTEGER, SAVE                        :: recPosRun=0 ,recPosErr=0
     INTEGER, SAVE                        :: recPosKll=0
     REAL                                 :: x14 ,y14 ,z14
+    INTEGER*8                            :: twrite
 
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
@@ -1026,6 +992,11 @@ return
     x14=real(x1,kind=4)
     y14=real(y1,kind=4)
     z14=real(z1,kind=4)
+    if (twritetype==1) then
+       twrite = tt
+    else
+       twrite = int(ints,kind=8)
+    end if
     select case (sel)       
     case (10)
        recPosIn = recPosIn+1
@@ -1036,38 +1007,32 @@ return
             (kriva.eq.2 .and. scrivi                    ) .or. &
             (kriva.eq.3                                 ) .or. &
             (kriva.eq.4 .and. niter.eq.1                ) .or. &
-            (kriva.eq.5 .and. dmod(tt-t0,7.d0).eq.0.d0  ) .or. &
+            (kriva.eq.5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva.eq.6 .and. .not.scrivi               )        ) then
 #if defined tempsalt
           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif
 !         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14
+          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
        end if
     case (13)
        recPosKll = recPosKll+1
-       write(unit=77 ,rec=recPosKll) ntrac,ints,x14,y14,z14   
+       write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14   
     case (15)
        recPosRun = recPosRun+1
-       write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
+       write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14   
     case (17)
        recPosOut = recPosOut+1
-       write(unit=77 ,rec=recPosOut) ntrac,ints,x14,y14,z14   
+       write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14   
     case (18)
-    !   if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
-    !        ints.eq.intstart+intrun) then 
-    !      call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)
-    !      recPosRun = recPosRun+1
-    !      write(unit=76 ,rec=recPosRun) ntrac,ints,x14,y14,z14   
-    !   endif
-       !   !case (19)
+       print *,"Case 18"
     case (19)
        recPosOut = recPosOut+1
-       write(unit=75 ,rec=recPosOut) ntrac,ints,x14,y14,z14
+       write(unit=75 ,rec=recPosOut) ntrac,twrite,x14,y14,z14
     case (40)
        recPosErr=recPosErr+1    
-       write(unit=79 ,rec=recPosErr) ntrac,ints,x14,y14,z14   
+       write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14   
     end select
 #endif    
 
@@ -1089,6 +1054,19 @@ return
     if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
 #endif /*freesurface*/
     dxyz=dxyz*dxdy(ib,jb)
+    if (dxyz<0) then
+       print *,'====================================='
+       print *,'ERROR: Negative box volume           '
+       print *,'-------------------------------------'
+       print *,'dzt  = ', dxyz/dxdy(ib,jb)
+       print *,'dxdy = ', dxdy(ib,jb)
+       print *,'i  = ', ib, ' j  = ', jb 
+       print *,'-------------------------------------'
+       print *,'The run is terminated'
+       print *,'====================================='
+       errCode = -60
+       stop
+    end if
   end subroutine calc_dxyz
 
   subroutine calc_time
