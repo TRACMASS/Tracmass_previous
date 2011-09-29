@@ -1,5 +1,5 @@
 SUBROUTINE init_params
-!!------------------------------------------------------------------------------
+!!----------------------------------------------------------------------------
 !!
 !!
 !!       SUBROUTINE: init_params
@@ -12,7 +12,7 @@ SUBROUTINE init_params
 !!       Last change: Joakim Kjellsson, 21 June 2011
 !!
 !!
-!!------------------------------------------------------------------------------
+!!----------------------------------------------------------------------------
    USE mod_param
    USE mod_seed
    USE mod_coord
@@ -28,6 +28,7 @@ SUBROUTINE init_params
    USE mod_streamv
    USE mod_streamr
    USE mod_tracer
+   USE mod_getfile
 #if defined diffusion || turb 
    USE mod_diffusion
 #endif
@@ -37,17 +38,18 @@ SUBROUTINE init_params
 #endif
    IMPLICIT NONE
 
-!!------------------------------------------------------------------------------
+!!----------------------------------------------------------------------------
    
    INTEGER                                    ::  argint1 ,argint2
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
    CHARACTER (LEN=23)                         ::  Project, Case
+   real*8                                     :: jd
 
-!!------------------------------------------------------------------------------
-!!-------------------- R E A D   F R O M   N A M E L I S T S -------------------
-!!------------------------------------------------------------------------------
+!!----------------------------------------------------------------------------
+!!-------------------- R E A D   F R O M   N A M E L I S T S -----------------
+!!----------------------------------------------------------------------------
    ! -------------------------------
    ! --- Parameters from grid.in ---
    ! -------------------------------
@@ -90,7 +92,7 @@ SUBROUTINE init_params
 #endif
    namelist /INITRUNEND/ ienw, iene, jens, jenn, timax
 
-!!------------------------------------------------------------------------------   
+!!--------------------------------------------------------------------------  
    
    Project  = PROJECT_NAME
    Case     = CASE_NAME
@@ -108,7 +110,7 @@ SUBROUTINE init_params
          IF (gridVerNum < 1) THEN
             PRINT *,'==================== ERROR ===================='
             PRINT *,'Your grid namefile seems to be out of date.'
-            PRINT *,'Check the version_grig.txt file for changes.'
+            PRINT *,'Check the version_grid.txt file for changes.'
             PRINT *,'You have to edit the version number in you grid'
             PRINT *,'manually when done.'
             STOP
@@ -152,7 +154,13 @@ SUBROUTINE init_params
             STOP
          
          END SELECT
-  
+         start1d  = [  1]
+         count1d  = [ km]
+         start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
+         count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
+         start3d  = [  1, subGridImin, subGridJmin,  1]
+         count3d  = [  1, subGridImax, subGridJmax, km]
+
          READ (8,nml=INITRUNTIME)
          READ (8,nml=INITRUNDATE)
          READ (8,nml=INITRUNWRITE)  
@@ -181,7 +189,7 @@ SUBROUTINE init_params
          IF (ngcm >= 24) THEN 
             intmin      = (startJD-baseJD)/(ngcm/24)+1
          ELSE ! this is a quick fix to avoid division by zero when ngcm < 24
-            intmin      = (startJD-baseJD-ngcm)/(ngcm)+1
+            intmin      = int(real(startJD-baseJD)/(real(ngcm)/24)+1)
          END IF
       END IF startYearCond
       
@@ -249,9 +257,9 @@ SUBROUTINE init_params
          kst2 = KM
       END IF
 
-!!------------------------------------------------------------------------------
-!!------------------------ A L L O C A T I O N S -------------------------------
-!!------------------------------------------------------------------------------
+!!---------------------------------------------------------------------------
+!!------------------------ A L L O C A T I O N S ----------------------------
+!!---------------------------------------------------------------------------
 
       ! --- Allocate information about the coordinates and grid ---
 
@@ -274,6 +282,9 @@ SUBROUTINE init_params
       
       ALLOCATE ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
       ALLOCATE ( hs(imt+1,jmt+1,nst) )
+      hs    = 0.
+      uflux = 0.
+      vflux = 0.
 #ifdef full_wflux
       ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
 #else
@@ -282,19 +293,30 @@ SUBROUTINE init_params
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       ALLOCATE ( trj(ntracmax,NTRJ), nrj(ntracmax,NNRJ) )
 #ifdef tempsalt
-      ALLOCATE ( tem(imt,jmt,km,nst) ,sal(imt,jmt,km,nst), rho(imt,jmt,km,nst) )
+      ALLOCATE ( tem(imt,jmt,km,nst) ) 
+      ALLOCATE ( sal(imt,jmt,km,nst) )
+      ALLOCATE ( rho(imt,jmt,km,nst) )
+      tem = 0.
+      sal = 0.
+      rho = 0.
 #endif
 
       ! --- Allocate Lagrangian stream functions ---
 
 #ifdef streamxy
       ALLOCATE ( stxyy(imt,jmt,lbt), stxyx(imt,jmt,lbt) )
+      sxyy=0.
+      sxyx=0.
 #endif
 #ifdef streamv
       ALLOCATE ( stxz(imt,km,lbt), styz(jmt,km,lbt) )
+      stxz=0.
+      styz=0.
 #endif
 #ifdef streamr
       ALLOCATE ( stxr(imt,mr,lbt,lov), styr(jmt,mr,lbt,lov) )
+      stxr=0.
+      styr=0
 #endif
 
       ! --- Allocate tracer data ---
@@ -311,5 +333,5 @@ SUBROUTINE init_params
 
 END SUBROUTINE init_params
 
-!!------------------------------------------------------------------------------
-!!------------------------------------------------------------------------------
+!!----------------------------------------------------------------------------
+!!----------------------------------------------------------------------------
