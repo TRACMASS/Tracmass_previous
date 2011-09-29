@@ -1,6 +1,7 @@
 import datetime
 from datetime import datetime as dtm
 import glob
+import os
 
 import numpy as np
 import pylab as pl
@@ -10,6 +11,8 @@ import MySQLdb
 import pycdf
 #from pyhdf.SD import SD,SDC
 
+import anim
+import namelist
 import lldist
 import projmaps
 from hitta import GrGr
@@ -68,13 +71,25 @@ class trm:
         elif projname=="jplSCB":
             import jpl
             self.gcm = jpl.SCB()
+            self.gcm.add_landmask()
+            self.landmask = self.gcm.landmask
             self.llon = self.gcm.llon
             self.llat = self.gcm.llat
             self.imt = 211
             self.jmt = 111
             self.region = "scb"
-            self.base_iso = pl.date2num(dtm(2001,1,1))
-            
+            self.base_iso = pl.date2num(dtm(2001,1,1))-3./24
+        elif projname=="jplNOW":
+            import jpl
+            self.gcm = jpl.NOW()
+            self.gcm.add_landmask()
+            self.landmask = self.gcm.landmask
+            self.llon = self.gcm.llon
+            self.llat = self.gcm.llat
+            self.imt = 385
+            self.jmt = 257
+            self.region = "scb"
+            self.base_iso = pl.date2num(dtm(2001,1,1))-3./24
     def ijll(self,ps=None):
         from scipy.ndimage.interpolation import map_coordinates
 
@@ -112,11 +127,11 @@ class trm:
 
     def read_bin(self, filename):
         """ Load binary output from TRACMASS """
-        fd = open(filename)
-        runvec = np.fromfile(fd,np.dtype([
-                    ('ntrac','>i4'), ('ints','>i4'), 
-                    ('x','>f4'), ('y','>f4'), ('z','>f4')
-                    ]))
+        with open(filename) as fd:
+            runvec = np.fromfile(fd,np.dtype([
+                ('ntrac','>i4'), ('ints','>f8'), 
+                ('x','>f4'), ('y','>f4'), ('z','>f4')
+                ]))
         return runvec
 
     def create_table(self):
@@ -156,12 +171,11 @@ class trm:
     def load(self, intstart=0, ftype="run", stype='bin', filename=''):
         """Load a tracmass output file. Add data to class instance."""
         if intstart != 0:
-            filename = ("%s%08i_%s.%s" %
-                        (self.casename,intstart,ftype,stype) )
+            filename = ("%s%s%08i_%s.%s" %
+                        (self.projname,self.casename,intstart,ftype,stype) )
         elif filename == '':
             print (self.datadir + self.casename +
                                  "*" + ftype)
-            print filename
         if filename[-3:] == "bin":
             runtraj = self.read_bin(self.datadir + filename)
         elif filename[-3:] == "asc":
@@ -173,6 +187,7 @@ class trm:
         tvec = ['ntrac', 'ints', 'x', 'y', 'z']
         for tv in tvec:
             self.__dict__[tv] = runtraj[:][tv]
+        self.ints = self.ints.astype(np.int64)
         self.x = self.x - 1
         self.y = self.y - 1
         self.x[self.x<0] = self.x[self.x<0] + self.imt
@@ -181,6 +196,7 @@ class trm:
         assert self.x.min() <= self.imt
         assert self.y.min() <= self.jmt
         self.intstart = intstart
+        self.jd = (self.ints.astype(float)/60/60/24 + self.base_iso)
         
     def db_insert(self, intstart=0, ftype="run", stype='bin',
                    filename='', db="trm"):        
@@ -228,7 +244,7 @@ class trm:
                 self.__dict__[a] = np.array(res[n])
         #self.ijll()
 
-    def scatter(self,ntrac=None,ints=None,k1=None,k2=None,c="g"):
+    def scatter(self,ntrac=None,ints=None,k1=None,k2=None,c="g",clf=True):
         if not hasattr(self,'mp'):
             self.mp = projmaps.Projmap(self.region)
             self.xll,self.yll = self.mp(self.llon,self.llat)
@@ -238,7 +254,7 @@ class trm:
         if ntrac:
             mask = mask & (self.ntrac==ntrac)
 
-        pl.clf()
+        if clf: pl.clf()
         self.ijll()
         x,y = self.mp(self.lon[mask],self.lat[mask])
 
@@ -262,13 +278,41 @@ class trm:
             pl.title(pl.num2date(jd).strftime("%Y-%m-%d %H:%M"))
         print len(x)
 
-    def movie(self):
+    def movie(self,di=10):
+        mv = anim.Movie()
         ints = np.unique(self.ints)
-        for n,i in enumerate(ints):
-            if i/100 == float(i)/100:
+        for i in ints:
+            if i/di == float(i)/di:
                 self.scatter(ints=i)
-                pl.savefig('trm_mov_%06i.png' % n, dpi=100)
-                print i
+                mv.image()
+        mv.video(self.projname+self.casename+"_mov.mp4")
+
+    def export(self,filename='',filetype="mat"):
+        import scipy.io as sio
+
+        if type(self.intstart) == int:
+            intstart = self.intstart
+        else:
+            instart = self.intstart.min()
+            
+        if not filename:
+            filename = ( "%s_%s_%i_%i_%i_%i_%i.%s" %
+                         (self.projname,self.casename,
+                          intstart,
+                          self.ints.min(),self.ints.max(),
+                          self.ntrac.min(),self.ntrac.max(),filetype)
+                         )
+        sio.savemat(filename, {'ints':self.ints,
+                               'jd':self.jd,
+                               'ntrac':self.ntrac,
+                               'x':self.x,
+
+                               'y':self.y})
+    def ls(self):
+        flist = glob.glob(self.datadir + "/" +
+                          self.projname + self.casename + "*")
+        for f in flist: print f
+
 
 def import_batchrun(batchfile='batch_ints_start.asc'):
     tr = trm('gompom')
@@ -277,13 +321,17 @@ def import_batchrun(batchfile='batch_ints_start.asc'):
         tr.load_to_mysql(int(t))
     tr._enable_indexes()
 
-#def field_recorder(tr,'fld',datadir=
 
-
-
-
-
-
+def movie2(tr1,tr2,di=10):
+    mv = anim.Movie()
+    ints = np.intersect1d(tr1.ints,tr2.ints)
+    for i in ints:
+        if i/di == float(i)/di:
+            tr1.scatter(ints=i,c="b",clf=True)
+            tr2.scatter(ints=i,c="r",clf=False)
+            mv.image()
+    mv.video(tr1.projname + tr1.casename + "_" +
+             tr2.projname + tr2.casename + "_mov.mp4") )
 
 
 
