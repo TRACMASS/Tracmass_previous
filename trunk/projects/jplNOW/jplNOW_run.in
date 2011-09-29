@@ -5,7 +5,7 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'fullrun',
+  caseName     = 'test',
   caseDesc     = 'Looking at chl growth in lagrangian space'/
   ! 
   !
@@ -44,8 +44,8 @@
   !
   startHour         = 0,
   startDay          = 01,
-  startMon          = 11,
-  startYear         = 2008/
+  startMon          = 02,
+  startYear         = 2011/
   !
   !
   &INITRUNWRITE
@@ -62,13 +62,13 @@
   kriva        = 5,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/projData/jplSCB/',
+  inDataDir       = '/projData/jplSCB/NOWCAST/',
   !
   ! === Directory where output files are saved
   outDataDir      = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'jplSCBfullrun',
+  outDataFile     = 'jplNOWtest',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -118,12 +118,12 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 5,		 
+  ist1         = 200,		 
   ist2         = 205,			  
-  jst1         = 5,		 
-  jst2         = 105,		 
-  kst1         = 23,		 
-  kst2         = 23,
+  jst1         = 75,		 
+  jst2         = 125,		 
+  kst1         = 40,		 
+  kst2         = 40,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -163,20 +163,20 @@ $INITRUNEND
   ienw(1) =   1,
   iene(1) =   2,
   jens(1) =   1,
-  jenn(1) = 111,
+  jenn(1) = 257,
 !
   ienw(2) =   1,
-  iene(2) = 111,
-  jens(2) = 210,
-  jenn(2) = 211,
+  iene(2) = 257,
+  jens(2) = 380,
+  jenn(2) = 385,
 !
   ienw(3) =   1,
-  iene(3) = 211,
+  iene(3) = 385,
   jens(3) =   1,
   jenn(3) =   2,
 
-  ienw(4) = 110,
-  iene(4) = 111,
+  ienw(4) = 255,
+  iene(4) = 257,
   jens(4) =   1,
-  jenn(4) = 211,
+  jenn(4) = 385,
   timax =  36500./  ! maximum time length of a trajectory in days

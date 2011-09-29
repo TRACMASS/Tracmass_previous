@@ -14,9 +14,9 @@
   !
 $INITGRIDGRID	
   !
-  IMT      = 211,
-  JMT      = 111,	
-  KM       = 24,
+  IMT      = 385,
+  JMT      = 257,	
+  KM       = 40,
   LBT      = 5,	
   NEND     = 6/              ! NEND = LBT +1
   !
