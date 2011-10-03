@@ -1,7 +1,7 @@
 # Makfile for orc
 #========================================================================
-  INPUT_INT1        = dummy   # Variables set from command line
-  INPUT_INT2        = intrun   # Use 'dummy' if not used.   
+  INPUT_INT1        = startJD   # Variables set from command line
+  INPUT_INT2        = dummy     # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
  fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
 #  fl01   = -Dtimeanalyt    # Stationary time scheme 

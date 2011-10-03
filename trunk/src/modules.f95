@@ -67,13 +67,16 @@ MODULE mod_time
   REAL*8                                    :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
   INTEGER                                   :: currHour, currMin, currSec
-  REAL*8                                    :: startJD=0 ,baseJD=0
+  REAL*8                                    :: startJD=0 ,baseJD=0,ttpart
   INTEGER                                   :: fieldsPerFile
 CONTAINS
   subroutine updateClock  
     USE mod_param
-    currJDtot = (ints-1)*(real(ngcm)/24) 
-    call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
+    USE mod_loopvars
+    ttpart = round((tt/tseas-floor(tt/tseas))*tseas)/tseas 
+    currJDtot = (ints+ttpart-1)*(real(ngcm)/24) 
+
+call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
     currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
     currFrac = (currJDtot-int(currJDtot))*24
     currHour = int(currFrac)

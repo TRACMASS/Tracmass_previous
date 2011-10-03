@@ -46,6 +46,8 @@ SUBROUTINE setupgrid
   map2d    = [3, 4, 1, 2]
   map3d    = [2, 3, 4, 1]
 
+  twritetype = 2
+
   ncTpos = 1
   dxv(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'x_rho')
   dyu(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'y_rho')
