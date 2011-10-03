@@ -504,8 +504,6 @@ SUBROUTINE loop
         end do niterLoop
 #endif
         nout=nout+1
-        
-        call writedata(17)
         nrj(ntrac,6)=1
      end do ntracLoop
      
@@ -1025,8 +1023,6 @@ return
     case (17)
        recPosOut = recPosOut+1
        write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14   
-    case (18)
-       print *,"Case 18"
     case (19)
        recPosOut = recPosOut+1
        write(unit=75 ,rec=recPosOut) ntrac,twrite,x14,y14,z14

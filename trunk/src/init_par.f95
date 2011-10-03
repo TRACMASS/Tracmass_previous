@@ -123,37 +123,29 @@ SUBROUTINE init_params
       READ (8,nml=INITGRIDARC)
    
    CLOSE (8)
-      
-      OPEN (8,file='projects/'//trim(Project)//'/'//trim(Case)//'_run.in',     &
-          & status='OLD', delim='APOSTROPHE')
-         
-         READ (8,nml=INITRUNDESC)
-         READ (8,nml=INITRUNGRID)
-         SELECT CASE (subGrid)
-         
-         CASE (0)
-            
-            PRINT *,'Use the Full grid.'     
-            subGridImin =   1
-            subGridJmin =   1
-            subGridImax = imt
-            subGridJmax = jmt
-       
-         CASE (1)
-    
-            PRINT *,'Use a subgrid: ', subGridImin ,subGridImax, &
-                &   subGridJmin ,subGridJmax
-            imt = subGridImax-subGridImin+1
-            jmt = subGridJmax-subGridJmin+1
-       
-         CASE default
-    
-            PRINT *,'==================== ERROR ===================='
-            PRINT *,'This subGrid selection is not implemented yet.'
-            PRINT *,'subGrid = ' ,subGrid
-            STOP
-         
-         END SELECT
+   OPEN (8,file='projects/'//trim(Project)//'/'//trim(Case)//'_run.in',     &
+        & status='OLD', delim='APOSTROPHE')
+   
+   READ (8,nml=INITRUNDESC)
+   READ (8,nml=INITRUNGRID)
+   SELECT CASE (subGrid)
+   CASE (0)          
+      PRINT *,'Use the Full grid.'     
+      subGridImin =   1
+      subGridJmin =   1
+      subGridImax = imt
+      subGridJmax = jmt 
+   CASE (1)
+      PRINT *,'Use a subgrid: ', subGridImin ,subGridImax, &
+           &   subGridJmin ,subGridJmax
+      imt = subGridImax-subGridImin+1
+      jmt = subGridJmax-subGridJmin+1
+   CASE default
+      PRINT *,'==================== ERROR ===================='
+      PRINT *,'This subGrid selection is not implemented yet.'
+      PRINT *,'subGrid = ' ,subGrid
+      STOP
+   END SELECT
          start1d  = [  1]
          count1d  = [ km]
          start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
@@ -178,13 +170,15 @@ SUBROUTINE init_params
          
       CLOSE (8)
 
-      timax   =  24.*3600.*timax ! convert time lengths from days to seconds
-      dstep   =  1.d0/dble(iter)
-      dtmin   =  dtstep*tseas
-
+      timax    =  24.*3600.*timax ! convert time lengths from days to seconds
+      dstep    =  1.d0/dble(iter)
+      dtmin    =  dtstep*tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
-      startJD  =  jdate(startYear ,startMon ,startDay)
-      
+      startJD  =  jdate(startYear ,startMon ,startDay) + &  
+           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 )
+
+      print *,startJD
+
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
             intmin      = (startJD-baseJD)/(ngcm/24)+1
@@ -192,18 +186,7 @@ SUBROUTINE init_params
             intmin      = int(real(startJD-baseJD)/(real(ngcm)/24)+1)
          END IF
       END IF startYearCond
-      
-      startHourCond: IF ((startHour /= 0) .OR. &
-             &           (startMin  /= 0) .OR. &
-             &           (startSec  /= 0)      ) THEN
-         PRINT *,'------------------------------------------------------'
-         PRINT *,'ERROR!'
-         PRINT *,'------------------------------------------------------'
-         PRINT *,'Fractions of day for start values not implemented yet.'
-         PRINT *,'Email Bror (brorfred@gmail.com) to have it fixed.'
-         STOP 100
-      END IF startHourCond
-  
+ 
       IF ((IARGC() > 1) )  THEN
          CALL getarg(2,inparg)
          factor=1

@@ -42,10 +42,13 @@
   !
  &INITRUNDATE
   !
+  startSec          = 1,
+  startMin          = 0,
+  startHour         = 0,
   startHour         = 0,
   startDay          = 01,
   startMon          = 11,
-  startYear         = 2008/
+  startYear         = 2007/
   !
   !
   &INITRUNWRITE

@@ -42,7 +42,9 @@
   !
  &INITRUNDATE
   !
-  startHour         = 0,
+  startSec          = 00,	
+  startMin          = 25,
+  startHour         = 18,
   startDay          = 01,
   startMon          = 02,
   startYear         = 2011/

@@ -40,16 +40,8 @@ SUBROUTINE setupgrid
 
 
 ! === Template for setting up grids. Move the code from readfile.f95
-
-  start1d  = [  1]
-  count1d  = [ km]
   !Order is     t    k            i            j 
-  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-  count2d  = [  1 ,  1 ,2,2]! subGridImax ,subGridJmax]
   map2d    = [  1 ,  4 ,          2 ,          3]
-
-  start3d  = [  1, subGridImin, subGridJmin,  1]
-  count3d  = [  1, subGridImax, subGridJmax, km]
   map3d    = [2, 3, 4, 1]
 
 
