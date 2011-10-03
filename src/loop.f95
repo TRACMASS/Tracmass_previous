@@ -1,6 +1,5 @@
 SUBROUTINE loop
-!!------------------------------------------------------------------------------
-!!
+!!------------------------------------------------------------------------------!!
 !!
 !!       SUBROUTINE loop:
 !!
@@ -113,16 +112,9 @@ SUBROUTINE loop
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
 
   ! === initialise to zero ===
-!  nev=0
   nrh0=0
-  nout=0
-  nloop=0
-  ndrake=0
   nexit=0
-  nnorth=0
   ntractot=0
-  ngyre=0
-  nerror=0
 #ifdef sediment
   nsed=0
   nsusp=0
@@ -582,32 +574,6 @@ return
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    CONTAINS
      
      subroutine errorCheck(teststr,errCode)
@@ -649,13 +615,12 @@ return
                 print *,'rg*hs=',rg*hs(ib,jb,NST)
                 print *,'rr*hs=',rr*hs(ib,jb,1)
                 print *,'-------------------------------------'
-                !             print *,'The run is terminated'
                 print *,'The trajectory is killed'
                 print *,'====================================='
              end if
              nerror=nerror+1
              errCode = -39
-             stop 40961
+             if (strict==1) stop 40961
              call writedata(40)
              nrj(ntrac,6)=1
           endif          
@@ -881,7 +846,7 @@ return
     INTEGER, SAVE                        :: recPosRun=0 ,recPosErr=0
     INTEGER, SAVE                        :: recPosKll=0
     REAL                                 :: x14 ,y14 ,z14
-    INTEGER*8                            :: twrite
+    REAL*8                               :: twrite
 
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
@@ -957,19 +922,6 @@ return
     case (17)
        write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
             ,temp,salt,dens  
-    case (18)
-       if( kriva.ne.0 .and. ts.eq.dble(idint(ts)) .and. &
-            ints.eq.intstart+intrun) then 
-#if defined tempsalt
-          call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-#endif
-          !write(56,566) ntrac,ints,x1,y1,z1, &
-          !tt/tday,t0/tday,subvol,temp,salt,dens,arct
-!          write(56,566) ntrac,ints,x1,y1,z1, & 
-!               uvel(xf,yf,zf),vvel(xf,yf,zf),vort,temp,salt,dens,arct
-          ! write(56,566) ntrac,niter,x1,y1,z1,tt/3600.,t0/3600.
-          !,subvol,temp,salt,dens,arct
-       endif
     case (19)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
@@ -992,8 +944,11 @@ return
     z14=real(z1,kind=4)
     if (twritetype==1) then
        twrite = tt
+    else if (twritetype==2) then
+       call updateclock
+       twrite = currJDtot
     else
-       twrite = int(ints,kind=8)
+       twrite = real(ints,kind=8)
     end if
     select case (sel)       
     case (10)
@@ -1012,6 +967,7 @@ return
 #endif
 !         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1
+          if (ntrac==500) print *,twrite
           write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
        end if
     case (13)
@@ -1074,9 +1030,9 @@ return
            endif
 #else
            if(ds.eq.dsmin) then ! transform ds to dt in seconds
-            dt=dtmin  ! this makes dt more accurate
+              dt=dtmin  ! this makes dt more accurate
            else
-            dt=ds*dxyz 
+              dt=ds*dxyz 
            endif
 #endif /*regulardt*/
            if(dt.lt.0.d0) then

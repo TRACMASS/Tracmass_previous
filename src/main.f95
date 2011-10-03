@@ -20,15 +20,15 @@ PROGRAM main
   call writesetup
 
   modrundirCond: if(intstep.gt.0) then ! forward 
-     intstart=intmin          
-     intend  =intmax
+     intstart =  intmin          
+     intend   =  intmax
   elseif(intstep.lt.0) then ! backward
-     intstart=intmax
-     intend  =intmin
-     intspin =-intspin
-     intrun  =-intrun    
+     intstart =  intmin+intrun
+     intend   =  intmin
+     intspin  = -intspin
+     intrun   = -intrun    
   end if modrundirCond
-  
+  print *,intmin,intstart,intrun
   call setupgrid
   call init_seed
   

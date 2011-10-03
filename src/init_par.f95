@@ -101,7 +101,6 @@ SUBROUTINE init_params
       CALL getarg(IARGC(),inparg)
       Case = inparg
    END IF
-  
    OPEN (8,file='projects/'//trim(Project)//'/'//trim(Project)//'_grid.in',    &
        & status='OLD', delim='APOSTROPHE')
    
@@ -123,6 +122,9 @@ SUBROUTINE init_params
       READ (8,nml=INITGRIDARC)
    
    CLOSE (8)
+
+   print *,' runfile =  ','projects/'//trim(Project)//'/'//trim(Case)//'_run.in'
+
    OPEN (8,file='projects/'//trim(Project)//'/'//trim(Case)//'_run.in',     &
         & status='OLD', delim='APOSTROPHE')
    
@@ -174,7 +176,7 @@ SUBROUTINE init_params
       dstep    =  1.d0/dble(iter)
       dtmin    =  dtstep*tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
-      startJD  =  jdate(startYear ,startMon ,startDay) + &  
+      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
 
       IF ((IARGC() > 1) )  THEN
@@ -189,7 +191,7 @@ SUBROUTINE init_params
     
       IF ((IARGC() > 2) ) THEN
           ARG_INT2 = 0.1
-         CALL getarg(2,inparg)
+         CALL getarg(3,inparg)
          if ( ARG_INT2 == 0) then
             read( inparg, '(i15)' ) ARG_INT2
          else
@@ -204,7 +206,6 @@ SUBROUTINE init_params
             intmin      = int(real(startJD)/(real(ngcm)/24)+1)
          END IF
       END IF startYearCond
-
 
       ! tseas - the time step between data sets in [s]
       tseas= dble(ngcm)*3600.d0
@@ -255,7 +256,6 @@ SUBROUTINE init_params
     
       ! --- Allocate velocity fields, temperature, salinity, density, --- 
       ! --- sea-surface height, and trajectory data                   ---
-      
       ALLOCATE ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
       ALLOCATE ( hs(imt+1,jmt+1,nst) )
       hs    = 0.
@@ -278,7 +278,6 @@ SUBROUTINE init_params
 #endif
 
       ! --- Allocate Lagrangian stream functions ---
-
 #ifdef streamxy
       ALLOCATE ( stxyy(imt,jmt,lbt), stxyx(imt,jmt,lbt) )
       sxyy=0.
@@ -296,13 +295,11 @@ SUBROUTINE init_params
 #endif
 
       ! --- Allocate tracer data ---
-
 #ifdef tracer
       ALLOCATE ( tra(imt,jmt,km) )
 #endif
 
       ! --- Allocate sedimentation data ---
-
 #ifdef sediment
       ALLOCATE (orb(km) )
 #endif

@@ -95,6 +95,7 @@ SUBROUTINE readfields
      uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k) * dyu
      vflux(:,:,k,2)   = vvel(:,:,k) * dzv(:,:,k) * dxv
   end do
+
   return
 
 

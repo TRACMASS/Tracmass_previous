@@ -29,5 +29,7 @@ def parse(filename):
                 arg = arg.strip().rstrip(',').rstrip('/')
                 var = var.strip()
                 struct.__dict__[curstr][var] = duck(arg)
-                print var,type(arg)
+                struct.__dict__[var] = duck(arg)
+
     return struct
+
