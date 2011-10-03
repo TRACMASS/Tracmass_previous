@@ -177,7 +177,25 @@ SUBROUTINE init_params
       startJD  =  jdate(startYear ,startMon ,startDay) + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
 
-      print *,startJD
+      IF ((IARGC() > 1) )  THEN
+         ARG_INT1 = 0.1
+         CALL getarg(2,inparg)
+         if ( ARG_INT1 == 0) then
+            read( inparg, '(i15)' ) ARG_INT1
+         else
+            read( inparg, '(f15.10)' ) ARG_INT1
+         end if
+      END IF
+    
+      IF ((IARGC() > 2) ) THEN
+          ARG_INT2 = 0.1
+         CALL getarg(2,inparg)
+         if ( ARG_INT2 == 0) then
+            read( inparg, '(i15)' ) ARG_INT2
+         else
+            read( inparg, '(f15.10)' ) ARG_INT2
+         end if
+      END IF
 
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
@@ -186,33 +204,8 @@ SUBROUTINE init_params
             intmin      = int(real(startJD)/(real(ngcm)/24)+1)
          END IF
       END IF startYearCond
- 
-      IF ((IARGC() > 1) )  THEN
-         CALL getarg(2,inparg)
-         factor=1
-         argint1=0
-         DO i=29,1,-1
-            IF (ichar(inparg(i:i)) /= 32) THEN
-               argint1=argint1+(ichar(inparg(i:i))-48)*factor
-               factor=factor*10
-            END IF
-         END DO
-         ARG_INT1=argint1
-      END IF
-    
-      IF ((IARGC() > 2) ) THEN
-         CALL getarg(3,inparg)
-         factor=1
-         argint2=0
-         DO i=29,1,-1
-            IF (ichar(inparg(i:i)) /= 32) THEN
-               argint2=argint2+(ichar(inparg(i:i))-48)*factor
-               factor=factor*10
-            END IF
-         END DO
-         ARG_INT2=argint2
-      END IF
-      
+
+
       ! tseas - the time step between data sets in [s]
       tseas= dble(ngcm)*3600.d0
 
