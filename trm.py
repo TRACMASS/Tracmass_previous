@@ -12,7 +12,7 @@ import pycdf
 #from pyhdf.SD import SD,SDC
 
 import anim
-import namelist
+import namelist as nlt
 import lldist
 import projmaps
 from hitta import GrGr
@@ -20,7 +20,7 @@ from hitta import GrGr
 class trm:
     """ main class for TRACMASS data manipulation"""
     def __init__(self,projname,casename="",datadir="/Users/bror/ormOut/", 
-                 ormdir="/Users/bror/svn/orm"):
+                 datafile="", ormdir="/Users/bror/git/orm"):
         self.projname = projname
         if len(casename) == 0:
             self.casename = projname
@@ -35,6 +35,15 @@ class trm:
                                 db = "partsat")
         self.c = conn.cursor ()
         self.tablename = "partsat.%s%s" % (projname ,casename)
+
+        self.nlgrid = nlt.parse('/%s/projects/%s/%s_grid.in' %
+                                (self.ormdir,self.projname,self.projname))
+        self.nlrun = nlt.parse('/%s/projects/%s/%s_run.in' %
+                               (self.ormdir,self.projname,self.casename))
+        if datafile:
+            self.datafile = datafile
+        else:
+            self.datafile=self.nlrun.outDataFile
 
         if projname == 'oscar':
             import oscar
@@ -86,13 +95,17 @@ class trm:
             self.landmask = self.gcm.landmask
             self.llon = self.gcm.llon
             self.llat = self.gcm.llat
-            self.imt = 385
-            self.jmt = 257
+            self.imt = self.nlgrid.IMT
+            self.jmt = self.nlgrid.JMT
             self.region = "scb"
-            self.base_iso = pl.date2num(dtm(2001,1,1))-3./24
+            self.base_iso = pl.date2num(dtm(
+                self.nlgrid.baseYear,
+                self.nlgrid.baseMon,
+                self.nlgrid.baseDay))-1
+            
+
     def ijll(self,ps=None):
         from scipy.ndimage.interpolation import map_coordinates
-
         self.lon = map_coordinates(self.llon, [self.y,self.x])
         self.lat = map_coordinates(self.llat, [self.y,self.x])
         self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
@@ -168,11 +181,14 @@ class trm:
             #self.create_indexes()
         self.c.execute(DL)
 
-    def load(self, intstart=0, ftype="run", stype='bin', filename=''):
+    def load(self, jdstart=0, intstart=0,
+             ftype="run", stype='bin', filename=''):
         """Load a tracmass output file. Add data to class instance."""
-        if intstart != 0:
-            filename = ("%s%s%08i_%s.%s" %
-                        (self.projname,self.casename,intstart,ftype,stype) )
+        if jdstart != 0:
+            ints = (jdstart+self.base_iso) * 24./self.nlgrid.ngcm  + 1
+            filename = ("%s%08i_%s.%s" % (self.datafile,ints,ftype,stype))
+        elif intstart != 0:
+            filename = ("%s%08i_%s.%s" % (self.datafile,intstart,ftype,stype))
         elif filename == '':
             print (self.datadir + self.casename +
                                  "*" + ftype)
@@ -187,7 +203,7 @@ class trm:
         tvec = ['ntrac', 'ints', 'x', 'y', 'z']
         for tv in tvec:
             self.__dict__[tv] = runtraj[:][tv]
-        self.ints = self.ints.astype(np.int64)
+        #self.ints = self.ints.astype(np.int64)
         self.x = self.x - 1
         self.y = self.y - 1
         self.x[self.x<0] = self.x[self.x<0] + self.imt
@@ -280,8 +296,9 @@ class trm:
 
     def movie(self,di=10):
         mv = anim.Movie()
-        ints = np.unique(self.ints)
+        ints = np.sort(np.unique(self.ints))
         for i in ints:
+            print i-ints[0]
             if i/di == float(i)/di:
                 self.scatter(ints=i)
                 mv.image()
@@ -324,14 +341,14 @@ def import_batchrun(batchfile='batch_ints_start.asc'):
 
 def movie2(tr1,tr2,di=10):
     mv = anim.Movie()
-    ints = np.intersect1d(tr1.ints,tr2.ints)
+    ints = np.intersect1d(tr1.ints,tr2.ints).sort()
     for i in ints:
         if i/di == float(i)/di:
             tr1.scatter(ints=i,c="b",clf=True)
             tr2.scatter(ints=i,c="r",clf=False)
             mv.image()
     mv.video(tr1.projname + tr1.casename + "_" +
-             tr2.projname + tr2.casename + "_mov.mp4") )
+             tr2.projname + tr2.casename + "_mov.mp4")
 
 
 
