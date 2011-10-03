@@ -60,14 +60,14 @@ MODULE mod_time
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
   INTEGER                                   :: startYear ,startMon ,startDay
   INTEGER                                   :: startHour ,startMin ,startSec
-  INTEGER                                   :: iyear     ,imon     ,iday ,ihour
-  INTEGER                                   :: iyear0    ,imon0    ,iday0 
-  INTEGER                                   :: yearmin   ,yearmax
+  INTEGER                                   :: iyear ,imon ,iday ,ihour
+  INTEGER                                   :: iyear0 ,imon0 ,iday0 
+  INTEGER                                   :: yearmin ,yearmax
   INTEGER*8                                 :: ntime
   REAL*8                                    :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
   INTEGER                                   :: currHour, currMin, currSec
-  REAL*8                                    :: startJD   ,baseJD
+  REAL*8                                    :: startJD=0 ,baseJD=0
   INTEGER                                   :: fieldsPerFile
 CONTAINS
   subroutine updateClock  
