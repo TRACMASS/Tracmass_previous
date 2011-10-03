@@ -1,4 +1,6 @@
 *.o
 *.mod
+*.pyc
+*.log
 runtraj
 Makefile
