@@ -64,30 +64,35 @@ MODULE mod_time
   INTEGER                                   :: iyear0    ,imon0    ,iday0 
   INTEGER                                   :: yearmin   ,yearmax
   INTEGER*8                                 :: ntime
-  INTEGER                                   :: currJDtot ,currJDyr
+  REAL*8                                    :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
   INTEGER                                   :: currHour, currMin, currSec
-  INTEGER                                   :: startJD   ,baseJD
+  REAL*8                                    :: startJD   ,baseJD
   INTEGER                                   :: fieldsPerFile
 CONTAINS
   subroutine updateClock  
     USE mod_param
-    currJDtot = int((ints-1)*(real(ngcm)/24)+1)
+    currJDtot = ((ints-1)*(real(ngcm)/24)+1) 
     call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
     currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
-    currHour = int(((ints-intmin)/(24./ngcm)-floor(real(ints-intmin)/ &
-         (24./ngcm)))*24)
-
+    currFrac = (currJDtot-int(currJDtot))*24
+    currHour = int(currFrac)
+    currFrac = (currFrac - currHour) * 60
+    CurrMin  = int(currFrac)
+    currSec  = int((currFrac - currMin) * 60)
   end subroutine updateClock
   
-  subroutine gdate (jd, year,month,day)
+  subroutine gdate (rjd, year,month,day)
     !                                                                      
     !---computes the gregorian calendar date (year,month,day)              
     !   given the julian date (jd).                                        
     !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
-    INTEGER                                  :: jd ,year ,month ,day
+    REAL*8                                   :: rjd
+    INTEGER                                  :: jd
+    INTEGER                                  :: year ,month ,day
     INTEGER                                  :: i ,j ,k ,l ,n
     
+    jd = int(rjd)
     l= jd+68569
     n= 4*l/146097
     l= l-(146097*n+3)/4
@@ -135,7 +140,6 @@ MODULE mod_grid
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
-
 
   REAL*8                                    :: rmin ,tmin ,smin
   REAL*8                                    :: dr ,dtemp ,dsalt
