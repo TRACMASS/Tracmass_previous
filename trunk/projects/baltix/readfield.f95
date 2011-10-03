@@ -159,9 +159,12 @@ END IF alloCondUVW
 !!------------------------------------------------------------------------------
    
    ntime=1000000*iyear+10000*imon+100*iday+ihour
+   
+!   print *,'ntime=',ntime
+!   print *,'ntempus(imon,iday,ihour)=',ntempus(imon,iday,ihour)
 
    ! === 1 Jan at 00:00 is named as 31 Dec 24:00 the previous year ===
-   IF (imon == 1 .AND. iday == 1 .AND. ihour == 0) THEN
+   IF (imon == 1 .AND. iday == 1 .AND. ihour == 0 ) THEN
       
       IF (idmax (2,iyear) == 29) THEN
          dataprefix='2927_BALTIX4_3h_xxxx0101_xxxx1231_grid_'
@@ -216,6 +219,7 @@ END IF alloCondUVW
    END IF
 
    fieldFile = trim(inDataDir)//trim(dataprefix)
+   dataprefix = '1984/'//trim(dataprefix)
    nread=1
    start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
    start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
@@ -261,8 +265,12 @@ END IF alloCondUVW
       PRINT*,NF90_STRERROR (ierr)
       STOP
    END IF
-   
-   hs(:,:,2) = temp2d_simp(:,:)
+
+   DO ji=1,IMT
+      DO jj=1,JMT
+   		hs(ji,jj,2) = temp2d_simp(ji,jj)
+      END DO
+   END DO
 
 #ifdef tempsalt 
 
@@ -483,9 +491,9 @@ END IF alloCondUVW
          DO jk=1,KM
             ik = KM+1-jk
             IF (kmt(ji,jj) == ik) THEN
-               dztb(ji,jj,1) = dztb(ji,jj,1) * ( zw(kmt(ji,jj))+hs(ji,jj,2) )  &
+               dztb(ji,jj,2) = dztb(ji,jj,1) * ( zw(kmt(ji,jj))+hs(ji,jj,2) )  &
                &               / zw(kmt(ji,jj))
-               dzt(ji,jj,jk,2) = dztb(ji,jj,1)
+               dzt(ji,jj,jk,2) = dztb(ji,jj,2)
             ELSE IF (kmt(ji,jj) /= 0) THEN
                dzt(ji,jj,jk,2) = dz(jk)
                dzt(ji,jj,jk,2) = dzt(ji,jj,jk,2) *                             &

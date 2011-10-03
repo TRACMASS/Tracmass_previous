@@ -2,12 +2,12 @@
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-#   fl01   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
+   fl01   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
 #  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
-#   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-#   fl03   = -Dtempsalt       # Include temp and salt
-#   fl04   = -Dtextwrite      # Write results to textfile
+   fl03   = -Dtempsalt       # Include temp and salt
+   fl04   = -Dtextwrite      # Write results to textfile
 #  fl05   = -Dbinwrite       # Write results to binaryfile
 #  fl06   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
@@ -24,11 +24,11 @@
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-#   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
+   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
 #  fl17  = -Dfreesurface    # Variable bottom box to match actual depth
 #  fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
 #  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
-#  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
 #  fl20  = -Dselect         # Select only one trajectory (for debugging)
 #  fl21  = -Dtracer         # Stores a simulated tracer
@@ -40,5 +40,9 @@
 #------------------------------------------------------------------------
 #   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
+ORM_FLAGS= -D$(PROJECT) \
+$(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)$(fl07)$(fl08)$(fl09)$(fl10)\
+$(fl11)$(fl12)$(fl13)$(fl14)$(fl15)$(fl16)$(fl17)$(fl18)$(fl19)$(fl20)\
+$(fl21)$(fl22)$(fl23)$(fl24)$(fl25)$(fl26)$(fl27)$(fl28)$(fl29)$(fl30)\
 
-ORM_FLAGS= -Dbaltix -Dtimestep -Dregulardt -Dtempsalt -Dtextwrite -Dinitxyt -Dtwodim -Dvarbottombox -Dzgrid3Dt -Dturb -Ddrifter
+#ORM_FLAGS= -Dbaltix -Dtimestep -Dregulardt -Dtempsalt -Dtextwrite -Dinitxyt -Dtwodim -Dvarbottombox -Dzgrid3Dt -Dturb -Ddrifter

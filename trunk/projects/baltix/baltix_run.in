@@ -45,8 +45,8 @@
 !!------------------------------------------------------------------------------
 &INITRUNTIME
    intmin  = 1,
-   intspin = 10,
-   intrun  = 10,
+   intspin = 1,
+   intrun  = 1000,
    intstep = 1/
 !!
 !!------------------------------------------------------------------------------
@@ -54,9 +54,9 @@
 !!------------------------------------------------------------------------------
 &INITRUNDATE
    startHour         = 0,
-   startDay          = 1,
+   startDay          = 2,
    startMon          = 1,
-   startYear         = 1981/
+   startYear         = 1984/
 !!
 !!------------------------------------------------------------------------------
 !! --- Set up the process of writing trajectory output ---
@@ -85,9 +85,13 @@
    ncoor            =  1,  
    kriva            =  5,
    inDataDir        =  '/Users/Jocke/Public/data/baltix/',
+   inDataDir        =  '/Users/doos/data/baltix/',
    outDataDir       =  '/Users/Jocke/Public/data/baltix/',
+   outDataDir       =  '/Users/doos/data/baltix/data_out/',
    topoDataDir      =  '/Users/Jocke/Public/data/baltix/topo/',
+   topoDataDir      =  '/Users/doos/data/baltix/topo/',
    outDataFile      =  'baltix_drifter_sim',
+   outDataFile      =  'testae2',
    intminInOutFile  =  0/
 !!
 !!------------------------------------------------------------------------------
@@ -160,19 +164,19 @@
    isec        = 4,
    idir        = 0,
    nqua        = 4, 
-   partQuant   = 4,
-   seedType    = 2,
-   seedPos     = 2,
-   seedTime    = 2,
-   seedAll     = 2,
-   ist1        = 440,		 
-   ist2        = 440,		 
-   jst1        = 300,		 
-   jst2        = 300,		 
-   kst1        =  1,  
-   kst2        =  84,
-   tst1        = 1981010106,
-   tst2        = 1981010112, 
+   partQuant   = 1,
+   seedType    = 1, !2,
+   seedPos     = 1, !2,
+   seedTime    = 1, !2,
+   seedAll     = 1, !2,
+   ist1        = 100,		 
+   ist2        = 600,		 
+   jst1        =   1,		 
+   jst2        = 500,		 
+   kst1        =   1,  
+   kst2        =  80,
+   tst1        = 1984010101, ! 1981010106,
+   tst2        = 1984120106, ! 1981010112,
    varSeedFile = 0,
    seedFile    = '/Users/Jocke/Public/kristofers_drifters/xyz_start_2001.txt.perturbed',
    timeFile    = '/Users/Jocke/Public/kristofers_drifters/xyz_start_2001.txt.perturbed' /
@@ -252,7 +256,7 @@
 !! timax               :  Maximum life time of trajectory in days
 !!------------------------------------------------------------------------------
 &INITRUNEND
-   timax        =  12./
+   timax        =  3656./
 
 !!------------------------------------------------------------------------------   
 !!------------------------------------------------------------------------------

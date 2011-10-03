@@ -25,6 +25,7 @@ contains
     INTEGER                                    :: ia, iam, ja, ka
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens
+    REAL*8                                     :: thicka,thickb
     REAL*8, INTENT(IN)                         :: x0, y0, z0
     REAL*8, INTENT(OUT)                        :: x1, y1, z1
         
@@ -49,7 +50,7 @@ contains
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) 
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr)
 #endif /*timeanalyt*/
-!       scrivi=.true.
+
 #ifdef streamr
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
@@ -268,6 +269,23 @@ contains
        endif
 #endif
     endif
+    
+    
+! This is just a try and needs to be implemented and tested thoroughly
+#ifdef zgrid3Dt || zgrid3D
+! depth conversion for bottom box
+       if(ds.eq.dse .and. ds.eq.dsw .and. ds.eq.dsn .and. ds.eq.dss .and. ka == kmv(ia,ja)) then
+#ifdef zgrid3Dt 
+        rg=1.d0-rr
+        thicka=rg*dzt(ia,ja,ka,NST)+rr*dzt(ia,ja,ka,1)
+        thickb=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
+#elif  zgrid3D
+        thicka=dzt(ia,ja,ka)
+        thickb=dzt(ib,jb,kb)
+#endif /*zgrid3Dt*/
+	    z1=dble(int(z1)+1) - (dble(int(z1)+1)-z1) * thickb/thicka
+	   endif
+#endif
     
   end subroutine pos
   
