@@ -175,15 +175,15 @@ SUBROUTINE init_params
       dtmin    =  dtstep*tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + &  
-           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 )
+           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
 
       print *,startJD
 
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
-            intmin      = (startJD-baseJD)/(ngcm/24)+1
+            intmin      = (startJD)/(ngcm/24)+1
          ELSE ! this is a quick fix to avoid division by zero when ngcm < 24
-            intmin      = int(real(startJD-baseJD)/(real(ngcm)/24)+1)
+            intmin      = int(real(startJD)/(real(ngcm)/24)+1)
          END IF
       END IF startYearCond
  

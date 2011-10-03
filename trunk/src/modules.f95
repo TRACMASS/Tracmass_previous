@@ -72,7 +72,7 @@ MODULE mod_time
 CONTAINS
   subroutine updateClock  
     USE mod_param
-    currJDtot = ((ints-1)*(real(ngcm)/24)+1) 
+    currJDtot = (ints-1)*(real(ngcm)/24) 
     call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
     currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
     currFrac = (currJDtot-int(currJDtot))*24

@@ -57,6 +57,11 @@ SUBROUTINE readfields
   call datasetswap !Copy field(t+1) to field(t).
   call updateClock
 
+  print *,startJD
+  print *,currJDtot
+  print *,ints
+  stop
+
   ! === update the time counting ===
   intpart1    = mod(ints,24)
   intpart2    = floor((ints)/24.)
