@@ -91,7 +91,7 @@
    topoDataDir      =  '/Users/Jocke/Public/data/baltix/topo/',
    topoDataDir      =  '/Users/doos/data/baltix/topo/',
    outDataFile      =  'baltix_drifter_sim',
-   outDataFile      =  'testae2',
+   outDataFile      =  'testae1',
    intminInOutFile  =  0/
 !!
 !!------------------------------------------------------------------------------

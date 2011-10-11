@@ -39,7 +39,7 @@ SUBROUTINE readfields
 
 !!------------------------------------------------------------------------------
 
-   INTEGER                                      :: ji, jj, jk, ik, ntrac,      &
+   INTEGER                                      :: ji, jj, jk, ik,             &
    &                                               jhour, jday, jmon, jyear,   &
    &                                               kbot,ktop, ntempusb,nread
    INTEGER, PARAMETER                           :: IMTG = 619,                 &
@@ -348,6 +348,29 @@ END IF alloCondUVW
 #endif     
 
 !!------------------------------------------------------------------------------
+   ! Compute the level thickness of all boxes tking account of the z-star coordinates
+   ! withayer thicknesses dz* = dz (H+ssh)/H and the variable bottom box
+hs=0. ! to be commented out =0 just for the test case <----------------------------- ta bort!!!!!
+   DO ji=1,IMT
+      DO jj=1,JMT
+         DO jk=1,KM
+            ik = KM+1-jk
+            IF (kmt(ji,jj) == ik) THEN ! for the bottom box
+               dztb(ji,jj,2) = dztb(ji,jj,1) * ( zw(kmt(ji,jj))+hs(ji,jj,2) )  &
+               &               / zw(kmt(ji,jj))
+               dzt(ji,jj,jk,2) = dztb(ji,jj,2)
+            ELSE IF (kmt(ji,jj) /= 0) THEN ! for the levels above the bottom box
+               dzt(ji,jj,jk,2) = dz(jk) *                                       &
+               &                 (zw(kmt(ji,jj)) + hs(ji,jj,2)) / zw(kmt(ji,jj))
+            ELSE
+               dzt(ji,jj,jk,2) = 0.
+            END IF
+         END DO
+      END DO
+   END DO
+
+
+!!------------------------------------------------------------------------------
 
    dmult = 1. ! amplification of the velocity amplitude by simple multiplication
 
@@ -401,7 +424,7 @@ END IF alloCondUVW
             ik=KM+1-jk
             dd = dz(ik)
             IF (jk == kmu(ji,jj)) THEN
-               dd = MIN (dztb(ji,jj,2),dztb(ji+1,jj,2))
+               dd = MIN (dztb(ji,jj,1),dztb(ji+1,jj,1))
             ENDIF
             IF (kmu(ji,jj) <= 0) THEN
                dd = 0.
@@ -466,7 +489,7 @@ END IF alloCondUVW
             ik = KM+1-jk
             dd = dz(ik)
             IF (jk == kmv(ji,jj)) THEN
-               dd = MIN (dztb(ji,jj,2),dztb(ji,jj+1,2))
+               dd = MIN (dztb(ji,jj,1),dztb(ji,jj+1,1))
             END IF
             IF (kmv(ji,jj) <= 0) THEN
                dd = 0.
@@ -480,30 +503,6 @@ END IF alloCondUVW
       END DO
    END DO
 
-!!------------------------------------------------------------------------------
-!!------------------------------------------------------------------------------
-
-
-   ! Compute z-star coordinates
-   ! Layer thicknesses dz* = dz (H+ssh)/H 
-   DO ji=1,IMT
-      DO jj=1,JMT
-         DO jk=1,KM
-            ik = KM+1-jk
-            IF (kmt(ji,jj) == ik) THEN
-               dztb(ji,jj,2) = dztb(ji,jj,1) * ( zw(kmt(ji,jj))+hs(ji,jj,2) )  &
-               &               / zw(kmt(ji,jj))
-               dzt(ji,jj,jk,2) = dztb(ji,jj,2)
-            ELSE IF (kmt(ji,jj) /= 0) THEN
-               dzt(ji,jj,jk,2) = dz(jk)
-               dzt(ji,jj,jk,2) = dzt(ji,jj,jk,2) *                             &
-               &                 (zw(kmt(ji,jj)) + hs(ji,jj,2)) / zw(kmt(ji,jj))
-            ELSE
-               dzt(ji,jj,jk,2) = 0.
-            END IF
-         END DO
-      END DO
-   END DO
 
 !!------------------------------------------------------------------------------
 

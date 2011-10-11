@@ -10,7 +10,7 @@ MODULE mod_param
 #else
   INTEGER, PARAMETER                        :: LOV=1
 #endif
-  INTEGER                                   :: ncoor,kriva,iter,ngcm
+  INTEGER                                   :: ncoor,kriva,iter,ngcm,ntrac
   INTEGER                                   :: twritetype = 0
   REAL*8                                    :: tseas,tday,tyear,dtmin,voltr
   REAL*8                                    :: tstep,dstep,tss,partQuant
