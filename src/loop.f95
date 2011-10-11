@@ -72,7 +72,7 @@ SUBROUTINE loop
   INTEGER                                    :: ib, jb, kb, ibm
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: niter
-  INTEGER                                    :: ntrac,nrh0=0
+  INTEGER                                    :: nrh0=0
 
   ! Counters
   INTEGER                                    :: nout=0, nloop=0, nerror=0
@@ -996,15 +996,18 @@ return
     dxyz=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
 #elif  zgrid3D
     dxyz=dzt(ib,jb,kb)
+#ifdef freesurface
+    if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+#endif /*freesurface*/
 #else
     dxyz=dz(kb)
-#endif /*zgrid3Dt*/
 #ifdef varbottombox
     if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
     if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
 #endif /*freesurface*/
+#endif /*zgrid3Dt*/
     dxyz=dxyz*dxdy(ib,jb)
     if (dxyz<0) then
        print *,'====================================='

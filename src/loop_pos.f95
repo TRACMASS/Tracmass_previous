@@ -22,7 +22,7 @@ contains
     
     INTEGER                                    :: mra,mta,msa
     REAL                                       :: uu
-    INTEGER                                    :: ia, iam, ja, ka
+    INTEGER                                    :: ia, iam, ja, ka,k
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens
     REAL*8                                     :: thicka,thickb
@@ -32,7 +32,7 @@ contains
     ! === calculate the new positions ===
     ! === of the trajectory           ===    
     scrivi=.false.
-    if(ds.eq.dse) then ! eastward grid-cell exit 
+    if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
        uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
 #ifdef turb    
@@ -67,7 +67,7 @@ contains
 #endif /*streamr*/
        call savepsi(ia,ja,ka,mra,mta,msa,1,1,real(subvol*ff))
         
-    elseif(ds.eq.dsw) then ! westward grid-cell exit
+    elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
        uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
 #ifdef turb    
@@ -101,7 +101,7 @@ contains
 #endif /*streamr*/
        call savepsi(iam,ja,ka,mra,mta,msa,1,-1,real(subvol*ff))
 
-    elseif(ds.eq.dsn) then ! northward grid-cell exit
+    elseif(ds==dsn) then ! northward grid-cell exit
        
        scrivi=.false.
        uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
@@ -135,7 +135,7 @@ contains
 #endif /*streamr*/
        call savepsi(ia,ja,ka,mra,mta,msa,2,1,real(subvol*ff))
 
-    elseif(ds.eq.dss) then ! southward grid-cell exit
+    elseif(ds==dss) then ! southward grid-cell exit
        
        scrivi=.false.
        uu=(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
@@ -145,7 +145,7 @@ contains
        if(uu.lt.0.d0) then
           jb=ja-1
 #ifndef ifs 
-        if(jb.eq.0) stop 34578
+        if(jb==0) stop 34578
 #endif
        endif
        y1=dble(ja-1)
@@ -172,7 +172,7 @@ contains
 #endif /*streamr*/
        call savepsi(ia,ja-1,ka,mra,mta,msa,2,-1,real(subvol*ff))
        
-    elseif(ds.eq.dsu) then ! upward grid-cell exit
+    elseif(ds==dsu) then ! upward grid-cell exit
        
        scrivi=.false.
        call vertvel(rb,ia,iam,ja,ka)
@@ -188,7 +188,7 @@ contains
           kb=ka+1
        endif
        z1=dble(ka)
-       if(kb.eq.KM+1) then  ! prevent "evaporation"
+       if(kb==KM+1) then  ! prevent "evaporation"
           !                 nev=nev+1
           kb=KM
           z1=dble(KM)-0.5d0
@@ -200,7 +200,7 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr)
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr)
 #endif
-    elseif(ds.eq.dsd) then ! downward grid-cell exit
+    elseif(ds==dsd) then ! downward grid-cell exit
        scrivi=.false.
        call vertvel(rb,ia,iam,ja,ka)
        
@@ -218,7 +218,7 @@ contains
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr)
 #endif
 #ifdef sediment
-       if(kb.eq.KM-kmt(ia,ja)) then
+       if(kb==KM-kmt(ia,ja)) then
           nsed=nsed+1
           nrj(ntrac,6)=2
           trj(ntrac,1)=x1
@@ -238,7 +238,7 @@ contains
        endif
 #endif
        
-    elseif( ds.eq.dsc .or. ds.eq.dsmin) then  
+    elseif( ds==dsc .or. ds==dsmin) then  
        ! shortest time is the time-steping 
        scrivi=.true.
 #ifdef timeanalyt
@@ -248,8 +248,8 @@ contains
 #else           
        ! If there is no spatial solution, 
        ! which should correspond to a convergence zone
-       if(dse.eq.UNDEF .and. dsw.eq.UNDEF .and. dsn.eq.UNDEF .and. & 
-            dss.eq.UNDEF .and. dsu.eq.UNDEF .and. dsd.eq.UNDEF ) then
+       if(dse==UNDEF .and. dsw==UNDEF .and. dsn==UNDEF .and. & 
+          dss==UNDEF .and. dsu==UNDEF .and. dsd==UNDEF ) then
           
           ! move if atmosphere, freeze if ocean
           ib=ia ; jb=ja ; kb=ka
@@ -272,9 +272,11 @@ contains
     
     
 ! This is just a try and needs to be implemented and tested thoroughly
-#ifdef zgrid3Dt || zgrid3D
+#ifdef baltix
 ! depth conversion for bottom box
-       if(ds.eq.dse .and. ds.eq.dsw .and. ds.eq.dsn .and. ds.eq.dss .and. ka == kmv(ia,ja)) then
+#ifdef varbottombox
+       if(  (ds==dse .or. ds==dsw .or. ds==dsn .or. ds==dss)  .and.  &
+            (ka==KM-kmv(ia,ja) .or. ka==KM-kmv(ib,jb))  ) then
 #ifdef zgrid3Dt 
         rg=1.d0-rr
         thicka=rg*dzt(ia,ja,ka,NST)+rr*dzt(ia,ja,ka,1)
@@ -282,10 +284,31 @@ contains
 #elif  zgrid3D
         thicka=dzt(ia,ja,ka)
         thickb=dzt(ib,jb,kb)
+#else
+ stop 4967
 #endif /*zgrid3Dt*/
+print *,'ds,dse,dsw,dsn,dss=',ds,dse,dsw,dsn,dss
+print *,'kmv(ia,ja)=',kmv(ia,ja),KM-kmv(ia,ja)
+print *,'kmv(ib,jb)=',kmv(ib,jb),KM-kmv(ib,jb)
+print *,'dzt(ia,ja,ka,NST)=',dzt(ia,ja,ka,NST)
+print *,'dzt(ia,ja,ka,1)=',dzt(ia,ja,ka,1)
+print *,'dzt(ib,jb,kb,NST)=',dzt(ib,jb,kb,NST)
+print *,'dzt(ib,jb,kb,1)=',dzt(ib,jb,kb,1)
+print *,'x0,y0,z0=',x0,y0,z0
+print *,'x1,y1,z1=',x1,y1,z1
+print *,'thickb,thicka,thickb/thicka=',thickb,thicka,thickb/thicka
 	    z1=dble(int(z1)+1) - (dble(int(z1)+1)-z1) * thickb/thicka
+print *,'som blir z1=',z1
+print *,'ia,ja,ka=',ia,ja,ka
+print *,'ib,jb,kb=',ib,jb,kb
+print *,'ntrac=',ntrac
+print *,(dzt(ib,jb,k,2),k=kb-10,KM)
+if(ka.gt.KM-10) stop 11111
 	   endif
-#endif
+
+#endif /*varbottombox*/
+#endif /*baltix*/
+
     
   end subroutine pos
   
