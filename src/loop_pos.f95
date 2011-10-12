@@ -287,23 +287,25 @@ contains
 #else
  stop 4967
 #endif /*zgrid3Dt*/
-print *,'ds,dse,dsw,dsn,dss=',ds,dse,dsw,dsn,dss
-print *,'kmv(ia,ja)=',kmv(ia,ja),KM-kmv(ia,ja)
-print *,'kmv(ib,jb)=',kmv(ib,jb),KM-kmv(ib,jb)
-print *,'dzt(ia,ja,ka,NST)=',dzt(ia,ja,ka,NST)
-print *,'dzt(ia,ja,ka,1)=',dzt(ia,ja,ka,1)
-print *,'dzt(ib,jb,kb,NST)=',dzt(ib,jb,kb,NST)
-print *,'dzt(ib,jb,kb,1)=',dzt(ib,jb,kb,1)
-print *,'x0,y0,z0=',x0,y0,z0
-print *,'x1,y1,z1=',x1,y1,z1
-print *,'thickb,thicka,thickb/thicka=',thickb,thicka,thickb/thicka
-	    z1=dble(int(z1)+1) - (dble(int(z1)+1)-z1) * thickb/thicka
-print *,'som blir z1=',z1
-print *,'ia,ja,ka=',ia,ja,ka
-print *,'ib,jb,kb=',ib,jb,kb
-print *,'ntrac=',ntrac
-print *,(dzt(ib,jb,k,2),k=kb-10,KM)
-if(ka.gt.KM-10) stop 11111
+	z1=z1 + (z1-dble(int(z1)))*(thickb-thicka)/thickb
+
+!if(1.eq.0 .and. ka.gt.KM-10 .and. dzt(ib,jb,KM-kmv(ib,jb),2).ne.dz(KM-kmv(ib,jb))) then
+!print *,'ds,dse,dsw,dsn,dss=',ds,dse,dsw,dsn,dss
+!print *,'kmv(ia,ja)=',kmv(ia,ja),KM-kmv(ia,ja)
+!print *,'kmv(ib,jb)=',kmv(ib,jb),KM-kmv(ib,jb)
+!print *,'kmt=',KM-kmt(ia,ja),KM-kmt(ib,jb)
+!print *,'dzt(ia,ja,ka,NST)=',dzt(ia,ja,ka,NST)
+!print *,'dzt(ia,ja,ka,1)=',dzt(ia,ja,ka,1)
+!print *,'dzt(ib,jb,kb,NST)=',dzt(ib,jb,kb,NST)
+!print *,'dzt(ib,jb,kb,1)=',dzt(ib,jb,kb,1)
+!print *,'x0,y0,z0=',x0,y0,z0
+!print *,'x1,y1,z1=',x1,y1,z1
+!print *,'thickb,thicka,thickb/thicka=',thickb,thicka,thickb/thicka
+!print *,z0,'som blir z1=',z1
+!print *,'ia,ja,ka=',ia,ja,ka
+!print *,'ib,jb,kb=',ib,jb,kb
+!print *,'ntrac=',ntrac
+!endif
 	   endif
 
 #endif /*varbottombox*/
