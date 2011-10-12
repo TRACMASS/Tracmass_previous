@@ -140,7 +140,7 @@ SUBROUTINE setupgrid
       dz(kk)=zw(k)
       zw(k)=zw(k)+zw(k-1)
   end do
-
+  
   ! dz is independent of x,y except at bottom
   do j=1,JMT
       do i=1,IMT
@@ -149,6 +149,8 @@ SUBROUTINE setupgrid
           endif
       enddo
   enddo
+  
+  dztb(:,:,2)=dztb(:,:,1)  ! this and the third "time" dimension is probably unnecessary
 
 ! ===============================================
 

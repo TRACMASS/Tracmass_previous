@@ -47,7 +47,7 @@ SUBROUTINE readfields
                                                     KMM = 84
    INTEGER, DIMENSION(1:12,1:31,0:21), SAVE     :: ntempus
    
-   REAL*4                                       :: dd,dmult,uint,vint,zint
+   REAL*4                                       :: dd,dmult,uint,vint,zint,hu,hv
    REAL*4,  ALLOCATABLE, DIMENSION(:,:)         :: temp2d_simp
    REAL*4,  ALLOCATABLE, DIMENSION(:,:,:)       :: temp3d_simp
 #ifdef tempsalt
@@ -350,15 +350,18 @@ END IF alloCondUVW
 !!------------------------------------------------------------------------------
    ! Compute the level thickness of all boxes tking account of the z-star coordinates
    ! withayer thicknesses dz* = dz (H+ssh)/H and the variable bottom box
-hs=0. ! to be commented out =0 just for the test case <----------------------------- ta bort!!!!!
+!hs=0. ! to be commented out =0 just for the test case <----------------------------- ta bort!!!!!
    DO ji=1,IMT
       DO jj=1,JMT
+       if( kmt(ji,jj) /= 0) then
+!        if(  dztb(ji,jj,1) /= dz(KM+1-kmt(ji,jj)) ) print *,ji,jj,dztb(ji,jj,1),dz(KM+1-kmt(ji,jj))
+!        print *,ji,jj,kmt(ji,jj),dztb(ji,jj,1)-dz(KM+1-kmt(ji,jj))
+       endif
          DO jk=1,KM
             ik = KM+1-jk
             IF (kmt(ji,jj) == ik) THEN ! for the bottom box
-               dztb(ji,jj,2) = dztb(ji,jj,1) * ( zw(kmt(ji,jj))+hs(ji,jj,2) )  &
-               &               / zw(kmt(ji,jj))
-               dzt(ji,jj,jk,2) = dztb(ji,jj,2)
+               dzt(ji,jj,jk,2) = dztb(ji,jj,1) *                               &
+               &                 (zw(kmt(ji,jj)) + hs(ji,jj,2)) / zw(kmt(ji,jj))
             ELSE IF (kmt(ji,jj) /= 0) THEN ! for the levels above the bottom box
                dzt(ji,jj,jk,2) = dz(jk) *                                       &
                &                 (zw(kmt(ji,jj)) + hs(ji,jj,2)) / zw(kmt(ji,jj))
@@ -369,6 +372,7 @@ hs=0. ! to be commented out =0 just for the test case <-------------------------
       END DO
    END DO
 
+!stop 49567
 
 !!------------------------------------------------------------------------------
 
@@ -420,21 +424,21 @@ hs=0. ! to be commented out =0 just for the test case <-------------------------
    
    DO ji=1,IMT-1
       DO jj=1,JMT
+       hu=min(zw(kmt(ji,jj)),zw(kmt(ji+1,jj))) ! total depth at u point
          DO jk=1,kmu(ji,jj)
             ik=KM+1-jk
             dd = dz(ik)
             IF (jk == kmu(ji,jj)) THEN
-               dd = MIN (dztb(ji,jj,1),dztb(ji+1,jj,1))
+               dd = MIN (dztb(ji,jj,2),dztb(ji+1,jj,2))
             ENDIF
             IF (kmu(ji,jj) <= 0) THEN
                dd = 0.
             END IF
-            
-            ! Depth of grid box
-            dd = dd * ( zw(kmt(ji,jj)) + (hs(ji,jj,2) + hs(ji+1,jj,2))/2.      &
-            &         )/zw(kmt(ji,jj))
-            
-            uflux(ji,jj,ik,2) = temp3d_simp(ji,jj,jk) * dyu(ji,jj) * dd * dmult
+            ! thickness of the wall at the u-point
+            if (kmu(ji,jj) /= 0) then
+             dd = dd * ( hu + 0.5*(hs(ji,jj,2) + hs(ji+1,jj,2)) ) / hu 
+             uflux(ji,jj,ik,2) = temp3d_simp(ji,jj,jk) * dyu(ji,jj) * dd * dmult
+            endif
          END DO
       END DO
    END DO
@@ -485,20 +489,21 @@ hs=0. ! to be commented out =0 just for the test case <-------------------------
    
    DO ji=1,IMT
       DO jj=1,JMT-1
+       hv=min(zw(kmt(ji,jj)),zw(kmt(ji,jj+1))) ! total depth at u point
          DO jk=1,kmv(ji,jj)
             ik = KM+1-jk
             dd = dz(ik)
             IF (jk == kmv(ji,jj)) THEN
-               dd = MIN (dztb(ji,jj,1),dztb(ji,jj+1,1))
+               dd = MIN (dztb(ji,jj,2),dztb(ji,jj+1,2))
             END IF
             IF (kmv(ji,jj) <= 0) THEN
                dd = 0.
             END IF
-         
-            dd = dd * ( zw(kmt(ji,jj)) + (hs(ji,jj,2) + hs(ji,jj+1,2))/2.      &
-            &         ) / zw(kmt(ji,jj))
-            
-            vflux (ji,jj,ik,2) = temp3d_simp(ji,jj,jk) * dxv(ji,jj) * dd * dmult
+            ! thickness of the wall at the u-point
+            if (kmv(ji,jj) /= 0) then
+             dd = dd * ( hv + 0.5*(hs(ji,jj,2) + hs(ji,jj+1,2)) ) / hv 
+             vflux(ji,jj,ik,2) = temp3d_simp(ji,jj,jk) * dxv(ji,jj) * dd * dmult
+            endif
          END DO
       END DO
    END DO
