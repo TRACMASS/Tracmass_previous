@@ -24,74 +24,34 @@ miv = np.ma.masked_invalid
 
 class traj(trm):
 
-    def __init__(self,projname="gompom",
+    def __init__(self,projname,casename="",
+                 datadir="/Users/bror/ormOut/", 
+                 datafile="", ormdir="/Users/bror/git/orm",
                  griddir='/projData/GOMPOM/'):
-        trm.__init__(self,projname)
-        self.projname = projname
+        trm.__init__(self,projname,casename,datadir,datafile,ormdir)
         self.flddict = {'par':('L3',),'chl':('box8',)}
-        
-    def init_nasa(self):
-        import pysea.NASA
-        self.ns = pysea.NASA.nasa(res='4km',ijarea=(700,1700,2000,4000))
 
-    def create_ijvecs(self,fld,proj=""):
-        if self.projname == "casco":
-            import casco
-            sat = casco.Sat(res='500m')
-            kd = KDTree(zip(np.ravel(sat.llon),np.ravel(sat.llat)))
-            dist,ij = kd.query(zip(np.ravel(self.llon),np.ravel(self.llat)))
-            l3j,l3i = np.meshgrid(np.arange(sat.j2-sat.j1),
-                                  np.arange(sat.i2-sat.i1))
-            l3ij = np.array(zip(np.ravel(l3i),np.ravel(l3j)))
-            gomj,gomi = np.meshgrid(np.arange(self.imt),np.arange(self.jmt))
-            gomij = np.array(zip(np.ravel(gomi),np.ravel(gomj)))
-        
-            def gla(kk):
-                mat = gomj[:]*0
-                n=0
-                for i,j in gomij:
-                    mat[i,j] = l3ij[ij,:][n,kk]
-                    n+=1
-                return mat
-            self.gomj = np.ravel(gomi)
-            self.gomi = np.ravel(gomj)
-            self.satj = np.ravel(gla(0))
-            self.sati = np.ravel(gla(1))
-            self.sat = sat
-        elif self.flddict[fld][0]=='L3':
-            if not hasattr(self,'ns'):
-                self.init_nasa()
-            ns = self.ns
-            kd = KDTree(zip(np.ravel(ns.lon),np.ravel(ns.lat)))
-            gomll = scipy.io.matlab.mio.loadmat(
-                '/Users/bror/svn/code/matlab/gom/gomlatlon.mat')
-            dist,ij = kd.query(zip(np.ravel(gomll['gomlon']),
-                                   np.ravel(gomll['gomlat'])))
-            l3j,l3i = np.meshgrid(np.arange(ns.j2-ns.j1),
-                                  np.arange(ns.i2-ns.i1))
-            l3ij = np.array(zip(np.ravel(l3i),np.ravel(l3j)))
-            gomj,gomi = np.meshgrid(np.arange(164),np.arange(80))
-            gomij = np.array(zip(np.ravel(gomi),np.ravel(gomj)))
-        
-            def gla(kk):
-                mat = gomj[:]*0
-                n=0
-                for i,j in gomij:
-                    mat[i,j] = l3ij[ij,:][n,kk]
-                    n+=1
-                return mat
-            self.gomj = np.ravel(gomi)
-            self.gomi = np.ravel(gomj)
-            self.satj = np.ravel(gla(0))
-            self.sati = np.ravel(gla(1))
-        elif self.flddict[fld][0] == 'box8':
+        if projname == 'oscar':
+            import pysea.NASA
+            self.sat = pysea.NASA.nasa(res='4km',ijarea=(700,1700,2000,4000))
+            def calc_jd(ints,intstart):
+                return self.base_iso + float(ints)/6-1
+        elif projname=="casco":
+            self.sat = casco.Sat(res='500m')
+            def calc_jd(ints,intstart):
+                return (self.base_iso +(ints-(intstart)*10800)/150+intstart/8)
+        elif projname=="gompom":
             n = pycdf.CDF('/Users/bror/svn/modtraj/box8_gompom.cdf')
             self.gomi = n.var('igompom')[:]
             self.gomj = n.var('jgompom')[:]
             self.sati = n.var('ibox8')[:]
             self.satj = n.var('jbox8')[:]
-        else:
-            raise KeyError, "Wrong flag for satellite source given."
+        elif projname=="jplSCB":
+            import mati
+            self.sat = mati.Cal()
+        elif projname=="jplNOW":
+            import mati
+            self.sat = mati.Cal()
 
     def sat_trajs(self,intstart,field,pos='start'):
         """Retrive start- and end-values together
@@ -129,7 +89,6 @@ class traj(trm):
             self.empty = True
         self.ijll()
 
-
     def sat_conc(self,intstart,field,pos='start'):
         """Retrive fields of start- and end-values""" 
         jdS = self.field_jds(field)
@@ -138,7 +97,7 @@ class traj(trm):
                 ints = jdS.t1[jdS.t0==intstart].item()
             else:
                 ints = jdS.t2[jdS.t0==intstart].item()
-        else:
+        else:            
             return self.llat * 0
         table = self.tablename + field
         sql = """
@@ -183,24 +142,12 @@ class traj(trm):
                for n,a in enumerate(['ints','ntrac','x','y','val']):
                    self.__dict__[a] = np.array(res[n])
         #self.ijll()
-
-    
-    def sat_field(self,field,ints,intstart=0):
-        if not hasattr(self,'gomi'):
-            self.create_ijvecs(field)
-        if self.projname == "casco":
-            jd = (self.base_iso +
-                  (ints-(intstart)/8*3600*24)/3600/24+intstart/8)
-            self.sat.load('chlor_a',jd=jd)
-            return self.sat.__dict__[field]
-            
-        elif field == 'par':
-            if not hasattr(self,'ns'):
-                self.init_nasa()
-            jd = self.base_iso + float(ints)/6-1
-            self.ns.l3read(self.ns.fname('par',jd),field)
-            return self.ns.__dict__[field]
-        else:
+  
+    def load_sat(self,field,ints=0,intstart=0,jd=0):
+        """ Load satellite field for a given jd or ints"""
+        self.sat.load(field,jd=jd)
+        return self.sat.__dict__[field]
+        """ GOMPOM
             ds = mpl.dates.num2date(self.ints2iso(ints))
             box8dir = '/projData/JCOOT_sat_Box8/'
             filepre = "A%i%03i" % (ds.year, ds.timetuple().tm_yday)
@@ -211,6 +158,28 @@ class traj(trm):
                 raise
             h = SD(satfile, SDC.READ)
             return h.select(field)[:]
+        """
+
+    def gcmij_to_satij(self,mask=[]):
+        if len(mask)==0: mask = tr.x==tr.x
+        self.ijll()
+        self.si, self.sj = self.sat.ll2ij(self.lon[mask],self.lat[mask])
+
+    def remove_satnans(self,jd=False):
+        if not jd: jd = self.jd.min()
+        self.gcmij_to_satij(self.jd==jd)
+        chl = self.load_sat('chl',jd=jd)
+        chl = chl[self.si,self.sj]
+        ntrac = self.ntrac[self.jd==jd]
+        ntrac = ntrac[~np.isnan(chl)]
+        mask = np.in1d(self.ntrac,ntrac)
+        self.x = self.x[mask]
+        self.y = self.y[mask]
+        self.z = self.z[mask]
+        self.jd = self.jd[mask]
+        self.ntrac = self.ntrac[mask]
+        self.ints = self.ints[mask]
+
 
     def sat_to_db(self,field,intstart,ints,batch=False,traj=False):
         """Load field data to a table. """
@@ -234,9 +203,10 @@ class traj(trm):
             if not hasattr(self,"x"):
                 return False
             self.gcmij_to_satij()
-            self.val = self.sat_field(field,ints)[self.sj,self.si]
+            self.val = self.load_sat(field,ints)[self.sj,self.si]
             print len(self.val[self.val>-1e9])
-            print ("min:", min(self.ints[self.val>-1e9]*0+intstart),min(self.ints[self.val>-1e9]))
+            print ("min:", min(self.ints[self.val>-1e9]*0+intstart),
+                   min(self.ints[self.val>-1e9]))
         plist = zip(
                     self.ints[self.val>-1e9]*0+intstart,
                     self.ints[self.val>-1e9],
@@ -248,12 +218,6 @@ class traj(trm):
         if not batch:
             self.enable_indexes(table)
             
-    def gcmij_to_satij(self):
-        k = KDTree(zip(self.gomi,self.gomj))
-        ann = k.query(zip(self.x,self.y),1,1,1,10)
-        self.si = self.sati[ann[1]]
-        self.sj = self.satj[ann[1]]
-
     def field_jds(self,field):
         table = self.tablename + field
         class ints: pass
@@ -463,3 +427,23 @@ def interp(ps,intstart=6353):
         pl.title(pl.num2date(jd).strftime("log(Chl) %Y-%m-%d %H:%M"))
         pl.clim(-2,2.5)
         pl.savefig("interp_%i_%03i.png" % (intstart,n), dpi=100)
+
+
+def test():
+    tr = traj('jplNOW','ftp','/Volumes/keronHD3/ormOut/')
+    tr.load(733833.0)
+    tr.remove_satnans()
+    tr.db_insert()
+
+def batch_insert():
+    tr = traj('jplNOW','ftp','/Volumes/keronHD3/ormOut/')
+    for jd in np.arange(733773.0, 734138.0):
+        print pl.num2date(jd), jd
+        tr.load(jd)
+        tr.remove_satnans()
+        tr.db_insert()
+
+def profile():
+    import cProfile
+
+    cProfile.run('test()')
