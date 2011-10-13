@@ -350,13 +350,13 @@ END IF alloCondUVW
 !!------------------------------------------------------------------------------
    ! Compute the level thickness of all boxes tking account of the z-star coordinates
    ! withayer thicknesses dz* = dz (H+ssh)/H and the variable bottom box
-!hs=0. ! to be commented out =0 just for the test case <----------------------------- ta bort!!!!!
+!hs=0. ! to be commented out, just for the test case <----------------------------- ta bort!!!!!
    DO ji=1,IMT
       DO jj=1,JMT
-       if( kmt(ji,jj) /= 0) then
+!       if( kmt(ji,jj) /= 0) then
 !        if(  dztb(ji,jj,1) /= dz(KM+1-kmt(ji,jj)) ) print *,ji,jj,dztb(ji,jj,1),dz(KM+1-kmt(ji,jj))
 !        print *,ji,jj,kmt(ji,jj),dztb(ji,jj,1)-dz(KM+1-kmt(ji,jj))
-       endif
+!       endif
          DO jk=1,KM
             ik = KM+1-jk
             IF (kmt(ji,jj) == ik) THEN ! for the bottom box
