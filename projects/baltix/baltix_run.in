@@ -83,7 +83,7 @@
 !!------------------------------------------------------------------------------
 &INITRUNWRITE
    ncoor            =  1,  
-   kriva            =  5,
+   kriva            =  1,
    inDataDir        =  '/Users/Jocke/Public/data/baltix/',
    inDataDir        =  '/Users/doos/data/baltix/',
    outDataDir       =  '/Users/Jocke/Public/data/baltix/',
@@ -256,6 +256,10 @@
 !! timax               :  Maximum life time of trajectory in days
 !!------------------------------------------------------------------------------
 &INITRUNEND
+   ienw(1)      =     0,
+   iene(1)      =    25,
+   jens(1)      =     0,
+   jenn(1)      =  1000,
    timax        =  3656./
 
 !!------------------------------------------------------------------------------   

@@ -280,8 +280,8 @@ SUBROUTINE init_params
       ! --- Allocate Lagrangian stream functions ---
 #ifdef streamxy
       ALLOCATE ( stxyy(imt,jmt,lbt), stxyx(imt,jmt,lbt) )
-      sxyy=0.
-      sxyx=0.
+!      sxyy=0.
+!      sxyx=0.
 #endif
 #ifdef streamv
       ALLOCATE ( stxz(imt,km,lbt), styz(jmt,km,lbt) )

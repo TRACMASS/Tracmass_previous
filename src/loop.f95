@@ -49,16 +49,6 @@ SUBROUTINE loop
 #endif /*sediment*/
   
   IMPLICIT none
-
-#ifdef streamxy
-  REAL sxyy(IMT,JMT),sxyx(IMT,JMT)
-#endif /*streamxy*/
-#ifdef streamv
-  REAL sxz(JMT,KM),syz(JMT,KM)
-#endif /*streamv*/
-#ifdef streamr
-  REAL sxr(IMT,MR,LOV),syr(JMT,MR,LOV)
-#endif /*streamr*/
     
   INTEGER mra,mta,msa
   REAL temp,salt,dens
@@ -124,8 +114,8 @@ SUBROUTINE loop
   trj=0.d0
   
 #ifdef streamxy
-  sxyy=0.
-  sxyx=0.
+  stxyx=0.
+  stxyy=0.
 #endif /*streamxy*/
 #ifdef streamv
   stxz=0.

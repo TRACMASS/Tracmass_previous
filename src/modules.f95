@@ -213,7 +213,6 @@ ENDMODULE mod_name
 MODULE mod_streamxy
 #ifdef streamxy
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
-  REAL                                       :: sxyy(IMT,JMT),sxyx(IMT,JMT)
 #endif
 ENDMODULE mod_streamxy
 
@@ -221,7 +220,6 @@ ENDMODULE mod_streamxy
 MODULE mod_streamv
 #ifdef streamv
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
-  REAL                                       :: sxz(JMT,KM),syz(JMT,KM)
 #endif
 ENDMODULE mod_streamv
 
@@ -229,8 +227,6 @@ ENDMODULE mod_streamv
 MODULE mod_streamr
 #ifdef streamr
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
-  REAL                                       :: sxr(IMT,MR,LOV)
-  REAL                                       :: syr(JMT,MR,LOV)
 #endif
 ENDMODULE mod_streamr
 

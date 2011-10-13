@@ -287,7 +287,7 @@ contains
 #else
  stop 4967
 #endif /*zgrid3Dt*/
-	z1=z1 + (z1-dble(int(z1)))*(thickb-thicka)/thickb
+!	z1=z1 + (z1-dble(int(z1)))*(thickb-thicka)/thickb
 
 !if(1.eq.0 .and. ka.gt.KM-10 .and. dzt(ib,jb,KM-kmv(ib,jb),2).ne.dz(KM-kmv(ib,jb))) then
 !print *,'ds,dse,dsw,dsn,dss=',ds,dse,dsw,dsn,dss
