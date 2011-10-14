@@ -25,7 +25,7 @@ contains
     INTEGER                                    :: ia, iam, ja, ka,k
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens
-    REAL*8                                     :: thicka,thickb
+    REAL*8                                     :: dza,dzb, zz
     REAL*8, INTENT(IN)                         :: x0, y0, z0
     REAL*8, INTENT(OUT)                        :: x1, y1, z1
         
@@ -276,23 +276,35 @@ contains
 ! depth conversion for bottom box
 #ifdef varbottombox
        if(  (ds==dse .or. ds==dsw .or. ds==dsn .or. ds==dss)  .and.  &
-            (ka==KM-kmv(ia,ja) .or. ka==KM-kmv(ib,jb))  ) then
+            (ka==KM+1-kmt(ia,ja) .or. kb==KM+1-kmt(ib,jb))  ) then
 #ifdef zgrid3Dt 
         rg=1.d0-rr
-        thicka=rg*dzt(ia,ja,ka,NST)+rr*dzt(ia,ja,ka,1)
-        thickb=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
+!        dza=rg*dzt(ia,ja,ka,NST)+rr*dzt(ia,ja,ka,1)
+!        dzb=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
+        dza=dz(ka)
+        dzb=dz(kb)
+        if(ka==KM+1-kmt(ia,ja)) dza=dztb(ia,ja,1)
+        if(kb==KM+1-kmt(ib,jb)) dzb=dztb(ib,jb,1)
 #elif  zgrid3D
-        thicka=dzt(ia,ja,ka)
-        thickb=dzt(ib,jb,kb)
+        dza=dzt(ia,ja,ka)
+        dzb=dzt(ib,jb,kb)
 #else
  stop 4967
 #endif /*zgrid3Dt*/
-!	z1=z1 + (z1-dble(int(z1)))*(thickb-thicka)/thickb
+	zz=dble(int(z1)) + ( (z1-dble(int(z1)))*dza + dabs(dzb-dza)  ) / dzb
+	
+	if(zz.le.dble(int(z1) )) then
+	print *, 'fel',zz,z1,dble(int(z1)),(z1-dble(int(z1)))*dza,dzb-dza,dzb
+	stop 4956
+	endif
+	
+	z1=zz
 
-!if(1.eq.0 .and. ka.gt.KM-10 .and. dzt(ib,jb,KM-kmv(ib,jb),2).ne.dz(KM-kmv(ib,jb))) then
+!if( dzt(ia,ja,ka,2)==2 .and. dzt(ib,jb,kb,2).eq.3 .and. kmt(ia,ja)==kmt(ib,jb)) then
+!!if(kb.gt.KM-10 .and. dzt(ia,ja,KM-kmt(ia,ja),2).ne.dz(KM-kmt(ib,jb))) then
 !print *,'ds,dse,dsw,dsn,dss=',ds,dse,dsw,dsn,dss
-!print *,'kmv(ia,ja)=',kmv(ia,ja),KM-kmv(ia,ja)
-!print *,'kmv(ib,jb)=',kmv(ib,jb),KM-kmv(ib,jb)
+!print *,'kmt(ia,ja)=',kmt(ia,ja),KM-kmt(ia,ja)
+!print *,'kmt(ib,jb)=',kmt(ib,jb),KM-kmt(ib,jb)
 !print *,'kmt=',KM-kmt(ia,ja),KM-kmt(ib,jb)
 !print *,'dzt(ia,ja,ka,NST)=',dzt(ia,ja,ka,NST)
 !print *,'dzt(ia,ja,ka,1)=',dzt(ia,ja,ka,1)
@@ -300,11 +312,16 @@ contains
 !print *,'dzt(ib,jb,kb,1)=',dzt(ib,jb,kb,1)
 !print *,'x0,y0,z0=',x0,y0,z0
 !print *,'x1,y1,z1=',x1,y1,z1
-!print *,'thickb,thicka,thickb/thicka=',thickb,thicka,thickb/thicka
-!print *,z0,'som blir z1=',z1
+!print *,'dzb,dza,dzb/dza=',dzb,dza,dzb/dza
+!z1=z0 ! för att testa 
+!print *,'z1=',z1
+!print *,'som ska bli=',  (z1-dble(int(z1)))*dza, dz(ka)-dza , (dz(kb)-dzb)
+!	z1=dble(int(z1)) + ( (z1-dble(int(z1)))*dza + dzb-dza  ) / dzb
+!print *,'som blir z1=',z1
 !print *,'ia,ja,ka=',ia,ja,ka
 !print *,'ib,jb,kb=',ib,jb,kb
 !print *,'ntrac=',ntrac
+!stop 4967
 !endif
 	   endif
 
