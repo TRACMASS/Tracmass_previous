@@ -16,8 +16,6 @@ SUBROUTINE readfields
 !!               rho          -  density             (if option tempsalt)
 !!
 !!
-!!       Last change: Joakim Kjellsson, 5 July 2011
-!!
 !!------------------------------------------------------------------------------
    USE netcdf
    USE mod_param

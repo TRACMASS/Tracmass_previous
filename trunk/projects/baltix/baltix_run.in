@@ -83,7 +83,7 @@
 !!------------------------------------------------------------------------------
 &INITRUNWRITE
    ncoor            =  1,  
-   kriva            =  1,
+   kriva            =  4,
    inDataDir        =  '/Users/Jocke/Public/data/baltix/',
    inDataDir        =  '/Users/doos/data/baltix/',
    outDataDir       =  '/Users/Jocke/Public/data/baltix/',
@@ -169,7 +169,7 @@
    seedPos     = 1, !2,
    seedTime    = 1, !2,
    seedAll     = 1, !2,
-   ist1        = 100,		 
+   ist1        =  28,		 
    ist2        = 600,		 
    jst1        =   1,		 
    jst2        = 500,		 

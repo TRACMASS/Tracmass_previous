@@ -12,10 +12,6 @@ MODULE mod_seed
 !!             nrj        - Dimension NTRACMAX x NNRJ
 !!
 !!
-!!
-!!       Last change: Joakim Kjellsson, 21 June 2011
-!!
-!!
 !!------------------------------------------------------------------------------
    USE mod_param
    USE mod_time
