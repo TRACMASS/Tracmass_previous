@@ -31,7 +31,7 @@ subroutine readfields
   INTEGER :: itt0,year,month,day,hour,minute,second,ittstart,itt,dtts
   INTEGER :: imt0,jmt0,km0,nt0,NLEN0,NSNAPS0,nvars,got_hs,got_u,got_v
   INTEGER ::  i,j,k,m,kz,ii,ints2,kk,i0,ktop,kbot
-  INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:) :: kmu
+!  INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:) :: kmu
 
   REAL*8 :: ird0,ird20,ird30,ird40,stlon,stlat,dxdeg,dydeg
   REAL*4 :: snapd,totsec,ird,ird2,ird3,ird4

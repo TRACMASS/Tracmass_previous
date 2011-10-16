@@ -348,13 +348,8 @@ END IF alloCondUVW
 !!------------------------------------------------------------------------------
    ! Compute the level thickness of all boxes tking account of the z-star coordinates
    ! withayer thicknesses dz* = dz (H+ssh)/H and the variable bottom box
-!hs=0. ! to be commented out, just for the test case <----------------------------- ta bort!!!!!
    DO ji=1,IMT
       DO jj=1,JMT
-!       if( kmt(ji,jj) /= 0) then
-!        if(  dztb(ji,jj,1) /= dz(KM+1-kmt(ji,jj)) ) print *,ji,jj,dztb(ji,jj,1),dz(KM+1-kmt(ji,jj))
-!        print *,ji,jj,kmt(ji,jj),dztb(ji,jj,1)-dz(KM+1-kmt(ji,jj))
-!       endif
          DO jk=1,KM
             ik = KM+1-jk
             IF (kmt(ji,jj) == ik) THEN ! for the bottom box
@@ -370,7 +365,6 @@ END IF alloCondUVW
       END DO
    END DO
 
-!stop 49567
 
 !!------------------------------------------------------------------------------
 
@@ -487,7 +481,7 @@ END IF alloCondUVW
    
    DO ji=1,IMT
       DO jj=1,JMT-1
-       hv=min(zw(kmt(ji,jj)),zw(kmt(ji,jj+1))) ! total depth at u point
+       hv=min(zw(kmt(ji,jj)),zw(kmt(ji,jj+1))) ! total depth at v point
          DO jk=1,kmv(ji,jj)
             ik = KM+1-jk
             dd = dz(ik)
