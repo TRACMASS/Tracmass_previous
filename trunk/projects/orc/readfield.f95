@@ -20,7 +20,7 @@ SUBROUTINE readfields
   
 
   ! = Loop variables
-  INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm,ii,jmm,jpp,ntrac, l
+  INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
   INTEGER                                      :: kbot,ktop
   INTEGER, SAVE                                :: ntempus,ntempusb,nread
 
