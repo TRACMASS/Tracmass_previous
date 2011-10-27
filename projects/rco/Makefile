@@ -34,11 +34,11 @@
 #  fl21  = -Dtracer         # Stores a simulated tracer
 #  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
-#  fl23  = -Dturb           # Adds subgrid turbulent velocities 
+  fl23  = -Dturb           # Adds subgrid turbulent velocities 
 #  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #------------------------------------------------------------------------
-#   fl27   = -Ddrifter       # surface drifter depth average of uflux/vflux
+   fl27   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \

@@ -23,7 +23,7 @@ subroutine readfields
  CHARACTER (len=200)                        :: gridFile ,fieldFile,string
  CHARACTER hour(4)*4,month(12)*2,date(31)*2,year(1989:2009)*4
  LOGICAL around
- REAL*8, SAVE :: dxdeg,dydeg,rconst,aa(0:60),bb(0:60),punit
+ REAL*8, SAVE :: punit
  INTEGER*8, SAVE :: nlon(NY)
 
 data year /'1989','1990','1991','1992','1993','1994','1995','1996','1997','1998','1999',&
@@ -99,27 +99,13 @@ tem=0.
 sal=0.
 rho=0.
 #endif
-kmt=KM
 
-dxdeg=dx*deg
-dydeg=dy*deg
-rconst=287.05
+
 punit=1.e-2 ! Pressure units  1.=Pa, 1.e-2=hPa, 1.e.-3=kPa 
 iyear=startYear
 imon=startMon
 iday=startDay
 ihour=startHour
-print *,'iyear=',iyear,imon,iday,ihour,dxdeg,dydeg
-
-! read the vertical levales
-open(12,file=trim(inDataDir)//'topo/model_60lev.txt')
-99 format(10x,f12.6,4x,f10.8)
-do k=0,KM
- read(12,99) aa(k),bb(k)
-! print *,k,aa(k)
-enddo
-close(12)
-!aa=100.*aa   !  [hPa] -->  [Pa]
 
 endif
 

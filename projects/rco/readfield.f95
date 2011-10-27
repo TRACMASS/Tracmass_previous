@@ -33,7 +33,7 @@ subroutine readfields
   INTEGER ::  i,j,k,m,kz,ii,ints2,kk,i0,ktop,kbot
 !  INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:) :: kmu
 
-  REAL*8 :: ird0,ird20,ird30,ird40,stlon,stlat,dxdeg,dydeg
+  REAL*8 :: ird0,ird20,ird30,ird40,stlon,stlat
   REAL*4 :: snapd,totsec,ird,ird2,ird3,ird4
   REAL*4, ALLOCATABLE, DIMENSION(:)   :: rd1d_a, rd1d_b,zdzz,dzw,dxt,ispvar,isplev
   REAL*4, ALLOCATABLE, DIMENSION(:)   :: phit,yu,snap1d
@@ -42,7 +42,7 @@ subroutine readfields
 
   REAL :: snap2d(imt,jmt) ! ??????????????????
 
-  CHARACTER ofile*20,infile*78,zfile*193,rfile*99,a_exp1*3,a_exp2*2
+  CHARACTER ofile*100,infile*100,zfile*193,rfile*99,a_exp1*3,a_exp2*2
 
   LOGICAL around
   
@@ -82,7 +82,6 @@ endif
 ntime=1000000*iyear+10000*imon+100*iday+ihour
 
 !print *,'tiden=',ntime,iyear,imon,iday,ihour,iyear0
-
 !____________________________ initialise ___________________________
 if(ints.eq.intstart) then
 hs=0.
@@ -130,11 +129,12 @@ ntime=1000000*iyear+10000*imon+100*iday+ihour
   !print *,'hhhhhhhhhhh',ints
                      
 !     === Create filenames for the snap-files to be used ===
-ofile='d0000000000.snap1'
-write(ofile(2:11),'(i10)') ntime
+ofile='0000/d0000000000.snap1'
+write(ofile(1:4), '(i4) ') iyear
+write(ofile(7:16),'(i10)') ntime
 
 infile=trim(inDataDir)//ofile
-!print *,infile
+
 inquire(file=trim(infile)//'.gz',exist=around)
 if(.not.around) then
 print *,'This file is missing:',infile,ntime
@@ -242,8 +242,6 @@ if(ints.eq.intstart) then
 stlon1 = ird0
 stlat1 = ird20
 !They are longitude and lattitude values
-!print *,'stlon,stlat=',stlon1,stlat1
-
 !dya=0.005*dydeg
 !dxa=0.005*dxdeg
 
@@ -510,7 +508,7 @@ do i=1,imt
 
 #ifdef drifter
 ! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories
-kbot=KM-5 ; ktop=KM-4 ! number of surface layers to integrat over
+kbot=36 ; ktop=37 ! number of surface layers to integrat over
 
 do i=1,imt
  do j=1,jmt
@@ -538,6 +536,8 @@ enddo
 
 #endif
 
+uflux(:,:,:,2) = uflux(:,:,:,2)
+vflux(:,:,:,2) = vflux(:,:,:,2)
 
 !deallocate ( snap1d, rd2d )
 !deallocate ( rd1d_a, rd1d_b )

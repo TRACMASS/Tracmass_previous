@@ -65,13 +65,13 @@
   !
   ! === Directory where input fields are stored
   !inDataDir    = '/Users/doos/data/ifs/',
-  inDataDir    = '/Volumes/wasa/data/ifs/',
+  inDataDir    = '/nobackup/vagn2/x_joakj/data/ifs/',
   !inDataDir     = '/Users/Jocke/Public/data/'
   !inDataDir    = '/Volumes/Resa2/data/ifs/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Users/doos/data/ifs/orm/',
-  outDataDir   = '/Volumes/wasa/data/ifs/utdata/',
+  outDataDir   = '/nobackup/vagn2/x_joakj/data/ifs/',
   !outDataDir   = '/Volumes/Resa2/data/ifs/orm/',
   !
   ! === name of current trajectory run

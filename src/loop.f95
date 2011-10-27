@@ -505,7 +505,8 @@ SUBROUTINE loop
 799  format('ints=',i7,' active=',i10,' out=',i10,' err=',i10,' tot=',i10)
 #endif
   
-   IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0) THEN
+   IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND.                &
+   &   seedTime /= 2) THEN
       EXIT intsTimeLoop
    END IF
   
@@ -842,7 +843,7 @@ return
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined rco || baltix 
-566 format(i8,i7,f7.2,f7.2,f7.1,2f10.2 &
+566 format(i8,i7,f7.2,f7.2,f7.1,2f12.4 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined tes 
 566 format(i8,i7,f8.3,f8.3,f7.3,2f10.2 &

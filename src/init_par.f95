@@ -29,6 +29,7 @@ SUBROUTINE init_params
    USE mod_streamr
    USE mod_tracer
    USE mod_getfile
+   
 #if defined diffusion || turb 
    USE mod_diffusion
 #endif
