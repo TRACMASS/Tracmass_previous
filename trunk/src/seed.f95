@@ -87,7 +87,7 @@ CONTAINS
             itim  = seed_tim (jsd)
          END IF
          
-#ifdef baltix  
+#if defined baltix || defined rco
          ! -------------------------------------------------
          ! --- Test if it is time to launch the particle ---
          ! -------------------------------------------------

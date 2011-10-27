@@ -10,7 +10,8 @@ SUBROUTINE setupgrid
   USE mod_vel
   USE mod_getfile
 
-  IMPLICIT none
+  IMPLICIT NONE
+  
   ! =============================================================
   !    ===  Set up the grid ===
   ! =============================================================
@@ -36,51 +37,92 @@ SUBROUTINE setupgrid
 
 
   ! === Init local variables for the subroutine ===
-  INTEGER                                    :: i ,j ,k ,kk
+  INTEGER                                    :: ji,jj,jk
+  REAL*8                                     :: rlatt
+  
+  ! -------------------------------------------------------------
+  
+  !!
+  !! All levels are active in the IFS model
+  !!
+  kmt = KM
+  
+  !!
+  !! Grid box sizes
+  !!
+  dx = 360./float(IMT)   
+  dy = 180./float(JMT)  ! Horizontal resolution in degrees [deg]
+  stlon1=0. 
+  stlat1=-90000.
+  dxdeg = dx*deg        
+  dydeg = dy*deg        ! Horizontal resolution in radians [rad]
+  
+  !! Cosine at each v-point (C-grid) 
+  DO jj=0,JMT
+     phi(jj) = -90. + dy * FLOAT(jj)    ! Latitude for each v-point (C-grid)
+     csu(jj) = DCOS (phi(jj) * radian) 
+  END DO
+  
+  !! Cosine at each u-point (C-grid)
+  DO jj=1,JMT
+     rlatt = 0.5 * ( phi(jj) + phi(jj-1) )   ! Latitude at each u-point (C-grid)
+     cst(jj) = DCOS ( rlatt * radian )
+  END DO
+  
+  !! Total horizontal area of grid box
+  DO ji=1,IMT
+     DO jj=1,JMT
+        dxdy(ji,jj) = dx * deg * cst(jj) * dy * deg
+     END DO
+  END DO
+  
+  ! -------------------------------------------------------------
+  
+  !!
+  !! Some atmosphere constants
+  !!
+  !R_d = 287.05d0   ! Gas constant for dry air
+  !L_v = 2.5d+6     ! Latent heat for condensation of water vapor [J/kg]
+  !c_d = 1004.d0    ! Specific heat for dry air
+  print*,R_d,L_v,c_d
+  
+  !!
+  !! Min/max for pressure, temperature, specific humidity
+  !!
+  rmin  =    0.d0 ![hPa]
+  rmax  = 1100.d0 ![hPa]
+  tmin  =  173.d0 ![K]
+  tmax  =  323.d0 ![K]
+  smin  =    0.d0 ![g/kg]
+  smax  =   25.d0 ![g/kg]
+  dr    = (rmax-rmin)/dble(MR-1) ![hPa]
+  dtemp = (tmax-tmin)/dble(MR-1) ![K]
+  dsalt = (smax-smin)/dble(MR-1) ![g/kg]
+  
+  !!
+  !! Read A(k) and B(k) to determine hybrid coordinate levels.
+  !! p(k) = A(k) + B(k) * p_surface
+  !!
+  ALLOCATE ( aa(0:KM), bb(0:KM) )
+  
+  OPEN (12,FILE=TRIM(inDataDir)//'topo/model_60lev.txt')
+99 FORMAT(10x,f12.6,4x,f10.8)
+  
+  DO jk=0,KM
+     READ (12,99) aa(jk),bb(jk)
+  END DO
+  
+  CLOSE (12)
+  
+  !!
+  !! Setting necessary dummy argument
+  !!
+  zw=9.e10  ! should not be used
+  DO jk=1,KM
+     dz(jk) = zw(jk)-zw(jk-1)
+  END DO
 
 
-! === Template for setting up grids. Move the code from readfile.f95
-
-! ===
-
-
-!!$  CHARACTER (len=200)                        :: gridFileXY, gridFileZ
-!!$  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: kmask
-!!$
-!!$  alloCondGrid: if ( .not. allocated (kmask) ) then
-!!$     allocate ( kmask(IMT+2,JMT,KM) )
-!!$  end if alloCondGrid
-!!$  
-!!$  start1d  = [  1]
-!!$  count1d  = [ km]
-!!$  !Order is     t    k            i            j
-!!$  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-!!$  map2d    = [  4 ,  3 ,          1 ,          2]  
-!!$  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count3d  = [  1 , km ,subGridImax ,subGridJmax]
-!!$  map3d    = [  4 ,  3 ,          2 ,          1]  
-!!$  
-!!$  gridFileXY = trim(inDataDir)//'grid_cell_xy.nc'
-!!$  gridFileZ  = trim(inDataDir)//'grid_cell_z.nc'
-!!$  
-!!$  dz   = get1DfieldNC(trim(gridFileZ)  ,'dz')  / 100.
-!!$  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
-!!$  dyu  = get2DfieldNC(trim(gridFileXY) ,'DYU') / 100.
-!!$  dxdy = dxv * dyu
-!!$
-!!$  dzt = 0
-!!$  kmask  = get3DfieldNC(trim(gridFileZ) ,'SALT')
-!!$  do j=1,jmt
-!!$     do i=1,imt
-!!$        do k=1,km
-!!$           kk=km+1-k
-!!$           if(kmask(i,j,k) .le. 1000.) then
-!!$              kmt(i,j)=k
-!!$              dzt(i,j,k) = dz(kk)
-!!$           end if
-!!$        enddo
-!!$     enddo
-!!$  enddo
-
-end SUBROUTINE setupgrid
+  ! -------------------------------------------------------------
+  
+END SUBROUTINE setupgrid

@@ -14,7 +14,7 @@ subroutine readfields
     
  INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
  CHARACTER hour(4)*4,month(12)*2,date(31)*2
- REAL*8, SAVE :: dxdeg,dydeg,omtime,cox,coy,om,co,uwe,dl
+ REAL*8, SAVE ::omtime,cox,coy,om,co,uwe,dl
 
 data month /'01','02','03','04','05','06','07','08','09','10','11','12'/
 data date /'01','02','03','04','05','06','07','08','09','10',&

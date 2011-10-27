@@ -15,7 +15,6 @@ MODULE mod_param
   REAL*8                                    :: tseas,tday,tyear,dtmin,voltr
   REAL*8                                    :: tstep,dstep,tss,partQuant
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
-  REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
 ENDMODULE mod_param
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -26,8 +25,18 @@ ENDMODULE mod_precdef
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_coord
   REAL*8                                    :: dx,dy
-  REAL*8                                    :: deg,stlon1,stlat1
-  REAL*8, PARAMETER                         :: grav=9.81
+  REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
+  REAL*8, PARAMETER                         :: grav=9.81, &
+  &                                            PI = 3.14159265358979323846d0, &
+  &                                            radius = 6371229.d0, &
+  &                                            radian = pi/180.d0,  &
+  &                                            deg=radius*radian,   &
+  &                                            tday=24.d0 * 3600.d0
+#ifdef ifs
+  REAL*8, PARAMETER                         :: R_d = 287.05d0, &
+  &                                            L_v = 2.5d0 * 1e+6,   &
+  &                                            c_d = 1004.d0
+#endif
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
   INTEGER idmax(12,1000:3000)
@@ -73,7 +82,7 @@ CONTAINS
   subroutine updateClock  
     USE mod_param
     USE mod_loopvars
-    ttpart = round((tt/tseas-floor(tt/tseas))*tseas)/tseas 
+    ttpart = anint((tt/tseas-floor(tt/tseas))*tseas)/tseas 
     currJDtot = (ints+ttpart-1)*(real(ngcm)/24) 
 
 call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
@@ -143,8 +152,11 @@ MODULE mod_grid
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
-
-  REAL*8                                    :: rmin ,tmin ,smin
+#ifdef ifs
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa,bb
+#endif
+  REAL*8                                    :: rmin ,tmin ,smin,&
+  &                                            rmax ,smax ,tmax
   REAL*8                                    :: dr ,dtemp ,dsalt
   REAL*8                                    :: arc,arct,arcscale
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu,kmv, depth

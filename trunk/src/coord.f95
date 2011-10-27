@@ -9,7 +9,7 @@ USE mod_name
 IMPLICIT none
 
 INTEGER i,j,k,kk,mois(12)
-REAL*8 radian,radius,rlatt,rlatu,rmax,smax,tmax
+REAL*8 rlatt,rlatu!,radian,radius
 REAL :: a
 
 #if defined occ
@@ -23,10 +23,10 @@ data b1,b2,b3,b4/10725.0d0,  10275.0d0, 36.0d0,     13.0d0/
 data mois/31,28,31,30,31,30,31,31,30,31,30,31/
 !__________________________________________________________________________________________
 ! Earth constants
-radius = 6371229.d0 ! earth radius in metre
-radian = pi/180.d0
-deg=radius*radian ! ~ 111000 metre
-tday=24.d0 * 3600.d0
+!radius = 6371229.d0 ! earth radius in metre
+!radian = pi/180.d0
+!deg=radius*radian ! ~ 111000 metre
+!tday=24.d0 * 3600.d0
 
 ! month lengths including leap years
 do i=1900,3000
@@ -116,10 +116,10 @@ rmax=30.d0
 
 dr=(rmax-rmin)/dble(MR-1)
 
-#ifdef streamts 
+#ifdef streamts
 tmin=-2.d0
 ! Values for the Baltic 
-#if defined rco || for || sim  
+#if defined for || sim  
 tmax=25.d0 
 smin= 0.d0
 smax=15.d0
@@ -241,7 +241,7 @@ enddo
 !______________________________________________________________________________________________
 
 
-#if defined occ || rco || tes || for || sim 
+#if defined occ || tes || for || sim 
 do i=1,IMT
  do j=1,JMT
   dxdy(i,j)=dx*cst(j)*dy*deg**2
@@ -249,57 +249,6 @@ do i=1,IMT
 enddo
 #endif
 
-#if defined ifs || atm
-zw=9.e10  ! should not be used
-
-do k=1,KM
- dz(k)=zw(k)-zw(k-1)
-! print *,'k=',k,' dz(k)=',dz(k)
-enddo
-
-dx = 360./float(IMT)
-dy = 180./float(JMT)
-stlon1=0. 
-stlat1=-90000.
-!print *,'e her nu=',dx,dy
-
-! pressure in hPa
-rmin=0.d0
-rmax=1100.d0
-dr=(rmax-rmin)/dble(MR-1)
-! temperature
-tmin=173.d0 ![K]
-tmax=323.d0 ![K]
-dtemp=(tmax-tmin)/dble(MR-1)
-! specific humidity
-smin= 0.d0
-smax=25.d0
-dsalt=(smax-smin)/dble(MR-1)
-
-
-do j=0,JMT
- phi(j)=-90.+dy*float(j)
- csu(j)=dcos(phi(j)*radian)
-enddo
-
-do j=1,JMT
- rlatt=0.5*(phi(j)+phi(j-1))
- cst(j)=dcos(rlatt*radian)
-enddo
-
-do i=1,IMT
- do j=1,JMT
-  dxdy(i,j)=dx*deg*cst(j)*dy*deg
- enddo
-enddo
-
-
-kmt=KM  ! all grid cells are active in an AGCM
-
-
-#endif
-
-!print *,dxdy
 
 !_________________________________ The ORCA grids _______________________________________
 !#if defined orca2 || orca1 || orca05 || orca025 || orca12 
