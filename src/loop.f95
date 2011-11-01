@@ -482,10 +482,11 @@ SUBROUTINE loop
               nexit(NEND)=nexit(NEND)+1
               exit niterLoop
            endif
-           call writedata(18)
+           !call writedata(18)
         end do niterLoop
 #endif
         nout=nout+1
+        call writedata(17)
         nrj(ntrac,6)=1
      end do ntracLoop
      
