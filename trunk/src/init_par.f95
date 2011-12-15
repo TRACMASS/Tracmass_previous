@@ -175,7 +175,7 @@ SUBROUTINE init_params
 
       timax    =  24.*3600.*timax ! convert time lengths from days to seconds
       dstep    =  1.d0/dble(iter)
-      dtmin    =  dtstep*tseas
+      dtmin    =  dstep*tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD

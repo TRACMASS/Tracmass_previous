@@ -12,7 +12,7 @@ MODULE mod_param
 #endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm,ntrac
   INTEGER                                   :: twritetype = 0
-  REAL*8                                    :: tseas,tday,tyear,dtmin,voltr
+  REAL*8                                    :: tseas,tyear,dtmin,voltr
   REAL*8                                    :: tstep,dstep,tss,partQuant
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
 ENDMODULE mod_param
@@ -159,7 +159,7 @@ MODULE mod_grid
   &                                            rmax ,smax ,tmax
   REAL*8                                    :: dr ,dtemp ,dsalt
   REAL*8                                    :: arc,arct,arcscale
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu,kmv, depth
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
