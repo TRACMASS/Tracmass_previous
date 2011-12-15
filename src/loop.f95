@@ -18,6 +18,7 @@ SUBROUTINE loop
 !!
 !!------------------------------------------------------------------------------          
   USE mod_param
+  USE mod_coord
   USE mod_name
   USE mod_time
   USE mod_loopvars
@@ -571,7 +572,7 @@ return
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
        INTEGER                             :: verbose = 1
-       INTEGER                             :: strict  = 0
+       INTEGER                             :: strict  = 1
        INTEGER                             :: errCode
 
        errCode=0
@@ -853,8 +854,6 @@ return
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.2 &
          ,f15.0,f6.1,f6.2,f8.2,f6.0,8e8.1 )
 #elif defined orc
-!566 format(i8,i7,2f8.2,f6.2,2f10.2 &
-!         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
