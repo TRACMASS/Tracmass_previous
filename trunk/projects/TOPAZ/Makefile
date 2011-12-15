@@ -1,15 +1,15 @@
-# Makefile for orc
+# Makefile for auscom
 #========================================================================
   INPUT_INT1        = intmin   # Variables set from command line
   INPUT_INT2        = intrun   # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-# fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
+  fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
 #  fl01   = -Dtimeanalyt    # Stationary time scheme 
-  fl02   = -Dregulardt     # Regular time steps with -Dtimestep
+#  fl02   = -Dregulardt     # Regular time steps with -Dtimestep
 #------------------------------------------------------------------------
-  fl03   = -Dtempsalt       # Include temp and salt
-#  fl04   = -Dtextwrite      # Write results to textfile
-  fl05   = -Dbinwrite      # Write results to binaryfile
+#  fl03   = -Dtempsalt       # Include temp and salt
+  fl04   = -Dtextwrite      # Write results to textfile
+#  fl05   = -Dbinwrite      # Write results to binaryfile
 #  fl06   = -Dmysqlwrite    # Write results to mysql
 #------------------------------------------------------------------------
 #  fl07  = -Dstreamxy       # Calculates the barotropic stream function.
@@ -20,12 +20,12 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.   
 #------------------------------------------------------------------------
-  fl12  = -Dtwodim         # Turn off vetical velocities.
+#  fl12  = -Dtwodim         # Turn off vetical velocities.
 #  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
 #  fl15  = -Dvarbottombox   # Variable bottom box to match actual depth
-#  fl16  = -Dfreesurface    # Variable bottom box to match actual depth
+  fl16  = -Dfreesurface    # Variable bottom box to match actual depth
 #  fl17  = -Dzvec1D         # Cell depths defined as vector
   fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
 #  fl17  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
@@ -43,5 +43,3 @@ ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\
 			$(fl13)$(fl14)$(fl15)$(fl16)$(fl17)$(fl18)\
 			$(fl19)$(fl20)$(fl21)$(fl22)$(fl23)$(fl24)\
 			$(fl25)$(fl26)$(fl27)$(fl28)$(fl29)$(fl30)\
-
-# Var bottom to be used by occ66 || orc || for || sim || multcol || jplSCB || eccoSOSE
