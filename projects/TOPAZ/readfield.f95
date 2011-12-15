@@ -17,70 +17,202 @@ SUBROUTINE readfields
   
   IMPLICIT none
 
-  CHARACTER(len=200), SAVE                   :: ncFile, maskfile
-  integer                                    :: i,im,j,jm,k,kk,ints2
-  INTEGER, SAVE                              :: nread,ndates
-  
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: ssh
+  CHARACTER(len=200), SAVE         :: ncFile, maskfile
+  INTEGER                          :: i, im, ip, j, jm, jp, k, kk
+  INTEGER                          :: year, month, day, nread, ndates
+  INTEGER, SAVE                    :: varid_u,varid_v,varid_ssh,varid_sst,varid_sss,varid_rho
+  LOGICAL                          :: around
+  CHARACTER(len=100)               :: fileName
+  REAL*4                           :: du,dv
+  REAL*4,  ALLOCATABLE, DIMENSION(:,:)     :: temp2d_simp
+  REAL*4,  ALLOCATABLE, DIMENSION(:,:,:)   :: temp3d_simp
     
-  integer                                    :: year,month,day  
-  logical                                    :: around
-  character(len=100)                         :: fileName
+  
+!  REAL temp2d(IMT,JMT)
  
-  allocate ( ssh(imt,jmt) )
+alloCondUVW: IF (.NOT. ALLOCATED (temp2d_simp)) THEN
+      ALLOCATE (temp3d_simp(IMT,JMT,KM), temp2d_simp(IMT,JMT))
+!#ifdef tempsalt
+!      ALLOCATE (tempb(KMM), saltb(KMM), rhob(KMM), depthb(KM), latb(KM))
+!#endif
+END IF alloCondUVW
+
 
   call datasetswap
 
   ! === NetCDF file and fields ===
-  fileName = '22450101.ocean_daily.nc'
+  fileName = 'monthlydata/ocean-20071231_month.nc'
   ncFile   = trim(inDataDir)//fileName
-  ncTpos = ints - 17459
+  nread=mod(ints,2)+1
+  nread=1
+!  print *,'ncFile=',ints,nread,ncFile
+
+  map2D    = [  1, 2, 3, 4 ]  
+  map3D    = [  1, 2, 3, 4 ]  
+  start1d  = [  1]
+  count1d  = [ km]
+  start2d  = [1,  1, nread, 1   ]
+  count2d  = [IMT, JMT, 1, 1 ]
+  start3d  = [1,  1, 1, nread]
+  count3d  = [IMT, JMT, KM, 1]
+
   inquire(file=ncFile,exist=around)
   if(.not.around) stop 4556
+  
+  if(ints==1) then
+   ierr = NF90_OPEN (ncFile,NF90_NOWRITE,ncid)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   ierr = NF90_INQ_VARID (ncid,'eta_u',varid_ssh)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   ierr = NF90_INQ_VARID(ncid,'u',varid_u) 
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   ierr = NF90_INQ_VARID(ncid,'v',varid_v) 
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   ierr = NF90_INQ_VARID(ncid,'sst',varid_sst) 
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   ierr = NF90_INQ_VARID(ncid,'sss',varid_sss) 
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   ierr = NF90_INQ_VARID(ncid,'rho',varid_sss) 
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+  endif
+  
+  
+     ! Read SSH
+      
+   ierr = NF90_GET_VAR (ncid,varid_ssh,temp2d_simp,start2d,count2d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+
+  where (temp2d_simp<-100000.) 
+   temp2d_simp = 0.
+  end where
+  
+     DO i=1,IMT
+      DO j=1,JMT
+   		hs(i,j,2) = temp2d_simp(i,j)
+      END DO
+   END DO
+
+   ! Read U velocity
+   ierr = NF90_GET_VAR(ncid,varid_u,uvel,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+   ! Read V velocity
+   ierr = NF90_GET_VAR(ncid,varid_v,vvel,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   
+#ifdef tempsalt
+   ! Read SST 
+   ierr = NF90_GET_VAR(ncid,varid_sst,temp3d_simp,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   where (temp3d_simp<-1000.) 
+    temp3d_simp = 0.
+   end where
+   do k=1,KM
+    tem(:,:,km-k+1,2) =  temp3d_simp(:,:,k)
+   enddo
+   ! Read SSS
+   ierr = NF90_GET_VAR(ncid,varid_sss,temp3d_simp,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   where (temp3d_simp<-1000.) 
+    temp3d_simp = 0.
+   end where
+   do k=1,KM
+    sal(:,:,km-k+1,2) =  temp3d_simp(:,:,k)
+   enddo
+   ! Read rho
+   ierr = NF90_GET_VAR(ncid,varid_rho,temp3d_simp,start3d,count3d)
+   IF (ierr /= 0) THEN
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   END IF
+   where (temp3d_simp<-1000.) 
+    temp3d_simp = 0.
+   end where
+   do k=1,KM
+    rho(:,:,km-k+1,2) =  temp3d_simp(:,:,k)
+   enddo
+#endif
+
+!   ierr=NF90_CLOSE(ncid)
+!   IF (ierr /= 0) THEN
+!      PRINT*,NF90_STRERROR (ierr)
+!      STOP
+!   END IF
 
   ! === Velocities ===
-  uvel =  get3DfieldNC(trim(ncFile), 'u')
-  vvel =  get3DfieldNC(trim(ncFile), 'v')
-  if (intstep .le. 0) then
-     uvel = -vvel
-     vvel = -vvel
-  end if
-  where (vvel== -10) 
-     uvel = 0
-     vvel = 0
-  end where 
 
-  !print *,kmt(200:210,32)
-  !print *,uvel(200:210,32,1)
-  !print *,vvel(200:210,32,1)
+  where (uvel<-1000.) 
+   uvel = 0.
+  end where
+  where (vvel<-1000.) 
+   vvel = 0.
+  end where
 
-  !sal(:,:,:,2) = get3dfieldNC(trim(ncFile) ,'salt') 
-  !sal(:,:,:,2) = sal(:,:,:,2) * salt_scale + salt_offset
-  !Use  t=1  i=2  j=3  k=4
-  map2d    = [2, 3, 1, 4]
-  hs(:,:,2) = get2DfieldNC(trim(ncFile) ,'eta_t')
-
-  dzu(:,:,km) = dzt0surf + hs(:,:,2)
-  dzv(:,:,km) = dzt0surf + hs(:,:,2)
-
-  do k=1,km
-    kk=km-k+1
-    uflux(2:imt,2:jmt,k,2)  =  &
-         (uvel(1:imt-1,2:jmt,kk) + uvel(1:imt-1,1:jmt-1,kk))/2 * & 
-         dyu(1:imt-1,2:jmt) * dzt(1:imt-1,2:jmt,k)
-    vflux(2:imt,2:jmt,k,2)  = &
-         (vvel(2:imt,1:jmt-1,kk) + vvel(1:imt-1,1:jmt-1,kk))/2 * & 
-         dxv(2:imt,1:jmt-1) * dzt(2:imt,1:jmt-1,k)
-    uflux(1,2:jmt,k,2) =  &
-         (uvel(1,2:jmt,kk) + uvel(imt,1:jmt-1,kk))/2 * & 
-         dyu(1,2:jmt) * dzt(imt,2:jmt,k)
-    vflux(1,2:jmt,k,2)  = &
-         (vvel(1,1:jmt-1,kk) + vvel(1,1:jmt-1,kk))/2 * & 
-         dxv(1,1:jmt-1) * dzt(1,1:jmt-1,k)
-  !  rho(:,1:80,k,2)=NCfieldr(1,:,:,k)
+  do i=1,IMT
+   ip=i+1
+   im=i-1
+   if(i.eq.IMT) ip=1
+   if(i.eq.1  ) im=IMT
+   do j=1,JMT
+    jp=j+1
+    jm=j-1
+    if(j.eq.JMT) jp=JMT
+    if(j.eq.  1) jm=1
+    do k=1,km
+     kk=km-k+1
+     du=dzu(i,j,k)
+     dv=dzv(i,j,k)
+     if(k.eq.KM) then
+      du=du+0.5*(hs(i,j,2)+hs(ip,j,2))
+      dv=dv+0.5*(hs(i,j,2)+hs(i,jp,2))
+     endif
+     uflux(i,j,k,2) = 0.5 * (uvel(i,j,kk)+uvel(im,j,kk)) * dyu(i,j) * du
+     vflux(i,j,k,2) = 0.5 * (vvel(i,j,kk)+vvel(i,jm,kk)) * dxv(i,j) * dv
+    enddo
+   enddo
   enddo
 
 
+   DEALLOCATE ( temp3d_simp, temp2d_simp )
+#ifdef tempsalt
+!   DEALLOCATE ( tempb, saltb, rhob, depthb, latb )
+#endif
 
 
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
