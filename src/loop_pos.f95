@@ -36,7 +36,7 @@ contains
        scrivi=.false.
        uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
 #ifdef turb    
-       ! uu=1%uu+upr(1,2)
+       ! uu=1 uu+upr(1,2)
 #endif /*turb*/
        if(uu.gt.0.d0) then
           ib=ia+1
