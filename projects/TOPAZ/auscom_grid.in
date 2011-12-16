@@ -30,7 +30,7 @@ $INITGRIDTIME
   !
   ngcm    = 730,          ! hours between GCM datasets
   iter    =  10,            ! iteration between two gcm data sets
-  intmax  = 365,          ! maximum length of GCM fields
+  intmax  = 12000,          ! maximum length of GCM fields
   fieldsPerFile = /       ! How many timesteps in each datafile
   !
   !
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour          = 0,
   baseDay           = 1,
   baseMon           = 1,
-  baseYear          = 2007/
+  baseYear          = 2006/
   !
   !
 $INITGRIDARC
