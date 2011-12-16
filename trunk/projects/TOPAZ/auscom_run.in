@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 364,
+  intrun       = 12000,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -45,7 +45,7 @@
   startHour         = 00,
   startDay          = 01,
   startMon          = 01,
-  startYear         = 2007/
+  startYear         = 2006/
   !
   !
   &INITRUNWRITE
@@ -122,8 +122,8 @@
   ist2         = 70,			  
   jst1         = 60,		 
   jst2         = 60,		 
-  kst1         = 30,		 
-  kst2         = 30,
+  kst1         = 1,		 
+  kst2         = 50,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -165,4 +165,4 @@ $INITRUNEND
 !  jens(1) =   1,
 !  jenn(1) = 163,
 !
-  timax =  36500./  ! maximum time length of a trajectory in days
+  timax =  365000./  ! maximum time length of a trajectory in days

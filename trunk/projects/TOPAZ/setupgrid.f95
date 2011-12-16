@@ -43,7 +43,7 @@ SUBROUTINE setupgrid
   logical                                    :: around
 
   allocate ( dzu(imt,jmt,km),dzv(imt,jmt,km),dzt0surf(imt,jmt) )
-  allocate ( depth(imt,jmt),  mask(imt,jmt), kmu(imt,jmt) )
+  allocate ( depth(imt,jmt),  mask(imt,jmt), kmu(imt,jmt), kmv(imt,jmt) )
   
   
   call coordinat
@@ -93,7 +93,7 @@ print *,trim(gridfile),' tday=',tday
   
   ! === Set up cell heights ===
   
-  gridfile = trim(inDataDir) // 'monthlydata/ocean-20071231_month.nc'
+  gridfile = trim(inDataDir) // 'monthlydata/ocean_month_20061231.nc'
   print *,trim(gridfile)
   
    ierr = NF90_OPEN (gridfile,NF90_NOWRITE,ncid)
@@ -122,8 +122,11 @@ print *,trim(gridfile),' tday=',tday
    do j=1,JMT
     jp=j+1
     if(jp.eq.JMT+1) jp=JMT ! there should be an f-fold here i think K.Döös
-     dzu(i,j,:) = min(dzt(i,j,:),dzt(ip,j,:))
-     dzv(i,j,:) = min(dzt(i,j,:),dzt(i,jp,:))
+     do k=1,KM
+      dzu(i,j,k) = min(dzt(i,j,k),dzt(ip,j,k))
+      dzv(i,j,k) = min(dzt(i,j,k),dzt(i,jp,k))
+!      if(k.eq.KM .and. i==1) print *,j, dzt(i,j,k), dzt(ip,j,k), dzu(i,j,k)
+     enddo
     enddo
    enddo
 ! find the total depth
@@ -156,6 +159,19 @@ depth=0.
   kmu=tem2d
   where (kmu<-1000) 
    kmu = 0
+  end where
+  
+  
+   ierr = NF90_INQ_VARID (ncid,'kmv',varid)
+   ierr = NF90_GET_VAR (ncid,varid,tem2d,start2d,count2d)
+   IF (ierr /= 0) THEN
+    PRINT*,NF90_STRERROR (ierr)
+    STOP
+   END IF  
+
+  kmv=tem2d
+  where (kmv<-1000) 
+   kmv = 0
   end where
 
   
