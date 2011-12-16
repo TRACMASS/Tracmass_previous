@@ -5,8 +5,8 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'auscom',
-  caseDesc     = 'Jaci'/
+  caseName     = 'topaz',
+  caseDesc     = 'Study O2Ar in Southern Ocean'/
   ! 
   !
 &INITRUNGRID
@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 12000,
+  intrun       = 364,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -43,9 +43,9 @@
  &INITRUNDATE
   !
   startHour         = 00,
-  startDay          = 01,
-  startMon          = 01,
-  startYear         = 2006/
+  startDay          = 20,
+  startMon          = 10,
+  startYear         = 2005/
   !
   !
   &INITRUNWRITE
@@ -59,16 +59,16 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva        = 3,
+  kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/Users/doos/data/auscom/',
+  inDataDir       = '/projData/TOPAZ/1yr_1d/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Users/doos/data/auscom/data_out/',
+  outDataDir      = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'jaci',
+  outDataFile     = 'topaz',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -118,11 +118,11 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 70,		 
-  ist2         = 70,			  
-  jst1         = 60,		 
-  jst2         = 60,		 
-  kst1         = 1,		 
+  ist1         = 2,		 
+  ist2         = 359,			  
+  jst1         = 1,		 
+  jst2         = 50,		 
+  kst1         = 50,		 
   kst2         = 50,
   ! ===   ===   ===   ===   ===
   !
@@ -165,4 +165,4 @@ $INITRUNEND
 !  jens(1) =   1,
 !  jenn(1) = 163,
 !
-  timax =  365000./  ! maximum time length of a trajectory in days
+  timax =  36500./  ! maximum time length of a trajectory in days
