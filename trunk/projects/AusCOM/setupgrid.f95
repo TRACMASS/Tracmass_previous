@@ -89,7 +89,7 @@ print *,trim(gridfile),' tday=',tday
    dyu(1:imt,:)=tem2d
    dxdy = dxv(1:imt,:)*dyu(1:imt,:)
   
-
+   dx=dxv(IMT/2,JMT/2) ; dy=dyu(IMT/2,JMT/2) ! rough resolution for arclength
   
   ! === Set up cell heights ===
   
@@ -115,6 +115,14 @@ print *,trim(gridfile),' tday=',tday
   do  k=1,km
    dzt(:,:,km-k+1) =  tem3d(:,:,k)
   end do
+  dz=0.
+  do i=1,IMT
+   do j=1,JMT
+    do k=1,KM
+     dz(k)=max(dz(k),dzt(i,j,k))
+    enddo
+   enddo
+  enddo
   
   do i=1,IMT
    ip=i+1

@@ -20,7 +20,7 @@ SUBROUTINE readfields
   CHARACTER(len=200), SAVE         :: ncFile, maskfile
   INTEGER                          :: i, im, ip, j, jm, jp, k, kk, ii
   INTEGER                          :: nread, ndates
-  INTEGER, SAVE                    :: varid_u,varid_v,varid_ssh,varid_sst,varid_sss,varid_rho
+  INTEGER, SAVE                    :: varid_u,varid_v,varid_ssh,varid_temp,varid_salt,varid_rho
   LOGICAL                          :: around
   CHARACTER(len=100)               :: fileName
   REAL*4                           :: du,dv
@@ -97,17 +97,17 @@ END IF alloCondUVW
       PRINT*,NF90_STRERROR (ierr)
       STOP
    END IF
-   ierr = NF90_INQ_VARID(ncid,'sst',varid_sst) 
+   ierr = NF90_INQ_VARID(ncid,'temp',varid_temp) 
    IF (ierr /= 0) THEN
       PRINT*,NF90_STRERROR (ierr)
       STOP
    END IF
-   ierr = NF90_INQ_VARID(ncid,'sss',varid_sss) 
+   ierr = NF90_INQ_VARID(ncid,'salt',varid_salt) 
    IF (ierr /= 0) THEN
       PRINT*,NF90_STRERROR (ierr)
       STOP
    END IF
-   ierr = NF90_INQ_VARID(ncid,'rho',varid_sss) 
+   ierr = NF90_INQ_VARID(ncid,'rho',varid_rho) 
    IF (ierr /= 0) THEN
       PRINT*,NF90_STRERROR (ierr)
       STOP
@@ -146,7 +146,6 @@ END IF alloCondUVW
    temp3d_simp = 0.
   end where
   uvel(1:IMT,:,:)=temp3d_simp
-
    
    ! Read V velocity
    ierr = NF90_GET_VAR(ncid,varid_v,temp3d_simp,start3d,count3d)
@@ -161,8 +160,8 @@ END IF alloCondUVW
   vvel(1:IMT,:,:)=temp3d_simp
    
 #ifdef tempsalt
-   ! Read SST 
-   ierr = NF90_GET_VAR(ncid,varid_sst,temp3d_simp,start3d,count3d)
+   ! Read temp 
+   ierr = NF90_GET_VAR(ncid,varid_temp,temp3d_simp,start3d,count3d)
    IF (ierr /= 0) THEN
       PRINT*,NF90_STRERROR (ierr)
       STOP
@@ -173,8 +172,8 @@ END IF alloCondUVW
    do k=1,KM
     tem(:,:,km-k+1,2) =  temp3d_simp(:,:,k)
    enddo
-   ! Read SSS
-   ierr = NF90_GET_VAR(ncid,varid_sss,temp3d_simp,start3d,count3d)
+   ! Read salt
+   ierr = NF90_GET_VAR(ncid,varid_salt,temp3d_simp,start3d,count3d)
    IF (ierr /= 0) THEN
       PRINT*,NF90_STRERROR (ierr)
       STOP
@@ -191,28 +190,20 @@ END IF alloCondUVW
       PRINT*,NF90_STRERROR (ierr)
       STOP
    END IF
-   where (temp3d_simp<-1000.) 
-    temp3d_simp = 0.
-   end where
-   do k=1,KM
-    rho(:,:,km-k+1,2) =  temp3d_simp(:,:,k)
+   do i=1,IMT
+    do j=1,JMT   
+     do k=1,KM
+      if(temp3d_simp(i,j,k) <- 1000.) then
+       rho(i,j,km-k+1,2) = 0.
+      else
+       rho(i,j,km-k+1,2) = temp3d_simp(i,j,k) - 1000.
+      endif
+     enddo
+    enddo
    enddo
 #endif
 
-!   ierr=NF90_CLOSE(ncid)
-!   IF (ierr /= 0) THEN
-!      PRINT*,NF90_STRERROR (ierr)
-!      STOP
-!   END IF
 
-
-  
-!  dyu=1000000. ; dxv=1000000. 
-  
-!  do j=JMT,1,-1
-! write(*,"(370i1)") (int(100000.*uvel(i,j,1)),i=1,IMT/2)
-!enddo 
-!stop 3495
 
   do i=1,IMT
    ip=i+1
