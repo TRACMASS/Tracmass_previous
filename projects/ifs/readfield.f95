@@ -16,14 +16,14 @@ subroutine readfields
  INTEGER, PARAMETER ::  NY=145
 
  REAL*4, ALLOCATABLE, DIMENSION(:,:) :: txy,zxy,uxy,vxy,qxy,pxy,th,zh,uh,vh,qh,ph
- REAL*4, ALLOCATABLE, DIMENSION(:,:,:) :: zeta
+ REAL*4, ALLOCATABLE, DIMENSION(:,:,:) :: zeta,td,tw,zg
   
  INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
- REAL*4 :: pp
+ REAL*4 :: pp,tv,pc,pm,pref,Rd,cp,Lv
  CHARACTER (len=200)                        :: gridFile ,fieldFile,string
  CHARACTER hour(4)*4,month(12)*2,date(31)*2,year(1989:2009)*4
  LOGICAL around
- REAL*8, SAVE :: punit
+ REAL*8, SAVE :: punit,eunit
  INTEGER*8, SAVE :: nlon(NY)
 
 data year /'1989','1990','1991','1992','1993','1994','1995','1996','1997','1998','1999',&
@@ -45,181 +45,263 @@ data hour /'0000','0600','1200','1800'/
 
 
 
-!_______________________ update the time counting ________________________________________
-! ihour=ihour+6
-! if(ihour.eq.24) then
-!  ihour=0
-!  iday=iday+1
-!  if(iday.gt.idmax(imon,iyear)) then
-!   iday=1
-!   imon=imon+1
-!   if(imon.eq.13) then
-!    imon=1
-!    iyear=iyear+1
-!    if(iyear.gt.yearmax) iyear=yearmin ! recycle over gcm outputdata
-!   endif
-!  endif
-! endif
+!!
+!! Update the time counter
+!!
 
-ihour=ihour+int(ff)*ngcm
-if(ihour.ge.24) then
- ihour=0
- iday=iday+1
- if(iday.gt.idmax(imon,iyear)) then
-  iday=1
-  imon=imon+1
-  if(imon.eq.13) then
-   imon=1
-   iyear=iyear+1
-  endif
- endif
-elseif(ihour.lt.0) then
- ihour=18
- iday=iday-1
- if(iday.eq.0) then
-  imon=imon-1
-  if(imon.eq.0) then
-   imon=12
-   iyear=iyear-1
-  endif
-  iday=idmax(imon,iyear)
- endif
-endif
+ihour = ihour + int(ff) * ngcm  
+
+IF (ihour >= 24) THEN   !Forward scheme
+
+   ihour = 0
+   iday  = iday + 1
+   IF (iday > idmax(imon,iyear)) THEN
+      iday = 1
+      imon = imon + 1
+      IF (imon == 13) THEN
+         imon  = 1
+         iyear = iyear + 1
+      END IF
+   END IF
+
+ELSE IF (ihour < 0) THEN  !Backward scheme
+   
+   ihour = 18
+   iday  = iday - 1
+   IF (iday == 0) THEN
+      imon = imon - 1
+      IF (imon == 0) THEN
+         imon  = 12
+         iyear = iyear - 1
+      END IF
+      iday=idmax(imon,iyear)
+   END IF
+
+END IF
 
 
-ntime=1000000*iyear+10000*imon+100*iday+ihour
+ntime = 1000000 * iyear + 10000 * imon + 100 * iday + ihour
 
-!____________________________ initialise ________________________________________________
-if(ints.eq.intstart) then
-hs=0.
-uflux=0.
-vflux=0.
+
+!!
+!! Initialise on the first time step
+!!
+
+IF (ints == intstart) THEN
+   
+   hs    = 0.
+   uflux = 0.
+   vflux = 0.
 #ifdef tempsalt
-tem=0.
-sal=0.
-rho=0.
+   tem   = 0.
+   sal   = 0.
+   rho   = 0.
 #endif
 
+   punit = 1.e-2 ! Scale factor for pressure units  
+               ! 1.=Pa, 1.e-2=hPa, 1.e.-3=kPa 
+   iyear = startYear
+   imon  = startMon
+   iday  = startDay
+   ihour = startHour
 
-punit=1.e-2 ! Pressure units  1.=Pa, 1.e-2=hPa, 1.e.-3=kPa 
-iyear=startYear
-imon=startMon
-iday=startDay
-ihour=startHour
+END IF
 
-endif
 
-  ! === swap between datasets ===
-!  hs(:,:,1)=hs(:,:,2)
-  uflux(:,:,:,1)=uflux(:,:,:,2)
-  vflux(:,:,:,1)=vflux(:,:,:,2)
-  dzt(:,:,:,1)=dzt(:,:,:,2)
+!!
+!! Swap data sets
+!!
+
+   uflux(:,:,:,1) = uflux(:,:,:,2)
+   vflux(:,:,:,1) = vflux(:,:,:,2)
+   dzt(:,:,:,1)   = dzt(:,:,:,2)
 #ifdef tempsalt 
-  tem(:,:,:,1)=tem(:,:,:,2)
-  sal(:,:,:,1)=sal(:,:,:,2)
-  rho(:,:,:,1)=rho(:,:,:,2)
+   tem(:,:,:,1)   = tem(:,:,:,2)
+   sal(:,:,:,1)   = sal(:,:,:,2)
+   rho(:,:,:,1)   = rho(:,:,:,2)
 #endif
 
 
-!____ construct format of time to read files _______________________
 
-!print *,'inDataDir',inDataDir
+!!
+!! Construct string to read input files
+!!
 
-!_____________________________ read ifs fields _________________________________________
-!fil=trim(dirgcm)//year(nyear)//'/uvtqzp_'//year(nyear)//month(nmonth)//date(nday)//'.'//trim(hour(nhour))//'.grb'
+fieldFile = TRIM(inDataDir)//'era/'//year(iyear)//'/uvtqzp_'//year(iyear)//    &
+&           month(imon)//date(iday)//'.'//TRIM(hour(ihour/6+1))//'.grb'
 
-fieldFile=trim(inDataDir)//'era/'//year(iyear)//'/uvtqzp_'//year(iyear)//month(imon)//date(iday)//'.'//trim(hour(ihour/6+1))//'.grb'
+ntime     = 1000000 * iyear + 10000 * imon + 100 * iday + ihour
 
-ntime=1000000*iyear+10000*imon+100*iday+ihour
-!print *,'hour=',ihour,iday,imon,iyear,fieldFile
-!print *,'ntime=',ntime
-inquire(file = fieldFile, exist = around )
-if(.not.around) then
- print *,'cannot find: ',fieldFile
- stop 39467
-endif
+INQUIRE (FILE = fieldFile, EXIST = around)
+IF (.not. around) THEN
+   PRINT*,'ERROR: cannot find: ',fieldFile
+   STOP 39467
+END IF
 
 
-! Read in data from the A-grid using wgrib
-! Set a environment variable WGRIB, e.g. export WGRIB=/home/user/bin/wgrib
-string='$WGRIB '//trim(fieldFile)//' -o '//trim(inDataDir)//&
-       trim(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
-call system(string)
-! read
-open(14,form='unformatted',file=trim(inDataDir)//trim(outDataFile)//'.bin',access='direct',recl=IMT*145*4,convert='little_endian')
+!!
+!! Read in data from the A-grid using wgrib
+!! Set a environment variable WGRIB, e.g. export WGRIB=/home/user/bin/wgrib
+!!
 
-kk=0
-do k=1,KM
-! l=KM+1-k
- l=k
- kk=kk+1
- read(14,rec=kk) txy ! read tempeterature in [K]
- kk=kk+1
- read(14,rec=kk) qxy  ! read specific humidity in [Kg/Kg]
- if(k.eq.1) then
-  kk=kk+1
-  read(14,rec=kk) zxy ! read geopotential at the orography in [m2/s2]
-  kk=kk+1
-!print *,'kk=',kk
-  read(14,rec=kk) pxy ! read the ln surface pressure 
-  do j=1,NY
-   ph(:,j)=exp(pxy(:,NY+1-j))   !  [Pa]
-!   zh(:,j)=zxy(:,NY+1-j)
-  enddo
+string = '$WGRIB '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
+&        TRIM(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
+CALL SYSTEM(string)
 
- endif
- kk=kk+1
-!print *,'kk=',kk
- read(14,rec=kk) uxy ! read the zonal velocity in [m/s]
- kk=kk+1
-!print *,'kk=',kk
- read(14,rec=kk) vxy !  read the meridional velocity in [m/s]
+OPEN (14,FORM='UNFORMATTED',FILE=trim(inDataDir)//trim(outDataFile)//'.bin',   &
+&     ACCESS='DIRECT',RECL=IMT*145*4,CONVERT='little_endian')
 
-! reverse the latitudenal order 
-  do j=1,NY
-   jj=NY+1-j
-   th(:,j)=txy(:,jj)
-   qh(:,j)=qxy(:,jj)*1.e3 !  [g/Kg]
-   uh(:,j)=uxy(:,jj)!*( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*ph(:,j) )*punit
-   vh(:,j)=vxy(:,jj)!*( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*ph(:,j) )*punit
-!   uh(:,j)=uxy(:,jj)
-!   vh(:,j)=vxy(:,jj)
-  enddo
+!!
+!! Read for each model level
+!!
+
+kk = 0
+DO k=1,KM
+
+   l=k
+   kk=kk+1
+   READ (14,rec=kk) txy ! read tempeterature in [K]
+   kk=kk+1
+   READ (14,rec=kk) qxy  ! read specific humidity in [Kg/Kg]
+   
+   IF (k == 1) THEN
+      kk=kk+1
+      READ (14,rec=kk) zxy ! read geopotential at the orography in [m2/s2]
+      kk=kk+1
+      READ (14,rec=kk) pxy ! read the ln surface pressure 
+      DO j=1,NY
+         ph(:,j) = EXP (pxy(:,NY+1-j))   ![Pa]
+         zh(:,j) = zxy(:,NY+1-j)         ![m2/s2]
+      END DO
+   END IF
+   
+   kk=kk+1
+   READ (14,rec=kk) uxy ! read the zonal velocity in [m/s]
+   kk=kk+1
+   READ (14,rec=kk) vxy !  read the meridional velocity in [m/s]
+
+   ! Reverse latitude order
+   DO j=1,NY
+      jj=NY+1-j
+      th(:,j) = txy(:,jj)
+      qh(:,j) = qxy(:,jj)*1.e3 !  [g/Kg]
+      uh(:,j) = uxy(:,jj)
+      vh(:,j) = vxy(:,jj)
+   END DO
  
- ! In ERA-Interim data, vh is not zero at NP, but the zonal mean is.
- vh(:,NY)=0.
-! A-grid -> C-grid & store in matrixes
- do j=1,JMT
-  jj=j+1
-  jm=j
-  do i=1,IMT
-   im=i-1
-   if(im.eq.0) im=IMT
-   tem  (i,j,l,2)=0.25*(th(i,jj)+th(im,jj)+th(i,jm)+th(im,jm))
-   sal  (i,j,l,2)=0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm))
-   pp=0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm))
-   rho  (i,j,l,2)=0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit
-   dzt (i,j,l,2)= ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit / grav
+   ! In ERA-Interim data, vh is not zero at NP, but the zonal mean is.
+   vh(:,NY) = 0.
+   
+   ! A-grid -> C-grid & store in matrixes
+   DO j=1,JMT
+      
+      jj = j+1
+      jm = j
+      
+      DO i=1,IMT
+         
+         im=i-1
+         IF (im == 0) THEN
+            im=IMT
+         END IF
+         
+         tem  (i,j,l,2) = 0.25*(th(i,jj)+th(im,jj)+th(i,jm)+th(im,jm))
+         sal  (i,j,l,2) = 0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm))
+         
+         pp = 0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm))
+         dzt  (i,j,l,2) = ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit / grav
+         
+         rho  (i,j,l,2) = 0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit
+                  
+         uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg / grav * &
+         &     ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(i,jm)) )*punit
+         vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j) / grav * &
+         &     ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(im,jj)) )*punit
+         
+         
+      END DO
+   END DO
 
-   uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg / grav * &
-                  ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(i,jm)) )*punit
-   vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j) / grav * &
-                  ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(im,jj)) )*punit
-
-  enddo
- enddo
-!stop 4067
-enddo ! enddo k-loop
+END DO
 
 
-close(14) 
+!!
+!! Compute the geopotential, potential temperature, and energies
+!!
+
+ALLOCATE (zg(IMT,JMT,0:KM), td(IMT,JMT,KM), tw(IMT,JMT,KM))
+
+zg = 0.
+td = 0.
+tw = 0.
+DO i = 1,IMT
+   im = i-1
+   IF (im == 0) THEN
+      im = IMT
+   END IF
+   zg(i,:,KM) = 0.25 * (zh(i,1:JMT)+zh(i,2:NY)+zh(im,1:JMT)+zh(im,2:NY))
+END DO
+
+pref = 100000. * punit
+eunit = 1e-3
+
+Rd = 287.05d0   ! Gas constant for dry air
+Lv = 2.5d+6     ! Latent heat for condensation of water vapor [J/kg]
+cp = 1004.d0    ! Specific heat for dry air
 
 
+DO k = KM,1,-1
+   DO j = 1,JMT
+      DO i = 1,IMT
+         
+         im = i-1
+         IF (im == 0) THEN
+            im = IMT
+         END IF
+         
+         ! Virtual temperature in layer k
+         tv = ( 1.0 + 0.622 * sal(i,j,k,2) ) * tem(i,j,k,2)
+         ! Pressure at current interface k
+         pc = aa(k) + bb(k) * &
+         &         0.25 * (ph(i,j+1)+ph(im,j+1)+ph(i,j)+ph(im,j))
+         ! Pressure at interface k-1
+         pm = aa(k-1) + bb(k-1) * &
+         &         0.25 * (ph(i,j+1)+ph(im,j+1)+ph(i,j)+ph(im,j))
+         IF (k-1 == 0) THEN
+            pm = 10.*punit
+         END IF
+         ! Geopotential at interface k-1
+         zg(i,j,k-1) = zg(i,j,k+1) + Rd * tv * LOG (pc/pm)
+      
+      END DO
+   END DO
+ENDDO
+
+#ifdef pottemp
+! Potential temperature (dry)
+td(:,:,:) = tem(:,:,:,2) * ( rho(:,:,:,2)/pref )**(Rd/cp)
+! Potential temperature (wet)
+tw(:,:,:) = tem(:,:,:,2) * (1.d0 + 0.622d0 * sal(:,:,:,2)/1000.d0) &
+          &              * ( rho(:,:,:,2)/pref )**(Rd/cp)
+
+tem(:,:,:,2) = td
+sal(:,:,:,2) = tw
+#endif
+
+#ifdef energy
+! Dry static energy
+td(:,:,:) = cp * tem(:,:,:,2) + 0.5 * (zg(:,:,1:KM) + zg(:,:,0:KM-1))
+! Moist static energy
+tw(:,:,:) = td(:,:,:) + Lv * sal(:,:,:,2)/1000.
+
+tem(:,:,:,2) = td * eunit
+sal(:,:,:,2) = tw * eunit
+#endif
+
+CLOSE (14) 
+
+RETURN
+
+END SUBROUTINE readfields
 
 
-!deallocate ( pxy,zxy,uxy,vxy,qxy,pxy  )
-!#ifdef tempsalt
-!deallocate ( gaus )
-!#endif
-return
-end subroutine readfields

@@ -81,10 +81,7 @@ SUBROUTINE setupgrid
   !!
   !! Some atmosphere constants
   !!
-  !R_d = 287.05d0   ! Gas constant for dry air
-  !L_v = 2.5d+6     ! Latent heat for condensation of water vapor [J/kg]
-  !c_d = 1004.d0    ! Specific heat for dry air
-  print*,R_d,L_v,c_d
+  
   
   !!
   !! Min/max for pressure, temperature, specific humidity
@@ -95,9 +92,23 @@ SUBROUTINE setupgrid
   tmax  =  323.d0 ![K]
   smin  =    0.d0 ![g/kg]
   smax  =   25.d0 ![g/kg]
+#ifdef energy
+  tmin  =  150.d0
+  tmax  = 1350.d0
+  smin  =  150.d0
+  smax  = 1400.d0
+#endif
+#ifdef pottemp
+  tmin  =   12.d0
+  tmax  =  332.d0
+  smin  =   12.d0
+  smax  =  342.d0
+#endif
   dr    = (rmax-rmin)/dble(MR-1) ![hPa]
   dtemp = (tmax-tmin)/dble(MR-1) ![K]
   dsalt = (smax-smin)/dble(MR-1) ![g/kg]
+  
+
   
   !!
   !! Read A(k) and B(k) to determine hybrid coordinate levels.
