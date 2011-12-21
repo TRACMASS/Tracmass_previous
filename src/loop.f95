@@ -8,16 +8,14 @@ SUBROUTINE loop
 !!          Sets the flags for reruns.
 !!
 !!          Contains subroutines for computing the grid box volume, time,
-!!          and writing data to files. 
+!!          and writing data to text-files. 
 !!
 !!          See tracmass manual for schematic of the structure.
-!!
-!!
-!!       Last change: Joakim Kjellsson, 21 December 2011
-!!
+!! 
 !!
 !!------------------------------------------------------------------------------          
   USE mod_param
+  USE mod_coord
   USE mod_name
   USE mod_time
   USE mod_loopvars
@@ -29,7 +27,6 @@ SUBROUTINE loop
   USE mod_traj
   USE mod_pos
   USE mod_turb
-  USE mod_coord
 #ifdef tracer
   USE mod_tracer
 #endif /*tracer*/
@@ -51,19 +48,25 @@ SUBROUTINE loop
   
   IMPLICIT none
     
+  INTEGER mra,mta,msa
+  REAL temp,salt,dens
+  
+#if defined sediment
+  INTEGER nsed,nsusp
+  logical res
+#endif /*sediment*/
+  
   INTEGER                                    :: ia, ja, ka, iam
   INTEGER                                    :: ib, jb, kb, ibm
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: niter
   INTEGER                                    :: nrh0=0
-  INTEGER                                    :: mra, mta, msa
 
   ! Counters
   INTEGER                                    :: nout=0, nloop=0, nerror=0
   INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
   INTEGER                                    :: nexit(NEND)
   
-  REAL                                       :: temp, salt, dens
   REAL*8                                     :: x0, y0, z0, x1, y1, z1
   REAL*8                                     :: rlon,rlat
   REAL*8                                     :: dt, t0
@@ -75,16 +78,7 @@ SUBROUTINE loop
   INTEGER                                    :: landError=0 ,boundError=0
   REAL                                       :: zz
 
-#if defined sediment
-  ! Specific for sediment code
-  INTEGER                                    :: nsed,nsusp
-  LOGICAL                                    :: res
-#endif /*sediment*/
-
-
-!!------------------------------------------------------------------------------
-
-
+!_________________________________________________________________  
   iday0=iday
   imon0=imon
   iyear0=iyear
@@ -133,7 +127,7 @@ SUBROUTINE loop
 
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
-  
+!  dtmin=tseas/dble(iter)
   
   !==========================================================
   !=== Read in the end positions from an previous run     === 
@@ -145,7 +139,7 @@ SUBROUTINE loop
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
-
+!  print 566,ntrac,niter,rlon,rlat,zz
 
 #ifdef orc
 !  do k=1,LBT
@@ -184,7 +178,8 @@ SUBROUTINE loop
 566 format(i8,i7,2f8.2,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #endif
- 
+!  print 566,ntrac,niter,rlon,rlat,zz
+!  print *,nrj(ntrac,8)  
   goto 40
 41 continue
   print 566,ntrac,niter,rlon,rlat,zz
@@ -199,7 +194,6 @@ SUBROUTINE loop
   !==========================================================
   !=== read ocean/atmosphere GCM data files               ===
   !==========================================================
-  
   print *,'------------------------------------------------------'
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
@@ -214,7 +208,6 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  
   intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
      call fancyTimer('reading next datafield','start')
      call readfields
@@ -236,7 +229,6 @@ SUBROUTINE loop
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===
      !=======================================================
-     
      call fancyTimer('advection','start')
      ntracLoop: do ntrac=1,ntractot  
 
@@ -245,25 +237,21 @@ SUBROUTINE loop
         
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
-        
-        x1     =  trj(ntrac,1)
-        y1     =  trj(ntrac,2)
-        z1     =  trj(ntrac,3)
-        tt     =  trj(ntrac,4)
-        subvol =  trj(ntrac,5)
-        arct   =  trj(ntrac,6)
-        t0     =  trj(ntrac,7)
-        
-        ib     =  nrj(ntrac,1)
-        jb     =  nrj(ntrac,2)
-        kb     =  nrj(ntrac,3)
-        niter  =  nrj(ntrac,4)
-        ts     =  dble(nrj(ntrac,5))
-        tss    =  0.d0
-        
+        x1=trj(ntrac,1)
+        y1=trj(ntrac,2)
+        z1=trj(ntrac,3)
+        tt=trj(ntrac,4)
+        subvol=trj(ntrac,5)
+        arct=trj(ntrac,6)
+        t0=trj(ntrac,7)
+        ib=nrj(ntrac,1)
+        jb=nrj(ntrac,2)
+        kb=nrj(ntrac,3)
+        niter=nrj(ntrac,4)
+        ts=dble(nrj(ntrac,5))
+        tss=0.d0
         ! === Write initial data to in.asc file ===
         ! If t0 = tt (first step) 
-        
         if(trj(ntrac,4).eq.trj(ntrac,7)) then
 #ifdef tempsalt
         call interp(nrj(ntrac,1),nrj(ntrac,2),nrj(ntrac,3),&
@@ -342,12 +330,9 @@ SUBROUTINE loop
               print *,'rg=',rg
               exit intsTimeLoop
            endif
-           
            ! === Cyclic world ocean/atmosphere === 
-           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-              x1 = x1 - DBLE(IMT)
-           END IF
-           
+           if(ib.eq.1.and.x1.eq.dble(IMT)) x1=0.d0
+  
            x0=x1
            y0=y1
            z0=z1
@@ -495,7 +480,7 @@ SUBROUTINE loop
               nexit(NEND)=nexit(NEND)+1
               exit niterLoop
            endif
-           
+           !call writedata(18)
         end do niterLoop
 #endif
         nout=nout+1
@@ -864,15 +849,13 @@ return
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined ifs 
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.2 &
-         ,f15.0,f8.2,f8.2,f8.2,f6.0,8e8.1 )
+         ,f15.0,f6.1,f6.2,f8.2,f6.0,8e8.1 )
 #elif defined orc
-!566 format(i8,i7,2f8.2,f6.2,2f10.2 &
-!         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
-         ,f13.8,f6.2,f6.2,f6.2,f6.0,8e8.1 )
+         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
     
     xf   = floor(x1)

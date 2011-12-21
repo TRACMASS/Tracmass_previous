@@ -26,7 +26,7 @@ subroutine arclength(ia,ja,ka,dt,rr)
   jj=ja
   jjm=ja-1
   vv=0.5*ff*(  (rg*vflux(ia,jj ,ka,NST)+rr*vflux(ia,jj ,ka,1)) &
-             + (rg*vflux(ia,jjm,ka,NST)+rr*vflux(ia,jjm,ka,1)) ) /(dx*deg*cst(ja)*dz(ka))
+             + (rg*vflux(ia,jjm,ka,NST)+rr*vflux(ia,jjm,ka,1)) ) /(dx*deg*dz(ka))
   
   ! === w ===
   kk=ka
@@ -36,7 +36,6 @@ subroutine arclength(ia,ja,ka,dt,rr)
 #else  
   ww=0.5*( rg*(wflux(kk,NST)+ wflux(kkm,NST) ) +rr*(wflux(kk,1)+ wflux(kkm,1)) )/dxdy(ia,ja)
 #endif
-
 
 
 #if defined ifs
@@ -53,7 +52,7 @@ subroutine arclength(ia,ja,ka,dt,rr)
   jj=ja
   jjm=ja-1
   vv=0.5*ff*(  (rg*vflux(ia,jj ,ka,NST)+rr*vflux(ia,jj ,ka,1)) &
-    + (rg*vflux(ia,jjm,ka,NST)+rr*vflux(ia,jjm,ka,1)) ) /(dx*deg*cst(ja)*dzt(ia,ja,ka,2))
+    + (rg*vflux(ia,jjm,ka,NST)+rr*vflux(ia,jjm,ka,1)) ) /(dx*deg*dzt(ia,ja,ka,2))
   
   ! === w ===
   kk=ka
@@ -74,7 +73,7 @@ subroutine arclength(ia,ja,ka,dt,rr)
   jj=ja
   jjm=ja-1
   vv=0.5*ff*(  (rg*vflux(ia,jj ,ka,NST)+rr*vflux(ia,jj ,ka,1)) &
-       + (rg*vflux(ia,jjm,ka,NST)+rr*vflux(ia,jjm,ka,1)) ) /(dx*deg*cst(ja)*dz(ka))
+       + (rg*vflux(ia,jjm,ka,NST)+rr*vflux(ia,jjm,ka,1)) ) /(dx*deg*dz(ka))
   
   ! === w ===
   kk=ka
