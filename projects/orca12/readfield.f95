@@ -40,7 +40,7 @@ SUBROUTINE readfields
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
   REAL*4 , SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
 #endif
-  REAL*4 dd,dmult,uint,vint,zint
+  REAL*4 dd,hu,hv,uint,vint,zint
   
 #ifdef tempsalt
  REAL*4, ALLOCATABLE, DIMENSION(:) :: tempb, saltb, rhob, depthb,latb
@@ -53,7 +53,7 @@ SUBROUTINE readfields
 #ifdef initxyt
   alloCondGrid: if ( .not. allocated (ntimask) ) then
      allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(NTID,IJKMAX2,3) )
-  end if alloCondGrid
+  endif alloCondGrid
 #endif
 
  alloCondUVW: if(.not. allocated (temp2d_simp)) then
@@ -61,12 +61,13 @@ SUBROUTINE readfields
 #ifdef tempsalt
    allocate ( tempb(KM), saltb(KM), rhob(KM), depthb(KM), latb(KM))
 #endif
- end if alloCondUVW
+ endif alloCondUVW
 
   ! === swap between datasets ===
   hs(:,:,1)=hs(:,:,2)
   uflux(:,:,:,1)=uflux(:,:,:,2)
   vflux(:,:,:,1)=vflux(:,:,:,2)
+  dzt(:,:,:,1)=dzt(:,:,:,2)
 #ifdef tempsalt 
   tem(:,:,:,1)=tem(:,:,:,2)
   sal(:,:,:,1)=sal(:,:,:,2)
@@ -80,6 +81,7 @@ SUBROUTINE readfields
      hs     = 0.
      uflux  = 0.
      vflux  = 0.
+     dzt=0.
 #ifdef tempsalt
      tem    = 0.
      sal    = 0.
@@ -127,7 +129,6 @@ else
 ! ----------------------------------------------------------------
 
 ! === Update clockworks ===
-#if defined orca1  || orca025
   iday=iday+5
   if(iday > idmax(imon,1999)) then
     iday=iday-idmax(imon,1999)
@@ -137,7 +138,7 @@ else
        iyear=iyear+1
     endif
   endif
-#elif orca025l75h6
+#if orca025l75h6
   if(ngcm.le.24) then
    ihour=ihour+ngcm
    if(ihour.eq.24) then
@@ -163,39 +164,16 @@ ntime=10000*iyear+100*imon+iday
 
 ! === Find the file for this timestep ===
 
-#ifdef orca1
- dataprefix='xxxx/ORCA1-N202_xxxxxxxx'
- write(dataprefix(17:24),'(i8)') ntime
- write(dataprefix(1:4),'(i4)') iyear
- fieldFile = trim(inDataDir)//trim(dataprefix)/'d05'
-#elif orca025
- dataprefix='xxxx/ORCA025-N112_xxxxxxxx'
+ dataprefix='xxxx/ORCA0083-N01_xxxxxxxx'
  write(dataprefix(19:26),'(i8)') ntime
  write(dataprefix(1:4),'(i4)') iyear
- fieldFile = trim(inDataDir)//trim(dataprefix)//'d05'
-#elif orca025l75h6
- if(ngcm.eq.  3) dataprefix='ORCA025.L75-SLB2_3h_19900101_19901231_grid_'
-! if(ngcm.eq.6) dataprefix='ORCA025.L75-SLB2_6h_19580101_19581231_grid_'
- if(ngcm.eq.  6) dataprefix='ORCA025.L75-SLB2_6h_20050101_20051231_grid_'
- if(ngcm.eq.730) dataprefix='ORCA025.L75-SLB0_730h_19770101_19771231_grid_'
-! write(dataprefix(19:26),'(i8)') ntime
- write(dataprefix(23:26),'(i4)') iyear
- write(dataprefix(32:35),'(i4)') iyear
-! print *,dataprefix
-! stop 4906
-! fieldFile = trim(inDataDir)//trim(dataprefix)
- fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
-! print *,fieldFile
-  nread=mod(ints-1,intmax)+1
-  start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
-  start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
-#else
- stop 39573
-#endif
+ fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)//'d05'
 
+!print *,'fieldFile=',trim(fieldFile)
     
 ! Sea surface height
 ierr=NF90_OPEN(trim(fieldFile)//'T.nc',NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 3766
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid)
 if(ierr.ne.0) stop 3768
 ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
@@ -215,6 +193,32 @@ do i=4,IMT
  hs(i,JMT+1,2)=hs(ii,JMT-3,2)  !  north fold 
 enddo
 
+!!------------------------------------------------------------------------------
+   ! Compute the level thickness of all boxes tking account of the z-star coordinates
+   ! withayer thicknesses dz* = dz (H+ssh)/H and the variable bottom box
+   do i=1,IMT
+      do j=1,JMT
+         do k=1,KM
+            kk = KM+1-k
+            if (kmt(i,j) == kk) then ! for the bottom box
+               dzt(i,j,k,2) = dztb(i,j,1) * (zw(kmt(i,j)) + hs(i,j,2)) / zw(kmt(i,j))
+               if(dzt(i,j,k,2).eq.0.) then
+                print *,i,j,kmt(i,j),dztb(i,j,1),hs(i,j,2),zw(kmt(i,j))
+                stop 4967
+               endif
+            elseif (kmt(i,j) /= 0) then ! for the levels above the bottom box
+               dzt(i,j,k,2) = dz(k)       * (zw(kmt(i,j)) + hs(i,j,2)) / zw(kmt(i,j))
+               if(dzt(i,j,k,2).eq.0.) then
+                print *,i,j,kmt(i,j),dz(k),hs(i,j,2),zw(kmt(i,j))
+                stop 4968
+               endif
+            else
+               dzt(i,j,k,2) = 0.
+            endif
+         enddo
+      enddo
+   enddo
+   
 #ifdef tempsalt 
 ! Temperature
 gridFile = trim(fieldFile)//'T.nc'
@@ -253,7 +257,7 @@ enddo
 
 depthb=0.
 do j=1,JMT
- latb=-80+0.25*float(j+subGridJmin-1)
+ latb=-80+1./12.*float(j+subGridJmin-1)
  do i=1,IMT
   do k=1,kmt(i,j)
    kk=KM+1-k
@@ -270,7 +274,6 @@ enddo
 
 #endif     
 
-dmult=1.  ! amplification of the velocity amplitude by simple multiplication
 ! u velocity
 gridFile = trim(fieldFile)//'U.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
@@ -280,17 +283,30 @@ if(ierr.ne.0) stop 3769
 ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
 ierr=NF90_CLOSE(ncid)
-do i=1,IMT
- do j=1,JMT
-  do k=1,kmu(i,j)
-   kk=KM+1-k
-   dd = dz(kk) 
-   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
-   if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
-   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
-  enddo
- enddo
-enddo
+
+   do i=1,IMT
+   	  ip=i+1
+   	  if(i.eq.IMT) ip=1
+      do j=1,JMT
+       hu=min(zw(kmt(i,j)),zw(kmt(ip,j))) ! total depth at u point
+         do kk=1,kmu(i,j)
+            k=KM+1-kk
+            dd = dz(k)
+            if (kk == kmu(i,j)) THEN
+               dd = MIN (dztb(i,j,2),dztb(ip,j,2))
+            endif
+            if (kmu(i,j) <= 0) THEN
+               dd = 0.
+            endif
+            ! thickness of the wall at the u-point
+            if (kmu(i,j) /= 0) then
+             dd = dd * ( hu + 0.5*(hs(i,j,2) + hs(ip,j,2)) ) / hu 
+             uflux(i,j,k,2) = temp3d_simp(i,j,kk) * dyu(i,j) * dd 
+            endif
+         enddo
+      enddo
+   enddo
+
 
 ! v velocity
 gridFile = trim(fieldFile)//'V.nc'
@@ -302,25 +318,35 @@ ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
 ierr=NF90_CLOSE(ncid)
 
+
+   do i=1,IMT
+      do j=1,JMT-1
+       hv=min(zw(kmt(i,j)),zw(kmt(i,j+1))) ! total depth at v point
+         do kk=1,kmv(i,j)
+            k = KM+1-kk
+            dd = dz(k)
+            if (kk == kmv(i,j)) THEN
+               dd = MIN (dztb(i,j,2),dztb(i,j+1,2))
+            endif
+            if (kmv(i,j) <= 0) then
+               dd = 0.
+            endif
+            ! thickness of the wall at the u-point
+            if (kmv(i,j) /= 0) then
+             dd = dd * ( hv + 0.5*(hs(i,j,2) + hs(i,j+1,2)) ) / hv 
+             vflux(i,j,k,2) = temp3d_simp(i,j,kk) * dxv(i,j) * dd 
+            endif
+         enddo
+      enddo
+   enddo
+
+
+
 !  north fold 
 do i=4,IMT
  ii=IMT+4-i
 ! vflux(i,JMT,:,2)=-vflux(ii,JMT-3,:,2)
 enddo
-
-do i=1,IMT
- do j=1,JMT
-  do k=1,kmv(i,j)
-   kk=KM+1-k
-   dd = dz(kk) 
-   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
-   if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
-   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
-  enddo
- enddo
-enddo
-
-
 
 #ifdef drifter
 ! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories
@@ -329,7 +355,6 @@ do i=1,imt
  do j=1,jmt
  
   uint=0. ; vint=0. ; zint=0.
-  if(ktop.eq.KM) zint=hs(i,j,2)
   do k=kbot,ktop
    uint=uint+uflux(i,j,k,2) ! integrated transport
    vint=vint+vflux(i,j,k,2)
@@ -337,13 +362,8 @@ do i=1,imt
   enddo
   ! weighted transport for each layer
   do k=kbot,KM
-   if(k.ne.KM) then
     uflux(i,j,k,2)=uint*dz(k)/zint 
     vflux(i,j,k,2)=vint*dz(k)/zint
-   else
-    uflux(i,j,k,2)=uint*(hs(i,j,2)+dz(k))/zint
-    vflux(i,j,k,2)=vint*(hs(i,j,2)+dz(k))/zint
-   endif
   enddo
 
  enddo

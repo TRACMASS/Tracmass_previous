@@ -1,4 +1,4 @@
-# Makfile for orc
+# Makfile for orca12
 #========================================================================
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
@@ -21,15 +21,15 @@
                             # calculated in an identical previous run.    
 #   fl12  = -Dinitxyt       # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-#   fl13  = -Dtwodim         # Turn off vertical velocities.
+   fl13  = -Dtwodim         # Turn off vertical velocities.
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
    fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
-   fl17  = -Dfreesurface    # Variable bottom box to match actual depth
-   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
+#   fl17  = -Dfreesurface    # Variable bottom box to match actual depth
+#   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
 #  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
-#  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
 #  fl20  = -Dselect         # Select only one trajectory (for debugging)
 #  fl21  = -Dtracer         # Stores a simulated tracer
@@ -39,9 +39,9 @@
 #  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #------------------------------------------------------------------------
-   fl27  = -Dorca025          # orca1 or orca025 or orca025l75h6
+#   fl27  = -Dorca025          # orca1 or orca025 or orca025l75h6
 #------------------------------------------------------------------------
-#   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
+   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \
@@ -49,4 +49,3 @@ $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)$(fl07)$(fl08)$(fl09)$(fl10)\
 $(fl11)$(fl12)$(fl13)$(fl14)$(fl15)$(fl16)$(fl17)$(fl18)$(fl19)$(fl20)\
 $(fl21)$(fl22)$(fl23)$(fl24)$(fl25)$(fl26)$(fl27)$(fl28)$(fl29)$(fl30)\
 
-# Var bottom to be used by occ66 || orc || for || sim || multcol || jplSCB || eccoSOSE

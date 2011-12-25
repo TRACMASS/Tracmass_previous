@@ -6,9 +6,9 @@
  &INITGRIDDESC
   !
   GCMname     = 'NEMO',
-  GCMsource   = 'http://www.locean-ipsl.upmc.fr/opa/',
+  GCMsource   = 'http://www.nemo-ocean.eu/',
   gridName    = 'ORCA12',
-  gridSource  = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+  gridSource  = 'http://www.nemo-ocean.eu/',
   gridDesc    = '1/12 deg run for the global Ocean.'/
   !
   !
@@ -17,8 +17,8 @@ $INITGRIDGRID
   IMT      = 4320,  
   JMT      = 3059,  
   KM       = 75,   
-  LBT      = 1,
-  NEND     = 2/                   ! NEND = LBT +1
+  LBT      = 4,
+  NEND     = 5/                   ! NEND = LBT +1
   !
   !
 $INITGRIDNTRAC
@@ -29,7 +29,7 @@ $INITGRIDNTRAC
 $INITGRIDTIME
   !
   ngcm          =  120,            ! (5*24) hours between GCM datasets
-  iter          =   1,            ! iteration between two gcm data sets
+  iter          =   10,            ! iteration between two gcm data sets
   intmax        =   15330, !1460, !145,2920            ! maximum length of GCM fields
   fieldsPerFile =   1 / ! 1460 1,2920
   !
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 1980/
+  baseYear       = 1996/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! orig arc meters -> 100 km  

@@ -67,7 +67,7 @@ END IF alloCondUVW
   map2D    = [  1, 2, 3, 4 ]  
   map3D    = [  1, 2, 3, 4 ]  
   start1d  = [  1]
-  count1d  = [ km]
+  count1d  = [ KM]
   start2d  = [1,  1, nread, 1   ]
   count2d  = [IMT, JMT, 1, 1 ]
   start3d  = [1,  1, 1, nread]
@@ -223,24 +223,6 @@ END IF alloCondUVW
       du=du+0.5*(hs(i,j,2)+hs(ip,j,2))
       dv=dv+0.5*(hs(i,j,2)+hs(i,jp,2))
      endif
-!     if(du.lt.0. .and. kk.le.kmu(i,j)) then
-!      print *,i,j,k,dzu(i,j,k),du
-!      print *,'hs',hs(i,j,2),hs(ip,j,2)
-!      print *,'uv',uvel(i,j,kk),uvel(i,jm,kk)
-!      write(*,"(370i1)") (kmt(ii,jp),ii=im,ip)
-!      write(*,"(370i1)") (kmt(ii,j),ii=im,ip)
-!      write(*,"(370i1)") (kmt(ii,jm),ii=im,ip)
-!      stop 4967
-!     endif
-!      if(dv.lt.0. .and. kk.le.kmv(i,j)) then
-!      print *,i,j,k,dzv(i,j,k),dv
-!      print *,'hs',hs(i,j,2),hs(i,jp,2)
-!      print *,'uv',uvel(i,j,kk),uvel(i,jm,kk)
-!      write(*,"(370i1)") (kmt(ii,jp),ii=im,ip)
-!      write(*,"(370i1)") (kmt(ii,j),ii=im,ip)
-!      write(*,"(370i1)") (kmt(ii,jm),ii=im,ip)
-!      stop 4968
-!     endif
      if(kk.le.kmu(i,j)) uflux(i,j,k,2) = 0.5 * (uvel(i,j,kk)+uvel(i,jm,kk)) * dyu(i,j) * du
      if(kk.le.kmv(i,j)) vflux(i,j,k,2) = 0.5 * (vvel(i,j,kk)+vvel(im,j,kk)) * dxv(i,j) * dv
     enddo
