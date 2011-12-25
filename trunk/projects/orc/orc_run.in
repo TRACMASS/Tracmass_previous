@@ -124,7 +124,7 @@ $INITRUNSEED
   ist2        = 1096,  !480,
   jst1        = 800,   !940,
   jst2        = 800,   !1010,
-  kst1        =  -1,
+  kst1        =   1,
   kst2        =  -1,
   varSeedFile = 0,
   seedDir     = ' ',

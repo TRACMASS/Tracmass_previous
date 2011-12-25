@@ -38,12 +38,17 @@ SUBROUTINE setupgrid
   ! === Init local variables for the subroutine ===
   INTEGER                                     :: i ,j ,k, ip, jp, im, jm
   INTEGER                                     :: kk, ii
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)        :: temp2d_int
   REAL*8                                      :: dp,dd
   REAL*8,  ALLOCATABLE, DIMENSION(:,:)        :: temp2d_doub
   REAL*8,  ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_doub
+!  REAL*4									  :: long(IMT,JMT),lat(IMT,JMT)
   
   REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t !,rhom
   CHARACTER (len=200)                         :: gridFile
+  
+!    INTEGER, PARAMETER :: IMTG=4320 ,JMTG=3059
+
 
   ! === Start and count mask for reading netCDF files ===
   start1D  = [ 1]
@@ -58,6 +63,7 @@ SUBROUTINE setupgrid
 
   ! === Open mesh file ===
   gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
+!  print *,trim(gridFile)
   ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
   if(ierr.ne.0) stop 3751
 
@@ -101,15 +107,41 @@ SUBROUTINE setupgrid
     dxv(i,:)=temp2d_doub(i,:)
   enddo
   
+    
+! extras for analysis to be commented out
+! === Read dy for u points ===
+!  ierr=NF90_INQ_VARID(ncid,'glamu',varid) 
+!  if(ierr.ne.0) stop 3764
+!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
+!  if(ierr.ne.0) stop 3799
+!  do i=1,IMT
+!  do  j=1,JMT
+!    long(i,j)=temp2d_doub(i,j)
+!    if(long(i,j).lt.0.) long(i,j)=long(i,j)+360.
+!  enddo
+!  enddo
+!  ierr=NF90_INQ_VARID(ncid,'gphiv',varid) 
+!  if(ierr.ne.0) stop 3764
+!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
+!  if(ierr.ne.0) stop 3799
+!  do i=1,IMT
+!  do  j=1,JMT
+!    lat(i,j)=temp2d_doub(i,j)
+!  enddo
+!  enddo
+!  print *,(lat(IMT/2,j),j=1,JMT)
+  
+  
   deallocate( temp2d_doub, e1t, e2t )
   
-#ifdef orca025
-  ! === In orca025 the vertical mesh is ===
-  ! === in a separate file              ===
+  dx=dxv(IMT/2,JMT/2) ; dy=dyu(IMT/2,JMT/2) ! rough resolution for arclength
+
+  
+!  ! === In orca025 the vertical mesh is ===
+!  ! === in a separate file              ===
   ierr=NF90_CLOSE(ncid)
   gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
   ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-#endif
 
 
   ! === Read and compute depth coordinates ===
@@ -122,101 +154,78 @@ SUBROUTINE setupgrid
     kk=km+1-k
     dz(kk)=zw(k)
     zw(k)=zw(k)+zw(k-1)
+!    print *,k,kk,dz(kk),zw(k)
   end do
 
-  ! === Read kmt - number of vertical T points ===
-  ierr=NF90_INQ_VARID(ncid,'mbathy',varid)
+  ALLOCATE( temp2d_int(IMT,JMT), kmu(IMT,JMT), kmv(IMT,JMT) )
+
+  ! === Bathymetry ===
+  if(ierr.ne.0) stop 5751
+  ierr=NF90_INQ_VARID(ncid,'mbathy',varid) ! kmt field
   if(ierr.ne.0) stop 3767
-  ierr=NF90_GET_VAR(ncid,varid,kmt,start2d,count2d)
+  ierr=NF90_GET_VAR(ncid,varid,temp2d_int,start2d,count2d)
+  do i=1,IMT
+      kmt(i,:)=temp2d_int(i,:)
+  enddo
   
+  kmu=0 ; kmv=0
+  do j=1,jmt
+      jp=j+1
+      if(jp.eq.jmt+1) jp=jmt
+      do i=1,imt
+          ip=i+1
+          if(ip.eq.IMT+1) ip=1
+          kmu(i,j)=min(temp2d_int(i,j),temp2d_int(ip,j),KM)
+          kmv(i,j)=min(temp2d_int(i,j),temp2d_int(i,jp),KM)
+      enddo
+  enddo
+  
+!  north fold 
+  do i=4,IMT
+    ii=IMT+4-i
+    kmv(i,JMT)=kmv(ii,JMT-3)
+  enddo
+
+  
+  DEALLOCATE( temp2d_int ) 
   ! === Read and compute the depth of the bottom T point ===
-  allocate (  botbox(IMT,JMT,3) )
-  allocate( temp3d_doub(IMT,JMT,KM) )
+  ALLOCATE( temp3d_doub(IMT+2,JMT,KM) )
   
-  botbox=0.
+  ! === dz at T points ===
   ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
   if(ierr.ne.0) stop 3763
   ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
   do i=1,IMT
-    do j=1,JMT
-      if(kmt(i,j).ne.0) then
-        botbox(i,j,3)=temp3d_doub(i,j,kmt(i,j))
-        if(botbox(i,j,3).eq.0.) then
-          print *,i,j,kmt(i,j),botbox(i,j,3),temp3d_doub(i,j,kmt(i,j))
-          botbox(i,j,3)=dz(km+1-kmt(i,j))
-        endif
-      endif
-    enddo
+      do j=1,JMT
+          if(kmt(i,j).ne.0) dztb(i,j,1)=temp3d_doub(i,j,kmt(i,j))
+      enddo
   enddo
-
-  ! === Read and compute the depth of the bottom u and v point ===
-  allocate ( kmu(IMT,JMT)    ,kmv(IMT,JMT) )
-  kmu=0 ; kmv=0
-
-  do j=1,JMT
-    jp=j+1
-    if(jp.eq.jmt+1) jp=jmt
-    do i=1,imt
-      ip=i+1
-      if(ip.eq.IMT+1) ip=1
-      ! Number of depth levels for u and v
-      kmu(i,j)=min(kmt(i,j),kmt(ip,j),KM)
-      kmv(i,j)=min(kmt(i,j),kmt(i,jp),KM)
-      ! Depth of bottom box for u
-      if(kmu(i,j).ne.0) then
-        if(kmu(i,j) .eq. kmt(i,j) .and. kmu(i,j) .eq. kmt(ip,j)) then
-          botbox(i,j,1)=min(dztb(i,j,1),dztb(ip,j,1))
-        elseif(kmu(i,j) .eq. kmt(i,j)) then
-          botbox(i,j,1)=dztb(i,j,1)
-        elseif(kmu(i,j) .eq. kmt(ip,j)) then
-          botbox(i,j,1)=dztb(ip,j,1)
-        else
-          print*,kmu(i,j),kmt(i,j),kmt(ip,j)
-        endif
-      else
-        botbox(i,j,1) = 0.d0
-      endif
-      ! Depth of bottom box for v
-      if(kmv(i,j).ne.0) then
-        if(kmv(i,j) == kmt(i,j) .and. kmv(i,j) == kmt(i,jp)) then
-          botbox(i,j,2) = min(dztb(i,j,1),dztb(i,jp,1))
-        elseif(kmv(i,j) == kmt(i,j)) then
-          botbox(i,j,2) = dztb(i,j,1)
-        elseif(kmv(i,j) == kmt(i,jp)) then
-          botbox(i,j,2) = dztb(i,jp,1)
-        else
-          print*,kmv(i,j),kmt(i,j),kmt(i,jp)
-        endif
-      else
-        botbox(i,j,2) = 0.d0
-      endif
-    enddo
-  enddo
-
-  !  north fold 
-  do i=4,IMT
-    ii=IMT+4-i
-    kmv(i,JMT)=kmv(ii,JMT-3)
-    botbox(i,JMT,2)=botbox(ii,JMT-3,2)
-  enddo
-
+  
+  DEALLOCATE( temp3d_doub )
   ierr=NF90_CLOSE(ncid)
 
 
-  ! Bottom box 
-  do j=1,JMT
-    do i=1,IMT
-      if(kmt(i,j).ne.0) then
-        dztb(i,j,1)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
-        if(botbox(i+subGridImin-1,j+subGridJmin-1,3).eq.0.) then
-          print *,i,j,kmt(i,j),botbox(i+subGridImin-1,j+subGridJmin-1,3)
-          stop 4957
-        endif
-      else
-        dztb(i,j,1)=0.
-      endif
-    enddo
-  enddo
 
+
+  ! dz is independent of x,y except at bottom
+  do j=1,JMT
+      do i=1,IMT
+          if(kmt(i,j).eq.0) then
+              dztb(i,j,1)=0.
+          endif
+      enddo
+  enddo
+  
+  dztb(:,:,2)=dztb(:,:,1)  ! this and the third "time" dimension is probably unnecessary
+
+  
+!open(21,file='/Users/doos/data/orca/orca12/topo/longlat',form='unformatted')
+!write(21) long
+!write(21) lat
+!write(21) kmt
+!write(21) kmu
+!write(21) kmv
+!close(21)
+!stop 3956
 
 end SUBROUTINE setupgrid

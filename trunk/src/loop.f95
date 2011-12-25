@@ -479,12 +479,9 @@ SUBROUTINE loop
            endif northbound
 #else     
            LBTloop: do k=1,LBT
-!              if(ienw(k).le.ib .and. ib.le.iene(k) .and. &
-!                 jens(k).le.jb .and. jb.le.jenn(k)  ) then
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
-
                  exit niterLoop                                
               endif
            enddo LBTLOOP
@@ -584,7 +581,7 @@ return
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
        INTEGER                             :: verbose = 1
-       INTEGER                             :: strict  = 0
+       INTEGER                             :: strict  = 1
        INTEGER                             :: errCode
 
        errCode=0
@@ -615,10 +612,12 @@ return
                 print *,'-------------------------------------'
                 print *,'ntrac=',ntrac,' ints=', ints
                 print *,'ib=',ib,'jb=',jb,'kb=',kb
+                print *,'kmt=',kmt(ib,jb)
+                print *,'dz=',dz(kb)
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
-                !print *,'dztb=',dztb(ib,jb,kb,1),dztb(ib,jb,kb,2)
-                print *,'rg*hs=',rg*hs(ib,jb,NST)
-                print *,'rr*hs=',rr*hs(ib,jb,1)
+!                print *,'dztb=',dztb(ib,jb,1),dztb(ib,jb,2)
+!                print *,'rg*hs=',rg,hs(ib,jb,NST)
+!                print *,'rr*hs=',rr,hs(ib,jb,1)
                 print *,'-------------------------------------'
                 print *,'The trajectory is killed'
                 print *,'====================================='
@@ -1018,9 +1017,9 @@ return
        print *,'====================================='
        print *,'ERROR: Negative box volume           '
        print *,'-------------------------------------'
-       print *,'dzt  = ', dxyz/dxdy(ib,jb)
+       print *,'dzt  = ', dxyz/dxdy(ib,jb),dz(kb),hs(ib,jb,:)
        print *,'dxdy = ', dxdy(ib,jb)
-       print *,'i  = ', ib, ' j  = ', jb 
+       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
        print *,'-------------------------------------'
        print *,'The run is terminated'
        print *,'====================================='

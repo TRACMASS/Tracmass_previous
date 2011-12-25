@@ -38,7 +38,7 @@ SUBROUTINE setupgrid
 !  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: mask
   CHARACTER (len=200)                        :: gridfile
   REAL tem3d(imt,jmt,km),tem2d(imt,jmt)
-  REAL geolon(IMT,JMT),geolat(IMT,JMT)
+  REAL geolon(IMT,JMT),geolat(IMT,JMT),aa
   INTEGER itemp2d(IMT,JMT)
   logical                                    :: around
 
@@ -123,6 +123,12 @@ print *,trim(gridfile),' tday=',tday
     enddo
    enddo
   enddo
+!  aa=0.
+!  do k=KM,1,-1
+!  aa=aa+dzt(IMT/2,JMT/2,k)
+!  print *,k,aa,dzt(IMT/2,JMT/2,k)
+!  enddo
+!  stop 406
   
   do i=1,IMT
    ip=i+1
