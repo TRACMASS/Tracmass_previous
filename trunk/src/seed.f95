@@ -206,9 +206,9 @@ CONTAINS
          ijjLoop: DO jjt=1,ijt
             kkkLoop: DO jkt=1,ikt          
             
-            IF ( ib /= iist ) PRINT*,iist,ib
-            IF ( jb /= ijst ) PRINT*,ijst,jb
-            IF ( kb /= ikst ) PRINT*,ikst,kb
+!            IF ( ib /= iist ) PRINT*,iist,ib
+!            IF ( jb /= ijst ) PRINT*,ijst,jb
+!            IF ( kb /= ikst ) PRINT*,ikst,kb
             ib = iist
             jb = ijst
             kb = ikst
