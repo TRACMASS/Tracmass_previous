@@ -22,7 +22,7 @@ SUBROUTINE readfields
   ! = Loop variables
   INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
   INTEGER                                      :: kbot,ktop
-  INTEGER, SAVE                                :: ntempus,ntempusb,nread
+  INTEGER, SAVE                                :: nread
 
   ! = Variables used for getfield procedures
   CHARACTER (len=200)                        :: gridFile ,fieldFile
@@ -35,28 +35,10 @@ SUBROUTINE readfields
   INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=75
 #endif
 
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)         :: temp2d_simp
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)       :: temp3d_simp
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)         	:: temp2d_simp
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)       	:: temp3d_simp
 
-#ifdef initxyt
-  INTEGER, PARAMETER :: NTID=73
-!#ifdef orca1
-!  INTEGER, PARAMETER :: IJKMAX2=254
-!#else
-!  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.05 and 32 days
-!  INTEGER, PARAMETER :: IJKMAX2=? ! for distmax=0.10 and 32 days
-  INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
-
-!  INTEGER, PARAMETER :: IJKMAX2=169 ! for single particle and 1024 days
-!  INTEGER, PARAMETER :: IJKMAX2=3305 ! for single particle and 365 days
-!  INTEGER, PARAMETER :: IJKMAX2=34855 ! for single particle and 64 days
-!  INTEGER, PARAMETER :: IJKMAX2=73756 ! for single particle and 32 days
-
-!#endif
-  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
-  REAL*4 , SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
-#endif
-  REAL*4 dd,dmult,uint,vint,zint
+  REAL*4 										:: dd,dmult,uint,vint,zint
   
 #ifdef tempsalt
  REAL*4, ALLOCATABLE, DIMENSION(:) :: tempb, saltb, rhob, depthb,latb
@@ -101,40 +83,6 @@ SUBROUTINE readfields
      sal    = 0.
      rho    = 0.
 #endif
-     ntempus=0 ; ntempusb=0
-
-#ifdef initxyt
-! Time for individual start positions
-
-!open(84,file=trim(inDataDir)//'topo/masktime_32_005',form='unformatted')
-!open(84,file=trim(inDataDir)//'topo/masktime_32_010',form='unformatted')
-if(IJKMAX2.eq.7392) open(84,file=trim(inDataDir)//'topo/masktime_32_025',form='unformatted')
-!open(84,file=trim(inDataDir)//'topo/masktime_orca1_32_025',form='unformatted')
-if(IJKMAX2.eq.169) open(84,file=trim(inDataDir)//'topo/masktime_orca025_1024_single',form='unformatted')
-if(IJKMAX2.eq.3305) open(84,file=trim(inDataDir)//'topo/masktime_orca025_365_single',form='unformatted')
-if(IJKMAX2.eq.34855) open(84,file=trim(inDataDir)//'topo/masktime_orca025_64_single',form='unformatted')
-if(IJKMAX2.eq.73756) open(84,file=trim(inDataDir)//'topo/masktime_orca025_32_single',form='unformatted')
- read(84) trajinit
-close(84)
-j=0
-do k=1,NTID
- do i=1,IJKMAX2
-  if(trajinit(k,i,3).ne.0.) then
-   j=j+1
-#if orca025l75h6
-   trajinit(k,i,3)=float(kst2)-0.5
-!   print *,j,trajinit(k,i,:)
-#endif
-  endif
- enddo
-! print *,k,j
-enddo
-ijkst=0
-! print *,'ijkmax=',j,IJKMAX2,ijkmax
-if(j.ne.IJKMAX2) then
- stop 4396
-endif
-#endif
 
 ihour=startHour
 iday=startDay
@@ -151,8 +99,8 @@ else
 ! ----------------------------------------------------------------
 
 ! === Update clockworks ===
-#if defined orca1  || orca025
-  iday=iday+5
+  iday=iday+nff*ngcm/24
+  
   if(iday > idmax(imon,1999)) then
     iday=iday-idmax(imon,1999)
     imon=imon+1
@@ -161,23 +109,15 @@ else
        iyear=iyear+1
      if(iyear.eq.2002) iyear=1999
     endif
-  endif
-#elif orca025l75h6
-  if(ngcm.le.24) then
-   ihour=ihour+ngcm
-   if(ihour.eq.24) then
-    iday=iday+1
-    ihour=0
+  elseif(iday <=0) then
+    imon=imon-1
+    if(imon == 0) then
+       imon=12
+       iyear=iyear-1
+     if(iyear.eq.1998) iyear=2001
+    endif
+    iday=iday+idmax(imon,1999)
    endif
-  else
-   imon=imon+1
-   if(imon.eq.13) then
-    imon=1
-    iyear=iyear+1
-    if(iyear.eq.2001) iyear=2000
-   endif
-  endif
-#endif
 
 endif initFieldcond
 
@@ -219,12 +159,14 @@ ntime=10000*iyear+100*imon+iday
  stop 39573
 #endif
 
-    
+! print *,fieldFile
 ! Sea surface height
 ierr=NF90_OPEN(trim(fieldFile)//'T.nc',NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid)
-! print *,trim(fieldFile)//'T.nc'
-if(ierr.ne.0) stop 3768
+if(ierr.ne.0) then
+ print *,'file not found:',trim(fieldFile)//'T.nc'
+ stop 3768
+endif
 ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
 if(ierr.ne.0) stop 3799
 ierr=NF90_CLOSE(ncid)
@@ -376,46 +318,6 @@ do i=1,imt
  enddo
 enddo
 
-#endif
-
-
-#ifdef initxyt
-! Set the initial trajectory positions
-!ijkst(:,5)=ntimask(ntempus,:)
-#ifdef orca025l75h6
-if( mod(ints,24/ngcm*5).eq.1 .or. ints.le.2) ntempus=ntempus+1
-if(ntempus.ne.ntempusb .and. ntempus.le.NTID) then
-ntempusb=ntempus
-!print *,'ints=',ints,' ntempus=',ntempus,' ntempusb=',ntempusb
-#else
-if(ints.le.NTID) then
-#endif
-do ntrac=1,ijkmax
- if(trajinit(ntempus,ntrac,3).ne.0.) then
-  ijkst(ntrac,4)=0
-  ijkst(ntrac,5)=5
-  ijkst(ntrac,6)=ijkst(ntrac,6)+1
-  do l=1,3
-   ijkst(ntrac,l)=trajinit(ntempus,ntrac,l)+1
-   trj(ntrac,l)=trajinit(ntempus,ntrac,l)
-!   if(l.eq.1) print *,ntrac,float(ijkst(ntrac,l)-1),trj(ntrac,l),float(ijkst(ntrac,l))
-   if(trj(ntrac,l).gt.float(ijkst(ntrac,l)) .or. trj(ntrac,l).lt.float(ijkst(ntrac,l)-1)) then
-    print *,l,ntrac,float(ijkst(ntrac,l)-1),trj(ntrac,l),float(ijkst(ntrac,l))
-    stop 3946
-   endif
-  enddo
- else
-  ijkst(ntrac,5)=0
-  ijkst(ntrac,6)=0
- endif
-enddo
-endif
-#ifdef orca025l75h6
-
-#endif
-if( mod(ints,24/ngcm*5).ne.1 .and. ints.gt.2) then
- ijkst=0 
-endif
 #endif
 
 

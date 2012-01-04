@@ -32,9 +32,9 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  = 1,
-  intspin = 1,  
+  intspin = 15,  
   intrun  = 1000,         ! = 73*20*10
-  intstep = 1
+  intstep = -1
 /
   !
 &INITRUNDATE
@@ -43,9 +43,9 @@
   ! ===================================
   !
   startHour         = 0,
-  startDay          = 5,
-  startMon          = 1,
-  startYear         = 1999
+  startDay          = 4,
+  startMon          = 7,
+  startYear         = 2000
 / 
   !
   !
@@ -69,11 +69,11 @@
   !
   ncoor           = 1,
   kriva           = 2,
-!  inDataDir       = '/Users/doos/data/orca/orca025/'
-  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
-!  outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
-  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'corkscrew'
+  inDataDir       = '/Users/doos/data/orca/orca025/'
+!  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
+  outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
+!  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
+  outDataFile     = 'backtrack1'
   intminInOutFile = 0
   /
   !
@@ -116,14 +116,14 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
   !
-  nff         = 1,
+  nff         = -1,
   isec        = 1,
   idir        = 1,
   nqua        = 1,
   partQuant   = 100,
   seedType    = 1,
   ist1        = 390,   !330,
-  ist2        = 390,  !480,
+  ist2        = 391,   !480,
   jst1        = 496,   !940,
   jst2        = 501,   !1010,
   kst1        =  41,

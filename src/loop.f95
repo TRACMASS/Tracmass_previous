@@ -214,7 +214,6 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  
   intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
      call fancyTimer('reading next datafield','start')
      call readfields
