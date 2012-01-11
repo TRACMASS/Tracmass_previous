@@ -60,7 +60,6 @@ SUBROUTINE setupgrid
   ! === Open mesh file ===
   gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
   ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-  print *,gridFile
   if(ierr.ne.0) stop 3751
 
   ! === Read dx and dy for T points ===
