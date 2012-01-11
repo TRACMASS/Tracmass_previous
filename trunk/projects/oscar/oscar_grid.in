@@ -17,7 +17,7 @@ $INITGRIDGRID
   IMT      = 1081,
   JMT      = 481,	
   KM       = 1,
-  LBT      = 5,	
+  LBT      = 5,	              ! set by iene,ienw,jenn,jens,timax
   NEND     = 6/               ! NEND = LBT +1
   !
   !

@@ -32,7 +32,7 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  = 1,
-  intspin = 15,  
+  intspin = 1,  
   intrun  = 1000,         ! = 73*20*10
   intstep = -1
 /
@@ -43,8 +43,8 @@
   ! ===================================
   !
   startHour         = 0,
-  startDay          = 4,
-  startMon          = 7,
+  startDay          = 31,!4,!31,
+  startMon          = 12,!7,!12,
   startYear         = 2000
 / 
   !
@@ -54,26 +54,27 @@
   ! NAMELIST  OUTPUT
   ! ===========================================
   ! ncoor:          0 = output in model coordinates
-  !                 1 = output in long/lat coordinates
+  !                 1 = output in long/lat coordinates (not working at the moment)
   !
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets (each ints)
   !                 2 = write at each time iteration
   !                 3 = write all the time
   !                 4 = write only start and end positions
-  !                 5 = write at chosen intervals
+  !                 5 = write at chosen intervals (hard coded at the moment)
   !                 6 = write each spatial grid-crossing 
   !
   ! inDataDir  : Directory where input fields are stored
   ! outDataDir : Directory where output files are saved
+  ! intminInOutFile : ??????????????????????????????????????????
   !
-  ncoor           = 1,
-  kriva           = 2,
+  ncoor           = 0,
+  kriva           = 1,
   inDataDir       = '/Users/doos/data/orca/orca025/'
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'backtrack1'
+  outDataFile     = 'warmpoolback5'
   intminInOutFile = 0
   /
   !
@@ -83,13 +84,11 @@ $INITRUNSEED
   ! ==============================================
   ! nff:           1 = Follow trajectories forward in time
   !                2 = Follow trajectories backward in time
-  !                3 = Follow trajectories both forward and backward in time.
   !
   ! isec:          1 = Seed particles meridional(y-z)
   !                2 = Seed particles zonal(x-z)
   !                3 = Seed particles horiz(x-y)
   !                4 = Seed particles in the middle of T-box
-  !                5 = Seed particles from given exact positions read in ?????
   !
   ! idir:          1 = follow positive direction (eastward/northward)  
   !               -1 = follow negative direction (westward/southward)
@@ -117,17 +116,17 @@ $INITRUNSEED
   ! -1 indicates max value in grid.
   !
   nff         = -1,
-  isec        = 1,
-  idir        = 1,
+  isec        = 4,
+  idir        = 0,
   nqua        = 1,
-  partQuant   = 100,
+  partQuant   = 1,
   seedType    = 1,
-  ist1        = 390,   !330,
-  ist2        = 391,   !480,
-  jst1        = 496,   !940,
-  jst2        = 501,   !1010,
-  kst1        =  41,
-  kst2        =  52,
+  ist1        = 250,   !330,
+  ist2        = 550,   !480,
+  jst1        = 416,   !940,
+  jst2        = 582,   !1010,
+  kst1        =   1,
+  kst2        =  64,
   varSeedFile = 0,
   seedDir     = ' ',
   seedFile    = ' '
@@ -137,18 +136,18 @@ $INITRUNSEED
   ! water mass properties with minimum & maximum on temp, salt and density
   !
   ! for starting a trajectory (active only with option tempsalt) 
-  tmin0 =-50.,
-  tmax0 = 400.,
-  smin0 =-500.,
-  smax0 = 400.,
-  rmin0 =-100.,
-  rmax0 = 500.,
+  tmin0 =   29.3,
+  tmax0 =  500.,
+  smin0 =   35.5,
+  smax0 =   35.6,
+  rmin0 = -500.,
+  rmax0 =  500.,
   ! for ending a trajectory
-  tmine = -50.,
-  tmaxe =  400.,
-  smine = -150.,
+  tmine = -500.,
+  tmaxe =  500.,
+  smine = -500.,
   smaxe =  500.,
-  rmine = -100.,
+  rmine = -500.,
   rmaxe =  500./
 
 $INITRUNDIFFUSION
@@ -234,10 +233,10 @@ $INITRUNSEDIMENT
   !        jens(n)=jmt+1
   !        jenn(n)=0
   !        enddo
-    iene =  2000, 2000, 1071, 2000,
-    ienw =  1156,   -1,   -1,   -1,
-    jens =   772,  889,  772,   -1,
-    jenn =   889, 2000,  889,  772,
-    timax = 3650000./
+    ienw =    1,    1,    1, 
+    iene = 9999, 9999,  200,  
+    jens =    1,  590,    1,   
+    jenn =  416, 9999, 9999,  
+    timax = 1100./
     
     

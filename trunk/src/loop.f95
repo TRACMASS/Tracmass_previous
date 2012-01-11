@@ -461,22 +461,7 @@ SUBROUTINE loop
            call arclength(ia,ja,ka,dt,rr,arc)
            arct=arct+arc*arcscale 
            ! === end trajectory if outside chosen domain ===
-#if defined occ
-           ! === stop and select stream function ===
-           northbound: if( y1.eq.dble(jmt-2) .and. n.ne.1 ) then
-              nnorth=nnorth+1
-              nexit(1)=nexit(1)+1
-           ! or to Drake:
-           elseif(x1.eq.dble(idr) .and. ja.lt.94 .and. n.ne.1 ) then 
-              ndrake=ndrake+1
-              call writedata(15)
-              nexit(2)=nexit(2)+1
-              cycle niterLoop
-              ! or continue trajectory
-           else
-              cycle niterLoop                                   
-           endif northbound
-#else     
+    
            LBTloop: do k=1,LBT
               if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
                  float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
@@ -484,6 +469,16 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
+           
+#if defined tempsalt && rst_rest
+               call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+               if (temp < tmine .or. temp > tmaxe .or. &
+               &   salt < smine .or. salt > smaxe .or. &
+               &   dens < rmine .or. dens > rmaxe      ) then
+                 nexit(NEND)=nexit(NEND)+1
+                 exit niterLoop                                
+               endif
+#endif 
            
            ! === stop trajectory if the choosen time or ===
            ! === water mass properties are exceeded     ===
@@ -493,7 +488,7 @@ SUBROUTINE loop
            endif
            
         end do niterLoop
-#endif
+
         nout=nout+1
         call writedata(17)
         nrj(ntrac,6)=1
@@ -505,7 +500,7 @@ SUBROUTINE loop
 599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
           ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
           ' nsusp=',i8,' nexit=',9i8)
-#elif defined ifs || rco || tes || orc || baltix
+#elif defined ifs || rco || tes || orc || baltix || orca025  || orca12
      print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
 799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
           ' nerror=',i4,' in ocean/atm=',i8)
@@ -890,12 +885,12 @@ return
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
     case (11)
-       if(  (kriva == 1 .AND. nrj(ntrac,4) == niter-1   ) .OR. &
-            (kriva == 2 .AND. scrivi                    ) .OR. &
-            (kriva == 3                                 ) .OR. &
-            (kriva == 4 .AND. niter == 1                ) .OR. &
+       if(  (kriva == 1 .AND. nrj(ntrac,4) == niter-1   ) .or. &
+            (kriva == 2 .AND. scrivi                    ) .or. &
+            (kriva == 3                                 ) .or. &
+            (kriva == 4 .AND. niter == 1                ) .or. &
             (kriva == 5 .AND.                                  &
-          &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .OR. &
+          &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
             (kriva == 6 .AND. .not.scrivi               )        ) then
 #if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 

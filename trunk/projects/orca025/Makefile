@@ -1,4 +1,4 @@
-# Makfile for orc
+# Makfile for orca025
 #========================================================================
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
@@ -7,19 +7,19 @@
 #  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
    fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-#  fl03   = -Dtempsalt       # Include temp and salt
+   fl03   = -Dtempsalt       # Include temp and salt
    fl04   = -Dtextwrite      # Write results to textfile
 #  fl05   = -Dbinwrite       # Write results to binaryfile
 #  fl06   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
-#  fl07  = -Dstreamxy       # Calculates the barotropic stream function.
+   fl07  = -Dstreamxy       # Calculates the barotropic stream function.
 #  fl08  = -Dstreamr        #    vertical stream function, z=density
 #  fl09  = -Dstreamts       #    vertical stream function, z=???
 #  fl10  = -Dstreamv        #    vertical stream function, z=depth
 #  fl11  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
-#   fl12  = -Dinitxyt       # Start trajectories at given positions and times
+#   fl12  = -Drst_rest      # Restictions on what water masses are alowed
 #------------------------------------------------------------------------
 #   fl13  = -Dtwodim         # Turn off vertical velocities.
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
