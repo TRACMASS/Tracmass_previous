@@ -37,7 +37,7 @@
   ! === Trajectory run
   intrun       = 12000,
   ! === Pos if forward  neg if backward
-  intstep      = 1/
+  intstep      = -1/
   !
   !
  &INITRUNDATE
@@ -80,7 +80,7 @@
   ! nff:            1 = Follow trajectories forward
   !                 2 = Follow trajectories backward
   !                 3 = Follow trajectories both ways.
-  nff          = 1,
+  nff          = -1,
   !
   !
   ! isec:           1 = Seed particles meridional(y-z)
@@ -165,4 +165,4 @@ $INITRUNEND
 !  jens(1) =   1,
 !  jenn(1) = 163,
 !
-  timax =  730./  ! maximum time length of a trajectory in days
+  timax =  2730./  ! maximum time length of a trajectory in days

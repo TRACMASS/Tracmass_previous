@@ -36,8 +36,8 @@ $INITGRIDTIME
   !
 $INITGRIDDATE
   ! 
-  yearmin = 0,
-  yearmax = 0,
+  yearmin = 2006,  ! First year of the GCM run
+  yearmax = 2007,  ! Last year of the GCM run
   ! === Reference basetime for the velocity field. 
   baseSec           = 0,
   baseMin           = 0,

@@ -8,7 +8,9 @@ SUBROUTINE readfields
   USE mod_grid
   USE mod_name
   USE mod_vel
+  USE mod_traj
   USE mod_getfile
+  use mod_seed
 
 
 #ifdef tempsalt
@@ -40,20 +42,44 @@ END IF alloCondUVW
 
   call datasetswap
   
-! initialise  
-  if(ints.eq.1) then
-   uflux=0. ; vflux=0.
+! === Initialising fields ===
+  initFieldcond: if(ints.eq.intstart) then
+     hs     = 0.
+     uflux  = 0.
+     vflux  = 0.
    imon=0 ; iyear=startYear 
-  endif
+#ifdef tempsalt
+     tem    = 0.
+     sal    = 0.
+     rho    = 0.
+#endif
+ihour=startHour
+iday=startDay
+imon=startMon
+iyear=startYear
+
+else
   
   ! time count
-  if(imon.eq.0) iyear=startYear
-  imon=imon+1
+  imon=imon+nff
   if(imon.eq.13) then
    imon=1
    iyear=iyear+1
-   if(iyear.eq.2008) iyear=2006
+   if(iyear.eq.yearmax+1) iyear=yearmin
+  elseif(imon.eq.0) then
+   imon=12
+   iyear=iyear-1
+   if(iyear.eq.yearmin-1) iyear=yearmax
   endif
+  
+  endif initFieldcond
+
+  
+! === Time number ===
+ntime=10000*iyear+100*imon+iday
+
+!print *,ints,intstart,ntime
+
  
   ! === NetCDF file and fields ===
   fileName = ''
@@ -76,7 +102,7 @@ END IF alloCondUVW
   inquire(file=ncFile,exist=around)
   if(.not.around) stop 4556
   
-  if(ints==1) then
+  if(ints==intstart) then
    ierr = NF90_OPEN (ncFile,NF90_NOWRITE,ncid)
    IF (ierr /= 0) THEN
       PRINT*,NF90_STRERROR (ierr)
