@@ -11,6 +11,9 @@ module mod_psi
 #ifdef streamv
   USE mod_streamv
 #endif
+#ifdef stream_thermohaline
+  USE mod_stream_thermohaline
+#endif
 
   CONTAINS
 
@@ -54,6 +57,9 @@ select case(xy)
           stxr(ia,mta,lbas,2) = stxr(ia,mta,lbas,2) + flux
           stxr(ia,msa,lbas,3) = stxr(ia,msa,lbas,3) + flux
 #endif
+#ifdef stream_thermohaline
+          psi_ts(mta,msa) = psi_ts(mta,msa) + flux
+#endif
     
      ! === Meridional component ===
      case(2)
@@ -72,6 +78,9 @@ select case(xy)
 #ifdef streamts
           styr(ja,mta,lbas,2) = styr(ja,mta,lbas,2) + flux
           styr(ja,msa,lbas,3) = styr(ja,msa,lbas,3) + flux 
+#endif
+#ifdef stream_thermohaline
+          psi_ts(mta,msa) = psi_ts(mta,msa) + flux
 #endif
 
 end select

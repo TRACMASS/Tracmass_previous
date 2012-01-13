@@ -153,9 +153,9 @@ CONTAINS
     print *,'Lagrangian density stream function stored'
 #endif
 #endif
-    
-#if defined streamxy
-    print *,'Lagrangian horizontal stream function stored'
+
+#if defined stream_thermohaline
+    print *,'Lagrangian thermohaline stream function stored'
 #endif
     
 #if defined tracer

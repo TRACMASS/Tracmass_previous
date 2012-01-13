@@ -12,6 +12,9 @@ module mod_pos
 #ifdef streamr
   USE mod_streamr
 #endif
+#ifdef stream_thermohaline
+  USE mod_stream_thermohaline
+#endif
   USE mod_psi
     
   IMPLICIT none
@@ -51,20 +54,20 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr)
 #endif /*timeanalyt*/
 
-#ifdef streamr
+#if defined streamr || stream_thermohaline
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1 ) mra=1
        if(mra.gt.MR) mra=MR
-#ifdef streamts
+#if defined streamts || stream_thermohaline
        mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
        msa=(salt-smin)/dsalt+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-#endif /*streamts*/
-#endif /*streamr*/
+#endif 
+#endif 
        call savepsi(ia,ja,ka,mra,mta,msa,1,1,real(subvol*ff))
         
     elseif(ds==dsw) then ! westward grid-cell exit
@@ -85,20 +88,20 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
 !       scrivi=.true.      
-#ifdef streamr
+#if defined streamr || stream_thermohaline
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1) mra=1
        if(mra.gt.MR) mra=MR
-#ifdef streamts
+#if defined streamts || stream_thermohaline
        mta=nint((temp-tmin)/dtemp)+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
        msa=nint((salt-smin)/dsalt)+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-#endif /*streamts*/
-#endif /*streamr*/
+#endif 
+#endif 
        call savepsi(iam,ja,ka,mra,mta,msa,1,-1,real(subvol*ff))
 
     elseif(ds==dsn) then ! northward grid-cell exit
@@ -119,20 +122,20 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-#ifdef streamr
+#if defined streamr || stream_thermohaline
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1) mra=1
        if(mra.gt.MR) mra=MR
-#ifdef streamts
+#if defined streamts || stream_thermohaline
        mta=nint((temp-tmin)/dtemp)+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
        msa=nint((salt-smin)/dsalt)+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-#endif /*streamts*/
-#endif /*streamr*/
+#endif 
+#endif 
        call savepsi(ia,ja,ka,mra,mta,msa,2,1,real(subvol*ff))
 
     elseif(ds==dss) then ! southward grid-cell exit
@@ -156,20 +159,20 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-#ifdef streamr
+#if defined streamr || stream_thermohaline
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        mra=nint((dens-rmin)/dr)+1
        if(mra.lt.1) mra=1
        if(mra.gt.MR) mra=MR
-#ifdef streamts
+#if defined streamts  || stream_thermohaline
        mta=nint((temp-tmin)/dtemp)+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
        msa=nint((salt-smin)/dsalt)+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-#endif /*streamts*/
-#endif /*streamr*/
+#endif 
+#endif 
        call savepsi(ia,ja-1,ka,mra,mta,msa,2,-1,real(subvol*ff))
        
     elseif(ds==dsu) then ! upward grid-cell exit

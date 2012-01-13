@@ -74,7 +74,7 @@
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'warmpoolback5'
+  outDataFile     = 'warmpoolback6'
   intminInOutFile = 0
   /
   !
@@ -184,59 +184,13 @@ $INITRUNSEDIMENT
   ! ==================================
   ! END of THE RUN
   ! ==================================
-  ! timax : maximum time length of a trajectory in days
   ! defining end sections
-  !  ienw(1) =  1000,
-  !  iene(1) =  1000,
-  !  jens(1) =  1000,
-  !  jenn(1) =  1000,
-  !
-  ! FRAM STRAIT
-  !ienw(1) =   10000,
-  !iene(1) =   -1,
-  !jens(1) =   10000,
-  !jenn(1) =   -1,
-  ! NORTH ATL
-  !ienw(1) =   950,
-  !iene(1) =   1050,
-  !jens(1) =   695,
-  !jenn(1) =   695,
-  ! Finskaq viken
-  !  ienw(1) =     0,
-  !  iene(1) =   203,
-  !  jens(1) =     0,
-  !  jenn(1) =   362,
-  ! Lilla Bält
-  !       ienw(1)=1
-  !       iene(1)=25
-  !       jens(1)=47+1
-  !       jenn(1)=jmt
-  ! Stora Bält
-  !       ienw(2)=26
-  !       iene(2)=36
-  !       jens(2)=33+1
-  !       jenn(2)=jmt
-  ! Öresund
-  !       ienw(1)=37
-  !       iene(3)=63
-  !       jens(3)=56+1
-  !       jenn(3)=jmt
-  ! utanför Finska viken     ! Finska viken
-  !      ienw(1)=0
-  !      iene(1)=204
-  !      jens(1)=0
-  !      jenn(1)=jmt
-  ! inget stopp alls för musslorna
-  !       do n=1,NEND
-  !        ienw(n)=imt+1
-  !        iene(n)=0
-  !        jens(n)=jmt+1
-  !        jenn(n)=0
-  !        enddo
+  ! timax : maximum time length of a trajectory in days
+
     ienw =    1,    1,    1, 
     iene = 9999, 9999,  200,  
     jens =    1,  590,    1,   
     jenn =  416, 9999, 9999,  
-    timax = 1100./
+    timax = 991100./
     
     
