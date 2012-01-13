@@ -27,6 +27,7 @@ SUBROUTINE init_params
    USE mod_streamxy
    USE mod_streamv
    USE mod_streamr
+   USE mod_stream_thermohaline
    USE mod_tracer
    USE mod_getfile
    
@@ -294,7 +295,10 @@ SUBROUTINE init_params
       stxr=0.
       styr=0
 #endif
-
+#ifdef stream_thermohaline
+      ALLOCATE ( psi_ts(mr,mr) )
+      psi_ts=0.
+#endif
       ! --- Allocate tracer data ---
 #ifdef tracer
       ALLOCATE ( tra(imt,jmt,km) )

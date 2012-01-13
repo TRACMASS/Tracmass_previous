@@ -16,12 +16,13 @@
 #  fl08  = -Dstreamr        #    vertical stream function, z=density
 #  fl09  = -Dstreamts       #    vertical stream function, z=???
 #  fl10  = -Dstreamv        #    vertical stream function, z=depth
+  fl11  = -Dstream_thermohaline        #    psi(T,S)
 #  fl11  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #   fl12  = -Drst_rest      # Restictions on what water masses are alowed
 #------------------------------------------------------------------------
-#   fl13  = -Dtwodim         # Turn off vertical velocities.
+#  fl13  = -Dtwodim         # Turn off vertical velocities.
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------

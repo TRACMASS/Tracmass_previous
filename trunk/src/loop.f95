@@ -42,6 +42,9 @@ SUBROUTINE loop
 #ifdef streamr
   USE mod_streamr
 #endif /*streamr*/
+#ifdef stream_thermohaline
+  USE mod_stream_thermohaline
+#endif /*stream_thermohaline*/
 #ifdef tracer
   USE mod_tracer
 #endif /*tracer*/
@@ -129,7 +132,9 @@ SUBROUTINE loop
   stxr=0.
   styr=0.
 #endif /*streamr*/
-
+#ifdef stream_thermohaline
+  psi_ts=0.
+#endif /*stream_thermohaline*/
 
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas

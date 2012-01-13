@@ -101,20 +101,20 @@ else
 ! === Update clockworks ===
   iday=iday+nff*ngcm/24
   
-  if(iday > idmax(imon,1999)) then
+  if(iday > idmax(imon,1999)) then ! why 1999 and not iyear?????
     iday=iday-idmax(imon,1999)
     imon=imon+1
     if(imon == 13) then
        imon=1
        iyear=iyear+1
-     if(iyear.eq.2002) iyear=1999
+     if(iyear.eq.yearmax+1) iyear=yearmin
     endif
   elseif(iday <=0) then
     imon=imon-1
     if(imon == 0) then
        imon=12
        iyear=iyear-1
-     if(iyear.eq.1998) iyear=2001
+     if(iyear.eq.yearmin-1) iyear=yearmax
     endif
     iday=iday+idmax(imon,1999)
    endif

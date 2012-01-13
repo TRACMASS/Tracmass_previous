@@ -243,6 +243,13 @@ MODULE mod_streamr
 ENDMODULE mod_streamr
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_stream_thermohaline
+#ifdef stream_thermohaline
+  REAL, ALLOCATABLE, DIMENSION(:,:)      :: psi_ts
+#endif
+ENDMODULE mod_stream_thermohaline
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_tracer
 #ifdef tracer
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: tra
