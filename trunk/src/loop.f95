@@ -59,7 +59,6 @@ SUBROUTINE loop
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: niter
   INTEGER                                    :: nrh0=0
-  INTEGER                                    :: mra, mta, msa
 
   ! Counters
   INTEGER                                    :: nout=0, nloop=0, nerror=0
@@ -224,7 +223,7 @@ SUBROUTINE loop
      call readfields
      call fancyTimer('reading next datafield','stop')
      
-     if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
+     if(mod(ints,12).eq.0 .and. ints.ne.0) call writepsi ! write psi
      if(mod(ints,120).eq.0) call writetracer
 
     intspinCond: if(nff*ints <= nff*(intstart+intspin)) then

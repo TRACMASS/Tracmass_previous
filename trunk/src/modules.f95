@@ -2,7 +2,7 @@
 MODULE mod_param
   INTEGER                                   :: IMT, JMT, KM
   INTEGER                                   :: JMAX, LBT, NTRACMAX
-  INTEGER, PARAMETER                        :: MR=1001
+  INTEGER, PARAMETER                        :: MR=501
   INTEGER                                   :: NEND
   INTEGER, PARAMETER                        :: NST=2,NNRJ=8,NTRJ=7
 #ifdef streamts
@@ -245,7 +245,7 @@ ENDMODULE mod_streamr
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_stream_thermohaline
 #ifdef stream_thermohaline
-  REAL, ALLOCATABLE, DIMENSION(:,:)      :: psi_ts
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)      :: psi_ts
 #endif
 ENDMODULE mod_stream_thermohaline
 

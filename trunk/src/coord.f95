@@ -47,20 +47,6 @@ enddo
 rmin=19.d0
 rmax=28.5d0
 
-#if defined occ66
-dx = 0.25d0
-dy = 0.25d0
-rmin=19.d0
-rmax=28.5d0
-#ifdef mod1
-stlon1 = dx
-stlat1 = -78.d0
-#endif
-#ifdef mod2
-stlon2 = dx
-stlat2 = -54.50d0
-#endif
-#endif
 
 #if defined orc
 dx = 0.25d0  ! this is a quick and dirty fix since it is only used in arclength
@@ -117,17 +103,16 @@ rmax=30.d0
 dr=(rmax-rmin)/dble(MR-1)
 
 #ifdef streamts
-tmin=-2.d0
 ! Values for the Baltic 
 #if defined for || sim  
+tmin=-2.d0
 tmax=25.d0 
 smin= 0.d0
 smax=15.d0
 ! Values for the world ocean but bad for brakish water
 #else               
-tmax=30.d0 
-smin=20.d0
-smax=40.d0
+tmin=-3. ; tmax=33
+smin=33. ; smax=38.
 #endif
 dtemp=(tmax-tmin)/dble(MR-1)
 dsalt=(smax-smin)/dble(MR-1)
