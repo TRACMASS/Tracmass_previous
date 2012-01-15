@@ -17,7 +17,7 @@ module mod_psi
 
   CONTAINS
 
-subroutine savepsi(ia,ja,ka,mra,mta,msa,xy,dir,flux)
+subroutine savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,xy,dir,flux)
 
 IMPLICIT NONE
 
@@ -29,10 +29,11 @@ IMPLICIT NONE
 
 INTEGER             :: ia,ja,ka   !where to write
 REAL*8              :: x1,y1,z1
-INTEGER             :: xy, dir !1 - zonal, 2 - meridional
+INTEGER             :: xy, dir !1 - zonal, 2 - meridional, 3 - vertical
 REAL                :: flux
 REAL                :: temp,salt,dens
-INTEGER             :: mra,mta,msa
+INTEGER             :: mrb,mtb,msb
+INTEGER             :: mta,msa,m
 
 
 flux = flux*real(dir)
@@ -51,14 +52,25 @@ select case(xy)
 #endif
           ! === Overturning dens/temp/salt stream function ===
 #ifdef streamr
-          stxr(ia,mra,lbas,1) = stxr(ia,mra,lbas,1) + flux
+          stxr(ia,mrb,lbas,1) = stxr(ia,mrb,lbas,1) + flux
 #endif
 #ifdef streamts
-          stxr(ia,mta,lbas,2) = stxr(ia,mta,lbas,2) + flux
-          stxr(ia,msa,lbas,3) = stxr(ia,msa,lbas,3) + flux
+          stxr(ia,mtb,lbas,2) = stxr(ia,mtb,lbas,2) + flux
+          stxr(ia,msb,lbas,3) = stxr(ia,msb,lbas,3) + flux
 #endif
 #ifdef stream_thermohaline
-          psi_ts(mta,msa) = psi_ts(mta,msa) + flux
+		  do m=mta,mtb-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) + flux
+          enddo
+		  do m=mtb,mta-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) - flux
+          enddo
+		  do m=msa,msb-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) + flux
+          enddo
+		  do m=msb,msa-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) - flux
+          enddo
 #endif
     
      ! === Meridional component ===
@@ -73,14 +85,42 @@ select case(xy)
 #endif
           ! === Overturning dens/temp/salt stream function ===
 #ifdef streamr
-          styr(ja,mra,lbas,1) = styr(ja,mra,lbas,1) + flux
+          styr(ja,mrb,lbas,1) = styr(ja,mrb,lbas,1) + flux
 #endif
 #ifdef streamts
-          styr(ja,mta,lbas,2) = styr(ja,mta,lbas,2) + flux
-          styr(ja,msa,lbas,3) = styr(ja,msa,lbas,3) + flux 
+          styr(ja,mtb,lbas,2) = styr(ja,mtb,lbas,2) + flux
+          styr(ja,msb,lbas,3) = styr(ja,msb,lbas,3) + flux 
 #endif
 #ifdef stream_thermohaline
-          psi_ts(mta,msa) = psi_ts(mta,msa) + flux
+		  do m=mta,mtb-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) + flux
+          enddo
+		  do m=mtb,mta-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) - flux
+          enddo
+		  do m=msa,msb-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) + flux
+          enddo
+		  do m=msb,msa-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) - flux
+          enddo
+#endif
+
+     ! === Vertical component ===
+     case(3)
+#ifdef stream_thermohaline
+		  do m=mta,mtb-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) + flux
+          enddo
+		  do m=mtb,mta-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) - flux
+          enddo
+		  do m=msa,msb-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) + flux
+          enddo
+		  do m=msb,msa-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) - flux
+          enddo
 #endif
 
 end select

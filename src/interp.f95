@@ -1,12 +1,11 @@
-!23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890x
-
-
 #ifdef tempsalt
 
 subroutine interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,ns)
 
 !     computes temperature, salinity, density at position of trajectory
 !     by interpolating data from the center of eight nearest boxes  
+!
+!     This subroutine should be improved in order to include time interpolation   
 
 USE mod_param
 USE mod_dens

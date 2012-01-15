@@ -282,8 +282,8 @@ SUBROUTINE init_params
       ! --- Allocate Lagrangian stream functions ---
 #ifdef streamxy
       ALLOCATE ( stxyy(imt,jmt,lbt), stxyx(imt,jmt,lbt) )
-!      sxyy=0.
-!      sxyx=0.
+      stxyy=0.
+      stxyx=0.
 #endif
 #ifdef streamv
       ALLOCATE ( stxz(imt,km,lbt), styz(jmt,km,lbt) )
@@ -296,7 +296,7 @@ SUBROUTINE init_params
       styr=0
 #endif
 #ifdef stream_thermohaline
-      ALLOCATE ( psi_ts(mr,mr) )
+      ALLOCATE ( psi_ts(mr,mr,2) )
       psi_ts=0.
 #endif
       ! --- Allocate tracer data ---

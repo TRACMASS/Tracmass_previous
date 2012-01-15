@@ -24,6 +24,7 @@ contains
   subroutine  pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
     
     INTEGER                                    :: mra,mta,msa
+    INTEGER                                    :: mrb,mtb,msb
     REAL                                       :: uu
     INTEGER                                    :: ia, iam, ja, ka,k
     INTEGER                                    :: ib, jb, kb
@@ -54,12 +55,30 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr)
 #endif /*timeanalyt*/
 
-#if defined streamr || stream_thermohaline
+#if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mra=nint((dens-rmin)/dr)+1
-       if(mra.lt.1 ) mra=1
-       if(mra.gt.MR) mra=MR
-#if defined streamts || stream_thermohaline
+       mrb=nint((dens-rmin)/dr)+1
+       if(mrb.lt.1 ) mrb=1
+       if(mrb.gt.MR) mrb=MR
+#if defined streamts 
+       mtb=(temp-tmin)/dtemp+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=(salt-smin)/dsalt+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+#endif 
+#endif 
+#if defined stream_thermohaline
+! calculate the layers of temperature and salinity for both a-box and b-box
+       call interp2(ib,jb,kb,temp,salt,dens)
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+       call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
@@ -67,8 +86,8 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-#endif 
-       call savepsi(ia,ja,ka,mra,mta,msa,1,1,real(subvol*ff))
+
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
@@ -88,21 +107,38 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
 !       scrivi=.true.      
-#if defined streamr || stream_thermohaline
+#if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mra=nint((dens-rmin)/dr)+1
-       if(mra.lt.1) mra=1
-       if(mra.gt.MR) mra=MR
-#if defined streamts || stream_thermohaline
-       mta=nint((temp-tmin)/dtemp)+1
+       mrb=nint((dens-rmin)/dr)+1
+       if(mrb.lt.1) mrb=1
+       if(mrb.gt.MR) mrb=MR
+#if defined streamts 
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+#endif 
+#endif 
+#if defined stream_thermohaline
+! calculate the layers of temperature and salinity for both a-box and b-box
+       call interp2(ib,jb,kb,temp,salt,dens)
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+       call interp2(ia,ja,ka,temp,salt,dens)
+       mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
-       msa=nint((salt-smin)/dsalt)+1
+       msa=(salt-smin)/dsalt+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-#endif 
-       call savepsi(iam,ja,ka,mra,mta,msa,1,-1,real(subvol*ff))
+       call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
 
     elseif(ds==dsn) then ! northward grid-cell exit
        
@@ -122,21 +158,38 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-#if defined streamr || stream_thermohaline
+#if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mra=nint((dens-rmin)/dr)+1
-       if(mra.lt.1) mra=1
-       if(mra.gt.MR) mra=MR
-#if defined streamts || stream_thermohaline
-       mta=nint((temp-tmin)/dtemp)+1
+       mrb=nint((dens-rmin)/dr)+1
+       if(mrb.lt.1) mrb=1
+       if(mrb.gt.MR) mrb=MR
+#if defined streamts 
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+#endif 
+#endif 
+#if defined stream_thermohaline
+! calculate the layers of temperature and salinity for both a-box and b-box
+       call interp2(ib,jb,kb,temp,salt,dens)
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+       call interp2(ia,ja,ka,temp,salt,dens)
+       mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
-       msa=nint((salt-smin)/dsalt)+1
+       msa=(salt-smin)/dsalt+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-#endif 
-       call savepsi(ia,ja,ka,mra,mta,msa,2,1,real(subvol*ff))
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
 
     elseif(ds==dss) then ! southward grid-cell exit
        
@@ -159,21 +212,38 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
-#if defined streamr || stream_thermohaline
+#if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mra=nint((dens-rmin)/dr)+1
-       if(mra.lt.1) mra=1
-       if(mra.gt.MR) mra=MR
-#if defined streamts  || stream_thermohaline
-       mta=nint((temp-tmin)/dtemp)+1
+       mrb=nint((dens-rmin)/dr)+1
+       if(mrb.lt.1) mrb=1
+       if(mrb.gt.MR) mrb=MR
+#if defined streamts  
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+#endif 
+#endif 
+#if defined stream_thermohaline
+! calculate the layers of temperature and salinity for both a-box and b-box
+       call interp2(ib,jb,kb,temp,salt,dens)
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+       call interp2(ia,ja,ka,temp,salt,dens)
+       mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
-       msa=nint((salt-smin)/dsalt)+1
+       msa=(salt-smin)/dsalt+1
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-#endif 
-       call savepsi(ia,ja-1,ka,mra,mta,msa,2,-1,real(subvol*ff))
+       call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
        
     elseif(ds==dsu) then ! upward grid-cell exit
        
@@ -203,6 +273,26 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr)
        call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr)
 #endif
+
+#if defined stream_thermohaline
+! calculate the layers of temperature and salinity for both a-box and b-box
+       call interp2(ib,jb,kb,temp,salt,dens)
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+       call interp2(ia,ja,ka,temp,salt,dens)
+       mta=(temp-tmin)/dtemp+1
+       if(mta.lt.1 ) mta=1
+       if(mta.gt.MR) mta=MR
+       msa=(salt-smin)/dsalt+1
+       if(msa.lt.1 ) msa=1
+       if(msa.gt.MR) msa=MR
+#endif 
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,real(subvol*ff))
+
     elseif(ds==dsd) then ! downward grid-cell exit
        scrivi=.false.
        call vertvel(rb,ia,iam,ja,ka)
@@ -240,7 +330,25 @@ contains
           !cycle ntracLoop
        endif
 #endif
-       
+#if defined stream_thermohaline
+! calculate the layers of temperature and salinity for both a-box and b-box
+       call interp2(ib,jb,kb,temp,salt,dens)
+       mtb=nint((temp-tmin)/dtemp)+1
+       if(mtb.lt.1 ) mtb=1
+       if(mtb.gt.MR) mtb=MR
+       msb=nint((salt-smin)/dsalt)+1
+       if(msb.lt.1 ) msb=1
+       if(msb.gt.MR) msb=MR
+       call interp2(ia,ja,ka,temp,salt,dens)
+       mta=(temp-tmin)/dtemp+1
+       if(mta.lt.1 ) mta=1
+       if(mta.gt.MR) mta=MR
+       msa=(salt-smin)/dsalt+1
+       if(msa.lt.1 ) msa=1
+       if(msa.gt.MR) msa=MR
+#endif 
+       call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
+
     elseif( ds==dsc .or. ds==dsmin) then  
        ! shortest time is the time-steping 
        scrivi=.true.

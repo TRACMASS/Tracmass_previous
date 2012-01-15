@@ -43,8 +43,8 @@
   ! ===================================
   !
   startHour         = 0,
-  startDay          = 31,!4,!31,
-  startMon          = 12,!7,!12,
+  startDay          =  31,!5,!4,!31,
+  startMon          =  12,!1,!7,!12,
   startYear         = 2000
 / 
   !
@@ -74,7 +74,7 @@
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'warmpoolback6'
+  outDataFile     = 'warmpool2'
   intminInOutFile = 0
   /
   !
@@ -116,15 +116,15 @@ $INITRUNSEED
   ! -1 indicates max value in grid.
   !
   nff         = -1,
-  isec        = 4,
+  isec        = 1,
   idir        = 0,
   nqua        = 1,
   partQuant   = 1,
   seedType    = 1,
-  ist1        = 250,   !330,
-  ist2        = 550,   !480,
-  jst1        = 416,   !940,
-  jst2        = 582,   !1010,
+  ist1        = 260, !260,   !330,
+  ist2        = 550, ! 880,   !480,
+  jst1        = 490, !487,   !940,
+  jst2        = 507, !487,   !1010,
   kst1        =   1,
   kst2        =  64,
   varSeedFile = 0,
@@ -136,10 +136,10 @@ $INITRUNSEED
   ! water mass properties with minimum & maximum on temp, salt and density
   !
   ! for starting a trajectory (active only with option tempsalt) 
-  tmin0 =   29.3,
+  tmin0 =   29.,
   tmax0 =  500.,
-  smin0 =   35.5,
-  smax0 =   35.6,
+  smin0 = -500.,
+  smax0 =  34.5,
   rmin0 = -500.,
   rmax0 =  500.,
   ! for ending a trajectory
@@ -187,10 +187,10 @@ $INITRUNSEDIMENT
   ! defining end sections
   ! timax : maximum time length of a trajectory in days
 
-    ienw =    1,    1,    1, 
-    iene = 9999, 9999,  200,  
-    jens =    1,  590,    1,   
-    jenn =  416, 9999, 9999,  
-    timax = 991100./
+    ienw =    1,    1,    1,    
+    iene = 9999, 9999,  100,   
+    jens =    1,  667,    1,      
+    jenn =  330, 9999, 9999,  
+    timax = 9999999./
     
     
