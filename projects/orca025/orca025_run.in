@@ -34,7 +34,7 @@
   intmin  = 1,
   intspin = 1,  
   intrun  = 1000,         ! = 73*20*10
-  intstep = -1
+  intstep = 1
 /
   !
 &INITRUNDATE
@@ -43,8 +43,8 @@
   ! ===================================
   !
   startHour         = 0,
-  startDay          =  31,!5,!4,!31,
-  startMon          =  12,!1,!7,!12,
+  startDay          =  5,!5,!4,!31,
+  startMon          =  1,!1,!7,!12,
   startYear         = 2000
 / 
   !
@@ -74,7 +74,7 @@
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'warmpool2'
+  outDataFile     = 'warmpool6p'
   intminInOutFile = 0
   /
   !
@@ -115,17 +115,17 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
   !
-  nff         = -1,
-  isec        = 1,
-  idir        = 0,
-  nqua        = 1,
-  partQuant   = 1,
+  nff         = 1,
+  isec        = 2,
+  idir        = 1,
+  nqua        = 2,
+  partQuant   = 1000,
   seedType    = 1,
-  ist1        = 260, !260,   !330,
-  ist2        = 550, ! 880,   !480,
-  jst1        = 490, !487,   !940,
-  jst2        = 507, !487,   !1010,
-  kst1        =   1,
+  ist1        = 227,!260, !260,   !330,
+  ist2        = 880, !880, !550, ! 880,   !480,
+  jst1        = 518,!332, !490, !487,   !940,
+  jst2        = 518,!650, !507, !487,   !1010,
+  kst1        =  1,
   kst2        =  64,
   varSeedFile = 0,
   seedDir     = ' ',
@@ -189,8 +189,8 @@ $INITRUNSEDIMENT
 
     ienw =    1,    1,    1,    
     iene = 9999, 9999,  100,   
-    jens =    1,  667,    1,      
-    jenn =  330, 9999, 9999,  
+    jens =    1,    1,    1,      
+    jenn =  478,    5, 9999,  
     timax = 9999999./
     
     

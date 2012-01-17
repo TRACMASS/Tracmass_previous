@@ -39,9 +39,6 @@ contains
     if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
        uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
-#ifdef turb    
-       ! uu=1 uu+upr(1,2)
-#endif /*turb*/
        if(uu.gt.0.d0) then
           ib=ia+1
           if(ib.gt.IMT) ib=ib-IMT 
@@ -57,7 +54,7 @@ contains
 
 #if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mrb=nint((dens-rmin)/dr)+1
+       mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
        if(mrb.gt.MR) mrb=MR
 #if defined streamts 
@@ -72,10 +69,10 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
@@ -92,9 +89,6 @@ contains
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
        uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
-#ifdef turb    
-       ! uu=uu+upr(2,2)
-#endif
        if(uu.lt.0.d0) then
           ib=iam
        endif
@@ -109,14 +103,14 @@ contains
 !       scrivi=.true.      
 #if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mrb=nint((dens-rmin)/dr)+1
+       mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1) mrb=1
        if(mrb.gt.MR) mrb=MR
 #if defined streamts 
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
 #endif 
@@ -124,10 +118,10 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
@@ -144,9 +138,6 @@ contains
        
        scrivi=.false.
        uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
-#ifdef turb    
-       ! uu=uu+upr(3,2)
-#endif /*turb*/
        if(uu.gt.0.d0) then
           jb=ja+1
        endif
@@ -160,14 +151,14 @@ contains
 #endif
 #if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mrb=nint((dens-rmin)/dr)+1
+       mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1) mrb=1
        if(mrb.gt.MR) mrb=MR
 #if defined streamts 
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
 #endif 
@@ -175,10 +166,10 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
@@ -195,9 +186,6 @@ contains
        
        scrivi=.false.
        uu=(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
-#ifdef turb    
-       ! uu=uu+upr(4,2)
-#endif
        if(uu.lt.0.d0) then
           jb=ja-1
 #ifndef ifs 
@@ -214,14 +202,14 @@ contains
 #endif
 #if defined streamr 
        call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
-       mrb=nint((dens-rmin)/dr)+1
+       mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1) mrb=1
        if(mrb.gt.MR) mrb=MR
 #if defined streamts  
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
 #endif 
@@ -229,10 +217,10 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
@@ -246,7 +234,6 @@ contains
        call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
        
     elseif(ds==dsu) then ! upward grid-cell exit
-       
        scrivi=.false.
        call vertvel(rb,ia,iam,ja,ka)
 #ifdef full_wflux
@@ -254,17 +241,13 @@ contains
 #else
        uu=rbg*wflux(ka,NST)+rb*wflux(ka,1)
 #endif
-#ifdef turb    
-       ! uu=uu+upr(5,2)
-#endif
        if(uu.gt.0.d0) then
           kb=ka+1
        endif
        z1=dble(ka)
-       if(kb==KM+1) then  ! prevent "evaporation"
-          !                 nev=nev+1
-          kb=KM
-          z1=dble(KM)-0.5d0
+       if(kb==KM+1) then    ! prevent "evaporation" and put particle from the surface
+          kb=KM           
+          z1=dble(KM)-0.5d0 ! to the middle of the surface layer
        endif
 #if defined timeanalyt
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
@@ -277,10 +260,10 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
@@ -333,10 +316,10 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
-       mtb=nint((temp-tmin)/dtemp)+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=nint((salt-smin)/dsalt)+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
