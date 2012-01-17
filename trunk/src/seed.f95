@@ -184,8 +184,8 @@ CONTAINS
          END SELECT
          
          IF (num == 0 .AND. nqua /= 4) THEN
-            PRINT*,'WARNING: Number of trajectories = 0 !'
-            PRINT*,'         Using num = 1'
+!            PRINT*,'WARNING: Number of trajectories = 0 !'  ! This is nothing to worry about!
+!            PRINT*,'         Using num = 1'				 ! Just weak velocities. K.Döös
             num=1
          END IF
      

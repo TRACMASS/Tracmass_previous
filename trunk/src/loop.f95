@@ -13,9 +13,6 @@ SUBROUTINE loop
 !!          See tracmass manual for schematic of the structure.
 !!
 !!
-!!       Last change: Joakim Kjellsson, 21 December 2011
-!!
-!!
 !!------------------------------------------------------------------------------          
   USE mod_param
   USE mod_name
@@ -223,7 +220,7 @@ SUBROUTINE loop
      call readfields
      call fancyTimer('reading next datafield','stop')
      
-     if(mod(ints,12).eq.0 .and. ints.ne.0) call writepsi ! write psi
+     if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
      if(mod(ints,120).eq.0) call writetracer
 
     intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
@@ -510,7 +507,7 @@ SUBROUTINE loop
           ' nerror=',i4,' in ocean/atm=',i8)
 #else
      call fancyTimer('advection','stop') 
-     print 799 ,ints ,ntractot-nout ,nout ,nerror,ntractot !,nev
+     print 799 ,ints ,ntractot-nout ,nout ,nerror,ntractot 
 799  format('ints=',i7,' active=',i10,' out=',i10,' err=',i10,' tot=',i10)
 #endif
   
