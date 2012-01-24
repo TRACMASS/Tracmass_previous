@@ -4,11 +4,12 @@ import glob
 import os
 from itertools import izip
 import cStringIO
+import subprocess as spr
 
 import numpy as np
 import pylab as pl
 import matplotlib as mpl
-import MySQLdb,oursql
+#import MySQLdb,oursql
 import psycopg2
 
 import pycdf
@@ -149,11 +150,11 @@ class trm:
         return runvec
 
     def create_table(self):
-        """Create a mysql table  table """
+        """Create a postgres  table """
         itp = " INT  "
-        ftp = " FLOAT "
+        ftp = " REAL "
         CT1 = ( "CREATE TABLE %s (" % self.tablename )
-        CT2 = "   runid " + itp + ",ints " + ftp + ",ntrac " + itp
+        CT2 = "   runid " + itp + "DEFAULT -999,ints " + ftp + ",ntrac " + itp
         CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
         CT4 = "   )"
         CT  = CT1 + CT2 + CT3 + CT4
@@ -163,6 +164,12 @@ class trm:
             pass
         finally:
             self.conn.commit()
+
+        """CREATE FUNCTION trm_bl_filter(int, float8, int, real, real, real) RETURNS record AS $$ SELECT -999, $2, $1, $3, $4, $5 $$ LANGUAGE SQL;
+        """
+
+
+
         
     def generate_runid(self):
         """Check if run exists in runs table. If not insert run info.
@@ -259,6 +266,28 @@ class trm:
                     self.y.astype('float'),      self.z.astype('float'))
         self.c.executemany(sql,vals)
 
+    def db_bulkinsert(self,datafile=None):
+        """Insert trm bin-files data using pg_bulkload"""
+        pg_bulkload = "/opt/local/lib/postgresql90/bin/pg_bulkload"
+        ctl_file = "load_trm.ctl"
+        db = "-dpartsat"
+        outtable = "-O" + self.tablename
+
+        def run_command(datafile):
+            t1 = dtm.now()
+            print datafile
+            infile = "-i" + datafile
+            spr.call([pg_bulkload,ctl_file,db,infile,outtable])
+            t2 = dtm.now()
+            print "Elapsed time: " + str(t2-t1)
+
+        if datafile:
+            run_command(datafile)
+        else:
+            flist = glob.glob(self.datadir + "/" +
+                              self.projname + self.casename + "*_run.bin")
+            for f in flist[:10]: run_command(f)
+
     def db_copy(self):
         if len(self.x) == 0: return False
         self.create_table()
@@ -271,7 +300,7 @@ class trm:
         vf.seek(0)
         self.c.copy_from(vf,self.tablename,sep=' ')
         self.conn.commit()
-        
+
     def ints2iso(self,ints):
         base_iso = mpl.dates.date2num(self.isobase)
         return base_iso + float(ints)/6-1
@@ -362,13 +391,6 @@ class trm:
                           self.projname + self.casename + "*")
         for f in flist: print f
 
-
-def import_batchrun(batchfile='batch_ints_start.asc'):
-    tr = trm('gompom')
-    file = tr.ormdir + "/projects/gomoos/" + batchfile
-    for t in open(file):
-        tr.load_to_mysql(int(t))
-    tr._enable_indexes()
 
 
 def movie2(tr1,tr2,di=10):
