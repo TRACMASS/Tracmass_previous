@@ -65,13 +65,14 @@ SUBROUTINE readfields
   inquire(file=ncFile,exist=around)
   if(.not.around) stop 4556
   nread = mod(ints/5,18) + 1
-  ncTpos = mod(ints+1,8)+1
+  ncTpos = mod(ints-1,8)+1
   print *,"File and tpos: ", filename, ncTpos
 
   ! === Velocities ===
   !Use  t=1  i=2  j=3  k=4
-  map2d    = [2, 3, 4, 1]   
-  map3d    = [2, 3, 4, 1]   
+  map3d    = [2, 3, 4, 1]     
+  map2d    = [3, 4, 1, 1]
+
   uvel =  get3DfieldNC(trim(ncFile), 'u') * x_scale + x_offset
   vvel =  get3DfieldNC(trim(ncFile), 'v') * y_scale + y_offset
   ssh  = get2DfieldNC(trim(ncFile) ,'elev') * ssh_scale + ssh_offset

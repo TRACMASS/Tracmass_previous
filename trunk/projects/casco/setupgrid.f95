@@ -43,14 +43,8 @@ SUBROUTINE setupgrid
   allocate ( depth(imt,jmt), ang(imt,jmt),  mask(imt,jmt)  )
   call coordinat
    
-  start1d  = [  1]
-  count1d  = [ km]
-
-
-  start2d  = [ 1,subGridImin, subGridJmin, 1]
-  count2d  = [ 1,subGridImax, subGridJmax, 1]
-  !Use  t=1  i=2  j=3  k=4
-  map2d    = [2, 3, 1, 1]
+  !Use  t=1  k=2  i=3  j=4
+  map2d    = [3, 4, 1, 1]
 
   start3d  = [  1, subGridImin, subGridJmin,  1]
   count3d  = [  1, subGridImax, subGridJmax, km]
