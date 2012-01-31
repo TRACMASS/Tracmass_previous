@@ -2,11 +2,12 @@ import datetime
 from datetime import datetime as dtm
 import glob
 import os
+from itertools import izip
 
 import numpy as np
 import pylab as pl
 import matplotlib as mpl
-import MySQLdb
+import MySQLdb,oursql
 
 import pycdf
 #from pyhdf.SD import SD,SDC
@@ -30,16 +31,16 @@ class trm:
         self.ormdir = ormdir
         self.isobase = datetime.datetime(2004,1,1)
         
-        conn = MySQLdb.connect (host = "localhost",
+        conn = oursql.connect (host = "localhost",
                                 user = "root", passwd = "",
                                 db = "partsat")
         self.c = conn.cursor ()
         self.tablename = "partsat.%s%s" % (projname ,casename)
 
         self.nlgrid = nlt.parse('/%s/projects/%s/%s_grid.in' %
-                                (self.ormdir,self.projname,self.projname))
+                            (self.ormdir,self.projname,self.projname))
         self.nlrun = nlt.parse('/%s/projects/%s/%s_run.in' %
-                               (self.ormdir,self.projname,self.casename))
+                            (self.ormdir,self.projname,self.casename))
         if datafile:
             self.datafile = datafile
         else:
@@ -47,9 +48,9 @@ class trm:
 
         if projname == 'oscar':
             import oscar
-            os = oscar.Oscar()
-            self.llat = os.llat
-            self.llon = os.llon
+            self.gcm = oscar.Oscar()
+            self.llat = self.gcm.llat
+            self.llon = self.gcm.llon
             self.imt = 1080
             self.jmt = 480
         elif projname=="topaz":
@@ -64,13 +65,13 @@ class trm:
             self.jmt = 360
         elif projname=="casco":
             import casco
-            self.cs = casco.GCM()
-            self.llon = self.cs.llon
-            self.llat = self.cs.llat
+            self.gcm = casco.GCM()
+            self.llon = self.gcm.llon
+            self.llat = self.gcm.llat
             self.imt = 285
             self.jmt = 274
             self.region = "casco"
-            self.landmask = self.cs.get_landmask()
+            self.landmask = self.gcm.get_landmask()
             self.base_iso = pl.date2num(dtm(2004,1,1))
         elif projname=="gompom":
             n = pycdf.CDF(griddir + 'grid.cdf')
@@ -139,7 +140,7 @@ class trm:
         pass
 
     def read_bin(self, filename):
-        """ Load binary output from TRACMASS """
+        """ Read binary output from TRACMASS """
         with open(filename) as fd:
             runvec = np.fromfile(fd,np.dtype([
                 ('ntrac','>i4'), ('ints','>f8'), 
@@ -152,11 +153,30 @@ class trm:
         itp = " INT NOT NULL "
         ftp = " FLOAT NOT NULL "
         CT1 = ( "CREATE TABLE IF NOT EXISTS %s (" % self.tablename )
-        CT2 = "   intstart " + itp + ",ints " + itp + ",ntrac " + itp
+        CT2 = "   runid " + itp + ",ints " + ftp + ",ntrac " + itp
         CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
         CT4 = "   )"
         CT  = CT1 + CT2 + CT3 + CT4
         self.c.execute(CT)
+
+    def generate_runid(self):
+        """Check if run exists in runs table. If not insert run info.
+        Return runid"""
+        print self.jd.min(),self.jd.max(),self.tablename
+        sql = "SELECT id FROM runs WHERE jd1=? AND jd2=? AND tablename=?"
+        self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
+        id = self.c.fetchall()
+        print id
+        #if len(id) == 1:
+        #    return id[0][0]
+        #elif len(id) == 0:
+        sql = "INSERT INTO runs (jd1,jd2,tablename) values (?,?,?)"
+        self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
+        return self.c.lastrowid
+        #else:
+        #raise ValueError,"More than one runid in database"
+        
+
 
     def disable_indexes(self,table):
         self.create_table()
@@ -169,12 +189,12 @@ class trm:
         sql = ("ALTER TABLE %s ENABLE KEYS;" % table)
         self.c.execute(sql)
 
-    def remove_earlier_data_from_table(self, intstart):
-        self.c.execute("SELECT DISTINCT(intstart) FROM %s;" %self.tablename)
+    def remove_earlier_data_from_table(self, runid):
+        self.c.execute("SELECT DISTINCT(runid) FROM %s;" %self.tablename)
         if self.c.rowcount > 0:
-            DL = ( "DELETE FROM %s WHERE intstart=%s;" % 
-                   (self.tablename,intstart) )
-            print "Any old posts with intstart=%s deleted." % (intstart)
+            DL = ( "DELETE FROM %s WHERE runid=%s;" % 
+                   (self.tablename,runid) )
+            print "Any old posts with runid=%s deleted." % (runid)
         else :
             DL = "TRUNCATE  TABLE %s;" % self.tablename
             print "The table %s was truncated." % self.tablename
@@ -182,11 +202,12 @@ class trm:
         self.c.execute(DL)
 
     def load(self, jdstart=0, intstart=0,
-             ftype="run", stype='bin', filename=''):
+             ftype="run", stype='bin', filename='',rt=False):
         """Load a tracmass output file. Add data to class instance."""
         if jdstart != 0:
             ints = (jdstart+self.base_iso) * 24./self.nlgrid.ngcm  + 1
             filename = ("%s%08i_%s.%s" % (self.datafile,ints,ftype,stype))
+            self.jd = jdstart
         elif intstart != 0:
             filename = ("%s%08i_%s.%s" % (self.datafile,intstart,ftype,stype))
         elif filename == '':
@@ -200,6 +221,7 @@ class trm:
         else:
             print "Unknown file format, data file should be bin or asc"
             raise
+        if rt: self.runtraj=runtraj
         tvec = ['ntrac', 'ints', 'x', 'y', 'z']
         for tv in tvec:
             self.__dict__[tv] = runtraj[:][tv]
@@ -212,31 +234,27 @@ class trm:
         assert self.x.min() <= self.imt
         assert self.y.min() <= self.jmt
         self.intstart = intstart
-        self.jd = (self.ints.astype(float)/60/60/24 + self.base_iso)
+        if self.nlrun.twritetype == 1:
+            self.jd = (self.ints.astype(float)/60/60/24 + self.base_iso)
+        elif self.nlrun.twritetype == 2:
+            self.jd = (self.ints + self.base_iso)
+        else:
+            self.jd = (self.ints * self.nlgrid.ngcm/24. +self.base_iso) 
         
-    def db_insert(self, intstart=0, ftype="run", stype='bin',
-                   filename='', db="trm"):        
+    def db_insert(self, ftype="run", stype='bin', filename='', db="trm"):
         """Load a tracmass output file and add to mysql table"""
         self.create_table()
-        self.remove_earlier_data_from_table(intstart)
-        self.load(intstart, ftype=ftype, stype=stype)
-
+        id = self.generate_runid()
+        print id
+        self.remove_earlier_data_from_table(id)
         sql = ("INSERT INTO " + self.tablename +
-               " (intstart, ntrac, ints, x, y, z) " + 
-               " VALUES (%s, %s, %s, %s, %s, %s)")
-        self.c.executemany(sql,zip(self.ntrac*0+intstart,
-                                   self.ntrac, self.ints,
-                                   self.x, self.y, self.z))
-
-        """
-        for r in runtraj:
-            self.c.execute(
-                "INSERT INTO " + self.tablename +
-                " (intstart, ntrac, ints, x, y, z) " + 
-                " VALUES (-999, %s, %s, %s, %s, %s)", tuple(r) )
-        self.c.execute("UPDATE %s SET intstart=%i WHERE intstart=-999" % 
-                       (self.tablename, intstart) )
-                        """
+               " (runid, ntrac, ints, x, y, z) " + 
+               " values (?,?,?,?,?,?)")
+        vals = izip((self.x*0+id).astype('float'), self.ntrac.astype('float'),
+                    self.ints.astype('float'),   self.x.astype('float'),
+                    self.y.astype('float'),      self.z.astype('float'))
+        self.c.executemany(sql,vals)
+        
     def ints2iso(self,ints):
         base_iso = mpl.dates.date2num(self.isobase)
         return base_iso + float(ints)/6-1
@@ -287,10 +305,7 @@ class trm:
         if ntrac: self.mp.plot(x,y,'-w',lw=0.5)
         self.mp.scatter(x,y,5,c)
         if ints:
-            jd = (self.base_iso +
-                  (float(ints)-
-                   (self.intstart)/8*3600*24)/3600/24 +
-                  self.intstart/8)
+            jd = self.jd[self.ints==ints][0]
             pl.title(pl.num2date(jd).strftime("%Y-%m-%d %H:%M"))
         print len(x)
 
@@ -443,3 +458,7 @@ def grid2z(k2zMat ,kVec):
 
 
 
+"""
+CREATE TABLE runs (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id),
+jd1 FLOAT, jd2 FLOAT, tablename VARCHAR(50));
+"""
