@@ -124,6 +124,9 @@ SUBROUTINE init_params
       READ (8,nml=INITGRIDARC)
    
    CLOSE (8)
+
+   print *,' runfile =  ','projects/'//trim(Project)//'/'//trim(Case)//'_run.in'
+
    OPEN (8,file='projects/'//trim(Project)//'/'//trim(Case)//'_run.in',     &
         & status='OLD', delim='APOSTROPHE')
    
