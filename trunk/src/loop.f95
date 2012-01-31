@@ -827,10 +827,33 @@ return
            ! === Can not find any path for unknown reasons ===
            if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
               if (verbose == 0) then
-                 print *,'ds cross error',ds,dse,dsw,dsn,dss,dsu
-                 print *,dsd,dsmin,dxyz
-                 print *,ia,ja,ka,x0,y0,z0,ntrac,niter
-                 print *,'k=',ka,kb,KM+1-kmt(ia,ja),kmt(ia,ja)
+                 print *, " "
+                 print *, " "
+                 print *,'==================================================='
+                 print *,'Warning: not find any path for unknown reason '
+                 print *, " "
+                 write (*,'(A E9.3 A E9.3)'), ' uflux= ', &
+                      uflux(ia,ja,ka,1),'  vflux= ', vflux(ia,ja,ka,1)
+
+                 write (*,FMT='(A E9.2E2,E12.2E2,E12.2E2,E12.2E2)'), &
+                      ' ds=',ds,dse,dsw,dsn,dss,dsu
+                 write (*,FMT='(E12.2E2,E12.2E2,E12.2E2,E12.2E2)'), dsd,dsmin,dxyz
+                 print *,'---------------------------------------------------'
+                 print *,"   ntrac = ",ntrac
+                 write (*,'(A7 I10 A7 I10 A7 I10)'), & 
+                      ' ia= ', ia, ' ja= ', ja, ' ka= ', ka
+                 write (*,'(A7 I10 A7 I10 A7 I10)'), & 
+                      ' ib= ', ib, ' jb= ', jb, ' kb= ', kb
+                 write (*,'(A7 F10.3 A7 F10.3 A7 F10.3)'), & 
+                      ' x0= ', x0, ' y0= ', y0, ' z0= ', z0
+                 write (*,'(A7 F10.3 A7 F10.3 A7 F10.3)'), & 
+                      ' x0= ', x0, ' y0= ', y0, ' z0= ', z0
+                 write (*,'(A7 I10 A7 I10 A7 I10)'), & 
+                      ' k_inv= ', KM+1-kmt(ia,ja), ' kmt= ', kmt(ia,ja), &
+                      'lnd= ', mask(ia,ja)
+                 print *,'---------------------------------------------------'
+                print *,'The trajectory is killed'
+                print *,'==================================================='
               end if
               nerror=nerror+1
               nrj(ntrac,6)=1
