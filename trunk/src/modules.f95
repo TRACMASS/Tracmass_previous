@@ -82,7 +82,7 @@ CONTAINS
   subroutine updateClock  
     USE mod_param
     USE mod_loopvars
-    ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
+    ttpart = anint((tt/tseas-floor(tt/tseas))*tseas)/tseas 
     currJDtot = (ints+ttpart-1)*(real(ngcm)/24) 
 
 call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)

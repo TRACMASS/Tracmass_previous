@@ -3,19 +3,15 @@ from datetime import datetime as dtm
 import glob
 import os
 from itertools import izip
-import cStringIO
-import subprocess as spr
 
 import numpy as np
 import pylab as pl
 import matplotlib as mpl
-#import MySQLdb,oursql
-import psycopg2
+import MySQLdb,oursql
 
 import pycdf
 #from pyhdf.SD import SD,SDC
 
-import batch
 import anim
 import namelist as nlt
 import lldist
@@ -24,8 +20,8 @@ from hitta import GrGr
 
 class trm:
     """ main class for TRACMASS data manipulation"""
-    def __init__(self,projname, casename="", datadir="", datafile="",
-                 ormdir="/Users/bror/git/orm"):
+    def __init__(self,projname,casename="",datadir="/Users/bror/ormOut/", 
+                 datafile="", ormdir="/Users/bror/git/orm"):
         self.projname = projname
         if len(casename) == 0:
             self.casename = projname
@@ -35,33 +31,28 @@ class trm:
         self.ormdir = ormdir
         self.isobase = datetime.datetime(2004,1,1)
         
-        self.conn = psycopg2.connect (host="localhost", database="partsat")
-        self.c = self.conn.cursor()
-        self.tablename = "%s%s" % (projname ,casename)
+        conn = oursql.connect (host = "localhost",
+                                user = "root", passwd = "",
+                                db = "partsat")
+        self.c = conn.cursor ()
+        self.tablename = "partsat.%s%s" % (projname ,casename)
 
         self.nlgrid = nlt.parse('/%s/projects/%s/%s_grid.in' %
                             (self.ormdir,self.projname,self.projname))
         self.nlrun = nlt.parse('/%s/projects/%s/%s_run.in' %
                             (self.ormdir,self.projname,self.casename))
-        if datadir:
-            self.datadir = datadir
-        else:
-            self.datadir = self.nlrun.outDataDir
         if datafile:
             self.datafile = datafile
         else:
             self.datafile=self.nlrun.outDataFile
 
-        self.base_iso = pl.date2num(dtm(
-             self.nlgrid.baseYear,
-             self.nlgrid.baseMon,
-             self.nlgrid.baseDay))-1
-        self.imt = self.nlgrid.IMT
-        self.jmt = self.nlgrid.JMT
-
         if projname == 'oscar':
             import oscar
             self.gcm = oscar.Oscar()
+            self.llat = self.gcm.llat
+            self.llon = self.gcm.llon
+            self.imt = 1080
+            self.jmt = 480
         elif projname=="topaz":
             griddir  = '/projData/TOPAZ/1yr_1d/'
             gridname = '/22450101.ocean_daily.nc' 
@@ -70,10 +61,17 @@ class trm:
             lat = g.var('yu_ocean')[:]
             #self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
             self.llon,self.llat = np.meshgrid(lon, lat)
+            self.imt = 90
+            self.jmt = 360
         elif projname=="casco":
             import casco
             self.gcm = casco.GCM()
+            self.llon = self.gcm.llon
+            self.llat = self.gcm.llat
+            self.imt = 285
+            self.jmt = 274
             self.region = "casco"
+            self.landmask = self.gcm.get_landmask()
             self.base_iso = pl.date2num(dtm(2004,1,1))
         elif projname=="gompom":
             n = pycdf.CDF(griddir + 'grid.cdf')
@@ -83,18 +81,28 @@ class trm:
         elif projname=="jplSCB":
             import jpl
             self.gcm = jpl.SCB()
+            self.gcm.add_landmask()
+            self.landmask = self.gcm.landmask
+            self.llon = self.gcm.llon
+            self.llat = self.gcm.llat
+            self.imt = 211
+            self.jmt = 111
             self.region = "scb"
             self.base_iso = pl.date2num(dtm(2001,1,1))-3./24
         elif projname=="jplNOW":
             import jpl
             self.gcm = jpl.NOW()
-            self.region = "scb"
-
-        if hasattr(self,'gcm'):
             self.gcm.add_landmask()
             self.landmask = self.gcm.landmask
             self.llon = self.gcm.llon
             self.llat = self.gcm.llat
+            self.imt = self.nlgrid.IMT
+            self.jmt = self.nlgrid.JMT
+            self.region = "scb"
+            self.base_iso = pl.date2num(dtm(
+                self.nlgrid.baseYear,
+                self.nlgrid.baseMon,
+                self.nlgrid.baseDay))-1
             
 
     def ijll(self,ps=None):
@@ -135,122 +143,55 @@ class trm:
         """ Read binary output from TRACMASS """
         with open(filename) as fd:
             runvec = np.fromfile(fd,np.dtype([
-                ('ntrac','i4'), ('ints','f8'), 
-                ('x','f4'), ('y','f4'), ('z','f4')
+                ('ntrac','>i4'), ('ints','>f8'), 
+                ('x','>f4'), ('y','>f4'), ('z','>f4')
                 ]))
         return runvec
 
-    def db_drop_all_tables(self,tablename,really=False):
-        """Drop master and inherited tables in a partition"""
-        if really:
-            sql = "SELECT tablename FROM pg_tables WHERE tablename LIKE '%s%%';"
-            self.c.execute(sql % tablename.lower())
-            tablelist = self.c.fetchall()
-            for table in tablelist:
-                print table
-                self.c.execute("DROP TABLE %s;" % table)
-                self.conn.commit()
-
-    def db_create_table(self,tablename=None):
-        """Create a postgres  table for tracmass output"""
-        if not tablename: tablename = self.tablename
-        sql = "SELECT tablename FROM pg_tables WHERE tablename='%s';"
-        self.c.execute(sql % tablename.lower())
-        if self.c.rowcount > 0: return
-        itp = " INT  "
-        ftp = " REAL "
-        CT1 = ( "CREATE TABLE %s (" % tablename )
-        CT2 = "   runid " + itp + "DEFAULT -999,ints float8, ntrac " + itp
+    def create_table(self):
+        """Create a mysql table  table """
+        itp = " INT NOT NULL "
+        ftp = " FLOAT NOT NULL "
+        CT1 = ( "CREATE TABLE IF NOT EXISTS %s (" % self.tablename )
+        CT2 = "   runid " + itp + ",ints " + ftp + ",ntrac " + itp
         CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
         CT4 = "   )"
         CT  = CT1 + CT2 + CT3 + CT4
         self.c.execute(CT)
-        self.conn.commit()
 
-    def db_create_partition(self,tablename,partition):
-        sql = "SELECT tablename FROM pg_tables WHERE tablename='%s';"
-        self.c.execute(sql % partition.lower())
-        if self.c.rowcount > 0: return
-        self.db_create_table(tablename)
-        sql= "CREATE TABLE %s ( ) INHERITS (%s);"
-        self.c.execute(sql % (partition, tablename))
-        self.conn.commit()
-
-    def db_create_bulkload_table(self):
-        """Create a temporary postgres table for bulkload of trm data """
-        sql = "SELECT tablename FROM pg_tables WHERE tablename='temp_bulkload';"
-        self.c.execute(sql)
-        if self.c.rowcount > 0: return
-        CT1 = "CREATE TABLE temp_bulkload "
-        CT2 = "( ntrac INT, ints float8, x REAL, y REAL, z REAL)"
-        self.c.execute(CT1 + CT2)
-        self.conn.commit()
+    def generate_runid(self):
+        """Check if run exists in runs table. If not insert run info.
+        Return runid"""
+        print self.jd.min(),self.jd.max(),self.tablename
+        sql = "SELECT id FROM runs WHERE jd1=? AND jd2=? AND tablename=?"
+        self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
+        id = self.c.fetchall()
+        print id
+        #if len(id) == 1:
+        #    return id[0][0]
+        #elif len(id) == 0:
+        sql = "INSERT INTO runs (jd1,jd2,tablename) values (?,?,?)"
+        self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
+        return self.c.lastrowid
+        #else:
+        #raise ValueError,"More than one runid in database"
         
-    def generate_runid(self, jd1=None, jd2=None, temp=False,
-                       tablename=None,filename=''):
-        """Find or generate row for current run in runs."""
-        if not tablename: tablename = self.tablename
 
-        def insert_runid(jd1,jd2):
-            sql = ("INSERT INTO runs (jd1,jd2,tablename,filename) " +
-                   " values (%s,%s,%s,%s) RETURNING id" )
-            self.c.execute(sql, (jd1, jd2, tablename.lower(), filename) )
-            self.conn.commit()
-            return self.c.fetchone()[0]
 
-        if temp:
-            return insert_runid(-999, -998)
-        else:
-            if not jd1: jd1,jd2 = (self.jd.min(),self.jd.max())
-            sql = ("SELECT id FROM runs " +
-                   " WHERE jd1=%s AND jd2=%s AND tablename='%s'" %
-                (jd1, jd2, tablename))
-            self.c.execute(sql )
-            id = self.c.fetchall()
-            if len(id) == 1:
-                return id[0][0]
-            elif len(id) == 0:
-                return insert_runid(jd1,jd2)
-            else:
-                raise ValueError,"More than one runid in database"
-
-    def db_create_indexes(self):
-        """ Create all missing indexes """
-
-        def index_exists(index_name):
-            sql = "SELECT * FROM pg_indexes WHERE tablename LIKE '%s%%';"
-            self.c.execute(sql % index_name.lower())
-            if self.c.rowcount > 0:
-                return True
-            else:
-                return False
-        
-        sql = "SELECT distinct(tablename) FROM runs;"
+    def disable_indexes(self,table):
+        self.create_table()
+        """Disable indexes to speed up large inserts."""
+        sql = ("ALTER TABLE %s DISABLE KEYS;" % table)
         self.c.execute(sql)
-        rowlist = self.c.fetchall()
-        t1 = dtm.now()
-        for row in rowlist:
-            print row[0]
-            if not index_exists("_%s_pkey" % row[0]):
-                sql = "ALTER TABLE %s ADD PRIMARY KEY (runid,ints,ntrac);"
-                self.c.execute(sql % ("%s" % row[0].lower()) )
-            print "Time passed: ",dtm.now()-t1
-            if not index_exists("ints_%s_idx" % row[0]):
-                sql = "CREATE INDEX %s ON %s USING btree (ints)"
-                self.c.execute(sql % ("ints_%s_idx" %
-                                      row[0].lower(),row[0].lower() ))
-            print "Time passed: ",dtm.now()-t1
-            if not index_exists("runtrac_%s_idx" % row[0]):
-                sql = "CREATE INDEX %s ON %s USING btree (runid,ntrac)"
-                self.c.execute(sql % ("runtrac_%s_idx" %
-                                      row[0].lower(),row[0].lower() ))
-            print "Time passed: ",dtm.now()-t1
-            self.conn.commit()
-            batch.purge()
+
+    def enable_indexes(self,table):
+        """Enable indexes again after a large insert."""
+        sql = ("ALTER TABLE %s ENABLE KEYS;" % table)
+        self.c.execute(sql)
 
     def remove_earlier_data_from_table(self, runid):
         self.c.execute("SELECT DISTINCT(runid) FROM %s;" %self.tablename)
-        if self.c.rowcount > -2:
+        if self.c.rowcount > 0:
             DL = ( "DELETE FROM %s WHERE runid=%s;" % 
                    (self.tablename,runid) )
             print "Any old posts with runid=%s deleted." % (runid)
@@ -259,7 +200,6 @@ class trm:
             print "The table %s was truncated." % self.tablename
             #self.create_indexes()
         self.c.execute(DL)
-        self.conn.commit()
 
     def load(self, jdstart=0, intstart=0,
              ftype="run", stype='bin', filename='',rt=False):
@@ -271,8 +211,8 @@ class trm:
         elif intstart != 0:
             filename = ("%s%08i_%s.%s" % (self.datafile,intstart,ftype,stype))
         elif filename == '':
-            filename = self.currfile()
-         
+            print (self.datadir + self.casename +
+                                 "*" + ftype)
         if filename[-3:] == "bin":
             runtraj = self.read_bin(self.datadir + filename)
         elif filename[-3:] == "asc":
@@ -309,80 +249,21 @@ class trm:
         self.remove_earlier_data_from_table(id)
         sql = ("INSERT INTO " + self.tablename +
                " (runid, ntrac, ints, x, y, z) " + 
-               " values (%s,%s,%s,%s,%s,%s)")
+               " values (?,?,?,?,?,?)")
         vals = izip((self.x*0+id).astype('float'), self.ntrac.astype('float'),
                     self.ints.astype('float'),   self.x.astype('float'),
                     self.y.astype('float'),      self.z.astype('float'))
         self.c.executemany(sql,vals)
-
-    def tablejds(self,jd):
-        return "%s_%i_%i" % (self.tablename, int(jd/10)*10, int(jd/10)*10+10)
-
-    def db_bulkinsert(self,datafile=None):
-        """Insert trm bin-files data using pg_bulkload"""
-        pg_bulkload = "/opt/local/lib/postgresql90/bin/pg_bulkload"
-        ctl_file = "load_trm.ctl"
-        db = "-dpartsat"
-        outtable = "-O" + "temp_bulkload" # self.tablename
-
-        def run_command(datafile):
-            t1 = dtm.now()
-            sql = "truncate table temp_bulkload;"
-            self.c.execute(sql)
-            self.conn.commit()      
-
-            infile = "-i%s/%s" % (self.datadir, datafile)
-            spr.call([pg_bulkload,ctl_file,db,infile,outtable])
-            print "Elapsed time: " + str(dtm.now()-t1)            
-
-            sql = "SELECT min(ints),max(ints) FROM temp_bulkload;"
-            self.c.execute(sql)
-            jd1,jd2 = self.c.fetchall()[0]
-            tablename = self.tablejds(jd1)
-            runid = self.generate_runid(jd1=jd1, jd2=jd2,filename = datafile,
-                                        tablename=tablename)
-            print "Elapsed time: " + str(dtm.now()-t1)            
-
-         
-            self.db_create_partition(self.tablename, tablename)
-            sql1 = "INSERT INTO %s (runid,ints,ntrac,x,y,z) " % tablename
-            sql2 = "   SELECT %i as runid,ints,ntrac,x,y,z " % runid
-            sql3 = "      FROM temp_bulkload;"
-            self.c.execute(sql1 + sql2 + sql3)
-            self.conn.commit()
-            print "Elapsed time: " + str(dtm.now()-t1)
-
-            batch.purge()
-            
-        if datafile:
-            run_command(datafile)
-        else:
-            flist = glob.glob( "%s/%s*_run.bin" % (self.datadir, self.datafile))
-            for f in flist: run_command(os.path.basename(f))
-
-    def db_copy(self):
-        if len(self.x) == 0: return False
-        self.create_table()
-        id = self.generate_runid()
-        self.remove_earlier_data_from_table(id)
-        vf = cStringIO.StringIO()
-        mat = np.vstack( ((self.jd*0+1).astype(np.int),self.jd,self.ntrac,
-                           self.x, self.y, self.z) ).T
-        np.savetxt(vf,mat,fmt=('%i %f %i %f %f %f') )
-        vf.seek(0)
-        self.c.copy_from(vf,self.tablename,sep=' ')
-        self.conn.commit()
-
+        
     def ints2iso(self,ints):
         base_iso = mpl.dates.date2num(self.isobase)
         return base_iso + float(ints)/6-1
 
-    def select(self,jd=None, runid=0, ints=0, ntrac=0):
+    def trajs(self,intstart=0, ints=0, ntrac=0):
         """ Retrive trajectories from database """
-        if not jd: jd = ints
         whstr = ""
-        if runid != 0:
-            whstr += " runid = %i AND" % intstart
+        if intstart != 0:
+            whstr += " intstart = %i AND" % intstart
         if ints != 0:
             whstr += " ints = %i AND" % ints
         if ntrac != 0:
@@ -390,11 +271,12 @@ class trm:
         whstr = whstr.rstrip("AND")
 
         self.c.execute('SELECT * FROM %s WHERE %s' %
-                       (self.tablejds(jd),whstr) )
+                       (self.tablename,whstr) )
         res = zip(*self.c.fetchall())
         if len(res) > 0:
-            for n,a in enumerate(['runid','ints','ntrac','x','y','z']):
+            for n,a in enumerate(['intstart','ints','ntrac','x','y','z']):
                 self.__dict__[a] = np.array(res[n])
+        #self.ijll()
 
     def scatter(self,ntrac=None,ints=None,k1=None,k2=None,c="g",clf=True):
         if not hasattr(self,'mp'):
@@ -458,19 +340,18 @@ class trm:
                                'x':self.x,
 
                                'y':self.y})
-
-    def currfile(self, ftype='run', stype='bin'):
-        flist = glob.glob("%s/%s*%s.%s" %
-                          (self.datadir,self.nlrun.outDataFile,
-                           ftype,stype))
-        datearr = np.array([ os.path.getmtime(f) for f in flist])
-        listpos = np.nonzero(datearr == datearr.max())[0][0]
-        return os.path.basename(flist[listpos])
-            
-    
     def ls(self):
-        flist = glob.glob("%s/%s*"% (self.datadir,self.nlrun.outDataFile))
+        flist = glob.glob(self.datadir + "/" +
+                          self.projname + self.casename + "*")
         for f in flist: print f
+
+
+def import_batchrun(batchfile='batch_ints_start.asc'):
+    tr = trm('gompom')
+    file = tr.ormdir + "/projects/gomoos/" + batchfile
+    for t in open(file):
+        tr.load_to_mysql(int(t))
+    tr._enable_indexes()
 
 
 def movie2(tr1,tr2,di=10):
@@ -580,23 +461,4 @@ def grid2z(k2zMat ,kVec):
 """
 CREATE TABLE runs (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id),
 jd1 FLOAT, jd2 FLOAT, tablename VARCHAR(50));
-"""
-
-"""
-  def db_create_loadfilter(self,runid=-999):
-
-        sql = "DROP FUNCTION  trm_bl_filter(int, float8, real, real, real)";
-        try:
-            self.c.execute(sql )
-        except:
-            pass
-        finally:
-            self.conn.commit()
-
-        sql = \"""CREATE FUNCTION trm_bl_filter(int, float8, real, real, real)
-                   RETURNS record AS $$
-                   SELECT -999, $2, $1, $3, $4, $5
-                   $$ LANGUAGE SQL;\"""
-        self.c.execute(sql, (runid,) )
-        self.conn.commit()
 """

@@ -8,12 +8,17 @@ import numpy as np
 import pylab as pl
 import matplotlib as mpl
 import scipy.io
+from scipy.spatial import KDTree
 
-import psycopg2
+import MySQLdb
+
 import pycdf
 from pyhdf.SD import SD,SDC
 
 from trm import trm
+
+sys.path.append('/Users/bror/svn/chlcarb/')
+import chl2c
 
 miv = np.ma.masked_invalid
 
@@ -431,21 +436,12 @@ def test():
     tr.db_insert()
 
 def batch_insert():
-    import batch
-    def copy(jd):
-        tr = traj('jplNOW','ftp','/Volumes/keronHD3/ormOut/')
+    tr = traj('jplNOW','ftp','/Volumes/keronHD3/ormOut/')
+    for jd in np.arange(733773.0, 734138.0):
         print pl.num2date(jd), jd
         tr.load(jd)
         tr.remove_satnans()
-        if len(tr.x>0):
-            tr.db_copy()
-
-    #batch.jdloop(copy,733773.0, 734138.0,3)
-    for jd in np.arange(733865.0,734138):
-        dt1 = pl.date2num(dtm.now())
-        copy(jd)
-        dt2 = pl.date2num(dtm.now())        
-        print "----------",dt2-dt1
+        tr.db_insert()
 
 def profile():
     import cProfile

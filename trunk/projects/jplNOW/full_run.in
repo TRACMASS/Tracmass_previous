@@ -5,7 +5,7 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'test',
+  caseName     = 'fullrun',
   caseDesc     = 'Looking at chl growth in lagrangian space'/
   ! 
   !
@@ -31,11 +31,11 @@
 &INITRUNTIME
   !
   ! === Number of initial datasets
-  intmin       = 65800,
+  intmin       = 58800,
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 42,
+  intrun       = 192,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -43,9 +43,9 @@
  &INITRUNDATE
   !
   startHour         = 0,
-  startDay          = 01,
-  startMon          = 02,
-  startYear         = 2010/
+  startDay          = 13,
+  startMon          = 9,
+  startYear         = 0/
   !
   !
   &INITRUNWRITE
@@ -53,7 +53,6 @@
   !                 1 = output in long/lat coordinates
   ncoor        = 0,      
   !
-  twritetype = 2,
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets
   !                 2 = write each grid-crossing and timne change
@@ -63,13 +62,13 @@
   kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/projData/jplSCB/NOWCAST/',
+  inDataDir       = '/projData/jplSCB/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Volumes/keronHD4/ormOut/',
+  outDataDir      = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'jplNOWtest',
+  outDataFile     = 'jplSCBfullrun',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -107,7 +106,7 @@
   nqua        = 1, 
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant= 9,     
+  partQuant= 5,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -120,11 +119,11 @@
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
   ist1         = 5,		 
-  ist2         = 380,			  
+  ist2         = 206,			  
   jst1         = 5,		 
-  jst2         = 252,		 
-  kst1         = 40,		 
-  kst2         = 40,
+  jst2         = 106,		 
+  kst1         = 23,		 
+  kst2         = 24,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -164,20 +163,20 @@ $INITRUNEND
   ienw(1) =   1,
   iene(1) =   2,
   jens(1) =   1,
-  jenn(1) = 257,
+  jenn(1) = 211,
 !
   ienw(2) =   1,
-  iene(2) = 385,
-  jens(2) = 255,
-  jenn(2) = 257,
+  iene(2) = 211,
+  jens(2) = 110,
+  jenn(2) = 111,
 !
   ienw(3) =   1,
-  iene(3) = 385,
+  iene(3) = 111,
   jens(3) =   1,
   jenn(3) =   2,
 
-  ienw(4) = 383,
-  iene(4) = 385,
+  ienw(4) = 210,
+  iene(4) = 211,
   jens(4) =   1,
-  jenn(4) = 257,
+  jenn(4) = 111,
   timax =  36500./  ! maximum time length of a trajectory in days

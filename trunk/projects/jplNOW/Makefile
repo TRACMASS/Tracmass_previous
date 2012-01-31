@@ -20,7 +20,7 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.   
 #------------------------------------------------------------------------
-  fl12  = -Dtwodim         # Turn off vertical velocities.
+  fl12  = -Dtwodim         # Turn off vetical velocities.
 #  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------

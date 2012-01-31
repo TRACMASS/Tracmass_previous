@@ -49,10 +49,8 @@ SUBROUTINE setupgrid
   twritetype = 2
 
   ncTpos = 1
-  print *,trim(inDataDir) // "scb_grid.nc" 
   dxv(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'x_rho')
   dyu(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'y_rho')
-
   dxv(1:imt-1,:) = dxv(2:imt,:)-dxv(1:imt-1,:)
   dyu(:,1:jmt-1) = dyu(:,2:jmt)-dyu(:,1:jmt-1)
   dxv(imt:imt+1,:) = dxv(imt-2:imt-1,:)

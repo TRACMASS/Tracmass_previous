@@ -85,6 +85,8 @@ SUBROUTINE readfields
   dzt(:,:,1:km-1)=dzt(:,:,2:km)-dzt(:,:,1:km-1)
   dzt(:,:,km) = ssh-dzt0
 
+
+
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:)*0.5 + dzt(2:imt,:,:)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:)*0.5 + dzt(:,2:jmt,:)*0.5
 
@@ -93,11 +95,6 @@ SUBROUTINE readfields
      uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k) * dyu
      vflux(:,:,k,2)   = vvel(:,:,k) * dzv(:,:,k) * dxv
   end do
-
-  if (intstep .le. 0) then
-     uflux = -uflux
-     vflux = -vflux
-  end if
 
   return
 
@@ -115,7 +112,6 @@ contains
 #ifdef explicit_w
     wflux(:,:,:,1) = wflux(:,:,:,2)
 #endif
-
 #ifdef tempsalt
     tem(:,:,:,1)   = tem(:,:,:,2)
     sal(:,:,:,1)   = sal(:,:,:,2)
