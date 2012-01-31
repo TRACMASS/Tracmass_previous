@@ -423,7 +423,7 @@ class trm:
         if ntrac: self.mp.plot(x,y,'-w',lw=0.5)
         self.mp.scatter(x,y,5,c)
         if ints:
-            jd = unique(self.jd[self.ints==ints])[0]
+            jd = self.jd[self.ints==ints][0]
             pl.title(pl.num2date(jd).strftime("%Y-%m-%d %H:%M"))
         print len(x)
 
