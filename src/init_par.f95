@@ -124,9 +124,6 @@ SUBROUTINE init_params
       READ (8,nml=INITGRIDARC)
    
    CLOSE (8)
-
-   print *,' runfile =  ','projects/'//trim(Project)//'/'//trim(Case)//'_run.in'
-
    OPEN (8,file='projects/'//trim(Project)//'/'//trim(Case)//'_run.in',     &
         & status='OLD', delim='APOSTROPHE')
    
@@ -180,7 +177,6 @@ SUBROUTINE init_params
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
-
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
          CALL getarg(2,inparg)
