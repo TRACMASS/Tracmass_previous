@@ -19,8 +19,6 @@ SUBROUTINE readfields
 
   CHARACTER(len=63), SAVE                    :: ncFile, maskfile
   integer                                    :: i,im,j,jm,k,kk,ints2
-  INTEGER, SAVE                              :: nread,ndates
-  integer                                    :: intpart1,intpart2
   
   real,         ALLOCATABLE, DIMENSION(:,:)  :: ssh
   real,       ALLOCATABLE, DIMENSION(:,:,:)  :: utemp
@@ -36,37 +34,45 @@ SUBROUTINE readfields
   REAL                                       :: ssh_scale   = 0.00024414808
   REAL                                       :: ssh_offset  = 0
   
-  integer                                    :: year,month,day  
+  integer                                    :: year,month,day, last_ncTpos=0
+  integer, save                              :: degrade_counter = -1
   logical                                    :: around
-  character*18                               :: fileName
+  character*18, save                         :: filename, last_filename
   real, dimension(22) :: dS = (/ 0.008, 0.008, 0.017, 0.033, 0.067, &
        0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, 0.067, &
        0.067, 0.067, 0.067, 0.033, 0.017, 0.008, 0.008, 0.000 /)
    
-  allocate ( ssh(imt,jmt), utemp(imt,jmt,km) ) 
+  allocate ( ssh(imt,jmt), utemp(imt,jmt,km) )
   if ( .not. allocated (dzv) ) then
      allocate ( dzv(imt,jmt,km),dzu(imt,jmt,km)  )
   end if
 
-  call datasetswap
   call updateClock
 
+  if (degrade_counter < 1) then
+     call datasetswap
+     filename = 'casco.20000000.cdf'
+     write(filename(7:14),'(i4i2.2i2.2)') currYear,currMon,currDay
+     ncTpos = mod(ints-1,8)+1
+     last_filename = filename
+     last_ncTpos = ncTpos
+  else
+     ncTpos = last_ncTpos
+     filename = last_filename
+     print *,filename
+  end if
+  degrade_counter = degrade_counter + 1
+  if (degrade_counter > degrade_time) degrade_counter = 0
 
-
-  intpart1 = mod(ints+1,8)
-  if (intpart1 .eq. 0) then
-     intpart1=8
-  endif
-  intpart2 = floor((ints)/8.)+1
-  ndates   = intpart2
-  fileName = 'casco.20000000.cdf'
-  write(fileName(7:14),'(i4i2.2i2.2)') currYear,currMon,currDay
-  ncFile   = trim(inDataDir)//fileName
+  ncFile   = trim(inDataDir)//filename
   inquire(file=ncFile,exist=around)
-  if(.not.around) stop 4556
-  nread = mod(ints/5,18) + 1
-  ncTpos = mod(ints-1,8)+1
   print *,"File and tpos: ", filename, ncTpos
+  if(.not.around) stop 4556
+
+ 
+
+
+
 
   ! === Velocities ===
   !Use  t=1  i=2  j=3  k=4
@@ -76,10 +82,13 @@ SUBROUTINE readfields
   uvel =  get3DfieldNC(trim(ncFile), 'u') * x_scale + x_offset
   vvel =  get3DfieldNC(trim(ncFile), 'v') * y_scale + y_offset
   ssh  = get2DfieldNC(trim(ncFile) ,'elev') * ssh_scale + ssh_offset
+  
+  sal(:,:,km:1:-1,2) = get3DfieldNC(trim(ncFile), 'salt')* 0.0006103702 + 20
+  tem(:,:,km:1:-1,2) = get3DfieldNC(trim(ncFile), 'temp')* 0.0005340739 + 12.5
 
   do k=1,km
-     utemp(:,:,k) = ( uvel(:,:,k) * cos(ang) + vvel(:,:,k)*sin(ang) ) * mask
-     vvel(:,:,k) = (-uvel(:,:,k) * sin(ang) + vvel(:,:,k)*cos(ang) ) * mask
+     utemp(:,:,k)= ( uvel(:,:,k) * cos(ang)+vvel(:,:,k)*sin(ang) ) * mask
+     vvel(:,:,k) = (-uvel(:,:,k) * sin(ang)+vvel(:,:,k)*cos(ang) ) * mask
   end do
   uvel = utemp
 

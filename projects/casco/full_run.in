@@ -5,7 +5,7 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'decorr',
+  caseName     = 'casco',
   caseDesc     = 'Estimate decorrelation time.'/
   ! 
   !
@@ -45,7 +45,7 @@
  &INITRUNDATE
   !
   startHour         = 00,
-  startDay          = 02,
+  startDay          = 01,
   startMon          = 03,
   startYear         = 2006/
   !
@@ -71,7 +71,7 @@
   outDataDir      = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'decorr',
+  outDataFile     = 'cascofull',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -129,17 +129,10 @@
   !kst1         = 22,		 
   !kst2         = 22,
   ! === Full ===
-  !ist1         = 5,		 
-  !ist2         = 189,			  
-  !jst1         = 5,		 
-  !jst2         = 117,		 
-  !kst1         = 22,		 
-  !kst2         = 22,
-  ! === Patch ===	
-  ist1         = 100,		 
-  ist2         = 109,			  
-  jst1         = 100,		 
-  jst2         = 109,		 
+  ist1         = 5,		 
+  ist2         = 280,			  
+  jst1         = 5,		 
+  jst2         = 270,		 
   kst1         = 22,		 
   kst2         = 22,
   ! ===   ===   ===   ===   ===
@@ -175,7 +168,7 @@
   rmaxe =  500./
 
 &INITRUNDIFFUSION
-  ah      =    100, 
+  ah      =  100, 
   av      =    0./
 
 

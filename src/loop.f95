@@ -51,6 +51,14 @@ SUBROUTINE loop
   
   IMPLICIT none
     
+  INTEGER mra,mta,msa
+  REAL temp,salt,dens,salt2,temp2,dens2
+  
+#if defined sediment
+  INTEGER nsed,nsusp
+  logical res
+#endif /*sediment*/
+ 
   INTEGER                                    :: ia, ja, ka, iam
   INTEGER                                    :: ib, jb, kb, ibm
   INTEGER                                    :: i,  j,  k, l, m
@@ -988,9 +996,10 @@ return
             (kriva.eq.5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva.eq.6 .and. .not.scrivi               )  ) then
 #if defined tempsalt
-          call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+          call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
+          call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
+          !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
-!         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1
           write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
        end if

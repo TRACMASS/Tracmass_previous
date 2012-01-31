@@ -164,6 +164,7 @@ MODULE mod_grid
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
   CHARACTER(LEN=200)                        :: SubGridFile 
+  INTEGER                                   :: degrade_time=0, degrade_space=0
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy

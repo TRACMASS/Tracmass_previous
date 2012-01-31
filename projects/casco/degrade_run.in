@@ -5,7 +5,7 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'decorr',
+  caseName     = 'degrade',
   caseDesc     = 'Estimate decorrelation time.'/
   ! 
   !
@@ -39,14 +39,14 @@
   ! === Pos if forward  neg if backward
   intstep      = 1,
   ! === Number of timesteps to skip for degrading the field in time
-  degrade_time = 0/
+  degrade_time = 5/
   !
   !
  &INITRUNDATE
   !
   startHour         = 00,
-  startDay          = 02,
-  startMon          = 03,
+  startDay          = 15,
+  startMon          = 04,
   startYear         = 2006/
   !
   !
@@ -71,7 +71,7 @@
   outDataDir      = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'decorr',
+  outDataFile     = 'degrade',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -138,8 +138,8 @@
   ! === Patch ===	
   ist1         = 100,		 
   ist2         = 109,			  
-  jst1         = 100,		 
-  jst2         = 109,		 
+  jst1         = 50,		 
+  jst2         = 59,		 
   kst1         = 22,		 
   kst2         = 22,
   ! ===   ===   ===   ===   ===

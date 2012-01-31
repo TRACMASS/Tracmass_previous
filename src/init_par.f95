@@ -68,9 +68,10 @@ SUBROUTINE init_params
    ! --- Parameters from run.in ---
    ! ------------------------------
    namelist /INITRUNVER/     runVerNum
-   namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax ,subGridJmin,   &
-                         &   subGridJmax ,SubGridFile, subGridID
-   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep 
+   namelist /INITRUNGRID/    subGrid, subGridImin, subGridImax,              &
+                                      subGridJmin, subGridJmax, SubGridFile, &
+                                      subGridID, degrade_space
+   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep,degrade_time 
    namelist /INITRUNDATE/    startSec ,startMin ,startHour,                    &
                          &   startDay ,startMon ,startYear,                    &
                          &   ihour, iday, imon, iyear
@@ -99,37 +100,33 @@ SUBROUTINE init_params
    Project  = PROJECT_NAME
    Case     = CASE_NAME
    
-   IF ( (IARGC() == 1 ) .OR. (IARGC() == 4 ) )  then
-      CALL getarg(IARGC(),inparg)
+   IF ( IARGC() >= 1 ) then
+      CALL getarg(1,inparg)
       Case = inparg
    END IF
-   OPEN (8,file='projects/'//trim(Project)//'/'//trim(Project)//'_grid.in',    &
-       & status='OLD', delim='APOSTROPHE')
    
-      ! -- Check if the namefiles has correct version number. 
-      READ (8,nml=INITGRIDVER)
-         IF (gridVerNum < 1) THEN
-            PRINT *,'==================== ERROR ===================='
-            PRINT *,'Your grid namefile seems to be out of date.'
-            PRINT *,'Check the version_grid.txt file for changes.'
-            PRINT *,'You have to edit the version number in you grid'
-            PRINT *,'manually when done.'
-            STOP
-         END IF
-      READ (8,nml=INITGRIDDESC)
-      READ (8,nml=INITGRIDGRID)
-      READ (8,nml=INITGRIDNTRAC)
-      READ (8,nml=INITGRIDTIME)
-      READ (8,nml=INITGRIDDATE)
-      READ (8,nml=INITGRIDARC)
-   
+   OPEN (8,file='projects/'//trim(Project)//'/'//trim(Project)//'_grid.in', &
+        status='OLD', delim='APOSTROPHE')
+   ! -- Check if the namefiles has correct version number. 
+   READ (8,nml=INITGRIDVER)
+   IF (gridVerNum < 1) THEN
+      PRINT *,'==================== ERROR ===================='
+      PRINT *,'Your grid namefile seems to be out of date.'
+      PRINT *,'Check the version_grid.txt file for changes.'
+      PRINT *,'You have to edit the version number in you grid'
+      PRINT *,'manually when done.'
+      STOP
+   END IF
+   READ (8,nml=INITGRIDDESC)
+   READ (8,nml=INITGRIDGRID)
+   READ (8,nml=INITGRIDNTRAC)
+   READ (8,nml=INITGRIDTIME)
+   READ (8,nml=INITGRIDDATE)
+   READ (8,nml=INITGRIDARC)
    CLOSE (8)
 
-   print *,' runfile =  ','projects/'//trim(Project)//'/'//trim(Case)//'_run.in'
-
-   OPEN (8,file='projects/'//trim(Project)//'/'//trim(Case)//'_run.in',     &
-        & status='OLD', delim='APOSTROPHE')
-   
+   OPEN (8,file='projects/'//trim(Project)//'/'//trim(Project)//'_run.in', &
+        status='OLD', delim='APOSTROPHE')
    READ (8,nml=INITRUNDESC)
    READ (8,nml=INITRUNGRID)
    SELECT CASE (subGrid)
