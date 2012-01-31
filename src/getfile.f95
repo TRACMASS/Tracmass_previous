@@ -48,7 +48,9 @@ CONTAINS
        print *,"   to use in the cdf data file."
        stop
     end if
-    start2d(map2d(1)) = ncTpos   
+    start2d(map2d(3)) = ncTpos   
+    
+
     s = start2d(map2d)
     c = count2d(map2d)
     d = c + s - 1  
@@ -67,7 +69,8 @@ CONTAINS
     if(ierr.ne.0) call printReadError(3)
     ierr=NF90_CLOSE(ncid)
 
-    if ( map2d(4) > map2d(3) ) then
+    if ( all(map2d(1:2) == (/3,4/),DIM=1) .or. &
+         all(map2d(2:3) == (/3,4/),DIM=1) ) then
        get2DfieldNC(1:imt,:) = field
     else
        do i = 1,imt
