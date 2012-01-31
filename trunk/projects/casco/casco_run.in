@@ -65,7 +65,7 @@
   inDataDir       = '/projData/casco/gompom/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Users/bror/ormOut/',
+  outDataDir      = '/Volumes/keronHD4/ormOut/',
   !
   ! === Name of current trajectory run
   outDataFile     = 'casco',

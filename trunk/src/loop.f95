@@ -52,7 +52,6 @@ SUBROUTINE loop
   IMPLICIT none
     
   INTEGER mra,mta,msa
-  REAL temp,salt,dens,salt2,temp2,dens2
   
 #if defined sediment
   INTEGER nsed,nsusp
@@ -71,6 +70,7 @@ SUBROUTINE loop
   INTEGER                                    :: nexit(NEND)
   
   REAL                                       :: temp, salt, dens
+  REAL                                       :: temp2, salt2, dens2
   REAL*8                                     :: x0, y0, z0, x1, y1, z1
   REAL*8                                     :: rlon,rlat
   REAL*8                                     :: dt, t0
