@@ -436,12 +436,21 @@ def test():
     tr.db_insert()
 
 def batch_insert():
-    tr = traj('jplNOW','ftp','/Volumes/keronHD3/ormOut/')
-    for jd in np.arange(733773.0, 734138.0):
+    import batch
+    def copy(jd):
+        tr = traj('jplNOW','ftp','/Volumes/keronHD3/ormOut/')
         print pl.num2date(jd), jd
         tr.load(jd)
         tr.remove_satnans()
-        tr.db_insert()
+        if len(tr.x>0):
+            tr.db_copy()
+
+    #batch.jdloop(copy,733773.0, 734138.0,3)
+    for jd in np.arange(733865.0,734138):
+        dt1 = pl.date2num(dtm.now())
+        copy(jd)
+        dt2 = pl.date2num(dtm.now())        
+        print "----------",dt2-dt1
 
 def profile():
     import cProfile
