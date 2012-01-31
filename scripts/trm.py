@@ -3,11 +3,13 @@ from datetime import datetime as dtm
 import glob
 import os
 from itertools import izip
+import cStringIO
 
 import numpy as np
 import pylab as pl
 import matplotlib as mpl
 import MySQLdb,oursql
+import psycopg2
 
 import pycdf
 #from pyhdf.SD import SD,SDC
@@ -31,11 +33,9 @@ class trm:
         self.ormdir = ormdir
         self.isobase = datetime.datetime(2004,1,1)
         
-        conn = oursql.connect (host = "localhost",
-                                user = "root", passwd = "",
-                                db = "partsat")
-        self.c = conn.cursor ()
-        self.tablename = "partsat.%s%s" % (projname ,casename)
+        self.conn = psycopg2.connect (host="localhost", database="partsat")
+        self.c = self.conn.cursor()
+        self.tablename = "%s%s" % (projname ,casename)
 
         self.nlgrid = nlt.parse('/%s/projects/%s/%s_grid.in' %
                             (self.ormdir,self.projname,self.projname))
@@ -150,34 +150,37 @@ class trm:
 
     def create_table(self):
         """Create a mysql table  table """
-        itp = " INT NOT NULL "
-        ftp = " FLOAT NOT NULL "
-        CT1 = ( "CREATE TABLE IF NOT EXISTS %s (" % self.tablename )
+        itp = " INT  "
+        ftp = " FLOAT "
+        CT1 = ( "CREATE TABLE %s (" % self.tablename )
         CT2 = "   runid " + itp + ",ints " + ftp + ",ntrac " + itp
         CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
         CT4 = "   )"
         CT  = CT1 + CT2 + CT3 + CT4
-        self.c.execute(CT)
-
+        try:
+            self.c.execute(CT)
+        except:
+            pass
+        finally:
+            self.conn.commit()
+        
     def generate_runid(self):
         """Check if run exists in runs table. If not insert run info.
         Return runid"""
-        print self.jd.min(),self.jd.max(),self.tablename
-        sql = "SELECT id FROM runs WHERE jd1=? AND jd2=? AND tablename=?"
+        sql = "SELECT id FROM runs WHERE jd1=%s AND jd2=%s AND tablename=%s"
         self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
         id = self.c.fetchall()
-        print id
-        #if len(id) == 1:
-        #    return id[0][0]
-        #elif len(id) == 0:
-        sql = "INSERT INTO runs (jd1,jd2,tablename) values (?,?,?)"
-        self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
-        return self.c.lastrowid
-        #else:
-        #raise ValueError,"More than one runid in database"
+        if len(id) == 1:
+            return id[0][0]
+        elif len(id) == 0:
+            sql = ("INSERT INTO runs (jd1,jd2,tablename) " +
+                   " values (%s,%s,%s) RETURNING id" )
+            self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
+            self.conn.commit()
+            return self.c.fetchone()[0]
+        else:
+            raise ValueError,"More than one runid in database"
         
-
-
     def disable_indexes(self,table):
         self.create_table()
         """Disable indexes to speed up large inserts."""
@@ -191,7 +194,7 @@ class trm:
 
     def remove_earlier_data_from_table(self, runid):
         self.c.execute("SELECT DISTINCT(runid) FROM %s;" %self.tablename)
-        if self.c.rowcount > 0:
+        if self.c.rowcount > -2:
             DL = ( "DELETE FROM %s WHERE runid=%s;" % 
                    (self.tablename,runid) )
             print "Any old posts with runid=%s deleted." % (runid)
@@ -200,6 +203,7 @@ class trm:
             print "The table %s was truncated." % self.tablename
             #self.create_indexes()
         self.c.execute(DL)
+        self.conn.commit()
 
     def load(self, jdstart=0, intstart=0,
              ftype="run", stype='bin', filename='',rt=False):
@@ -249,11 +253,24 @@ class trm:
         self.remove_earlier_data_from_table(id)
         sql = ("INSERT INTO " + self.tablename +
                " (runid, ntrac, ints, x, y, z) " + 
-               " values (?,?,?,?,?,?)")
+               " values (%s,%s,%s,%s,%s,%s)")
         vals = izip((self.x*0+id).astype('float'), self.ntrac.astype('float'),
                     self.ints.astype('float'),   self.x.astype('float'),
                     self.y.astype('float'),      self.z.astype('float'))
         self.c.executemany(sql,vals)
+
+    def db_copy(self):
+        if len(self.x) == 0: return False
+        self.create_table()
+        id = self.generate_runid()
+        self.remove_earlier_data_from_table(id)
+        vf = cStringIO.StringIO()
+        mat = np.vstack( ((self.jd*0+1).astype(np.int),self.jd,self.ntrac,
+                           self.x, self.y, self.z) ).T
+        np.savetxt(vf,mat,fmt=('%i %f %i %f %f %f') )
+        vf.seek(0)
+        self.c.copy_from(vf,self.tablename,sep=' ')
+        self.conn.commit()
         
     def ints2iso(self,ints):
         base_iso = mpl.dates.date2num(self.isobase)
