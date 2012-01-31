@@ -74,7 +74,7 @@ SUBROUTINE init_params
    namelist /INITRUNDATE/    startSec ,startMin ,startHour,                    &
                          &   startDay ,startMon ,startYear,                    &
                          &   ihour, iday, imon, iyear
-   namelist /INITRUNWRITE/   ncoor, kriva,                                     &
+   namelist /INITRUNWRITE/   ncoor, twritetype, kriva,                                     &
                          &   inDataDir ,outDataDir, topoDataDir,               &
                              outDataFile ,intminInOutFile
    namelist /INITRUNSEED/    nff, isec, idir, nqua, partQuant,                 &
