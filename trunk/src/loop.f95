@@ -576,8 +576,8 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verbose = 1
-       INTEGER                             :: strict  = 1
+       INTEGER                             :: verbose = 0
+       INTEGER                             :: strict  = 0
        INTEGER                             :: errCode
 
        errCode=0
@@ -963,13 +963,12 @@ return
             (kriva.eq.3                                 ) .or. &
             (kriva.eq.4 .and. niter.eq.1                ) .or. &
             (kriva.eq.5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
-            (kriva.eq.6 .and. .not.scrivi               )        ) then
+            (kriva.eq.6 .and. .not.scrivi               )  ) then
 #if defined tempsalt
           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif
 !         call interp2(ib,jb,kb,ia,ja,ka,temp,salt,dens,1)          
           recPosRun = recPosRun+1
-          if (ntrac==500) print *,twrite
           write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
        end if
     case (13)
