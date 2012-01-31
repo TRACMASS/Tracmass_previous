@@ -217,6 +217,7 @@ SUBROUTINE loop
   !==========================================================
   intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
      call fancyTimer('reading next datafield','start')
+     tt = ints*tseas
      call readfields
      call fancyTimer('reading next datafield','stop')
      
