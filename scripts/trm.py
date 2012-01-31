@@ -23,8 +23,8 @@ from hitta import GrGr
 
 class trm:
     """ main class for TRACMASS data manipulation"""
-    def __init__(self,projname,casename="",datadir="/Users/bror/ormOut/", 
-                 datafile="", ormdir="/Users/bror/git/orm"):
+    def __init__(self,projname, casename="", datadir="", datafile="",
+                 ormdir="/Users/bror/git/orm"):
         self.projname = projname
         if len(casename) == 0:
             self.casename = projname
@@ -42,18 +42,25 @@ class trm:
                             (self.ormdir,self.projname,self.projname))
         self.nlrun = nlt.parse('/%s/projects/%s/%s_run.in' %
                             (self.ormdir,self.projname,self.casename))
+        if datadir:
+            self.datadir = datadir
+        else:
+            self.datadir = self.nlrun.outDataDir
         if datafile:
             self.datafile = datafile
         else:
             self.datafile=self.nlrun.outDataFile
 
+        self.base_iso = pl.date2num(dtm(
+             self.nlgrid.baseYear,
+             self.nlgrid.baseMon,
+             self.nlgrid.baseDay))-1
+        self.imt = self.nlgrid.IMT
+        self.jmt = self.nlgrid.JMT
+
         if projname == 'oscar':
             import oscar
             self.gcm = oscar.Oscar()
-            self.llat = self.gcm.llat
-            self.llon = self.gcm.llon
-            self.imt = 1080
-            self.jmt = 480
         elif projname=="topaz":
             griddir  = '/projData/TOPAZ/1yr_1d/'
             gridname = '/22450101.ocean_daily.nc' 
@@ -62,17 +69,10 @@ class trm:
             lat = g.var('yu_ocean')[:]
             #self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
             self.llon,self.llat = np.meshgrid(lon, lat)
-            self.imt = 90
-            self.jmt = 360
         elif projname=="casco":
             import casco
             self.gcm = casco.GCM()
-            self.llon = self.gcm.llon
-            self.llat = self.gcm.llat
-            self.imt = 285
-            self.jmt = 274
             self.region = "casco"
-            self.landmask = self.gcm.get_landmask()
             self.base_iso = pl.date2num(dtm(2004,1,1))
         elif projname=="gompom":
             n = pycdf.CDF(griddir + 'grid.cdf')
@@ -82,28 +82,18 @@ class trm:
         elif projname=="jplSCB":
             import jpl
             self.gcm = jpl.SCB()
-            self.gcm.add_landmask()
-            self.landmask = self.gcm.landmask
-            self.llon = self.gcm.llon
-            self.llat = self.gcm.llat
-            self.imt = 211
-            self.jmt = 111
             self.region = "scb"
             self.base_iso = pl.date2num(dtm(2001,1,1))-3./24
         elif projname=="jplNOW":
             import jpl
             self.gcm = jpl.NOW()
+            self.region = "scb"
+
+        if hasattr(self,'gcm'):
             self.gcm.add_landmask()
             self.landmask = self.gcm.landmask
             self.llon = self.gcm.llon
             self.llat = self.gcm.llat
-            self.imt = self.nlgrid.IMT
-            self.jmt = self.nlgrid.JMT
-            self.region = "scb"
-            self.base_iso = pl.date2num(dtm(
-                self.nlgrid.baseYear,
-                self.nlgrid.baseMon,
-                self.nlgrid.baseDay))-1
             
 
     def ijll(self,ps=None):
@@ -144,8 +134,8 @@ class trm:
         """ Read binary output from TRACMASS """
         with open(filename) as fd:
             runvec = np.fromfile(fd,np.dtype([
-                ('ntrac','>i4'), ('ints','>f8'), 
-                ('x','>f4'), ('y','>f4'), ('z','>f4')
+                ('ntrac','i4'), ('ints','f8'), 
+                ('x','f4'), ('y','f4'), ('z','f4')
                 ]))
         return runvec
 
@@ -154,7 +144,7 @@ class trm:
         itp = " INT  "
         ftp = " REAL "
         CT1 = ( "CREATE TABLE %s (" % self.tablename )
-        CT2 = "   runid " + itp + "DEFAULT -999,ints " + ftp + ",ntrac " + itp
+        CT2 = "   runid " + itp + "DEFAULT -999,ints float8, ntrac " + itp
         CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
         CT4 = "   )"
         CT  = CT1 + CT2 + CT3 + CT4
@@ -165,28 +155,53 @@ class trm:
         finally:
             self.conn.commit()
 
-        """CREATE FUNCTION trm_bl_filter(int, float8, int, real, real, real) RETURNS record AS $$ SELECT -999, $2, $1, $3, $4, $5 $$ LANGUAGE SQL;
-        """
+    def db_create_bulkload_table(self):
+        """Create a postgres table for bulkloads """
+        itp = " INT  "
+        ftp = " REAL "
+        CT1 = "CREATE TABLE temp_bulkload "
+        CT2 = "( ntrac INT, ints float8, "
+        CT3 = " x " + ftp + ", y " + ftp + ", z " + ftp
+        CT4 = "   )"
+        CT  = CT1 + CT2 + CT3 + CT4
+        try:
+            self.c.execute(CT)
+        except:
+            pass
+        finally:
+            self.conn.commit()
 
 
 
+        sql = """CREATE FUNCTION trm_bl_filter(int, float8, real, real, real)
+                   RETURNS record AS $$
+                   SELECT -999, $2, $1, $3, $4, $5
+                   $$ LANGUAGE SQL;"""
+        self.c.execute(sql, (runid,) )
+        self.conn.commit()
         
-    def generate_runid(self):
-        """Check if run exists in runs table. If not insert run info.
-        Return runid"""
-        sql = "SELECT id FROM runs WHERE jd1=%s AND jd2=%s AND tablename=%s"
-        self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
-        id = self.c.fetchall()
-        if len(id) == 1:
-            return id[0][0]
-        elif len(id) == 0:
+    def generate_runid(self,temp=False):
+        """Check if run exists in runs table. If not, create and return runid"""
+
+        def insert_runid(jd1,jd2):
             sql = ("INSERT INTO runs (jd1,jd2,tablename) " +
                    " values (%s,%s,%s) RETURNING id" )
-            self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
+            self.c.execute(sql, (jd1, jd2, self.tablename) )
             self.conn.commit()
             return self.c.fetchone()[0]
+        
+        if temp:
+            return insert_runid(-999,-998)
         else:
-            raise ValueError,"More than one runid in database"
+            sql = "SELECT id FROM runs WHERE jd1=%s AND jd2=%s AND tablename=%s"
+            self.c.execute(sql, (self.jd.min(),self.jd.max(),self.tablename) )
+            id = self.c.fetchall()
+            if len(id) == 1:
+                return id[0][0]
+            elif len(id) == 0:
+                return insert_runid(self.jd.min(),self.jd.max())
+            else:
+                raise ValueError,"More than one runid in database"
         
     def disable_indexes(self,table):
         self.create_table()
@@ -222,8 +237,9 @@ class trm:
         elif intstart != 0:
             filename = ("%s%08i_%s.%s" % (self.datafile,intstart,ftype,stype))
         elif filename == '':
-            print (self.datadir + self.casename +
-                                 "*" + ftype)
+            filename = self.currfile()
+
+            
         if filename[-3:] == "bin":
             runtraj = self.read_bin(self.datadir + filename)
         elif filename[-3:] == "asc":
@@ -275,18 +291,17 @@ class trm:
 
         def run_command(datafile):
             t1 = dtm.now()
-            print datafile
-            infile = "-i" + datafile
+            runid = self.generate_runid(temp=True)
+            self.db_create_loadfilter(runid)
+            infile = "-i%s/%s" % (self.datadir, datafile)
             spr.call([pg_bulkload,ctl_file,db,infile,outtable])
-            t2 = dtm.now()
-            print "Elapsed time: " + str(t2-t1)
+            print "Elapsed time: " + str(dtm.now()-t1)            
 
         if datafile:
             run_command(datafile)
         else:
-            flist = glob.glob(self.datadir + "/" +
-                              self.projname + self.casename + "*_run.bin")
-            for f in flist[:10]: run_command(f)
+            flist = glob.glob( "%s/%s*_run.bin" % (self.datadir, self.datafile))
+            for f in flist: run_command(os.path.basename(f))
 
     def db_copy(self):
         if len(self.x) == 0: return False
@@ -386,11 +401,19 @@ class trm:
                                'x':self.x,
 
                                'y':self.y})
-    def ls(self):
-        flist = glob.glob(self.datadir + "/" +
-                          self.projname + self.casename + "*")
-        for f in flist: print f
 
+    def currfile(self, ftype='run', stype='bin'):
+        flist = glob.glob("%s/%s*%s.%s" %
+                          (self.datadir,self.nlrun.outDataFile,
+                           ftype,stype))
+        datearr = np.array([ os.path.getmtime(f) for f in flist])
+        listpos = np.nonzero(datearr == datearr.max())[0][0]
+        return os.path.basename(flist[listpos])
+            
+    
+    def ls(self):
+        flist = glob.glob("%s/%s*"% (self.datadir,self.nlrun.outDataFile))
+        for f in flist: print f
 
 
 def movie2(tr1,tr2,di=10):
