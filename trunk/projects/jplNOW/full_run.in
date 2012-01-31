@@ -167,17 +167,17 @@ $INITRUNEND
   jenn(1) = 257,
 !
   ienw(2) =   1,
-  iene(2) = 257,
-  jens(2) = 380,
-  jenn(2) = 385,
+  iene(2) = 385,
+  jens(2) = 255,
+  jenn(2) = 257,
 !
   ienw(3) =   1,
   iene(3) = 385,
   jens(3) =   1,
   jenn(3) =   2,
 
-  ienw(4) = 255,
-  iene(4) = 257,
+  ienw(4) = 383,
+  iene(4) = 385,
   jens(4) =   1,
-  jenn(4) = 385,
+  jenn(4) = 257,
   timax =  36500./  ! maximum time length of a trajectory in days
