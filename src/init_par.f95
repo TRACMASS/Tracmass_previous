@@ -177,6 +177,7 @@ SUBROUTINE init_params
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
          CALL getarg(2,inparg)

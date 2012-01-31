@@ -81,11 +81,16 @@ MODULE mod_time
 CONTAINS
   subroutine updateClock  
     USE mod_param
+<<<<<<< HEAD
     USE mod_loopvars
     ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
     currJDtot = (ints+ttpart-1)*(real(ngcm)/24) 
 
 call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
+=======
+    currJDtot = (ints-1)*(real(ngcm)/24) 
+    call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
+>>>>>>> Fixed a small JD bug. Now jd is always in relation to baseJD.
     currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
     currFrac = (currJDtot-int(currJDtot))*24
     currHour = int(currFrac)
