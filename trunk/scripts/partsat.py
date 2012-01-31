@@ -8,17 +8,12 @@ import numpy as np
 import pylab as pl
 import matplotlib as mpl
 import scipy.io
-from scipy.spatial import KDTree
 
-import MySQLdb
-
+import psycopg2
 import pycdf
 from pyhdf.SD import SD,SDC
 
 from trm import trm
-
-sys.path.append('/Users/bror/svn/chlcarb/')
-import chl2c
 
 miv = np.ma.masked_invalid
 
