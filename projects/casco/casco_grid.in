@@ -29,7 +29,7 @@ $INITGRIDNTRAC
 $INITGRIDTIME
   !
   ngcm    = 3,              ! hours between GCM datasets
-  iter    = 5,              ! iteration between two gcm data sets
+  iter    = 15,              ! iteration between two gcm data sets
   intmax  = 730,  !10*365/5 ! maximum length of RCO fields
   fieldsPerFile = 8/
   !
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour          = 0,
   baseDay           = 1,
   baseMon           = 1,
-  baseYear          = 2004/
+  baseYear          = 1/
   !
   !
 $INITGRIDARC

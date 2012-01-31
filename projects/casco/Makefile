@@ -3,7 +3,7 @@
   INPUT_INT1        = startMon   # Variables set from command line
   INPUT_INT2        = startDay   # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-# fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
+ fl01   = -Dtimestep       # Analytical time scheme to solve PDFs
 #  fl01   = -Dtimeanalyt    # Stationary time scheme 
   fl02   = -Dregulardt     # Regular time steps with -Dtimestep
 #------------------------------------------------------------------------
