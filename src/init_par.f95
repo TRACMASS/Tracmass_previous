@@ -173,7 +173,7 @@ SUBROUTINE init_params
 
       timax    =  24.*3600.*timax ! convert time lengths from days to seconds
       dstep    =  1.d0/dble(iter)
-      dtmin    =  dstep*tseas
+      dtmin    =  dstep * tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
@@ -279,8 +279,8 @@ SUBROUTINE init_params
       ! --- Allocate Lagrangian stream functions ---
 #ifdef streamxy
       ALLOCATE ( stxyy(imt,jmt,lbt), stxyx(imt,jmt,lbt) )
-      stxyy=0.
-      stxyx=0.
+!      sxyy=0.
+!      sxyx=0.
 #endif
 #ifdef streamv
       ALLOCATE ( stxz(imt,km,lbt), styz(jmt,km,lbt) )
@@ -292,10 +292,7 @@ SUBROUTINE init_params
       stxr=0.
       styr=0
 #endif
-#ifdef stream_thermohaline
-      ALLOCATE ( psi_ts(mr,mr,2) )
-      psi_ts=0.
-#endif
+
       ! --- Allocate tracer data ---
 #ifdef tracer
       ALLOCATE ( tra(imt,jmt,km) )
