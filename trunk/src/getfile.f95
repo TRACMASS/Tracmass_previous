@@ -54,13 +54,10 @@ CONTAINS
     s = start2d(map2d)
     c = count2d(map2d)
     d = c + s - 1  
-    print *,'d',d
-    print *,'s',s
-    print *,'c',c
-    print *,'map2d',map2d
 
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
     field=0; get2dfieldNC=0
+    
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
