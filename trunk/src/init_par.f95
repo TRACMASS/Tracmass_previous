@@ -9,7 +9,6 @@ SUBROUTINE init_params
 !!          and Lagrangian stream functions.
 !!
 !!
-!!       Last change: Joakim Kjellsson, 21 June 2011
 !!
 !!
 !!----------------------------------------------------------------------------
@@ -47,6 +46,8 @@ SUBROUTINE init_params
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
    CHARACTER (LEN=23)                         ::  Project, Case
+   CHARACTER (LEN=200)                        ::  projdir, ormdir
+
    real*8                                     :: jd
 
 !!----------------------------------------------------------------------------
@@ -68,10 +69,9 @@ SUBROUTINE init_params
    ! --- Parameters from run.in ---
    ! ------------------------------
    namelist /INITRUNVER/     runVerNum
-   namelist /INITRUNGRID/    subGrid, subGridImin, subGridImax,              &
-                                      subGridJmin, subGridJmax, SubGridFile, &
-                                      subGridID, degrade_space
-   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep,degrade_time 
+   namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax ,subGridJmin,   &
+                         &   subGridJmax ,SubGridFile, subGridID
+   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep 
    namelist /INITRUNDATE/    startSec ,startMin ,startHour,                    &
                          &   startDay ,startMon ,startYear,                    &
                          &   ihour, iday, imon, iyear
@@ -100,33 +100,48 @@ SUBROUTINE init_params
    Project  = PROJECT_NAME
    Case     = CASE_NAME
    
-   IF ( IARGC() >= 1 ) then
-      CALL getarg(1,inparg)
+   IF ( (IARGC() == 1 ) .OR. (IARGC() == 4 ) )  then
+      CALL getarg(IARGC(),inparg)
       Case = inparg
    END IF
+
+   CALL getenv('ORMPROJDIR',projdir)
+   if (len(trim(projdir)) == 0) then
+      CALL getenv('ORMDIR',ormdir)
+      if (len(trim(ormdir)) .ne. 0) then
+         projdir = trim(ormdir)//'/'//'projects/'//trim(Project)//'/'
+      else
+         projdir = 'projects/'//trim(Project)
+      end if
+   end if
+
+   OPEN (8,file=trim(projdir)//'/'//trim(Project)//'_grid.in',    &
+       & status='OLD', delim='APOSTROPHE')
    
-   OPEN (8,file='projects/'//trim(Project)//'/'//trim(Project)//'_grid.in', &
-        status='OLD', delim='APOSTROPHE')
-   ! -- Check if the namefiles has correct version number. 
-   READ (8,nml=INITGRIDVER)
-   IF (gridVerNum < 1) THEN
-      PRINT *,'==================== ERROR ===================='
-      PRINT *,'Your grid namefile seems to be out of date.'
-      PRINT *,'Check the version_grid.txt file for changes.'
-      PRINT *,'You have to edit the version number in you grid'
-      PRINT *,'manually when done.'
-      STOP
-   END IF
-   READ (8,nml=INITGRIDDESC)
-   READ (8,nml=INITGRIDGRID)
-   READ (8,nml=INITGRIDNTRAC)
-   READ (8,nml=INITGRIDTIME)
-   READ (8,nml=INITGRIDDATE)
-   READ (8,nml=INITGRIDARC)
+      ! -- Check if the namefiles has correct version number. 
+      READ (8,nml=INITGRIDVER)
+         IF (gridVerNum < 1) THEN
+            PRINT *,'==================== ERROR ===================='
+            PRINT *,'Your grid namefile seems to be out of date.'
+            PRINT *,'Check the version_grid.txt file for changes.'
+            PRINT *,'You have to edit the version number in you grid'
+            PRINT *,'manually when done.'
+            STOP
+         END IF
+      READ (8,nml=INITGRIDDESC)
+      READ (8,nml=INITGRIDGRID)
+      READ (8,nml=INITGRIDNTRAC)
+      READ (8,nml=INITGRIDTIME)
+      READ (8,nml=INITGRIDDATE)
+      READ (8,nml=INITGRIDARC)
+   
    CLOSE (8)
 
-   OPEN (8,file='projects/'//trim(Project)//'/'//trim(Project)//'_run.in', &
-        status='OLD', delim='APOSTROPHE')
+   print *,' runfile =  ',trim(projdir)//'/'//trim(Case)//'_run.in'
+
+   OPEN (8,file=trim(projdir)//'/'//trim(Case)//'_run.in',     &
+        & status='OLD', delim='APOSTROPHE')
+   stop
    READ (8,nml=INITRUNDESC)
    READ (8,nml=INITRUNGRID)
    SELECT CASE (subGrid)
