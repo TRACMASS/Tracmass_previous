@@ -24,15 +24,18 @@ from hitta import GrGr
 
 class trm:
     """ main class for TRACMASS data manipulation"""
-    def __init__(self,projname, casename="", datadir="", datafile="",
-                 ormdir="/Users/bror/git/orm"):
+    def __init__(self,projname, casename="", datadir="", datafile="", ormdir=""):
         self.projname = projname
         if len(casename) == 0:
             self.casename = projname
         else:
             self.casename = casename
         self.datadir = datadir
-        self.ormdir = ormdir
+        if ormdir:
+            self.ormdir = ormdir
+        else:
+            self.ormdir = os.getenv('ORMDIR')
+
         self.isobase = datetime.datetime(2004,1,1)
         
         self.conn = psycopg2.connect (host="localhost", database="partsat")
@@ -151,26 +154,26 @@ class trm:
                 self.c.execute("DROP TABLE %s;" % table)
                 self.conn.commit()
 
+    def table_exists(self, table_name):
+        """ Check if an index exists in the DB """
+        sql = "SELECT tablename FROM pg_tables WHERE tablename LIKE '%s';"
+        self.c.execute(sql % table_name.lower())
+        if self.c.rowcount > 0:
+            return True
+        else:
+            return False
+
     def db_create_table(self,tablename=None):
-        """Create a postgres  table for tracmass output"""
+        """Create a postgres table for tracmass data"""
         if not tablename: tablename = self.tablename
-        sql = "SELECT tablename FROM pg_tables WHERE tablename='%s';"
-        self.c.execute(sql % tablename.lower())
-        if self.c.rowcount > 0: return
-        itp = " INT  "
-        ftp = " REAL "
-        CT1 = ( "CREATE TABLE %s (" % tablename )
-        CT2 = "   runid " + itp + "DEFAULT -999,ints float8, ntrac " + itp
-        CT3 = "   ,x " + ftp + " ,y " + ftp + ",z " + ftp
-        CT4 = "   )"
-        CT  = CT1 + CT2 + CT3 + CT4
-        self.c.execute(CT)
+        if self.table_exists(tablename): return
+        CT1 = "CREATE TABLE %s " % tablename
+        CT2 = "( runid INT, ints float8, ntrac INT, x REAL ,y REAL, z REAL )"
+        self.c.execute(CT1 + CT2)
         self.conn.commit()
 
     def db_create_partition(self,tablename,partition):
-        sql = "SELECT tablename FROM pg_tables WHERE tablename='%s';"
-        self.c.execute(sql % partition.lower())
-        if self.c.rowcount > 0: return
+        if self.table_exists(partition): return
         self.db_create_table(tablename)
         sql= "CREATE TABLE %s ( ) INHERITS (%s);"
         self.c.execute(sql % (partition, tablename))
@@ -178,9 +181,7 @@ class trm:
 
     def db_create_bulkload_table(self):
         """Create a temporary postgres table for bulkload of trm data """
-        sql = "SELECT tablename FROM pg_tables WHERE tablename='temp_bulkload';"
-        self.c.execute(sql)
-        if self.c.rowcount > 0: return
+        if self.table_exists("temp_bulkload"): return
         CT1 = "CREATE TABLE temp_bulkload "
         CT2 = "( ntrac INT, ints float8, x REAL, y REAL, z REAL)"
         self.c.execute(CT1 + CT2)
@@ -214,33 +215,33 @@ class trm:
             else:
                 raise ValueError,"More than one runid in database"
 
+    def index_exists(self, index_name):
+        """ Check if an index exists in the DB """
+        sql = "SELECT * FROM pg_indexes WHERE indexname LIKE '%s';"
+        self.c.execute(sql % index_name.lower())
+        if self.c.rowcount > 0:
+            return True
+        else:
+            return False
+
     def db_create_indexes(self):
         """ Create all missing indexes """
-
-        def index_exists(index_name):
-            sql = "SELECT * FROM pg_indexes WHERE tablename LIKE '%s%%';"
-            self.c.execute(sql % index_name.lower())
-            if self.c.rowcount > 0:
-                return True
-            else:
-                return False
-        
         sql = "SELECT distinct(tablename) FROM runs;"
         self.c.execute(sql)
         rowlist = self.c.fetchall()
-        t1 = dtm.now()
         for row in rowlist:
+            t1 = dtm.now()
             print row[0]
-            if not index_exists("_%s_pkey" % row[0]):
+            if not self.index_exists("%s_pkey" % row[0]):
                 sql = "ALTER TABLE %s ADD PRIMARY KEY (runid,ints,ntrac);"
                 self.c.execute(sql % ("%s" % row[0].lower()) )
             print "Time passed: ",dtm.now()-t1
-            if not index_exists("ints_%s_idx" % row[0]):
+            if not self.index_exists("ints_%s_idx" % row[0]):
                 sql = "CREATE INDEX %s ON %s USING btree (ints)"
                 self.c.execute(sql % ("ints_%s_idx" %
                                       row[0].lower(),row[0].lower() ))
             print "Time passed: ",dtm.now()-t1
-            if not index_exists("runtrac_%s_idx" % row[0]):
+            if not self.index_exists("runtrac_%s_idx" % row[0]):
                 sql = "CREATE INDEX %s ON %s USING btree (runid,ntrac)"
                 self.c.execute(sql % ("runtrac_%s_idx" %
                                       row[0].lower(),row[0].lower() ))
