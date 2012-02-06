@@ -141,7 +141,6 @@ SUBROUTINE init_params
 
    OPEN (8,file=trim(projdir)//'/'//trim(Case)//'_run.in',     &
         & status='OLD', delim='APOSTROPHE')
-   stop
    READ (8,nml=INITRUNDESC)
    READ (8,nml=INITRUNGRID)
    SELECT CASE (subGrid)
@@ -294,8 +293,8 @@ SUBROUTINE init_params
       ! --- Allocate Lagrangian stream functions ---
 #ifdef streamxy
       ALLOCATE ( stxyy(imt,jmt,lbt), stxyx(imt,jmt,lbt) )
-!      sxyy=0.
-!      sxyx=0.
+      stxyy=0.
+      stxyx=0.
 #endif
 #ifdef streamv
       ALLOCATE ( stxz(imt,km,lbt), styz(jmt,km,lbt) )
