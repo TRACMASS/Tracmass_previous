@@ -279,7 +279,7 @@ ENDDO
 
 #ifdef pottemp
 ! Potential temperature (dry)
-td(:,:,:) = tem(:,:,:,2) * ( rho(:,:,:,2)/pref )**(Rd/cp)
+td(:,:,:) = tem(:,:,:,2) * ( pref/rho(:,:,:,2) )**(Rd/cp)
 ! Potential temperature (wet)
 tw(:,:,:) = tem(:,:,:,2) * (1.d0 + 0.622d0 * sal(:,:,:,2)/1000.d0) &
           &              * ( rho(:,:,:,2)/pref )**(Rd/cp)

@@ -267,7 +267,7 @@ CONTAINS
            ! ------------------------------------------------------
            ! --- Check properties of water mass at initial time ---
            ! ------------------------------------------------------ 
-#ifndef ifs 
+
 #ifdef tempsalt 
                CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
                IF (temp < tmin0 .OR. temp > tmax0 .OR. &
@@ -276,7 +276,7 @@ CONTAINS
                   CYCLE kkkLoop 
                END IF
 #endif /*tempsalt*/
-#endif
+
                ! Update trajectory numbers
                ntractot = ntractot+1
                ntrac = ntractot
