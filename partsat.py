@@ -6,22 +6,16 @@ from itertools import izip
 
 import numpy as np
 import pylab as pl
-import matplotlib as mpl
 import scipy.io
 
-import psycopg2
-import pycdf
-from pyhdf.SD import SD,SDC
-
 from trm import trm
+import batch
 
 miv = np.ma.masked_invalid
 
 class traj(trm):
 
-    def __init__(self,projname,casename="",
-                 datadir="/Users/bror/ormOut/", 
-                 datafile="", ormdir="/Users/bror/git/orm",
+    def __init__(self,projname,casename="", datadir="", datafile="", ormdir="",
                  griddir='/projData/GOMPOM/'):
         trm.__init__(self,projname,casename,datadir,datafile,ormdir)
         self.flddict = {'par':('L3',),'chl':('box8',)}
@@ -44,7 +38,7 @@ class traj(trm):
         elif projname=="jplSCB":
             import mati
             self.sat = mati.Cal()
-        elif projname=="jplNOW":
+        elif projname=="jplNow":
             import mati
             self.sat = mati.Cal()
 
@@ -141,78 +135,41 @@ class traj(trm):
     def load_sat(self,field,ints=0,intstart=0,jd=0):
         """ Load satellite field for a given jd or ints"""
         self.sat.load(field,jd=jd)
-        return self.sat.__dict__[field]
-        """ GOMPOM
-            ds = mpl.dates.num2date(self.ints2iso(ints))
-            box8dir = '/projData/JCOOT_sat_Box8/'
-            filepre = "A%i%03i" % (ds.year, ds.timetuple().tm_yday)
-            try:
-                satfile = glob.glob(box8dir + filepre + "*")[0]
-            except IndexError:
-                print "Satellite file missing"
-                raise
-            h = SD(satfile, SDC.READ)
-            return h.select(field)[:]
-        """
-
-    def gcmij_to_satij(self,mask=[]):
-        if len(mask)==0: mask = tr.x==tr.x
         self.ijll()
-        self.si, self.sj = self.sat.ll2ij(self.lon[mask],self.lat[mask])
+        self.sati,self.satj = self.sat.ll2ij(self.lon,self.lat)
+        self.__dict__[field] = self.sat.__dict__[field][self.sati,self.satj]
 
-    def remove_satnans(self,jd=False):
-        if not jd: jd = self.jd.min()
-        self.gcmij_to_satij(self.jd==jd)
-        chl = self.load_sat('chl',jd=jd)
-        chl = chl[self.si,self.sj]
-        ntrac = self.ntrac[self.jd==jd]
-        ntrac = ntrac[~np.isnan(chl)]
-        mask = np.in1d(self.ntrac,ntrac)
-        self.x = self.x[mask]
-        self.y = self.y[mask]
-        self.z = self.z[mask]
-        self.jd = self.jd[mask]
-        self.ntrac = self.ntrac[mask]
-        self.ints = self.ints[mask]
+    def create_fieldtable(self,field):
+        """Create a postgresql table for satellite fields """
+        tablename = self.tablename + '__' + field
+        if self.table_exists(tablename): return
+        sql = "CREATE TABLE %s (runid INT, ints FLOAT8, ntrac INT ,val REAL )"
+        self.c.execute(sql % tablename)
+        self.conn.commit()
 
-
-    def sat_to_db(self,field,intstart,ints,batch=False,traj=False):
-        """Load field data to a table. """
-        table = self.tablename + '__' + field
-        def create_table():
-            """Create a mysql table  table """
-            itp = " INT NOT NULL "
-            ftp = " FLOAT NOT NULL "
-            CT  = ( """CREATE TABLE IF NOT EXISTS %s 
-                       (intstart %s, ints %s, ntrac %s ,val %s 
-                        ,PRIMARY KEY (intstart,ints,ntrac) )"""
-                    % (table, itp, itp, itp, ftp) )
-            self.c.execute(CT)
-            self.disable_indexes(table)
-        create_table()
-        if not hasattr(self,'gomi'): self.create_ijvecs(field)
-        if traj:
-            val = traj.val
+    def sat_to_db(self,field,jd1,jd2):
+        """Insert field data into a table. """
+        self.create_fieldtable(field)
+        def insertload(jd):
+            self.select(ints=jd)
+            if not hasattr(self,'x'): return
+            self.load_sat(field,jd=jd)
+            mask = ~np.isnan(self.__dict__[field])
+            plist = zip(self.runid[mask], self.ints[mask], self.ntrac[mask],
+                        self.__dict__[field][mask])
+            tablename = self.tablename + '__' + field
+            sql = ("INSERT INTO " + tablename + " (runid,ints,ntrac,val) " +
+                   " VALUES (%s,%s,%s,%s)")
+            self.c.executemany(sql,plist)
+            self.conn.commit()
+        if not jd2:
+            insertload(jd1)
         else:
-            self.trajs(intstart=intstart,ints=ints)
-            if not hasattr(self,"x"):
-                return False
-            self.gcmij_to_satij()
-            self.val = self.load_sat(field,ints)[self.sj,self.si]
-            print len(self.val[self.val>-1e9])
-            print ("min:", min(self.ints[self.val>-1e9]*0+intstart),
-                   min(self.ints[self.val>-1e9]))
-        plist = zip(
-                    self.ints[self.val>-1e9]*0+intstart,
-                    self.ints[self.val>-1e9],
-                    self.ntrac[self.val>-1e9],
-                    self.val[self.val>-1e9])
-        sql = ("INSERT INTO " + table + " (intstart,ints,ntrac,val) " +
-               " VALUES (%s,%s,%s,%s)")
-        self.c.executemany(sql,plist)
-        if not batch:
-            self.enable_indexes(table)
-            
+            for jd in np.arange(jd1,jd2+1):
+                print jd2-jd
+                insertload(jd)
+                batch.purge()
+
     def field_jds(self,field):
         table = self.tablename + field
         class ints: pass

@@ -88,7 +88,7 @@ class trm:
             self.gcm = jpl.SCB()
             self.region = "scb"
             self.base_iso = pl.date2num(dtm(2001,1,1))-3./24
-        elif projname=="jplNOW":
+        elif projname=="jplNow":
             import jpl
             self.gcm = jpl.NOW()
             self.region = "scb"
