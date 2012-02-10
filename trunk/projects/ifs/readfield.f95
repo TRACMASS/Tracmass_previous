@@ -20,19 +20,12 @@ subroutine readfields
   
  INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
  REAL*4 :: pp,tv,pc,pm,pref,Rd,cp,Lv
- CHARACTER (len=200)                        :: gridFile ,fieldFile,string
- CHARACTER hour(4)*4,month(12)*2,date(31)*2,year(1989:2009)*4
+ 
+ CHARACTER (len=200)                        :: gridFile ,fieldFile,string, prefix
+ 
  LOGICAL around
  REAL*8, SAVE :: punit,eunit
  INTEGER*8, SAVE :: nlon(NY)
-
-data year /'1989','1990','1991','1992','1993','1994','1995','1996','1997','1998','1999',&
-                  '2000','2001','2002','2003','2004','2005','2006','2007','2008','2009'/
-data month /'01','02','03','04','05','06','07','08','09','10','11','12'/
-data date /'01','02','03','04','05','06','07','08','09','10',&
-           '11','12','13','14','15','16','17','18','19','20',&
-           '21','22','23','24','25','26','27','28','29','30','31'/
-data hour /'0000','0600','1200','1800'/
 
 
 !  print *,'readfield startar',ints
@@ -127,8 +120,30 @@ END IF
 !! Construct string to read input files
 !!
 
-fieldFile = TRIM(inDataDir)//'era/'//year(iyear)//'/uvtqzp_'//year(iyear)//    &
-&           month(imon)//date(iday)//'.'//TRIM(hour(ihour/6+1))//'.grb'
+prefix = '0000/uvtqzp_00000000.0000'
+
+WRITE (prefix(1:4),'(i4)') iyear
+WRITE (prefix(13:16),'(i4)') iyear
+
+IF (imon < 10) THEN
+   WRITE (prefix(18:18),'(i1)') imon
+ELSE
+   WRITE (prefix(17:18),'(i2)') imon
+END IF
+
+IF (iday < 10) THEN
+   WRITE (prefix(20:20),'(i1)') iday
+ELSE
+   WRITE (prefix(19:20),'(i2)') iday
+END IF
+
+IF (ihour < 10) THEN
+   WRITE (prefix(23:23),'(i1)') ihour
+ELSE
+   WRITE (prefix(22:23),'(i2)') ihour
+END IF
+
+fieldFile = TRIM(inDataDir)//'era/'//TRIM(prefix)//'.grb'
 
 ntime     = 1000000 * iyear + 10000 * imon + 100 * iday + ihour
 
