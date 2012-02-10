@@ -224,12 +224,6 @@ class trm:
         else:
             return False
 
-    def db_add_primary_key(self,tablename):
-        """Alter table to add Priamry key based on runid,ints, and ntrac"""
-        if not self.index_exists("%s_pkey" % tablename):
-            sql = "ALTER TABLE %s ADD PRIMARY KEY (runid,ints,ntrac);"
-            self.c.execute(sql % ("%s" % tablename.lower()) )
-
     def db_create_indexes(self):
         """ Create all missing indexes """
         sql = "SELECT distinct(tablename) FROM runs;"
@@ -238,7 +232,9 @@ class trm:
         for row in rowlist:
             t1 = dtm.now()
             print row[0]
-            db_add_primary_key(row[0])
+            if not self.index_exists("%s_pkey" % row[0]):
+                sql = "ALTER TABLE %s ADD PRIMARY KEY (runid,ints,ntrac);"
+                self.c.execute(sql % ("%s" % row[0].lower()) )
             print "Time passed: ",dtm.now()-t1
             if not self.index_exists("ints_%s_idx" % row[0]):
                 sql = "CREATE INDEX %s ON %s USING btree (ints)"
@@ -387,13 +383,15 @@ class trm:
         if not jd: jd = ints
         whstr = ""
         if runid != 0:
-            whstr += " runid = %i AND" % runid
+            whstr += " runid = %i AND" % intstart
         if ints != 0:
             whstr += " ints = %i AND" % ints
         if ntrac != 0:
             whstr += " ntrac = %i " % ntrac
         whstr = whstr.rstrip("AND")
-        self.c.execute('SELECT * FROM %s WHERE %s' % (self.tablename, whstr) )
+
+        self.c.execute('SELECT * FROM %s WHERE %s' %
+                       (self.tablejds(jd),whstr) )
         res = zip(*self.c.fetchall())
         if len(res) > 0:
             for n,a in enumerate(['runid','ints','ntrac','x','y','z']):
