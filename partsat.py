@@ -13,6 +13,13 @@ import batch
 
 miv = np.ma.masked_invalid
 
+badjds = np.array([ 733779.,  733799.,  733809.,  733819.,  733829.,  733839.,
+                 733849.,  733859.,  733869.,  733889.,  733899.,  733909.,
+                 733919.,  733929.,  733939.,  733949.,  733959.,  733969.,
+                 733979.,  733989.,  733999.,  734009.,  734019.,  734029.,
+                 734039.,  734049.,  734069.,  734079.,  734089.,  734099.,
+                 734109.,  734119.,  734129.])
+
 class traj(trm):
 
     def __init__(self,projname,casename="", datadir="", datafile="", ormdir="",
@@ -147,7 +154,7 @@ class traj(trm):
         self.c.execute(sql % tablename)
         self.conn.commit()
 
-    def sat_to_db(self,field,jd1,jd2):
+    def insert_sat_to_db(self,field,jd1,jd2=None):
         """Insert field data into a table. """
         self.create_fieldtable(field)
         def insertload(jd):
@@ -169,6 +176,16 @@ class traj(trm):
                 print jd2-jd
                 insertload(jd)
                 batch.purge()
+
+    def fix_bad_jds(self):
+
+        for jd in badjds:
+            sql = "DELETE FROM jplnowfull__chl WHERE ints=%i"
+            self.c.execute(sql % jd)
+            self.conn.commit()
+            self.insert_sat_to_db('chl',jd)
+            self.insert_sat_to_db('chl',jd+1)
+            print jd
 
     def field_jds(self,field):
         table = self.tablename + field
