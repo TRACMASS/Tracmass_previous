@@ -480,7 +480,7 @@ SUBROUTINE loop
               endif
            enddo LBTLOOP
            
-#if defined tempsalt && rst_rest
+#if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
                if (temp < tmine .or. temp > tmaxe .or. &
                &   salt < smine .or. salt > smaxe .or. &
