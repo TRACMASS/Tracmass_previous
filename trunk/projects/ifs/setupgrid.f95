@@ -99,10 +99,10 @@ SUBROUTINE setupgrid
   smax  = 1400.d0
 #endif
 #ifdef pottemp
-  tmin  =   12.d0
-  tmax  =  332.d0
-  smin  =   12.d0
-  smax  =  342.d0
+  tmin  =  200.d0
+  tmax  = 2000.d0
+  smin  =  200.d0
+  smax  = 2000.d0
 #endif
   dr    = (rmax-rmin)/dble(MR-1) ![hPa]
   dtemp = (tmax-tmin)/dble(MR-1) ![K]

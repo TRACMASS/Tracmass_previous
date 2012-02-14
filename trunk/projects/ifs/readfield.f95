@@ -275,7 +275,7 @@ DO k = KM,1,-1
          END IF
          
          ! Virtual temperature in layer k
-         tv = ( 1.0 + 0.622 * sal(i,j,k,2) ) * tem(i,j,k,2)
+         tv = ( 1.0 + 0.61 * sal(i,j,k,2)/1000. ) * tem(i,j,k,2)
          ! Pressure at current interface k
          pc = aa(k) + bb(k) * &
          &         0.25 * (ph(i,j+1)+ph(im,j+1)+ph(i,j)+ph(im,j))
@@ -296,8 +296,8 @@ ENDDO
 ! Potential temperature (dry)
 td(:,:,:) = tem(:,:,:,2) * ( pref/rho(:,:,:,2) )**(Rd/cp)
 ! Potential temperature (wet)
-tw(:,:,:) = tem(:,:,:,2) * (1.d0 + 0.622d0 * sal(:,:,:,2)/1000.d0) &
-          &              * ( rho(:,:,:,2)/pref )**(Rd/cp)
+tw(:,:,:) = tem(:,:,:,2) * (1.d0 + 0.61 * sal(:,:,:,2)/1000.d0) &
+          &              * ( pref/rho(:,:,:,2) )**(Rd/cp)
 
 tem(:,:,:,2) = td
 sal(:,:,:,2) = tw
