@@ -212,7 +212,7 @@ SUBROUTINE loop
   print *,'------------------------------------------------------'
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
-  tstep=dble(intstep) 
+!  tstep=dble(intstep) 
   ints=intstart
   call readfields   ! initial dataset
   ntrac=0
@@ -223,7 +223,8 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
+  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
+!  intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      call readfields

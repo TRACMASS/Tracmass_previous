@@ -33,8 +33,8 @@
   !
   intmin  = 1,
   intspin = 1,  
-  intrun  = 1000,         ! = 73*20*10
-  intstep = 1
+  intrun  = 100,         ! = 73*20*10
+  intstep = 10000000
 /
   !
 &INITRUNDATE
@@ -42,10 +42,12 @@
   ! START TIME
   ! ===================================
   !
-  startHour         = 0,
-  startDay          =  5,!5,!4,!31,
-  startMon          =  1,!1,!7,!12,
-  startYear         = 2000
+  startSec         =    0,
+  startMIN         =    0,
+  startHour        =    0,
+  startDay         =    31,!5,!4,!31,
+  startMon         =    12,!1,!7,!12,
+  startYear        = 2001
 / 
   !
   !
@@ -125,7 +127,7 @@ $INITRUNSEED
   ist2        = 880, !880, !550, ! 880,   !480,
   jst1        = 518,!332, !490, !487,   !940,
   jst2        = 518,!650, !507, !487,   !1010,
-  kst1        =  1,
+  kst1        =  64,
   kst2        =  64,
   varSeedFile = 0,
   seedDir     = ' ',
@@ -186,11 +188,10 @@ $INITRUNSEDIMENT
   ! ==================================
   ! defining end sections
   ! timax : maximum time length of a trajectory in days
-
     ienw =    1,    1,    1,    
     iene = 9999, 9999,  100,   
     jens =    1,    1,    1,      
     jenn =  478,    5, 9999,  
-    timax = 9999999./
+    timax = 64./
     
     

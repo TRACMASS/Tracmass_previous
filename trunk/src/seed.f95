@@ -291,7 +291,8 @@ CONTAINS
            
                ! ts - time, fractions of ints
                ! tt - time [s] rel to start
-               ts = ff * DBLE (ints-intstep) / tstep
+!               ts = ff * DBLE (ints-intstep) / tstep
+               ts = DBLE (ints-1) 
                tt = ts * tseas
                
                ! ------------------------------------------------------------

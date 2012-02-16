@@ -245,6 +245,15 @@ SUBROUTINE setupgrid
       endif
     enddo
   enddo
+
+! Initialise time
+!  currSec = startSec 
+!  currMin = startMin 
+!  currHour = startHour 
+!  currDay = startDay 
+!  currMon = startMon 
+!  currYear = startYear 
+  
   
 !open(21,file='/Users/doos/data/orca/orca025/topo/longlat',form='unformatted')
 !write(21) long
