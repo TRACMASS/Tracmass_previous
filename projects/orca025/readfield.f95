@@ -17,7 +17,12 @@ SUBROUTINE readfields
   USE mod_stat
 #endif
   IMPLICIT none
-  
+  ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+  ! = Variables for filename generation 
+  CHARACTER                                  :: dates(62)*17
+  CHARACTER (len=200)                        :: dataprefix, dstamp
+  INTEGER                                    :: intpart1 ,intpart2
+  INTEGER                                    :: ndates
 
   ! = Loop variables
   INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
@@ -25,9 +30,7 @@ SUBROUTINE readfields
   INTEGER, SAVE                                :: nread
 
   ! = Variables used for getfield procedures
-  CHARACTER (len=200)                        :: gridFile ,fieldFile
-  ! = Variables for filename generation
-  CHARACTER (len=200)                        :: dataprefix
+  CHARACTER (len=200)                        :: gridFile ,fieldFile, zfile
 
 #ifdef orca1
   INTEGER, PARAMETER :: IMTG=???,JMTG=???
@@ -54,24 +57,15 @@ SUBROUTINE readfields
   end if alloCondGrid
 #endif
 
+
  alloCondUVW: if(.not. allocated (temp2d_simp)) then
    allocate ( temp3d_simp(IMT,JMT,KM), temp2d_simp(IMT,JMT)  )
 #ifdef tempsalt
    allocate ( tempb(KM), saltb(KM), rhob(KM), depthb(KM), latb(KM))
 #endif
  end if alloCondUVW
-
-  ! === swap between datasets ===
-  hs(:,:,1)=hs(:,:,2)
-  uflux(:,:,:,1)=uflux(:,:,:,2)
-  vflux(:,:,:,1)=vflux(:,:,:,2)
-#ifdef tempsalt 
-  tem(:,:,:,1)=tem(:,:,:,2)
-  sal(:,:,:,1)=sal(:,:,:,2)
-  rho(:,:,:,1)=rho(:,:,:,2)
-#endif
-
-! -------------------------------------------------------------
+ 
+  call datasetswap
 
 ! === Initialising fields ===
   initFieldcond: if(ints.eq.intstart) then
@@ -84,87 +78,70 @@ SUBROUTINE readfields
      rho    = 0.
 #endif
 
-ihour=startHour
-iday=startDay
-imon=startMon
-iyear=startYear
-if(ngcm.le.24) then
-ihour=24-ngcm
-iday=startDay-5
-imon=startMon
-endif
+ currHour=startHour
+ currDay=startDay
+ currMon=startMon
+ currYear=startYear
+ if(ngcm.le.24) then
+  currHour=24-ngcm
+  currDay=startDay-5
+  currMon=startMon
+ endif
      
 else
 
 ! ----------------------------------------------------------------
 
 ! === Update clockworks ===
-  iday=iday+nff*ngcm/24
+  currDay=currDay+nff*ngcm/24
   
-  if(iday > idmax(imon,1999)) then ! why 1999 and not iyear?????
-    iday=iday-idmax(imon,1999)
-    imon=imon+1
-    if(imon == 13) then
-       imon=1
-       iyear=iyear+1
-     if(iyear.eq.yearmax+1) iyear=yearmin
+  if(currDay > idmax(currMon,1999)) then ! why 1999 and not currYear?????
+    currDay=currDay-idmax(currMon,1999)
+    currMon=currMon+1
+    if(currMon == 13) then
+       currMon=1
+       currYear=currYear+1
+     if(currYear.eq.yearmax+1) currYear=yearmin
     endif
-  elseif(iday <=0) then
-    imon=imon-1
-    if(imon == 0) then
-       imon=12
-       iyear=iyear-1
-     if(iyear.eq.yearmin-1) iyear=yearmax
+  elseif(currDay <=0) then
+    currMon=currMon-1
+    if(currMon == 0) then
+       currMon=12
+       currYear=currYear-1
+     if(currYear.eq.yearmin-1) currYear=yearmax
     endif
-    iday=iday+idmax(imon,1999)
+    currDay=currDay+idmax(currMon,1999)
    endif
 
 endif initFieldcond
-
 ! === Time number ===
-ntime=10000*iyear+100*imon+iday
+ntime=10000*currYear+100*currMon+currDay
 
 ! ------------------------------------------------------------
 
 ! === Find the file for this timestep ===
 
-#ifdef orca1
- dataprefix='xxxx/ORCA1-N202_xxxxxxxx'
- write(dataprefix(17:24),'(i8)') ntime
- write(dataprefix(1:4),'(i4)') iyear
- fieldFile = trim(inDataDir)//trim(dataprefix)/'d05'
-#elif orca025
  dataprefix='xxxx/ORCA025-N112_xxxxxxxx'
- write(dataprefix(19:26),'(i8)') ntime
- write(dataprefix(1:4),'(i4)') iyear
+ write(dataprefix(1:4),'(i4)') currYear
+ write(dataprefix(19:26),'(i4i2.2i2.2)') currYear,currMon,currDay
  fieldFile = trim(inDataDir)//trim(dataprefix)//'d05'
  fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)//'d05'
-#elif orca025l75h6
- if(ngcm.eq.  3) dataprefix='ORCA025.L75-SLB2_3h_19900101_19901231_grid_'
-! if(ngcm.eq.6) dataprefix='ORCA025.L75-SLB2_6h_19580101_19581231_grid_'
- if(ngcm.eq.  6) dataprefix='ORCA025.L75-SLB2_6h_20050101_20051231_grid_'
- if(ngcm.eq.730) dataprefix='ORCA025.L75-SLB0_730h_19770101_19771231_grid_'
-! write(dataprefix(19:26),'(i8)') ntime
- write(dataprefix(23:26),'(i4)') iyear
- write(dataprefix(32:35),'(i4)') iyear
-! print *,dataprefix
-! stop 4906
-! fieldFile = trim(inDataDir)//trim(dataprefix)
- fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
-! print *,fieldFile
-  nread=mod(ints-1,intmax)+1
-  start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
-  start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
-#else
- stop 39573
-#endif
+ 
+ print *,trim(fieldFile)
 
-! print *,fieldFile
 ! Sea surface height
-ierr=NF90_OPEN(trim(fieldFile)//'T.nc',NF90_NOWRITE,ncid)
+gridFile=trim(fieldFile)//'T.nc'
+inquire(file=trim(gridFile),exist=around)
+if(.not.around) then
+ zfile='gunzip -c '//trim(gridFile)//'.gz > tmp'
+ CALL system(zfile)
+ gridFile='tmp'
+endif
+
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 ierr=NF90_INQ_VARID(ncid,'sossheig',varid)
 if(ierr.ne.0) then
- print *,'file not found:',trim(fieldFile)//'T.nc'
+ print *,'file not found:',trim(gridFile)
  stop 3768
 endif
 ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
@@ -186,7 +163,7 @@ enddo
 
 #ifdef tempsalt 
 ! Temperature
-gridFile = trim(fieldFile)//'T.nc'
+!gridFile = trim(fieldFile)//'T.nc'
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 5751
 ierr=NF90_INQ_VARID(ncid,'votemper',varid) 
@@ -205,7 +182,7 @@ enddo
    
 ! Salinity
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5751
+if(ierr.ne.0) stop 5752
 ierr=NF90_INQ_VARID(ncid,'vosaline',varid) 
 if(ierr.ne.0) stop 3769
 ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
@@ -241,9 +218,16 @@ enddo
 
 dmult=1.  ! amplification of the velocity amplitude by simple multiplication
 ! u velocity
-gridFile = trim(fieldFile)//'U.nc'
+gridFile=trim(fieldFile)//'U.nc'
+inquire(file=trim(gridFile),exist=around)
+if(.not.around) then
+ zfile='gunzip -c '//trim(gridFile)//'.gz > tmp'
+ CALL system(zfile)
+ gridFile='tmp'
+endif
+
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5751
+if(ierr.ne.0) stop 5753
 ierr=NF90_INQ_VARID(ncid,'vozocrtx',varid) 
 if(ierr.ne.0) stop 3769
 ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
@@ -262,9 +246,16 @@ do i=1,IMT
 enddo
 
 ! v velocity
-gridFile = trim(fieldFile)//'V.nc'
+gridFile=trim(fieldFile)//'V.nc'
+inquire(file=trim(gridFile),exist=around)
+if(.not.around) then
+ zfile='gunzip -c '//trim(gridFile)//'.gz > tmp'
+ CALL system(zfile)
+ gridFile='tmp'
+endif
+
 ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-if(ierr.ne.0) stop 5751
+if(ierr.ne.0) stop 5754
 ierr=NF90_INQ_VARID(ncid,'vomecrty',varid) ! kmt field
 if(ierr.ne.0) stop 3770
 ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
@@ -293,7 +284,7 @@ enddo
 
 #ifdef drifter
 ! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories
-kbot=65 ; ktop=66 ! number of surface layers to integrat over
+kbot=59 ; ktop=60 ! number of surface layers to integrat over
 do i=1,imt
  do j=1,jmt
  
@@ -328,6 +319,29 @@ enddo
 #endif
 
   return
+  
+  
+   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+ 
+contains
+
+  
+  subroutine datasetswap
+    hs(:,:,1)      = hs(:,:,2)
+    uflux(:,:,:,1) = uflux(:,:,:,2)
+    vflux(:,:,:,1) = vflux(:,:,:,2)
+#ifdef explicit_w
+    wflux(:,:,:,1) = wflux(:,:,:,2)
+#endif
+
+#ifdef tempsalt
+    tem(:,:,:,1)   = tem(:,:,:,2)
+    sal(:,:,:,1)   = sal(:,:,:,2)
+    rho(:,:,:,1)   = rho(:,:,:,2)
+#endif
+  end subroutine datasetswap
+  
 end subroutine readfields
 
 

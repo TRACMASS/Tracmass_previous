@@ -84,7 +84,6 @@ CONTAINS
     USE mod_loopvars
     ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
     currJDtot = (ints+ttpart-1)*(real(ngcm)/24) 
-
     call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
     currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
     currFrac = (currJDtot-int(currJDtot))*24
