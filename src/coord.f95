@@ -47,12 +47,6 @@ enddo
 rmin=19.d0
 rmax=28.5d0
 
-
-#if defined orc
-dx = 0.25d0  ! this is a quick and dirty fix since it is only used in arclength
-dy = 0.25d0
-#endif
-
 #if defined rco || baltix
 dx = 1./15.d0
 dy = 1./30.d0

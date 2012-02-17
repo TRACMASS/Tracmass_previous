@@ -157,7 +157,6 @@ MODULE mod_grid
   REAL*8                                    :: rmin ,tmin ,smin,&
   &                                            rmax ,smax ,tmax
   REAL*8                                    :: dr ,dtemp ,dsalt
-  REAL*8                                    :: arc,arct,arcscale
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax

@@ -51,7 +51,7 @@ CC                = gcc -O  $(INC_DIR)
 objects           = modules.o seed.o  savepsi.o loop_pos.o init_seed.o \
                     sw_stat.o loop.o time_subs.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o \
-                    interp.o interp2.o pos.o arclength.o \
+                    interp.o interp2.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o turb.o main.o \
 		            setupgrid.o readfield.o diffusion.o \
@@ -137,7 +137,7 @@ CC                = gcc -O  $(INC_DIR)
 objects           = modules.o seed.o  savepsi.o loop_pos.o init_seed.o \
                     sw_stat.o loop.o time_subs.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o \
-                    interp.o interp2.o pos.o arclength.o \
+                    interp.o interp2.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o turb.o main.o \
 		            setupgrid.o readfield.o diffusion.o \
@@ -220,13 +220,13 @@ ifeq ($(F95COMPILER),"g95")
 endif
 CC                = gcc -O  $(INC_DIR)
 
-objects           = modules.o seed.o loop_pos.o init_seed.o \
-                    sw_stat.o loop.o \
+objects           = modules.o seed.o  savepsi.o loop_pos.o init_seed.o \
+                    sw_stat.o loop.o time_subs.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o \
-                    interp.o interp2.o pos.o arclength.o \
-                    sw_seck.o sw_pres.o sw_dens0.o getfile.o\
+                    interp.o interp2.o pos.o \
+                    sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o turb.o main.o \
-		    setupgrid.o readfield.o diffusion.o \
+		            setupgrid.o readfield.o diffusion.o \
 #objwdir = $(patsubst %,tmp/%,$(objects))
 #jacket.o
 
@@ -301,7 +301,7 @@ CC                = gcc -O  $(INC_DIR)
 objects           = modules.o seed.o  savepsi.o loop_pos.o init_seed.o \
                     sw_stat.o loop.o time_subs.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o \
-                    interp.o interp2.o pos.o arclength.o \
+                    interp.o interp2.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o turb.o main.o \
 		            setupgrid.o readfield.o diffusion.o \

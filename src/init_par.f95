@@ -63,7 +63,6 @@ SUBROUTINE init_params
    namelist /INITGRIDDATE/   yearmin, yearmax, baseSec  ,baseMin  ,baseHour,   &
                          &   baseDay  ,baseMon  ,baseYear
    namelist /INITGRIDTIME/   ngcm, iter, intmax ,fieldsPerFile
-   namelist /INITGRIDARC/    arcscale
    
    ! ------------------------------
    ! --- Parameters from run.in ---
@@ -133,7 +132,6 @@ SUBROUTINE init_params
       READ (8,nml=INITGRIDNTRAC)
       READ (8,nml=INITGRIDTIME)
       READ (8,nml=INITGRIDDATE)
-      READ (8,nml=INITGRIDARC)
    
    CLOSE (8)
 

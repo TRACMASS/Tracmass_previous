@@ -302,7 +302,6 @@ contains
           trj(ntrac,3)=z1
           trj(ntrac,4)=tt
           trj(ntrac,5)=subvol
-          trj(ntrac,6)=arct
           nrj(ntrac,1)=ib
           nrj(ntrac,2)=jb
           nrj(ntrac,3)=ka
