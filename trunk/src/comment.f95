@@ -82,7 +82,6 @@
 ! trj(ntrac,3)=z1 vertical   model index coordinate of trajectory
 ! trj(ntrac,4)=tt time of trajectory in seconds
 ! trj(ntrac,5)=subvol volume transport of trajctory in m3/s
-! trj(ntrac,6)=arct length of the trajectory computed by arclength.f
 ! trj(ntrac,7)=t0 initial time in seconds of trajectory
 !
 !__________________________ Array dimensions defined in modules.f95_______________________

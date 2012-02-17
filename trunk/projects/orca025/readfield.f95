@@ -127,7 +127,7 @@ ntime=10000*currYear+100*currMon+currDay
  fieldFile = trim(inDataDir)//trim(dataprefix)//'d05'
  fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)//'d05'
  
- print *,trim(fieldFile)
+! print *,trim(fieldFile)
 
 ! Sea surface height
 gridFile=trim(fieldFile)//'T.nc'
@@ -154,7 +154,7 @@ do j=1,JMT
   if(ii.eq.IMT+1) ii=1
   hs(i,j,2)=temp2d_simp(ii,j)
  enddo
-enddo
+enddo 
 
 do i=4,IMT
  ii=IMT+4-i

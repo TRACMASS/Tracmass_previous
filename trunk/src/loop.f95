@@ -156,7 +156,7 @@ SUBROUTINE loop
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
 
 
-#ifdef orc
+#ifdef orc || orca025 || orca12
 !  do k=1,LBT
 !     if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
 !        nrj(ntrac,8)=k                               
@@ -239,7 +239,6 @@ SUBROUTINE loop
         call fancyTimer('seeding','stop')
         t0 = tt
         dt = 0.d0
-        arct = 0.d0
      end if intspinCond
 
      !=======================================================
@@ -261,7 +260,6 @@ SUBROUTINE loop
         z1     =  trj(ntrac,3)
         tt     =  trj(ntrac,4)
         subvol =  trj(ntrac,5)
-        arct   =  trj(ntrac,6)
         t0     =  trj(ntrac,7)
         
         ib     =  nrj(ntrac,1)
@@ -336,7 +334,6 @@ SUBROUTINE loop
               trj(ntrac,3)=z1
               trj(ntrac,4)=tt
               trj(ntrac,5)=subvol
-              trj(ntrac,6)=arct
               nrj(ntrac,1)=ib
               nrj(ntrac,2)=jb
               nrj(ntrac,3)=kb
@@ -423,12 +420,14 @@ SUBROUTINE loop
            if (errCode.ne.0) cycle ntracLoop
 
            call calc_time
+           
            ! === calculate the new positions ===
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
-#ifdef orc 
-! north fold cyclic ORCA grid (only tested with ORCA025)
            
+#if defined orc || orca025 || orca12
+           ! === north fold cyclic for the ORCA grids ===
+           ! === only tested with ORCA025 so far !!!  ===
             if( y1 == dble(JMT-1) ) then
               x1 = dble(IMT+3) - x1
               y1 = dble(JMT-2)
@@ -442,8 +441,7 @@ SUBROUTINE loop
             print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
             stop 4967
            endif
-#endif           
-
+#endif
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
            if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
@@ -467,10 +465,6 @@ SUBROUTINE loop
 #if defined diffusion     
            call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
-           ! === Calculate arclength of the ===
-           ! === trajectory path in the box ===
-           call arclength(ia,ja,ka,dt,rr,arc)
-           arct=arct+arc*arcscale 
            ! === end trajectory if outside chosen domain ===
     
            LBTloop: do k=1,LBT
@@ -760,7 +754,6 @@ return
              trj(ntrac,3)=z1
              trj(ntrac,4)=tt
              trj(ntrac,5)=subvol
-             trj(ntrac,6)=arct
              nrj(ntrac,1)=ib
              nrj(ntrac,2)=jb
              nrj(ntrac,3)=kb
@@ -931,7 +924,7 @@ return
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,arct
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 #endif        
        endif
     case (13)
@@ -940,7 +933,7 @@ return
             tt/tday,t0/tday,subvol,temp,salt,dens 
     case (14)
        write(56,566) ntrac,ints,x1,y1,z1, &
-            tt/60.,t0/3600.,subvol,temp,salt,dens,arct
+            tt/60.,t0/3600.,subvol,temp,salt,dens
     case (15)
        write(57,566) ntrac,ints,x1,y1,z1, &
             tt/tday,t0/tday,subvol,temp,salt,dens
@@ -950,7 +943,7 @@ return
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif
           write(56,566) ntrac,ints,x1,y1,z1, &
-               tt/tday,t0/tday,subvol,temp,salt,dens,arct
+               tt/tday,t0/tday,subvol,temp,salt,dens
        end if
     case (17)
        write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &

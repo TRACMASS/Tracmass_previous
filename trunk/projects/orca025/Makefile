@@ -17,7 +17,7 @@
 #   fl09  = -Dstreamts       #    vertical stream function, z=???
 #   fl10  = -Dstreamv        #    vertical stream function, z=depth
 #   fl11  = -Dstream_thermohaline        #    psi(T,S)
-#  fl12  = -Drerun          # Stores the Lagrangian stream functions as a
+#   fl12  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #  fl13  = -Drst_rest       # Restictions on what water masses are alowed

@@ -32,9 +32,9 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  = 1,
-  intspin = 1,  
-  intrun  = 100,         ! = 73*20*10
-  intstep = 10000000
+  intspin = 73,  
+  intrun  = 999999,         ! = 73*20*10
+  intstep = 0
 /
   !
 &INITRUNDATE
@@ -45,9 +45,9 @@
   startSec         =    0,
   startMIN         =    0,
   startHour        =    0,
-  startDay         =    31,!5,!4,!31,
+  startDay         =    26,!5,!4,!31,
   startMon         =    12,!1,!7,!12,
-  startYear        = 2001
+  startYear        = 1990  !2001
 / 
   !
   !
@@ -76,7 +76,7 @@
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'warmpool6p'
+  outDataFile     = 'warmpool2'
   intminInOutFile = 0
   /
   !
@@ -84,27 +84,27 @@ $INITRUNSEED
   ! ==============================================
   ! NAMELIST INITIALIZATION SEED
   ! ==============================================
-  ! nff:           1 = Follow trajectories forward in time
-  !                2 = Follow trajectories backward in time
+  ! nff:          1 = Follow trajectories forward in time
+  !              -1 = Follow trajectories backward in time
   !
-  ! isec:          1 = Seed particles meridional(y-z)
-  !                2 = Seed particles zonal(x-z)
-  !                3 = Seed particles horiz(x-y)
-  !                4 = Seed particles in the middle of T-box
+  ! isec:         1 = Seed particles meridional(y-z)
+  !               2 = Seed particles zonal(x-z)
+  !               3 = Seed particles horiz(x-y)
+  !               4 = Seed particles in the middle of T-box
   !
-  ! idir:          1 = follow positive direction (eastward/northward)  
-  !               -1 = follow negative direction (westward/southward)
-  !                0 = both directions
+  ! idir:         1 = follow positive direction (eastward/northward)  
+  !              -1 = follow negative direction (westward/southward)
+  !               0 = both directions
   !
   !
   ! number of trajectories can be set by
-  ! nqua:           1 = constant number of particles in all boxes
-  !                     (partQuant in # particles / gridcell)
-  !                 2 = Each particle reflects water transport at seeding. 
-  !                     (partQuant in m3s-1. per particle)
-  !                 3 = Each particle reflects water volume at seeding.
-  !                     (partQuant in m3 per particle)
-  !                 5 = particles set by seedfile (isec==nqua==5)
+  ! nqua:         1 = constant number of particles in all boxes
+  !                   (partQuant in # particles / gridcell)
+  !               2 = Each particle reflects water transport at seeding. 
+  !                   (partQuant in m3s-1. per particle)
+  !               3 = Each particle reflects water volume at seeding.
+  !                   (partQuant in m3 per particle)
+  !               5 = particles set by seedfile (isec==nqua==5)
   !
   ! partQuant       : particles/gridcell or m3s-1/particle or m3/particle
   !
@@ -120,14 +120,14 @@ $INITRUNSEED
   nff         = 1,
   isec        = 2,
   idir        = 1,
-  nqua        = 2,
-  partQuant   = 1000,
+  nqua        = 1,
+  partQuant   = 1,
   seedType    = 1,
   ist1        = 227,!260, !260,   !330,
-  ist2        = 880, !880, !550, ! 880,   !480,
+  ist2        = 550, !880, !550, ! 880,   !480,
   jst1        = 518,!332, !490, !487,   !940,
   jst2        = 518,!650, !507, !487,   !1010,
-  kst1        =  64,
+  kst1        =   1,
   kst2        =  64,
   varSeedFile = 0,
   seedDir     = ' ',
@@ -192,6 +192,6 @@ $INITRUNSEDIMENT
     iene = 9999, 9999,  100,   
     jens =    1,    1,    1,      
     jenn =  478,    5, 9999,  
-    timax = 64./
+    timax = 99999999999./
     
     
