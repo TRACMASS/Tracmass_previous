@@ -36,9 +36,22 @@ INTEGER             :: mrb,mtb,msb
 INTEGER             :: mta,msa,m
 
 
+#ifdef stream_thermohaline
+		  do m=mta,mtb-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) + flux
+          enddo
+		  do m=mtb,mta-1
+           psi_ts(m,msb,1) = psi_ts(m,msb,1) - flux
+          enddo
+		  do m=msa,msb-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) + flux
+          enddo
+		  do m=msb,msa-1
+           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) - flux
+          enddo
+#endif
+
 flux = flux*real(dir)
-
-
 select case(xy)
      ! === Zonal component ===
      case(1)
@@ -58,20 +71,7 @@ select case(xy)
           stxr(ia,mtb,lbas,2) = stxr(ia,mtb,lbas,2) + flux
           stxr(ia,msb,lbas,3) = stxr(ia,msb,lbas,3) + flux
 #endif
-#ifdef stream_thermohaline
-		  do m=mta,mtb-1
-           psi_ts(m,msb,1) = psi_ts(m,msb,1) + flux
-          enddo
-		  do m=mtb,mta-1
-           psi_ts(m,msb,1) = psi_ts(m,msb,1) - flux
-          enddo
-		  do m=msa,msb-1
-           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) + flux
-          enddo
-		  do m=msb,msa-1
-           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) - flux
-          enddo
-#endif
+
     
      ! === Meridional component ===
      case(2)
@@ -91,37 +91,10 @@ select case(xy)
           styr(ja,mtb,lbas,2) = styr(ja,mtb,lbas,2) + flux
           styr(ja,msb,lbas,3) = styr(ja,msb,lbas,3) + flux 
 #endif
-#ifdef stream_thermohaline
-		  do m=mta,mtb-1
-           psi_ts(m,msb,1) = psi_ts(m,msb,1) + flux
-          enddo
-		  do m=mtb,mta-1
-           psi_ts(m,msb,1) = psi_ts(m,msb,1) - flux
-          enddo
-		  do m=msa,msb-1
-           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) + flux
-          enddo
-		  do m=msb,msa-1
-           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) - flux
-          enddo
-#endif
 
-     ! === Vertical component ===
-     case(3)
-#ifdef stream_thermohaline
-		  do m=mta,mtb-1
-           psi_ts(m,msb,1) = psi_ts(m,msb,1) + flux
-          enddo
-		  do m=mtb,mta-1
-           psi_ts(m,msb,1) = psi_ts(m,msb,1) - flux
-          enddo
-		  do m=msa,msb-1
-           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) + flux
-          enddo
-		  do m=msb,msa-1
-           psi_ts(mtb,m,2) = psi_ts(mtb,m,2) - flux
-          enddo
-#endif
+!     ! === Vertical component ===
+!     case(3)
+
 
 end select
 

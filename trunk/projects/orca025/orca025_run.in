@@ -45,9 +45,9 @@
   startSec         =    0,
   startMIN         =    0,
   startHour        =    0,
-  startDay         =    26,!5,!4,!31,
-  startMon         =    12,!1,!7,!12,
-  startYear        = 1990  !2001
+  startDay         =    05,!5,!4,!31,
+  startMon         =    01,!1,!7,!12,
+  startYear        =  1990  !1990
 / 
   !
   !
@@ -71,12 +71,12 @@
   ! intminInOutFile : ??????????????????????????????????????????
   !
   ncoor           = 0,
-  kriva           = 1,
+  kriva           = 3,
   inDataDir       = '/Users/doos/data/orca/orca025/'
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'warmpool2'
+  outDataFile     = 'wp_t200'
   intminInOutFile = 0
   /
   !
@@ -119,7 +119,7 @@ $INITRUNSEED
   !
   nff         = 1,
   isec        = 2,
-  idir        = 1,
+  idir        = 0,
   nqua        = 1,
   partQuant   = 1,
   seedType    = 1,
@@ -146,8 +146,8 @@ $INITRUNSEED
   rmax0 =  500.,
   ! for ending a trajectory
   tmine = -500.,
-  tmaxe =  500.,
-  smine = -500.,
+  tmaxe =   29.,
+  smine =   34.5,
   smaxe =  500.,
   rmine = -500.,
   rmaxe =  500./

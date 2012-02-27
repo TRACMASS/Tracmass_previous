@@ -55,6 +55,8 @@ SUBROUTINE setupgrid
   start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
   count3D  = [         imt,        jmt , KM , 1 ]
   map3D    = [          1 ,          2 ,  3 , 4 ] 
+  
+  call coordinat
 
 
   ! === Open mesh file ===

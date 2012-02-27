@@ -304,6 +304,10 @@ SUBROUTINE init_params
       stxr=0.
       styr=0
 #endif
+#ifdef stream_thermohaline
+      ALLOCATE ( psi_ts(MR,MR,2) )
+      psi_ts=0.
+#endif
 
       ! --- Allocate tracer data ---
 #ifdef tracer

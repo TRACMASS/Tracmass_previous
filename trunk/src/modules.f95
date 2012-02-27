@@ -2,7 +2,7 @@
 MODULE mod_param
   INTEGER                                   :: IMT, JMT, KM
   INTEGER                                   :: JMAX, LBT, NTRACMAX
-  INTEGER, PARAMETER                        :: MR=1001
+  INTEGER, PARAMETER                        :: MR=501 ! or 1001
   INTEGER                                   :: NEND
   INTEGER, PARAMETER                        :: NST=2,NNRJ=8,NTRJ=7
 #ifdef streamts

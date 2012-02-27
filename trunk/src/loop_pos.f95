@@ -53,15 +53,16 @@ contains
 #endif /*timeanalyt*/
 
 #if defined streamr 
-       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+       call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
        if(mrb.gt.MR) mrb=MR
 #if defined streamts 
-       mtb=(temp-tmin)/dtemp+1
+       mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
-       msb=(salt-smin)/dsalt+1
+       msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
 #endif 
@@ -102,9 +103,10 @@ contains
 #endif
 !       scrivi=.true.      
 #if defined streamr 
-       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+       call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
-       if(mrb.lt.1) mrb=1
+       if(mrb.lt.1 ) mrb=1
        if(mrb.gt.MR) mrb=MR
 #if defined streamts 
        mtb=int((temp-tmin)/dtemp)+1
@@ -150,9 +152,10 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
 #if defined streamr 
-       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+       call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
-       if(mrb.lt.1) mrb=1
+       if(mrb.lt.1 ) mrb=1
        if(mrb.gt.MR) mrb=MR
 #if defined streamts 
        mtb=int((temp-tmin)/dtemp)+1
@@ -201,11 +204,12 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
 #endif
 #if defined streamr 
-       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+       call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
-       if(mrb.lt.1) mrb=1
+       if(mrb.lt.1 ) mrb=1
        if(mrb.gt.MR) mrb=MR
-#if defined streamts  
+#if defined streamts 
        mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR

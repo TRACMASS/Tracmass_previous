@@ -20,25 +20,25 @@ subroutine writepsi
 IMPLICIT none
 
 #ifdef streamxy
-open(51,file=trim(outDataDir)//'psi_xy_yx.'//trim(outDataFile),form='unformatted')
+open(51,file=trim(outDataDir)//trim(outDataFile)//'_psi_xy_yx.bin',form='unformatted')
 write(51) stxyy
 write(51) stxyx
 close(51)
 #endif
 #if defined streamv
-open(52,file=trim(outDataDir)//'psi_yz_xz.'//trim(outDataFile),form='unformatted')
+open(52,file=trim(outDataDir)//trim(outDataFile)//'_ psi_yz_xz.bin',form='unformatted')
 write(52) styz
 write(52) stxz
 close(52)
 #endif
 #if defined streamr 
-open(53,file=trim(outDataDir)//'psi_xr_yr.'//trim(outDataFile),form='unformatted')
+open(53,file=trim(outDataDir)//trim(outDataFile)//'_psi_xr_yr.bin',form='unformatted')
 write(53) stxr
 write(53) styr
 close(53)
 #endif
 #ifdef stream_thermohaline
-open(54,file=trim(outDataDir)//'psi_ts.'//trim(outDataFile),form='unformatted')
+open(54,file=trim(outDataDir)//trim(outDataFile)//'_psi_ts.bin',form='unformatted')
 write(54) psi_ts
 close(54)
 #endif
