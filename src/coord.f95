@@ -81,8 +81,6 @@ rmin=20.d0
 rmax=30.d0
 smin= 0.d0
 smax=40.d0
-tmin= 0.d0
-tmax=30.d0
 #endif
 
 #ifdef tun
@@ -96,7 +94,6 @@ rmax=30.d0
 
 dr=(rmax-rmin)/dble(MR-1)
 
-#ifdef streamts
 ! Values for the Baltic 
 #if defined for || sim  
 tmin=-2.d0
@@ -110,7 +107,6 @@ smin=33. ; smax=38.
 #endif
 dtemp=(tmax-tmin)/dble(MR-1)
 dsalt=(smax-smin)/dble(MR-1)
-#endif
 
 ! cosines relating to corners of grid box: ...u
 ! cosines relating to center of grid box:   ...t

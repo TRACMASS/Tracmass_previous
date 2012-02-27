@@ -153,37 +153,29 @@ SUBROUTINE loop
        trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
-  read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,zz
+  read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,z1,tt,t0,subvol,temp,salt,dens
+!  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
-
-#ifdef orc || orca025 || orca12
-!  do k=1,LBT
-!     if(ienw(k).le.rlon .and. rlon.le.iene(k)) then
-!        nrj(ntrac,8)=k                               
-!     endif
-!  enddo
-  nrj(ntrac,8)=1                               
-  if(nrj(ntrac,8).eq.0) stop 7395                               
+#if defined orca025
+  if(rlat == 478.) then
+     nrj(ntrac,8)=0    ! South
+!     nout=nout+1 
+  elseif(rlon == 100) then
+     nrj(ntrac,8)=0    ! East
+!     nout=nout+1 
+  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>200.) then
+     nrj(ntrac,8)=1    ! into the warm pool
+!     print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
+  else
+     nrj(ntrac,8)=0    
+!     nout=nout+1 
+  endif
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined  occ66
-
-  if(rlon.eq.293.) then
-     nrj(ntrac,8)=3    ! Drake Passage
-  elseif(rlat.eq.-47.00) then
-     nrj(ntrac,8)=2    ! Mid Gyre  (47S)
-  elseif(rlat.eq.-29.25) then
-     nrj(ntrac,8)=1    ! Northern boundary (30S)
-  else
-     nrj(ntrac,8)=0
-     print 566,ntrac,n,rlon,rlat,zz
-     stop 4957
-  endif
-
 #elif defined ifs
-  if(rlat.eq.float(jenn(1))) then
+  if(rlat == float(jenn(1))) then
      nrj(ntrac,8)=1    ! Southern boundary
-  elseif(rlat.eq.float(jens(2))) then
+  elseif(rlat == float(jens(2))) then
      nrj(ntrac,8)=2    ! Northern boundary 
   else
      nrj(ntrac,8)=0
@@ -196,9 +188,9 @@ SUBROUTINE loop
  
   goto 40
 41 continue
-  print 566,ntrac,niter,rlon,rlat,zz
+!  print 566,ntrac,niter,rlon,rlat,zz
   do ntrac=1,ntracmax
-     if(nrj(ntrac,8).eq.0) nrj(ntrac,6)=1 
+     if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
   enddo
   
 #else
@@ -230,8 +222,13 @@ SUBROUTINE loop
      call readfields
      call fancyTimer('reading next datafield','stop')
      
-     if(mod(ints,120).eq.0 .and. ints.ne.0) call writepsi ! write psi
-     if(mod(ints,120).eq.0) call writetracer
+     !=======================================================
+     !=== write stream functions and "particle tracer"    ===
+     !=======================================================
+     if(mod(ints,120) == 0) then 
+      call writepsi 
+      call writetracer
+     endif
 
     intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
         call fancyTimer('seeding','start')
@@ -250,7 +247,7 @@ SUBROUTINE loop
      ntracLoop: do ntrac=1,ntractot  
 
         ! === Test if the trajectory is dead   ===
-        if(nrj(ntrac,6).eq.1) cycle ntracLoop
+        if(nrj(ntrac,6) == 1) cycle ntracLoop
         
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
@@ -272,7 +269,7 @@ SUBROUTINE loop
         ! === Write initial data to in.asc file ===
         ! If t0 = tt (first step) 
         
-        if(trj(ntrac,4).eq.trj(ntrac,7)) then
+        if(trj(ntrac,4) == trj(ntrac,7)) then
 #ifdef tempsalt
         call interp(nrj(ntrac,1),nrj(ntrac,2),nrj(ntrac,3),&
         trj(ntrac,1),trj(ntrac,2),trj(ntrac,3),temp,salt,dens,1)
@@ -293,7 +290,7 @@ SUBROUTINE loop
         ! === Check if water velocities are === 
         ! === large enough for resuspention ===
         ! === of sedimentated trajectories  ===   
-        if( nrj(ntrac,6).eq.2 ) then
+        if( nrj(ntrac,6) == 2 ) then
            call resusp(res,ib,jb,kb)
            if(res) then
               ! === updating model time for  ===
@@ -327,7 +324,7 @@ SUBROUTINE loop
 #endif /*sediment*/
            ! === change velocity fields &  === 
            ! === store trajectory position ===
-           if( niter.ne.1 .and. tss.eq.dble(iter) &
+           if( niter.ne.1 .and. tss == dble(iter) &
                 .and. nrj(ntrac,7).ne.1 ) then
               trj(ntrac,1)=x1
               trj(ntrac,2)=y1
@@ -360,7 +357,7 @@ SUBROUTINE loop
            z0=z1
            ia=ib
            iam=ia-1
-           if(iam.eq.0)iam=IMT
+           if(iam == 0)iam=IMT
            ja=jb
            ka=kb
 
@@ -372,7 +369,7 @@ SUBROUTINE loop
 
            ! === write trajectory ===                       
 #ifdef tracer
-           if(ts.eq.dble(idint(ts))) then 
+           if(ts == dble(idint(ts))) then 
               tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
            end if
 #endif /*tracer*/
@@ -415,7 +412,7 @@ SUBROUTINE loop
 #endif /*timeanalyt*/
            ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
      
-           !if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
+           !if(ds == UNDEF .or.ds == 0.d0)then 
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
 
@@ -477,9 +474,11 @@ SUBROUTINE loop
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-               if (temp < tmine .or. temp > tmaxe .or. &
-               &   salt < smine .or. salt > smaxe .or. &
-               &   dens < rmine .or. dens > rmaxe      ) then
+!               if (temp < tmine .or. temp > tmaxe .or. &
+!               &   salt < smine .or. salt > smaxe .or. &
+!               &   dens < rmine .or. dens > rmaxe      ) then
+                if (temp > tmaxe .and. salt < smine .and.  &
+               &   (tt-t0)/tday > 200.      ) then
                  nexit(NEND)=nexit(NEND)+1
                  exit niterLoop                                
                endif
@@ -604,7 +603,7 @@ return
           endif
           
        case ('dxyzError')
-          if(dxyz.eq.0.d0) then
+          if(dxyz == 0.d0) then
              if (verbose == 1) then                 
                 print *,'====================================='
                 print *,'ERROR: dxyz is zero'
@@ -655,7 +654,7 @@ return
           endif
 
        case ('landError')
-          if(kmt(ib,jb).eq.0) then
+          if(kmt(ib,jb) == 0) then
              if (verbose == 1) then
                 print *,'====================================='
                 print *,'Warning: Trajectory on land'
@@ -796,24 +795,24 @@ return
            ! sets the right level for the corresponding trajectory depth
            if(z1.ne.dble(idint(z1))) then
               kb=idint(z1)+1
-              if(kb.eq.KM+1) kb=KM  ! (should perhaps be removed)
+              if(kb == KM+1) kb=KM  ! (should perhaps be removed)
               errCode = -52
            endif
            case ('cornerError')
               ! problems if trajectory is in the exact location of a corner
-           if(x1.eq.dble(idint(x1)) .and. y1.eq.dble(idint(y1))) then
+           if(x1 == dble(idint(x1)) .and. y1 == dble(idint(y1))) then
               !print *,'corner problem',ntrac,x1,x0,y1,y0,ib,jb
               !print *,'ds=',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
               !stop 34957
               ! corner problems may be solved the following way 
               ! but should really not happen at all
-              if(ds.eq.dse .or. ds.eq.dsw) then
+              if(ds == dse .or. ds == dsw) then
                  if(y1.ne.y0) then
                     y1=y0 ; jb=ja
                  else
                     y1=dble(jb)-0.5d0
                  endif
-              elseif(ds.eq.dsn .or. ds.eq.dss) then
+              elseif(ds == dsn .or. ds == dss) then
                  if(y1.ne.y0) then
                     x1=x0 ; ib=ia 
                  else
@@ -827,7 +826,7 @@ return
            endif
         case ('dsCrossError')
            ! === Can not find any path for unknown reasons ===
-           if(ds.eq.UNDEF .or.ds.eq.0.d0)then 
+           if(ds == UNDEF .or.ds == 0.d0)then 
               if (verbose == 0) then
                  print *, " "
                  print *, " "
@@ -982,12 +981,12 @@ return
        write(unit=78 ,rec=recPosIn) ntrac,ints,x14,y14,z14
        return
     case (11)
-       if(  (kriva.eq.1 .and. nrj(ntrac,4) .eq. niter-1 ) .or. &
-            (kriva.eq.2 .and. scrivi                    ) .or. &
-            (kriva.eq.3                                 ) .or. &
-            (kriva.eq.4 .and. niter.eq.1                ) .or. &
-            (kriva.eq.5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
-            (kriva.eq.6 .and. .not.scrivi               )  ) then
+       if(  (kriva == 1 .and. nrj(ntrac,4)  ==  niter-1 ) .or. &
+            (kriva == 2 .and. scrivi                    ) .or. &
+            (kriva == 3                                 ) .or. &
+            (kriva == 4 .and. niter == 1                ) .or. &
+            (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
+            (kriva == 6 .and. .not.scrivi               )  ) then
 #if defined tempsalt
           call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
           call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
@@ -1023,15 +1022,15 @@ return
 #elif  zgrid3D
     dxyz=dzt(ib,jb,kb)
 #ifdef freesurface
-    if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
 #endif /*freesurface*/
 #else
     dxyz=dz(kb)
 #ifdef varbottombox
-    if(kb.eq.KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
+    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
-    if(kb.eq.KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
 #endif /*freesurface*/
 #endif /*zgrid3Dt*/
     dxyz=dxyz*dxdy(ib,jb)
@@ -1052,13 +1051,13 @@ return
 
   subroutine calc_time
 #ifdef regulardt
-           if(ds.eq.dsmin) then ! transform ds to dt in seconds
+           if(ds == dsmin) then ! transform ds to dt in seconds
 !            dt=dt  ! this makes dt more accurate
            else
             dt=ds*dxyz 
            endif
 #else
-           if(ds.eq.dsmin) then ! transform ds to dt in seconds
+           if(ds == dsmin) then ! transform ds to dt in seconds
               dt=dtmin  ! this makes dt more accurate
            else
               dt=ds*dxyz 
@@ -1080,10 +1079,10 @@ return
            else
               tt=tt+dt
 #if defined regulardt
-              if(dt.eq.dtmin) then
+              if(dt == dtmin) then
                  ts=ts+dstep
                  tss=tss+1.d0
-              elseif(dt.eq.dtreg) then  
+              elseif(dt == dtreg) then  
                  ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
 !                 ts=ts+dtreg/tseas
                  tss=dble(nint(tss+dt/dtmin))
@@ -1092,7 +1091,7 @@ return
                  tss=tss+dt/dtmin
               endif
 #else
-              if(dt.eq.dtmin) then
+              if(dt == dtmin) then
                  ts=ts+dstep
                  tss=tss+1.d0
               else
