@@ -40,7 +40,7 @@ class trm:
         
         self.conn = psycopg2.connect (host="localhost", database="partsat")
         self.c = self.conn.cursor()
-        self.tablename = "%s%s" % (projname ,casename)
+        self.tablename = ("%s%s" % (projname ,casename)).lower()
 
         self.nlgrid = nlt.parse('/%s/projects/%s/%s_grid.in' %
                             (self.ormdir,self.projname,self.projname))
@@ -92,7 +92,11 @@ class trm:
             import jpl
             self.gcm = jpl.NOW()
             self.region = "scb"
-
+        elif projname=="rutgersNWA":
+            import rutgers
+            self.gcm = rutgers.NWA()
+            self.region = "nwa"
+            
         if hasattr(self,'gcm'):
             self.gcm.add_landmask()
             self.landmask = self.gcm.landmask
@@ -108,6 +112,24 @@ class trm:
         self.lon[self.lon> 180] = self.lon[self.lon> 180] - 360
         self.lon[self.lon==0] = np.nan
         self.lat[self.lat==0] = np.nan
+
+    def ij2utm(self,ps=None):
+        from scipy.ndimage.interpolation import map_coordinates
+        self.gcm.add_utmxy()
+        self.utmx = map_coordinates(self.gcm.utmx, [self.y,self.x])
+        self.utmy = map_coordinates(self.gcm.utmy, [self.y,self.x])
+
+
+
+    def map(self,weights=[]):
+        #xy = np.array(zip(self.x.astype(np.int), self.y.astype(np.int)))
+        xy = np.vstack( (self.x.astype(np.int), self.y.astype(np.int)) )
+        if len(weights) == 0: weights = np.ones(xy.shape[1])
+        flat_coord = np.ravel_multi_index(xy, (self.imt, self.jmt))
+        sums = np.bincount(flat_coord, weights)
+        fld = np.zeros((self.imt, self.jmt))
+        fld.flat[:len(sums)] = sums
+        return fld.T
 
     def dist(self):
         if not hasattr(self, 'lon'):
@@ -143,11 +165,11 @@ class trm:
                 ]))
         return runvec
 
-    def db_drop_all_tables(self,tablename,really=False):
+    def db_drop_all_tables(self, tablename, really=False):
         """Drop master and inherited tables in a partition"""
         if really:
             sql = "SELECT tablename FROM pg_tables WHERE tablename LIKE '%s%%';"
-            self.c.execute(sql % tablename.lower())
+            self.c.execute(sql % tablename)
             tablelist = self.c.fetchall()
             for table in tablelist:
                 print table
@@ -188,14 +210,15 @@ class trm:
         self.conn.commit()
         
     def generate_runid(self, jd1=None, jd2=None, temp=False,
-                       tablename=None,filename=''):
+                       tablename
+                       =None,filename=''):
         """Find or generate row for current run in runs."""
         if not tablename: tablename = self.tablename
 
         def insert_runid(jd1,jd2):
             sql = ("INSERT INTO runs (jd1,jd2,tablename,filename) " +
                    " values (%s,%s,%s,%s) RETURNING id" )
-            self.c.execute(sql, (jd1, jd2, tablename.lower(), filename) )
+            self.c.execute(sql, (jd1, jd2, tablename, filename) )
             self.conn.commit()
             return self.c.fetchone()[0]
 
@@ -224,6 +247,19 @@ class trm:
         else:
             return False
 
+    def db_add_primary_keys(self, tablename):
+        if not self.index_exists("%s_pkey" % tablename):
+            sql = "ALTER TABLE %s ADD PRIMARY KEY (runid,ints,ntrac);"
+            self.c.execute(sql % ("%s" % tablename) )
+            self.conn.commit()
+
+    def db_add_index(self, tablename, indexname, rows):
+        index = "%s_%s_idx" % (indexname, tablename)
+        if not self.index_exists(index):
+            sql = "CREATE INDEX %s ON %s USING btree (%s)"
+            self.c.execute(sql % (index, tablename, rows ))
+            self.conn.commit()
+            
     def db_create_indexes(self):
         """ Create all missing indexes """
         sql = "SELECT distinct(tablename) FROM runs;"
@@ -232,21 +268,12 @@ class trm:
         for row in rowlist:
             t1 = dtm.now()
             print row[0]
-            if not self.index_exists("%s_pkey" % row[0]):
-                sql = "ALTER TABLE %s ADD PRIMARY KEY (runid,ints,ntrac);"
-                self.c.execute(sql % ("%s" % row[0].lower()) )
+            db_add_primary_keys(row[0])
             print "Time passed: ",dtm.now()-t1
-            if not self.index_exists("ints_%s_idx" % row[0]):
-                sql = "CREATE INDEX %s ON %s USING btree (ints)"
-                self.c.execute(sql % ("ints_%s_idx" %
-                                      row[0].lower(),row[0].lower() ))
+            db_add_index(self, row[0], 'ints', 'ints')
             print "Time passed: ",dtm.now()-t1
-            if not self.index_exists("runtrac_%s_idx" % row[0]):
-                sql = "CREATE INDEX %s ON %s USING btree (runid,ntrac)"
-                self.c.execute(sql % ("runtrac_%s_idx" %
-                                      row[0].lower(),row[0].lower() ))
+            db_add_index(self, row[0], 'runtrac', 'runid,ntrac')
             print "Time passed: ",dtm.now()-t1
-            self.conn.commit()
             batch.purge()
 
     def remove_earlier_data_from_table(self, runid):
@@ -382,25 +409,32 @@ class trm:
         """ Retrive trajectories from database """
         if not jd: jd = ints
         whstr = ""
-        if runid != 0:
-            whstr += " runid = %i AND" % intstart
-        if ints != 0:
-            whstr += " ints = %i AND" % ints
-        if ntrac != 0:
-            whstr += " ntrac = %i " % ntrac
+        if runid != 0: whstr += " runid = %i AND" % intstart
+        if ints != 0:  whstr += " ints = %i AND" % ints
+        if ntrac != 0: whstr += " ntrac = %i " % ntrac
         whstr = whstr.rstrip("AND")
-
-        self.c.execute('SELECT * FROM %s WHERE %s' %
-                       (self.tablejds(jd),whstr) )
+        self.c.execute('SELECT * FROM %s WHERE %s' % (self.tablename,whstr) )
         res = zip(*self.c.fetchall())
         if len(res) > 0:
             for n,a in enumerate(['runid','ints','ntrac','x','y','z']):
                 self.__dict__[a] = np.array(res[n])
 
+
+
+    def create_seedfile(self,filename, k, mask):
+        """Create a seed file based on a 2D mask for TRACMASS """
+        ii,jj = np.meshgrid(np.arange(mask.shape[1]),
+                            np.arange(mask.shape[0]))
+        f = open(filename,'w')
+        for i,j,m in zip(np.ravel(ii), np.ravel(jj), np.ravel(mask)):
+            if m: f.writelines("% 6i% 6i% 6i% 6i% 6i% 6i\n" %
+                               (i+1, j+1, k+1,3,0,50))
+        f.close()
+
+
+
     def scatter(self,ntrac=None,ints=None,k1=None,k2=None,c="g",clf=True):
-        if not hasattr(self,'mp'):
-            self.mp = projmaps.Projmap(self.region)
-            self.xll,self.yll = self.mp(self.llon,self.llat)
+        self.add_mp()
         mask = self.ntrac==self.ntrac
         if ints:
             mask = mask & (self.ints==ints)
@@ -411,7 +445,7 @@ class trm:
         self.ijll()
         x,y = self.mp(self.lon[mask],self.lat[mask])
 
-        self.mp.pcolormesh(self.xll,self.yll,
+        self.mp.pcolormesh(self.mpxll,self.mpyll,
                            np.ma.masked_equal(self.landmask,1),cmap=GrGr())
         xl,yl = self.mp(
             [self.llon[0,0], self.llon[0,-1], self.llon[-1,-1],
@@ -472,6 +506,11 @@ class trm:
     def ls(self):
         flist = glob.glob("%s/%s*"% (self.datadir,self.nlrun.outDataFile))
         for f in flist: print f
+
+    def add_mp(self):
+        if not hasattr(self,'mp'):
+            self.mp = projmaps.Projmap(self.region)
+            self.mpxll,self.mpyll = self.mp(self.llon,self.llat)
 
 
 def movie2(tr1,tr2,di=10):
