@@ -1,5 +1,21 @@
-
-subroutine readfields
+SUBROUTINE readfields
+!!------------------------------------------------------------------------------
+!!
+!!
+!!   Subroutine to read the ERA-Interim data fields, and fill the matrices
+!!   uflux  -  Zonal mass flux [kg/s]
+!!   vflux  -  Meridional mass flux [kg/s]
+!!   tem    -  Temperature [K]
+!!   sal    -  Specific humidity [g/kg]
+!!   rho    -  Pressure [hPa]
+!!
+!!   If option -Dpottemp is activated in Makefile, tem is potential temperature
+!!   [K], and sal is moist potential temperature [K].
+!!   If option -Denergy is activated in Makefile, tem is dry static energy
+!!   [kJ/kg] and sal is moist static energy [kJ/kg].
+!!
+!!
+!!------------------------------------------------------------------------------
 
   USE mod_param
   USE mod_coord
@@ -10,33 +26,38 @@ subroutine readfields
   USE mod_dens
   USE mod_stat
   
-  
   IMPLICIT none
-  
- INTEGER, PARAMETER ::  NY=145
 
- REAL*4, ALLOCATABLE, DIMENSION(:,:) :: txy,zxy,uxy,vxy,qxy,pxy,th,zh,uh,vh,qh,ph
- REAL*4, ALLOCATABLE, DIMENSION(:,:,:) :: zeta,td,tw,zg
-  
- INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
- REAL*4 :: pp,tv,pc,pm,pref,Rd,cp,Lv
+!!------------------------------------------------------------------------------
  
- CHARACTER (len=200)                        :: gridFile ,fieldFile,string, prefix
+ INTEGER                                            ::  i, j, k, n, ii, kk,    &
+ &                                                      im, jj, jm, l
+ INTEGER, PARAMETER                                 ::  NY=145
+ INTEGER*8, SAVE                                    ::  nlon(NY)
+
+ REAL*4                                             ::  pp, tv, pc, pm, pref,  &
+ &                                                      Rd, cp, Lv
+ REAL*8, SAVE                                       ::  punit, eunit
+ REAL*4, ALLOCATABLE, DIMENSION(:,:)                ::  txy, zxy, uxy, vxy,    &
+ &                                                      qxy, pxy,              &
+ &                                                      th, zh, uh, vh, qh, ph
+ REAL*4, ALLOCATABLE, DIMENSION(:,:,:)              ::  zeta, td, tw, zg
+  
+ CHARACTER (LEN=200)                                ::  gridFile, fieldFile,   &
+ &                                                      string, prefix
  
  LOGICAL around
- REAL*8, SAVE :: punit,eunit
- INTEGER*8, SAVE :: nlon(NY)
 
 
-!  print *,'readfield startar',ints
-  
-  if ( .NOT. ALLOCATED(txy) ) then
-    allocate ( txy(IMT,NY),zxy(IMT,NY),uxy(IMT,NY),vxy(IMT,NY),qxy(IMT,NY),pxy(IMT,NY) )
-    allocate ( th(IMT,NY),zh(IMT,NY),uh(IMT,NY),vh(IMT,NY),qh(IMT,NY),ph(IMT,NY) )
-  end if
+!!------------------------------------------------------------------------------
 
+IF ( .NOT. ALLOCATED(txy) ) THEN
+   ALLOCATE ( txy(IMT,NY), zxy(IMT,NY), uxy(IMT,NY), vxy(IMT,NY), qxy(IMT,NY), &
+   &          pxy(IMT,NY), th(IMT,NY), zh(IMT,NY), uh(IMT,NY), vh(IMT,NY),     &
+   &          qh(IMT,NY), ph(IMT,NY) )
+END IF
 
-
+!!------------------------------------------------------------------------------
 
 !!
 !! Update the time counter
@@ -286,7 +307,7 @@ DO k = KM,1,-1
             pm = 10.*punit
          END IF
          ! Geopotential at interface k-1
-         zg(i,j,k-1) = zg(i,j,k+1) + Rd * tv * LOG (pc/pm)
+         zg(i,j,k-1) = zg(i,j,k) + Rd * tv * LOG (pc/pm)
       
       END DO
    END DO
