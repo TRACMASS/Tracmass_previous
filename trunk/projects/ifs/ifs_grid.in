@@ -36,15 +36,15 @@ $INITGRIDTIME
   !
 $INITGRIDDATE
   !
-  yearmin        = 1989,
-  yearmax        = 2007,
+  yearmin        = 1979,
+  yearmax        = 2015,
   ! === Reference basetime for the velocity field.
   baseSec        = 0,
   baseMin        = 0,
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 1989/
+  baseYear       = 1979/
   !
 $INITGRIDARC
 !  arcscale      = 0.001/         ! orig arc meters -> km
