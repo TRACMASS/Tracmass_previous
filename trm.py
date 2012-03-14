@@ -95,7 +95,7 @@ class trm:
         elif projname=="rutgersNWA":
             import rutgers
             self.gcm = rutgers.NWA()
-            self.region = "nwa"
+            self.region = "nwa_small"
             
         if hasattr(self,'gcm'):
             self.gcm.add_landmask()
