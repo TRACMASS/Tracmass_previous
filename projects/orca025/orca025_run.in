@@ -47,7 +47,7 @@
   startHour        =    0,
   startDay         =    05,!5,!4,!31,
   startMon         =    01,!1,!7,!12,
-  startYear        =  1990  !1990
+  startYear        =  1986  !1990
 / 
   !
   !
@@ -76,7 +76,7 @@
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'wp_t200'
+  outDataFile     = 'wpool_t200b'
   intminInOutFile = 0
   /
   !
@@ -125,8 +125,8 @@ $INITRUNSEED
   seedType    = 1,
   ist1        = 227,!260, !260,   !330,
   ist2        = 550, !880, !550, ! 880,   !480,
-  jst1        = 518,!332, !490, !487,   !940,
-  jst2        = 518,!650, !507, !487,   !1010,
+  jst1        = 508, !518,!332, !490, !487,   !940,
+  jst2        = 508, !518,!650, !507, !487,   !1010,
   kst1        =   1,
   kst2        =  64,
   varSeedFile = 0,

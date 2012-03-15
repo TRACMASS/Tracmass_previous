@@ -30,13 +30,13 @@ $INITGRIDTIME
   !
   ngcm          =  120,          ! (5*24) hours between GCM datasets
   iter          =    5,          ! iteration between two gcm data sets
-  intmax        =  1500,          ! maximum length of GCM fields
+  intmax        =  2500,          ! maximum length of GCM fields
   fieldsPerFile =   1 / ! 1460 1,2920
   !
   !
 $INITGRIDDATE
   !
-  yearmin        = 1990,
+  yearmin        = 1986,
   yearmax        = 2001,
   ! === Reference basetime for the velocity field.
   baseSec        = 0,
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 5,
   baseMon        = 1,
-  baseYear       = 1990/
+  baseYear       = 1986/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! scaling factor for length output in the orig arc m -> 100 km  

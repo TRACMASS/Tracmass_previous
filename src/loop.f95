@@ -123,22 +123,6 @@ SUBROUTINE loop
   
   nrj=0
   trj=0.d0
-  
-#ifdef streamxy
-  stxyx=0.
-  stxyy=0.
-#endif /*streamxy*/
-#ifdef streamv
-  stxz=0.
-  styz=0.
-#endif /*streamv*/
-#ifdef streamr
-  stxr=0.
-  styr=0.
-#endif /*streamr*/
-#ifdef stream_thermohaline
-  psi_ts=0.
-#endif /*stream_thermohaline*/
 
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
@@ -149,6 +133,7 @@ SUBROUTINE loop
   !==========================================================
   
 #ifdef rerun
+ I=0 ; j=0 ; k=0 ; l=0
   print *,'rerun with initial points from ', & 
        trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
@@ -159,16 +144,16 @@ SUBROUTINE loop
 #if defined orca025
   if(rlat == 478.) then
      nrj(ntrac,8)=0    ! South
-!     nout=nout+1 
+     i=i+1
   elseif(rlon == 100) then
      nrj(ntrac,8)=0    ! East
-!     nout=nout+1 
+     j=j+1
   elseif(temp > tmaxe .and. salt < smine .and. tt-t0>200.) then
-     nrj(ntrac,8)=1    ! into the warm pool
-!     print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
+     nrj(ntrac,8)=1    ! back to the warm pool
+     k=k+1
   else
-     nrj(ntrac,8)=0    
-!     nout=nout+1 
+     nrj(ntrac,8)=0 
+     l=l+1   
   endif
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
@@ -188,8 +173,12 @@ SUBROUTINE loop
  
   goto 40
 41 continue
-!  print 566,ntrac,niter,rlon,rlat,zz
-  do ntrac=1,ntracmax
+  m=i+j+k+l
+  print *,'Lagrangian decomposition distribution in %: ',     &
+  100.*float(i)/float(i+j+k+l),100.*float(j)/float(i+j+k+l),  &
+  100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
+
+  do ntrac=1,ntracmax ! eliminate the unwanted trajectories
      if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
   enddo
   

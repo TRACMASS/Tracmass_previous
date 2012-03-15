@@ -26,7 +26,7 @@ write(51) stxyx
 close(51)
 #endif
 #if defined streamv
-open(52,file=trim(outDataDir)//trim(outDataFile)//'_ psi_yz_xz.bin',form='unformatted')
+open(52,file=trim(outDataDir)//trim(outDataFile)//'_psi_yz_xz.bin',form='unformatted')
 write(52) styz
 write(52) stxz
 close(52)
