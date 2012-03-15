@@ -305,13 +305,14 @@ SUBROUTINE init_params
       styr=0
 #endif
 #ifdef stream_thermohaline
-      ALLOCATE ( psi_ts(MR,MR,2) )
+      ALLOCATE ( psi_ts(MR,MR,2,LBT) )
       psi_ts=0.
 #endif
 
       ! --- Allocate tracer data ---
 #ifdef tracer
       ALLOCATE ( tra(imt,jmt,km) )
+      tra=0.
 #endif
 
       ! --- Allocate sedimentation data ---
