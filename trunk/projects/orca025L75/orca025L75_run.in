@@ -47,7 +47,7 @@
   startHour        =    0,
   startDay         =    05,!5,!4,!31,
   startMon         =    01,!1,!7,!12,
-  startYear        =  1978  !1990
+  startYear        =  1997  !1990
 / 
   !
   !
@@ -72,9 +72,9 @@
   !
   ncoor           = 0,
   kriva           = 3,
-  inDataDir       = '/Users/doos/data/orca/orca025/'
+  inDataDir       = '/Users/doos/data/orca/orca025L75/'
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
-  outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
+  outDataDir      = '/Users/doos/data/orca/orca025L75/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
   outDataFile     = 'wpool_big'
   intminInOutFile = 0
