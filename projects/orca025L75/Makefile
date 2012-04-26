@@ -1,4 +1,4 @@
-# Makfile for orca025
+# Makfile for orca025L75
 #========================================================================
   INPUT_INT1 = intmin       # Variables set from command line
   INPUT_INT2 = intrun       # Use 'dummy' if not used.   
