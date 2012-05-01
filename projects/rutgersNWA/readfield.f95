@@ -58,13 +58,12 @@ SUBROUTINE readfields
   ! === update the time counting ===
   intpart1    = mod(ints,24)
   intpart2    = floor((ints)/24.)
-  dstamp      = '2011083121_da.nc'
+  dstamp      = 'nwa_avg_XXXXX.nc'
 
-  write (dstamp(1:10),'(i4i2.2i2.2i2.2)') & 
-       currYear,currMon,currDay,currHour+3
+  write (dstamp(9:13),'(I5)') & 
+       int(currJDtot) - 714782
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
-
   print *,dataprefix
 
   uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
@@ -72,10 +71,17 @@ SUBROUTINE readfields
   ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
   hs(:,:,2) = ssh
 
-  ierr = NF90_OPEN(trim(dataprefix) ,NF90_NOWRITE ,ncid)
-  ierr = NF90_GET_ATT(ncid, NF90_GLOBAL, 'sc_w', sc_r)
-  ierr = NF90_GET_ATT(ncid, NF90_GLOBAL, 'Cs_w', Cs_r)
-  ierr = NF90_GET_ATT(ncid, NF90_GLOBAL, 'hc', hc)
+  where (uvel > 1000)
+     uvel = 0
+  end where
+  where (vvel > 1000)
+     vvel = 0
+  end where
+
+  Cs_r = get1DfieldNC (trim(dataprefix), 'Cs_w')
+  sc_r = get1DfieldNC (trim(dataprefix), 's_w')
+  hc   = getScalarNC (trim(dataprefix), 'hc')
+
   do k=1,km
      dzt0 = (sc_r(k)-Cs_r(k))*hc + Cs_r(k) * depth
      dzt(:,:,k)= dzt0 + ssh*(1.0 + dzt0/depth)
@@ -89,7 +95,6 @@ SUBROUTINE readfields
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:)*0.5 + dzt(:,2:jmt,:)*0.5
 
   do k=1,km
-     kk=km+1-k
      uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k) * dyu
      vflux(:,:,k,2)   = vvel(:,:,k) * dzv(:,:,k) * dxv
   end do
@@ -100,7 +105,6 @@ SUBROUTINE readfields
   end if
 
   return
-
 
  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
