@@ -62,7 +62,7 @@ SUBROUTINE readfields
 
   write (dstamp(9:13),'(I5)') & 
        int(currJDtot) - 714782
-  dataprefix  = trim(inDataDir) // dstamp
+  dataprefix  = trim(inDataDir) // '/2000/' // dstamp
   tpos        = intpart1+1
   print *,dataprefix
 

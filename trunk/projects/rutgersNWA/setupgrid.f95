@@ -63,6 +63,21 @@ SUBROUTINE setupgrid
   depth = get2DfieldNC(trim(gridfile), 'h')
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')
   kmt = 40 
-  where (mask==0) kmt=0
+
+  where (mask(2:imt,:) == 0) 
+     mask(1:imt-1,:) = 0
+  end where
   
+  where (mask(1:imt-1,:) == 0) 
+     mask(2:imt,:) = 0
+  end where
+  where (mask(:, 2:jmt) == 0) 
+     mask(:,1:jmt-1) = 0
+  end where
+  where (mask(:, 1:jmt-1) == 0) 
+     mask(:, 2:jmt) = 0
+  end where
+
+  where (mask==0) kmt=0
+
 end SUBROUTINE setupgrid
