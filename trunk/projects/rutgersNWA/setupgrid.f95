@@ -37,6 +37,7 @@ SUBROUTINE setupgrid
 
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
+  CHARACTER (len=200)                        :: gridfile
 
 
 ! === Template for setting up grids. Move the code from readfile.f95
@@ -46,12 +47,12 @@ SUBROUTINE setupgrid
   map2d    = [3, 4, 1, 2]
   map3d    = [2, 3, 4, 1]
 
-  twritetype = 2
+  gridfile =  trim(inDataDir) // "NWA_grd.nc"
 
   ncTpos = 1
-  print *,trim(inDataDir) // "scb_grid.nc" 
-  dxv(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'x_rho')
-  dyu(:-2,:) = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'y_rho')
+  print *, trim(gridfile)
+  dxv(:-2,:) = get2DfieldNC(trim(gridfile), 'x_rho')
+  dyu(:-2,:) = get2DfieldNC(trim(gridfile), 'y_rho')
 
   dxv(1:imt-1,:) = dxv(2:imt,:)-dxv(1:imt-1,:)
   dyu(:,1:jmt-1) = dyu(:,2:jmt)-dyu(:,1:jmt-1)
@@ -59,8 +60,8 @@ SUBROUTINE setupgrid
   dyu(:,jmt) = dyu(:,jmt-1)
   dxdy = dyu*dxv
 
-  depth = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'h')
-  mask = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'mask_rho')
+  depth = get2DfieldNC(trim(gridfile), 'h')
+  mask = get2DfieldNC(trim(gridfile), 'mask_rho')
   kmt = 40 
   where (mask==0) kmt=0
   

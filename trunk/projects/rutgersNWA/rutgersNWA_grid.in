@@ -7,15 +7,15 @@
   !
   GCMname    = 'ROMS',
   GCMsource  = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
-  gridName   = 'jplSCB',
-  gridSource = 'http://ourocean.jpl.nasa.gov/SCB/',
-  gridDesc   = '1*1 km biogeochemical run in the North Atlantic'/
+  gridName   = 'rutgersNWA',
+  gridSource = 'Rutgers',
+  gridDesc   = '7.5 km 50 yr simulation of the NW Atlantic'/
   !
   !
 $INITGRIDGRID	
   !
-  IMT      = 385,
-  JMT      = 257,	
+  IMT      = 721,
+  JMT      = 361,	
   KM       = 40,
   LBT      = 5,	
   NEND     = 6/              ! NEND = LBT +1

@@ -45,7 +45,7 @@
   startHour         = 0,
   startDay          = 01,
   startMon          = 02,
-  startYear         = 2010/
+  startYear         = 2000/
   !
   !
   &INITRUNWRITE
@@ -63,13 +63,13 @@
   kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/projData/jplSCB/NOWCAST/',
+  inDataDir       = '/Volumes/keronHD4/rutgersNWA/',
   !
   ! === Directory where output files are saved
   outDataDir      = '/Volumes/keronHD4/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'jplNOWtest',
+  outDataFile     = 'rutgersNWAtest',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
