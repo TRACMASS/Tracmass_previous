@@ -77,12 +77,20 @@ CONTAINS
       ! --- Loop over the seed size, nsdMax ---
       !----------------------------------------
       startLoop: DO jsd=1,nsdMax
-      
          iist  = seed_ijk (jsd,1)
          ijst  = seed_ijk (jsd,2)
          ikst  = seed_ijk (jsd,3)
          isec  = seed_set (jsd,1)
          idir  = seed_set (jsd,2)
+         if (iist <= 1)   cycle startLoop
+         if (ijst <= 1)   cycle startLoop
+         if (iist >= imt) cycle startLoop
+         if (ijst >= jmt) cycle startLoop
+         if (ikst > km)   cycle startLoop
+         if (kmt(iist,ijst) == 0) cycle startLoop
+
+
+
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
@@ -184,8 +192,6 @@ CONTAINS
          END SELECT
          
          IF (num == 0 .AND. nqua /= 4) THEN
-!            PRINT*,'WARNING: Number of trajectories = 0 !'  ! This is nothing to worry about!
-!            PRINT*,'         Using num = 1'				 ! Just weak velocities. K.Döös
             num=1
          END IF
      
@@ -238,8 +244,7 @@ CONTAINS
                      jb = ijst
                   END IF 
               
-               CASE (3)   ! Horizontal section
-                  
+               CASE (3)   ! Horizontal section                  
                   x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                   y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                   z1 = DBLE (kb)
@@ -250,14 +255,12 @@ CONTAINS
                      kb = ikst
                   END IF
                   
-               CASE (4)   ! Spread even inside box
-                  
+               CASE (4)   ! Spread even inside box                  
                   x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt) - 0.5d0) / DBLE(ijt)
                   y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt) - 0.5d0) / DBLE(ikt)
                   z1 = DBLE (kb-1) + 0.5d0
                                  
-               CASE (5)
-                  
+               CASE (5)                  
                   x1 = seed_xyz (jsd,1)
                   y1 = seed_xyz (jsd,2) 
                   z1 = seed_xyz (jsd,3)
