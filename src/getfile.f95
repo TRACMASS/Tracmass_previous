@@ -13,6 +13,23 @@ MODULE mod_getfile
   
 CONTAINS
 
+ !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+  function getScalarNC (fieldFile ,varName)
+    CHARACTER (len=*)                       :: fieldFile ,varName 
+    REAL                                    :: getScalarNC
+    INTEGER,             DIMENSION(1)       :: d    
+    INTEGER                                 :: varid ,ncid
+  
+    ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
+    if(ierr.ne.0) call printReadError(1)    
+    ierr=NF90_INQ_VARID(ncid ,varName ,varid)
+    if(ierr.ne.0) call printReadError(2)
+    ierr=NF90_GET_VAR(ncid ,varid ,getScalarNC)
+    if(ierr.ne.0) call printReadError(3)
+    ierr=NF90_CLOSE(ncid)
+  end function getScalarNC
+
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
   function get1DfieldNC (fieldFile ,varName)
