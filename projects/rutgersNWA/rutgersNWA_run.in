@@ -63,10 +63,10 @@
   kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/Volumes/keronHD4/rutgersNWA/',
+  inDataDir       = '/Volumes/rutgersNWA/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Volumes/keronHD4/ormOut/',
+  outDataDir      = '/Volumes/rutgersNWA/ormOut/',
   !
   ! === Name of current trajectory run
   outDataFile     = 'rutgersNWAtest',
