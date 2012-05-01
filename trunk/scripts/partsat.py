@@ -7,18 +7,14 @@ from itertools import izip
 import numpy as np
 import pylab as pl
 import scipy.io
+from matplotlib.colors import LogNorm
 
+from hitta import GBRY
+import projmaps, anim
 from trm import trm
 import batch
 
 miv = np.ma.masked_invalid
-
-badjds = np.array([ 733779.,  733799.,  733809.,  733819.,  733829.,  733839.,
-                 733849.,  733859.,  733869.,  733889.,  733899.,  733909.,
-                 733919.,  733929.,  733939.,  733949.,  733959.,  733969.,
-                 733979.,  733989.,  733999.,  734009.,  734019.,  734029.,
-                 734039.,  734049.,  734069.,  734079.,  734089.,  734099.,
-                 734109.,  734119.,  734129.])
 
 class traj(trm):
 
@@ -84,6 +80,57 @@ class traj(trm):
         else:
             self.empty = True
         self.ijll()
+
+    def select_dfld(self,field="chl", jd=734107):
+        """ Get the change in tracer for all trajectories at jd=jd"""
+        sql = """SELECT c2.ints-c.ints as dt, c.val as val1, c2.val as val2,
+                        t.x, t.y FROM %s__%s c
+                    INNER JOIN %s__%s c2 ON
+                            c.runid=c2.runid AND c.ntrac=c2.ntrac
+                    INNER JOIN %s t ON c.runid=t.runid AND c.ntrac=t.ntrac
+                  WHERE c.ints > %i AND  c.ints <= %i AND
+                          c2.ints > %i AND c2.ints < %i AND t.ints=%i;"""
+        self.c.execute(sql % (self.tablename, field, self.tablename, field,
+                              self.tablename, jd-10, jd, jd, jd+10, jd))
+        res = zip(*self.c.fetchall())
+        if len(res)==0: return False
+        for n,a in enumerate(['dt', 'val1', 'val2', 'x', 'y']):
+            self.__dict__[a] = np.array(res[n])
+        return True
+    
+    def map_dfld(self, field="chl",jd=734107):
+        """ Create map of average change in tracer """
+        success = self.select_dfld(field=field, jd=jd)
+        if not success:
+             self.dfld = self.llat * np.nan
+             return
+        dfld = self.map((self.val2-self.val1)/self.dt)
+        dcnt = self.map()
+        self.dfld = dfld/dcnt
+
+    def pcolor(self, field, jd=None):
+        """Plot a map of a field using projmap"""
+        self.add_mp()
+        pl.clf()
+        pl.subplot(111,axisbg='0.9')
+        self.mp.pcolormesh(self.mpxll,self.mpyll,miv(field), cmap=GBRY())
+        self.mp.nice()
+        if jd: pl.title(pl.num2date(jd).strftime("%Y-%m-%d"))
+        pl.clim(-10,10)
+        pl.colorbar(aspect=40,shrink=0.95,pad=0,fraction=0.05)
+
+    def dfld_movie(self, jd1, jd2, field='chl'):
+        """Create a movie of the daily changes in tracer"""
+        mv = anim.Movie()
+        for jd in np.arange(jd1,jd2+1):
+            t1 = dtm.now()
+            print "Images left: ", jd2-jd
+            self.map_dfld(field=field, jd=jd)
+            self.pcolor(self.dfld, jd)
+            mv.image()
+            print "Delta time: ", dtm.now() - t1
+        mv.video(self.projname + "_" + field + "_mov.mp4",r=2)
+
 
     def sat_conc(self,intstart,field,pos='start'):
         """Retrive fields of start- and end-values""" 
