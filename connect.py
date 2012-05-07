@@ -9,12 +9,14 @@ import pylab as pl
 import scipy.io
 from matplotlib.colors import LogNorm
 from scipy.spatial import cKDTree
+import matplotlib.cm as cm
 
 from hitta import GBRY
 import projmaps, anim
 from trm import trm
 import batch
 import figpref
+import mycolor
 
 miv = np.ma.masked_invalid
 
@@ -103,8 +105,11 @@ class Matrix(trm):
         return bFunc
 
     @trajsloaded
-    def reg_from_discs(self,mask):
+    def reg_from_discs(self,mask=False):
         """Generate a vector with region IDs"""
+        if not mask:
+            self.add_default_regmask()
+            mask = self.mask
         self.generate_regdiscs(mask)
         dist,ij = self.discKD.query(list(np.vstack(
             (self.x,self.y)).T),1)
@@ -166,7 +171,7 @@ class Matrix(trm):
             self.y = self.discj
             self.ijll()
 
-        figpref.manuscript()
+        figpref.presentation()
         pl.close(1)
         pl.figure(1,(10,10))
 
@@ -178,12 +183,14 @@ class Matrix(trm):
         pl.subplots_adjust(wspace=0,hspace=0,top=0.95)
 
         pl.subplot(2,2,1)
-        pl.pcolormesh(miv(conmat))
-        pl.clim(0,50)
+        pl.pcolormesh(miv(conmat),cmap=cm.hot)
+        pl.clim(0,250)
         pl.plot([0,800],[0,800],'g',lw=2)
         pl.gca().set_aspect(1)
         pl.setp(pl.gca(),yticklabels=[])
         pl.setp(pl.gca(),xticklabels=[])
+        pl.colorbar(aspect=40,orientation='horizontal',
+                    pad=0,shrink=.8,fraction=0.05,ticks=[0,50,100,150,200])
 
         pl.subplot(2,2,2)
         colorvec = (np.nansum(conmat,axis=1)-np.nansum(conmat,axis=0))[1:]
@@ -207,18 +214,91 @@ class Matrix(trm):
         self.gcm.mp.nice()
         pl.clim(0,10000)
 
+        mycolor.freecbar([0.2,.06,0.6,0.020],[2000,4000,6000,8000])
+
         pl.suptitle("Trajectories seeded from %s to %s, Duration: %i-%i days" %
                     (pl.num2date(jd1).strftime("%Y-%m-%d"),
                      pl.num2date(jd1+djd).strftime("%Y-%m-%d"), dt,dt+10))
 
-        pl.savefig('multplot_%i_%03i.png' % (jd1,dt))
+        pl.savefig('multplot_%i_%03i.png' % (jd1,dt),transparent=True)
+    def all_multiplots(self):
+        for jd in np.arange(0,235,60):
+            for dt in [10,20,40,60,90]:
+                self.multiplot(730120+jd,dt=dt)
+
 
     def add_default_regmask(self):
         self.mask = (self.gcm.depth<200) & (self.gcm.depth>10)
         self.mask[:,:250] = False
         self.mask[:160,:] = False
 
+    def export(self,filename,type='csv'):
+        np.savetxt(filename,co.conmat,fmt="%f",delimiter=',')
+        
+    
+def ncfile(co):
+    nc = Netcdf()
+  
+    nc.write_conmat(co.conmat,0,0)
+    nc.close()
 
+
+from scipy.io import netcdf
+
+class Netcdf(object):
+    """Class to create and populate necdf files for connectivity mats"""
+
+    def __init__(self):
+        nc.create_file('test.cdf')
+        nc.create_jdvar()
+        nc.create_dtvar(np.arange(1,120))
+        nc.create_regions(co.discn,co.disci,co.discj)
+        nc.create_conmat()
+
+    def create_file(self,filename):
+        self.f = netcdf.netcdf_file(filename, 'w')
+        self.f.history = 'Connectivity matrices for NWA'
+
+    def create_jdvar(self):
+        self.f.createDimension('jd', None)
+        self.jdvec = self.f.createVariable('seed_time', 'i', ('jd',))
+        self.jdvec.units = 'Julian days from 0001-01-01 (scipy)'
+
+    def create_dtvar(self, pldvec):
+        self.f.createDimension('dt', len(pldvec))
+        self.dtvec = self.f.createVariable('dtvec', 'i', ('dt',))
+        self.dtvec.units = 'Time since start of trajecories (days)'
+        self.dtvec[:] = pldvec
+
+    def create_regions(self,regid, regi, regj):
+        self.f.createDimension('reg', len(regid)+1)
+        ncregid = self.f.createVariable('regid', 'i', ('reg',))
+        ncregid.units = 'ID for the different regions.'
+        ncregx = self.f.createVariable('regx', 'f', ('reg',))
+        ncregx.units = 'X-pos of the region centers'
+        ncregy = self.f.createVariable('regy', 'f', ('reg',))
+        ncregy.units = 'Y-pos of the region centers.'
+        ncregid[1:] = regid
+        ncregx[1:] =  regi
+        ncregy[1:] =  regj
+
+    def create_conmat(self):
+        self.conmat = self.f.createVariable('conmat', 'i',
+                                       ('jd','dt','reg','reg'))
+        self.conmat.units = 'Connectivity matrix (number of particles).'
+
+
+    def write_conmat(self,conmat,jdpos=None,dtpos=None):
+        self.conmat[jdpos,dtpos,:,:] = conmat
+
+    
+    def close(self):
+        self.f.close()
+
+def rsquared(dt, jd=0):
+    mask = ~np.isnan(np.ravel(co[jd,dt]))
+    return linregress(ravel(imat)[mask], ravel(jmat)[mask])[2]        
+    
 def all_conmats(mask,jd1=730120.0,jd2=730360.0, djd=5):
     """Generate  nonmats for all trm runs and dt's"""
     co = Matrix('rutgersNWA')
@@ -230,63 +310,3 @@ def all_conmats(mask,jd1=730120.0,jd2=730360.0, djd=5):
             np.load('conmatfiles/conmat_%04i_%04i.npz' % (jd-jd1,dt),
                      conmat=co.conmat)
             print jd-jd1,dt
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def generate_netcdf(co, dtlen=120,jd1=730120.0,jd2=730360.0, djd=5):
-    from scipy.io import netcdf
-    f = netcdf.netcdf_file('conmat.cdf', 'w')
-    f.history = 'Connectivity matrices for NWA'
-
-    f.createDimension('jd', None)
-    jdvec = f.createVariable('jd', 'i', ('jd',))
-    jdvec.units = 'Julian days from 0001-01-01 as defined by scipy'
-
-    f.createDimension('dt', dtlen-1)
-    dtvec = f.createVariable('dtvec', 'i', ('dt',))
-    dtvec.units = 'Time since start of trajecories (days)'
-    dtvec[:] = np.arange(1,dtlen)
-
-    f.createDimension('reg', co.nreg)
-    regid = f.createVariable('regid', 'i', ('reg',))
-    regid.units = 'ID for the different regions.'
-    regx = f.createVariable('regx', 'f', ('reg',))
-    regx.units = 'X-pos of the different regions.'
-    regy = f.createVariable('regy', 'f', ('reg',))
-    regy.units = 'Y-pos of the different regions.'
-    regid[1:] = co.discn
-    regx[1:] = co.disci
-    regy[1:] = co.discj
-
-    conmat = f.createVariable('conmat', 'i', ('jd','dt','reg','reg'))
-    conmat.units = 'Connectivity matrix (number of particles).'
-
-
-    for n1,jd in enumerate(np.arange(jd1,jd2,djd)):
-        for n2,dt in enumerate(np.arange(2,3)):
-            cmobj = np.load('conmatfiles/conmat_%04i_%04i.npz' % (jd-jd1,dt))
-            conmat[n1,n2,:,:] = cmobj['conmat']
-            print jd-jd1,dt
-            cmobj.close()
-        jdvec[n1] = jd
-        return
-    
-    f.close()
-
-def rsquared(dt, jd=0):
-    mask = ~np.isnan(np.ravel(co[jd,dt]))
-    return linregress(ravel(imat)[mask], ravel(jmat)[mask])[2]        
-    
