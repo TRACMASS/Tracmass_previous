@@ -20,7 +20,7 @@ import mycolor
 
 miv = np.ma.masked_invalid
 
-class Matrix(trm):
+class Matrix(Trm):
 
     def __init__(self,projname,casename="", datadir="", datafile="",
                  ormdir="", griddir="",radius=2):
@@ -94,15 +94,7 @@ class Matrix(trm):
         self.conmat = np.zeros((self.nreg,self.nreg))
         self.conmat.flat[:len(sums)] = sums
         
-    def trajsloaded( aFunc ):
-        """Trace entry, exit and exceptions."""
-        def bFunc( *args, **kw ):
-            if not "x" in dir(args[0]):
-                raise NameError, "Trajectory data not loaded."
-            return aFunc( *args, **kw )
-        bFunc.__name__= aFunc.__name__
-        bFunc.__doc__= aFunc.__doc__
-        return bFunc
+
 
     @trajsloaded
     def reg_from_discs(self,mask=False):

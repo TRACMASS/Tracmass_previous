@@ -16,22 +16,23 @@ import batch
 
 miv = np.ma.masked_invalid
 
-class traj(trm):
+class Partsat(trm):
 
-    def __init__(self,projname,casename="", datadir="", datafile="", ormdir="",
-                 griddir='/projData/GOMPOM/'):
+    def __init__(self,projname,casename="", datadir="",
+                 datafile="", ormdir="", griddir='/projData/GOMPOM/'):
         trm.__init__(self,projname,casename,datadir,datafile,ormdir)
         self.flddict = {'par':('L3',),'chl':('box8',)}
-
         if projname == 'oscar':
             import pysea.NASA
-            self.sat = pysea.NASA.nasa(res='4km',ijarea=(700,1700,2000,4000))
+            self.sat = pysea.NASA.nasa(res='4km',
+                                       ijarea=(700,1700,2000,4000))
             def calc_jd(ints,intstart):
                 return self.base_iso + float(ints)/6-1
         elif projname=="casco":
             self.sat = casco.Sat(res='500m')
             def calc_jd(ints,intstart):
-                return (self.base_iso +(ints-(intstart)*10800)/150+intstart/8)
+                return (self.base_iso +(ints-(intstart)*10800)/150 +
+                        intstart/8)
         elif projname=="gompom":
             n = pycdf.CDF('/Users/bror/svn/modtraj/box8_gompom.cdf')
             self.gomi = n.var('igompom')[:]
@@ -46,8 +47,7 @@ class traj(trm):
             self.sat = mati.Cal()
 
     def sat_trajs(self,intstart,field,pos='start'):
-        """Retrive start- and end-values together
-        with x-y pos for trajs""" 
+        """Retrive x-y pos and start-end values for trajs""" 
         if pos == 'start':
             t1str = " AND t.ints=t1.ints "; t2str = ""
         else:
@@ -80,57 +80,6 @@ class traj(trm):
         else:
             self.empty = True
         self.ijll()
-
-    def select_dfld(self,field="chl", jd=734107):
-        """ Get the change in tracer for all trajectories at jd=jd"""
-        sql = """SELECT c2.ints-c.ints as dt, c.val as val1, c2.val as val2,
-                        t.x, t.y FROM %s__%s c
-                    INNER JOIN %s__%s c2 ON
-                            c.runid=c2.runid AND c.ntrac=c2.ntrac
-                    INNER JOIN %s t ON c.runid=t.runid AND c.ntrac=t.ntrac
-                  WHERE c.ints > %i AND  c.ints <= %i AND
-                          c2.ints > %i AND c2.ints < %i AND t.ints=%i;"""
-        self.c.execute(sql % (self.tablename, field, self.tablename, field,
-                              self.tablename, jd-10, jd, jd, jd+10, jd))
-        res = zip(*self.c.fetchall())
-        if len(res)==0: return False
-        for n,a in enumerate(['dt', 'val1', 'val2', 'x', 'y']):
-            self.__dict__[a] = np.array(res[n])
-        return True
-    
-    def map_dfld(self, field="chl",jd=734107):
-        """ Create map of average change in tracer """
-        success = self.select_dfld(field=field, jd=jd)
-        if not success:
-             self.dfld = self.llat * np.nan
-             return
-        dfld = self.map((self.val2-self.val1)/self.dt)
-        dcnt = self.map()
-        self.dfld = dfld/dcnt
-
-    def pcolor(self, field, jd=None):
-        """Plot a map of a field using projmap"""
-        self.add_mp()
-        pl.clf()
-        pl.subplot(111,axisbg='0.9')
-        self.mp.pcolormesh(self.mpxll,self.mpyll,miv(field), cmap=GBRY())
-        self.mp.nice()
-        if jd: pl.title(pl.num2date(jd).strftime("%Y-%m-%d"))
-        pl.clim(-10,10)
-        pl.colorbar(aspect=40,shrink=0.95,pad=0,fraction=0.05)
-
-    def dfld_movie(self, jd1, jd2, field='chl'):
-        """Create a movie of the daily changes in tracer"""
-        mv = anim.Movie()
-        for jd in np.arange(jd1,jd2+1):
-            t1 = dtm.now()
-            print "Images left: ", jd2-jd
-            self.map_dfld(field=field, jd=jd)
-            self.pcolor(self.dfld, jd)
-            mv.image()
-            print "Delta time: ", dtm.now() - t1
-        mv.video(self.projname + "_" + field + "_mov.mp4",r=2)
-
 
     def sat_conc(self,intstart,field,pos='start'):
         """Retrive fields of start- and end-values""" 
@@ -224,16 +173,6 @@ class traj(trm):
                 insertload(jd)
                 batch.purge()
 
-    def fix_bad_jds(self):
-
-        for jd in badjds:
-            sql = "DELETE FROM jplnowfull__chl WHERE ints=%i"
-            self.c.execute(sql % jd)
-            self.conn.commit()
-            self.insert_sat_to_db('chl',jd)
-            self.insert_sat_to_db('chl',jd+1)
-            print jd
-
     def field_jds(self,field):
         table = self.tablename + field
         class ints: pass
@@ -277,6 +216,64 @@ class traj(trm):
         svec.mean  = res[4]
         
         return svec
+
+
+class DeltaField(Partsat):
+    """ Calculate the change in tracer from one day to another """
+    def __init__(self,projname,casename="", datadir="",
+                 datafile="", ormdir="", griddir='/projData/GOMPOM/'):
+        Partsat.__init__(self,projname,casename,datadir,datafile,ormdir)
+
+    def select(self,field="chl", jd=734107):
+        """ Get the change in tracer for all trajectories at jd=jd"""
+        sql = """SELECT c2.ints-c.ints as dt, c.val as val1,c2.val as val2,
+                        t.x, t.y FROM %s__%s c
+                    INNER JOIN %s__%s c2 ON
+                            c.runid=c2.runid AND c.ntrac=c2.ntrac
+                    INNER JOIN %s t ON c.runid=t.runid AND c.ntrac=t.ntrac
+                  WHERE c.ints > %i AND  c.ints <= %i AND
+                          c2.ints > %i AND c2.ints < %i AND t.ints=%i;"""
+        self.c.execute(sql % (self.tablename, field, self.tablename, field,
+                              self.tablename, jd-10, jd, jd, jd+10, jd))
+        res = zip(*self.c.fetchall())
+        if len(res)==0: return False
+        for n,a in enumerate(['dt', 'val1', 'val2', 'x', 'y']):
+            self.__dict__[a] = np.array(res[n])
+        return True
+    
+    def map(self, field="chl",jd=734107):
+        """ Create map of average change in tracer """
+        success = self.select(field=field, jd=jd)
+        if not success:
+             self.dfld = self.llat * np.nan
+             return
+        dfld = self.map((self.val2-self.val1)/self.dt)
+        dcnt = self.map()
+        self.dfld = dfld/dcnt
+
+    def pcolor(self, field, jd=None):
+        """Plot a map of a field using projmap"""
+        self.add_mp()
+        pl.clf()
+        pl.subplot(111,axisbg='0.9')
+        self.mp.pcolormesh(self.mpxll,self.mpyll,miv(field), cmap=GBRY())
+        self.mp.nice()
+        if jd: pl.title(pl.num2date(jd).strftime("%Y-%m-%d"))
+        pl.clim(-10,10)
+        pl.colorbar(aspect=40,shrink=0.95,pad=0,fraction=0.05)
+
+    def movie(self, jd1, jd2, field='chl'):
+        """Create a movie of the daily changes in tracer"""
+        mv = anim.Movie()
+        for jd in np.arange(jd1,jd2+1):
+            t1 = dtm.now()
+            print "Images left: ", jd2-jd
+            self.map(field=field, jd=jd)
+            self.pcolor(self.dfld, jd)
+            mv.image()
+            print "Delta time: ", dtm.now() - t1
+        mv.video(self.projname + "_" + field + "_mov.mp4",r=2)
+
 
 
 #####################################################################
@@ -359,25 +356,6 @@ def calc_ncp_time(batchfile='batch_ints_start.asc'):
         tS.cnt.append(len(ncp.ncp))
     return tS
 
-def test(ps2):
-    ps = traj(projname='casco')
-    ps.gomi,ps.gomj,ps.sati,ps.satj,ps.sat = (
-        ps2.gomi,ps2.gomj,ps2.sati,ps2.satj,ps2.sat)
-    print ps.sat_field('chlor_a',68612400,6535)
-
-def add_all(ps):
-    intstart = [6353,6361,7665,7865,7873,7993,8001]
-    ints = [68612400, 68698800, 68785200, 84250800,
-            84942000, 85028400, 86324400, 86410800] 
-
-    for s,i in zip(intstart,ints)[4:]:
-        print s,i
-        ps.sat_to_db('chlor_a',intstart=s,ints=i,batch=True)
-        print s,i+24*3600
-        ps.sat_to_db('chlor_a',intstart=s,ints=(i+24*3600),batch=True)
-
-
-
 def interp(ps,intstart=6353):
     import figpref
     import projmaps
@@ -411,16 +389,6 @@ def interp(ps,intstart=6353):
     itvec = tvec-tvec.min()
     itvec = itvec.astype(np.float)/itvec.max()
 
-    """
-    for n,t in enumerate(tvec):
-        pl.clf()
-        pl.scatter(trj.x[trj.ints==t],
-                   trj.y[trj.ints==t],5,
-                   np.log(trj.t1val[trj.ints==t])*(1-itvec[n]) +
-                   np.log(trj.t2val[trj.ints==t])*(itvec[n]) )
-        print itvec[n]
-        pl.savefig("interp_%i.png" % t, dpi=100)
-    """
     mp = projmaps.Projmap('casco')
     xl,yl = mp(ps.llon,ps.llat)
     for n,t in enumerate(tvec):
@@ -445,12 +413,6 @@ def interp(ps,intstart=6353):
         pl.savefig("interp_%i_%03i.png" % (intstart,n), dpi=100)
 
 
-def test():
-    tr = traj('jplNOW','ftp','/Volumes/keronHD3/ormOut/')
-    tr.load(733833.0)
-    tr.remove_satnans()
-    tr.db_insert()
-
 def batch_insert():
     import batch
     def copy(jd):
@@ -470,5 +432,4 @@ def batch_insert():
 
 def profile():
     import cProfile
-
     cProfile.run('test()')
