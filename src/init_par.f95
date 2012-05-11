@@ -189,7 +189,6 @@ SUBROUTINE init_params
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
-
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
          CALL getarg(2,inparg)
@@ -213,8 +212,8 @@ SUBROUTINE init_params
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
             intmin      = (startJD)/(ngcm/24)+1
-         ELSE ! this is a quick fix to avoid division by zero when ngcm < 24
-            intmin      = int(real(startJD)/(real(ngcm)/24)+1)
+         ELSE ! this needs to be verified
+            intmin      = (24*startJD)/ngcm+3-ngcm
          END IF
       END IF startYearCond
 

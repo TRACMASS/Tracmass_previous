@@ -42,7 +42,7 @@ $INITGRIDDATE
   baseSec        = 0,
   baseMin        = 0,
   baseHour       = 0,
-  baseDay        = 5,
+  baseDay        = 1,
   baseMon        = 1,
   baseYear       = 1997/
   !

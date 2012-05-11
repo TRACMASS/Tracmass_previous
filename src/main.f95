@@ -19,18 +19,15 @@ PROGRAM main
   call coordinat
   call writesetup
 
-!  modrundirCond: if(intstep.gt.0) then ! forward 
   modrundirCond: if(nff == 1) then ! forward 
      intstart =  intmin          
      intend   =  intmax
   elseif(nff == -1) then ! backward
-!  elseif(intstep.lt.0) then ! backward
      intstart =  intmin+intrun
      intend   =  intmin
      intspin  = -intspin
      intrun   = -intrun    
   end if modrundirCond
-!  print *,intmin,intstart,intrun
   call setupgrid
   call init_seed
   

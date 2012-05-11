@@ -350,20 +350,23 @@ contains
           
           ! move if atmosphere, freeze if ocean
           ib=ia ; jb=ja ; kb=ka
-#ifdef ifs
-          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
-#else
-          x1=x0 ; y1=y0 ; z1=z0 
-#endif  
+!          print *,'convergence for ',ib,jb,kb,x0,y0,z0
+!#ifdef ifs
+!          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
+!          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
+!          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+!#else
+!          x1=x0 ; y1=y0 ; z1=z0 
+!          print *,ib,jb,kb,x1,y1,z1
+!#endif  
           ! If there is at least one spatial solution 
           ! but the shortest cross time is the time step
-       else
+       endif
+!       else
           call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
           call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
           call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
-       endif
+!       endif
 #endif
     endif
     

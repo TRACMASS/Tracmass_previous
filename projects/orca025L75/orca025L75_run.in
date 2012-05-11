@@ -45,9 +45,9 @@
   startSec         =    0,
   startMIN         =    0,
   startHour        =    0,
-  startDay         =    05,!5,!4,!31,
-  startMon         =    01,!1,!7,!12,
-  startYear        =  1997  !1990
+  startDay         =    1,!5,!4,!31,
+  startMon         =   01,!1,!7,!12,
+  startYear        = 1997  !1990
 / 
   !
   !
