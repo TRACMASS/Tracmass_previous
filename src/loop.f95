@@ -467,7 +467,7 @@ SUBROUTINE loop
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then
                 if (temp > tmaxe .and. salt < smine .and.  &
-               &   (tt-t0)/tday > 200.      ) then
+               &   (tt-t0)/tday > 100.      ) then
                  nexit(NEND)=nexit(NEND)+1
                  exit niterLoop                                
                endif

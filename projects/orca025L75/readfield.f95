@@ -121,12 +121,12 @@ julian5=5*int(real(julian-1)/5.)+1
 ntime=1000000*currYear+10000*currMon+100*currDay+currHour
 nread=nread+1
 if(nread>20) nread=1
+
 ! ------------------------------------------------------------
 
 ! === Find the file for this timestep ===
   start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
   start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
-  
 if(nread.eq.1) then
 
  dataprefix='xxxx/ORCA025.L75-SLB2_6h_yxxxx_d000-000_grid_'
@@ -137,7 +137,7 @@ if(nread.eq.1) then
  elseif(julian5  <100) then
   write(dataprefix(34:35),'(i2)') julian5
 else
-  write(dataprefix(34:35),'(i3)') julian5
+  write(dataprefix(33:35),'(i3)') julian5
 endif
  if(julian5+4    <10) then
  write(dataprefix(39:39),'(i1)') julian5+4
@@ -152,7 +152,7 @@ endif
 
 ! SSH + T + S
 gridFileT=trim(fieldFile)//'T.nc'
-!print *,'gridFile=',gridFile
+!print *,'gridFileT =', gridFileT
 inquire(file=trim(gridFileT),exist=around)
 if(.not.around) then
  zfile='gunzip -c '//trim(gridFileT)//'.gz > tmpT'

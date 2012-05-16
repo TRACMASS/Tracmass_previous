@@ -32,7 +32,7 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  =    1,
-  intspin =  292,  
+  intspin =    4,  
   intrun  = 1752,         ! = 73*24
   intstep = 0
 /
@@ -45,7 +45,7 @@
   startSec         =    0,
   startMIN         =    0,
   startHour        =    0,
-  startDay         =    1,!5,!4,!31,
+  startDay         =    1,!6,11,16,
   startMon         =   01,!1,!7,!12,
   startYear        = 1997  !1990
 / 
@@ -71,12 +71,12 @@
   ! intminInOutFile : ??????????????????????????????????????????
   !
   ncoor           = 0,
-  kriva           = 3,
+  kriva           = 1,
   inDataDir       = '/Users/doos/data/orca/orca025L75/'
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025L75/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'wpool_big'
+  outDataFile     = 'wpool_big1'
   intminInOutFile = 0
   /
   !
@@ -121,14 +121,14 @@ $INITRUNSEED
   isec        = 2,
   idir        = 0,
   nqua        = 1,
-  partQuant   = 1,
+  partQuant   = 16,
   seedType    = 1,
   ist1        = 227,!260, !260,   !330,
   ist2        = 550, !880, !550, ! 880,   !480,
   jst1        = 508,!508, !518,!332, !490, !487,   !940,
   jst2        = 508,! 508, !518,!650, !507, !487,   !1010,
   kst1        =   1,
-  kst2        =  64,
+  kst2        =  75,
   varSeedFile = 0,
   seedDir     = ' ',
   seedFile    = ' '
