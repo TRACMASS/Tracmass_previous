@@ -1024,17 +1024,17 @@ return
 #endif /*zgrid3Dt*/
     dxyz=dxyz*dxdy(ib,jb)
     if (dxyz<0) then
-       print *,'====================================='
-       print *,'ERROR: Negative box volume           '
-       print *,'-------------------------------------'
+       print *,'=========================================================='
+       print *,'ERROR: Negative box volume                                '
+       print *,'----------------------------------------------------------'
        print *,'dzt  = ', dxyz/dxdy(ib,jb),dz(kb),hs(ib,jb,:)
        print *,'dxdy = ', dxdy(ib,jb)
        print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
-       print *,'-------------------------------------'
+       print *,'----------------------------------------------------------'
        print *,'The run is terminated'
-       print *,'====================================='
+       print *,'=========================================================='
        errCode = -60
-       stop
+       !stop
     end if
   end subroutine calc_dxyz
 

@@ -162,9 +162,11 @@ SUBROUTINE init_params
          start1d  = [  1]
          count1d  = [ km]
          start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-         count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
+         count2d  = [  1 ,  1 ,subGridImax-subGridImin + 1,  &
+                               subGridJmax-subGridJmin + 1]
          start3d  = [  1, subGridImin, subGridJmin,  1]
-         count3d  = [  1, subGridImax, subGridJmax, km]
+         count3d  = [  1, subGridImax - subGridImin + 1,    & 
+                          subGridJmax - subGridJmin + 1, km]
 
          READ (8,nml=INITRUNTIME)
          READ (8,nml=INITRUNDATE)

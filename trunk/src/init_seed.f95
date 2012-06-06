@@ -65,7 +65,7 @@ SUBROUTINE init_seed()
       
       DO ji=ist1,ist2
          DO jj=jst1,jst2
-            IF (kmt(ji,jj) .ne. 0) THEN 
+            IF (mask(ji,jj) .ne. 0) THEN 
               DO jk=kst1,kst2
                  nsd = nsd+1
                  seed_ijk (nsd,1:3) = [ ji, jj, jk ]
