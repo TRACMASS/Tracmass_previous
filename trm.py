@@ -12,7 +12,6 @@ import matplotlib as mpl
 
 from traj import Traj
 
-import batch
 import namelist as nlt
 import lldist
 
@@ -54,22 +53,6 @@ class Trm(Traj):
         self.imt = self.nlgrid.IMT
         self.jmt = self.nlgrid.JMT
 
-        """
-        elif projname=="topaz":
-            griddir  = '/projData/TOPAZ/1yr_1d/'
-            gridname = '/22450101.ocean_daily.nc' 
-            g = pycdf.CDF(griddir + gridname)
-            lon = g.var('xu_ocean')[:]
-            lat = g.var('yu_ocean')[:]
-            #self.lon[self.lon<-180] = self.lon[self.lon<-180] + 360
-            self.llon,self.llat = np.meshgrid(lon, lat)
-        elif projname=="gompom":
-            n = pycdf.CDF(griddir + 'grid.cdf')
-            self.llon = n.var('x')[:]    
-            self.llat = n.var('y')[:]
-            self.base_iso = pl.date2num(dtm(2004,1,1))
-        """
-
     def read_bin(self, filename):
         """Read binary output from TRACMASS"""
         with open(filename) as fd:
@@ -90,7 +73,7 @@ class Trm(Traj):
             filename = ("%s%08i_%s.%s" % (self.datafile,intstart,
                                           ftype,stype))
         elif filename == '':
-            filename = self.currfile()
+            filename = "%s_%s.%s" % (self.currfile()[:-8],ftype,stype) 
          
         if filename[-3:] == "bin":
             runtraj = self.read_bin(self.datadir + filename)
@@ -110,8 +93,8 @@ class Trm(Traj):
         self.x[self.x<0] = self.x[self.x<0] + self.imt
         #assert self.x.min() >= 0
         #assert self.y.min() >= 0
-        assert self.x.min() <= self.imt
-        assert self.y.min() <= self.jmt
+        #assert self.x.min() <= self.imt
+        #assert self.y.min() <= self.jmt
         self.intstart = intstart
         if self.nlrun.twritetype == 1:
             self.jd = (self.ints.astype(float)/60/60/24 + self.base_iso)
@@ -122,6 +105,7 @@ class Trm(Traj):
         
     def db_bulkinsert(self,datafile=None):
         """Insert trm bin-files data using pg_bulkload"""
+        import batch
         pg_bulkload = "/opt/local/lib/postgresql90/bin/pg_bulkload"
         ctl_file = "load_trm.ctl"
         db = "-dpartsat"
