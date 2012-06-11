@@ -15,8 +15,30 @@ from traj import Traj
 import namelist as nlt
 import lldist
 
+"""trm - a module to post-process output from TRACMASS""
+
+This module simplifies reading and analysis of data genereated by the TRACMASS
+off-line perticle tracking code (http://tracmass.org). The module also 
+includes functionality to generate seed files to be used when a specific
+region should be seeded by TRACMASS. 
+"""
 class Trm(Traj):
-    """Class for TRACMASS specific functionality"""
+    """Class for TRACMASS specific functionalily
+         Usage:
+           tr = pytraj.Trm('projname', 'casename')
+           tr.load()                    #Load the last generated file
+           tr.load(jd=1234)             #Load the file starting at 1234
+           tr.load (filename"file.bin") #Load the file named file.bin   
+         
+         Before using this module, set the environmental variable TRM 
+         to point to the directory with your TRACMASS project. Add the 
+         following line to the .profile, .bashrc, or other configuration
+         file in your home directory:
+        
+           export TRMDIR="/path/to/the/trm/root/dir/"                     
+    """
+
+
     def __init__(self,projname, casename=None, region=None,
                  datadir="", datafile="", trmdir=""):
         super(Trm, self).__init__(projname, casename, region)
@@ -168,6 +190,6 @@ class Trm(Traj):
 
     @property
     def ls(self):
-        flist = glob.glob("%s/%s*"% (self.datadir,self.nlrun.outDataFile))
+        flist = glo.glob("%s/%s*"% (self.datadir,self.nlrun.outDataFile))
         for f in flist: print f
 

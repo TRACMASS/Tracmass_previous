@@ -6,13 +6,12 @@ import pylab as pl
 import matplotlib as mpl
 
 #import anim
-#import projmaps
 #from hitta import GrGr
 
 import lldist
 from postgresql import DB
 
-sys.path.append('/Users/bror/git/njord/')
+#sys.path.append('/Users/bror/git/njord/')
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -32,17 +31,25 @@ class Traj(object):
         cfg = ConfigParser.ConfigParser()
         cfg.read(PROJECT_ROOT + "/projects.cfg")
         if not self.projname in cfg.sections():
-            raise NameError('Project not included in config file')
+            print "Project not included in config file"
+            print "Geo-reference functionality will be limited"
+            return
         nmod = cfg.get(self.projname, 'njord_module')
         ncls = cfg.get(self.projname, 'njord_class')
         if self.region is None:
             self.region = cfg.get(self.projname, 'map_region')
 
-        self.gcm = (__import__(nmod).__dict__[ncls])()
-        self.gcm.add_landmask()
-        self.landmask = self.gcm.landmask
-        self.llon = self.gcm.llon
-        self.llat = self.gcm.llat
+        try:
+            self.gcm = (__import__(nmod).__dict__[ncls])()
+            self.gcm.add_landmask()
+            self.landmask = self.gcm.landmask
+            self.llon = self.gcm.llon
+            self.llat = self.gcm.llat
+        except:
+            print "Couldn't load the NJORD module." 
+            print "Geo-reference functionality will be limited"""
+            
+
 
     def trajsloaded( aFunc ):
         """Decorator function to check if trajs are loaded."""
@@ -55,6 +62,10 @@ class Traj(object):
         return bFunc
 
     def add_mp(self):
+        try:
+            import projmap
+        except:
+            raise ImportError("Module PROJMAP not available")            
         if not hasattr(self,'mp'):
             self.mp = projmaps.Projmap(self.region)
             self.mpxll,self.mpyll = self.mp(self.llon,self.llat)
