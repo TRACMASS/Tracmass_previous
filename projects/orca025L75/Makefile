@@ -6,7 +6,7 @@
    fl01   = -Dtimestep      # Time steps with analytical stationary scheme differential Eqs.
 #  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
    fl02   = -Dregulardt     # Regular time steps to be used with -Dtimestep
-#   fl05   = -Dmonthly       # Monthly GCM data
+   fl05   = -Dmonthly       # Monthly GCM data
 #------------------------------------------------------------------------
    fl07   = -Dtempsalt      # Include temp and salt
    fl08   = -Dtextwrite     # Write results to textfile
