@@ -259,7 +259,7 @@ SUBROUTINE init_params
       ALLOCATE ( dzt(imt,jmt,km) )   
 #endif /*zgrid3Dt*/
 #ifdef varbottombox
-      ALLOCATE ( dztb(imt,jmt,nst) )   
+      ALLOCATE ( dztb(imt,jmt,nst) )  !should probably be changed to  dztb(imt,jmt)
 #endif /*varbottombox*/
       ALLOCATE ( dxdy(imt,jmt) )   
       ALLOCATE ( kmt(imt,jmt), dz(km) )

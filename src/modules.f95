@@ -65,6 +65,7 @@ MODULE mod_time
   INTEGER                                   :: ints      ,intstart ,intend
   INTEGER                                   :: intrun    ,intspin  ,intstep
   INTEGER                                   :: intmin    ,intmax
+  INTEGER                                   :: nsm=1     ,nsp=2
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
   INTEGER                                   :: startYear ,startMon ,startDay

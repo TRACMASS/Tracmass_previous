@@ -5,9 +5,11 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   
   ! === Computes the vertical velocity by integrating ===
   ! === the continuity eq. from the bottom            ===
+  ! === for the nsm and nsp velocity time steps       ===
   
   USE mod_param
   USE mod_vel
+  USE mod_time
   USE mod_turb
 #ifdef ifs
   USE mod_grid
@@ -37,17 +39,17 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 ! start 3D code
 #else
   kloop: do k=1,ka
-     uu=rg*uflux(ia ,ja  ,k,NST)+rr*uflux(ia ,ja  ,k,1)
-     um=rg*uflux(iam,ja  ,k,NST)+rr*uflux(iam,ja  ,k,1)
-     vv=rg*vflux(ia ,ja  ,k,NST)+rr*vflux(ia ,ja  ,k,1)
-     vm=rg*vflux(ia ,ja-1,k,NST)+rr*vflux(ia ,ja-1,k,1)
+     uu=rg*uflux(ia ,ja  ,k,nsp)+rr*uflux(ia ,ja  ,k,nsm)
+     um=rg*uflux(iam,ja  ,k,nsp)+rr*uflux(iam,ja  ,k,nsm)
+     vv=rg*vflux(ia ,ja  ,k,nsp)+rr*vflux(ia ,ja  ,k,nsm)
+     vm=rg*vflux(ia ,ja-1,k,nsp)+rr*vflux(ia ,ja-1,k,nsm)
 
 ! start ifs code
 #if defined ifs
-    do n=1,NST
+    do n=nsm,nsp
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
-     + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))*dxdy(ia,ja)/tseas )  ! time change of the mass the in grid box
+     + (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )  ! time change of the mass the in grid box
     enddo
 #endif
 !end ifs code
@@ -55,9 +57,9 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 ! start ocean code
 #ifndef ifs
 #ifdef  full_wflux
-     wflux(ia,ja,k,1)=wflux(ia,ja,k-1,1) - ff * ( uu - um + vv - vm )
+     wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
 #else
-    do n=1,NST
+    do n=nsm,nsp
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
     enddo
@@ -81,17 +83,17 @@ wflux(km,:) = 0.d0
   
   k2loop: do k=0,km
      wsedtemp=0.d0
-     kin=(uflux(ia,ja,k,1)*uflux(ia,ja,k,1)+ &
-          vflux(ia,ja,k,1)*vflux(ia,ja,k,1))*0.5d0
+     kin=(uflux(ia,ja,k,nsm)*uflux(ia,ja,k,nsm)+ &
+          vflux(ia,ja,k,nsm)*vflux(ia,ja,k,nsm))*0.5d0
      !if (kin.le.3000000) then   !för RCO
      !wsedtemp=wsed*(3000000-kin)/3000000
      if (kin.le.kincrit) then   !för SKB
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
 #ifdef full_wflux
-     wflux(k)=wflux(ia,ja,k,1) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
+     wflux(k)=wflux(ia,ja,k,nsm) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
 #else
-    do n=1,NST
+    do n=nsm,nsp
      wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
     enddo
 #endif

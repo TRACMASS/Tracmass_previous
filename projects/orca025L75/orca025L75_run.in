@@ -11,9 +11,9 @@
   subGrid      = 0,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 1,
+  subGridImin  = 99,
   subGridImax  = 1440,
-  subGridJmin  = 1,
+  subGridJmin  = 330,
   subGridJmax  = 1021,
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
@@ -33,7 +33,7 @@
   !
   intmin  =    1,
   intspin =    4,  
-  intrun  = 1752,         ! = 73*24
+  intrun  = 9999,         ! = 73*24
   intstep = 0
 /
   !
@@ -47,7 +47,7 @@
   startHour        =    0,
   startDay         =    1,!6,11,16,
   startMon         =   01,!1,!7,!12,
-  startYear        = 1997  !1990
+  startYear        = 1999  !1990
 / 
   !
   !
@@ -76,7 +76,7 @@
 !  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
   outDataDir      = '/Users/doos/data/orca/orca025L75/data_out/'
 !  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'wpool_big1'
+  outDataFile     = 'wpool_monthly2'
   intminInOutFile = 0
   /
   !
@@ -189,9 +189,9 @@ $INITRUNSEDIMENT
   ! defining end sections
   ! timax : maximum time length of a trajectory in days
     ienw =    1,    1,    1,    
-    iene = 9999, 9999,  100,   
+    iene = 9999, 9999,  107,   
     jens =    1,    1,    1,      
-    jenn =  478,    5, 9999,  
+    jenn =  331,    5, 9999,  
     timax = 99999999999./
     
     

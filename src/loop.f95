@@ -142,18 +142,21 @@ SUBROUTINE loop
 !  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
 #if defined orca025
-  if(rlat == 478.) then
-     nrj(ntrac,8)=0    ! South
+  if(    rlat == float(jenn(1))) then
+     nrj(ntrac,8)=0     ! Southern boundary
      i=i+1
-  elseif(rlon == 100) then
+     nout=nout+1
+  elseif(rlon == float(iene(3))) then
      nrj(ntrac,8)=0    ! East
      j=j+1
-  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>200.) then
+     nout=nout+1
+  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
      nrj(ntrac,8)=1    ! back to the warm pool
      k=k+1
   else
      nrj(ntrac,8)=0 
      l=l+1   
+     nout=nout+1
   endif
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
@@ -179,7 +182,7 @@ SUBROUTINE loop
   100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
 
   do ntrac=1,ntracmax ! eliminate the unwanted trajectories
-     if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
+   if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
   enddo
   
 #else
@@ -411,7 +414,7 @@ SUBROUTINE loop
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            
-#if defined orc || orca025 || orca12
+#if defined orc || orca025 || orca12 || orca025L75
            ! === north fold cyclic for the ORCA grids ===
            ! === only tested with ORCA025 so far !!!  ===
             if( y1 == dble(JMT-1) ) then
@@ -467,7 +470,7 @@ SUBROUTINE loop
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then
                 if (temp > tmaxe .and. salt < smine .and.  &
-               &   (tt-t0)/tday > 100.      ) then
+               &   (tt-t0)/tday > 365.      ) then
                  nexit(NEND)=nexit(NEND)+1
                  exit niterLoop                                
                endif
@@ -602,9 +605,9 @@ return
                 print *,'kmt=',kmt(ib,jb)
                 print *,'dz=',dz(kb)
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
-!                print *,'dztb=',dztb(ib,jb,1),dztb(ib,jb,2)
-!                print *,'rg*hs=',rg,hs(ib,jb,NST)
-!                print *,'rr*hs=',rr,hs(ib,jb,1)
+!                print *,'dztb=',dztb(ib,jb,1)
+!                print *,'rg*hs=',rg,hs(ib,jb,nsp)
+!                print *,'rr*hs=',rr,hs(ib,jb,nsm)
                 print *,'-------------------------------------'
                 print *,'The trajectory is killed'
                 print *,'====================================='
@@ -653,7 +656,7 @@ return
                 print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd
                 print *,'dsmin=',ds,dsmin,dtmin
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
-                print *,'hs=',hs(ia,ja,1),hs(ia,ja,2),hs(ib,jb,1),hs(ib,jb,2)
+                print *,'hs=',hs(ia,ja,nsm),hs(ia,ja,nsp),hs(ib,jb,nsm),hs(ib,jb,nsp)
                 print *,'tt=',tt,ts,tt/tday,t0/tday
                 print *,'ntrac=',ntrac
                 print *,'niter=',niter
@@ -727,14 +730,14 @@ return
                      ' ka=',ka,' kb=',kb
                 print *,'x1=',x1,' x0=',x0,' y1=',y1,' y0=',y0, & 
                      ' z1=',z1,' z0=',z0
-                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,NST) + &
-                     rb*uflux(ia ,ja,ka,1))*ff
-                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,NST) + & 
-                     rb*uflux(iam,ja,ka,1))*ff
-                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,NST) + & 
-                     rb*vflux(ia,ja  ,ka,1))*ff
-                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,NST) + & 
-                     rb*vflux(ia,ja-1,ka,1))*ff
+                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,nsp) + &
+                     rb*uflux(ia ,ja,ka,nsm))*ff
+                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,nsp) + & 
+                     rb*uflux(iam,ja,ka,nsm))*ff
+                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,nsp) + & 
+                     rb*vflux(ia,ja  ,ka,nsm))*ff
+                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,nsp) + & 
+                     rb*vflux(ia,ja-1,ka,nsm))*ff
                 print *,'-------------------------------------'
              end if
              trj(ntrac,1)=x1
@@ -823,7 +826,7 @@ return
                  print *,'Warning: not find any path for unknown reason '
                  print *, " "
                  write (*,'(A, E9.3, A, E9.3)'), ' uflux= ', &
-                      uflux(ia,ja,ka,1),'  vflux= ', vflux(ia,ja,ka,1)
+                      uflux(ia,ja,ka,nsm),'  vflux= ', vflux(ia,ja,ka,nsm)
 
                  write (*,FMT='(A, 5E9.2)'),' ds=',ds,dse,dsw,dsn,dss
                  write (*,FMT='(4E9.2)'), dsu,dsd,dsmin,dxyz
@@ -1007,11 +1010,11 @@ return
   subroutine calc_dxyz
     ! T-box volume in m3
 #ifdef zgrid3Dt 
-    dxyz=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
+    dxyz=rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
 #elif  zgrid3D
     dxyz=dzt(ib,jb,kb)
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #else
     dxyz=dz(kb)
@@ -1019,7 +1022,7 @@ return
     if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #endif /*zgrid3Dt*/
     dxyz=dxyz*dxdy(ib,jb)
@@ -1088,7 +1091,7 @@ return
                  tss=tss+dt/tseas*dble(iter)
 !                 tss=tss+dt/dtmin
               endif
-#endif
+#endif /*regulardt*/
            end if
            ! === time interpolation constant ===
            rbg=dmod(ts,1.d0) 

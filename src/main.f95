@@ -99,6 +99,8 @@ CONTAINS
     print *,'Analytical time scheme used to solve the differential Eqs.'
 #elif defined timestep
     print *,'Time steps with analytical stationary scheme used to solve the differential Eqs.'
+#elif defined timestat
+    print *,'Steady state velocity fields with analytical stationary scheme used to solve the differential Eqs.'
 #endif
 #if defined tempsalt
 #if defined ifs

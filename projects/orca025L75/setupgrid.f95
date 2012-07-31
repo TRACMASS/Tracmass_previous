@@ -264,6 +264,10 @@ SUBROUTINE setupgrid
 !write(21) kmu
 !write(21) kmv
 !close(21)
+
+!do j=900,325,-1
+! write (*,"(i4,999i1)") j,(kmt(i,j),i=105,300)
+!enddo
 !stop 3956
 
 
