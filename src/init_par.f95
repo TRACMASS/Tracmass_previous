@@ -272,9 +272,9 @@ SUBROUTINE init_params
       uflux = 0.
       vflux = 0.
 #ifdef full_wflux
-      ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
+      ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km,NST) )
 #else
-      ALLOCATE ( wflux(0:km,2) )
+      ALLOCATE ( wflux(0:km,NST) )
 #endif
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       ALLOCATE ( trj(ntracmax,NTRJ), nrj(ntracmax,NNRJ) )

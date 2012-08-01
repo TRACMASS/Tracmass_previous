@@ -30,7 +30,7 @@ SUBROUTINE readfields
 
   ! = Variables used for getfield procedures
 
-  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=75
+ ! INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=75
 
   REAL*4, ALLOCATABLE, DIMENSION(:,:)        :: temp2d_simp
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_simp
@@ -127,7 +127,7 @@ endif initFieldcond
 #ifdef seasonal
  nsp=mod(ints-1,12)+1
  nsm=mod(ints-2,12)+1
- print *,'ints=',ints,nsp,nsm
+! print *,'ints=',ints,nsp,nsm
  if(ints>12) return
 #else
   call datasetswap
@@ -148,35 +148,11 @@ if(nread>fieldsPerFile) nread=1
 start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
 start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
   
-if(nread==1) then
+ dataprefix='ORCA1-MSP1_MM_12000101_12001231_grid_'
 
- if(ngcm==6) then
-  dataprefix='xxxx/ORCA025.L75-SLB2_6h_yxxxx_d000-000_grid_'
-  write(dataprefix(1:4),'(i4)') currYear
-  write(dataprefix(27:30),'(i4)') currYear
-  if(julian5  <10) then
-   write(dataprefix(35:35),'(i1)') julian5
-  elseif(julian5  <100) then
-   write(dataprefix(34:35),'(i2)') julian5
-  else
-   write(dataprefix(33:35),'(i3)') julian5
-  endif
-  if(julian5+4    <10) then
-   write( dataprefix(39:39),'(i1)') julian5+4
-  elseif(julian5+4<100) then
-   write(dataprefix(38:39),'(i2)') julian5+4
-  else
-   write(dataprefix(37:39),'(i3)') julian5+4
-  endif
- elseif(ngcm==5*24) then
-  stop 3957 ! to be implemented
- elseif(ngcm==730) then
-  dataprefix='1999/ORCA025.L75-SLB24_730h_19990101_19991231_grid_'
- endif
-
- fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
+ fieldFile = trim(inDataDir)//'fields/msp1/'//trim(dataprefix)
  gridFileT=trim(fieldFile)//'T.nc'   ! SSH + T + S
- print *, gridFileT
+! print *, gridFileT
  inquire(file=trim(gridFileT),exist=around)
  if(.not.around) then
   zfile='gunzip -c '//trim(gridFileT)//'.gz > tmpT'
@@ -184,8 +160,6 @@ if(nread==1) then
   gridFileT='tmpT'
  endif
  ierr=NF90_OPEN(trim(gridFileT),NF90_NOWRITE,ncidt)
-
-endif
 
 
 ierr=NF90_INQ_VARID(ncidt,'sossheig',varidt)
@@ -204,13 +178,13 @@ do j=1,JMT
  do i=1,IMT+1
   ii=i
   if(ii.eq.IMT+1) ii=1
-  hs(i,j,2)=temp2d_simp(ii,j)
+  hs(i,j,nsp)=temp2d_simp(ii,j)
  enddo
 enddo 
 
 do i=4,IMT
  ii=IMT+4-i
- hs(i,JMT+1,2)=hs(ii,JMT-3,2)  !  north fold 
+ hs(i,JMT+1,nsp)=hs(ii,JMT-3,nsp)  !  north fold 
 enddo
 
 #ifdef tempsalt 
@@ -227,12 +201,12 @@ do i=1,IMT
  do j=1,JMT
   do k=1,kmt(i,j)
    kk=KM+1-k
-   tem(i,j,kk,2)=temp3d_simp(i,j,k)
+   tem(i,j,kk,nsp)=temp3d_simp(i,j,k)
   enddo
  enddo
 enddo
 
-print *,'ntime=',ntime,nread,trim(dataprefix),tem(IMT/2,JMT/2,75,2)
+!print *,'ntime=',ntime,nread,trim(dataprefix),tem(IMT/2,JMT/2,KM,nsp)
 ! Salinity
 !ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 !if(ierr.ne.0) stop 5752
@@ -247,7 +221,7 @@ do i=1,IMT
  do j=1,JMT
   do k=1,kmt(i,j)
    kk=KM+1-k
-   sal(i,j,kk,2)=temp3d_simp(i,j,k)
+   sal(i,j,kk,nsp)=temp3d_simp(i,j,k)
   enddo
  enddo
 enddo
@@ -258,16 +232,17 @@ do j=1,JMT
  do i=1,IMT
   do k=1,kmt(i,j)
    kk=KM+1-k
-   tempb(k)=tem(i,j,kk,2)
-   saltb(k)=sal(i,j,kk,2)
+   tempb(k)=tem(i,j,kk,nsp)
+   saltb(k)=sal(i,j,kk,nsp)
   enddo
   call statvd(tempb, saltb, rhob ,KM ,depthb ,latb)
   do k=1,kmt(i,j)
    kk=KM+1-k
-   rho(i,j,kk,2)=rhob(k)-1000.
+   rho(i,j,kk,nsp)=rhob(k)-1000.
   enddo
  enddo
 enddo
+
 
 #endif     
 
@@ -297,7 +272,7 @@ do i=1,IMT
   do k=1,kmu(i,j)
    kk=KM+1-k
    dd = dz(kk) 
-   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
+   if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i+1,j,nsp))
    if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
    uflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
   enddo
@@ -337,7 +312,7 @@ do i=1,IMT
   do k=1,kmv(i,j)
    kk=KM+1-k
    dd = dz(kk) 
-   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
+   if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i,j+1,nsp))
    if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
    vflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
   enddo
@@ -353,7 +328,7 @@ do i=1,imt
  do j=1,jmt
  
   uint=0. ; vint=0. ; zint=0.
-  if(ktop.eq.KM) zint=hs(i,j,2)
+  if(ktop.eq.KM) zint=hs(i,j,nsp)
   do k=kbot,ktop
    uint=uint+uflux(i,j,k,nsp) ! integrated transport
    vint=vint+vflux(i,j,k,nsp)

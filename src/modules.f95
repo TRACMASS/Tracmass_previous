@@ -4,7 +4,12 @@ MODULE mod_param
   INTEGER                                   :: JMAX, LBT, NTRACMAX
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
   INTEGER                                   :: NEND
-  INTEGER, PARAMETER                        :: NST=2,NNRJ=8,NTRJ=7
+  INTEGER, PARAMETER                        :: NNRJ=8,NTRJ=7
+#ifdef seasonal
+  INTEGER, PARAMETER                        :: NST=12
+#else
+  INTEGER, PARAMETER                        :: NST=2
+#endif
 #ifdef streamts
   INTEGER, PARAMETER                        :: LOV=3
 #else
