@@ -23,10 +23,10 @@ PROGRAM main
      intstart =  intmin          
      intend   =  intmax
   elseif(nff == -1) then ! backward
-     intstart =  intmin+intrun
-     intend   =  intmin
-     intspin  = -intspin
-     intrun   = -intrun    
+     intstart =  intmin
+     intend   =  intmax
+!     intspin  = -intspin
+!     intrun   = -intrun    
   end if modrundirCond
   call setupgrid
   call init_seed

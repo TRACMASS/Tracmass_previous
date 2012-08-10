@@ -207,8 +207,8 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
-!  intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
+  intsTimeLoop: do ints=intstart+1,intstart+intrun
+!  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      call readfields
@@ -222,7 +222,8 @@ SUBROUTINE loop
       call writetracer
      endif
 
-    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+!    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+    intspinCond: if(ints <= intstart+intspin) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)
         call fancyTimer('seeding','stop')
@@ -414,15 +415,16 @@ SUBROUTINE loop
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            
-#if defined orc || orca025 || orca12 || orca025L75
+#if defined orc || orca1 || orca025 || orca12 || orca025L75
            ! === north fold cyclic for the ORCA grids ===
            ! === only tested with ORCA025 so far !!!  ===
             if( y1 == dble(JMT-1) ) then
-              x1 = dble(IMT+3) - x1
-              y1 = dble(JMT-2)
-              ib=idint(x1)
-              jb=JMT-2
+              print *,'North fold for',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb),kmt(ib,jb-1)
+              x1 = dble(IMT+2) - x1
+              ib=idint(x1)+1
+              jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+ !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
            elseif(y1 > dble(JMT-1)) then
             print *,ia,ib,x0,x1
             print *,ja,jb,y0,y1
@@ -496,7 +498,7 @@ SUBROUTINE loop
 599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
           ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
           ' nsusp=',i8,' nexit=',9i8)
-#elif defined ifs || rco || tes || orc || baltix || orca025 || orca12 || AusCOM
+#elif defined ifs || rco || tes || orc || baltix || orca1 || orca025  || orca025L75 || orca12 || AusCOM
      print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
 799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
           ' nerror=',i4,' in ocean/atm=',i8)
@@ -759,8 +761,9 @@ return
           ! then put in middle of deepest layer 
           ! (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
-              print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb)), &
-                   kmt(ia,ja),kmt(ib,jb),ntrac
+              print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
+              print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
+              print *,'ntrac=',ntrac
                print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
                print *,'ia=',ia,ib,ja,jb,ka,kb
                print *,'x0=',x0,x1,y0,y1,z0,z1
@@ -768,7 +771,6 @@ return
                call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
                call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
                print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
-               print *,'ntrac=',ntrac
               nerror=nerror+1
               nrj(ntrac,6)=1
                stop 3957

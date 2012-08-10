@@ -32,8 +32,8 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  =    1,
-  intspin =   12,  
-  intrun  =12000,         ! = 73*24
+  intspin =   48,  
+  intrun  =120000,         ! = 73*24
   intstep = 0
 /
   !
@@ -45,9 +45,9 @@
   startSec         =    0,
   startMIN         =    0,
   startHour        =    0,
-  startDay         =    1,!6,11,16,
-  startMon         =   01,!1,!7,!12,
-  startYear        = 1200  !1990
+  startDay         =    1,
+  startMon         =    1,
+  startYear        =    0 ! 1197 eller 1200 
 / 
   !
   !
@@ -74,7 +74,7 @@
   kriva           = 1,
   inDataDir='/Users/doos/data/orca/orca1/'
   outDataDir='/Users/doos/data/orca/orca1/data_out/'
-  outDataFile     = 'wpool_monthly0'
+  outDataFile     = 'cb_t6_back'
   intminInOutFile = 0
   /
   !
@@ -115,16 +115,16 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
   !
-  nff         = 1,
+  nff         = -1,
   isec        = 2,
-  idir        = -1,
+  idir        = 1,
   nqua        = 1,
   partQuant   = 1,
   seedType    = 1,
   ist1        = 220,!260, !260,   !330,
   ist2        = 305, !880, !550, ! 880,   !480,
-  jst1        = 147,!508, !518,!332, !490, !487,   !940,
-  jst2        = 147,! 508, !518,!650, !507, !487,   !1010,
+  jst1        = 147,!
+  jst2        = 147,! 
   kst1        =   1,
   kst2        =  42,
   varSeedFile = 0,
@@ -137,10 +137,10 @@ $INITRUNSEED
   !
   ! for starting a trajectory (active only with option tempsalt) 
   tmin0 = -500,
-  tmax0 =  500.,
-  smin0 = -500,
-  smax0 =  500,
-  rmin0 =   27.6,
+  tmax0 =    6.,
+  smin0 = -500.,
+  smax0 =  500.,
+  rmin0 = -500.,
   rmax0 =  500.,
   ! for ending a trajectory
   tmine = -500.,
@@ -186,10 +186,15 @@ $INITRUNSEDIMENT
   ! ==================================
   ! defining end sections
   ! timax : maximum time length of a trajectory in days
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  148,    1,    1,      
+!    jenn =  200,    1,    1,  
+!    timax = 99999999999./
     ienw =  220,    1,    1,    
     iene =  305,    1,    1,   
-    jens =  148,    1,    1,      
-    jenn =  200,    1,    1,  
+    jens =  100,    1,    1,      
+    jenn =  146,    1,    1,  
     timax = 99999999999./
     
     

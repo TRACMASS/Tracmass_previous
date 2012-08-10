@@ -225,7 +225,7 @@ SUBROUTINE setupgrid
     enddo
   enddo
 
-  !  north fold 
+  !  north fold (probably unnecessary)
   do i=4,IMT
     ii=IMT+4-i
     kmv(i,JMT)=kmv(ii,JMT-3)

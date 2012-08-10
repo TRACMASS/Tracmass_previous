@@ -6,7 +6,7 @@ MODULE mod_param
   INTEGER                                   :: NEND
   INTEGER, PARAMETER                        :: NNRJ=8,NTRJ=7
 #ifdef seasonal
-  INTEGER, PARAMETER                        :: NST=12
+  INTEGER, PARAMETER                        :: NST=48
 #else
   INTEGER, PARAMETER                        :: NST=2
 #endif

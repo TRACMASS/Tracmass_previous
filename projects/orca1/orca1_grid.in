@@ -23,7 +23,7 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=100000/               ! Maximum number of trajectories allowed
+  NTRACMAX=20000/               ! Maximum number of trajectories allowed
   !
   !
 $INITGRIDTIME
@@ -37,7 +37,7 @@ $INITGRIDTIME
 $INITGRIDDATE
   !
   yearmin        = 1200,
-  yearmax        = 1200,
+  yearmax        = 1203,
   ! === Reference basetime for the velocity field.
   baseSec        = 0,
   baseMin        = 0,
