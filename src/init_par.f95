@@ -99,10 +99,12 @@ SUBROUTINE init_params
    Project  = PROJECT_NAME
    Case     = CASE_NAME
    
+#ifdef commandline_args
    IF ( (IARGC() == 1 ) .OR. (IARGC() == 4 ) )  then
       CALL getarg(IARGC(),inparg)
       Case = inparg
    END IF
+#endif
 
    CALL getenv('ORMPROJDIR',projdir)
    if (len(trim(projdir)) == 0) then
@@ -192,6 +194,7 @@ SUBROUTINE init_params
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
      &     ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
 
+#ifdef commandline_args
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
          CALL getarg(2,inparg)
@@ -211,6 +214,7 @@ SUBROUTINE init_params
             read( inparg, '(f15.10)' ) ARG_INT2
          end if
       END IF
+#endif
 
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 

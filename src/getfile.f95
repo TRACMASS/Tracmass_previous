@@ -135,7 +135,7 @@ CONTAINS
     if  (all(map3d == (/1,2,3,4/),DIM=1) ) then
        get3DfieldNC = field
     elseif (all(map3d == (/2,3,4,1/),DIM=1) )  then
-       get3DfieldNC = field
+       get3DfieldNC(1:imt,:,:) = field
     elseif (all(map3d == (/3,2,4,1/),DIM=1) )  then
        do k=1,km
           do i=1,imt
