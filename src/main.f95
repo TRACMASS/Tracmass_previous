@@ -31,7 +31,23 @@ PROGRAM main
      intrun   = -intrun    
   end if modrundirCond
 !  print *,intmin,intstart,intrun
-  call setupgrid
+ 
+ call setupgrid
+  if (minval(dxv) < 0) then
+     print *, " "
+     print *, " === Error! === "
+     print *, "The array dxv contains values smaller than zero."
+     print *, "Please check your setupgrid.f95 file."
+     stop
+  end if
+  if (minval(dyu) < 0) then
+     print *, " "
+     print *, " === Error! === "
+     print *, "The array dyu contains values smaller than zero."
+     print *, "Please check your setupgrid.f95 file."
+     stop
+  end if
+
   call init_seed
   
   if(nqua.eq.1) then ! number of trajectories (per time resolution)
