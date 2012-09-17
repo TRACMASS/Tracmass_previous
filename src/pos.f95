@@ -81,6 +81,10 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
 #ifdef full_wflux
      uu=wflux(ia ,ja ,ka   ,nsm)
      um=wflux(ia ,ja ,ka-1 ,nsm)
+     !uu=wflux(ia ,ja ,ka   ,1)
+     !um=wflux(ia ,ja ,ka-1 ,1)
+     uu=rg*wflux(ia ,ja, ka  ,NST)+rr*wflux(ia, ja, ka  ,1)
+     um=rg*wflux(ia, ja, ka-1,NST)+rr*wflux(ia, ja, ka-1,1)
 #else
      uu=rg*wflux(ka  ,nsp)+rr*wflux(ka  ,nsm)
      um=rg*wflux(ka-1,nsp)+rr*wflux(ka-1,nsm)

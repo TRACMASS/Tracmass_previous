@@ -91,6 +91,19 @@ PROGRAM main
   open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  
        ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
 #endif
+
+#if defined csvwrite
+  ! Trajectory path
+  open(unit=86 ,file=trim(fullWritePref)//'_run.csv', status='replace')
+  ! Exit position 
+  open(unit=85 ,file=trim(fullWritePref)//'_out.csv', status='replace')
+  ! Killed position
+  open(unit=87 ,file=trim(fullWritePref)//'_kll.csv', status='replace')
+  ! Entrance position
+  open(unit=88 ,file=trim(fullWritePref)//'_in.csv',  status='replace')
+  ! Error position
+  open(unit=89 ,file=trim(fullWritePref)//'_err.csv', status='replace')
+#endif
   
   ! === Start main loop ===
   
