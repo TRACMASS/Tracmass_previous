@@ -69,11 +69,9 @@ SUBROUTINE readfields
   print *,dataprefix
 
   nctpos=4
-
-  print *, 'This is before u is read'
   uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
-  print *, 'This is after u is read'
   vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
+  wvel      = get3DfieldNC(trim(dataprefix) ,   'w')
   ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
   where (uvel > 1000)
      uvel = 0
@@ -110,9 +108,30 @@ SUBROUTINE readfields
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:)*0.5 + dzt(:,2:jmt,:)*0.5
 
   do k=1,km
-     uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k) * dyu
-     vflux(:,:,k,2)   = vvel(:,:,k) * dzv(:,:,k) * dxv
+     uflux(:,:,k,2) = uvel(:,:,k) * dzu(:,:,k) * dyu
+     vflux(:,:,k,2) = vvel(:,:,k) * dzv(:,:,k) * dxv
+     !wflux(:,:,k,2) = wvel(:,:,k) * dyu * dxv 
   end do
+  
+  wflux(2:imt,2:jmt,1,2)    = (uflux(1:imt-1, 2:jmt,   1,   2) -    &
+                               uflux(2:imt,   2:jmt,   1,   2))  +  &
+                              (vflux(2:imt,   1:jmt-2, 1,   2) -    & 
+                               vflux(2:imt,   2:jmt,   1,   2))
+  kloop: do k=2,km
+     wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, 2)   +  &
+                              (uflux(1:imt-1, 2:jmt,   k,   2) -    &
+                               uflux(2:imt,   2:jmt,   k,   2))  +  &
+                              (vflux(2:imt,   1:jmt-1, k,   2) -    & 
+                               vflux(2:imt,   2:jmt,   k,   2))
+     wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, 2)   -  &
+                               uflux(1,       2:jmt,   k,   2)   +  &
+                              (vflux(1,       1:jmt-1, k,   2) -    &
+                               vflux(1,       2:jmt,   k,   2))
+     !wflux(2:imt,1,  k,2)  =  wflux(2:imt,    1,       k-1, 2)   +  &
+     !                         (uflux(1:imt-1, 1,       k,   2) -    &
+     !                          uflux(2:imt,   1,       k,   2))  -  &
+     !                          vflux(2:imt,   1,       k,   2) 
+  enddo kloop
 
   if (intstep .le. 0) then
      uflux = -uflux
