@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 900,
+  intrun       = 10000,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -120,12 +120,12 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 30,		 
-  ist2         = 31,			  
-  jst1         = 70,		 
-  jst2         = 71,		 
-  kst1         =  1,		 
-  kst2         = 90,
+  ist1         = 20,		 
+  ist2         = 20,			  
+  jst1         = 20,		 
+  jst2         = 20,		 
+  kst1         =  5,		 
+  kst2         =  7,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -166,20 +166,5 @@ $INITRUNEND
   iene(1) =  200,
   jens(1) =    1,
   jenn(1) =    2,
-!
-  ienw(2) =    1,
-  iene(2) =  200,
-  jens(2) =   39,
-  jenn(2) =   40,
-!
-  ienw(3) =   1,
-  iene(3) =   2,
-  jens(3) =   1,
-  jenn(3) =  40,
-!
-  ienw(4) =  149,
-  iene(4) =  150,
-  jens(4) =    1,
-  jenn(4) =   40,
-!
+
   timax =  36500./  ! maximum time length of a trajectory in days

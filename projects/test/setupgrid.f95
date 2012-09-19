@@ -52,7 +52,6 @@ SUBROUTINE setupgrid
   gridfile =  "projects/test/ddf9-01c_mask_grd.nc"
 
   ncTpos = 1
-  print *, trim(gridfile)
   dxv = get2DfieldNC(trim(gridfile), 'x_rho')
   dyu = get2DfieldNC(trim(gridfile), 'y_rho')
 
@@ -61,6 +60,8 @@ SUBROUTINE setupgrid
   dxv(imt:imt+1,:) = dxv(imt-2:imt-1,:)
   dyu(:,jmt) = dyu(:,jmt-1)
   dxdy = dyu*dxv
+
+  
   
   depth = get2DfieldNC(trim(gridfile), 'h')
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')

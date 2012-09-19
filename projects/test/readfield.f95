@@ -51,7 +51,6 @@ SUBROUTINE readfields
   sc_r = 0
   Cs_r = 0
 
-
   call datasetswap
   call updateClock
 
@@ -60,19 +59,17 @@ SUBROUTINE readfields
   intpart2    = floor((ints)/24.)
   dstamp      = 'coral_avg_XXXXX.nc'
 
-  print *,currJDtot
-
   write (dstamp(11:15),'(I5.5)') & 
        int(currJDtot) - 731365
   dataprefix  = 'projects/test/ocean_ddf9-01c_his.nc'
   tpos        = intpart1+1
-  print *,dataprefix
 
   nctpos=4
   uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
   vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
   wvel      = get3DfieldNC(trim(dataprefix) ,   'w')
   ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
+
   where (uvel > 1000)
      uvel = 0
   end where
@@ -113,25 +110,7 @@ SUBROUTINE readfields
      !wflux(:,:,k,2) = wvel(:,:,k) * dyu * dxv 
   end do
   
-  wflux(2:imt,2:jmt,1,2)    = (uflux(1:imt-1, 2:jmt,   1,   2) -    &
-                               uflux(2:imt,   2:jmt,   1,   2))  +  &
-                              (vflux(2:imt,   1:jmt-2, 1,   2) -    & 
-                               vflux(2:imt,   2:jmt,   1,   2))
-  kloop: do k=2,km
-     wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, 2)   +  &
-                              (uflux(1:imt-1, 2:jmt,   k,   2) -    &
-                               uflux(2:imt,   2:jmt,   k,   2))  +  &
-                              (vflux(2:imt,   1:jmt-1, k,   2) -    & 
-                               vflux(2:imt,   2:jmt,   k,   2))
-     wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, 2)   -  &
-                               uflux(1,       2:jmt,   k,   2)   +  &
-                              (vflux(1,       1:jmt-1, k,   2) -    &
-                               vflux(1,       2:jmt,   k,   2))
-     !wflux(2:imt,1,  k,2)  =  wflux(2:imt,    1,       k-1, 2)   +  &
-     !                         (uflux(1:imt-1, 1,       k,   2) -    &
-     !                          uflux(2:imt,   1,       k,   2))  -  &
-     !                          vflux(2:imt,   1,       k,   2) 
-  enddo kloop
+ call calc_implicit_vertvel
 
   if (intstep .le. 0) then
      uflux = -uflux
