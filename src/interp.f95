@@ -13,10 +13,10 @@ IMPLICIT none
 
 REAL*8  :: x1,y1,z1,ax,ay,az
 
-REAL    :: tppp,tppm,tpmp,tpmm,tmpp,tmpm,tmmp,tmmm
-REAL    :: sppp,sppm,spmp,spmm,smpp,smpm,smmp,smmm
-REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
-REAL    :: temp,salt,dens
+REAL*8  :: tppp,tppm,tpmp,tpmm,tmpp,tmpm,tmmp,tmmm
+REAL*8  :: sppp,sppm,spmp,spmm,smpp,smpm,smmp,smmm
+REAL*8  :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
+REAL*8  :: temp,salt,dens
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
 ! determining nearest centers of boxes 

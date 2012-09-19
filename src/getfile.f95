@@ -18,7 +18,7 @@ CONTAINS
 
   function getScalarNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL                                    :: getScalarNC
+    REAL*8                                  :: getScalarNC
     INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
   
@@ -35,7 +35,7 @@ CONTAINS
 
   function get1DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfieldNC
+    REAL*8, ALLOCATABLE, DIMENSION(:)       :: get1dfieldNC
     INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
   
@@ -55,8 +55,8 @@ CONTAINS
 
   function get2DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2DfieldNC
-    REAL, ALLOCATABLE,   DIMENSION(:,:)     :: field
+    REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: get2DfieldNC
+    REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: field
     INTEGER,             DIMENSION(4)       :: d, s, c, dimids
     INTEGER                                 :: ncid
 
@@ -102,8 +102,8 @@ CONTAINS
 
   function get3DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
-    REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: field
-    REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: get3dfieldNC
+    REAL*8, ALLOCATABLE, DIMENSION(:,:,:)   :: field
+    REAL*8, ALLOCATABLE, DIMENSION(:,:,:)   :: get3dfieldNC
     INTEGER,             DIMENSION(4)       :: d, s, c
     INTEGER                                 :: i,j,k
 
@@ -205,7 +205,7 @@ end MODULE mod_getfile
 
 !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###     
 !  function get4dfield ()
-!    REAL, ALLOCATABLE,   DIMENSION(:,:,:,:) :: get4dfield
+!    REAL*8, ALLOCATABLE,   DIMENSION(:,:,:,:) :: get4dfield
 !    INTEGER,             DIMENSION(4)       :: d
 !    INTEGER                                 :: varid ,ncid
 !  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   === 

@@ -35,14 +35,13 @@ function sw_pres(DEPTH,LAT)
   !==================================================================
 
   IMPLICIT NONE
-  REAL, INTENT(IN)                           :: depth(:),lat(:)       
-  REAL, ALLOCATABLE, DIMENSION (:)           :: sw_pres ,x ,C1
-  REAL                                       :: deg2rad
-  REAL, PARAMETER                            :: pi=3.14159265358979
+  REAL*8, INTENT(IN)                         :: depth(:),lat(:)
+  REAL*8, ALLOCATABLE, DIMENSION (:)         :: sw_pres ,x ,C1
+  REAL*8                                     :: deg2rad
+  REAL*8, PARAMETER                          :: pi=3.14159265358979
   INTEGER                                    :: km
   km = size(depth)
   allocate ( sw_pres(km) ,x(km) ,C1(km) )
-
 
   deg2rad = pi/180;
   x       = sin(abs(LAT)*deg2rad);  ! convert to radians

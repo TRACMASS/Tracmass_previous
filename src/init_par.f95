@@ -264,6 +264,7 @@ SUBROUTINE init_params
       ALLOCATE ( dzt(imt,jmt,km,nst) )   
 #elif  zgrid3D
       ALLOCATE ( dzt(imt,jmt,km) )   
+      ALLOCATE ( z_r(imt,jmt,km) )   
 #endif /*zgrid3Dt*/
 #ifdef varbottombox
       ALLOCATE ( dztb(imt,jmt,nst) )   

@@ -22,7 +22,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   
 #if defined sediment
   REAL*8 wsedtemp
-  REAL kin
+  REAL*8 kin
 #endif
   
   real*8 rr,rg,uu,um,vv,vm

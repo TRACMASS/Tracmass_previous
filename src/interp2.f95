@@ -11,7 +11,7 @@ subroutine interp2(i,j,k,temp,salt,dens)
   USE mod_dens
   IMPLICIT none
   
-  real temp,salt,dens
+  real*8 temp,salt,dens
   
   integer i,j,k
   

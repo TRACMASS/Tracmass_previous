@@ -30,23 +30,23 @@ IMPLICIT NONE
 INTEGER             :: ia,ja,ka   !where to write
 REAL*8              :: x1,y1,z1
 INTEGER             :: xy, dir !1 - zonal, 2 - meridional, 3 - vertical
-REAL                :: flux
-REAL                :: temp,salt,dens
+REAL*8              :: flux
+REAL*8              :: temp,salt,dens
 INTEGER             :: mrb,mtb,msb
 INTEGER             :: mta,msa,m
 
 
 #ifdef stream_thermohaline
-		  do m=mta,mtb-1
+	  do m=mta,mtb-1
            psi_ts(m,msb,1,lbas) = psi_ts(m,msb,1,lbas) + flux
           enddo
-		  do m=mtb,mta-1
+	  do m=mtb,mta-1
            psi_ts(m,msb,1,lbas) = psi_ts(m,msb,1,lbas) - flux
           enddo
-		  do m=msa,msb-1
+	  do m=msa,msb-1
            psi_ts(mtb,m,2,lbas) = psi_ts(mtb,m,2,lbas) + flux
           enddo
-		  do m=msb,msa-1
+	  do m=msb,msa-1
            psi_ts(mtb,m,2,lbas) = psi_ts(mtb,m,2,lbas) - flux
           enddo
 #endif

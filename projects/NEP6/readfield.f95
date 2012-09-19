@@ -33,6 +33,7 @@ SUBROUTINE readfields
 
   ! = Variables for converting from S to Z
   REAL,       ALLOCATABLE, DIMENSION(:)      :: sc_r,Cs_r
+  REAL,       ALLOCATABLE, DIMENSION(:)      :: sc_w,Cs_w
   INTEGER                                    :: hc
 
   ! = Input fields from GCM
@@ -43,6 +44,7 @@ SUBROUTINE readfields
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt), dzt0(imt,jmt) )
      allocate ( sc_r(km), Cs_r(km) )
+     allocate ( sc_w(km), Cs_w(km) )
   end if alloCondUVW
   alloCondDZ: if(.not. allocated (dzu)) then
      allocate ( dzu(imt,jmt,km), dzv(imt,jmt,km) )
@@ -50,6 +52,8 @@ SUBROUTINE readfields
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   sc_r = 0
   Cs_r = 0
+  sc_w = 0
+  Cs_w = 0
 
 
   call datasetswap
@@ -63,7 +67,7 @@ SUBROUTINE readfields
   print *,currJDtot
 
   write (dstamp(10:14),'(I5.5)') & 
-       int(currJDtot) - 731365
+       int(currJDtot) - 731366
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
   print *,dataprefix
@@ -83,8 +87,10 @@ SUBROUTINE readfields
   hs(:imt,:jmt,2) = ssh
 
 
-  Cs_r = get1DfieldNC (trim(dataprefix), 'Cs_w')
-  sc_r = get1DfieldNC (trim(dataprefix), 's_w')
+  Cs_w = get1DfieldNC (trim(dataprefix), 'Cs_w')
+  sc_w = get1DfieldNC (trim(dataprefix), 's_w')
+  Cs_r = get1DfieldNC (trim(dataprefix), 'Cs_r')
+  sc_r = get1DfieldNC (trim(dataprefix), 's_rho')
   hc   = getScalarNC (trim(dataprefix), 'hc')
 
   !do k=1,km
@@ -97,6 +103,8 @@ SUBROUTINE readfields
 
   do k=1,km
      dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
+     z_r(:,:,k) = ssh + (ssh + depth) * dzt0
+     dzt0 = (hc*sc_w(k) + depth*Cs_w(k)) / (hc + depth)
      dzt(:,:,k) = ssh + (ssh + depth) * dzt0
   end do
   dzt0 = dzt(:,:,km)
@@ -114,6 +122,11 @@ SUBROUTINE readfields
      uflux = -uflux
      vflux = -vflux
   end if
+
+#ifdef tempsalt
+  tem(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'temp')
+  sal(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'salt')
+#endif
 
   return
 

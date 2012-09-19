@@ -25,10 +25,10 @@ contains
     
     INTEGER                                    :: mra,mta,msa
     INTEGER                                    :: mrb,mtb,msb
-    REAL                                       :: uu
+    REAL*8                                     :: uu
     INTEGER                                    :: ia, iam, ja, ka,k
     INTEGER                                    :: ib, jb, kb
-    REAL                                       :: temp,salt,dens
+    REAL*8                                     :: temp,salt,dens
     REAL*8                                     :: dza,dzb, zz
     REAL*8, INTENT(IN)                         :: x0, y0, z0
     REAL*8, INTENT(OUT)                        :: x1, y1, z1
@@ -85,7 +85,7 @@ contains
        if(msa.gt.MR) msa=MR
 #endif 
 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,dble(subvol*ff))
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
@@ -134,7 +134,7 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
+       call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,dble(subvol*ff))
 
     elseif(ds==dsn) then ! northward grid-cell exit
        
@@ -183,7 +183,7 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,dble(subvol*ff))
 
     elseif(ds==dss) then ! southward grid-cell exit
        
@@ -235,7 +235,7 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
+       call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,dble(subvol*ff))
        
     elseif(ds==dsu) then ! upward grid-cell exit
        scrivi=.false.
@@ -278,7 +278,7 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,real(subvol*ff))
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,dble(subvol*ff))
 
     elseif(ds==dsd) then ! downward grid-cell exit
        scrivi=.false.
@@ -333,7 +333,7 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
+       call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,dble(subvol*ff))
 
     elseif( ds==dsc .or. ds==dsmin) then  
        ! shortest time is the time-steping 

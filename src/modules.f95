@@ -137,19 +137,21 @@ ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: lat_rho
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: lon_rho
 #ifdef zgrid3Dt 
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: dzt
 #elif zgrid3D
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt,dzu,dzv
-  REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dzt,dzu,dzv,z_r
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dzt0surf,dzu0surf,dzv0surf
 #endif /*zgrid3Dt*/
 #ifdef varbottombox 
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dztb
 #endif /*varbottombox*/
 #ifdef ifs
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa,bb
@@ -157,7 +159,8 @@ MODULE mod_grid
   REAL*8                                    :: rmin ,tmin ,smin,&
   &                                            rmax ,smax ,tmax
   REAL*8                                    :: dr ,dtemp ,dsalt
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
@@ -166,29 +169,29 @@ MODULE mod_grid
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
-  REAL*4                                    :: tmin0 ,tmax0
-  REAL*4                                    :: smin0 ,smax0
-  REAL*4                                    :: rmin0 ,rmax0
-  REAL*4                                    :: tmine ,tmaxe
-  REAL*4                                    :: smine ,smaxe
-  REAL*4                                    :: rmine ,rmaxe
+  REAL*8                                    :: tmin0 ,tmax0
+  REAL*8                                    :: smin0 ,smax0
+  REAL*8                                    :: rmin0 ,rmax0
+  REAL*8                                    :: tmine ,tmaxe
+  REAL*8                                    :: smine ,smaxe
+  REAL*8                                    :: rmine ,rmaxe
 ENDMODULE mod_buoyancy
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_domain
   INTEGER, DIMENSION(10)                    :: ienw ,iene
   INTEGER, DIMENSION(10)                    :: jens ,jenn
-  REAL*4                                    :: timax
+  REAL*8                                    :: timax
 ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
 #if defined full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
 #endif
-  REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
   REAL*8                                     :: ff
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -199,13 +202,13 @@ ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_dens
 #ifdef tempsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
 ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_turb
 #ifdef turb
-  REAL upr(12,2)
+  REAL*8 upr(12,2)
 #endif
 ENDMODULE mod_turb
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -223,35 +226,35 @@ ENDMODULE mod_name
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamxy
 #ifdef streamxy
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
 #endif
 ENDMODULE mod_streamxy
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamv
 #ifdef streamv
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 ENDMODULE mod_streamv
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamr
 #ifdef streamr
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
 #endif
 ENDMODULE mod_streamr
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_stream_thermohaline
 #ifdef stream_thermohaline
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
 #endif
 ENDMODULE mod_stream_thermohaline
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_tracer
 #ifdef tracer
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: tra
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)        :: tra
 #endif
 ENDMODULE mod_tracer
 
@@ -259,7 +262,7 @@ ENDMODULE mod_tracer
 #if defined diffusion || turb 
 !#ifdef diffusion
 MODULE mod_diffusion
-  REAL                                       :: ah, av
+  REAL*8                                       :: ah, av
 ENDMODULE mod_diffusion
 #endif
 
@@ -267,9 +270,9 @@ ENDMODULE mod_diffusion
 #ifdef sediment
 MODULE mod_sed
   !  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
-  REAL                                       :: wsed, partdiam
-  REAL                                       :: rhos, cwamp, twave
-  REAL                                       :: critvel, kincrit
+  REAL*8                                       :: wsed, partdiam
+  REAL*8                                       :: rhos, cwamp, twave
+  REAL*8                                       :: critvel, kincrit
 
   INTEGER                                    :: nsed=0, nsusp=0
   LOGICAL                                    :: res
@@ -277,7 +280,7 @@ ENDMODULE mod_sed
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_orbital
-  REAL, ALLOCATABLE, DIMENSION(:)            :: orb
+  REAL*8, ALLOCATABLE, DIMENSION(:)            :: orb
 ENDMODULE mod_orbital
 #endif
 

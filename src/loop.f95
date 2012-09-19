@@ -69,8 +69,8 @@ SUBROUTINE loop
   INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
   INTEGER                                    :: nexit(NEND)
   
-  REAL                                       :: temp, salt, dens
-  REAL                                       :: temp2, salt2, dens2
+  REAL*8                                     :: temp, salt, dens
+  REAL*8                                     :: temp2, salt2, dens2
   REAL*8                                     :: x0, y0, z0, x1, y1, z1
   REAL*8                                     :: rlon,rlat
   REAL*8                                     :: dt, t0
@@ -80,7 +80,7 @@ SUBROUTINE loop
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0 ,boundError=0
-  REAL                                       :: zz
+  REAL*8                                     :: zz
 
 #if defined sediment
   ! Specific for sediment code
@@ -336,10 +336,12 @@ SUBROUTINE loop
               exit intsTimeLoop
            endif
            
+#ifndef regional
            ! === Cyclic world ocean/atmosphere === 
            IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
               x1 = x1 - DBLE(IMT)
            END IF
+#endif
            
            x0=x1
            y0=y1
@@ -430,10 +432,14 @@ SUBROUTINE loop
 #endif
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
+#ifndef regional
            if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
            if(x1.gt.dble(IMT)) x1=x1-dble(IMT)      ! east-west cyclic
+#endif
            if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! index for correct cell?
+#ifndef regional
            if(ib.gt.IMT) ib=ib-IMT                  ! east-west cyclic
+#endif
            if(y1.ne.dble(idint(y1))) jb=idint(y1)+1 ! index for correct cell?
            
            call errorCheck('boundError', errCode)
@@ -463,6 +469,7 @@ SUBROUTINE loop
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!              call statvd(temp, salt, dens, km, depth, lat)
 !               if (temp < tmine .or. temp > tmaxe .or. &
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then
@@ -852,12 +859,12 @@ return
       end subroutine errorCheck
 
   subroutine writedata(sel)
-    REAL                                 :: vort
+    REAL*8                               :: vort
     INTEGER                              :: sel ,xf ,yf ,zf ,n
     INTEGER, SAVE                        :: recPosIn=0  ,recPosOut=0
     INTEGER, SAVE                        :: recPosRun=0 ,recPosErr=0
     INTEGER, SAVE                        :: recPosKll=0
-    REAL                                 :: x14 ,y14 ,z14
+    REAL*8                               :: x14 ,y14 ,z14
     REAL*8                               :: twrite
 
 #if defined for || sim 
@@ -904,7 +911,7 @@ return
             (kriva == 3                                 ) .or. &
             (kriva == 4 .AND. niter == 1                ) .or. &
             (kriva == 5 .AND.                                  &
-          &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
+          &  MOD((DBLE(tt)-DBLE(t0))*DBLE(NGCM)/DBLE(ITER), 3600.) == 0.d0 ) .or. &
             (kriva == 6 .AND. .not.scrivi               )        ) then
 #if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
@@ -1099,9 +1106,9 @@ return
     IMPLICIT NONE
 
     CHARACTER (len=*)                          :: timerText ,testStr
-    REAL ,SAVE                                 :: fullstamp1 ,fullstamp2
-    REAL ,SAVE ,DIMENSION(2)                   :: timestamp1 ,timestamp2
-    REAL                                       :: timeDiff
+    REAL*8 ,SAVE                               :: fullstamp1 ,fullstamp2
+    REAL*8 ,SAVE ,DIMENSION(2)                 :: timestamp1 ,timestamp2
+    REAL*8                                     :: timeDiff
 !!$    
 !!$    select case (trim(testStr))
 !!$    case ('start')

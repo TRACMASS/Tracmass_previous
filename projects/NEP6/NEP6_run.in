@@ -120,10 +120,14 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 100,		 
-  ist2         = 220,			  
-  jst1         = 100,		 
-  jst2         = 600,		 
+  ! ist1         = 100,		 
+  ! ist2         = 200,			  
+  ! jst1         = 380,		 
+  ! jst2         = 520,		 
+  ist1         = 191,		 
+  ist2         = 192,			  
+  jst1         = 468,		 
+  jst2         = 468,		 
   kst1         = 50,		 
   kst2         = 50,
   ! ===   ===   ===   ===   ===

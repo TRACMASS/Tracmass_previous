@@ -41,43 +41,43 @@ function sw_seck(t,s,pres)
   ! UNESCO eqn 19 p 18
   IMPLICIT NONE
 
-  REAL, INTENT(IN)                         :: t(:),s(:),pres(:)       
-  REAL, ALLOCATABLE, DIMENSION (:)         :: sw_seck
-  REAL, ALLOCATABLE, DIMENSION (:)         :: p,AW,A,BW,B,KW,k,SR
+  REAL*8, INTENT(IN)                       :: t(:),s(:),pres(:)
+  REAL*8, ALLOCATABLE, DIMENSION (:)       :: sw_seck
+  REAL*8, ALLOCATABLE, DIMENSION (:)       :: p,AW,A,BW,B,KW,k,SR
   INTEGER                                  :: km
 
-  REAL, PARAMETER                          :: h3 = -5.77905E-7
-  REAL, PARAMETER                          :: h2 = +1.16092E-4
-  REAL, PARAMETER                          :: h1 = +1.43713E-3
-  REAL, PARAMETER                          :: h0 = +3.239908![-0.1194975]
+  REAL*8, PARAMETER                        :: h3 = -5.77905E-7
+  REAL*8, PARAMETER                        :: h2 = +1.16092E-4
+  REAL*8, PARAMETER                        :: h1 = +1.43713E-3
+  REAL*8, PARAMETER                        :: h0 = +3.239908![-0.1194975]
 
-  REAL, PARAMETER                          :: k2 =  5.2787E-8
-  REAL, PARAMETER                          :: k1 = -6.12293E-6
-  REAL, PARAMETER                          :: k0 = +8.50935E-5![+3.47718E-5]    
-  REAL, PARAMETER                          :: e4 = -5.155288E-5
-  REAL, PARAMETER                          :: e3 = +1.360477E-2
-  REAL, PARAMETER                          :: e2 = -2.327105
-  REAL, PARAMETER                          :: e1 = +148.4206
-  REAL, PARAMETER                          :: e0 = 19652.21![-1930.06]  
+  REAL*8, PARAMETER                        :: k2 =  5.2787E-8
+  REAL*8, PARAMETER                        :: k1 = -6.12293E-6
+  REAL*8, PARAMETER                        :: k0 = +8.50935E-5![+3.47718E-5]    
+  REAL*8, PARAMETER                        :: e4 = -5.155288E-5
+  REAL*8, PARAMETER                        :: e3 = +1.360477E-2
+  REAL*8, PARAMETER                        :: e2 = -2.327105
+  REAL*8, PARAMETER                        :: e1 = +148.4206
+  REAL*8, PARAMETER                        :: e0 = 19652.21![-1930.06]  
 
-  REAL, PARAMETER                          :: j0 = 1.91075E-4
+  REAL*8, PARAMETER                        :: j0 = 1.91075E-4
 
-  REAL, PARAMETER                          :: i2 = -1.6078E-6
-  REAL, PARAMETER                          :: i1 = -1.0981E-5
-  REAL, PARAMETER                          :: i0 =  2.2838E-3
+  REAL*8, PARAMETER                        :: i2 = -1.6078E-6
+  REAL*8, PARAMETER                        :: i1 = -1.0981E-5
+  REAL*8, PARAMETER                        :: i0 =  2.2838E-3
 
-  REAL, PARAMETER                          :: m2 =  9.1697E-10
-  REAL, PARAMETER                          :: m1 = +2.0816E-8
-  REAL, PARAMETER                          :: m0 = -9.9348E-7
+  REAL*8, PARAMETER                        :: m2 =  9.1697E-10
+  REAL*8, PARAMETER                        :: m1 = +2.0816E-8
+  REAL*8, PARAMETER                        :: m0 = -9.9348E-7
 
-  REAL, PARAMETER                          :: f3 =  -6.1670E-5
-  REAL, PARAMETER                          :: f2 =  +1.09987E-2
-  REAL, PARAMETER                          :: f1 =  -0.603459
-  REAL, PARAMETER                          :: f0 = +54.6746
+  REAL*8, PARAMETER                        :: f3 =  -6.1670E-5
+  REAL*8, PARAMETER                        :: f2 =  +1.09987E-2
+  REAL*8, PARAMETER                        :: f1 =  -0.603459
+  REAL*8, PARAMETER                        :: f0 = +54.6746
 
-  REAL, PARAMETER                          :: g2 = -5.3009E-4
-  REAL, PARAMETER                          :: g1 = +1.6483E-2
-  REAL, PARAMETER                          :: g0 = +7.944E-2
+  REAL*8, PARAMETER                        :: g2 = -5.3009E-4
+  REAL*8, PARAMETER                        :: g1 = +1.6483E-2
+  REAL*8, PARAMETER                        :: g0 = +7.944E-2
 
   km = size(t)
   allocate ( sw_seck(km) ,AW(km) ,BW(km) ,KW(km) ,SR(km) )

@@ -42,6 +42,7 @@ SUBROUTINE setupgrid
 
 ! === Template for setting up grids. Move the code from readfile.f95
   allocate ( mask(imt,jmt), depth(imt,jmt) )
+  allocate ( lat_rho(imt,jmt), lon_rho(imt,jmt) )
 
   !Order is   t  k  i  j 
   map2d    = [3, 4, 1, 2]
@@ -67,6 +68,8 @@ SUBROUTINE setupgrid
   
   depth = get2DfieldNC(trim(gridfile), 'h')
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')
+  lat_rho = get2DfieldNC(trim(gridfile), 'lat_rho')
+  lon_rho = get2DfieldNC(trim(gridfile), 'lon_rho')
   kmt = 50 
 
   !where (mask(2:imt,:) == 0) 

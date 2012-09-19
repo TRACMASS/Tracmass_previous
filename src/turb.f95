@@ -10,7 +10,7 @@ subroutine turbuflux(ia,ja,ka,rr,dt)
   IMPLICIT none
   
   REAL*8         :: uv(12),rr,rg,localW,dt !,en
-  REAL*4         :: qran(12),amp
+  REAL*8         :: qran(12),amp
   INTEGER        :: ia,ja,ka,im,jm,n
 
 !amp=Ah/sqrt(dt)
