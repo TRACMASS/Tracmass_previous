@@ -1,19 +1,17 @@
 
+
+MODULE mod_precdef		! Precision definitions
+  INTEGER, PARAMETER		            :: DP = SELECTED_REAL_KIND(15, 307)
+ENDMODULE mod_precdef
+
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+
 MODULE mod_param
-  INTEGER                                   :: IMT, JMT, KM
   INTEGER                                   :: JMAX, LBT, NTRACMAX
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
-  INTEGER                                   :: NEND
-  INTEGER, PARAMETER                        :: NNRJ=8,NTRJ=7
-#ifdef seasonal
-#if orca1
-  INTEGER, PARAMETER                        :: NST=48
-#elif orca025L75
-  INTEGER, PARAMETER                        :: NST=4
-#endif
-#else
-  INTEGER, PARAMETER                        :: NST=2
-#endif
 #ifdef streamts
   INTEGER, PARAMETER                        :: LOV=3
 #else
@@ -24,31 +22,21 @@ MODULE mod_param
   REAL*8                                    :: tseas,tyear,dtmin,voltr
   REAL*8                                    :: tstep,dstep,tss,partQuant
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
+
+  REAL*8, PARAMETER                         :: grav = 9.81
+  REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
+  REAL*8, PARAMETER                         :: radius = 6371229.d0 
+  REAL*8, PARAMETER                         :: radian = pi/180.d0  
+  REAL*8, PARAMETER                         :: deg=radius*radian   
+  REAL*8, PARAMETER                         :: tday=24.d0 * 3600.d0
+  INTEGER                                   :: idmax(12,1000:3000)
 ENDMODULE mod_param
 
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_precdef		! Precision definitions
-  INTEGER, PARAMETER		         :: DP = SELECTED_REAL_KIND(15, 307)
-ENDMODULE mod_precdef
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
 MODULE mod_coord
-  REAL*8                                    :: dx,dy
-  REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
-  REAL*8, PARAMETER                         :: grav=9.81, &
-  &                                            PI = 3.14159265358979323846d0, &
-  &                                            radius = 6371229.d0, &
-  &                                            radian = pi/180.d0,  &
-  &                                            deg=radius*radian,   &
-  &                                            tday=24.d0 * 3600.d0
-#ifdef ifs
-  REAL*8, PARAMETER                         :: R_d = 287.05d0, &
-  &                                            L_v = 2.5d0 * 1e+6,   &
-  &                                            c_d = 1004.d0
-#endif
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
-  INTEGER idmax(12,1000:3000)
+
 ENDMODULE mod_coord
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -74,21 +62,29 @@ MODULE mod_time
   INTEGER                                   :: ints      ,intstart ,intend
   INTEGER                                   :: intrun    ,intspin  ,intstep
   INTEGER                                   :: intmin    ,intmax
-  INTEGER                                   :: nsm=1     ,nsp=2
+  ! === Calculate julian dates
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
   INTEGER                                   :: startYear ,startMon ,startDay
   INTEGER                                   :: startHour ,startMin ,startSec
+  REAL*8                                    :: currJDtot ,currJDyr,currfrac
+  INTEGER                                   :: currYear  ,currMon  ,currDay
+  INTEGER                                   :: currHour, currMin, currSec 
+
   INTEGER                                   :: iyear ,imon ,iday ,ihour
   INTEGER                                   :: iyear0 ,imon0 ,iday0 
   INTEGER                                   :: yearmin ,yearmax
+
   INTEGER*8                                 :: ntime
-  REAL*8                                    :: currJDtot ,currJDyr,currfrac
-  INTEGER                                   :: currYear  ,currMon  ,currDay
-  INTEGER                                   :: currHour, currMin, currSec
+ 
   REAL*8                                    :: startJD=0 ,baseJD=0,ttpart
   INTEGER                                   :: fieldsPerFile
+  ! === Time-interpolation variables in loop ===
+  REAL*8                                     :: dt, t0
+  REAL*8                                     :: dtreg
+
 CONTAINS
+
   subroutine updateClock  
     USE mod_param
     USE mod_loopvars
@@ -147,11 +143,19 @@ ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
+  INTEGER                                   :: IMT, JMT, KM
+  INTEGER, PARAMETER                        :: NST=2
+  REAL*8                                    :: dx,dy
+  REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
   REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
+
+  ! === Vertical grids ===
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
 #ifdef zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D
@@ -173,6 +177,13 @@ MODULE mod_grid
   INTEGER                                   :: subGridJmin ,subGridJmax
   CHARACTER(LEN=200)                        :: SubGridFile 
   INTEGER                                   :: degrade_time=0, degrade_space=0
+
+#ifdef ifs
+  REAL*8, PARAMETER                         :: R_d = 287.05d0
+  REAL*8, PARAMETER                         :: L_v = 2.5d0 * 1e+6   
+  REAL*8, PARAMETER                         :: c_d = 1004.d0
+#endif
+
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
@@ -200,13 +211,69 @@ MODULE mod_vel
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
   REAL*8                                     :: ff
+
+CONTAINS
+  subroutine calc_implicit_vertvel
+    USE mod_grid
+    IMPLICIT none
+    ! = Loop variables
+    INTEGER                                    :: k
+    
+    wflux(2:imt,2:jmt,1,2)    =  uflux(1:imt-1, 2:jmt,   1,   2)  -   &
+                                 uflux(2:imt,   2:jmt,   1,   2)   +  &
+                                 vflux(2:imt,   1:jmt-2, 1,   2)  -   & 
+                                 vflux(2:imt,   2:jmt,   1,   2)
+    wflux(1, 2:jmt, 1, 2)     =  uflux(1,       2:jmt,   1,   2)   +  &
+                                 vflux(1,       1:jmt-1, 1,   2)  -   &
+                                 vflux(1,       2:jmt,   1,   2)
+    wflux(2:imt, 1, 1, 2)   =    uflux(1:imt-1, 1,       1,   2) -    &
+                                 uflux(2:imt,   1,       1,   2)  -  &
+                                 vflux(2:imt,   1,       1,   2) 
+    kloop: do k=2,km
+       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, 2)   +  &
+                                 uflux(1:imt-1, 2:jmt,   k,   2)  -   &
+                                 uflux(2:imt,   2:jmt,   k,   2)   +  &
+                                 vflux(2:imt,   1:jmt-1, k,   2)  -   & 
+                                 vflux(2:imt,   2:jmt,   k,   2) 
+       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, 2)  -   &
+                                 uflux(1,       2:jmt,   k,   2)   +  &
+                                 vflux(1,       1:jmt-1, k,   2)  -   &
+                                 vflux(1,       2:jmt,   k,   2)
+       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, 2)   +  &
+                                 uflux(1:imt-1, 1,       k,   2) -    &
+                                 uflux(2:imt,   1,       k,   2)  -  &
+                                 vflux(2:imt,   1,       k,   2) 
+    enddo kloop
+  end subroutine calc_implicit_vertvel
+
 ENDMODULE mod_vel
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
 MODULE mod_traj
+  INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
+  INTEGER                                    :: NEND
+
+  ! === Particle arrays ===
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
+
+  ! === Particle counters ===
+  INTEGER                                    :: nout=0, nloop=0, nerror=0
+  INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
+  INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
+
+  ! === Particle positions ===
+  INTEGER                                    :: ia, ja, ka, iam
+  INTEGER                                    :: ib, jb, kb, ibm
+  REAL*8                                     :: x0, y0, z0
+  REAL*8                                     :: x1, y1, z1
 ENDMODULE mod_traj
+
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
 MODULE mod_dens
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
@@ -231,32 +298,20 @@ MODULE mod_name
 ENDMODULE mod_name
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_streamxy
+MODULE mod_streamfunctions
 #ifdef streamxy
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
 #endif
-ENDMODULE mod_streamxy
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_streamv
 #ifdef streamv
   REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
-ENDMODULE mod_streamv
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_streamr
 #ifdef streamr
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
 #endif
-ENDMODULE mod_streamr
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_stream_thermohaline
 #ifdef stream_thermohaline
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
 #endif
-ENDMODULE mod_stream_thermohaline
+ENDMODULE mod_streamfunctions
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_tracer
@@ -274,8 +329,8 @@ ENDMODULE mod_diffusion
 #endif
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-#ifdef sediment
 MODULE mod_sed
+#ifdef sediment
   !  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
   REAL                                       :: wsed, partdiam
   REAL                                       :: rhos, cwamp, twave
@@ -283,87 +338,12 @@ MODULE mod_sed
 
   INTEGER                                    :: nsed=0, nsusp=0
   LOGICAL                                    :: res
-ENDMODULE mod_sed
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_orbital
-  REAL, ALLOCATABLE, DIMENSION(:)            :: orb
-ENDMODULE mod_orbital
 #endif
+ENDMODULE mod_sed
+MODULE mod_orbital
+#ifdef sediment
+  REAL, ALLOCATABLE, DIMENSION(:)            :: orb
+#endif
+ENDMODULE mod_orbital
 
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ! ===   OCCAM  === 
-!!$#if defined occ66
-!!$#ifdef mod1
-!!$  INTEGER, PARAMETER ::  IMT1=1440,JMT1=577
-!!$  INTEGER, PARAMETER ::  IMT=IMT1,JMT=JMT1
-!!$#endif
-!!$#ifdef mod2 
-!!$  INTEGER, PARAMETER ::  IMT2=438,JMT2=434
-!!$#endif
-!!$  INTEGER, PARAMETER ::  KM=66,JMAX=250,LBT=3
-!!$  INTEGER, PARAMETER ::  IDR=1171,JEQ=313
-!!$  INTEGER, PARAMETER ::  NTRACMAX=3*1000*1000
-!!$#endif
-!!$  
-!!$  
-!!$  ! ===   SKB  === 
-!!$#ifdef simp
-!!$  INTEGER, PARAMETER :: IMT=174, JMT=121
-!!$#endif
-!!$#ifdef fors
-!!$  INTEGER, PARAMETER ::  IMT=241,JMT=241
-!!$#endif
-!!$#if defined fors || simp 
-!!$  INTEGER, PARAMETER ::  KM=39,JMAX=JMT,LBT=4
-!!$  INTEGER, PARAMETER ::  NTRACMAX=1*100*1000
-!!$#endif
-!!$  
-!!$  ! ===   TEST  === 
-!!$#if defined tes
-!!$  !INTEGER, PARAMETER :: IMT=225,JMT=IMT,KM=10,JMAX=JMT,LBT=4
-!!$  INTEGER, PARAMETER :: IMT=105,JMT=IMT,KM=10,JMAX=JMT,LBT=4
-!!$  INTEGER, PARAMETER :: NTRACMAX=10000
-!!$#endif
-!!$  ! ===   TUNIS-ROMS  === 
-!!$#if defined tun
-!!$  INTEGER, PARAMETER ::  (IMT=249,JMT=258,KM=20,JMAX=JMT,LBT=4)
-!!$  INTEGER, PARAMETER ::  NTRACMAX=100000
-!!$#endif
-!!$  
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

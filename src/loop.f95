@@ -25,67 +25,33 @@ SUBROUTINE loop
   USE mod_vel
   USE mod_traj
   USE mod_pos
-  USE mod_turb
   USE mod_coord
-#ifdef tracer
+
+  ! === Selectable moules ===
+  USE mod_turb
+  USE mod_streamfunctions
   USE mod_tracer
-#endif /*tracer*/
-#ifdef streamxy
-  USE mod_streamxy
-#endif /*streamxy*/
-#ifdef streamv
-  USE mod_streamv
-#endif /*streamv*/
-#ifdef streamr
-  USE mod_streamr
-#endif /*streamr*/
-#ifdef stream_thermohaline
-  USE mod_stream_thermohaline
-#endif /*stream_thermohaline*/
-#ifdef tracer
-  USE mod_tracer
-#endif /*tracer*/
-#ifdef sediment
   USE mod_sed
-#endif /*sediment*/
-  
+
   IMPLICIT none
-  ! === Variables for particle positions ===
-  INTEGER                                    :: ia, ja, ka, iam
-  INTEGER                                    :: ib, jb, kb, ibm
-  REAL*8                                     :: x0, y0, z0
-  REAL*8                                     :: x1, y1, z1
   ! === Loop variables ===
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: niter
   INTEGER                                    :: nrh0=0
-  ! === Particle Counters ===
-  INTEGER                                    :: nout=0, nloop=0, nerror=0
-  INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
-  INTEGER                                    :: nexit(NEND)
   ! === Variables to interpolate fields ===
   REAL                                       :: temp, salt, dens
   REAL                                       :: temp2, salt2, dens2
-  ! === Time interpolation variables ===
-  REAL*8                                     :: dt, t0
-  REAL*8                                     :: dtreg
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
-#if defined sediment
-  ! Specific for sediment code
-  INTEGER                                    :: nsed,nsusp
-  LOGICAL                                    :: res
-#endif /*sediment*/
-
 
 !!------------------------------------------------------------------------------
 
 
-  iday0=iday
-  imon0=imon
-  iyear0=iyear
+  iday0 = iday
+  imon0 = imon
+  iyear0 = iyear
   ! === print some run stats ===
   print *,'------------------------------------------------------'  
   print *,'Files written in directory                  :  ' ,trim(outDataDir)
@@ -103,24 +69,11 @@ SUBROUTINE loop
          /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
 
-  ! === initialise to zero ===
-  nrh0=0
-  nexit=0
-  ntractot=0
-#ifdef sediment
-  nsed=0
-  nsusp=0
-#endif /*sediment*/
-  
-  nrj=0
-  trj=0.d0
-
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
-  
-  
+    
   !==========================================================
-  !=== Read in the end positions from an previous run     === 
+  !===   Read in end positions from a previous run        === 
   !==========================================================
   
 #ifdef rerun

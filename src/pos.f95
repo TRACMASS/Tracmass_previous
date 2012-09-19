@@ -19,8 +19,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
   !    r1       : the new position (coordinate)
   !====================================================================
   
-  USE mod_param
-  USE mod_time
+  USE mod_grid
   USE mod_vel
   USE mod_turb
   IMPLICIT none
