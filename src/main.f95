@@ -34,8 +34,7 @@ PROGRAM main
   end if modrundirCond
 !  print *,intmin,intstart,intrun
  
-  print *,' === Setup the grid === '
-  call setupgrid
+ call setupgrid
   if (minval(dxv) < 0) then
      print *, " "
      print *, " === Error! === "
@@ -51,7 +50,6 @@ PROGRAM main
      stop
   end if
 
-  print *,' === Decide where particle will be seeded === '
   call init_seed
   
   if(nqua.eq.1) then ! number of trajectories (per time resolution)

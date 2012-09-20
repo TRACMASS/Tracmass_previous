@@ -68,7 +68,7 @@ CONTAINS
        print *,"   to use in the cdf data file."
        stop
     end if
-    
+
     start2d(map2d(3)) = ncTpos       
     s = start2d
     s(3) = s(3) + istag
