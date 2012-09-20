@@ -398,27 +398,5 @@ enddo
 
   return
   
-  
-   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
- 
-contains
-
-  
-  subroutine datasetswap
-    hs(:,:,nsm)      = hs(:,:,nsp)
-    uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
-    vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
-#ifdef explicit_w
-    wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
-#endif
-
-#ifdef tempsalt
-    tem(:,:,:,nsm)   = tem(:,:,:,nsp)
-    sal(:,:,:,nsm)   = sal(:,:,:,nsp)
-    rho(:,:,:,nsm)   = rho(:,:,:,nsp)
-#endif
-  end subroutine datasetswap
-  
 end subroutine readfields
 

@@ -377,25 +377,6 @@ contains
   !  INTEGER,             DIMENSION(4)       :: d
   !end function get4dfield
   
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ### 
-  subroutine datasetswap
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    ! === swap between datasets ===
-    hs(:,:,1)=hs(:,:,2)
-    u(:,:,:,1)=u(:,:,:,2)
-    v(:,:,:,1)=v(:,:,:,2)
-#ifdef explicit_w
-    w(:,:,:,1)=w(:,:,:,2)
-#endif
-#ifdef tempsalt
-    tem(:,:,:,1)=tem(:,:,:,2)
-    sal(:,:,:,1)=sal(:,:,:,2)
-    rho(:,:,:,1)=rho(:,:,:,2)
-#endif
-  end subroutine datasetswap
-
-
   !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ### 
   subroutine printdiagnostics
     INTEGER                                 :: im
@@ -421,32 +402,4 @@ contains
        enddo
     enddo
   end subroutine printdiagnostics
-    
-
-  !###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ###   ### 
-  subroutine gdate (jd, year,month,day)
-    !
-    !---computes the gregorian calendar date (year,month,day)
-    !   given the julian date (jd).
-    !
-    integer jd ,year ,month ,day ,i ,j ,k ,l ,n
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-    l= jd+68569
-    n= 4*l/146097
-    l= l-(146097*n+3)/4
-    i= 4000*(l+1)/1461001
-    l= l-1461*i/4+31
-    j= 80*l/2447
-    k= l-2447*j/80
-    l= j/11
-    j= j+2-12*l
-    i= 100*(n-49)+i+l
-    
-    year= i
-    month= j
-    day= k
-    
-    return
-  end subroutine gdate
-  
 end subroutine readfields
