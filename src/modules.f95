@@ -141,6 +141,7 @@ CONTAINS
   end function jdate
 ENDMODULE mod_time
 
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
   INTEGER                                   :: IMT, JMT, KM
@@ -184,7 +185,21 @@ MODULE mod_grid
   REAL*8, PARAMETER                         :: c_d = 1004.d0
 #endif
 
+CONTAINS
+  function l2d(lon1,lon2,lat1,lat2)
+    real                                   :: lon1,lon2,lat1,lat2,l2d
+    real                                   :: dlon,dlat,a,c
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = (sin(dlat/2))**2 + cos(lat1) * cos(lat2) * (sin(dlon/2))**2
+    c = 2 * asin(min(1.0,sqrt(a)))
+    l2d = 6367 * c * 1000
+  end function l2d
+
 ENDMODULE mod_grid
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
   REAL*4                                    :: tmin0 ,tmax0
@@ -195,11 +210,17 @@ MODULE mod_buoyancy
   REAL*4                                    :: rmine ,rmaxe
 ENDMODULE mod_buoyancy
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_domain
   INTEGER, DIMENSION(10)                    :: ienw ,iene
   INTEGER, DIMENSION(10)                    :: jens ,jenn
   REAL*4                                    :: timax
 ENDMODULE mod_domain
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
@@ -213,6 +234,21 @@ MODULE mod_vel
   REAL*8                                     :: ff
 
 CONTAINS
+  
+!  subroutine datasetswap
+!    hs(:,:,1)      = hs(:,:,2)
+!    uflux(:,:,:,1) = uflux(:,:,:,2)
+!    vflux(:,:,:,1) = vflux(:,:,:,2)
+!#ifdef explicit_w || full_wflux
+!    wflux(:,:,:,1) = wflux(:,:,:,2)
+!#endif
+!#ifdef tempsalt
+!    tem(:,:,:,1)   = tem(:,:,:,2)
+!    sal(:,:,:,1)   = sal(:,:,:,2)
+!    rho(:,:,:,1)   = rho(:,:,:,2)
+!#endif
+!  end subroutine datasetswap
+
   subroutine calc_implicit_vertvel
     USE mod_grid
     IMPLICIT none
@@ -247,9 +283,9 @@ CONTAINS
   end subroutine calc_implicit_vertvel
 
 ENDMODULE mod_vel
-
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_traj
   INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
   INTEGER                                    :: NEND
