@@ -146,6 +146,7 @@ ENDMODULE mod_time
 MODULE mod_grid
   INTEGER                                   :: IMT, JMT, KM
   INTEGER, PARAMETER                        :: NST=2
+  INTEGER                                   :: nsm=1     ,nsp=2
   REAL*8                                    :: dx,dy
   REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
