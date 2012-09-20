@@ -8,6 +8,7 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
   INTEGER                                    :: ncTpos=0
+  INTEGER                                    :: istag=0, jstag=0
 
   INTEGER                                    :: ierr, varid,ncid
   
@@ -65,16 +66,18 @@ CONTAINS
        print *,"   to use in the cdf data file."
        stop
     end if
-    start2d(map2d(3)) = ncTpos   
-    
+    start2d(map2d(3)) = ncTpos       
 
-    s = start2d(map2d)
+    s = start2d
+    s(3) = s(3) + istag
+    s(4) = s(4) + jstag
+    s = s(map2d)
     c = count2d(map2d)
-    d = c + s - 1  
+    d = c + s - 2  
 
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
     field=0; get2dfieldNC=0
-    
+
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
@@ -82,6 +85,7 @@ CONTAINS
     ierr=NF90_GET_VAR(ncid ,varid , field, s,c)
     if(ierr.ne.0) call printReadError(3)
     ierr=NF90_CLOSE(ncid)
+
 
     if ( all(map2d(1:2) == (/3,4/),DIM=1) .or. &
          all(map2d(2:3) == (/3,4/),DIM=1) ) then
@@ -110,10 +114,16 @@ CONTAINS
        stop
     end if
     start3d(1) = ncTpos
-    s = start3d(map3d)
+
+    s = start3d
+    s(2) = s(2) + istag
+    s(3) = s(3) + jstag
+    s = s(map3d)
+
+    !s = start3d(map3d)
     c = count3d(map3d)
-    d = c + s - 1
-    allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) )
+    d = c + s - 2
+    allocate ( field(d(1),d(2),d(3)+1), get3dfieldNC(imt+2,jmt,km) )
 
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1)
