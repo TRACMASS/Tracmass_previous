@@ -142,11 +142,11 @@ SUBROUTINE loop
 !  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
 #if defined orca025
-  if(    rlat == float(jenn(1))) then
+  if(    rlat == dble(jenn(1))) then
      nrj(ntrac,8)=0     ! Southern boundary
      i=i+1
      nout=nout+1
-  elseif(rlon == float(iene(3))) then
+  elseif(rlon == dble(iene(3))) then
      nrj(ntrac,8)=0    ! East
      j=j+1
      nout=nout+1
@@ -160,10 +160,25 @@ SUBROUTINE loop
   endif
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+#elif defined orca025L75
+  if( tt-t0 >365.*1000. .and. temp > tmax0 ) then
+     nrj(ntrac,8)=1     ! warm end points
+     i=i+1
+  elseif( tt-t0 >365.*1000. .and. temp <= tmax0 ) then
+     nrj(ntrac,8)=2    ! cold end points
+     j=j+1
+  else                 ! too short
+     nrj(ntrac,8)=0 
+     k=k+1
+     nout=nout+1
+  endif
+566 format(i8,i7,2f9.3,f6.2,2f10.2 &
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+
 #elif defined ifs
-  if(rlat == float(jenn(1))) then
+  if(rlat == dble(jenn(1))) then
      nrj(ntrac,8)=1    ! Southern boundary
-  elseif(rlat == float(jens(2))) then
+  elseif(rlat == dble(jens(2))) then
      nrj(ntrac,8)=2    ! Northern boundary 
   else
      nrj(ntrac,8)=0
@@ -238,7 +253,7 @@ SUBROUTINE loop
      
      call fancyTimer('advection','start')
      ntracLoop: do ntrac=1,ntractot  
-
+     
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6) == 1) cycle ntracLoop
         
@@ -340,10 +355,22 @@ SUBROUTINE loop
               exit intsTimeLoop
            endif
            
-           ! === Cyclic world ocean/atmosphere === 
-           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-              x1 = x1 - DBLE(IMT)
-           END IF
+!            === Cyclic world ocean/atmosphere === 
+!           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+!            print *,'ojojoj',ntrac,ib,x1
+!            x1 = x1 - DBLE(IMT)
+!           elseif(x1 > DBLE (IMT)) THEN
+!            print *,'lololo',ntrac,ib,x1
+!            stop 9494
+!           END IF
+!           IF (ib == IMT .AND. x1 <= 0.d0) THEN
+!            print *,'hoppsan',ntrac,ib,x1
+!            x1 = x1 + DBLE(IMT)
+!           elseif(x1<0.d0) then
+!            print *,'fyfyfy',ntrac,ib,x1
+!            stop 9495
+!           END IF
+
            
            x0=x1
            y0=y1
@@ -415,31 +442,65 @@ SUBROUTINE loop
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            
-#if defined orc || orca1 || orca025 || orca12 || orca025L75
            ! === north fold cyclic for the ORCA grids ===
-           ! === only tested with ORCA025 so far !!!  ===
+#if defined orc || orca1 || orca12 
             if( y1 == dble(JMT-1) ) then
-              print *,'North fold for',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb),kmt(ib,jb-1)
+!              print *,'North fold for',ntrac
               x1 = dble(IMT+2) - x1
               ib=idint(x1)+1
               jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
  !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
            elseif(y1 > dble(JMT-1)) then
+            print *,'north of northfold for ntrac=',ntrac
             print *,ia,ib,x0,x1
             print *,ja,jb,y0,y1
             print *,ka,kb,z0,z1
             print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-            stop 4967
+            nerror=nerror+1
+            nrj(ntrac,6)=1
+            cycle ntracLoop
+!            stop 4967
            endif
+#elif defined orca025 || orca025L75
+            if( y1 == dble(JMT-1) ) then
+!              print *,'North fold for',ntrac
+              x1 = dble(IMT+3) - x1
+              y1 = dble(JMT-2)
+              ib=idint(x1)
+              jb=JMT-2
+              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+           elseif(y1 > dble(JMT-1)) then
+            print *,ia,ib,x0,x1
+            print *,ja,jb,y0,y1
+            print *,ka,kb,z0,z1
+            print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+            nerror=nerror+1
+            nrj(ntrac,6)=1
+            cycle ntracLoop
+!            stop 4977
+           endif
+
 #endif
+           ! === Cyclic world ocean/atmosphere === 
+           if(x1 <  0.d0    ) x1=x1+dble(IMT)       
+           if(x1 > dble(IMT)) x1=x1-dble(IMT)   
+           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+!            print *,'vavava',ntrac,niter,ib,x1,jb,y1,kb,z1
+            x1 = x1 - DBLE(IMT)
+           endif    
+           if(ib > IMT      ) ib=ib-IMT 
+            
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
-           if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
-           if(x1.gt.dble(IMT)) x1=x1-dble(IMT)      ! east-west cyclic
-           if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! index for correct cell?
-           if(ib.gt.IMT) ib=ib-IMT                  ! east-west cyclic
-           if(y1.ne.dble(idint(y1))) jb=idint(y1)+1 ! index for correct cell?
+           if(x1 /= dble(idint(x1))) ib=idint(x1)+1 
+           if(y1 /= dble(idint(y1))) jb=idint(y1)+1
+           if(z1 /= dble(idint(z1))) kb=idint(z1)+1 
+
+
+!if(ntrac==1472) print *,'ssss',ntrac,niter,ib,x1,jb,y1,kb,z1
+!if(ntrac==5) print *,'ssss',ntrac,niter,ib,x1,jb,y1,kb,z1
+
            
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
@@ -448,6 +509,8 @@ SUBROUTINE loop
            if (errCode.ne.0) cycle ntracLoop
            
            call errorCheck('bottomError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
+
            call errorCheck('airborneError', errCode)
            call errorCheck('corrdepthError', errCode)
            call errorCheck('cornerError', errCode)
@@ -459,12 +522,13 @@ SUBROUTINE loop
            ! === end trajectory if outside chosen domain ===
     
            LBTloop: do k=1,LBT
-              if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
-                 float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
+              if(dble(ienw(k)) <= x1 .and. x1 <= dble(iene(k)) .and. &
+                 dble(jens(k)) <= y1 .and. y1 <= dble(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
                  exit niterLoop                                
               endif
            enddo LBTLOOP
+
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
@@ -763,7 +827,7 @@ return
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
               print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
               print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
-              print *,'ntrac=',ntrac
+              print *,'ntrac=',ntrac,niter 
                print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
                print *,'ia=',ia,ib,ja,jb,ka,kb
                print *,'x0=',x0,x1,y0,y1,z0,z1
@@ -773,8 +837,8 @@ return
                print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
               nrj(ntrac,6)=1
-               stop 3957
-               z1=dble(KM-kmt(ib,jb))+0.5d0
+ !             stop 3957
+              z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if
         case ('airborneError')
@@ -1059,7 +1123,7 @@ return
 #endif /*regulardt*/
            if(dt.lt.0.d0) then
               print *,'dt=',dt
-              stop 49673
+              stop 4968
            endif
            ! === if time step makes the integration ===
            ! === exceed the time when fiedls change ===

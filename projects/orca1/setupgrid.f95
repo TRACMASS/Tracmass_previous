@@ -129,9 +129,6 @@ SUBROUTINE setupgrid
 !  print *,j,lat(IMT/2,j)
 !  enddo
   
-  
-  
-  
   deallocate( temp2d_doub, e1t, e2t )
   
 !#ifdef orca025
@@ -267,7 +264,8 @@ SUBROUTINE setupgrid
 !write(21) kmv
 !close(21)
 
-!kmt(220:305,147)=1
+!kmt(220:305,147)=1 ! Find the Equator in the Atlantic
+!kmt(110:120,246)=1 ! Find Bering Straight
 !do j=JMT,1,-1
 ! write (*,"(i4,999i1)") j,(kmt(i,j),i=1,IMT)
 !enddo

@@ -6,7 +6,11 @@ MODULE mod_param
   INTEGER                                   :: NEND
   INTEGER, PARAMETER                        :: NNRJ=8,NTRJ=7
 #ifdef seasonal
+#if orca1
   INTEGER, PARAMETER                        :: NST=48
+#elif orca025L75
+  INTEGER, PARAMETER                        :: NST=4
+#endif
 #else
   INTEGER, PARAMETER                        :: NST=2
 #endif

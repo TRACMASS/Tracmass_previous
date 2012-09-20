@@ -74,7 +74,7 @@
   kriva           = 1,
   inDataDir='/Users/doos/data/orca/orca1/'
   outDataDir='/Users/doos/data/orca/orca1/data_out/'
-  outDataFile     = 'cb_t6_back'
+  outDataFile     = 'cb_bering0'
   intminInOutFile = 0
   /
   !
@@ -115,16 +115,16 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
   !
-  nff         = -1,
+  nff         = 1,
   isec        = 2,
   idir        = 1,
   nqua        = 1,
   partQuant   = 1,
   seedType    = 1,
-  ist1        = 220,!260, !260,   !330,
-  ist2        = 305, !880, !550, ! 880,   !480,
-  jst1        = 147,!
-  jst2        = 147,! 
+  ist1        = 110,! AtlEq=220; Ber=110
+  ist2        = 120,! AtlEq=305; Ber=120
+  jst1        = 246,! AtlEq=147; Ber=
+  jst2        = 246,! AtlEq=147; Ber=
   kst1        =   1,
   kst2        =  42,
   varSeedFile = 0,
@@ -137,7 +137,7 @@ $INITRUNSEED
   !
   ! for starting a trajectory (active only with option tempsalt) 
   tmin0 = -500,
-  tmax0 =    6.,
+  tmax0 =  500.,
   smin0 = -500.,
   smax0 =  500.,
   rmin0 = -500.,
@@ -191,10 +191,22 @@ $INITRUNSEDIMENT
 !    jens =  148,    1,    1,      
 !    jenn =  200,    1,    1,  
 !    timax = 99999999999./
-    ienw =  220,    1,    1,    
-    iene =  305,    1,    1,   
-    jens =  100,    1,    1,      
-    jenn =  146,    1,    1,  
-    timax = 99999999999./
-    
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  100,    1,    1,      
+!    jenn =  146,    1,    1,  
+!    timax = 99999999999./
+! Equator in the Atlantic
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  147,    1,    1,      
+!    jenn =  147,    1,    1,  
+!    timax = 36500000./ ! 100 millennia
+! Bering Straight
+    ienw =  110,    1,    1,    
+    iene =  120,    1,    1,   
+    jens =  246,    1,    1,      
+    jenn =  246,    1,    1,  
+    timax = 36500000./ ! 100 millennia
+     
     

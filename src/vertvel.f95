@@ -27,11 +27,15 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   REAL kin
 #endif
   
-  real*8 rr,rg,uu,um,vv,vm
-  integer ia,iam,ja,ka,k,n
+  REAL*8 rr,rg,uu,um,vv,vm
+  INTEGER ia,iam,ja,ka,k,n,n1,n2
     
   rg=1.d0-rr
   wflux=0.d0
+
+  n1=min(nsm,nsp)
+  n2=max(nsm,nsp)
+ 
   
 #ifdef twodim
   return
@@ -46,7 +50,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 
 ! start ifs code
 #if defined ifs
-    do n=nsm,nsp
+    do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
      + (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )  ! time change of the mass the in grid box
@@ -59,7 +63,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #ifdef  full_wflux
      wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
 #else
-    do n=nsm,nsp
+    do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
     enddo
@@ -93,7 +97,7 @@ wflux(km,:) = 0.d0
 #ifdef full_wflux
      wflux(k)=wflux(ia,ja,k,nsm) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
 #else
-    do n=nsm,nsp
+    do n=n1,n2
      wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
     enddo
 #endif

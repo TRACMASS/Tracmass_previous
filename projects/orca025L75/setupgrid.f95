@@ -125,11 +125,10 @@ SUBROUTINE setupgrid
 !    lat(i,j)=temp2d_doub(i,j)
 !  enddo
 !  enddo
-!  print *,(lat(IMT/2,j),j=1,JMT)
-  
-  
-  
-  
+!do j=JMT,1,-1
+! write (*,"(i4,2x,99f6.2)") j,(lat(i,j),i=1,IMT,200)
+!enddo
+    
   deallocate( temp2d_doub, e1t, e2t )
   
 !#ifdef orca025
@@ -257,7 +256,7 @@ SUBROUTINE setupgrid
 !  currYear = startYear 
   
   
-!open(21,file='/Users/doos/data/orca/orca025/topo/longlat',form='unformatted')
+!open(21,file=trim(inDataDir)//'topo/longlat',form='unformatted')
 !write(21) long
 !write(21) lat
 !write(21) kmt
@@ -265,8 +264,9 @@ SUBROUTINE setupgrid
 !write(21) kmv
 !close(21)
 
-!do j=900,325,-1
-! write (*,"(i4,999i1)") j,(kmt(i,j),i=105,300)
+!kmt(940:1200,499)=1
+!do j=JMT,1,-1
+! write (*,"(i4,999i1)") j,(kmt(i,j),i=800,1300,2)
 !enddo
 !stop 3956
 

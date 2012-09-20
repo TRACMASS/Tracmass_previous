@@ -59,7 +59,7 @@ SUBROUTINE readfields
   
 
 ! === Initialising fields ===
-  initFieldcond: if(ints.eq.intstart) then
+initFieldcond: if(ints==intstart) then
      hs     = 0.
      uflux  = 0.
      vflux  = 0.
@@ -74,39 +74,47 @@ SUBROUTINE readfields
  currMon=startMon
  currYear=startYear
  nread=0
-#ifdef seasonal
- nsp=-nff
+
  if(nff==1) then
-  nsp=0
   npremier=1             ; ndernier= fieldsPerFile
   currYear=yearmin
  elseif(nff==-1) then
-  nsp=NST
-  nsp=0
   npremier=fieldsPerFile ; ndernier=1
-!  npremier=1             ; ndernier= fieldsPerFile
   currYear=yearmax
   currMon=12
  endif
+ 
+ 
+#ifdef seasonal
+  nsp=0
+  print *,'nff ggr denna',12/NST
+  if(ngcm/=365*24/min(12,NST)) stop 7777
+#else
+  nsp=2 ; nsm=1
 #endif
 
      
-else
+else ! i.e. when ints/=intstart
 
 ! === Update clockworks ===
 
- if(ngcm==730) then ! monthly GCM data
+#ifdef seasonal
+  currMon=currMon+nff*12/min(12,NST)
+#else
   currMon=currMon+nff
-  if(currMon == 13) then
-   currMon=1
+#endif
+
+ if(ngcm>=730) then ! monthly or coarser time resolution
+
+  if(currMon > 12) then
+   currMon=currMon-12
    currYear=currYear+1
-  elseif(currMon == 0) then
-   currMon=12
+  elseif(currMon < 1) then
+   currMon=currMon+12
    currYear=currYear-1
   endif
-   
-  
-  else ! uneaven months for 5 days or more frequent GCM data
+     
+ else ! For the 5 day or more often GCM data
   
 ! === Update clockworks ===
   currHour= currHour+nff*ngcm
@@ -119,33 +127,31 @@ else
    currDay=currDay-1
   endif
   
-    if(currDay > idmax(currMon, currYear)) then 
-    currDay=currDay-idmax(currMon, currYear)
-    currMon=currMon+1
-    if(currMon == 13) then
-       currMon=1
-       currYear=currYear+1
-     if(currYear.eq.yearmax+1) currYear=yearmin
-    endif
+  if(currDay > idmax(currMon, currYear)) then 
+   currDay=currDay-idmax(currMon, currYear)
+   currMon=currMon+1
+   if(currMon == 13) then
+    currMon=1
+    currYear=currYear+1
+    if(currYear.eq.yearmax+1) currYear=yearmin
+   endif
   elseif(currDay <=0) then
-    currMon=currMon-1
-    if(currMon == 0) then
-       currMon=12
-       currYear=currYear-1
-     if(currYear.eq.yearmin-1) currYear=yearmax
-    endif
-    currDay=currDay+idmax(currMon, currYear)
+   currMon=currMon-1
+   if(currMon == 0) then
+    currMon=12
+    currYear=currYear-1
+    if(currYear.eq.yearmin-1) currYear=yearmax
    endif
+   currDay=currDay+idmax(currMon, currYear)
+  endif
    
-   endif
+ endif
 
 endif initFieldcond
 
 ntime=100*currYear+currMon
 
 #ifdef seasonal
-! nsp=nsp+nff
-! nsm=nsp-nff
  nsp=nsp+1
  nsm=nsp-1
  if(nsp==NST+1) then
@@ -159,20 +165,14 @@ ntime=100*currYear+currMon
   nsm=NST
  endif
  
-! nsp=mod(ints,NST)
-! nsm=mod(ints-1,NST)
 
-! print *,'ints=',ints,nsp,nsm
-! print *,mod(-1,NST),mod(0,NST),mod(1,NST)
-! stop 4067
  if(abs(ints)>NST) return
 #else
   call datasetswap
 #endif
 
-
 nread=CurrMon
-!print *,'nread=',nread
+
 ! === Find the file for this timestep ===
 start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
 start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
@@ -183,7 +183,11 @@ write(dataprefix(15:18),'(i4)') currYear
 write(dataprefix(24:27),'(i4)') currYear
 
 fieldFile = trim(inDataDir)//'fields/msp1/'//trim(dataprefix)
-if(nread.eq.npremier) then
+
+!print *,nread, fieldFile
+
+if(nread==npremier) then
+
  gridFileT=trim(fieldFile)//'T.nc'   ! SSH + T + S
 ! print *, trim(gridFileT)
  inquire(file=trim(gridFileT),exist=around)
@@ -278,7 +282,6 @@ do j=1,JMT
  enddo
 enddo
 
-
 #endif     
 
 dmult=1.  ! amplification of the velocity amplitude by simple multiplication
@@ -355,8 +358,6 @@ do i=1,IMT
  enddo
 enddo
 
-!print *,'vflux=',vflux(270,147,42,nsp)
-
 
 
 #ifdef drifter
@@ -420,6 +421,4 @@ contains
   end subroutine datasetswap
   
 end subroutine readfields
-
-
 
