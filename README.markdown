@@ -1,5 +1,5 @@
 
-=== TRACMASS ===
+# TRACMASS 
 Lagrangian trajectory code for ocean and atmospheric general circulation models
 
 TRACMASS makes it possible to estimate water paths, Lagrangian stream functions (barotropic and overturning), exchange times, particle sedimentation, etc.
