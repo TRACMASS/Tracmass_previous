@@ -11,9 +11,9 @@
   subGrid      = 0,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 1,
+  subGridImin  = 99,
   subGridImax  = 1440,
-  subGridJmin  = 1,
+  subGridJmin  = 330,
   subGridJmax  = 1021,
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
@@ -32,8 +32,8 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  =    1,
-  intspin =    1,  
-  intrun  = 1752,         ! = 73*24
+  intspin =   48,  
+  intrun  =120000,         ! = 73*24
   intstep = 0
 /
   !
@@ -45,9 +45,9 @@
   startSec         =    0,
   startMIN         =    0,
   startHour        =    0,
-  startDay         =    05,!5,!4,!31,
-  startMon         =    01,!1,!7,!12,
-  startYear        =  1995
+  startDay         =    1,
+  startMon         =    1,
+  startYear        =    0 ! 1197 eller 1200 
 / 
   !
   !
@@ -71,12 +71,10 @@
   ! intminInOutFile : ??????????????????????????????????????????
   !
   ncoor           = 0,
-  kriva           = 2,
-  inDataDir       = '/Users/doos/data/orca/orca025/'
-!  inDataDir       = '/Volumes/Resa/data/orca/orca025/'
-  outDataDir      = '/Users/doos/data/orca/orca025/data_out/'
-!  outDataDir      = '/Volumes/Resa/data/orca/orca025/data_out/'
-  outDataFile     = 'wpool_anual'
+  kriva           = 1,
+  inDataDir='/Users/doos/data/orca/orca1/'
+  outDataDir='/Users/doos/data/orca/orca1/data_out/'
+  outDataFile     = 'cb_bering0'
   intminInOutFile = 0
   /
   !
@@ -119,16 +117,16 @@ $INITRUNSEED
   !
   nff         = 1,
   isec        = 2,
-  idir        = 0,
+  idir        = 1,
   nqua        = 1,
   partQuant   = 1,
   seedType    = 1,
-  ist1        = 227,!227
-  ist2        = 550, ! 550
-  jst1        = 500,! 332,
-  jst2        = 500,! 650
-  kst1        =  64,
-  kst2        =  64,
+  ist1        = 110,! AtlEq=220; Ber=110
+  ist2        = 120,! AtlEq=305; Ber=120
+  jst1        = 246,! AtlEq=147; Ber=
+  jst2        = 246,! AtlEq=147; Ber=
+  kst1        =   1,
+  kst2        =  42,
   varSeedFile = 0,
   seedDir     = ' ',
   seedFile    = ' '
@@ -138,16 +136,16 @@ $INITRUNSEED
   ! water mass properties with minimum & maximum on temp, salt and density
   !
   ! for starting a trajectory (active only with option tempsalt) 
-  tmin0 =   28.5,
-  tmax0 =   500., ! 30.,
-  smin0 =  -500.,  ! 34.2,
-  smax0 =   34.8,
+  tmin0 = -500,
+  tmax0 =  500.,
+  smin0 = -500.,
+  smax0 =  500.,
   rmin0 = -500.,
   rmax0 =  500.,
   ! for ending a trajectory
   tmine = -500.,
-  tmaxe =   28.5,
-  smine =   34.8,
+  tmaxe =  500,
+  smine = -500,
   smaxe =  500.,
   rmine = -500.,
   rmaxe =  500./
@@ -188,10 +186,27 @@ $INITRUNSEDIMENT
   ! ==================================
   ! defining end sections
   ! timax : maximum time length of a trajectory in days
-    ienw =    1,    1,    1,    
-    iene = 9999, 9999,  100,   
-    jens =    1,    1,    1,      
-    jenn =  332,    5, 9999,  
-    timax = 99999999999./
-    
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  148,    1,    1,      
+!    jenn =  200,    1,    1,  
+!    timax = 99999999999./
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  100,    1,    1,      
+!    jenn =  146,    1,    1,  
+!    timax = 99999999999./
+! Equator in the Atlantic
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  147,    1,    1,      
+!    jenn =  147,    1,    1,  
+!    timax = 36500000./ ! 100 millennia
+! Bering Straight
+    ienw =  110,    1,    1,    
+    iene =  120,    1,    1,   
+    jens =  246,    1,    1,      
+    jenn =  246,    1,    1,  
+    timax = 36500000./ ! 100 millennia
+     
     

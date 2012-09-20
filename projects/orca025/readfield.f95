@@ -95,8 +95,8 @@ else
 ! === Update clockworks ===
   currDay=currDay+nff*ngcm/24
   
-  if(currDay > idmax(currMon,1999)) then ! why 1999 and not currYear?????
-    currDay=currDay-idmax(currMon,1999)
+  if(currDay > idmax(currMon, currYear)) then ! why 1999 and not currYear?????
+    currDay=currDay-idmax(currMon, currYear)
     currMon=currMon+1
     if(currMon == 13) then
        currMon=1
@@ -110,7 +110,7 @@ else
        currYear=currYear-1
      if(currYear.eq.yearmin-1) currYear=yearmax
     endif
-    currDay=currDay+idmax(currMon,1999)
+    currDay=currDay+idmax(currMon, currYear)
    endif
 
 endif initFieldcond
@@ -127,7 +127,12 @@ ntime=10000*currYear+100*currMon+currDay
  fieldFile = trim(inDataDir)//trim(dataprefix)//'d05'
  fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)//'d05'
  
-! print *,trim(fieldFile)
+#ifdef timestat
+  fieldFile = trim(inDataDir)//'fields/ORCA025-N112_1958to2001y01'
+#endif 
+
+ 
+ print *,ntime,trim(fieldFile)
 
 ! Sea surface height
 gridFile=trim(fieldFile)//'T.nc'

@@ -1,4 +1,4 @@
-# Makfile for orca025L75
+# Makfile for orca1
 #========================================================================
   INPUT_INT1 = intmin       # Variables set from command line
   INPUT_INT2 = intrun       # Use 'dummy' if not used.   
@@ -19,7 +19,7 @@
    fl13  = -Dstreamts       #    vertical stream function, z=temp&salt
    fl14  = -Dstreamv        #    vertical stream function, z=depth
    fl15  = -Dstream_thermohaline        #    psi(T,S)
-   fl16  = -Drerun          # Stores the Lagrangian stream functions as a
+#   fl16  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
 #  fl17  = -Drst_rest       # Restictions on what water masses are alowed
