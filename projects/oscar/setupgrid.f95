@@ -88,16 +88,5 @@ SUBROUTINE setupgrid
   kmt = 1
   dz  = 10
   ncTpos = 1
-  
-  contains 
-
-    function l2d(lon1,lon2,lat1,lat2)
-      real :: lon1,lon2,lat1,lat2,l2d
-      real :: dlon,dlat,a,c
-      dlon = lon2 - lon1
-      dlat = lat2 - lat1
-      a = (sin(dlat/2))**2 + cos(lat1) * cos(lat2) * (sin(dlon/2))**2
-      c = 2 * asin(min(1.0,sqrt(a)))
-      l2d = 6367 * c * 1000
-    end function l2d
+      
 end SUBROUTINE setupgrid

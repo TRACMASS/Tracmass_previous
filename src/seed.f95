@@ -22,15 +22,16 @@ MODULE mod_seed
    
    IMPLICIT NONE
   
-   INTEGER                                    ::    nff,  isec,  idir,         &
-                                               &   nqua,   num,   nsd, nsdMax, &
-                                               & nsdTim,                       &
-                                               & seedPos, seedTime, seedType,  &
-                                               & seedAll, varSeedFile,         &
-                                               & ist1, ist2, jst1, jst2,       &
-                                               & kst1, kst2, tst1, tst2,       &
-                                               & iist, ijst, ikst, jsd, jst,   &
-                                               &  ijt,  ikt,  jjt, jkt, ntractot
+   INTEGER                                    :: nff,  isec,  idir
+   INTEGER                                    :: nqua, num, nsd, nsdMax
+   INTEGER                                    :: nsdTim
+   INTEGER                                    :: seedPos, seedTime, seedType
+   INTEGER                                    :: seedAll, varSeedFile
+   INTEGER                                    :: ist1, ist2, jst1, jst2
+   INTEGER                                    :: kst1, kst2, tst1, tst2
+   INTEGER                                    :: iist, ijst, ikst, jsd, jst
+   INTEGER                                    :: ijt,  ikt,  jjt, jkt
+   INTEGER                                    :: ntractot=0
    INTEGER*8                                  :: itim
    INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seed_ijk, seed_set
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim

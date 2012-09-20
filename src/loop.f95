@@ -25,76 +25,33 @@ SUBROUTINE loop
   USE mod_vel
   USE mod_traj
   USE mod_pos
-  USE mod_turb
   USE mod_coord
-#ifdef tracer
+
+  ! === Selectable moules ===
+  USE mod_turb
+  USE mod_streamfunctions
   USE mod_tracer
-#endif /*tracer*/
-#ifdef streamxy
-  USE mod_streamxy
-#endif /*streamxy*/
-#ifdef streamv
-  USE mod_streamv
-#endif /*streamv*/
-#ifdef streamr
-  USE mod_streamr
-#endif /*streamr*/
-#ifdef stream_thermohaline
-  USE mod_stream_thermohaline
-#endif /*stream_thermohaline*/
-#ifdef tracer
-  USE mod_tracer
-#endif /*tracer*/
-#ifdef sediment
   USE mod_sed
-#endif /*sediment*/
-  
+
   IMPLICIT none
-    
-  INTEGER mra,mta,msa
-  
-#if defined sediment
-  INTEGER nsed,nsusp
-  logical res
-#endif /*sediment*/
- 
-  INTEGER                                    :: ia, ja, ka, iam
-  INTEGER                                    :: ib, jb, kb, ibm
+  ! === Loop variables ===
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: niter
   INTEGER                                    :: nrh0=0
-
-  ! Counters
-  INTEGER                                    :: nout=0, nloop=0, nerror=0
-  INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
-  INTEGER                                    :: nexit(NEND)
-  
+  ! === Variables to interpolate fields ===
   REAL                                       :: temp, salt, dens
   REAL                                       :: temp2, salt2, dens2
-  REAL*8                                     :: x0, y0, z0, x1, y1, z1
-  REAL*8                                     :: rlon,rlat
-  REAL*8                                     :: dt, t0
-  REAL*8                                     :: dtreg
-  
-  
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
-  INTEGER                                    :: landError=0 ,boundError=0
+  INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
-
-#if defined sediment
-  ! Specific for sediment code
-  INTEGER                                    :: nsed,nsusp
-  LOGICAL                                    :: res
-#endif /*sediment*/
-
 
 !!------------------------------------------------------------------------------
 
 
-  iday0=iday
-  imon0=imon
-  iyear0=iyear
+  iday0 = iday
+  imon0 = imon
+  iyear0 = iyear
   ! === print some run stats ===
   print *,'------------------------------------------------------'  
   print *,'Files written in directory                  :  ' ,trim(outDataDir)
@@ -112,24 +69,11 @@ SUBROUTINE loop
          /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
 
-  ! === initialise to zero ===
-  nrh0=0
-  nexit=0
-  ntractot=0
-#ifdef sediment
-  nsed=0
-  nsusp=0
-#endif /*sediment*/
-  
-  nrj=0
-  trj=0.d0
-
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
-  
-  
+    
   !==========================================================
-  !=== Read in the end positions from an previous run     === 
+  !===   Read in end positions from a previous run        === 
   !==========================================================
   
 #ifdef rerun
@@ -355,22 +299,10 @@ SUBROUTINE loop
               exit intsTimeLoop
            endif
            
-!            === Cyclic world ocean/atmosphere === 
-!           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-!            print *,'ojojoj',ntrac,ib,x1
-!            x1 = x1 - DBLE(IMT)
-!           elseif(x1 > DBLE (IMT)) THEN
-!            print *,'lololo',ntrac,ib,x1
-!            stop 9494
-!           END IF
-!           IF (ib == IMT .AND. x1 <= 0.d0) THEN
-!            print *,'hoppsan',ntrac,ib,x1
-!            x1 = x1 + DBLE(IMT)
-!           elseif(x1<0.d0) then
-!            print *,'fyfyfy',ntrac,ib,x1
-!            stop 9495
-!           END IF
-
+           ! === Cyclic world ocean/atmosphere === 
+           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+              x1 = x1 - DBLE(IMT)
+           END IF
            
            x0=x1
            y0=y1
@@ -528,6 +460,7 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
+           if (x1 < 1) exit niterloop
 
            
 #if defined tempsalt
@@ -1071,7 +1004,56 @@ return
     end select
 #endif    
 
+#if defined csvwrite 
+    x14=real(x1,kind=4)
+    y14=real(y1,kind=4)
+    z14=real(z1,kind=4)
+    if (twritetype==1) then
+       twrite = tt
+    else if (twritetype==2) then
+       call updateclock
+       twrite = currJDtot
+    else
+       twrite = real(ints,kind=8)
+    end if
+    select case (sel)       
+    case (10)
+       write(88,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+       return
+    case (11)
+       if(  (kriva == 1 .and. nrj(ntrac,4)  ==  niter-1 ) .or. &
+            (kriva == 2 .and. scrivi                    ) .or. &
+            (kriva == 3                                 ) .or. &
+            (kriva == 4 .and. niter == 1                ) .or. &
+            (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
+            (kriva == 6 .and. .not.scrivi               )  ) then
+          !!!! CALL FIELD-INTERP !!!!
+          write(86,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+       end if
+    case (13)
+       write(87,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (15)
+       write(86,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (17)
+       write(87,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (19)
+       write(85,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (40)
+       write(89,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    end select
+#endif   
   end subroutine writedata
+
+
+
+
+
+
+
+
+
+
+
 
   subroutine calc_dxyz
     ! T-box volume in m3
@@ -1106,6 +1088,16 @@ return
        !stop
     end if
   end subroutine calc_dxyz
+
+
+
+
+
+
+
+
+
+
 
   subroutine calc_time
 #ifdef regulardt
@@ -1163,6 +1155,17 @@ return
            rbg=dmod(ts,1.d0) 
            rb =1.d0-rbg
          end subroutine calc_time
+
+
+
+
+
+
+
+
+
+
+
 
   subroutine fancyTimer(timerText ,testStr)
     IMPLICIT NONE

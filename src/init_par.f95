@@ -23,10 +23,7 @@ SUBROUTINE init_params
    USE mod_traj
    USE mod_dens
    USE mod_buoyancy
-   USE mod_streamxy
-   USE mod_streamv
-   USE mod_streamr
-   USE mod_stream_thermohaline
+   USE mod_streamfunctions
    USE mod_tracer
    USE mod_getfile
    
@@ -135,21 +132,20 @@ SUBROUTINE init_params
    
    CLOSE (8)
 
-   print *,' runfile =  ',trim(projdir)//'/'//trim(Case)//'_run.in'
-
+   print *,'Run file    : ',trim(projdir)//'/'//trim(Case)//'_run.in'
    OPEN (8,file=trim(projdir)//'/'//trim(Case)//'_run.in',     &
         & status='OLD', delim='APOSTROPHE')
    READ (8,nml=INITRUNDESC)
    READ (8,nml=INITRUNGRID)
    SELECT CASE (subGrid)
    CASE (0)          
-      PRINT *,'Use the Full grid.'     
-      subGridImin =   1
+      PRINT *,'Sub-grid    : Use the Full grid.'     
+      subGridImin =   1 
       subGridJmin =   1
       subGridImax = imt
       subGridJmax = jmt 
    CASE (1)
-      PRINT *,'Use a subgrid: ', subGridImin ,subGridImax, &
+      PRINT *,'Sub-grid    : ', subGridImin ,subGridImax, &
            &   subGridJmin ,subGridJmax
       imt = subGridImax-subGridImin+1
       jmt = subGridJmax-subGridJmin+1
@@ -279,7 +275,16 @@ SUBROUTINE init_params
       ALLOCATE ( wflux(0:km,NST) )
 #endif
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
+      
+      ! === Init mod_traj ===
       ALLOCATE ( trj(ntracmax,NTRJ), nrj(ntracmax,NNRJ) )
+      ALLOCATE ( nexit(NEND) ) 
+      nrj = 0
+      trj = 0.d0
+      nexit = 0
+      ntractot = 0
+
+
 #ifdef tempsalt
       ALLOCATE ( tem(imt,jmt,km,nst) ) 
       ALLOCATE ( sal(imt,jmt,km,nst) )
@@ -319,6 +324,8 @@ SUBROUTINE init_params
       ! --- Allocate sedimentation data ---
 #ifdef sediment
       ALLOCATE (orb(km) )
+      nsed = 0
+      nsusp = 0
 #endif
 
 END SUBROUTINE init_params

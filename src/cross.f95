@@ -23,8 +23,8 @@ subroutine cross(ijk,ia,ja,ka,r0,sp,sn,rr)
   !    sp,sn   : crossing time to reach the grid box wall 
   !              (in units of s/m3)
   
-
 USE mod_param
+USE mod_grid
 USE mod_vel
 USE mod_turb
 USE mod_time

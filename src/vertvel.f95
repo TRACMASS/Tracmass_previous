@@ -27,9 +27,9 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   REAL kin
 #endif
   
-  REAL*8 rr,rg,uu,um,vv,vm
-  INTEGER ia,iam,ja,ka,k,n,n1,n2
-    
+  real*8 rr,rg,uu,um,vv,vm
+  integer ia,iam,ja,ka,k,n
+  
   rg=1.d0-rr
   wflux=0.d0
 
@@ -42,6 +42,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   
 ! start 3D code
 #else
+ 
   kloop: do k=1,ka
      uu=rg*uflux(ia ,ja  ,k,nsp)+rr*uflux(ia ,ja  ,k,nsm)
      um=rg*uflux(iam,ja  ,k,nsp)+rr*uflux(iam,ja  ,k,nsm)
@@ -108,6 +109,7 @@ wflux(km,:) = 0.d0
 !#endif
   return
 #endif
+
 end subroutine vertvel
 
  
