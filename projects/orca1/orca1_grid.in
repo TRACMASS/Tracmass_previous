@@ -14,9 +14,9 @@
   !
 $INITGRIDGRID
   !
-  IMT      = 1440,  ! orca1=360 ; orca025=1440
-  JMT      = 1021,  ! orca1=292 ; orca025=1021
-  KM       = 64,    ! orca1=orca025=64 ; orca025l75h6=75
+  IMT      = 360,  
+  JMT      = 292,  
+  KM       = 42,   
   LBT      = 3,
   NEND     = 4/                   ! NEND = LBT +1
   !
@@ -28,23 +28,23 @@ $INITGRIDNTRAC
   !
 $INITGRIDTIME
   !
-  ngcm          =  876000,          ! (5*24) hours between GCM datasets
-  iter          =   1,          ! iteration between two gcm data sets
-  intmax        =  250000000,          ! maximum length of GCM fields
-  fieldsPerFile =   1 / ! 1460 1,2920
+  ngcm          =  730,          ! 6,5*24,365*24/12=730,365*24/2=4380 hours between GCM datasets
+  iter          =   10,          ! iteration between two gcm data sets
+  intmax        =    12,          ! maximum length of GCM fields
+  fieldsPerFile =    12 / ! 1460 1,2920
   !
   !
 $INITGRIDDATE
   !
-  yearmin        = 1978,
-  yearmax        = 2001,
+  yearmin        = 1200,
+  yearmax        = 1203,
   ! === Reference basetime for the velocity field.
   baseSec        = 0,
   baseMin        = 0,
   baseHour       = 0,
-  baseDay        = 5,
+  baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 1978/
+  baseYear       = 1200/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! scaling factor for length output in the orig arc m -> 100 km  
