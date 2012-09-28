@@ -46,8 +46,7 @@ SUBROUTINE loop
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
 
-!!------------------------------------------------------------------------------
-
+!!----------------------------------------------------------------------------
 
   iday0 = iday
   imon0 = imon
@@ -147,7 +146,6 @@ SUBROUTINE loop
 #else
   lbas=1 ! set to 1 if no rerun
 #endif /*rerun*/
-  
   !==========================================================
   !=== read ocean/atmosphere GCM data files               ===
   !==========================================================
@@ -157,6 +155,7 @@ SUBROUTINE loop
   ff=dble(nff)
 !  tstep=dble(intstep) 
   ints=intstart
+  call updateclock
   call readfields   ! initial dataset
   ntrac=0
   call fancyTimer('initialize dataset','stop')
