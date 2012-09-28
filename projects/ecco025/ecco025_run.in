@@ -5,8 +5,8 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'test',
-  caseDesc     = 'RUN13'/
+  caseName     = 'ecco025',
+  caseDesc     = 'Global ECCO 0.25 deg fields on a latlon grid'/
   ! 
   !
 &INITRUNGRID
@@ -42,10 +42,10 @@
   !
  &INITRUNDATE
   !
-  startHour         = 01,
-  startDay          = 01,
-  startMon          = 01,
-  startYear         = 01/
+  startHour         = 12,
+  startDay          = 05,
+  startMon          = 05,
+  startYear         = 2005/
   !
   !
   &INITRUNWRITE
@@ -63,13 +63,13 @@
   kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = 'projects/test/',
+  inDataDir       = '/projData/ECCO/025/',
   !
   ! === Directory where output files are saved
-  outDataDir      = 'projects/test/',
+  outDataDir      = '/Volumes/keronHD4/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'outDataTest',
+  outDataFile     = 'ecco025Test',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -120,12 +120,12 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 20,		 
-  ist2         = 20,			  
-  jst1         = 20,		 
-  jst2         = 20,		 
-  kst1         =  5,		 
-  kst2         =  7,
+  ist1         = 300,		 
+  ist2         = 350,			  
+  jst1         = 100,		 
+  jst2         = 150,		 
+  kst1         = 49,		 
+  kst2         = 50,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -163,7 +163,7 @@ $INITRUNEND
 ! defining end sections
 ! testar detta
   ienw(1) =    1,
-  iene(1) =  200,
+  iene(1) =   -1,
   jens(1) =    1,
   jenn(1) =    2,
 
