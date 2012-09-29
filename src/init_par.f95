@@ -9,8 +9,6 @@ SUBROUTINE init_params
 !!          and Lagrangian stream functions.
 !!
 !!
-!!
-!!
 !!----------------------------------------------------------------------------
    USE mod_param
    USE mod_seed
@@ -21,7 +19,7 @@ SUBROUTINE init_params
    USE mod_domain
    USE mod_vel
    USE mod_traj
-   USE mod_dens
+ !  USE mod_dens
    USE mod_buoyancy
    USE mod_streamfunctions
    USE mod_tracer
@@ -209,13 +207,11 @@ SUBROUTINE init_params
 
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
-            intmin      = (startJD)/(ngcm/24)+1
+            intmin = (startJD)/(real(ngcm)/24.)+1
          ELSE ! this needs to be verified
-            intmin      = (24*startJD)/ngcm+3-ngcm
+            intmin = (24*startJD)/ngcm+3-ngcm
          END IF
       END IF startYearCond
-
-      ! tseas - the time step between data sets in [s]
       tseas= dble(ngcm)*3600.d0
 
       ! --- ist -1 to imt ---
@@ -251,6 +247,7 @@ SUBROUTINE init_params
       ALLOCATE ( csu (0:jmt), cst(jmt)  ) 
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
+      ALLOCATE ( mask(imt,jmt) )
 #ifdef zgrid3Dt
       ALLOCATE ( dzt(imt,jmt,km,nst) )   
 #elif  zgrid3D

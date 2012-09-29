@@ -1,5 +1,5 @@
 MODULE mod_seed
-!!------------------------------------------------------------------------------!!
+!!------------------------------------------------------------------------------
 !!
 !!       MODULE: mod_seed
 !!
@@ -37,26 +37,20 @@ MODULE mod_seed
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
    REAL*8 , ALLOCATABLE, DIMENSION(:,:)       :: seed_xyz
    CHARACTER(LEN=200)                         :: seedDir, seedFile, timeFile
-!!
-!!------------------------------------------------------------------------------
+
   
 CONTAINS
 
-
    SUBROUTINE seed (tt,ts)
 
-!!------------------------------------------------------------------------------
-      
-      INTEGER                                  :: errCode,         &
-                                                & ib, jb, kb, ibm, &
-                                                &  i,  j,  k,   l, &
-                                                &  m, ntrac
-      REAL                                     :: temp,salt,dens
-      REAL*8                                   :: tt, ts,     &
-                                                & x1, y1, z1, &
-                                                & vol, subvol
-
-!!------------------------------------------------------------------------------
+     INTEGER                                  :: errCode
+     INTEGER                                  :: ib, jb, kb, ibm
+     INTEGER                                  :: i, j, k, l
+     INTEGER                                  :: m, ntrac
+     REAL                                     :: temp,salt,dens
+     REAL*8                                   :: tt, ts
+     REAL*8                                   :: x1, y1, z1
+     REAL*8                                   :: vol, subvol
 
       ! --------------------------------------------
       ! --- Check if ntime is in vector seed_tim ---
@@ -73,7 +67,6 @@ CONTAINS
             END IF
          END DO findTime
       END IF
-      
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---
       !----------------------------------------
@@ -89,9 +82,6 @@ CONTAINS
          if (ijst >= jmt) cycle startLoop
          if (ikst > km)   cycle startLoop
          if (kmt(iist,ijst) == 0) cycle startLoop
-
-
-
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
@@ -212,21 +202,15 @@ CONTAINS
          ! --------------------------------------------------
          ijjLoop: DO jjt=1,ijt
             kkkLoop: DO jkt=1,ikt          
-            
-!            IF ( ib /= iist ) PRINT*,iist,ib
-!            IF ( jb /= ijst ) PRINT*,ijst,jb
-!            IF ( kb /= ikst ) PRINT*,ikst,kb
-            ib = iist
-            jb = ijst
-            kb = ikst
+               ib = iist
+               jb = ijst
+               kb = ikst
 
-            SELECT CASE (isec)
+               SELECT CASE (isec)
                CASE (1)   ! Meridional-vertical section
-                  
                   x1 = DBLE (ib) 
                   y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
                   z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
-                  
                   IF (idir == 1) THEN
                      ib = iist+1
                   ELSE IF (idir == -1) THEN
@@ -234,11 +218,9 @@ CONTAINS
                   END IF
                   
                CASE (2)   ! Zonal-vertical section
-                  
                   x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                   y1 = DBLE (jb)
                   z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
-                  
                   IF (idir == 1) THEN
                      jb = ijst+1
                   ELSE IF (idir == -1) THEN
@@ -249,7 +231,6 @@ CONTAINS
                   x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                   y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                   z1 = DBLE (kb)
-                  
                   IF (idir == 1) THEN
                      kb = ikst+1
                   ELSE IF (idir == -1) THEN
@@ -308,13 +289,6 @@ CONTAINS
            
             END DO kkkLoop
          END DO ijjLoop   
-            
       END DO startLoop
-
    END SUBROUTINE seed
-
 END MODULE mod_seed
-
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
-

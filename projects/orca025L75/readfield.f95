@@ -13,7 +13,7 @@ SUBROUTINE readfields
   use mod_seed
 
 #ifdef tempsalt
-  USE mod_dens
+!  USE mod_dens
   USE mod_stat
 #endif
   IMPLICIT none

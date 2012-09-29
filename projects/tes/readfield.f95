@@ -6,7 +6,7 @@ subroutine readfields
   USE mod_grid
   USE mod_name
   USE mod_vel
-  USE mod_dens
+!  USE mod_dens
   USE mod_stat
   
   

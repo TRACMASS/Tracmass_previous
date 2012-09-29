@@ -6,10 +6,11 @@ subroutine interp2(i,j,k,temp,salt,dens)
   ! === can be called as either ia,ja,ka or ib,jb,kb
   ! === used to calculate the thermohaline stram function with -Dstream_thermohaline  
   
+  USE mod_grid
   USE mod_param
   USE mod_loopvars
   USE mod_time
-  USE mod_dens
+  USE mod_vel
   IMPLICIT none
   
   real temp,salt,dens

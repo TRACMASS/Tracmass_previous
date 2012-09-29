@@ -22,17 +22,15 @@ PROGRAM main
   call coordinat
   call writesetup
 
-  modrundirCond: if(nff == 1) then ! forward 
+  modrundirCond: if(intstep.gt.0) then ! forward 
      intstart =  intmin          
      intend   =  intmax
-  elseif(nff == -1) then ! backward
-!  elseif(intstep.lt.0) then ! backward
+  elseif(intstep.lt.0) then ! backward
      intstart =  intmin+intrun
      intend   =  intmin
      intspin  = -intspin
      intrun   = -intrun    
   end if modrundirCond
-!  print *,intmin,intstart,intrun
  
  call setupgrid
   if (minval(dxv) < 0) then
@@ -51,7 +49,7 @@ PROGRAM main
   end if
 
   call init_seed
-  
+
   if(nqua.eq.1) then ! number of trajectories (per time resolution)
      ! num=NTRACMAX
      num=partQuant
@@ -71,40 +69,28 @@ PROGRAM main
   end if
   
 #if defined textwrite
-  open(56,file=trim(fullWritePref)//'_run.asc')       ! trajectory path
-  open(57,file=trim(fullWritePref)//'_out.asc')       ! exit position
-  open(58,file=trim(fullWritePref)//'_in.asc')        ! entrance position
-  open(59,file=trim(fullWritePref)//'_err.asc')       ! Error position
+  open(56,file=trim(fullWritePref)//'_run.asc')    
+  open(57,file=trim(fullWritePref)//'_out.asc')  
+  open(58,file=trim(fullWritePref)//'_in.asc')   
+  open(59,file=trim(fullWritePref)//'_err.asc')
 #endif
-  
 #if defined binwrite
-  ! Trajectory path
   open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  
        ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  ! Exit position 
   open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  
        ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  ! Killed position
   open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &
        ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  ! Entrance position
   open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  
        ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  ! Error position
   open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  
        ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
 #endif
-
 #if defined csvwrite
-  ! Trajectory path
   open(unit=86 ,file=trim(fullWritePref)//'_run.csv', status='replace')
-  ! Exit position 
   open(unit=85 ,file=trim(fullWritePref)//'_out.csv', status='replace')
-  ! Killed position
   open(unit=87 ,file=trim(fullWritePref)//'_kll.csv', status='replace')
-  ! Entrance position
   open(unit=88 ,file=trim(fullWritePref)//'_in.csv',  status='replace')
-  ! Error position
   open(unit=89 ,file=trim(fullWritePref)//'_err.csv', status='replace')
 #endif
   
