@@ -459,7 +459,10 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
+
+!#ifndef tes
            if (x1 < 1) exit niterloop
+!#endif
 
            
 #if defined tempsalt

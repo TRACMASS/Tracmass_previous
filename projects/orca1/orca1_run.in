@@ -74,7 +74,7 @@
   kriva           = 1,
   inDataDir='/Users/doos/data/orca/orca1/'
   outDataDir='/Users/doos/data/orca/orca1/data_out/'
-  outDataFile     = 'cb_bering0'
+  outDataFile     = 'cb_bering1'
   intminInOutFile = 0
   /
   !

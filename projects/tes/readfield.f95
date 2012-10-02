@@ -15,6 +15,7 @@ subroutine readfields
  INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
  CHARACTER hour(4)*4,month(12)*2,date(31)*2
  REAL*8, SAVE ::omtime,cox,coy,om,co,uwe,dl
+ REAL*8, SAVE ::ug,u0,gamma,gammag,fcor
 
 data month /'01','02','03','04','05','06','07','08','09','10','11','12'/
 data date /'01','02','03','04','05','06','07','08','09','10',&
@@ -26,7 +27,7 @@ data hour /'0000','0600','1200','1800'/
 
 
 !_______________________ update the time counting ________________________________________
- ihour=ihour+6
+ ihour=ihour+1
  if(ihour.eq.24) then
   ihour=0
   iday=iday+1
@@ -48,10 +49,7 @@ hs=0. ; uflux=0. ; vflux=0.
 #ifdef tempsalt
 tem=0. ; sal=0. ; rho=0.
 #endif
-kmt=KM
 
-dxdeg=dx*deg
-dydeg=dy*deg
 iyear=startYear
 imon=startMon
 iday=startDay
@@ -60,7 +58,7 @@ print *,'iyear=',iyear,imon,iday,ihour,dxdeg,dydeg
 !print *,'dx=',dx,dxdeg
 !print *,'dy=',dy,dydeg
 
-call coordinat
+!call coordinat
 endif
 
   ! === swap between datasets ===
@@ -91,7 +89,13 @@ coy=0.5d0+0.5d0*dcos(omtime+pi)
 uwe=-0.4d0
 dl=dble(ints)*0.01d0*pi
 
-!print *,'ints=',ints,co
+! Nicoletta Fabboni velocities, which have analytical solutions
+ug=0.04  ; u0=0.5 ; fcor=2.*2.*pi/(24.*3600.)*cos(45.*pi/180.)
+gamma=1./(2.89*24.*3600.)
+gammag=1./(28.9*24.*3600.)
+omtime=dble(ints-intstart)*dble(ngcm*3600)
+
+!print *,'fcor=',fcor,omtime,omtime*fcor,cos(omtime*fcor)
 
 
 !co=0.
@@ -110,12 +114,12 @@ do k=1,KM
 #endif
 
 ! time evolving oscilating field
-   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
-                                     dsin(-pi*dble(j-1-jmt/2)/dble(jmt-1) )  + uwe &
-                                     + dcos(omtime)                                )
-   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( dsin( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
-                                     dcos( pi*dble(j-1-jmt/2)/dble(jmt-1) )        &
-                                     + dsin(omtime)                                )
+!   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( dcos( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+!                                     dsin(-pi*dble(j-1-jmt/2)/dble(jmt-1) )  + uwe &
+!                                     + dcos(omtime)                                )
+!   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( dsin( pi*dble(i-1-imt/2)/dble(imt-1) + dl) *  &
+!                                     dcos( pi*dble(j-1-jmt/2)/dble(jmt-1) )        &
+!                                     + dsin(omtime)                                )
 ! Circular stationary field
 !   uflux(i,j,k,2)=-cox*dy*deg*dz(k)*dble(j-1-jmt/2)/dble(jmt-1) 
 !   vflux(i,j,k,2)= cox*dx*deg*dz(k)*dble(i-1-imt/2)/dble(imt-1)
@@ -130,6 +134,12 @@ do k=1,KM
 !   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( -0.05 +omtime/5000.+ dcos(omtime) + 0.5*dsin(omtime*2.) + 2.*dsin(omtime*10.))
 !   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( -0.025 + dsin(omtime) + 0.5*dcos(omtime*2.) + 0.5*dcos(omtime/2))
 
+! Nicoletta Fabboni velocities, which have analytical solutions
+   uflux(i,j,k,2)=dy*dz(k)*( ug*dexp(-gammag*omtime) &
+                            + (u0-ug)*dexp(-gamma*omtime)*cos(fcor*omtime) )
+   vflux(i,j,k,2)=dx*dz(k)*(  -(u0-ug)*dexp(-gamma*omtime)*sin(fcor*omtime) )
+
+
 
 
 
@@ -142,7 +152,7 @@ vflux(:,0  ,:,:)=0.
 vflux(:,JMT,:,:)=0.
 
 do j=jmt,1,-10
-!print *,(uflux(i,j,2,2),i=1,imt,10)
+!print *,(vflux(i,j,2,2),i=1,imt,10)
 enddo
 
 !stop 39567

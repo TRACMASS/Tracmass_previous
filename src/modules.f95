@@ -175,7 +175,15 @@ MODULE mod_grid
   IMPLICIT NONE
 
   INTEGER                                   :: IMT, JMT, KM
+#ifdef seasonal
+#if orca1
+  INTEGER, PARAMETER                        :: NST=48
+#elif orca025L75
+  INTEGER, PARAMETER                        :: NST=4
+#endif
+#else
   INTEGER, PARAMETER                        :: NST=2
+#endif
   INTEGER                                   :: nsm=1     ,nsp=2
   REAL*8                                    :: dx,dy
   REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
@@ -276,18 +284,18 @@ MODULE mod_vel
 CONTAINS
   
   subroutine datasetswap
-!    USE mod_dens
+    USE mod_grid
     IMPLICIT NONE
-    hs(:,:,1)      = hs(:,:,2)
-    uflux(:,:,:,1) = uflux(:,:,:,2)
-    vflux(:,:,:,1) = vflux(:,:,:,2)
+    hs(:,:,nsm)      = hs(:,:,nsp)
+    uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
+    vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
 #if defined explicit_w || full_wflux
-    wflux(:,:,:,1) = wflux(:,:,:,2)
+    wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
 #endif
 #ifdef tempsalt
-    tem(:,:,:,1)   = tem(:,:,:,2)
-    sal(:,:,:,1)   = sal(:,:,:,2)
-    rho(:,:,:,1)   = rho(:,:,:,2)
+    tem(:,:,:,nsm)   = tem(:,:,:,nsp)
+    sal(:,:,:,nsm)   = sal(:,:,:,nsp)
+    rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
   end subroutine datasetswap
 
@@ -298,30 +306,30 @@ CONTAINS
     ! = Loop variables
     INTEGER                                    :: k
     
-    wflux(2:imt,2:jmt,1,2)    =  uflux(1:imt-1, 2:jmt,   1,   2)  -   &
-                                 uflux(2:imt,   2:jmt,   1,   2)   +  &
-                                 vflux(2:imt,   1:jmt-2, 1,   2)  -   & 
-                                 vflux(2:imt,   2:jmt,   1,   2)
-    wflux(1, 2:jmt, 1, 2)     =  uflux(1,       2:jmt,   1,   2)   +  &
-                                 vflux(1,       1:jmt-1, 1,   2)  -   &
-                                 vflux(1,       2:jmt,   1,   2)
-    wflux(2:imt, 1, 1, 2)   =    uflux(1:imt-1, 1,       1,   2) -    &
-                                 uflux(2:imt,   1,       1,   2)  -  &
-                                 vflux(2:imt,   1,       1,   2) 
+    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1,   nsp)  -   &
+                                   uflux(2:imt,   2:jmt,   1,   nsp)   +  &
+                                   vflux(2:imt,   1:jmt-2, 1,   nsp)  -   & 
+                                   vflux(2:imt,   2:jmt,   1,   nsp)
+    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1,   nsp)   +  &
+                                   vflux(1,       1:jmt-1, 1,   nsp)  -   &
+                                   vflux(1,       2:jmt,   1,   nsp)
+    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1,   nsp) -    &
+                                   uflux(2:imt,   1,       1,   nsp)  -  &
+                                   vflux(2:imt,   1,       1,   nsp) 
     kloop: do k=2,km
-       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, 2)   +  &
-                                 uflux(1:imt-1, 2:jmt,   k,   2)  -   &
-                                 uflux(2:imt,   2:jmt,   k,   2)   +  &
-                                 vflux(2:imt,   1:jmt-1, k,   2)  -   & 
-                                 vflux(2:imt,   2:jmt,   k,   2) 
-       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, 2)  -   &
-                                 uflux(1,       2:jmt,   k,   2)   +  &
-                                 vflux(1,       1:jmt-1, k,   2)  -   &
-                                 vflux(1,       2:jmt,   k,   2)
-       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, 2)   +  &
-                                 uflux(1:imt-1, 1,       k,   2) -    &
-                                 uflux(2:imt,   1,       k,   2)  -  &
-                                 vflux(2:imt,   1,       k,   2) 
+       wflux(2:imt,2:jmt,k,nsp) =  wflux(2:imt,   2:jmt,   k-1, nsp)   +  &
+                                   uflux(1:imt-1, 2:jmt,   k,   nsp)  -   &
+                                   uflux(2:imt,   2:jmt,   k,   nsp)   +  &
+                                   vflux(2:imt,   1:jmt-1, k,   nsp)  -   & 
+                                   vflux(2:imt,   2:jmt,   k,   nsp) 
+       wflux(1,2:jmt,k,nsp)     =  wflux(1,       2:jmt,   k-1, nsp)  -   &
+                                   uflux(1,       2:jmt,   k,   nsp)   +  &
+                                   vflux(1,       1:jmt-1, k,   nsp)  -   &
+                                   vflux(1,       2:jmt,   k,   nsp)
+       wflux(2:imt,1,  k,nsp)   =  wflux(2:imt,   1,       k-1, nsp)   +  &
+                                   uflux(1:imt-1, 1,       k,   nsp) -    &
+                                   uflux(2:imt,   1,       k,   nsp)  -  &
+                                   vflux(2:imt,   1,       k,   nsp) 
     enddo kloop
   end subroutine calc_implicit_vertvel
 

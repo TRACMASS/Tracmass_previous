@@ -69,8 +69,8 @@
   !
   !
   ! === name of current trajectory run
-  !outDataFile     ='analyt1e'/
-  outDataFile     ='timestep1000e'/
+  outDataFile     ='analyt10n'/
+  !outDataFile     ='timestep1000n'/
   !
   !
   intminInOutFile=0/
@@ -170,10 +170,10 @@ $INITRUNSEDIMENT
 
 $INITRUNEND
 ! defining end sections
-!  ienw =     -1,-1,
-!  iene =   500,500,
-!  jens =   500,500,
-!  jenn =   500,500,
-  timax =3650./  ! maximum time length of a trajectory in days
+  ienw =   1,
+  iene =   1,
+  jens =   1,
+  jenn =   1,
+  timax =18./  ! maximum time length of a trajectory in days
 
 

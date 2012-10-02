@@ -38,49 +38,31 @@ SUBROUTINE setupgrid
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
 
+  
 
-! === Template for setting up grids. Move the code from readfile.f95
+
+kmt=KM ! flat bottom
+
+!dxdeg=dx*deg
+!dydeg=dy*deg
+
+! Nicoletta Fabboni velocities, which have analytical solutions
+dx=250. 
+dy=dx
+
+dxdy=dx*dy
+dz=10.
+
+mask=1
+
+!print *,'dx=',dx,dxdeg,deg
+!print *,'dy=',dy,dydeg
+
+
 
 ! ===
 
 
-!!$  CHARACTER (len=200)                        :: gridFileXY, gridFileZ
-!!$  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: kmask
-!!$
-!!$  alloCondGrid: if ( .not. allocated (kmask) ) then
-!!$     allocate ( kmask(IMT+2,JMT,KM) )
-!!$  end if alloCondGrid
-!!$  
-!!$  start1d  = [  1]
-!!$  count1d  = [ km]
-!!$  !Order is     t    k            i            j
-!!$  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-!!$  map2d    = [  4 ,  3 ,          1 ,          2]  
-!!$  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count3d  = [  1 , km ,subGridImax ,subGridJmax]
-!!$  map3d    = [  4 ,  3 ,          2 ,          1]  
-!!$  
-!!$  gridFileXY = trim(inDataDir)//'grid_cell_xy.nc'
-!!$  gridFileZ  = trim(inDataDir)//'grid_cell_z.nc'
-!!$  
-!!$  dz   = get1DfieldNC(trim(gridFileZ)  ,'dz')  / 100.
-!!$  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
-!!$  dyu  = get2DfieldNC(trim(gridFileXY) ,'DYU') / 100.
-!!$  dxdy = dxv * dyu
-!!$
-!!$  dzt = 0
-!!$  kmask  = get3DfieldNC(trim(gridFileZ) ,'SALT')
-!!$  do j=1,jmt
-!!$     do i=1,imt
-!!$        do k=1,km
-!!$           kk=km+1-k
-!!$           if(kmask(i,j,k) .le. 1000.) then
-!!$              kmt(i,j)=k
-!!$              dzt(i,j,k) = dz(kk)
-!!$           end if
-!!$        enddo
-!!$     enddo
-!!$  enddo
+
 
 end SUBROUTINE setupgrid
