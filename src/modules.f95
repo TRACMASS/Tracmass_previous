@@ -50,6 +50,7 @@ MODULE mod_loopvars
   REAL*8                                     :: dsu, dsd, dsc
   LOGICAL                                    :: scrivi
   REAL*8                                     :: ts,tt
+  INTEGER                                    :: niter
   REAL*8                                     :: dxyz
   REAL*8                                     :: ss0
   INTEGER                                    :: lbas
@@ -252,6 +253,13 @@ ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
+MODULE mod_dens
+
+ENDMODULE mod_dens
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
+
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
@@ -263,6 +271,9 @@ MODULE mod_vel
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
   REAL*8                                     :: ff
+#ifdef tempsalt
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
+#endif
 
 CONTAINS
   
@@ -341,15 +352,6 @@ MODULE mod_traj
   REAL*8                                     :: x0, y0, z0
   REAL*8                                     :: x1, y1, z1
 ENDMODULE mod_traj
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_dens
-#ifdef tempsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
-#endif
-ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
