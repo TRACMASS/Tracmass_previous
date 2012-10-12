@@ -12,8 +12,8 @@ SUBROUTINE readfields
   
   IMPLICIT NONE
 
-  CHARACTER(LEN=80)                         :: fstamp
-  INTEGER                                   :: k, kk
+  CHARACTER(LEN=80)                          :: fstamp
+  INTEGER                                    :: k
  
   call datasetswap
   call updateClock
@@ -27,13 +27,8 @@ SUBROUTINE readfields
   vvel = get3DfieldNC(trim(trim(inDataDir)//'/VVEL'//fstamp), 'VVEL')
 
   do k=1,km
-     kk=km-k+1
-     uflux(:,:,k,2)   = uvel(:,:,kk) * dz(kk) * dyu
-     vflux(:,:,k,2)   = vvel(:,:,kk) * dz(kk) * dxv
+     uflux(:,:,km-k+1,2) = uvel(:,:,k) * dz(k) * dyu
+     vflux(:,:,km-k+1,2) = vvel(:,:,k) * dz(k) * dxv
   end do
-  if (intstep .le. 0) then
-     uflux = -uflux
-     vflux = -vflux
-  end if
-
+ 
 end subroutine readfields
