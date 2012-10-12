@@ -107,7 +107,7 @@
   nqua        = 1, 
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant= 1,     
+  partQuant= 3,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -120,10 +120,10 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 300,		 
-  ist2         = 350,			  
-  jst1         = 100,		 
-  jst2         = 150,		 
+  ist1         = 1100,		 
+  ist2         = 1150,			  
+  jst1         = 450,		 
+  jst2         = 500,		 
   kst1         = 49,		 
   kst2         = 50,
   ! ===   ===   ===   ===   ===
