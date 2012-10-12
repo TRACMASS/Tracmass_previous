@@ -279,17 +279,27 @@ CONTAINS
   
   subroutine datasetswap
     IMPLICIT NONE
-    hs(:,:,1)      = hs(:,:,2)
-    uflux(:,:,:,1) = uflux(:,:,:,2)
-    vflux(:,:,:,1) = vflux(:,:,:,2)
+
+    integer, save                              :: degrade_counter = -1
+
+    if (degrade_counter < 1) then
+       hs(:,:,1)      = hs(:,:,2)
+       uflux(:,:,:,1) = uflux(:,:,:,2)
+       vflux(:,:,:,1) = vflux(:,:,:,2)
 #ifdef explicit_w || full_wflux
-    wflux(:,:,:,1) = wflux(:,:,:,2)
+       wflux(:,:,:,1) = wflux(:,:,:,2)
 #endif
 #ifdef tempsalt
-    tem(:,:,:,1)   = tem(:,:,:,2)
-    sal(:,:,:,1)   = sal(:,:,:,2)
-    rho(:,:,:,1)   = rho(:,:,:,2)
+       tem(:,:,:,1)   = tem(:,:,:,2)
+       sal(:,:,:,1)   = sal(:,:,:,2)
+       rho(:,:,:,1)   = rho(:,:,:,2)
 #endif
+    end if
+    degrade_counter = degrade_counter + 1
+    if (degrade_counter > degrade_time) degrade_counter = 0
+    print *, degrade_time
+
+ 
   end subroutine datasetswap
 
 #if defined full_wflux
