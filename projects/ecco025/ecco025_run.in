@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 10000,
+  intrun       = 600,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -121,11 +121,11 @@
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
   ist1         = 1100,		 
-  ist2         = 1150,			  
-  jst1         = 450,		 
+  ist2         = 1200,			  
+  jst1         = 400,		 
   jst2         = 500,		 
   kst1         = 49,		 
-  kst2         = 50,
+  kst2         = 49,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
