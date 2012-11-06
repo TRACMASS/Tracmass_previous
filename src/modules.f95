@@ -282,6 +282,8 @@ MODULE mod_vel
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
+  INTEGER                                    :: degrade_time=0, degrade_space=0
+    integer, save                            :: degrade_counter = 0
 
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -295,7 +297,7 @@ MODULE mod_vel
 CONTAINS
   
   subroutine datasetswap
-    USE mod_grid
+
     IMPLICIT NONE
 
     integer, save                              :: degrade_counter = -1
