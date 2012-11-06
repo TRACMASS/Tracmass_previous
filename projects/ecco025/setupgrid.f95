@@ -35,11 +35,11 @@ SUBROUTINE setupgrid
 
   INTEGER                                    :: i ,j ,k ,kk
 
-  REAL,          ALLOCATABLE, DIMENSION(:)   :: lat,lon,depth1d
+  REAL,          ALLOCATABLE, DIMENSION(:)   :: lat,lon,dz_inv
   REAL,          ALLOCATABLE, DIMENSION(:,:) :: dytt,dxtt
   CHARACTER (len=200)                        :: gridfile
 
-  allocate ( lon(imt), lat(jmt) )
+  allocate ( lon(imt), lat(jmt), dz_inv(km) )
   allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt), mask(imt,jmt) )
   call coordinat
 
@@ -63,18 +63,19 @@ SUBROUTINE setupgrid
 
   do j=1,jmt-1
      dxtt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j) )
-     dytt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j+1) )
+     !dytt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j+1) )
   end do
+
   dxv(1:imt-1,:) = dxtt(1:imt-1,:)/2 + dxtt(2:imt,:)/2
   dyu(:,1:jmt-1) = dytt(:,1:jmt-1)/2 + dytt(:,2:jmt)/2
   dxv(imt,:) = dxtt(imt,:)/2 + dxtt(1,:)/2
   dxdy = dyu * dxv                                                          
 
-  dz = get1DfieldNC(trim(gridfile), 'DEPTH_T')
-  dz(1:km-1) = dz(2:km)-dz(1:km-1)
-
-  !uvel = get3DfieldNC(trim(trim(inDataDir)//'/UVEL'//fstamp), 'UVEL')
-
+  dz_inv = get1DfieldNC(trim(gridfile), 'DEPTH_T')
+  dz_inv(1:km-1) = dz_inv(2:km)-dz_inv(1:km-1)
+  dz_inv(km) = dz_inv(km-1)
+  dz = dz_inv(km:1:-1)
+ 
   kmt = 50
   mask = 1
 
