@@ -65,7 +65,7 @@ SUBROUTINE init_params
    namelist /INITRUNVER/     runVerNum
    namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax ,subGridJmin,   &
                          &   subGridJmax ,SubGridFile, subGridID
-   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep 
+   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep,degrade_time 
    namelist /INITRUNDATE/    startSec ,startMin ,startHour,                    &
                          &   startDay ,startMon ,startYear,                    &
                          &   ihour, iday, imon, iyear
@@ -94,9 +94,8 @@ SUBROUTINE init_params
    Project  = PROJECT_NAME
    Case     = CASE_NAME
    
-   IF ( (IARGC() == 1 ) .OR. (IARGC() == 4 ) )  then
-      CALL getarg(IARGC(),inparg)
-      Case = inparg
+   IF ((IARGC() > 0) )  THEN
+      CALL getarg(1,Case)
    END IF
 
    CALL getenv('ORMPROJDIR',projdir)
@@ -179,12 +178,6 @@ SUBROUTINE init_params
          
       CLOSE (8)
 
-      timax    =  24.*3600.*timax ! convert time lengths from days to seconds
-      dstep    =  1.d0/dble(iter)
-      dtmin    =  dstep * tseas
-      baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
-      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
-           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
          CALL getarg(2,inparg)
@@ -194,7 +187,7 @@ SUBROUTINE init_params
             read( inparg, '(f15.10)' ) ARG_INT1
          end if
       END IF
-    
+
       IF ((IARGC() > 2) ) THEN
           ARG_INT2 = 0.1
          CALL getarg(3,inparg)
@@ -205,6 +198,13 @@ SUBROUTINE init_params
          end if
       END IF
 
+      timax    =  24.*3600.*timax ! convert time lengths from days to seconds
+      dstep    =  1.d0/dble(iter)
+      dtmin    =  dstep * tseas
+      baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
+      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
+           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+  
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
             intmin = (startJD)/(real(ngcm)/24.)+1

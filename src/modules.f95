@@ -209,7 +209,7 @@ MODULE mod_grid
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
   CHARACTER(LEN=200)                        :: SubGridFile 
-  INTEGER                                   :: degrade_time=0, degrade_space=0
+  INTEGER                                   :: degrade_space=0
 
 #ifdef ifs
   REAL*8, PARAMETER                         :: R_d = 287.05d0
@@ -274,13 +274,15 @@ MODULE mod_vel
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
+  INTEGER                                    :: degrade_time=0, degrade_space=0
+    integer, save                            :: degrade_counter = 0
+
 
 CONTAINS
   
   subroutine datasetswap
-    IMPLICIT NONE
 
-    integer, save                              :: degrade_counter = -1
+    IMPLICIT NONE
 
     if (degrade_counter < 1) then
        hs(:,:,1)      = hs(:,:,2)
@@ -295,10 +297,6 @@ CONTAINS
        rho(:,:,:,1)   = rho(:,:,:,2)
 #endif
     end if
-    degrade_counter = degrade_counter + 1
-    if (degrade_counter > degrade_time) degrade_counter = 0
-    print *, degrade_time
-
  
   end subroutine datasetswap
 

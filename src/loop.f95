@@ -168,7 +168,9 @@ SUBROUTINE loop
 !  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
-     call readfields
+     if (degrade_counter < 1) call readfields
+     degrade_counter = degrade_counter + 1
+     if (degrade_counter > degrade_time) degrade_counter = 0
      call fancyTimer('reading next datafield','stop')
      
      !=======================================================
@@ -361,7 +363,6 @@ SUBROUTINE loop
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
            ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
-     
            !if(ds == UNDEF .or.ds == 0.d0)then 
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
