@@ -23,28 +23,28 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=900000/               ! Maximum number of trajectories allowed
+  NTRACMAX=500000/               ! Maximum number of trajectories allowed
   !
   !
 $INITGRIDTIME
   !
-  ngcm          =    6,          ! (5*24) hours between GCM datasets
-  iter          =    6,          ! iteration between two gcm data sets
-  intmax        =  2500,          ! maximum length of GCM fields
-  fieldsPerFile =   1 / ! 1460 1,2920
+  ngcm          = 2190,          ! 6,5*24,365*24/12=730, 2190,365*24/2=4380 hours between GCM datasets
+  iter          =   73,          ! iteration between two gcm data sets
+  intmax        =   12,          ! maximum length of GCM fields
+  fieldsPerFile =   12 / ! 1460 1,2920
   !
   !
 $INITGRIDDATE
   !
-  yearmin        = 1997,
-  yearmax        = 1997,
+  yearmin        = 1999,
+  yearmax        = 1999,
   ! === Reference basetime for the velocity field.
   baseSec        = 0,
   baseMin        = 0,
   baseHour       = 0,
-  baseDay        = 5,
+  baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 1997/
+  baseYear       = 1999/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! scaling factor for length output in the orig arc m -> 100 km  

@@ -44,7 +44,7 @@ SUBROUTINE setupgrid
   
   REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t !,rhom
   CHARACTER (len=200)                         :: gridFile
-!  REAL*4									  :: long(IMT,JMT),lat(IMT,JMT)
+  REAL*4									  :: long(IMT,JMT),lat(IMT,JMT)
 
   ! === Start and count mask for reading netCDF files ===
   start1D  = [ 1]
@@ -60,7 +60,7 @@ SUBROUTINE setupgrid
 
 
   ! === Open mesh file ===
-  gridFile = trim(inDataDir)//'topo/mesh_mask_ORCA025.L75_nov2010.nc'
+  gridFile = trim(inDataDir)//'topo/mesh_mask_ecearth_42l.nc'
   ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
   if(ierr.ne.0) stop 3751
 
@@ -125,10 +125,10 @@ SUBROUTINE setupgrid
 !    lat(i,j)=temp2d_doub(i,j)
 !  enddo
 !  enddo
-!do j=JMT,1,-1
-! write (*,"(i4,2x,99f6.2)") j,(lat(i,j),i=1,IMT,200)
-!enddo
-    
+!  do j=JMT,1,-1
+!  print *,j,lat(IMT/2,j)
+!  enddo
+  
   deallocate( temp2d_doub, e1t, e2t )
   
 !#ifdef orca025
@@ -222,7 +222,7 @@ SUBROUTINE setupgrid
     enddo
   enddo
 
-  !  north fold 
+  !  north fold (probably unnecessary)
   do i=4,IMT
     ii=IMT+4-i
     kmv(i,JMT)=kmv(ii,JMT-3)
@@ -264,9 +264,10 @@ SUBROUTINE setupgrid
 !write(21) kmv
 !close(21)
 
-!kmt(940:1200,499)=1
+!kmt(220:305,147)=1 ! Find the Equator in the Atlantic
+!kmt(110:120,246)=1 ! Find Bering Straight
 !do j=JMT,1,-1
-! write (*,"(i4,999i1)") j,(kmt(i,j),i=800,1300,2)
+! write (*,"(i4,999i1)") j,(kmt(i,j),i=1,IMT)
 !enddo
 !stop 3956
 
