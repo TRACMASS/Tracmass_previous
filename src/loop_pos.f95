@@ -3,6 +3,7 @@ module mod_pos
   USE mod_grid
   USE mod_vel
   USE mod_loopvars
+  USE mod_time
 #ifdef streamxy
   USE mod_streamxy
 #endif
@@ -38,7 +39,7 @@ contains
     scrivi=.false.
     if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
-       uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
+       uu=(rbg*uflux(ia,ja,ka,nsp)+rb*uflux(ia ,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
           ib=ia+1
           if(ib.gt.IMT) ib=ib-IMT 
@@ -89,7 +90,7 @@ contains
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
-       uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
+       uu=(rbg*uflux(iam,ja,ka,nsp)+rb*uflux(iam,ja,ka,nsm))*ff
        if(uu.lt.0.d0) then
           ib=iam
        endif
@@ -139,7 +140,7 @@ contains
     elseif(ds==dsn) then ! northward grid-cell exit
        
        scrivi=.false.
-       uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
+       uu=(rbg*vflux(ia,ja,ka,nsp)+rb*vflux(ia,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
           jb=ja+1
        endif
@@ -188,7 +189,7 @@ contains
     elseif(ds==dss) then ! southward grid-cell exit
        
        scrivi=.false.
-       uu=(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
+       uu=(rbg*vflux(ia,ja-1,ka,nsp)+rb*vflux(ia,ja-1,ka,nsm))*ff
        if(uu.lt.0.d0) then
           jb=ja-1
 #ifndef ifs 
@@ -241,9 +242,9 @@ contains
        scrivi=.false.
        call vertvel(rb,ia,iam,ja,ka)
 #ifdef full_wflux
-       uu=wflux(ia,ja,ka,1)
+       uu=wflux(ia,ja,ka,nsm)
 #else
-       uu=rbg*wflux(ka,NST)+rb*wflux(ka,1)
+       uu=rbg*wflux(ka,nsp)+rb*wflux(ka,nsm)
 #endif
        if(uu.gt.0.d0) then
           kb=ka+1
@@ -285,9 +286,9 @@ contains
        call vertvel(rb,ia,iam,ja,ka)
        
 #ifdef full_wflux
-       if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
+       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
 #else
-       if(rbg*wflux(ka-1,NST)+rb*wflux(ka-1,1).lt.0.d0) kb=ka-1
+       if(rbg*wflux(ka-1,nsp)+rb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
 #endif              
        z1=dble(ka-1)
 #if defined timeanalyt
@@ -350,20 +351,23 @@ contains
           
           ! move if atmosphere, freeze if ocean
           ib=ia ; jb=ja ; kb=ka
-#ifdef ifs
-          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
-#else
-          x1=x0 ; y1=y0 ; z1=z0 
-#endif  
+!          print *,'convergence for ',ib,jb,kb,x0,y0,z0
+!#ifdef ifs
+!          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
+!          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
+!          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+!#else
+!          x1=x0 ; y1=y0 ; z1=z0 
+!          print *,ib,jb,kb,x1,y1,z1
+!#endif  
           ! If there is at least one spatial solution 
           ! but the shortest cross time is the time step
-       else
+       endif
+!       else
           call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
           call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
           call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
-       endif
+!       endif
 #endif
     endif
     

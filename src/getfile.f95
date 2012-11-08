@@ -1,8 +1,10 @@
 
 MODULE mod_getfile
-  USE mod_param
+  USE mod_grid
   USE netcdf
   
+  IMPLICIT NONE
+
   INTEGER, DIMENSION(1)                      :: start1D  ,count1D
   INTEGER, DIMENSION(4)                      :: start2D  ,count2D ,map2D
   INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
@@ -23,11 +25,11 @@ CONTAINS
     INTEGER                                 :: varid ,ncid
   
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printReadError(1)    
+    if(ierr.ne.0) call printReadError(1, fieldFile, varName)    
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
-    if(ierr.ne.0) call printReadError(2)
+    if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid ,getScalarNC)
-    if(ierr.ne.0) call printReadError(3)
+    if(ierr.ne.0) call printReadError(3, fieldFile, varName)
     ierr=NF90_CLOSE(ncid)
   end function getScalarNC
 
@@ -43,11 +45,11 @@ CONTAINS
     allocate ( get1DfieldNC(d(1)) )
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printReadError(1)    
+    if(ierr.ne.0) call printReadError(1, fieldFile, varName)    
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
-    if(ierr.ne.0) call printReadError(2)
+    if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid ,get1DfieldNC ,start1d ,count1d)
-    if(ierr.ne.0) call printReadError(3)
+    if(ierr.ne.0) call printReadError(3, fieldFile, varName)
     ierr=NF90_CLOSE(ncid)
   end function get1dfieldNC
 
@@ -58,7 +60,7 @@ CONTAINS
     REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: get2DfieldNC
     REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: field
     INTEGER,             DIMENSION(4)       :: d, s, c, dimids
-    INTEGER                                 :: ncid
+    INTEGER                                 :: ncid, i
 
     if (ncTpos == 0) then
        print *,"Error: ncTpos, is not set!"
@@ -66,27 +68,25 @@ CONTAINS
        print *,"   to use in the cdf data file."
        stop
     end if
-    start2d(map2d(3)) = ncTpos       
 
+    start2d(map2d(3)) = ncTpos       
     s = start2d
     s(3) = s(3) + istag
     s(4) = s(4) + jstag
     s = s(map2d)
     c = count2d(map2d)
-    d = c + s - 2  
-
+    d = c + s - 1
     allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
     field=0; get2dfieldNC=0
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printReadError(1)
+    if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
-    if(ierr.ne.0) call printReadError(2)
+    if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid , field, s,c)
-    if(ierr.ne.0) call printReadError(3)
+    if(ierr.ne.0) call printReadError(3, fieldFile, varName)
     ierr=NF90_CLOSE(ncid)
-
-
+ 
     if ( all(map2d(1:2) == (/3,4/),DIM=1) .or. &
          all(map2d(2:3) == (/3,4/),DIM=1) ) then
        get2DfieldNC(1:imt,:) = field
@@ -95,6 +95,7 @@ CONTAINS
           get2DfieldNC(i,:) = field(:,i)
        end do
     end if
+
 
  end function get2DfieldNC
   
@@ -122,20 +123,22 @@ CONTAINS
 
     !s = start3d(map3d)
     c = count3d(map3d)
-    d = c + s - 2
-    allocate ( field(d(1),d(2),d(3)+1), get3dfieldNC(imt+2,jmt,km) )
+    d = c + s - 1
+    allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) )
 
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printReadError(1)
+    if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
-    if(ierr.ne.0) call printReadError(2)
+    if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid ,field, s, c)
-    if(ierr.ne.0) call printReadError(3)
+    if(ierr.ne.0) call printReadError(3, fieldFile, varName)
+
+
 
     if  (all(map3d == (/1,2,3,4/),DIM=1) ) then
-       get3DfieldNC = field
+       get3DfieldNC(:imt,:,:) = field
     elseif (all(map3d == (/2,3,4,1/),DIM=1) )  then
-       get3DfieldNC(1:imt,:,:) = field
+       get3DfieldNC(:imt,:,:) = field
     elseif (all(map3d == (/3,2,4,1/),DIM=1) )  then
        do k=1,km
           do i=1,imt
@@ -161,24 +164,25 @@ CONTAINS
   end function get3DfieldNC
 
 
-  subroutine printReadError(sel)
+  subroutine printReadError(sel, fieldFile, varName)
     USE netcdf
+    CHARACTER (len=*)                       :: fieldFile,VarName
     INTEGER                                 :: sel, ndims, v,dimln
     INTEGER, DIMENSION(4)                   :: dimvec
     CHARACTER(len=20)                       :: dimname
     select case (sel)
     case (1)
        print *,'Error when trying to open the file'
-       print *,'   ' ,getfile
+       print *,'   ' ,fieldFile, ' to read ', VarName
        print *,'    Error: ' , NF90_STRERROR(ierr)
        stop 
     case (2)
-       print *,'Error when trying to open the field   ',ncvar
+       print *,'Error when trying to open the field   ',VarName
        print *,'    Error: ' , NF90_STRERROR(ierr)
        stop 
     case (3)
 
-       print *,'Error when trying to read the field   ',ncvar
+       print *,'Error when trying to read the field   ',VarName
        print *, 'start1d =  ' ,start1d
        print *, 'count1d =  ' ,count1d
        print *, 'start2d =  ' ,start2d

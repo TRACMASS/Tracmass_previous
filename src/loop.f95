@@ -25,84 +25,42 @@ SUBROUTINE loop
   USE mod_vel
   USE mod_traj
   USE mod_pos
-  USE mod_turb
   USE mod_coord
-#ifdef tracer
+
+  ! === Selectable moules ===
+  USE mod_turb
+  USE mod_streamfunctions
   USE mod_tracer
-#endif /*tracer*/
-#ifdef streamxy
-  USE mod_streamxy
-#endif /*streamxy*/
-#ifdef streamv
-  USE mod_streamv
-#endif /*streamv*/
-#ifdef streamr
-  USE mod_streamr
-#endif /*streamr*/
-#ifdef stream_thermohaline
-  USE mod_stream_thermohaline
-#endif /*stream_thermohaline*/
-#ifdef tracer
-  USE mod_tracer
-#endif /*tracer*/
-#ifdef sediment
   USE mod_sed
-#endif /*sediment*/
 #if defined larval_fish
   USE mod_fish
 #endif /*fish*/
   
   IMPLICIT none
-    
-  INTEGER mra,mta,msa
-  
-#if defined sediment
-  INTEGER nsed,nsusp
-  logical res
-#endif /*sediment*/
- 
-  INTEGER                                    :: ia, ja, ka, iam
-  INTEGER                                    :: ib, jb, kb, ibm
+  ! === Loop variables ===
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: niter
   INTEGER                                    :: nrh0=0
-
-  ! Counters
-  INTEGER                                    :: nout=0, nloop=0, nerror=0
-  INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
-  INTEGER                                    :: nexit(NEND)
   
-  REAL*8                                     :: temp, salt, dens
-  REAL*8                                     :: temp2, salt2, dens2
-  REAL*8                                     :: x0, y0, z0, x1, y1, z1
-  REAL*8                                     :: rlon,rlat
-  REAL*8                                     :: dt, t0
-  REAL*8                                     :: dtreg
-  
-  
-  ! === Error Evaluation ===
-  INTEGER                                    :: errCode
-  INTEGER                                    :: landError=0 ,boundError=0
-  REAL*8                                     :: zz
-
-#if defined sediment
-  ! Specific for sediment code
-  INTEGER                                    :: nsed,nsusp
-  LOGICAL                                    :: res
-#endif /*sediment*/
-
 #if defined larval_fish
   ! Specific for fish code
   REAL*8                                     :: rhof    ! density of fish
 #endif /*larval_fish*/
 
+  ! === Variables to interpolate fields ===
+  REAL                                       :: temp, salt, dens
+  REAL                                       :: temp2, salt2, dens2
+  ! === Error Evaluation ===
+  INTEGER                                    :: errCode
+  INTEGER                                    :: landError=0, boundError=0
+  REAL                                       :: zz
 
 !!------------------------------------------------------------------------------
 
 
-  iday0=iday
-  imon0=imon
-  iyear0=iyear
+  iday0 = iday
+  imon0 = imon
+  iyear0 = iyear
   ! === print some run stats ===
   print *,'------------------------------------------------------'  
   print *,'Files written in directory                  :  ' ,trim(outDataDir)
@@ -120,24 +78,11 @@ SUBROUTINE loop
          /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
 
-  ! === initialise to zero ===
-  nrh0=0
-  nexit=0
-  ntractot=0
-#ifdef sediment
-  nsed=0
-  nsusp=0
-#endif /*sediment*/
-  
-  nrj=0
-  trj=0.d0
-
   dstep=1.d0/dble(iter)
   dtmin=dstep*tseas
-  
-  
+    
   !==========================================================
-  !=== Read in the end positions from an previous run     === 
+  !===   Read in end positions from a previous run        === 
   !==========================================================
   
 #ifdef rerun
@@ -150,25 +95,43 @@ SUBROUTINE loop
 !  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
 #if defined orca025
-  if(rlat == 478.) then
-     nrj(ntrac,8)=0    ! South
+  if(    rlat == dble(jenn(1))) then
+     nrj(ntrac,8)=0     ! Southern boundary
      i=i+1
-  elseif(rlon == 100) then
+     nout=nout+1
+  elseif(rlon == dble(iene(3))) then
      nrj(ntrac,8)=0    ! East
      j=j+1
-  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>200.) then
+     nout=nout+1
+  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
      nrj(ntrac,8)=1    ! back to the warm pool
      k=k+1
   else
      nrj(ntrac,8)=0 
      l=l+1   
+     nout=nout+1
   endif
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+#elif defined orca025L75
+  if( tt-t0 >365.*1000. .and. temp > tmax0 ) then
+     nrj(ntrac,8)=1     ! warm end points
+     i=i+1
+  elseif( tt-t0 >365.*1000. .and. temp <= tmax0 ) then
+     nrj(ntrac,8)=2    ! cold end points
+     j=j+1
+  else                 ! too short
+     nrj(ntrac,8)=0 
+     k=k+1
+     nout=nout+1
+  endif
+566 format(i8,i7,2f9.3,f6.2,2f10.2 &
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+
 #elif defined ifs
-  if(rlat == float(jenn(1))) then
+  if(rlat == dble(jenn(1))) then
      nrj(ntrac,8)=1    ! Southern boundary
-  elseif(rlat == float(jens(2))) then
+  elseif(rlat == dble(jens(2))) then
      nrj(ntrac,8)=2    ! Northern boundary 
   else
      nrj(ntrac,8)=0
@@ -187,7 +150,7 @@ SUBROUTINE loop
   100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
 
   do ntrac=1,ntracmax ! eliminate the unwanted trajectories
-     if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
+   if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
   enddo
   
 #else
@@ -212,8 +175,8 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
-!  intsTimeLoop: do ints=intstart+intstep,intstart+intrun,intstep
+  intsTimeLoop: do ints=intstart+1,intstart+intrun
+!  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      call readfields
@@ -227,7 +190,8 @@ SUBROUTINE loop
       call writetracer
      endif
 
-    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+!    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+    intspinCond: if(ints <= intstart+intspin) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)
         call fancyTimer('seeding','stop')
@@ -242,7 +206,7 @@ SUBROUTINE loop
      
      call fancyTimer('advection','start')
      ntracLoop: do ntrac=1,ntractot  
-
+     
         ! === Test if the trajectory is dead   ===
         if(nrj(ntrac,6) == 1) cycle ntracLoop
         
@@ -426,10 +390,29 @@ SUBROUTINE loop
            ! === of the trajectory           ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            
-#if defined orc || orca025 || orca12
            ! === north fold cyclic for the ORCA grids ===
-           ! === only tested with ORCA025 so far !!!  ===
+#if defined orc || orca1 || orca12 
             if( y1 == dble(JMT-1) ) then
+!              print *,'North fold for',ntrac
+              x1 = dble(IMT+2) - x1
+              ib=idint(x1)+1
+              jb=JMT-1
+              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+ !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
+           elseif(y1 > dble(JMT-1)) then
+            print *,'north of northfold for ntrac=',ntrac
+            print *,ia,ib,x0,x1
+            print *,ja,jb,y0,y1
+            print *,ka,kb,z0,z1
+            print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+            nerror=nerror+1
+            nrj(ntrac,6)=1
+            cycle ntracLoop
+!            stop 4967
+           endif
+#elif defined orca025 || orca025L75
+            if( y1 == dble(JMT-1) ) then
+!              print *,'North fold for',ntrac
               x1 = dble(IMT+3) - x1
               y1 = dble(JMT-2)
               ib=idint(x1)
@@ -440,20 +423,32 @@ SUBROUTINE loop
             print *,ja,jb,y0,y1
             print *,ka,kb,z0,z1
             print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-            stop 4967
+            nerror=nerror+1
+            nrj(ntrac,6)=1
+            cycle ntracLoop
+!            stop 4977
            endif
+
 #endif
+           ! === Cyclic world ocean/atmosphere === 
+           if(x1 <  0.d0    ) x1=x1+dble(IMT)       
+           if(x1 > dble(IMT)) x1=x1-dble(IMT)   
+           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+!            print *,'vavava',ntrac,niter,ib,x1,jb,y1,kb,z1
+            x1 = x1 - DBLE(IMT)
+           endif    
+           if(ib > IMT      ) ib=ib-IMT 
+            
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
-#ifndef regional
-           if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
-           if(x1.gt.dble(IMT)) x1=x1-dble(IMT)      ! east-west cyclic
-#endif
-           if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! index for correct cell?
-#ifndef regional
-           if(ib.gt.IMT) ib=ib-IMT                  ! east-west cyclic
-#endif
-           if(y1.ne.dble(idint(y1))) jb=idint(y1)+1 ! index for correct cell?
+           if(x1 /= dble(idint(x1))) ib=idint(x1)+1 
+           if(y1 /= dble(idint(y1))) jb=idint(y1)+1
+           if(z1 /= dble(idint(z1))) kb=idint(z1)+1 
+
+
+!if(ntrac==1472) print *,'ssss',ntrac,niter,ib,x1,jb,y1,kb,z1
+!if(ntrac==5) print *,'ssss',ntrac,niter,ib,x1,jb,y1,kb,z1
+
            
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
@@ -462,6 +457,8 @@ SUBROUTINE loop
            if (errCode.ne.0) cycle ntracLoop
            
            call errorCheck('bottomError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
+
            call errorCheck('airborneError', errCode)
            call errorCheck('corrdepthError', errCode)
            call errorCheck('cornerError', errCode)
@@ -473,12 +470,14 @@ SUBROUTINE loop
            ! === end trajectory if outside chosen domain ===
     
            LBTloop: do k=1,LBT
-              if(float(ienw(k)) <= x1 .and. x1 <= float(iene(k)) .and. &
-                 float(jens(k)) <= y1 .and. y1 <= float(jenn(k))  ) then
+              if(dble(ienw(k)) <= x1 .and. x1 <= dble(iene(k)) .and. &
+                 dble(jens(k)) <= y1 .and. y1 <= dble(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
                  exit niterLoop                                
               endif
            enddo LBTLOOP
+           if (x1 < 1) exit niterloop
+
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
@@ -487,7 +486,7 @@ SUBROUTINE loop
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then
                 if (temp > tmaxe .and. salt < smine .and.  &
-               &   (tt-t0)/tday > 200.      ) then
+               &   (tt-t0)/tday > 365.      ) then
                  nexit(NEND)=nexit(NEND)+1
                  exit niterLoop                                
                endif
@@ -513,7 +512,7 @@ SUBROUTINE loop
 599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
           ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
           ' nsusp=',i8,' nexit=',9i8)
-#elif defined ifs || rco || tes || orc || baltix || orca025 || orca12 || AusCOM
+#elif defined ifs || rco || tes || orc || baltix || orca1 || orca025  || orca025L75 || orca12 || AusCOM
      print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
 799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
           ' nerror=',i4,' in ocean/atm=',i8)
@@ -622,9 +621,9 @@ return
                 print *,'kmt=',kmt(ib,jb)
                 print *,'dz=',dz(kb)
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
-!                print *,'dztb=',dztb(ib,jb,1),dztb(ib,jb,2)
-!                print *,'rg*hs=',rg,hs(ib,jb,NST)
-!                print *,'rr*hs=',rr,hs(ib,jb,1)
+!                print *,'dztb=',dztb(ib,jb,1)
+!                print *,'rg*hs=',rg,hs(ib,jb,nsp)
+!                print *,'rr*hs=',rr,hs(ib,jb,nsm)
                 print *,'-------------------------------------'
                 print *,'The trajectory is killed'
                 print *,'====================================='
@@ -673,7 +672,7 @@ return
                 print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd
                 print *,'dsmin=',ds,dsmin,dtmin
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
-                print *,'hs=',hs(ia,ja,1),hs(ia,ja,2),hs(ib,jb,1),hs(ib,jb,2)
+                print *,'hs=',hs(ia,ja,nsm),hs(ia,ja,nsp),hs(ib,jb,nsm),hs(ib,jb,nsp)
                 print *,'tt=',tt,ts,tt/tday,t0/tday
                 print *,'ntrac=',ntrac
                 print *,'niter=',niter
@@ -747,14 +746,14 @@ return
                      ' ka=',ka,' kb=',kb
                 print *,'x1=',x1,' x0=',x0,' y1=',y1,' y0=',y0, & 
                      ' z1=',z1,' z0=',z0
-                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,NST) + &
-                     rb*uflux(ia ,ja,ka,1))*ff
-                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,NST) + & 
-                     rb*uflux(iam,ja,ka,1))*ff
-                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,NST) + & 
-                     rb*vflux(ia,ja  ,ka,1))*ff
-                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,NST) + & 
-                     rb*vflux(ia,ja-1,ka,1))*ff
+                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,nsp) + &
+                     rb*uflux(ia ,ja,ka,nsm))*ff
+                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,nsp) + & 
+                     rb*uflux(iam,ja,ka,nsm))*ff
+                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,nsp) + & 
+                     rb*vflux(ia,ja  ,ka,nsm))*ff
+                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,nsp) + & 
+                     rb*vflux(ia,ja-1,ka,nsm))*ff
                 print *,'-------------------------------------'
              end if
              trj(ntrac,1)=x1
@@ -776,8 +775,9 @@ return
           ! then put in middle of deepest layer 
           ! (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
-              print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb)), &
-                   kmt(ia,ja),kmt(ib,jb),ntrac
+              print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
+              print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
+              print *,'ntrac=',ntrac,niter 
                print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
                print *,'ia=',ia,ib,ja,jb,ka,kb
                print *,'x0=',x0,x1,y0,y1,z0,z1
@@ -785,11 +785,10 @@ return
                call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
                call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
                print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
-               print *,'ntrac=',ntrac
               nerror=nerror+1
               nrj(ntrac,6)=1
-               stop 3957
-               z1=dble(KM-kmt(ib,jb))+0.5d0
+ !             stop 3957
+              z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if
         case ('airborneError')
@@ -843,7 +842,7 @@ return
                  print *,'Warning: not find any path for unknown reason '
                  print *, " "
                  write (*,'(A, E9.3, A, E9.3)'), ' uflux= ', &
-                      uflux(ia,ja,ka,1),'  vflux= ', vflux(ia,ja,ka,1)
+                      uflux(ia,ja,ka,nsm),'  vflux= ', vflux(ia,ja,ka,nsm)
 
                  write (*,FMT='(A, 5E9.2)'),' ds=',ds,dse,dsw,dsn,dss
                  write (*,FMT='(4E9.2)'), dsu,dsd,dsmin,dxyz
@@ -1022,16 +1021,65 @@ return
     end select
 #endif    
 
+#if defined csvwrite 
+    x14=real(x1,kind=4)
+    y14=real(y1,kind=4)
+    z14=real(z1,kind=4)
+    if (twritetype==1) then
+       twrite = tt
+    else if (twritetype==2) then
+       call updateclock
+       twrite = currJDtot
+    else
+       twrite = real(ints,kind=8)
+    end if
+    select case (sel)       
+    case (10)
+       write(88,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+       return
+    case (11)
+       if(  (kriva == 1 .and. nrj(ntrac,4)  ==  niter-1 ) .or. &
+            (kriva == 2 .and. scrivi                    ) .or. &
+            (kriva == 3                                 ) .or. &
+            (kriva == 4 .and. niter == 1                ) .or. &
+            (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
+            (kriva == 6 .and. .not.scrivi               )  ) then
+          !!!! CALL FIELD-INTERP !!!!
+          write(86,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+       end if
+    case (13)
+       write(87,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (15)
+       write(86,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (17)
+       write(87,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (19)
+       write(85,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    case (40)
+       write(89,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
+    end select
+#endif   
   end subroutine writedata
+
+
+
+
+
+
+
+
+
+
+
 
   subroutine calc_dxyz
     ! T-box volume in m3
 #ifdef zgrid3Dt 
-    dxyz=rg*dzt(ib,jb,kb,NST)+rr*dzt(ib,jb,kb,1)
+    dxyz=rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
 #elif  zgrid3D
     dxyz=dzt(ib,jb,kb)
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #else
     dxyz=dz(kb)
@@ -1039,7 +1087,7 @@ return
     if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,NST)+rr*hs(ib,jb,1)
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #endif /*zgrid3Dt*/
     dxyz=dxyz*dxdy(ib,jb)
@@ -1058,6 +1106,16 @@ return
     end if
   end subroutine calc_dxyz
 
+
+
+
+
+
+
+
+
+
+
   subroutine calc_time
 #ifdef regulardt
            if(ds == dsmin) then ! transform ds to dt in seconds
@@ -1074,7 +1132,7 @@ return
 #endif /*regulardt*/
            if(dt.lt.0.d0) then
               print *,'dt=',dt
-              stop 49673
+              stop 4968
            endif
            ! === if time step makes the integration ===
            ! === exceed the time when fiedls change ===
@@ -1108,12 +1166,23 @@ return
                  tss=tss+dt/tseas*dble(iter)
 !                 tss=tss+dt/dtmin
               endif
-#endif
+#endif /*regulardt*/
            end if
            ! === time interpolation constant ===
            rbg=dmod(ts,1.d0) 
            rb =1.d0-rbg
          end subroutine calc_time
+
+
+
+
+
+
+
+
+
+
+
 
   subroutine fancyTimer(timerText ,testStr)
     IMPLICIT NONE
