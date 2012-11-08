@@ -8,8 +8,8 @@
   fl02   = -Dregulardt     # Regular time steps with -Dtimestep
 #------------------------------------------------------------------------
   fl03   = -Dtempsalt       # Include temp and salt
-#  fl04   = -Dtextwrite      # Write results to textfile
-  fl05   = -Dbinwrite      # Write results to binaryfile
+  fl04   = -Dtextwrite      # Write results to textfile
+#  fl05   = -Dbinwrite      # Write results to binaryfile
 #  fl06   = -Dmysqlwrite    # Write results to mysql
 #------------------------------------------------------------------------
 #  fl07  = -Dstreamxy       # Calculates the barotropic stream function.
@@ -20,7 +20,7 @@
                             # function of the end positions that has been
                             # calculated in an identical previous run.   
 #------------------------------------------------------------------------
-  fl12  = -Dtwodim         # Turn off vertical velocities.
+#  fl12  = -Dtwodim         # Turn off vertical velocities.
 #  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
@@ -37,7 +37,8 @@
 #  fl21  = -Dturb           # Adds subgrid turbulent velocities
 #  fl22  = -Ddiffusion      # Adds a diffusion on trajectory
 #------------------------------------------------------------------------
-#  fl23  = -Dregional       # Turns off periodic wrapping
+  fl23  = -Dregional       # Turns off periodic wrapping
+  fl24  = -Dlarval_fish    # Larval fish behaviors
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\

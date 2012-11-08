@@ -63,7 +63,7 @@
   kriva        = 2,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/archive/u1/uaf/kate/NEP6/run15/averages/',
+  inDataDir       = '/archive/u1/uaf/kate/NEP6/run21/averages/',
   !
   ! === Directory where output files are saved
   outDataDir      = '/scratch/kate/NEP6/ormOut/',

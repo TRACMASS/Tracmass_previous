@@ -151,7 +151,7 @@ SUBROUTINE init_seed()
       ELSE
          PRINT *,'------------------------------------------------------'
          PRINT *,'*** ERROR!                                         ***'
-         PRINT *,'*** Seed files does not exisit                     ***' 
+         PRINT *,'*** Seed files does not exist                      ***' 
          PRINT *,'File name    : '//trim(fullSeedFile)
          PRINT *,'*** Run terminated.                                ***'
          STOP

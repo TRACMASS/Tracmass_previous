@@ -37,6 +37,9 @@ SUBROUTINE init_params
    USE mod_orbital
    USE mod_sed
 #endif
+#if defined larval_fish
+  USE mod_fish
+#endif /*fish*/
    IMPLICIT NONE
 
 !!----------------------------------------------------------------------------
@@ -293,6 +296,10 @@ SUBROUTINE init_params
       tem = 0.
       sal = 0.
       rho = 0.
+#endif
+#ifdef larval_fish
+      ALLOCATE ( fish(ntracmax, nfish_var) )
+      ALLOCATE ( stage(ntracmax) )
 #endif
 
       ! --- Allocate Lagrangian stream functions ---

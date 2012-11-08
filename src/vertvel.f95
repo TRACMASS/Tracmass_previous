@@ -9,7 +9,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   USE mod_param
   USE mod_vel
   USE mod_turb
-#ifdef ifs
+#if defined ifs || defined larval_fish
   USE mod_grid
 #endif
 #ifdef sediment
@@ -17,6 +17,9 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   USE mod_orbital
   USE mod_grid
 #endif
+#if defined larval_fish
+  USE mod_fish
+#endif /*fish*/
   
   IMPLICIT none
   
@@ -99,7 +102,21 @@ wflux(km,:) = 0.d0
 #endif   
 ! end sediment code
   
-!#endif
+#ifdef larval_fish
+  ! === fisk!   ===
+
+  k3loop: do k=0,km
+#ifdef full_wflux
+     wflux(k)=wflux(ia,ja,k,1) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
+#else
+    do n=1,NST
+     wflux(k,n)=wflux(k,n) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
+    enddo
+#endif
+  end do k3loop
+#endif
+! end fish code
+
   return
 #endif
 end subroutine vertvel

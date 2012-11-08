@@ -67,7 +67,7 @@ SUBROUTINE readfields
   print *,currJDtot
 
   write (dstamp(10:14),'(I5.5)') & 
-       int(currJDtot) - 731366
+       int(currJDtot) - 731576
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
   print *,dataprefix
@@ -126,6 +126,7 @@ SUBROUTINE readfields
 #ifdef tempsalt
   tem(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'temp')
   sal(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'salt')
+  rho(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'rho')
 #endif
 
   return

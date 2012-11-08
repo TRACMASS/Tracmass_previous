@@ -267,6 +267,23 @@ ENDMODULE mod_diffusion
 #endif
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+#ifdef larval_fish
+MODULE mod_fish
+  REAL*8 :: wfish
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: fish
+  INTEGER, ALLOCATABLE, DIMENSION(:)           :: stage
+  INTEGER, parameter :: nfish_var = 4
+  REAL*8, parameter  :: fishdiam = 0.1
+  INTEGER, parameter :: f_egg = 1
+  INTEGER, parameter :: f_yolksac = 2
+  INTEGER, parameter :: f_larva = 3
+  INTEGER, parameter :: i_bodylength = 1
+  INTEGER, parameter :: i_age = 2
+  INTEGER, parameter :: i_weight = 3
+  INTEGER, parameter :: i_density = 4
+ENDMODULE mod_fish
+#endif
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #ifdef sediment
 MODULE mod_sed
   !  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit

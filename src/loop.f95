@@ -48,6 +48,9 @@ SUBROUTINE loop
 #ifdef sediment
   USE mod_sed
 #endif /*sediment*/
+#if defined larval_fish
+  USE mod_fish
+#endif /*fish*/
   
   IMPLICIT none
     
@@ -87,6 +90,11 @@ SUBROUTINE loop
   INTEGER                                    :: nsed,nsusp
   LOGICAL                                    :: res
 #endif /*sediment*/
+
+#if defined larval_fish
+  ! Specific for fish code
+  REAL*8                                     :: rhof    ! density of fish
+#endif /*larval_fish*/
 
 
 !!------------------------------------------------------------------------------
@@ -311,6 +319,11 @@ SUBROUTINE loop
            ! Find settling velocity for active gridbox ===
            call sedvel(temp,dens) 
 #endif /*sediment*/
+#ifdef larval_fish
+           ! Find settling velocity for active gridbox ===
+           rhof = fish(ntrac,i_density)
+           call fishvel(rhof,temp,dens)
+#endif /*larval_fish*/
            ! === change velocity fields &  === 
            ! === store trajectory position ===
            if( niter.ne.1 .and. tss == dble(iter) &
@@ -870,7 +883,7 @@ return
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined rco || baltix 
+#elif defined rco || defined baltix
 566 format(i8,i7,f7.2,f7.2,f7.1,2f12.4 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined tes 
