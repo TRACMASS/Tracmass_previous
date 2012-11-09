@@ -32,12 +32,12 @@ SUBROUTINE readfields
   CHARACTER (len=50)                         :: varName
 
   ! = Variables for converting from S to Z
-  REAL,       ALLOCATABLE, DIMENSION(:)      :: sc_r,Cs_r
-  REAL,       ALLOCATABLE, DIMENSION(:)      :: sc_w,Cs_w
+  REAL*8,       ALLOCATABLE, DIMENSION(:)      :: sc_r,Cs_r
+  REAL*8,       ALLOCATABLE, DIMENSION(:)      :: sc_w,Cs_w
   INTEGER                                    :: hc
 
   ! = Input fields from GCM
-  REAL,       ALLOCATABLE, DIMENSION(:,:)    :: ssh,dzt0
+  REAL*8,       ALLOCATABLE, DIMENSION(:,:)    :: ssh,dzt0
   ! ===   ===   ===
 
   

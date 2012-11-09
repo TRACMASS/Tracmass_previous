@@ -41,8 +41,8 @@ contains
     
     IMPLICIT NONE
 
-!    REAL*4, ALLOCATABLE, DIMENSION (:)       :: dens_temp, dens_zero, rho
-!    REAL*4, ALLOCATABLE, DIMENSION (:)       :: t, s
+!    REAL*8, ALLOCATABLE, DIMENSION (:)       :: dens_temp, dens_zero, rho
+!    REAL*8, ALLOCATABLE, DIMENSION (:)       :: t, s
     INTEGER                                  :: KM,k
     
     REAL*8, PARAMETER                          :: a0 = 999.842594

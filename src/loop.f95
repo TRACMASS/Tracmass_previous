@@ -79,8 +79,8 @@ SUBROUTINE loop
   INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
   INTEGER                                    :: nexit(NEND)
   
-  REAL                                       :: temp, salt, dens
-  REAL                                       :: temp2, salt2, dens2
+  REAL*8                                     :: temp, salt, dens
+  REAL*8                                     :: temp2, salt2, dens2
   REAL*8                                     :: x0, y0, z0, x1, y1, z1
   REAL*8                                     :: rlon,rlat
   REAL*8                                     :: dt, t0
