@@ -51,7 +51,7 @@ CONTAINS
                                                 & ib, jb, kb, ibm, &
                                                 &  i,  j,  k,   l, &
                                                 &  m, ntrac
-      REAL                                     :: temp,salt,dens
+      REAL*8                                   :: temp,salt,dens
       REAL*8                                   :: tt, ts,     &
                                                 & x1, y1, z1, &
                                                 & vol, subvol

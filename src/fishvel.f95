@@ -26,7 +26,8 @@ a4=0.07440
 ! mean density of the Baltic sea
 ! rho = 1002  ! If called from main.F
 ! temp = 10.
-rho=dens+1000.0  ! If called from loop.F
+!rho=dens+1000.0  ! If called from loop.F
+rho=dens+1025.0  ! If called from loop.F
 if(rho.lt.900.) stop 3095
 if(rho.gt.1200.) stop 3096
 
