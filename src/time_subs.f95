@@ -75,10 +75,10 @@ if(ijk.eq.1) then
  iim=ia-1
  iil=iim
  if(iim.eq.0) iil = imt
- uu=uflux(ii ,ja,ka,nsp)
- um=uflux(iil,ja,ka,nsp)
- vv=uflux(ii ,ja,ka,nsm)
- vm=uflux(iil,ja,ka,nsm)
+ uu=uflux(ii ,ja,ka,2)
+ um=uflux(iil,ja,ka,2)
+ vv=uflux(ii ,ja,ka,1)
+ vm=uflux(iil,ja,ka,1)
 #ifdef turb   
  if(r0.ne.dble(ja)) then
   uu=uu+upr(7,2)  
@@ -99,10 +99,10 @@ elseif(ijk.eq.2) then
  ii=ja
  iim=ja-1
  iil=iim
- uu=vflux(ia,ii ,ka,nsp)
- um=vflux(ia,iil,ka,nsp)
- vv=vflux(ia,ii ,ka,nsm)
- vm=vflux(ia,iil,ka,nsm)
+ uu=vflux(ia,ii ,ka,2)
+ um=vflux(ia,iil,ka,2)
+ vv=vflux(ia,ii ,ka,1)
+ vm=vflux(ia,iil,ka,1)
 #ifdef turb   
  if(r0.ne.dble(ii)) then
   vv=vv+upr(3,2)  
@@ -123,10 +123,10 @@ elseif(ijk.eq.3) then
  ii=ka
  iim=ka-1
  iil=iim
- uu=wflux(ii ,nsp)
- um=wflux(iil,nsp)
- vv=wflux(ii ,nsm)
- vm=wflux(iil,nsm)
+ uu=wflux(ii ,2)
+ um=wflux(iil,2)
+ vv=wflux(ii ,1)
+ vm=wflux(iil,1)
 #ifdef turb   
  if(r0.ne.dble(ii)) then
   vv=vv+upr( 5,2)  
@@ -144,9 +144,9 @@ elseif(ijk.eq.3) then
  endif
 #endif
  if (ka.eq.km) then
-  dzs= dz(km)+rg*hs(ia,ja,nsp)+rr*hs(ia,ja,nsm)
-  dzu1=dz(km)+hs(ia,ja,nsp)
-  dzu2=dz(km)+hs(ia,ja,nsm)
+  dzs= dz(km)+rg*hs(ia,ja,NST)+rr*hs(ia,ja,1)
+  dzu1=dz(km)+hs(ia,ja,2)
+  dzu2=dz(km)+hs(ia,ja,1)
   if(dabs(dzu1).le.eps) stop 4956
   if(dabs(dzu2).le.eps) stop 4957
   f0=dzs/dzu1
@@ -255,10 +255,10 @@ if(ijk.eq.1) then
  iim=ia-1
  iil=iim
  if(iim.eq.0) iil = imt
- uu=uflux(ii ,ja,ka,nsp)
- um=uflux(iil,ja,ka,nsp)
- vv=uflux(ii ,ja,ka,nsm)
- vm=uflux(iil,ja,ka,nsm)
+ uu=uflux(ii ,ja,ka,2)
+ um=uflux(iil,ja,ka,2)
+ vv=uflux(ii ,ja,ka,1)
+ vm=uflux(iil,ja,ka,1)
 #ifdef turb   
  if(r0.ne.dble(ja)) then
   uu=uu+upr(7,2)  
@@ -279,10 +279,10 @@ elseif(ijk.eq.2) then
  ii=ja
  iim=ja-1
  iil=iim
- uu=vflux(ia,ii ,ka,nsp)
- um=vflux(ia,iil,ka,nsp)
- vv=vflux(ia,ii ,ka,nsm)
- vm=vflux(ia,iil,ka,nsm)
+ uu=vflux(ia,ii ,ka,2)
+ um=vflux(ia,iil,ka,2)
+ vv=vflux(ia,ii ,ka,1)
+ vm=vflux(ia,iil,ka,1)
 #ifdef turb   
  if(r0.ne.dble(ii)) then
   vv=vv+upr(3,2)  
@@ -303,10 +303,10 @@ elseif(ijk.eq.3) then
  ii=ka
  iim=ka-1
  iil=iim
- uu=wflux(ii ,nsp)
- um=wflux(iil,nsp)
- vv=wflux(ii ,nsm)
- vm=wflux(iil,nsm)
+ uu=wflux(ii ,2)
+ um=wflux(iil,2)
+ vv=wflux(ii ,1)
+ vm=wflux(iil,1)
 #ifdef turb   
  if(r0.ne.dble(ii)) then
   vv=vv+upr( 5,2)  
@@ -324,9 +324,9 @@ elseif(ijk.eq.3) then
  endif
 #endif
  if (ka.eq.km) then
-  dzs= dz(km)+rg*hs(ia,ja,nsp)+rr*hs(ia,ja,nsm)
-  dzu1=dz(km)+hs(ia,ja,nsp)
-  dzu2=dz(km)+hs(ia,ja,nsm  )
+  dzs= dz(km)+rg*hs(ia,ja,NST)+rr*hs(ia,ja,1)
+  dzu1=dz(km)+hs(ia,ja,NST)
+  dzu2=dz(km)+hs(ia,ja,1  )
   if(dabs(dzu1).le.eps) stop 4966
   if(dabs(dzu2).le.eps) stop 4967
   f0=dzs/dzu1

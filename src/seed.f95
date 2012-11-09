@@ -22,16 +22,15 @@ MODULE mod_seed
    
    IMPLICIT NONE
   
-   INTEGER                                    :: nff,  isec,  idir
-   INTEGER                                    :: nqua, num, nsd, nsdMax
-   INTEGER                                    :: nsdTim
-   INTEGER                                    :: seedPos, seedTime, seedType
-   INTEGER                                    :: seedAll, varSeedFile
-   INTEGER                                    :: ist1, ist2, jst1, jst2
-   INTEGER                                    :: kst1, kst2, tst1, tst2
-   INTEGER                                    :: iist, ijst, ikst, jsd, jst
-   INTEGER                                    :: ijt,  ikt,  jjt, jkt
-   INTEGER                                    :: ntractot=0
+   INTEGER                                    ::    nff,  isec,  idir,         &
+                                               &   nqua,   num,   nsd, nsdMax, &
+                                               & nsdTim,                       &
+                                               & seedPos, seedTime, seedType,  &
+                                               & seedAll, varSeedFile,         &
+                                               & ist1, ist2, jst1, jst2,       &
+                                               & kst1, kst2, tst1, tst2,       &
+                                               & iist, ijst, ikst, jsd, jst,   &
+                                               &  ijt,  ikt,  jjt, jkt, ntractot
    INTEGER*8                                  :: itim
    INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seed_ijk, seed_set
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
@@ -123,27 +122,27 @@ CONTAINS
          SELECT CASE (isec)
          
             CASE (1)  ! Through eastern meridional-vertical surface
-               vol = uflux (iist,ijst,ikst,nsm)
+               vol = uflux (iist,ijst,ikst,1)
          
             CASE (2)  ! Through northern zonal-vertical surface
-               vol = vflux (iist,ijst,ikst,nsm)
+               vol = vflux (iist,ijst,ikst,1)
          
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (1.d0,ib,ibm,jb,kb)
 #ifdef full_wflux
-               vol=wflux(ib,jb,kb,nsm)
+               vol=wflux(ib,jb,kb,1)
 #elif twodim
                vol=1.
 #else 
-               vol=wflux(kb,nsm)
+               vol=wflux(kb,1)
 #endif
          
             CASE (4 ,5)   ! Total volume/mass transport through grid box
                IF (KM+1-kmt(iist,ijst) > kb) THEN
                   CYCLE startLoop
                ELSE
-                  vol = uflux (ib, jb, kb,nsm) + uflux (ibm, jb  , kb,nsm) + & 
-                  &     vflux (ib, jb, kb,nsm) + vflux (ib , jb-1, kb,nsm)
+                  vol = uflux (ib, jb, kb, 1) + uflux (ibm, jb  , kb, 1) + & 
+                  &     vflux (ib, jb, kb, 1) + vflux (ib , jb-1, kb, 1)
                ENDIF
                IF (vol == 0.d0) cycle startLoop
          
@@ -174,7 +173,7 @@ CONTAINS
 #endif /*varbottombox*/
 #ifdef freesurface
             IF (kb == KM) THEN
-               vol = vol+hs(ib,jb,nsm)
+               vol = vol+hs(ib,jb,1)
             END IF
             vol = vol*dxdy(ib,jb)
 #endif /*freesurface*/

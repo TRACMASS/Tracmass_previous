@@ -43,19 +43,19 @@ amp=Ah/( dtmin**(1./3.) )
   
 #if defined timestep
   ! time interpolated velocities
-  uv(1)=(rg*uflux(ia,ja,ka,nsp)+rr*uflux(ia,ja,ka,nsm))*ff ! western u
-  uv(2)=(rg*uflux(im,ja,ka,nsp)+rr*uflux(im,ja,ka,nsm))*ff ! eastern u
-  uv(3)=(rg*vflux(ia,ja,ka,nsp)+rr*vflux(ia,ja,ka,nsm))*ff ! northern v
-  uv(4)=(rg*vflux(ia,jm,ka,nsp)+rr*vflux(ia,jm,ka,nsm))*ff ! southern v
+  uv(1)=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff ! western u
+  uv(2)=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff ! eastern u
+  uv(3)=(rg*vflux(ia,ja,ka,NST)+rr*vflux(ia,ja,ka,1))*ff ! northern v
+  uv(4)=(rg*vflux(ia,jm,ka,NST)+rr*vflux(ia,jm,ka,1))*ff ! southern v
 #elif defined timeanalyt
-  uv( 1)=uflux(ia,ja,ka,nsm)*ff ! western u at t-1
-  uv( 2)=uflux(im,ja,ka,nsm)*ff ! eastern u at t-1
-  uv( 3)=vflux(ia,ja,ka,nsm)*ff ! northern v at t-1
-  uv( 4)=vflux(ia,jm,ka,nsm)*ff ! southern v at t-1
-  uv( 7)=uflux(ia,ja,ka,nsp)*ff ! western u at t
-  uv( 8)=uflux(im,ja,ka,nsp)*ff ! eastern u at t
-  uv( 9)=vflux(ia,ja,ka,nsp)*ff ! northern v at t
-  uv(10)=vflux(ia,jm,ka,nsp)*ff ! southern v at t
+  uv( 1)=uflux(ia,ja,ka,1)*ff ! western u at t-1
+  uv( 2)=uflux(im,ja,ka,1)*ff ! eastern u at t-1
+  uv( 3)=vflux(ia,ja,ka,1)*ff ! northern v at t-1
+  uv( 4)=vflux(ia,jm,ka,1)*ff ! southern v at t-1
+  uv( 7)=uflux(ia,ja,ka,2)*ff ! western u at t
+  uv( 8)=uflux(im,ja,ka,2)*ff ! eastern u at t
+  uv( 9)=vflux(ia,ja,ka,2)*ff ! northern v at t
+  uv(10)=vflux(ia,jm,ka,2)*ff ! southern v at t
 #endif  
 
 !   upr(:,1)=upr(:,2) ! store u' from previous time iteration step (this makes it unstable!)
@@ -93,9 +93,9 @@ amp=Ah/( dtmin**(1./3.) )
      ! === top and bottom of box if not a bottom box
 
 #ifdef full_wflux
-    localW=wflux(ia,ja,ka-1,nsm)
+    localW=wflux(ia,ja,ka-1,1)
 #else
-    localW=wflux(ka-1,nsm)
+    localW=wflux(ka-1,1)
 #endif
     
     if(localW.eq.0.d0) then

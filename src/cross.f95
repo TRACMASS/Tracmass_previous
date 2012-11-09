@@ -23,11 +23,10 @@ subroutine cross(ijk,ia,ja,ka,r0,sp,sn,rr)
   !    sp,sn   : crossing time to reach the grid box wall 
   !              (in units of s/m3)
   
+
 USE mod_param
-USE mod_grid
 USE mod_vel
 USE mod_turb
-USE mod_time
 IMPLICIT none
 
 real*8 r0,ba,sp,sn,uu,um,rr,rg,vv,vm
@@ -35,12 +34,19 @@ integer ijk,ia,ja,ka,ii,im
 
 rg=1.d0-rr
 
+#ifdef mod2 
+uu=rg*u2(ii ,ja,ka,ns)+rr*u2(ii ,ja,ka,nsn)
+um=rg*u2(iim,ja,ka,ns)+rr*u2(iim,ja,ka,nsn)
+stop 2567 ! Kolla på gammal traj.F för OCCAM
+#endif
+
+
 if(ijk.eq.1) then
  ii=ia
  im=ia-1
  if(im.eq.0) im=IMT
- uu=(rg*uflux(ia,ja,ka,nsp)+rr*uflux(ia,ja,ka,nsm))*ff
- um=(rg*uflux(im,ja,ka,nsp)+rr*uflux(im,ja,ka,nsm))*ff
+ uu=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff
+ um=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff
 #ifdef turb   
  if(r0.ne.dble(ii)) then
   uu=uu+upr(1,2)  
@@ -55,8 +61,8 @@ if(ijk.eq.1) then
 #endif
 elseif(ijk.eq.2) then
  ii=ja
- uu=(rg*vflux(ia,ja  ,ka,nsp)+rr*vflux(ia,ja  ,ka,nsm))*ff
- um=(rg*vflux(ia,ja-1,ka,nsp)+rr*vflux(ia,ja-1,ka,nsm))*ff
+ uu=(rg*vflux(ia,ja  ,ka,NST)+rr*vflux(ia,ja  ,ka,1))*ff
+ um=(rg*vflux(ia,ja-1,ka,NST)+rr*vflux(ia,ja-1,ka,1))*ff
 #ifdef turb    
  if(r0.ne.dble(ja  )) then
   uu=uu+upr(3,2)  
@@ -72,11 +78,11 @@ elseif(ijk.eq.2) then
 elseif(ijk.eq.3) then
  ii=ka
 #ifdef full_wflux
- uu=wflux(ia ,ja ,ka   ,nsm)
- um=wflux(ia ,ja ,ka-1 ,nsm)
+ uu=wflux(ia ,ja ,ka   ,1)
+ um=wflux(ia ,ja ,ka-1 ,1)
 #else
- uu=rg*wflux(ka  ,nsp)+rr*wflux(ka  ,nsm)
- um=rg*wflux(ka-1,nsp)+rr*wflux(ka-1,nsm)
+ uu=rg*wflux(ka  ,NST)+rr*wflux(ka  ,1)
+ um=rg*wflux(ka-1,NST)+rr*wflux(ka-1,1)
 #endif
 
 #ifndef twodim   
