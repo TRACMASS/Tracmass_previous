@@ -31,7 +31,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #endif
   
   real*8 rr,rg,uu,um,vv,vm
-  integer ia,iam,ja,ka,k,n
+  integer ia,iam,ja,ka,k,n, n1, n2
   
   rg=1.d0-rr
   wflux=0.d0

@@ -41,6 +41,7 @@ SUBROUTINE init_params
 
 !!----------------------------------------------------------------------------
    
+   INTEGER                                    :: iargc
    INTEGER                                    ::  argint1 ,argint2
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
