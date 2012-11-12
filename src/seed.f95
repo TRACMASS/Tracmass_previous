@@ -27,6 +27,7 @@ MODULE mod_seed
    INTEGER                                    :: nsdTim
    INTEGER                                    :: seedPos, seedTime, seedType
    INTEGER                                    :: seedAll, varSeedFile
+   INTEGER                                    :: loneparticle
    INTEGER                                    :: ist1, ist2, jst1, jst2
    INTEGER                                    :: kst1, kst2, tst1, tst2
    INTEGER                                    :: iist, ijst, ikst, jsd, jst
@@ -266,13 +267,11 @@ CONTAINS
                ntractot = ntractot+1
                ntrac = ntractot
            
-#ifdef select
-               ! Selects only one single trajectory
-               if(ntrac.ne.57562) then 
+               ! Only one particle for diagnistics purposes
+               if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
                   nrj(ntrac,6)=1
                   cycle kkkLoop
                endif
-#endif /*select*/
            
                ! ts - time, fractions of ints
                ! tt - time [s] rel to start
