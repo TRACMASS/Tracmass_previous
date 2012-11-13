@@ -62,7 +62,7 @@ SUBROUTINE setupgrid
 !  dyu(:,jmt) = dyu(:,jmt-1)
   dxv(:imt,:) = 1/dxv(:imt,:)
   dyu(:imt,:) = 1/dyu(:imt,:)
-  dxdy = dyu*dxv
+  dxdy = dyu(:imt,:)*dxv(:imt,:)
 
   
   depth = get2DfieldNC(trim(gridfile), 'h')

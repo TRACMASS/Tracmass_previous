@@ -84,7 +84,7 @@ SUBROUTINE readfields
   where (ssh > 1000)
      ssh = 0
   end where
-  hs(:imt,:jmt,2) = ssh
+  hs(:imt,:jmt,2) = ssh(:imt,:jmt)
 
 
   Cs_w = get1DfieldNC (trim(dataprefix), 'Cs_w')
@@ -103,13 +103,13 @@ SUBROUTINE readfields
 
   do k=1,km
      dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
-     z_r(:,:,k) = ssh + (ssh + depth) * dzt0
+     z_r(:,:,k) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
      dzt0 = (hc*sc_w(k) + depth*Cs_w(k)) / (hc + depth)
-     dzt(:,:,k) = ssh + (ssh + depth) * dzt0
+     dzt(:,:,k) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
   end do
   dzt0 = dzt(:,:,km)
   dzt(:,:,1:km-1)=dzt(:,:,2:km)-dzt(:,:,1:km-1)
-  dzt(:,:,km) = ssh - dzt0
+  dzt(:,:,km) = ssh(:imt,:) - dzt0
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:)*0.5 + dzt(2:imt,:,:)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:)*0.5 + dzt(:,2:jmt,:)*0.5
 
