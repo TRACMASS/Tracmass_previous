@@ -120,8 +120,8 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 1100,		 
-  ist2         = 1200,			  
+  ist1         = 1000,		 
+  ist2         = 1439,			  
   jst1         = 400,		 
   jst2         = 500,		 
   kst1         = 49,		 
@@ -136,7 +136,8 @@
   seedDir      = '/Users/frederic/TRACMASS/orm/projects/CORAL/',
   !
   ! === Seed filename (or beginning of it)
-  seedFile     = 'seed_run.in'/
+  seedFile     = 'seed_run.in',
+  loneparticle = 0/!/809/!28376/
 
 
 
@@ -162,9 +163,9 @@
 $INITRUNEND
 ! defining end sections
 ! testar detta
-  ienw(1) =    1,
-  iene(1) =   -1,
-  jens(1) =    1,
-  jenn(1) =    2,
+  ienw(1) =    0,
+  iene(1) =    0,
+  jens(1) =    0,
+  jenn(1) =    0,
 
   timax =  36500./  ! maximum time length of a trajectory in days

@@ -56,14 +56,14 @@ SUBROUTINE setupgrid
 
   do i=1,imt-1
      do j=1,jmt-1
-        dxtt(i,j) = l2d( lon(i),lon(i+1),lat(j),lat(j) )
-        dytt(i,j) = l2d( lon(i),lon(i),lat(j),lat(j+1) )
+        dxtt(i,j) = l2d( lon(i), lon(i+1), lat(j), lat(j) )
+        dytt(i,j) = l2d( lon(i), lon(i), lat(j), lat(j+1) )
      end do
   end do
 
   do j=1,jmt-1
      dxtt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j) )
-     !dytt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j+1) )
+     dytt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j+1) )
   end do
 
   dxv(1:imt-1,:) = dxtt(1:imt-1,:)/2 + dxtt(2:imt,:)/2
@@ -76,7 +76,15 @@ SUBROUTINE setupgrid
   dz_inv(km) = dz_inv(km-1)
   dz = dz_inv(km:1:-1)
  
-  kmt = 50
+  uvel = get3DfieldNC(trim(inDataDir)//'SALT.1440x720x50.20050812.nc', 'SALT')
+
   mask = 1
+  where (uvel(:,:,1) < 0) mask = 0
+  
+  kmt = 50
+  
+
+
+
 
 end SUBROUTINE setupgrid
