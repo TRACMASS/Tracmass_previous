@@ -1,6 +1,4 @@
-!!------------------------------------------------------------------------------
-!!
-!!
+!!-----------------------------------------------------------------------------
 !!       Subroutine: INIT_SEED 
 !!
 !!          Populates the matrices seed_ijk, seed_xyz, seed_tim, seed_set
@@ -11,11 +9,7 @@
 !!          seed_set   -  isec (how to seed) and idir (direction to seed in)
 !!          seed_tim   -  Time steps to seed at.
 !!
-!!       
-!!       Last change: Joakim Kjellsson, 21 June 2011
-!!
-!!
-!!------------------------------------------------------------------------------
+!!-----------------------------------------------------------------------------
 
 SUBROUTINE init_seed()
   
@@ -29,8 +23,8 @@ SUBROUTINE init_seed()
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:)     :: seedMask
    CHARACTER(LEN=50)                          :: fileStamp
    CHARACTER(LEN=200)                         :: fullSeedFile
-   CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6,i12)", &
-                                               & timform = "(42x      ,i12)"
+   CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6,i12)"
+   CHARACTER(LEN=*), PARAMETER                :: timform = "(42x      ,i12)"
 #if ! defined baltix && ! defined rco
    CHARACTER(LEN=*), PARAMETER                :: ijkform = "(6i6)"
 #else
@@ -60,9 +54,7 @@ SUBROUTINE init_seed()
       
       IF (maxval(kmt) == 0) THEN
          kmt = 1 
-      END IF
-      
-      
+      END IF      
       DO ji=ist1,ist2
          DO jj=jst1,jst2
             IF (mask(ji,jj) .ne. 0) THEN 
@@ -74,10 +66,8 @@ SUBROUTINE init_seed()
             END IF
          END DO
       END DO
-      
+     
       nsdMax = nsd
-      
-      
       PRINT *,'------------------------------------------------------'
       PRINT *,' Particles are seeded using ist, jst, kst             '
       PRINT *,'    ist         : ', ist1,ist2
@@ -131,15 +121,19 @@ SUBROUTINE init_seed()
          SELECT CASE (seedType)
             CASE(1)
                DO jsd = 1,nsdMax
-                  READ (unit=34, fmt=ijkform) seed_ijk(jsd,1), seed_ijk(jsd,2),&
-                  &                           seed_ijk(jsd,3),                 &
-                  &                           seed_set(jsd,1), seed_set(jsd,2)
+                  READ (unit=34, fmt=ijkform) seed_ijk(jsd,1), &
+                                              seed_ijk(jsd,2), &
+                                              seed_ijk(jsd,3), &
+                                              seed_set(jsd,1), & 
+                                              seed_set(jsd,2)
                END DO
             CASE(2)
                DO jsd = 1,nsdMax
-                  READ (unit=34, fmt=xyzform) seed_xyz(jsd,1), seed_xyz(jsd,2),&
-                  &                           seed_xyz(jsd,3),                 &
-                  &                           seed_set(jsd,1), seed_set(jsd,2)
+                  READ (unit=34, fmt=xyzform) seed_xyz(jsd,1), &
+                                              seed_xyz(jsd,2), &
+                                              seed_xyz(jsd,3), &
+                                              seed_set(jsd,1), &
+                                              seed_set(jsd,2)
                END DO
                seed_ijk(:,:) = INT (seed_xyz(:,:)) + 1
          END SELECT

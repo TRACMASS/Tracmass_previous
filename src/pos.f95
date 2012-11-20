@@ -36,7 +36,6 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
   endif
 #endif
   
-  
   if(ijk.eq.1) then
      ii=ia
      im=ia-1
@@ -47,7 +46,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
      if(r0.ne.dble(ii)) then
         uu=uu+upr(1,2)  
      else
-        uu=uu+upr(1,1)  
+        uu=uu+upr(1,1)
         ! add u' from previous iterative time step if on box wall
      endif
      if(r0.ne.dble(im)) then
@@ -57,6 +56,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
+
   elseif(ijk.eq.2) then
      ii=ja
      uu=(rg*vflux(ia,ja  ,ka,nsp)+rr*vflux(ia,ja  ,ka,nsm))*ff
@@ -76,19 +76,16 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
      endif
 #endif
   elseif(ijk.eq.3) then
-     ii=ka
+     ii = ka
 #ifdef full_wflux
-     uu=wflux(ia ,ja ,ka   ,nsm)
-     um=wflux(ia ,ja ,ka-1 ,nsm)
-     !uu=wflux(ia ,ja ,ka   ,1)
-     !um=wflux(ia ,ja ,ka-1 ,1)
-     uu=rg*wflux(ia ,ja, ka  ,NST)+rr*wflux(ia, ja, ka  ,1)
-     um=rg*wflux(ia, ja, ka-1,NST)+rr*wflux(ia, ja, ka-1,1)
+     uu = wflux(ia ,ja ,ka   ,nsm)
+     um = wflux(ia ,ja ,ka-1 ,nsm)
+     uu = rg * wflux(ia ,ja, ka  ,NST) + rr * wflux(ia, ja, ka  ,1)
+     um = rg * wflux(ia, ja, ka-1,NST) + rr * wflux(ia, ja, ka-1,1)
 #else
-     uu=rg*wflux(ka  ,nsp)+rr*wflux(ka  ,nsm)
-     um=rg*wflux(ka-1,nsp)+rr*wflux(ka-1,nsm)
+     uu = rg * wflux(ka  ,nsp) + rr * wflux(ka  ,nsm)
+     um = rg * wflux(ka-1,nsp) + rr * wflux(ka-1,nsm)
 #endif
-#ifndef twodim   
 #ifdef turb    
      if(r0.ne.dble(ka  )) then
         uu=uu+upr(5,2)  
@@ -103,19 +100,18 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
-#endif
   endif
-  
+
   !
   ! note: consider in future to improve the code below for accuracy 
   ! in case of um-uu = small; also see subroutine cross
   if(um.ne.uu) then
-     r1= (r0+(-dble(ii-1) + um/(uu-um))) * dexp( (uu-um)*ds ) + dble(ii-1) - um/(uu-um)
+     r1= (r0+(-dble(ii-1) + um/(uu-um))) * & 
+          dexp( (uu-um)*ds ) + dble(ii-1) - um/(uu-um)
   else
      r1=r0+uu*ds
   endif
-  !if(abs(um/(uu-um)).gt.1.d10) print *,'possible precision problem?',um/(uu-um),uu,um,ijk,ia,ja,ka,r0,r1,ds,rr
-  
+  !if(abs(um/(uu-um)).gt.1.d10) print *,'possible precision problem?',um/(uu-um),uu,um,ijk,ia,ja,ka,r0,r1,ds,rr  
   return
 #endif
 end subroutine pos_orgn
