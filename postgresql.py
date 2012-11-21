@@ -215,7 +215,7 @@ class DB(object):
         """ Retrive trajectories from database """
         if not jd: jd = ints
         whstr = ""
-        if runid != 0: whstr += " runid = %i AND" % intstart
+        if runid != 0: whstr += " runid = %i AND" % runid
         if ints != 0:  whstr += " ints = %i AND" % ints
         if ntrac != 0: whstr += " ntrac = %i " % ntrac
         whstr = whstr.rstrip("AND")

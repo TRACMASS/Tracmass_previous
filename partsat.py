@@ -11,19 +11,21 @@ from matplotlib.colors import LogNorm
 
 from hitta import GBRY
 import projmaps, anim
-from trm import trm
+import trm, postgresql
 import batch
 
 miv = np.ma.masked_invalid
 
-class Partsat(trm):
+class Partsat(trm.Trm, postgresql.DB):
 
     def __init__(self,projname,casename="", datadir="",
                  datafile="", ormdir="", griddir='/projData/GOMPOM/'):
-        trm.__init__(self,projname,casename,datadir,datafile,ormdir)
+        super(Partsat,self).__init__(projname,casename,datadir,datafile,ormdir)
+        postgresql.DB.__init__(self, projname,casename,database='partsat')
+
         self.flddict = {'par':('L3',),'chl':('box8',)}
         if projname == 'oscar':
-            import pysea.NASA
+            import pysea.MODIS
             self.sat = pysea.NASA.nasa(res='4km',
                                        ijarea=(700,1700,2000,4000))
             def calc_jd(ints,intstart):
@@ -46,7 +48,7 @@ class Partsat(trm):
             import mati
             self.sat = mati.Cal()
 
-    def sat_trajs(self,intstart,field,pos='start'):
+    def sat_trajs(self,jd,field,pos='start'):
         """Retrive x-y pos and start-end values for trajs""" 
         if pos == 'start':
             t1str = " AND t.ints=t1.ints "; t2str = ""
@@ -54,7 +56,7 @@ class Partsat(trm):
             t2str = " AND t.ints=t2.ints "; t1str = ""
         table = self.tablename + '__' + field
         self.c.execute(
-            "SELECT DISTINCT(ints) FROM %s WHERE intstart=%i" %
+            "SELECT DISTINCT(ints) FROM %s WHERE runid=%i" %
             (table,intstart) )
         ints_t1t2 = self.c.fetchall()
         if len(ints_t1t2) < 2:
@@ -83,7 +85,8 @@ class Partsat(trm):
 
     def sat_conc(self,intstart,field,pos='start'):
         """Retrive fields of start- and end-values""" 
-        jdS = self.field_jds(field)
+        if not hasattr(self, jdS):
+            jdS = self.field_jds(field)
         if intstart in jdS.t0:
             if pos == 'start':
                 ints = jdS.t1[jdS.t0==intstart].item()
@@ -107,27 +110,29 @@ class Partsat(trm):
         fld[np.array(y).astype(int),np.array(x).astype(int)-1] = val
         return fld
 
-    def trajs(self,intstart=0, ints=0, ntrac=0,fld=''):
+    def trajs(self,jdstart=0, jd=0, ntrac=0, fld=''):
         """ Retrive trajectories from database """
         whstr = ""
-        if intstart != 0:
-            whstr += " t.intstart = %i AND" % intstart
-        if ints != 0:
-            whstr += " t.ints = %i AND" % ints
+        if jd != 0:
+            pass
+            #whstr += " t.runid = %i AND" % runid
+        if jd != 0:
+            whstr += " t.ints = %i AND" % jd
         if ntrac != 0:
             whstr += " t.ntrac = %i " % ntrac
         whstr = whstr.rstrip("AND")
         if fld:
             valstr = " ,n.val val "
-            table2 = self.tablename + fld
-            valwhere = " AND n.ints=%s " % ints
+            table2 = self.tablename + "__" + fld
+            valwhere = " AND n.ints=%s " % jd
             valjoin = (" INNER JOIN %s n ON " % table2 +
-                       " t.intstart=n.intstart AND t.ntrac=n.ntrac ")
+                       " t.runid=n.runid AND t.ntrac=n.ntrac ")
         else:
-            valstr = " ,t.intstart val "
+            valstr = " ,t.runid val "
             table2 = valwhere = valjoin = ''
-        sql = ("SELECT t.ints ints, t.ntrac ntrac, t.x x, t.y y %s FROM %s t %s WHERE %s %s "
-               % (valstr, self.tablename, valjoin, whstr, valwhere) )
+        sql = ("""SELECT t.ints ints, t.ntrac ntrac, t.x x, t.y y
+                 %s FROM %s t %s WHERE %s %s """
+            % (valstr, self.tablename, valjoin, whstr, valwhere) )
         n = self.c.execute(sql)
         res = zip(*self.c.fetchall())
         if len(res) > 0:
@@ -135,8 +140,10 @@ class Partsat(trm):
                    self.__dict__[a] = np.array(res[n])
         #self.ijll()
   
-    def load_sat(self,field,ints=0,intstart=0,jd=0):
-        """ Load satellite field for a given jd or ints"""
+    def get_satdata(self,field, jd=0):
+        """ Load the satellite field corresponding to a given jd.
+            Generate a vector with satellite data at all particle
+            positions currently in memory """
         self.sat.load(field,jd=jd)
         self.ijll()
         self.sati,self.satj = self.sat.ll2ij(self.lon,self.lat)
@@ -156,7 +163,7 @@ class Partsat(trm):
         def insertload(jd):
             self.select(ints=jd)
             if not hasattr(self,'x'): return
-            self.load_sat(field,jd=jd)
+            self.get_satdata(field,jd=jd)
             mask = ~np.isnan(self.__dict__[field])
             plist = zip(self.runid[mask], self.ints[mask], self.ntrac[mask],
                         self.__dict__[field][mask])
@@ -174,10 +181,10 @@ class Partsat(trm):
                 batch.purge()
 
     def field_jds(self,field):
-        table = self.tablename + field
+        table = self.tablename + '__' + field
         class ints: pass
-        self.c.execute("SELECT intstart, min(ints), max(ints)" +
-                       "FROM %s GROUP BY intstart" % table)
+        self.c.execute("SELECT runid, min(ints), max(ints) " +
+                       "FROM %s GROUP BY runid" % table)
         res = zip(*self.c.fetchall())
         if len(res) > 0:
             for n,a in enumerate(['t0','t1','t2']):
@@ -219,7 +226,7 @@ class Partsat(trm):
 
 
 class DeltaField(Partsat):
-    """ Calculate the change in tracer from one day to another """
+    """ Calculate change in tracer from one day to another """
     def __init__(self,projname,casename="", datadir="",
                  datafile="", ormdir="", griddir='/projData/GOMPOM/'):
         Partsat.__init__(self,projname,casename,datadir,datafile,ormdir)
@@ -233,21 +240,24 @@ class DeltaField(Partsat):
                     INNER JOIN %s t ON c.runid=t.runid AND c.ntrac=t.ntrac
                   WHERE c.ints > %i AND  c.ints <= %i AND
                           c2.ints > %i AND c2.ints < %i AND t.ints=%i;"""
+        #print (sql % (self.tablename, field, self.tablename, field,
+        #                      self.tablename, jd-10, jd, jd, jd+10, jd))
         self.c.execute(sql % (self.tablename, field, self.tablename, field,
                               self.tablename, jd-10, jd, jd, jd+10, jd))
         res = zip(*self.c.fetchall())
         if len(res)==0: return False
         for n,a in enumerate(['dt', 'val1', 'val2', 'x', 'y']):
             self.__dict__[a] = np.array(res[n])
+        self.diff = (self.val2-self.val1)/self.dt
         return True
     
-    def map(self, field="chl",jd=734107):
+    def map2grid(self, field="chl",jd=734107):
         """ Create map of average change in tracer """
         success = self.select(field=field, jd=jd)
         if not success:
              self.dfld = self.llat * np.nan
              return
-        dfld = self.map((self.val2-self.val1)/self.dt)
+        dfld = self.map(self.diff)
         dcnt = self.map()
         self.dfld = dfld/dcnt
 
@@ -274,6 +284,68 @@ class DeltaField(Partsat):
             print "Delta time: ", dtm.now() - t1
         mv.video(self.projname + "_" + field + "_mov.mp4",r=2)
 
+    def histmoeller(self,fldname):
+        """Create a hofmoeller representation of diff distributions"""
+        sql = "SELECT min(ints),max(ints) FROM jplnowfull;"
+        self.c.execute(sql)
+        [jdmin,jdmax] = self.c.fetchall()[0]
+        jdvec = np.arange(jdmin,jdmax)
+        #hpos = np.linspace(np.log(0.001),np.log(100),100)
+        self.hpos = np.linspace(0, 100, 100)
+        self.posmat = np.zeros((len(jdvec), len(self.hpos)-1))
+        self.negmat = np.zeros((len(jdvec), len(self.hpos)-1))
+        for n,jd in enumerate(jdvec[:25]):
+            if not self.select(fldname,jd=jd): continue
+            diff = (self.val2-self.val1)/self.dt
+            self.negmat[n,:],_ = np.histogram(-diff[diff<0], self.hpos)
+            self.posmat[n,:],_ = np.histogram(diff[diff>0], self.hpos)
+            print n,jd,len(-diff[diff<0]),len(diff[diff>0])
+
+    def cumcum_moeller(self,fldname):
+        """Create a cumcum representation of diff distributions"""
+        sql = "SELECT min(ints),max(ints) FROM jplnowfull;"
+        self.c.execute(sql)
+        [jdmin,jdmax] = self.c.fetchall()[0]
+        jdvec = np.arange(jdmin,jdmax)
+        self.poscum = np.zeros((len(jdvec), 100))
+        self.negcum = np.zeros((len(jdvec), 100))
+        self.pavglog =[]
+        self.pavglin =[]
+        self.navglog =[]
+        self.navglin =[]
+   
+        for n,jd in enumerate(jdvec):
+            if not self.select(fldname,jd=jd): continue
+            _,self.negcum[n,:] = self.cumcum(-self.diff[self.diff<0])
+            _,self.poscum[n,:] = self.cumcum(self.diff[self.diff>0])
+            print n,jd,len(self.diff)
+            self.pavglog.append(np.mean(np.log(self.diff[self.diff>0])))
+            self.pavglin.append(np.mean(self.diff[self.diff>0]))
+            self.navglog.append(np.mean(np.log(-self.diff[self.diff<0])))
+            self.navglin.append(np.mean(-self.diff[self.diff<0]))
+
+
+
+    def cumcum(self, vec):
+        """Create a interpolated 'hypsograph' from a vector"""
+        xi = np.linspace(0,1,100)
+        xvec = np.arange(len(vec)).astype(np.float)/len(vec)
+        yvec = np.cumsum(np.sort(vec).astype(np.float)/sum(vec))
+        yi = np.interp(xi, xvec, yvec)
+        return xi,yi
+
+    def cumcumplot(self, fldname, jd=734107):
+        """Plot a 'hypsograph of the relative distribution of diffs"""
+        self.select(fldname, jd=jd)
+        pl.clf()
+        pl.plot(*self.hypso(abs(np.random.rand(500000))))
+        pl.plot(*self.hypso(abs(np.random.randn(500000))))
+        pl.plot(*self.hypso(-diff[diff<0]))
+        pl.plot(*self.hypso(diff[diff>0])) 
+        pl.xlim(0,1)
+        pl.ylim(0,1)
+        pl.legend(('Random values, symetrical', 'Random values, gaussian',
+                   'Trajs, increasing values','Trajs, decreasing values'))
 
 
 #####################################################################

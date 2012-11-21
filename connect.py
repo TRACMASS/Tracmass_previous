@@ -3,6 +3,7 @@ import datetime
 import glob
 from datetime import datetime as dtm
 from itertools import izip
+import csv
 
 import numpy as np
 import pylab as pl
@@ -13,18 +14,33 @@ import matplotlib.cm as cm
 
 from hitta import GBRY
 import projmaps, anim
-from trm import trm
+import trm
 import batch
 import figpref
 import mycolor
 
 miv = np.ma.masked_invalid
 
-class Matrix(Trm):
+class Matrix(trm.Trm):
+    """ Class to handle connectivity matrices from trajectories
 
+    This class generates connectivity matrices from defined regions
+    using the output from TRACMASS. The reagions are by default discs
+    with a prescribed radius. The discs are packed in a semi-optimal
+    fasion withing the part of the grid defined by self.mask.
+
+    Example to calculate a connectivity matrix for a give jd and dt:
+
+    cn = connect.Matrix('rutgersNWA','rutgersNWA')
+    cn.load(jdstart=730120)
+    cn.calc_conmat()
+    """
+
+    
     def __init__(self,projname,casename="", datadir="", datafile="",
                  ormdir="", griddir="",radius=2):
-        trm.__init__(self,projname,casename,datadir,datafile,ormdir)
+        super(Matrix,self).__init__(projname, casename,
+                                    datadir, datafile, ormdir)
         self.radius = radius
         self.add_default_regmask()
                 
@@ -74,57 +90,34 @@ class Matrix(Trm):
         self.discKD = cKDTree(list(np.vstack((np.ravel(self.disci),
                                               np.ravel(self.discj))).T))
         self.nreg = self.discn.max()+1
-
-    def conmat_from_regmat(self,jd=None,dt=20):
-        """Create connectivity matrix using a regions matrix."""
-        if not jd: jd = self.jd.min()
-        tmask1 = self.jd == jd
-        tmask2 = self.jd == jd + dt
-        ntracmax = max(self.ntrac[tmask1].max(), self.ntrac[tmask2].max())
-        convec = np.zeros((2, ntracmax+1))
-
-        self.reg = self.regmat[self.y.astype(int),self.x.astype(int)]
-        convec[0,self.ntrac[tmask1]] = self.reg[tmask1]
-        convec[1,self.ntrac[tmask2]] = self.reg[tmask2]
-        convec = convec.astype(np.int)
-
-        weights = np.ones(convec.shape[1])
-        flat_coord = np.ravel_multi_index(convec, (self.nreg, self.nreg))
-        sums = np.bincount(flat_coord, weights)
-        self.conmat = np.zeros((self.nreg,self.nreg))
-        self.conmat.flat[:len(sums)] = sums
-        
-
-
-    @trajsloaded
-    def reg_from_discs(self,mask=False):
+    @trm.Traj.trajsloaded
+    def regvec_from_discs(self,mask=False):
         """Generate a vector with region IDs"""
         if not mask:
             self.add_default_regmask()
             mask = self.mask
         self.generate_regdiscs(mask)
-        dist,ij = self.discKD.query(list(np.vstack(
-            (self.x,self.y)).T),1)
-        ij[dist>self.radius]=0
+        dist,ij = self.discKD.query(list(np.vstack((self.x,self.y)).T), 1)
         self.reg = self.discn[ij]
-        
-    @trajsloaded
+        self.reg[dist>self.radius] = 0
+
+    @trm.Traj.trajsloaded
     def calc_conmat(self,jd=None,dt=20):
         """Create connectivity matrix using a regions matrix."""
         if not jd: jd = self.jd.min()
+        if not hasattr(self,'reg'):
+             self.regvec_from_discs()
         tmask1 = self.jd == jd
         tmask2 = self.jd == jd + dt
-        ntracmax = max(self.ntrac[tmask1].max(),
-                       self.ntrac[tmask2].max())
+        ntracmax = max(self.ntrac[tmask1].max(), self.ntrac[tmask2].max())
 
         convec = np.zeros((2, ntracmax+1))
         convec[0,self.ntrac[tmask1]] = self.reg[tmask1]
         convec[1,self.ntrac[tmask2]] = self.reg[tmask2]
         convec = convec.astype(np.int)
 
-        weights = np.ones(convec.shape[1])
         flat_coord = np.ravel_multi_index(convec, (self.nreg, self.nreg))
-        sums = np.bincount(flat_coord, weights)
+        sums = np.bincount(flat_coord, minlength=self.nreg*self.nreg)
         self.conmat = np.zeros((self.nreg,self.nreg))
         self.conmat.flat[:len(sums)] = sums
 
@@ -154,7 +147,7 @@ class Matrix(Trm):
         conmat[conmat==0] = np.nan
         return conmat
 
-
+    @trm.Traj.trajsloaded
     def multiplot(self,jd1=730120.0, djd=60, dt=20):
 
         if not hasattr(self,'disci'):
@@ -292,13 +285,29 @@ def rsquared(dt, jd=0):
     return linregress(ravel(imat)[mask], ravel(jmat)[mask])[2]        
     
 def all_conmats(mask,jd1=730120.0,jd2=730360.0, djd=5):
-    """Generate  nonmats for all trm runs and dt's"""
+    """Generate connectivity matrices for all trm runs and dt's"""
     co = Matrix('rutgersNWA')
     for jd in np.arange(jd1,jd2,djd):
         co.load(jd)
-        co.reg_from_discs(mask)
+        co.regvec_from_discs(mask)
         for dt in np.arange(1,120):
             co.calc_conmat(dt=dt)
             np.load('conmatfiles/conmat_%04i_%04i.npz' % (jd-jd1,dt),
                      conmat=co.conmat)
             print jd-jd1,dt
+
+
+def npz_to_csv(datadir):
+    """Convert conmat npz files to csv"""
+    
+    files = glob.glob(datadir + '/conmat*.npz')
+    for fname in files:
+        print fname
+        conmat = np.load(fname)['conmat']
+        fH = open (fname[:-3] + "csv", 'w')
+        csw = csv.writer(fH)
+        for row in conmat:
+            csw.writerow(row)
+        fH.close()
+    
+
