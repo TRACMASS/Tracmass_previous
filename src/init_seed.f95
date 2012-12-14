@@ -70,10 +70,10 @@ SUBROUTINE init_seed()
       nsdMax = nsd
       PRINT *,'------------------------------------------------------'
       PRINT *,' Particles are seeded using ist, jst, kst             '
-      PRINT *,'    ist         : ', ist1,ist2
-      PRINT *,'    jst         : ', jst1,jst2
-      PRINT *,'    kst         : ', kst1,kst2
-      PRINT *,'    Seed size   : ', nsdMax
+      PRINT *,'    ist          : ', ist1,ist2
+      PRINT *,'    jst          : ', jst1,jst2
+      PRINT *,'    kst          : ', kst1,kst2
+      PRINT *,'    Cells seeded : ', nsdMax
   
    
    CASE (2)      ! Seed particles according to indices given in a list
@@ -85,7 +85,7 @@ SUBROUTINE init_seed()
          fullSeedFile=trim(seedDir) // trim(fileStamp)
          PRINT *,' Particles are seeded from a dynamic listfile '
       ELSE
-         fullSeedFile=trim(seedFile)        
+         fullSeedFile=trim(seedDir) // trim(seedFile)        
          PRINT *,' Particles are seeded from a given listfile  '
       END IF
       
@@ -141,11 +141,11 @@ SUBROUTINE init_seed()
          CLOSE (34)
          
          PRINT *,'File name    : '//trim(fullSeedFile)
-         PRINT *,'Seed size    : ', nsdMax
+         PRINT *,'Cells seeded : ', nsdMax      
       ELSE
          PRINT *,'------------------------------------------------------'
          PRINT *,'*** ERROR!                                         ***'
-         PRINT *,'*** Seed files does not exisit                     ***' 
+         PRINT *,'*** Seed files does not exist                      ***' 
          PRINT *,'File name    : '//trim(fullSeedFile)
          PRINT *,'*** Run terminated.                                ***'
          STOP
