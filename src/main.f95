@@ -97,7 +97,8 @@ PROGRAM main
   ! === Start main loop ===
   
   call loop
-  
+  return
+
 CONTAINS
   
   subroutine writesetup

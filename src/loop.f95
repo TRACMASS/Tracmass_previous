@@ -198,7 +198,6 @@ SUBROUTINE loop
         
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
-        
         x1     =  trj(ntrac,1)
         y1     =  trj(ntrac,2)
         z1     =  trj(ntrac,3)
@@ -299,14 +298,14 @@ SUBROUTINE loop
               x1 = x1 - DBLE(IMT)
            END IF
            
-           x0=x1
-           y0=y1
-           z0=z1
-           ia=ib
-           iam=ia-1
-           if(iam == 0)iam=IMT
-           ja=jb
-           ka=kb
+           x0  = x1
+           y0  = y1
+           z0  = z1
+           ia  = ib
+           iam = ia-1
+           if(iam == 0) iam = IMT
+           ja  = jb
+           ka  = kb
 
            call calc_dxyz
            call errorCheck('dxyzError'     ,errCode)
@@ -356,12 +355,9 @@ SUBROUTINE loop
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
            ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
-           !if(ds == UNDEF .or.ds == 0.d0)then 
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-
            call calc_time
-           
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
@@ -375,19 +371,19 @@ SUBROUTINE loop
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
  !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
            elseif(y1 > dble(JMT-1)) then
-            print *,'north of northfold for ntrac=',ntrac
-            print *,ia,ib,x0,x1
-            print *,ja,jb,y0,y1
-            print *,ka,kb,z0,z1
-            print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-            nerror=nerror+1
-            nrj(ntrac,6)=1
-            cycle ntracLoop
-!            stop 4967
+              print *,'north of northfold for ntrac=',ntrac
+              print *,ia,ib,x0,x1
+              print *,ja,jb,y0,y1
+              print *,ka,kb,z0,z1
+              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+              nerror=nerror+1
+              nrj(ntrac,6)=1
+              cycle ntracLoop
+              !stop 4967
            endif
 #elif defined orca025 || orca025L75
-            if( y1 == dble(JMT-1) ) then
-!              print *,'North fold for',ntrac
+           if( y1 == dble(JMT-1) ) then
+ !              print *,'North fold for',ntrac
               x1 = dble(IMT+3) - x1
               y1 = dble(JMT-2)
               ib=idint(x1)
@@ -407,7 +403,6 @@ SUBROUTINE loop
            if(x1 <  0.d0    ) x1=x1+dble(IMT)       
            if(x1 > dble(IMT)) x1=x1-dble(IMT)   
            IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-!            print *,'vavava',ntrac,niter,ib,x1,jb,y1,kb,z1
             x1 = x1 - DBLE(IMT)
            endif    
            if(ib > IMT      ) ib=ib-IMT 
@@ -435,8 +430,7 @@ SUBROUTINE loop
 #if defined diffusion     
            call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
-           ! === end trajectory if outside chosen domain ===
-    
+           ! === end trajectory if outside chosen domain === 
            LBTloop: do k=1,LBT
               if(dble(ienw(k)) <= x1 .and. x1 <= dble(iene(k)) .and. &
                  dble(jens(k)) <= y1 .and. y1 <= dble(jenn(k))  ) then
@@ -444,10 +438,7 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
-
-!#ifndef tes
-           if (x1 < 1) exit niterloop
-!#endif
+           if (x1 < 0) exit niterloop
 
            
 #if defined tempsalt
@@ -468,7 +459,6 @@ SUBROUTINE loop
               nexit(NEND)=nexit(NEND)+1
               exit niterLoop
            endif
-           
         end do niterLoop
 
         nout=nout+1
@@ -572,18 +562,18 @@ return
        select case (trim(teststr))
        case ('ntracGTntracmax')
           if(ntrac.gt.ntracmax) then
-             print *,'====================================='
+             print *, thickline !========================================
              print *,'ERROR: to many trajectories,'
-             print *,'-------------------------------------'             
+             print *, thinline !-----------------------------------------
              print *,'increase ntracmax since'
              print *,'ntrac >',ntrac
              print *,'when ints=',ints,' and ' 
              print *,'intspin=',intspin
              print *,',(intspin-ints)/ints*ntrac='
              print *,(intspin-ints)/ints*ntrac
-             print *,'-------------------------------------'
+             print *, thinline !-----------------------------------------
              print *,'The run is terminated'
-             print *,'====================================='
+             print *, thickline !========================================
              errCode = -38
              stop
           endif
@@ -591,9 +581,9 @@ return
        case ('dxyzError')
           if(dxyz == 0.d0) then
              if (verbose == 1) then                 
-                print *,'====================================='
+                print *, thickline !========================================
                 print *,'ERROR: dxyz is zero'
-                print *,'-------------------------------------'
+                print *, thinline !-----------------------------------------
                 print *,'ntrac=',ntrac,' ints=', ints
                 print *,'ib=',ib,'jb=',jb,'kb=',kb
                 print *,'kmt=',kmt(ib,jb)
@@ -602,9 +592,9 @@ return
 !                print *,'dztb=',dztb(ib,jb,1)
 !                print *,'rg*hs=',rg,hs(ib,jb,nsp)
 !                print *,'rr*hs=',rr,hs(ib,jb,nsm)
-                print *,'-------------------------------------'
+                print *, thinline !-----------------------------------------
                 print *,'The trajectory is killed'
-                print *,'====================================='
+                print *, thickline !========================================
              end if
              nerror=nerror+1
              errCode = -39
@@ -617,17 +607,17 @@ return
           if(ia>imt .or. ib>imt .or. ja>jmt .or. jb>jmt &
                .or. ia<1 .or. ib<1 .or. ja<1 .or. jb<1) then
              if (verbose == 1) then
-                print *,'====================================='
+                print *, thickline !========================================
                 print *,'Warning: Trajectory leaving model area'
-                print *,'-------------------------------------'
+                print *, thinline !-----------------------------------------
                 print *,'iaib',ia,ib,ja,jb,ka,kb
                 print *,'xyz',x0,x1,y0,y1,z0,z1
                 call print_ds
                 print *,'tt=',tt,ts
                 print *,'ntrac=',ntrac
-                print *,'-------------------------------------'
+                print *, thinline !-----------------------------------------
                 print *,'The trajectory is killed'
-                print *,'====================================='
+                print *, thickline !========================================
              end if
              call writedata(19)
              nerror=nerror+1
@@ -641,9 +631,9 @@ return
        case ('landError')
           if(kmt(ib,jb) == 0) then
              if (verbose == 1) then
-                print *,'====================================='
+                print *, thickline !========================================
                 print *,'Warning: Trajectory on land'
-                print *,'-------------------------------------'
+                print *, thinline !-----------------------------------------
                 print *,'land',ia,ib,ja,jb,ka,kb,kmt(ia,ja)
                 print *,'xyz',x0,x1,y0,y1,z0,z1
                 call print_ds
@@ -655,9 +645,9 @@ return
 #ifdef turb
                 print *,'upr=',upr
 #endif
-                print *,'-------------------------------------'
+                print *, thinline !-----------------------------------------
                 print *,'The trajectory is killed'
-                print *,'====================================='
+                print *, thickline !========================================
              end if
              nerror=nerror+1
              landError = landError +1
@@ -670,40 +660,40 @@ return
           ! ===  Check that coordinates belongs to   ===
           ! ===  correct box. Valuable for debugging ===
           if( dble(ib-1).gt.x1 .or. dble(ib).lt.x1 )  then
-             print *,'========================================'
+             print *, thickline !========================================
              print *,'ERROR: Particle overshoot in i direction'
-             print *,'----------------------------------------'
+             print *, thinline !-----------------------------------------
              print *,ib-1,x1,ib,ntrac,ib,jb,kb
              x1=dble(ib-1)+0.5d0
              ib=idint(x1)+1
              print *,'error i',ib-1,x1,ib,ntrac,ib,jb,kb
              print *,y1,z1
-             print *,'-------------------------------------'
+             print *, thinline !-----------------------------------------
              print *,'The run is terminated'
-             print *,'====================================='             
+             print *, thickline !========================================
              errCode = -42
              stop
           elseif( dble(jb-1).gt.y1 .or. dble(jb).lt.y1 )  then
-             print *,'========================================'
+             print *, thickline !========================================
              print *,'ERROR: Particle overshoot in j direction'
-             print *,'----------------------------------------'
+             print *, thinline !-----------------------------------------
              print *,'error j',jb-1,y1,jb,ntrac,x1,z1
              print *,'error j',jb-1,y1,jb,ntrac,ib,jb,kb
-             print *,'-------------------------------------'
+             print *, thinline !-----------------------------------------
              print *,'The run is terminated'
-             print *,'====================================='    
+             print *, thickline !========================================
              errCode = -44
              stop
           elseif((dble(kb-1).gt.z1.and.kb.ne.KM).or. & 
                dble(kb).lt.z1 ) then
-             print *,'========================================'
+             print *, thickline !========================================
              print *,'ERROR: Particle overshoot in k direction'
-             print *,'----------------------------------------'
+             print *, thinline !-----------------------------------------
              print *,'error k',kb-1,z1,kb,ntrac,x1,y1
              print *,'error k',kb-1,z1,kb,ntrac,ib,jb,kb
-             print *,'-------------------------------------'
+             print *, thinline !-----------------------------------------
              print *,'The run is terminated'
-             print *,'====================================='
+             print *, thickline !========================================
              errCode = -46
              stop
           end if
@@ -712,7 +702,7 @@ return
              nloop=nloop+1             
 !             nerror=nerror+1
              if (verbose == 1) then
-                print *,'====================================='
+                print *, thickline !========================================
                 print *,'Warning: Particle in infinite loop '
                 print *,'ntrac:',ntrac
                 print *,'niter:',niter,'nrj:',nrj(ntrac,4)
@@ -730,7 +720,7 @@ return
                      rb*vflux(ia,ja  ,ka,nsm))*ff
                 print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,nsp) + & 
                      rb*vflux(ia,ja-1,ka,nsm))*ff
-                print *,'-------------------------------------'
+                print *, thinline !-----------------------------------------
              end if
              trj(ntrac,1)=x1
              trj(ntrac,2)=y1
@@ -814,7 +804,7 @@ return
               if (verbose == 0) then
                  print *, " "
                  print *, " "
-                 print *,'==================================================='
+                 print *, thickline !========================================
                  print *,'Warning: not find any path for unknown reason '
                  print *, " "
                  write (*,'(A, E9.3, A, E9.3)'), ' uflux= ', &
@@ -833,9 +823,9 @@ return
                  write (*,'(A7, I10, A7, I10, A7, I10)'), & 
                       ' k_inv= ', KM+1-kmt(ia,ja), ' kmt= ', kmt(ia,ja), &
                       'lnd= ', mask(ia,ja)
-                 print *,'---------------------------------------------------'
-                print *,'The trajectory is killed'
-                print *,'==================================================='
+                 print *, thinline !-----------------------------------------
+                 print *,'The trajectory is killed'
+                 print *, thickline !========================================
               end if
               nerror=nerror+1
               nrj(ntrac,6)=1
@@ -896,7 +886,7 @@ return
        print *,'=========================================================='
        print *,'ERROR: Negative box volume                                '
        print *,'----------------------------------------------------------'
-       print *,'dzt  = ', dxyz/dxdy(ib,jb),dz(kb),hs(ib,jb,:)
+       print *,'dzt  = ', dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
        print *,'dxdy = ', dxdy(ib,jb)
        print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
        print *,'----------------------------------------------------------'
@@ -929,13 +919,13 @@ return
            if(ds == dsmin) then ! transform ds to dt in seconds
 !            dt=dt  ! this makes dt more accurate
            else
-            dt=ds*dxyz 
+            dt = ds * dxyz 
            endif
 #else
            if(ds == dsmin) then ! transform ds to dt in seconds
               dt=dtmin  ! this makes dt more accurate
            else
-              dt=ds*dxyz 
+              dt = ds * dxyz 
            endif
 #endif /*regulardt*/
            if(dt.lt.0.d0) then
@@ -943,7 +933,7 @@ return
               stop 4968
            endif
            ! === if time step makes the integration ===
-           ! === exceed the time when fiedls change ===
+           ! === exceed the time when fields change ===
            if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
               dt=dble(idint(ts)+1)*tseas-tt
               tt=dble(idint(ts)+1)*tseas
