@@ -216,7 +216,7 @@ MODULE mod_grid
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
   CHARACTER(LEN=200)                        :: SubGridFile 
-  INTEGER                                   :: degrade_time=0, degrade_space=0
+  INTEGER                                   :: degrade_space=0
 
 #ifdef ifs
   REAL*8, PARAMETER                         :: R_d = 287.05d0
@@ -297,25 +297,27 @@ MODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 CONTAINS
-  
+ 
   subroutine datasetswap
 
+    USE  mod_grid
     IMPLICIT NONE
 
     integer, save                              :: degrade_counter = -1
 
     if (degrade_counter < 1) then
-    hs(:,:,nsm)      = hs(:,:,nsp)
-    uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
-    vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
+       hs(:,:,nsm)      = hs(:,:,nsp)
+       uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
+       vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
 #if defined explicit_w || full_wflux
-    wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
+       wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
 #endif
 #ifdef tempsalt
-    tem(:,:,:,nsm)   = tem(:,:,:,nsp)
-    sal(:,:,:,nsm)   = sal(:,:,:,nsp)
-    rho(:,:,:,nsm)   = rho(:,:,:,nsp)
+       tem(:,:,:,nsm)   = tem(:,:,:,nsp)
+       sal(:,:,:,nsm)   = sal(:,:,:,nsp)
+       rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
+    end if
   end subroutine datasetswap
 
 #if defined full_wflux

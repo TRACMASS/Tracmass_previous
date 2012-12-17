@@ -41,7 +41,7 @@ SUBROUTINE setupgrid
 
 
 ! === Template for setting up grids. Move the code from readfile.f95
-  allocate ( mask(imt,jmt), depth(imt,jmt) )
+  allocate ( depth(imt,jmt) )
 
   start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
   !Order is   t  k  i  j 
