@@ -53,7 +53,7 @@
   !                 1 = output in long/lat coordinates
   ncoor        = 0,      
   !
-  twritetype = 0,
+  twritetype = 1,
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets
   !                 2 = write each grid-crossing and time change
@@ -107,23 +107,23 @@
   nqua        = 1, 
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant= 3,     
+  partQuant= 6,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 1,
+  SeedType = 2,
   SeedPos = 1,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1         = 1000,		 
+  ist1         = 1100,		 
   ist2         = 1439,			  
   jst1         = 400,		 
-  jst2         = 500,		 
+  jst2         = 700,		 
   kst1         = 49,		 
   kst2         = 49,
   ! ===   ===   ===   ===   ===
@@ -133,10 +133,10 @@
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 0,
-  seedDir      = '/Users/frederic/TRACMASS/orm/projects/CORAL/',
+  seedDir      = '/Users/bror/git/orm/projects/ecco025/',
   !
   ! === Seed filename (or beginning of it)
-  seedFile     = 'seed_run.in',
+  seedFile     = '/na_seed.asc',
   loneparticle = 0/!/809/!28376/
 
 
