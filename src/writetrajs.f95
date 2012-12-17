@@ -9,9 +9,9 @@
 
     REAL                                 :: vort
     INTEGER                              :: sel ,xf ,yf ,zf ,n
-    INTEGER, SAVE                        :: recPosIn=0  ,recPosOut=0
-    INTEGER, SAVE                        :: recPosRun=0 ,recPosErr=0
-    INTEGER, SAVE                        :: recPosKll=0
+    INTEGER*8, SAVE                      :: recPosIn=0  ,recPosOut=0
+    INTEGER*8, SAVE                      :: recPosRun=0 ,recPosErr=0
+    INTEGER*8, SAVE                      :: recPosKll=0
     REAL                                 :: x14 ,y14 ,z14
     REAL*8                               :: twrite
 
