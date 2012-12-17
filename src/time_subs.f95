@@ -1,6 +1,6 @@
 #ifdef timeanalyt 
 
-subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,ts,tt,dsmin,dxyz,rr)
+subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,dxyz,rr)
 
   ! subroutine to compute time (sp,sn) when trajectory 
   ! crosses face of box (ia,ja,ka) with the time analytical sceme by Vries and Döös (2001)
@@ -50,6 +50,8 @@ USE mod_param
 USE mod_vel
 USE mod_grid
 USE mod_turb
+USE mod_time, only: ts,tt
+USE mod_loopvars, only: dsmin, dxyz
 IMPLICIT NONE
 
 INTEGER :: iim,loop,iil,ii,ijk,ia,ja,ka

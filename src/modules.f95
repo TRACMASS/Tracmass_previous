@@ -16,8 +16,6 @@ MODULE mod_param
 #endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm,ntrac
   INTEGER                                   :: twritetype = 0
-  REAL*8                                    :: tseas,tyear,dtmin,voltr
-  REAL*8                                    :: tstep,dstep,tss,partQuant
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
 
   REAL*8, PARAMETER                         :: grav = 9.81
@@ -40,143 +38,45 @@ MODULE mod_diff
 	INTEGER                             :: dummy	
 ENDMODULE mod_diff
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-<<<<<<< HEAD
 
-
-=======
-
-
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
-  REAL*8                                     :: rr, rb, rg, rbg
   REAL*8                                     :: ds, dsmin
   REAL*8                                     :: dse, dsw, dsn, dss
   REAL*8                                     :: dsu, dsd, dsc
   LOGICAL                                    :: scrivi
-  REAL*8                                     :: ts,tt
   INTEGER                                    :: niter
-  REAL*8                                     :: dxyz
   REAL*8                                     :: ss0
   INTEGER                                    :: lbas
   REAL*8                                     :: subvol
 ENDMODULE mod_loopvars
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
-
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_time
-  ! === Timestep increasing with one for each new velocity field
-  INTEGER                                   :: ints      ,intstart ,intend
-  INTEGER                                   :: intrun    ,intspin  ,intstep
-  INTEGER                                   :: intmin    ,intmax
-  ! === Base for JD (When JD is 1)
-  REAL*8                                    :: baseJD=0
-  INTEGER                                   :: baseYear  ,baseMon  ,baseDay
-  INTEGER                                   :: baseHour  ,baseMin  ,baseSec
-  ! === JD when the run starts
-  REAL*8                                    :: startJD=0, ttpart
-  INTEGER                                   :: startYear ,startMon ,startDay
-  INTEGER                                   :: startHour ,startMin ,startSec
-  ! === Current JD
-  REAL*8                                    :: currJDtot ,currJDyr,currfrac
-  INTEGER                                   :: currYear  ,currMon  ,currDay
-  INTEGER                                   :: currHour, currMin, currSec 
-  ! === Looping time
-  INTEGER                                   :: loopints, loopintstart
-  REAL*8                                    :: loopJD, loopJDyr, loopFrac
-  INTEGER                                   :: loopYear  ,loopMon  ,loopDay
-  INTEGER                                   :: loopHour, loopMin, loopSec 
-  ! Old stuff
-  INTEGER                                   :: iyear ,imon ,iday ,ihour
-  INTEGER                                   :: yearmin ,yearmax
+MODULE mod_traj
+  INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
+  INTEGER                                    :: NEND
 
-  INTEGER*8                                 :: ntime
-  ! Used to figure out when to change file.
-  INTEGER                                   :: fieldsPerFile
-  ! === Time-interpolation variables in loop ===
-  REAL*8                                     :: dt, t0
-  REAL*8                                     :: dtreg
+  ! === Particle arrays ===
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
 
-CONTAINS
+  ! === Particle counters ===
+  INTEGER                                    :: nout=0, nloop=0, nerror=0
+  INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
+  INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
 
-  subroutine updateClock  
-    USE mod_param
-    USE mod_loopvars
-    IMPLICIT NONE
-    ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
-    currJDtot = (ints+ttpart)*(real(ngcm)/24)-1
-    call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
-    currJDyr = baseJD+currJDtot - jdate(currYear ,1 ,1)
-    currFrac = (currJDtot-int(currJDtot))*24
-    currHour = int(currFrac)
-    currFrac = (currFrac - currHour) * 60
-    CurrMin  = int(currFrac)
-    currSec  = int((currFrac - currMin) * 60)
-
-    if (ints > (intstart+intmax-1)) then
-       loopints = ints - intmax * int(real(ints-intstart)/intmax)
-    else
-       loopints = ints
-    end if
-    loopJD = (loopints+ttpart)*(real(ngcm)/24)-1
-    call  gdate (baseJD+loopJD-1 ,loopYear, loopMon, loopDay)
-    loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
-    loopFrac = (loopJD-int(loopJD)) * 24
-    loopHour = int(loopFrac)
-    loopFrac = (loopFrac - loopHour) * 60
-    LoopMin  = int(loopFrac)
-    loopSec  = int((loopFrac - loopMin) * 60)
-  end subroutine updateClock
-  
-  subroutine gdate (rjd, year,month,day)
-    !                                                                      
-    !---computes the gregorian calendar date (year,month,day)              
-    !   given the julian date (jd).                                        
-    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
-    REAL*8                                   :: rjd
-    INTEGER                                  :: jd
-    INTEGER                                  :: year ,month ,day
-    INTEGER                                  :: i ,j ,k ,l ,n
-    
-    jd = int(rjd)
-    l= jd+68569
-    n= 4*l/146097
-    l= l-(146097*n+3)/4
-    i= 4000*(l+1)/1461001
-    l= l-1461*i/4+31
-    j= 80*l/2447
-    k= l-2447*j/80
-    l= j/11
-    j= j+2-12*l
-    i= 100*(n-49)+i+l
-    
-    year= i
-    month= j
-    day= k
-    return
-  end subroutine gdate
-
-  INTEGER function jdate (YEAR,MONTH,DAY)
-    !---COMPUTES THE JULIAN DATE (JD) GIVEN A GREGORIAN CALENDAR
-    !   DATE (YEAR,MONTH,DAY).
-    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
-    INTEGER                                  :: YEAR,MONTH,DAY,I,J,K
-    i     = year
-    j     = month
-    k     = day
-    jdate = K-32075+1461*(I+4800+(J-14)/12)/4+367*(J-2-(J-14)/12*12) &
-         /12-3*((I+4900+(J-14)/12)/100)/4
-    RETURN
-  end function jdate
-ENDMODULE mod_time
+  ! === Particle positions ===
+  INTEGER                                    :: ia, ja, ka, iam
+  INTEGER                                    :: ib, jb, kb, ibm
+  REAL*8                                     :: x0, y0, z0
+  REAL*8                                     :: x1, y1, z1
+ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
   USE mod_param
-
   IMPLICIT NONE
 
   INTEGER                                   :: IMT, JMT, KM
@@ -196,6 +96,7 @@ MODULE mod_grid
   REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
+  REAL*8                                    :: dxyz
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
 
@@ -243,8 +144,234 @@ CONTAINS
     l2d = 6367 * c * 1000
   end function l2d
 
+  subroutine calc_dxyz
+
+    use mod_traj, only: ib,jb,kb
+    implicit none
+
+    ! T-box volume in m3
+#ifdef zgrid3Dt 
+    dxyz = rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
+#elif  zgrid3D
+    dxyz=dzt(ib,jb,kb)
+#ifdef freesurface
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+#endif /*freesurface*/
+#else
+    dxyz=dz(kb)
+#ifdef varbottombox
+    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
+#endif /*varbottombox*/
+#ifdef freesurface
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+#endif /*freesurface*/
+#endif /*zgrid3Dt*/
+    dxyz=dxyz*dxdy(ib,jb)
+    if (dxyz<0) then
+       print *,'=========================================================='
+       print *,'ERROR: Negative box volume                                '
+       print *,'----------------------------------------------------------'
+       !print *,'dzt  = ', dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
+       print *,'dxdy = ', dxdy(ib,jb)
+       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
+       print *,'----------------------------------------------------------'
+       print *,'The run is terminated'
+       print *,'=========================================================='
+       !errCode = -60
+       !stop
+    end if
+  end subroutine calc_dxyz
+
+
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_time
+  ! === Timestep increasing with one for each new velocity field
+  INTEGER                                   :: ints      ,intstart ,intend
+  INTEGER                                   :: intrun    ,intspin  ,intstep
+  INTEGER                                   :: intmin    ,intmax
+  !type for datetimes
+  type DATETIME
+     REAL*8                                 :: JD=0 
+     REAL                                   :: frac=0, yd=0
+     INTEGER                                :: Year, Mon, Day
+     INTEGER                                :: Hour, Min, Sec
+  end type DATETIME
+  type(DATETIME)                            :: basetime, starttime
+  type(DATETIME)                            :: currtime, looptime
+  ! === Base for JD (When JD is 1)
+  REAL*8                                    :: baseJD=0
+  INTEGER                                   :: baseYear  ,baseMon  ,baseDay
+  INTEGER                                   :: baseHour  ,baseMin  ,baseSec
+  ! === JD when the run starts
+  REAL*8                                    :: startJD=0, ttpart
+  INTEGER                                   :: startYear ,startMon ,startDay
+  INTEGER                                   :: startHour ,startMin ,startSec
+  ! === Current JD
+  REAL*8                                    :: currJDtot ,currJDyr,currfrac
+  INTEGER                                   :: currYear  ,currMon  ,currDay
+  INTEGER                                   :: currHour, currMin, currSec 
+  ! === Looping time
+  INTEGER                                   :: loopints, loopintstart
+  REAL*8                                    :: loopJD, loopJDyr, loopFrac
+  INTEGER                                   :: loopYear  ,loopMon  ,loopDay
+  INTEGER                                   :: loopHour, loopMin, loopSec 
+  ! Old stuff
+  INTEGER                                   :: iyear ,imon ,iday ,ihour
+  INTEGER                                   :: yearmin ,yearmax
+
+  INTEGER*8                                 :: ntime
+  ! Used to figure out when to change file.
+  INTEGER                                   :: fieldsPerFile
+  ! === Time-interpolation variables in loop ===
+  REAL*8                                    :: dt, t0
+  REAL*8                                    :: dtreg
+  REAL*8                                    :: tseas, tyear, dtmin,voltr
+  REAL*8                                    :: tstep, dstep, tss, partQuant
+  REAL*8                                    :: ts, tt
+  REAL*8                                    :: rr, rb, rg, rbg
+
+CONTAINS
+
+  subroutine updateClock  
+    USE mod_param, only: ngcm
+    IMPLICIT NONE
+    ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
+    currJDtot = (ints+ttpart)*(real(ngcm)/24)-1
+    call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
+    currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1)
+    currFrac = (currJDtot-int(currJDtot))*24
+    currHour = int(currFrac)
+    currFrac = (currFrac - currHour) * 60
+    CurrMin  = int(currFrac)
+    currSec  = int((currFrac - currMin) * 60)
+
+    if (ints > (intstart+intmax-1)) then
+       loopints = ints - intmax * int(real(ints-intstart)/intmax)
+    else
+       loopints = ints
+    end if
+    loopJD = (loopints+ttpart)*(real(ngcm)/24)-1
+    call  gdate (baseJD+loopJD-1 ,loopYear, loopMon, loopDay)
+    loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
+    loopFrac = (loopJD - int(loopJD)) * 24
+    loopHour = int(loopFrac)
+    loopFrac = (loopFrac - loopHour) * 60
+    LoopMin  = int(loopFrac)
+    loopSec  = int((loopFrac - loopMin) * 60)
+  end subroutine updateClock
+  
+  subroutine gdate (rjd, year,month,day)
+    !                                                                      
+    !---computes the gregorian calendar date (year,month,day)              
+    !   given the julian date (jd).                                        
+    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
+    REAL*8                                   :: rjd
+    INTEGER                                  :: jd
+    INTEGER                                  :: year ,month ,day
+    INTEGER                                  :: i ,j ,k ,l ,n
+    
+    jd = int(rjd)
+    l= jd+68569
+    n= 4*l/146097
+    l= l-(146097*n+3)/4
+    i= 4000*(l+1)/1461001
+    l= l-1461*i/4+31
+    j= 80*l/2447
+    k= l-2447*j/80
+    l= j/11
+    j= j+2-12*l
+    i= 100*(n-49)+i+l
+    
+    year= i
+    month= j
+    day= k
+    return
+  end subroutine gdate
+
+  INTEGER function jdate (year, month, day)
+    !---COMPUTES THE JULIAN DATE (JD) GIVEN A GREGORIAN CALENDAR
+    !   DATE (YEAR,MONTH,DAY).
+    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
+    INTEGER                                  :: year, month ,day
+    INTEGER                                  :: i, j, k
+    i     = year
+    j     = month
+    k     = day
+    jdate = K-32075+1461*(I+4800+(J-14)/12)/4+367*(J-2-(J-14)/12*12) &
+         /12-3*((I+4900+(J-14)/12)/100)/4
+    RETURN
+  end function jdate
+
+  subroutine calc_time
+    USE mod_loopvars, only: ds, dsc, dsmin
+    use mod_grid, only: dxyz
+    USE mod_param, only: iter
+    IMPLICIT NONE
+
+#ifdef regulardt
+    if(ds == dsmin) then ! transform ds to dt in seconds
+       !            dt=dt  ! this makes dt more accurate
+    else
+       dt = ds * dxyz 
+    endif
+#else
+    if(ds == dsmin) then ! transform ds to dt in seconds
+       dt=dtmin  ! this makes dt more accurate
+    else
+       dt = ds * dxyz 
+    endif
+#endif /*regulardt*/
+    if(dt.lt.0.d0) then
+       print *,'dt=',dt
+       stop 4968
+    endif
+    ! === if time step makes the integration ===
+    ! === exceed the time when fields change ===
+    if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
+       dt=dble(idint(ts)+1)*tseas-tt
+       tt=dble(idint(ts)+1)*tseas
+       ts=dble(idint(ts)+1)
+       tss=dble(iter)
+       ds=dt/dxyz
+       dsc=ds
+    else
+       tt=tt+dt
+#if defined regulardt
+       if(dt == dtmin) then
+          ts=ts+dstep
+          tss=tss+1.d0
+       elseif(dt == dtreg) then  
+          ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
+          !                 ts=ts+dtreg/tseas
+          tss=dble(nint(tss+dt/dtmin))
+       else
+          ts=ts+dt/tseas
+          tss=tss+dt/dtmin
+       endif
+#else
+       if(dt == dtmin) then
+          ts=ts+dstep
+          tss=tss+1.d0
+       else
+          ts =ts +dt/tseas
+          tss=tss+dt/tseas*dble(iter)
+          !                 tss=tss+dt/dtmin
+       endif
+#endif /*regulardt*/
+    end if
+    ! === time interpolation constant ===
+    rbg=dmod(ts,1.d0) 
+    rb =1.d0-rbg
+  end subroutine calc_time
+
+ENDMODULE mod_time
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+
 
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -292,26 +419,12 @@ MODULE mod_vel
   INTEGER                                    :: degrade_time=0, degrade_space=0
     integer, save                            :: degrade_counter = 0
 
-<<<<<<< HEAD
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-!MODULE mod_dens
-#ifdef tempsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
-#endif
-!ENDMODULE mod_dens
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-=======
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
-
 CONTAINS
  
   subroutine datasetswap
 
-<<<<<<< HEAD
     USE  mod_grid
     IMPLICIT NONE
-
     integer, save                              :: degrade_counter = -1
 
     if (degrade_counter < 1) then
@@ -327,24 +440,6 @@ CONTAINS
        rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
     end if
-=======
-    IMPLICIT NONE
-
-    if (degrade_counter < 1) then
-       hs(:,:,1)      = hs(:,:,2)
-       uflux(:,:,:,1) = uflux(:,:,:,2)
-       vflux(:,:,:,1) = vflux(:,:,:,2)
-#ifdef explicit_w || full_wflux
-       wflux(:,:,:,1) = wflux(:,:,:,2)
-#endif
-#ifdef tempsalt
-       tem(:,:,:,1)   = tem(:,:,:,2)
-       sal(:,:,:,1)   = sal(:,:,:,2)
-       rho(:,:,:,1)   = rho(:,:,:,2)
-#endif
-    end if
- 
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
   end subroutine datasetswap
 
 #if defined full_wflux
@@ -380,39 +475,11 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   2) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-<<<<<<< HEAD
-#endif 
-=======
-#endif full_wflux
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
 
+#endif full_wflux
 
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_traj
-  INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
-  INTEGER                                    :: NEND
-
-  ! === Particle arrays ===
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
-
-  ! === Particle counters ===
-  INTEGER                                    :: nout=0, nloop=0, nerror=0
-  INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
-  INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
-
-  ! === Particle positions ===
-  INTEGER                                    :: ia, ja, ka, iam
-  INTEGER                                    :: ib, jb, kb, ibm
-  REAL*8                                     :: x0, y0, z0
-  REAL*8                                     :: x1, y1, z1
-ENDMODULE mod_traj
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_name

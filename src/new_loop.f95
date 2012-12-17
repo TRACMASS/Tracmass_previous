@@ -76,7 +76,6 @@ SUBROUTINE loop
   open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
   read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,z1,tt,t0,subvol,temp,salt,dens
-!  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
 #if defined orca025
   if(    rlat == dble(jenn(1))) then
@@ -160,7 +159,6 @@ SUBROUTINE loop
   !==========================================================
   !==========================================================
   intsTimeLoop: do ints=intstart+1,intstart+intrun
-!  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
@@ -198,6 +196,7 @@ SUBROUTINE loop
         
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
+        
         x1     =  trj(ntrac,1)
         y1     =  trj(ntrac,2)
         z1     =  trj(ntrac,3)
@@ -211,7 +210,10 @@ SUBROUTINE loop
         niter  =  nrj(ntrac,4)
         ts     =  dble(nrj(ntrac,5))
         tss    =  0.d0
-        
+     
+        x00 = x1
+        y00 = y1
+   
         ! === Write initial data to in.asc file ===
         ! If t0 = tt (first step) 
         
@@ -272,17 +274,17 @@ SUBROUTINE loop
            ! === store trajectory position ===
            if( niter.ne.1 .and. tss == dble(iter) &
                 .and. nrj(ntrac,7).ne.1 ) then
-              trj(ntrac,1)=x1
-              trj(ntrac,2)=y1
-              trj(ntrac,3)=z1
-              trj(ntrac,4)=tt
-              trj(ntrac,5)=subvol
-              nrj(ntrac,1)=ib
-              nrj(ntrac,2)=jb
-              nrj(ntrac,3)=kb
-              nrj(ntrac,4)=niter
-              nrj(ntrac,5)=idint(ts)
-              nrj(ntrac,7)=1
+              trj(ntrac,1) = x1
+              trj(ntrac,2) = y1
+              trj(ntrac,3) = z1
+              trj(ntrac,4) = tt
+              trj(ntrac,5) = subvol
+              nrj(ntrac,1) = ib
+              nrj(ntrac,2) = jb
+              nrj(ntrac,3) = kb
+              nrj(ntrac,4) = niter
+              nrj(ntrac,5) = idint(ts)
+              nrj(ntrac,7) = 1
               cycle ntracLoop
            endif
            nrj(ntrac,7)=0
@@ -303,7 +305,7 @@ SUBROUTINE loop
            z0  = z1
            ia  = ib
            iam = ia-1
-           if(iam == 0) iam = IMT
+           if (iam == 0) iam = IMT
            ja  = jb
            ka  = kb
 
@@ -340,28 +342,30 @@ SUBROUTINE loop
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
-
+           ! === calculate the turbulent velocities ===
            call turbuflux(ia,ja,ka,rr,dt)
+
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
 #ifdef timeanalyt
            ss0=dble(idint(ts))*tseas/dxyz
-           call cross_time(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-           call cross_time(2,ia,ja,ka,y0,dsn,dss,rr) ! merid
-           call cross_time(3,ia,ja,ka,z0,dsu,dsd,rr) ! vert
+           call cross_time(1,ia,ja,ka,x0,dse,dsw,ts,tt,dsmin,dxyz,rr) ! zonal
+           call cross_time(2,ia,ja,ka,y0,dsn,dss,ts,tt,dsmin,dxyz,rr) ! merid
+           call cross_time(3,ia,ja,ka,z0,dsu,dsd,ts,tt,dsmin,dxyz,rr) ! vert
 #else
-           call cross_stat(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-           call cross_stat(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-           call cross_stat(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+           call cross     (1,ia,ja,ka,x0,dse,dsw,                 rr) ! zonal
+           call cross     (2,ia,ja,ka,y0,dsn,dss,                 rr) ! merid
+           call cross     (3,ia,ja,ka,z0,dsu,dsd,                 rr) ! vert
 #endif /*timeanalyt*/
            ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
+           !if(ds == UNDEF .or.ds == 0.d0)then 
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-   
            call calc_time
-           ! === calculate the new positions of the particle ===    
-           call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
-           !call errorCheck('longjump', errCode)
+           ! === calculate the new positions  of the trajectory ===   
+           call pos(ia, iam, ja, ka, ib, jb, kb, x0, y0, z0, x1, y1, z1)
+           call errorCheck('longjump', errCode)
+
 
            ! === north fold cyclic for the ORCA grids ===
 #if defined orc || orca1 || orca12 
@@ -370,7 +374,6 @@ SUBROUTINE loop
               ib=idint(x1)+1
               jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
- !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
            elseif(y1 > dble(JMT-1)) then
               print *,'north of northfold for ntrac=',ntrac
               print *,ia,ib,x0,x1
@@ -380,11 +383,9 @@ SUBROUTINE loop
               nerror=nerror+1
               nrj(ntrac,6)=1
               cycle ntracLoop
-              !stop 4967
            endif
 #elif defined orca025 || orca025L75
-           if( y1 == dble(JMT-1) ) then
- !              print *,'North fold for',ntrac
+            if( y1 == dble(JMT-1) ) then ! North fold for ntrac
               x1 = dble(IMT+3) - x1
               y1 = dble(JMT-2)
               ib=idint(x1)
@@ -399,11 +400,13 @@ SUBROUTINE loop
               nrj(ntrac,6)=1
               cycle ntracLoop
            endif
+
 #endif
            ! === Cyclic world ocean/atmosphere === 
            if(x1 <  0.d0    ) x1=x1+dble(IMT)       
            if(x1 > dble(IMT)) x1=x1-dble(IMT)   
            IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+!            print *,'vavava',ntrac,niter,ib,x1,jb,y1,kb,z1
             x1 = x1 - DBLE(IMT)
            endif    
            if(ib > IMT      ) ib=ib-IMT 
@@ -414,15 +417,13 @@ SUBROUTINE loop
            if(y1 /= dble(idint(y1))) jb=idint(y1)+1
            if(z1 /= dble(idint(z1))) kb=idint(z1)+1 
 
+
            call errorCheck('boundError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
-
+             if (errCode.ne.0) cycle ntracLoop
            call errorCheck('landError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
-           
+             if (errCode.ne.0) cycle ntracLoop
            call errorCheck('bottomError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
-
+             if (errCode.ne.0) cycle ntracLoop
            call errorCheck('airborneError', errCode)
            call errorCheck('corrdepthError', errCode)
            call errorCheck('cornerError', errCode)
@@ -431,7 +432,7 @@ SUBROUTINE loop
 #if defined diffusion     
            call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
-           ! === end trajectory if outside chosen domain === 
+           ! === end trajectory if outside chosen domain ===
            LBTloop: do k=1,LBT
               if(dble(ienw(k)) <= x1 .and. x1 <= dble(iene(k)) .and. &
                  dble(jens(k)) <= y1 .and. y1 <= dble(jenn(k))  ) then
@@ -439,7 +440,7 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
-           if (x1 < 0) exit niterloop
+           if (x1 < 1) exit niterloop
 
            
 #if defined tempsalt
@@ -460,6 +461,7 @@ SUBROUTINE loop
               nexit(NEND)=nexit(NEND)+1
               exit niterLoop
            endif
+           
         end do niterLoop
 
         nout=nout+1
@@ -515,51 +517,22 @@ SUBROUTINE loop
   
 return
      
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    CONTAINS
      
      subroutine errorCheck(teststr,errCode)
-       CHARACTER (len=*),intent(in)        :: teststr    
+       CHARACTER (len=*)                   :: teststr    
        INTEGER                             :: verbose = 0
        INTEGER                             :: strict  = 0
-       INTEGER,intent(out)                 :: errCode
+       INTEGER                             :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
        INTEGER, save                       :: dxntrac, dyntrac
        CHARACTER(70)                       :: thinline, thickline
-       
+
        thickline = "========================================" // &
                    "======================================="
        thinline  = "----------------------------------------" // &
                    "---------------------------------------"
-       errCode = 0
-       return
+       errCode=0
        select case (trim(teststr))
        case ('ntracGTntracmax')
           if(ntrac.gt.ntracmax) then
@@ -745,13 +718,13 @@ return
               print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
               print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
               print *,'ntrac=',ntrac,niter 
-              call print_ds
-              print *,'ia=',ia,ib,ja,jb,ka,kb
-              print *,'x0=',x0,x1,y0,y1,z0,z1
-              call cross_stat(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-              call cross_stat(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-              call cross_stat(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
-              print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
+               print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
+               print *,'ia=',ia,ib,ja,jb,ka,kb
+               print *,'x0=',x0,x1,y0,y1,z0,z1
+               call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
+               call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
+               call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
               nrj(ntrac,6)=1
  !             stop 3957
@@ -810,6 +783,8 @@ return
                  print *, " "
                  write (*,'(A, E9.3, A, E9.3)'), ' uflux= ', &
                       uflux(ia,ja,ka,nsm),'  vflux= ', vflux(ia,ja,ka,nsm)
+
+                 write (*,FMT='(A, 5E9.2)'),' ds=',ds,dse,dsw,dsn,dss
                  call print_ds
                  print *,'---------------------------------------------------'
                  print *,"   ntrac = ",ntrac
@@ -835,15 +810,15 @@ return
         case ('longjump')
            ! === Check if the particles are too large jumps ===
            !print *, 'x0 = ', x0, 'x1 = ', x1, 'dx = ', x1-x0
-           if (abs(x1-x0) > dxmax) then 
+           if (abs(x1-x00) > dxmax) then 
               print *,'New dxmax: ', dxmax, ' ntrac = ', ntrac
               dxntrac = ntrac
-              dxmax = abs(x1-x0)
+              dxmax = abs(x1-x00)
            end if
-           if (abs(y1-y0) > dymax) then 
+           if (abs(y1-y00) > dymax) then 
               print *,'New dymax: ', dymax, ' ntrac = ', ntrac
               dyntrac = ntrac
-              dymax = abs(y1-y0)
+              dymax = abs(y1-y00)
            end if
            if (dxmax>imt) then
               print *, thickline !========================================
@@ -861,6 +836,8 @@ return
               print *, thinline !-----------------------------------------
               stop
            end if
+           !print *,'-',x00,x0,x1,x1-x0,x1-x00,ds,dt
+
         end select
       end subroutine errorCheck
 
@@ -874,10 +851,109 @@ return
     print *, '  dsd = ', dsd
     print *, 'dsmin = ', dsmin
     print *, 'dtmin = ', dtmin
-    print *, 'dxyz = ', dxyz
-    !write (*,FMT='(A, 5E9.2)'),' ds=',ds,dse,dsw,dsn,dss
-    !             write (*,FMT='(4E9.2)'), dsu,dsd,dsmin,dxyz
   end subroutine print_ds
+
+  subroutine calc_dxyz
+    ! T-box volume in m3
+#ifdef zgrid3Dt 
+    dxyz=rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
+#elif  zgrid3D
+    dxyz=dzt(ib,jb,kb)
+#ifdef freesurface
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+#endif /*freesurface*/
+#else
+    dxyz=dz(kb)
+#ifdef varbottombox
+    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
+#endif /*varbottombox*/
+#ifdef freesurface
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+#endif /*freesurface*/
+#endif /*zgrid3Dt*/
+    dxyz=dxyz*dxdy(ib,jb)
+    if (dxyz<0) then
+       print *,'=========================================================='
+       print *,'ERROR: Negative box volume                                '
+       print *,'----------------------------------------------------------'
+       print *,'dzt  = ', dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
+       print *,'dxdy = ', dxdy(ib,jb)
+       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
+       print *,'----------------------------------------------------------'
+       print *,'The run is terminated'
+       print *,'=========================================================='
+       errCode = -60
+       !stop
+    end if
+  end subroutine calc_dxyz
+
+
+  subroutine calc_time
+#ifdef regulardt
+           if(ds == dsmin) then ! transform ds to dt in seconds
+!            dt=dt  ! this makes dt more accurate
+           else
+            dt = ds * dxyz 
+           endif
+#else
+           if(ds==dsmin) then ! transform ds to dt in seconds
+              dt = dtmin  ! this makes dt more accurate
+           else
+              dt = ds * dxyz 
+           endif
+#endif /*regulardt*/
+           if(dt.lt.0.d0) then
+              print *,'dt=',dt
+              stop 4968
+           endif
+           ! === if time step makes the integration ===
+           ! === exceed the time when fields change ===
+           if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
+              !print *, tss+dt/tseas*dble(iter), iter
+              !print *, 'dt=', dt, 'ds=', ds
+              !print *, 'tt=', tt, 'ts=', ts
+              ts  = dble(int(ts) + 1)
+              dt  = max(ts * tseas - tt, 0.d0)
+              tt  = ts * tseas
+              tss = dble(iter) 
+              !tt=dble(idint(ts)+1)*tseas
+              !ts=dble(idint(ts)+1)
+              !tss=dble(iter)
+              ds=dt/dxyz
+              dsc=ds
+              !print *, tss+dt/tseas*dble(iter), iter
+              !print *, 'dt=', dt, 'ds=', ds
+              !print *, 'tt=', tt, 'ts=', ts
+
+           else
+              tt=tt+dt
+#if defined regulardt
+              if(dt == dtmin) then
+                 ts=ts+dstep
+                 tss=tss+1.d0
+              elseif(dt == dtreg) then  
+                 ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
+!                 ts=ts+dtreg/tseas
+                 tss=dble(nint(tss+dt/dtmin))
+              else
+                 ts=ts+dt/tseas
+                 tss=tss+dt/dtmin
+              endif
+#else
+              if(dt == dtmin) then
+                 ts=ts+dstep
+                 tss=tss+1.d0
+              else
+                 ts =ts +dt/tseas
+                 tss=tss+dt/tseas*dble(iter)
+!                 tss=tss+dt/dtmin
+              endif
+#endif /*regulardt*/
+           end if
+           ! === time interpolation constant ===
+           rbg=dmod(ts,1.d0) 
+           rb =1.d0-rbg
+         end subroutine calc_time
 
 
   subroutine fancyTimer(timerText ,testStr)

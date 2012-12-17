@@ -1,6 +1,6 @@
 !#ifndef timeanalyt 
 
-subroutine cross(ijk,ia,ja,ka,r0,sp,sn,rr)
+subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn,rr)
   
   ! subroutine to compute time (sp,sn) when trajectory 
   ! crosses face of box (ia,ja,ka) 
@@ -27,7 +27,7 @@ USE mod_param
 USE mod_grid
 USE mod_vel
 USE mod_turb
-USE mod_time
+USE mod_time, only: tt, dtreg
 IMPLICIT none
 
 real*8 r0,ba,sp,sn,uu,um,rr,rg,vv,vm
@@ -134,5 +134,5 @@ endif
 if(sn.le.0.d0) sn=UNDEF
 
 return
-end subroutine cross
+end subroutine cross_stat
 !#endif
