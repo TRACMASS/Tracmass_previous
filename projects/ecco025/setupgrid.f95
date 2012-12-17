@@ -75,7 +75,7 @@ SUBROUTINE setupgrid
 
   !uvel = get3DfieldNC(trim(trim(inDataDir)//'/UVEL'//fstamp), 'UVEL')
 
-  kmt = 150
+  kmt = 50
   mask = 1
 
 end SUBROUTINE setupgrid
