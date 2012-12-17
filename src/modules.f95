@@ -297,6 +297,10 @@ CONTAINS
   subroutine datasetswap
     USE mod_grid
     IMPLICIT NONE
+
+    integer, save                              :: degrade_counter = -1
+
+    if (degrade_counter < 1) then
     hs(:,:,nsm)      = hs(:,:,nsp)
     uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
     vflux(:,:,:,nsm) = vflux(:,:,:,nsp)

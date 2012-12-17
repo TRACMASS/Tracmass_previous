@@ -3,19 +3,6 @@ module mod_psi
   USE mod_loopvars
   USE mod_grid
   USE mod_streamfunctions
-#ifdef streamxy
-!  USE mod_streamfunctions
-!  USE mod_streamxy
-#endif
-#ifdef streamr
-!  USE mod_streamr
-#endif
-#ifdef streamv
-!  USE mod_streamv
-#endif
-#ifdef stream_thermohaline
-!  USE mod_stream_thermohaline
-#endif
 
   CONTAINS
 

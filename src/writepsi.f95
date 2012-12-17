@@ -17,7 +17,7 @@ subroutine writepsi
 !#endif
 !#ifdef stream_thermohaline
 !  USE mod_stream_thermohaline
-!#endif
+
 IMPLICIT none
 
 #ifdef streamxy
