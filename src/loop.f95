@@ -1,5 +1,5 @@
 SUBROUTINE loop
-!!------------------------------------------------------------------------------!!
+!!---------------------------------------------------------------------------
 !!
 !!       SUBROUTINE loop:
 !!
@@ -13,7 +13,7 @@ SUBROUTINE loop
 !!          See tracmass manual for schematic of the structure.
 !!
 !!
-!!------------------------------------------------------------------------------          
+!!---------------------------------------------------------------------------          
   USE mod_param
   USE mod_name
   USE mod_time
@@ -34,6 +34,7 @@ SUBROUTINE loop
   USE mod_sed
 
   IMPLICIT none
+
   ! === Loop variables ===
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: nrh0=0
@@ -45,12 +46,6 @@ SUBROUTINE loop
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
 
-!!----------------------------------------------------------------------------
-
-  iday0 = iday
-  imon0 = imon
-  iyear0 = iyear
-  ! === print some run stats ===
   print *,'------------------------------------------------------'  
   print *,'Files written in directory                  :  ' ,trim(outDataDir)
   print *,'with file names starting with               :  ' ,trim(outDataFile)
@@ -67,8 +62,8 @@ SUBROUTINE loop
          /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
 
-  dstep=1.d0/dble(iter)
-  dtmin=dstep*tseas
+  dstep = 1.d0 / dble(iter)
+  dtmin = dstep * tseas
     
   !==========================================================
   !===   Read in end positions from a previous run        === 
@@ -346,10 +341,8 @@ SUBROUTINE loop
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
-           ! === calculate the turbulent velocities ===
-#ifdef turb
+
            call turbuflux(ia,ja,ka,rr,dt)
-#endif /*turb*/
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
 #ifdef timeanalyt
@@ -362,21 +355,20 @@ SUBROUTINE loop
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
-           ds=dmin1(dse,dsw,dsn,dss,dsu,dsd,dsmin)
+           ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
            !if(ds == UNDEF .or.ds == 0.d0)then 
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
 
            call calc_time
            
-           ! === calculate the new positions ===
-           ! === of the trajectory           ===    
+           ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
-           
+           !call errorCheck('longjump', errCode)
+
            ! === north fold cyclic for the ORCA grids ===
 #if defined orc || orca1 || orca12 
-            if( y1 == dble(JMT-1) ) then
-!              print *,'North fold for',ntrac
+            if( y1 == dble(JMT-1) ) then ! North fold for ntrac
               x1 = dble(IMT+2) - x1
               ib=idint(x1)+1
               jb=JMT-1
@@ -402,16 +394,14 @@ SUBROUTINE loop
               jb=JMT-2
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
            elseif(y1 > dble(JMT-1)) then
-            print *,ia,ib,x0,x1
-            print *,ja,jb,y0,y1
-            print *,ka,kb,z0,z1
-            print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-            nerror=nerror+1
-            nrj(ntrac,6)=1
-            cycle ntracLoop
-!            stop 4977
+              print *,ia,ib,x0,x1
+              print *,ja,jb,y0,y1
+              print *,ka,kb,z0,z1
+              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+              nerror=nerror+1
+              nrj(ntrac,6)=1
+              cycle ntracLoop
            endif
-
 #endif
            ! === Cyclic world ocean/atmosphere === 
            if(x1 <  0.d0    ) x1=x1+dble(IMT)       
@@ -428,11 +418,6 @@ SUBROUTINE loop
            if(y1 /= dble(idint(y1))) jb=idint(y1)+1
            if(z1 /= dble(idint(z1))) kb=idint(z1)+1 
 
-
-!if(ntrac==1472) print *,'ssss',ntrac,niter,ib,x1,jb,y1,kb,z1
-!if(ntrac==5) print *,'ssss',ntrac,niter,ib,x1,jb,y1,kb,z1
-
-           
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
 
@@ -574,6 +559,14 @@ return
        INTEGER                             :: verbose = 0
        INTEGER                             :: strict  = 0
        INTEGER                             :: errCode
+       REAL, save                          :: dxmax = 0, dymax = 0
+       INTEGER, save                       :: dxntrac, dyntrac
+       CHARACTER(70)                       :: thinline, thickline
+       
+       thickline = "========================================" // &
+                   "======================================="
+       thinline  = "----------------------------------------" // &
+                   "---------------------------------------"
 
        errCode=0
        select case (trim(teststr))
@@ -629,8 +622,7 @@ return
                 print *,'-------------------------------------'
                 print *,'iaib',ia,ib,ja,jb,ka,kb
                 print *,'xyz',x0,x1,y0,y1,z0,z1
-                print *,'ds',dse,dsw,dsn,dss,dsu,dsd
-                print *,'dsmin=',ds,dsmin,dtmin,dxyz
+                call print_ds
                 print *,'tt=',tt,ts
                 print *,'ntrac=',ntrac
                 print *,'-------------------------------------'
@@ -654,8 +646,7 @@ return
                 print *,'-------------------------------------'
                 print *,'land',ia,ib,ja,jb,ka,kb,kmt(ia,ja)
                 print *,'xyz',x0,x1,y0,y1,z0,z1
-                print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd
-                print *,'dsmin=',ds,dsmin,dtmin
+                call print_ds
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
                 print *,'hs=',hs(ia,ja,nsm),hs(ia,ja,nsp),hs(ib,jb,nsm),hs(ib,jb,nsp)
                 print *,'tt=',tt,ts,tt/tday,t0/tday
@@ -763,13 +754,13 @@ return
               print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
               print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
               print *,'ntrac=',ntrac,niter 
-               print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
-               print *,'ia=',ia,ib,ja,jb,ka,kb
-               print *,'x0=',x0,x1,y0,y1,z0,z1
-               call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-               call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-               call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
-               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
+              call print_ds
+              print *,'ia=',ia,ib,ja,jb,ka,kb
+              print *,'x0=',x0,x1,y0,y1,z0,z1
+              call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
+              call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
+              call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+              print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
               nrj(ntrac,6)=1
  !             stop 3957
@@ -828,9 +819,7 @@ return
                  print *, " "
                  write (*,'(A, E9.3, A, E9.3)'), ' uflux= ', &
                       uflux(ia,ja,ka,nsm),'  vflux= ', vflux(ia,ja,ka,nsm)
-
-                 write (*,FMT='(A, 5E9.2)'),' ds=',ds,dse,dsw,dsn,dss
-                 write (*,FMT='(4E9.2)'), dsu,dsd,dsmin,dxyz
+                 call print_ds
                  print *,'---------------------------------------------------'
                  print *,"   ntrac = ",ntrac
                  write (*,'(A7, I10, A7, I10, A7, I10)'), & 
@@ -851,6 +840,35 @@ return
               nerror=nerror+1
               nrj(ntrac,6)=1
               errCode = -56
+           end if
+        case ('longjump')
+           ! === Check if the particles are too large jumps ===
+           !print *, 'x0 = ', x0, 'x1 = ', x1, 'dx = ', x1-x0
+           if (abs(x1-x0) > dxmax) then 
+              print *,'New dxmax: ', dxmax, ' ntrac = ', ntrac
+              dxntrac = ntrac
+              dxmax = abs(x1-x0)
+           end if
+           if (abs(y1-y0) > dymax) then 
+              print *,'New dymax: ', dymax, ' ntrac = ', ntrac
+              dyntrac = ntrac
+              dymax = abs(y1-y0)
+           end if
+           if (dxmax>imt) then
+              print *, thickline !========================================
+              print *,'dx unrealistic, ntrac = ', ntrac, ' dx = ', dxmax
+              print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
+              print *, thinline !-----------------------------------------
+              stop
+           end if
+           if (dymax>jmt) then
+              print *, thickline !========================================
+              print *,'dy unrealistic, ntrac = ', ntrac, ' dy = ', dymax
+              print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd
+              print *,'dsmin=',ds,dsmin,dtmin
+              print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
+              print *, thinline !-----------------------------------------
+              stop
            end if
         end select
       end subroutine errorCheck
@@ -888,6 +906,22 @@ return
        !stop
     end if
   end subroutine calc_dxyz
+
+  subroutine print_ds
+    print *, '   ds = ', ds 
+    print *, '  dse = ', dse
+    print *, '  dsw = ', dsw
+    print *, '  dsn = ', dsn
+    print *, '  dss = ', dss
+    print *, '  dsu = ', dsu
+    print *, '  dsd = ', dsd
+    print *, 'dsmin = ', dsmin
+    print *, 'dtmin = ', dtmin
+    print *, 'dxyz = ', dxyz
+    !write (*,FMT='(A, 5E9.2)'),' ds=',ds,dse,dsw,dsn,dss
+    !             write (*,FMT='(4E9.2)'), dsu,dsd,dsmin,dxyz
+  end subroutine print_ds
+
 
 
   subroutine calc_time

@@ -84,7 +84,6 @@ MODULE mod_time
   INTEGER                                   :: loopHour, loopMin, loopSec 
   ! Old stuff
   INTEGER                                   :: iyear ,imon ,iday ,ihour
-  INTEGER                                   :: iyear0 ,imon0 ,iday0 
   INTEGER                                   :: yearmin ,yearmax
 
   INTEGER*8                                 :: ntime
@@ -228,10 +227,13 @@ MODULE mod_grid
 CONTAINS
   function l2d(lon1,lon2,lat1,lat2)
     real                                   :: lon1,lon2,lat1,lat2,l2d
+    real                                   :: rlon1,rlon2,rlat1,rlat2
     real                                   :: dlon,dlat,a,c
     dlon = (lon2 - lon1)/180*pi
-    dlat = (lat2 - lat1)/180.*pi
-    a = (sin(dlat/2))**2 + cos(lat1) * cos(lat2) * (sin(dlon/2))**2
+    rlat1 = lat1 /180.*pi
+    rlat2 = lat2 /180.*pi
+    dlat = rlat2 - rlat1
+    a = (sin(dlat/2))**2 + cos(rlat1) * cos(rlat2) * (sin(dlon/2))**2
     c = 2 * asin(min(1.0,sqrt(a)))
     l2d = 6367 * c * 1000
   end function l2d
@@ -376,15 +378,6 @@ MODULE mod_traj
   REAL*8                                     :: x0, y0, z0
   REAL*8                                     :: x1, y1, z1
 ENDMODULE mod_traj
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_turb
-#ifdef turb
-  REAL upr(12,2)
-#endif
-ENDMODULE mod_turb
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
