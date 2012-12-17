@@ -182,7 +182,6 @@ CONTAINS
     end if
   end subroutine calc_dxyz
 
-
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -371,9 +370,6 @@ ENDMODULE mod_time
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
-
-
-
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
   REAL*4                                    :: tmin0 ,tmax0
@@ -419,27 +415,25 @@ MODULE mod_vel
   INTEGER                                    :: degrade_time=0, degrade_space=0
     integer, save                            :: degrade_counter = 0
 
+
 CONTAINS
  
   subroutine datasetswap
 
     USE  mod_grid
     IMPLICIT NONE
-    integer, save                              :: degrade_counter = -1
 
-    if (degrade_counter < 1) then
-       hs(:,:,nsm)      = hs(:,:,nsp)
-       uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
-       vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
+    hs(:,:,nsm)      = hs(:,:,nsp)
+    uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
+    vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
 #if defined explicit_w || full_wflux
-       wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
+    wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
 #endif
 #ifdef tempsalt
-       tem(:,:,:,nsm)   = tem(:,:,:,nsp)
-       sal(:,:,:,nsm)   = sal(:,:,:,nsp)
-       rho(:,:,:,nsm)   = rho(:,:,:,nsp)
+    tem(:,:,:,nsm)   = tem(:,:,:,nsp)
+    sal(:,:,:,nsm)   = sal(:,:,:,nsp)
+    rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
-    end if
   end subroutine datasetswap
 
 #if defined full_wflux
@@ -475,9 +469,7 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   2) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-
 #endif full_wflux
-
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
