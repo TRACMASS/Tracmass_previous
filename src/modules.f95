@@ -15,7 +15,6 @@ MODULE mod_param
   INTEGER, PARAMETER                        :: LOV=1
 #endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm,ntrac
-  INTEGER                                   :: twritetype = 0
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
 
   REAL*8, PARAMETER                         :: grav = 9.81
@@ -475,9 +474,7 @@ ENDMODULE mod_vel
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_name
-  CHARACTER(LEN=200)                         :: outDataFile
-  INTEGER                                    :: intminInOutFile
-  CHARACTER(LEN=200)                         :: inDataDir ,outDataDir
+  CHARACTER(LEN=200)                         :: inDataDir
   CHARACTER(LEN=200)                         :: topoDataDir
   CHARACTER(LEN=200)                         :: projDesc
   CHARACTER(LEN=200)                         :: GCMname   ,GCMsource

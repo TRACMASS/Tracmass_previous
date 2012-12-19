@@ -24,6 +24,7 @@ SUBROUTINE loop
   USE mod_domain
   USE mod_vel
   USE mod_traj
+  USE mod_write
   USE mod_pos
   USE mod_coord
 
@@ -185,12 +186,16 @@ SUBROUTINE loop
         dt = 0.d0
      end if intspinCond
 
+     !=== Check if the output file should be switched. ===
+     call writedata(99)! switch
+
      !=======================================================
      !=== Loop over all trajectories and calculate        ===
      !=== a new position for this time step.              ===
      !=======================================================
      
      call fancyTimer('advection','start')
+
      ntracLoop: do ntrac=1,ntractot  
      
         ! === Test if the trajectory is dead   ===
@@ -212,17 +217,6 @@ SUBROUTINE loop
         ts     =  dble(nrj(ntrac,5))
         tss    =  0.d0
         
-        ! === Write initial data to in.asc file ===
-        ! If t0 = tt (first step) 
-        
-        if(trj(ntrac,4) == trj(ntrac,7)) then
-#ifdef tempsalt
-        call interp(nrj(ntrac,1),nrj(ntrac,2),nrj(ntrac,3),&
-        trj(ntrac,1),trj(ntrac,2),trj(ntrac,3),temp,salt,dens,1)
-#endif
-        call writedata(10)
-        endif
-
 #ifdef rerun
         lbas=nrj(ntrac,8)
         if(lbas.lt.1 .or.lbas.gt.LBT) then
@@ -463,7 +457,7 @@ SUBROUTINE loop
         end do niterLoop
 
         nout=nout+1
-        call writedata(17)
+        call writedata(17) !out
         nrj(ntrac,6)=1
      end do ntracLoop
      
@@ -490,14 +484,13 @@ SUBROUTINE loop
   
   end do intsTimeLoop
   
-  close(56)
   print *,ntractot ,' trajectories calculated'
   print *,nout     ,' trajectories exited the space and time domain'
   print *,nexit    ,' trajectories exited through the boundaries'
 #ifdef sediment
   print *,nsed     ,' trajectories sedimented'
   print *,nsusp    ,' trajectories resuspended'
-  call writedata(19)
+  call writedata(19) !end
   
 #endif
 #ifdef tempsalt     
@@ -620,12 +613,11 @@ return
                 print *,'The trajectory is killed'
                 print *, thickline !========================================
              end if
-             call writedata(19)
+             call writedata(40)
              nerror=nerror+1
              boundError = boundError +1
              errCode = -50
              if (strict==1) stop
-             call writedata(40)
              nrj(ntrac,6)=1
           endif
 

@@ -4,6 +4,7 @@ PROGRAM main
   USE mod_seed
   USE mod_name
   USE mod_time 
+  USE mod_write
   USE mod_domain
   USE mod_buoyancy
 #ifdef diffusion
@@ -12,8 +13,6 @@ PROGRAM main
   
   IMPLICIT none
   INTEGER                                    :: i,j,n
-  CHARACTER(LEN=200)                         :: fullWritePref
-  CHARACTER(LEN=8)                           :: WriteStamp
 
   print *,'==================================================================='
   print *,'========= TRACMASS lagrangian off-line particle tracking =========='
@@ -36,14 +35,14 @@ PROGRAM main
   if (minval(dxv) < 0) then
      print *, " "
      print *, " === Error! === "
-     print *, "The array dxv contains values smaller than zero."
+     print *, "The array dxv contains negative values."
      print *, "Please check your setupgrid.f95 file."
      stop
   end if
   if (minval(dyu) < 0) then
      print *, " "
      print *, " === Error! === "
-     print *, "The array dyu contains values smaller than zero."
+     print *, "The array dyu contains negative values."
      print *, "Please check your setupgrid.f95 file."
      stop
   end if
@@ -59,44 +58,10 @@ PROGRAM main
      voltr=partQuant
   endif
   
-  writeStamp='00000000'
-  write (writeStamp,'(i8.8)') intstart
-    
-  if (intminInOutFile.eq.1) then
-     fullWritePref =  trim(outDataDir)//trim(outDataFile)//writeStamp
-  else
-     fullWritePref =  trim(outDataDir)//trim(outDataFile)
-  end if
-  
-#if defined textwrite
-  open(56,file=trim(fullWritePref)//'_run.asc')    
-  open(57,file=trim(fullWritePref)//'_out.asc')  
-  open(58,file=trim(fullWritePref)//'_in.asc')   
-  open(59,file=trim(fullWritePref)//'_err.asc')
-#endif
-#if defined binwrite
-  open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  
-       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  
-       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &
-       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  open(unit=78 ,file=trim(fullWritePref)//'_in.bin' &  
-       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-  open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  
-       ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-#endif
-#if defined csvwrite
-  open(unit=86 ,file=trim(fullWritePref)//'_run.csv', status='replace')
-  open(unit=85 ,file=trim(fullWritePref)//'_out.csv', status='replace')
-  open(unit=87 ,file=trim(fullWritePref)//'_kll.csv', status='replace')
-  open(unit=88 ,file=trim(fullWritePref)//'_in.csv',  status='replace')
-  open(unit=89 ,file=trim(fullWritePref)//'_err.csv', status='replace')
-#endif
-  
-  ! === Start main loop ===
-  
+  call open_outfiles
   call loop
+  call close_outfiles
+
   return
 
 CONTAINS

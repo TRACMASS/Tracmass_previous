@@ -18,7 +18,8 @@ MODULE mod_seed
    USE mod_grid
    USE mod_buoyancy
    USE mod_vel
-   USE mod_traj
+   USE mod_traj, only: x1, y1, z1, trj, nrj
+   USE mod_write
    
    IMPLICIT NONE
   
@@ -50,7 +51,6 @@ CONTAINS
      INTEGER                                  :: m, ntrac
      REAL                                     :: temp,salt,dens
      REAL*8                                   :: tt, ts
-     REAL*8                                   :: x1, y1, z1
      REAL*8                                   :: vol, subvol
 
       ! --------------------------------------------
@@ -272,19 +272,22 @@ CONTAINS
                   nrj(ntrac,6)=1
                   cycle kkkLoop
                endif
-           
+               
                ! ts - time, fractions of ints
                ! tt - time [s] rel to start
-!               ts = ff * DBLE (ints-intstep) / tstep
+               ! ts = ff * DBLE (ints-intstep) / tstep
                ts = DBLE (ints-1) 
                tt = ts * tseas
                
                ! ------------------------------------------------------------
-               ! --- Put the new trajectory into the matrices trj and nrj ---
+               ! --- Put the new particle into the vectors trj and nrj ---
                ! ------------------------------------------------------------
                trj(ntrac,1:7) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
                nrj(ntrac,1:5) = [ ib, jb, kb,  0, IDINT(ts)]
                nrj(ntrac,7)=1
+
+               !Save initial particle position
+               call writedata(10) !ini
            
             END DO kkkLoop
          END DO ijjLoop   
