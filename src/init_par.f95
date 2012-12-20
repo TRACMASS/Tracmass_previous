@@ -298,10 +298,10 @@ SUBROUTINE init_params
       ALLOCATE ( fish(ntracmax, nfish_var) )
       ALLOCATE ( stage(ntracmax) )
       stage = f_egg
-      fish(:, i_bodylength) = 0.01
       fish(:, i_age) = 0.00
-      fish(:, i_weight) = 0.01
-      fish(:, i_density) = 1026.0
+      fish(:, i_hatchtime) = 0.00
+      fish(:, i_hatchlength) = 0.0
+      fish(:, i_length) = 0.0
 #endif
 
       ! --- Allocate Lagrangian stream functions ---
