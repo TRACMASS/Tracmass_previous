@@ -60,7 +60,7 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva        = 2,
+  kriva        = 1,
   !
   ! === Directory where input fields are stored
   inDataDir       = '/Volumes/USB2TB/NEP6/run15/averages/',
@@ -114,22 +114,22 @@
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 1,
+  SeedType = 2,
   SeedPos = 1,
   !
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ! ist1         = 100,		 
-  ! ist2         = 200,			  
-  ! jst1         = 380,		 
-  ! jst2         = 520,		 
-  ist1         = 201,		 
-  ist2         = 202,			  
-  jst1         = 468,		 
-  jst2         = 468,		 
-  kst1         = 30,
-  kst2         = 30,
+  !ist1         = 201,
+  !ist2         = 202,
+  !jst1         = 468,
+  !jst2         = 468,
+  ist1         = 100,
+  ist2         = 106,
+  jst1         = 407,
+  jst2         = 430,
+  kst1         = 20,
+  kst2         = 20,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -137,10 +137,10 @@
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 0,
-  seedDir      = '/Users/frederic/TRACMASS/orm/projects/CORAL/',
+  seedDir      = '/export/scratch/kate/roms/tracmass/projects/NEP6/',
   !
   ! === Seed filename (or beginning of it)
-  seedFile     = 'seed_run.in'/
+  seedFile     = 'll.out'/
 
 
 

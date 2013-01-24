@@ -70,6 +70,8 @@ SUBROUTINE loop
 #if defined larval_fish
   ! Specific for fish code
   REAL*8                                     :: rhof    ! density of fish
+  REAL*8                                     :: est, group, egg_sg, age
+  INTEGER                                    :: istage
 #endif /*larval_fish*/
 
   ! === Variables to interpolate fields ===
@@ -323,8 +325,8 @@ SUBROUTINE loop
 #endif /*sediment*/
 #ifdef larval_fish
            ! Find settling velocity for active gridbox ===
-           rhof = fish(ntrac,i_density)
-           call fishvel(rhof,temp,dens)
+!           rhof = fish(ntrac,i_density)
+           call fishvel(temp,dens)
 #endif /*larval_fish*/
            ! === change velocity fields &  === 
            ! === store trajectory position ===
