@@ -2,6 +2,7 @@
 MODULE mod_getfile
   USE mod_param
   USE netcdf
+  implicit none
   
   INTEGER, DIMENSION(1)                      :: start1D  ,count1D
   INTEGER, DIMENSION(4)                      :: start2D  ,count2D ,map2D
