@@ -167,10 +167,10 @@ SUBROUTINE init_params
          count1d  = [ km]
          start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
          count2d  = [  1 ,  1 ,subGridImax-subGridImin + 1,  &
-                               subGridJmax-subGridJmin + 1]
+     &                         subGridJmax-subGridJmin + 1]
          start3d  = [  1, subGridImin, subGridJmin,  1]
          count3d  = [  1, subGridImax - subGridImin + 1,    & 
-                          subGridJmax - subGridJmin + 1, km]
+     &                    subGridJmax - subGridJmin + 1, km]
 
          READ (8,nml=INITRUNTIME)
          READ (8,nml=INITRUNDATE)
@@ -194,7 +194,7 @@ SUBROUTINE init_params
       dtmin    =  dstep * tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
-           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+     &     ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
 
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1

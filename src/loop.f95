@@ -92,7 +92,7 @@ SUBROUTINE loop
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0 ,boundError=0
-  REAL                                       :: zz
+  REAL*8                                     :: zz
 
 #if defined sediment
   ! Specific for sediment code

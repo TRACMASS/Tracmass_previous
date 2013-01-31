@@ -286,9 +286,9 @@ ENDMODULE mod_fish
 #ifdef sediment
 MODULE mod_sed
   !  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
-  REAL*8                                       :: wsed, partdiam
-  REAL*8                                       :: rhos, cwamp, twave
-  REAL*8                                       :: critvel, kincrit
+  REAL*8                                     :: wsed, partdiam
+  REAL*8                                     :: rhos, cwamp, twave
+  REAL*8                                     :: critvel, kincrit
 
   INTEGER                                    :: nsed=0, nsusp=0
   LOGICAL                                    :: res
@@ -296,7 +296,7 @@ ENDMODULE mod_sed
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_orbital
-  REAL, ALLOCATABLE, DIMENSION(:)            :: orb
+  REAL*8, ALLOCATABLE, DIMENSION(:)          :: orb
 ENDMODULE mod_orbital
 #endif
 
