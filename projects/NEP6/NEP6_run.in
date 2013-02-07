@@ -6,7 +6,7 @@
 &INITRUNDESC
   !	
   caseName     = 'NEP6',
-  caseDesc     = 'Run15'/
+  caseDesc     = 'Run22'/
   ! 
   !
 &INITRUNGRID
@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 20,
+  intrun       = 200,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -60,10 +60,10 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva        = 1,
+  kriva        = 2,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/archive/u1/uaf/kate/NEP6/run21/averages/',
+  inDataDir       = '/archive/u1/uaf/kate/NEP6/run22/averages/',
   !
   ! === Directory where output files are saved
   outDataDir      = '/scratch/kate/NEP6/ormOut/',

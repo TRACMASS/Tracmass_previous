@@ -144,6 +144,7 @@ MODULE mod_grid
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
 #ifdef zgrid3Dt 
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: dzt
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dzu,dzv,z_r
 #elif zgrid3D
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dzt,dzu,dzv,z_r
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dzt0surf,dzu0surf,dzv0surf
@@ -183,7 +184,7 @@ ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
-#if defined full_wflux
+#if defined full_wflux || defined explicit_w
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux

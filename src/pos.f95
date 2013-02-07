@@ -77,7 +77,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
 #endif
   elseif(ijk.eq.3) then
      ii=ka
-#ifdef full_wflux
+#if defined full_wflux | defined explicit_w
      uu=wflux(ia ,ja ,ka   ,1)
      um=wflux(ia ,ja ,ka-1 ,1)
 #else

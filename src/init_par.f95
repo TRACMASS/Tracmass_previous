@@ -261,10 +261,11 @@ SUBROUTINE init_params
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
 #ifdef zgrid3Dt
-      ALLOCATE ( dzt(imt,jmt,km,nst) )   
+      ALLOCATE ( dzt(imt,jmt,km,nst) )
+      ALLOCATE ( z_r(imt,jmt,km) )
 #elif  zgrid3D
-      ALLOCATE ( dzt(imt,jmt,km) )   
-      ALLOCATE ( z_r(imt,jmt,km) )   
+      ALLOCATE ( dzt(imt,jmt,km) )
+      ALLOCATE ( z_r(imt,jmt,km) )
 #endif /*zgrid3Dt*/
 #ifdef varbottombox
       ALLOCATE ( dztb(imt,jmt,nst) )   
@@ -279,7 +280,7 @@ SUBROUTINE init_params
       hs    = 0.
       uflux = 0.
       vflux = 0.
-#ifdef full_wflux
+#if defined full_wflux || defined explicit_w
       ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
 #else
       ALLOCATE ( wflux(0:km,2) )
