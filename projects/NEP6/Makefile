@@ -27,8 +27,8 @@
 #  fl15  = -Dvarbottombox   # Variable bottom box to match actual depth
 #  fl16  = -Dfreesurface    # Variable bottom box to match actual depth
 #  fl17  = -Dzvec1D         # Cell depths defined as vector
-  fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
-#  fl17  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+#  fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+  fl17  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
 #  fl18  = -Dselect         # Select only one trajectory (for debugging)
 #  fl19  = -Dtracer         # Stores a simulated tracer

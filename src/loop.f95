@@ -450,8 +450,8 @@ SUBROUTINE loop
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
 #ifdef regional
-           if (x1.lt.0.d0 .or. x1.gt.dble(IMT) .or. &
-     &         y1.lt.0.d0 .or. y1.gt.dble(JMT)) then
+           if (x1.lt.0.d0 .or. x1.gt.(dble(IMT)-0.5) .or. &
+     &         y1.lt.0.d0 .or. y1.gt.(dble(JMT)-0.5)) then
                  nexit(NEND)=nexit(NEND)+1
                  exit niterLoop
            endif
