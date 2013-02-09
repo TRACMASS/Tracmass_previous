@@ -151,6 +151,8 @@ SUBROUTINE readfields
   tem(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'temp')
   sal(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'salt')
   rho(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'rho')
+  ak2(:,:,:)        = get3DfieldNC(trim(dataprefix) ,   'AKt')
+  akt(:,:,0:km-1,2) = ak2(:,:,:)
 #endif
 
   return
@@ -176,6 +178,7 @@ contains
     tem(:,:,:,1)   = tem(:,:,:,2)
     sal(:,:,:,1)   = sal(:,:,:,2)
     rho(:,:,:,1)   = rho(:,:,:,2)
+    akt(:,:,:,1)   = akt(:,:,:,2)
 #endif
   end subroutine datasetswap
 

@@ -202,6 +202,10 @@ ENDMODULE mod_traj
 MODULE mod_dens
 #ifdef tempsalt
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
+#ifdef roms
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: akt
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)      :: ak2
+#endif
 #endif
 ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

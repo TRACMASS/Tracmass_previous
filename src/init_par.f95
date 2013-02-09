@@ -294,6 +294,12 @@ SUBROUTINE init_params
       tem = 0.
       sal = 0.
       rho = 0.
+#ifdef roms
+      ALLOCATE ( akt(imt,jmt,0:km,nst) )
+      ALLOCATE ( ak2(imt,jmt,km) )
+      akt = 0.
+      ak2 = 0.
+#endif
 #endif
 #ifdef larval_fish
       ALLOCATE ( fish(ntracmax, nfish_var) )
