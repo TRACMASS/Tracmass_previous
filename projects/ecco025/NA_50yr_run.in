@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       =600,
+  intrun       = 6083,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !

@@ -40,7 +40,7 @@ SUBROUTINE setupgrid
   CHARACTER (len=200)                        :: gridfile
 
   allocate ( lon(imt), lat(jmt), dz_inv(km) )
-  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt), mask(imt,jmt) )
+  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt) )
   call coordinat
 
   map2d    = [3, 4, 1, 1]
