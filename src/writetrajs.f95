@@ -16,7 +16,7 @@ CONTAINS
 
     IMPLICIT NONE
     CHARACTER(LEN=200)                         :: fullWritePref
-    CHARACTER(LEN=20)                           :: WriteStamp
+    CHARACTER(LEN=20)                          :: WriteStamp
 
     if (intminInOutFile.eq.2) then
        writeStamp='00000000_000000'
