@@ -41,7 +41,7 @@ SUBROUTINE setupgrid
 
 
 ! === Template for setting up grids. Move the code from readfile.f95
-  allocate ( mask(imt,jmt), depth(imt,jmt) )
+  allocate ( depth(imt,jmt) )
 
   !Order is   t  k  i  j 
   map2d    = [3, 4, 1, 2]
@@ -64,19 +64,27 @@ SUBROUTINE setupgrid
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')
   kmt = 40 
 
-  where (mask(2:imt,:) == 0) 
-     mask(1:imt-1,:) = 0
+  where (mask(2:imt,:) == 1) 
+     mask(1:imt-1,:) = 1
   end where
-  
-  where (mask(1:imt-1,:) == 0) 
-     mask(2:imt,:) = 0
+  where (mask(:, 2:jmt) == 1) 
+     mask(:,1:jmt-1) = 1
   end where
-  where (mask(:, 2:jmt) == 0) 
-     mask(:,1:jmt-1) = 0
-  end where
-  where (mask(:, 1:jmt-1) == 0) 
-     mask(:, 2:jmt) = 0
-  end where
+
+
+  !where (mask(2:imt,:) == 0) 
+  !   mask(1:imt-1,:) = 0
+  !end where
+  !
+  !where (mask(1:imt-1,:) == 0) 
+  !   mask(2:imt,:) = 0
+  !end where
+  !where (mask(:, 2:jmt) == 0) 
+  !   mask(:,1:jmt-1) = 0
+  !end where
+  !where (mask(:, 1:jmt-1) == 0) 
+  !   mask(:, 2:jmt) = 0
+  !end where
 
   where (mask==0) kmt=0
 

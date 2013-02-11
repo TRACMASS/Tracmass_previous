@@ -60,16 +60,14 @@ SUBROUTINE readfields
   intpart2    = floor((ints)/24.)
   dstamp      = 'nwa_avg_XXXXX.nc'
 
-  write (dstamp(9:13),'(I5)') & 
+  write (dstamp(9:13),'(I5.5)') & 
        int(currJDtot) - 714782
-  dataprefix  = trim(inDataDir) // '/2000/' // dstamp
+  dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
-  print *,dataprefix
-
-  uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
-  vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
-  ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
-  hs(:,:,2) = ssh
+  uvel        = get3DfieldNC(trim(dataprefix) ,   'u')
+  vvel        = get3DfieldNC(trim(dataprefix) ,   'v')
+  ssh         = get2dfieldNC(trim(dataprefix) ,'zeta')
+  hs(:,:,2)   = ssh
 
   where (uvel > 1000)
      uvel = 0
