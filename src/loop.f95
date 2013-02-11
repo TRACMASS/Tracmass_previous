@@ -46,7 +46,11 @@ SUBROUTINE loop
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
-
+  ! === Timing ===
+  REAL, dimension(2)                         :: wallarray 
+  REAL                                       :: walltime, walltot
+  INTEGER                                    :: wallmin, wallsec
+  
   print *,'------------------------------------------------------'  
   print *,'Files written in directory                  :  ' ,trim(outDataDir)
   print *,'with file names starting with               :  ' ,trim(outDataFile)
@@ -160,6 +164,7 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
+  call dtime(wallarray, walltime)
   intsTimeLoop: do ints=intstart+1,intstart+intrun
 !  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
@@ -460,7 +465,8 @@ SUBROUTINE loop
         call writedata(17) !out
         nrj(ntrac,6)=1
      end do ntracLoop
-     
+ 
+call dtime(wallarray, walltime)
 #ifdef sediment
      print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout, & 
           nsed,nsusp,nexit
@@ -473,8 +479,11 @@ SUBROUTINE loop
           ' nerror=',i4,' in ocean/atm=',i8)
 #else
      call fancyTimer('advection','stop') 
-     print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot 
-799  format('timestep=',i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10)
+     wallmin = int(walltime/60)
+     wallsec = walltime - wallmin*60
+     print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot, &
+          wallmin,wallsec
+799  format(i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10, ' dt=',i2.2,':',i2.2)
 #endif
   
    IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND.                &
@@ -540,7 +549,7 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*),intent(in)        :: teststr    
-       INTEGER                             :: verbose = 0
+       INTEGER                             :: verbose = 1
        INTEGER                             :: strict  = 0
        INTEGER,intent(out)                 :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
@@ -552,7 +561,7 @@ return
        thinline  = "----------------------------------------" // &
                    "---------------------------------------"
        errCode = 0
-       return
+       !return
        select case (trim(teststr))
        case ('ntracGTntracmax')
           if(ntrac.gt.ntracmax) then
@@ -692,7 +701,6 @@ return
           end if
        case ('infLoopError')
           if(niter-nrj(ntrac,4).gt.30000) then ! break infinite loops
-             nloop=nloop+1             
 !             nerror=nerror+1
              if (verbose == 1) then
                 print *, thickline !========================================
@@ -705,13 +713,13 @@ return
                      ' ka=',ka,' kb=',kb
                 print *,'x1=',x1,' x0=',x0,' y1=',y1,' y0=',y0, & 
                      ' z1=',z1,' z0=',z0
-                print *,'u(ia )=',(rbg*uflux(ia ,ja,ka,nsp) + &
+                print *,'uflux(ia )=',(rbg*uflux(ia ,ja,ka,nsp) + &
                      rb*uflux(ia ,ja,ka,nsm))*ff
-                print *,'u(iam)=',(rbg*uflux(iam,ja,ka,nsp) + & 
+                print *,'uflux(iam)=',(rbg*uflux(iam,ja,ka,nsp) + & 
                      rb*uflux(iam,ja,ka,nsm))*ff
-                print *,'v(ja  )=',(rbg*vflux(ia,ja  ,ka,nsp) + & 
+                print *,'vflux(ja  )=',(rbg*vflux(ia,ja  ,ka,nsp) + & 
                      rb*vflux(ia,ja  ,ka,nsm))*ff
-                print *,'v(ja-1)=',(rbg*vflux(ia,ja-1,ka,nsp) + & 
+                print *,'vflux(ja-1)=',(rbg*vflux(ia,ja-1,ka,nsp) + & 
                      rb*vflux(ia,ja-1,ka,nsm))*ff
                 print *, thinline !-----------------------------------------
              end if
@@ -725,8 +733,9 @@ return
              nrj(ntrac,3)=kb
              nrj(ntrac,4)=niter
              nrj(ntrac,5)=idint(ts)
-             nrj(ntrac,6)=0  ! 0=continue trajectory, 1=end trajectory
+             nrj(ntrac,6) = 1  ! 0=continue trajectory, 1=end trajectory
              nrj(ntrac,7)=1
+             nloop=nloop+1             
              errCode = -48
           end if
        case ('bottomError')
