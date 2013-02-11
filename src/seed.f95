@@ -18,7 +18,7 @@ MODULE mod_seed
    USE mod_grid
    USE mod_buoyancy
    USE mod_vel
-   USE mod_traj, only: x1, y1, z1, trj, nrj
+   USE mod_traj, only: ntractot, ntrac, x1, y1, z1, trj, nrj
    USE mod_write
    
    IMPLICIT NONE
@@ -33,7 +33,6 @@ MODULE mod_seed
    INTEGER                                    :: kst1, kst2, tst1, tst2
    INTEGER                                    :: iist, ijst, ikst, jsd, jst
    INTEGER                                    :: ijt,  ikt,  jjt, jkt
-   INTEGER                                    :: ntractot=0
    INTEGER*8                                  :: itim
    INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seed_ijk, seed_set
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
@@ -47,8 +46,7 @@ CONTAINS
 
      INTEGER                                  :: errCode
      INTEGER                                  :: ib, jb, kb, ibm
-     INTEGER                                  :: i, j, k, l
-     INTEGER                                  :: m, ntrac
+     INTEGER                                  :: i, j, k, l, m
      REAL                                     :: temp,salt,dens
      REAL*8                                   :: tt, ts
      REAL*8                                   :: vol, subvol

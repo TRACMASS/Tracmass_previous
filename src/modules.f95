@@ -14,7 +14,7 @@ MODULE mod_param
 #else
   INTEGER, PARAMETER                        :: LOV=1
 #endif
-  INTEGER                                   :: ncoor,kriva,iter,ngcm,ntrac
+  INTEGER                                   :: ncoor,kriva,iter,ngcm
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
 
   REAL*8, PARAMETER                         :: grav = 9.81
@@ -55,6 +55,8 @@ ENDMODULE mod_loopvars
 MODULE mod_traj
   INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
   INTEGER                                    :: NEND
+  INTEGER                                    :: ntrac, ntractot=0
+
 
   ! === Particle arrays ===
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
@@ -204,7 +206,7 @@ MODULE mod_time
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
   ! === JD when the run starts
-  REAL*8                                    :: startJD=0, ttpart
+  REAL*8                                    :: startJD=-999, ttpart
   INTEGER                                   :: startYear ,startMon ,startDay
   INTEGER                                   :: startHour ,startMin ,startSec
   ! === Current JD
