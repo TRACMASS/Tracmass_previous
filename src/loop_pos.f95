@@ -239,9 +239,9 @@ contains
           kb=ka+1
        endif
        z1=dble(ka)
-       if(kb==KM+1) then    ! prevent "evaporation" and put particle from the surface
-          kb=KM           
-          z1=dble(KM)-0.5d0 ! to the middle of the surface layer
+       if(kb==KM+1) then    ! prevent "evaporation" and put particle from 
+          kb=KM             ! the surface to the middle of the surface layer
+          z1=dble(KM)-0.5d0 !
        endif
 #if defined timeanalyt
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
