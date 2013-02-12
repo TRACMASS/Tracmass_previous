@@ -144,6 +144,7 @@ MODULE mod_grid
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
 #ifdef zgrid3Dt 
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: dzt
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dzu,dzv,z_r
 #elif zgrid3D
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:)     :: dzt,dzu,dzv,z_r
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dzt0surf,dzu0surf,dzv0surf
@@ -183,7 +184,7 @@ ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
-#if defined full_wflux
+#if defined full_wflux || defined explicit_w
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
@@ -201,6 +202,10 @@ ENDMODULE mod_traj
 MODULE mod_dens
 #ifdef tempsalt
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
+#ifdef roms
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: akt
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)      :: ak2
+#endif
 #endif
 ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -286,9 +291,9 @@ ENDMODULE mod_fish
 #ifdef sediment
 MODULE mod_sed
   !  REAL :: wsed,rhos,D,critvel,T,cwamp,kincrit
-  REAL*8                                       :: wsed, partdiam
-  REAL*8                                       :: rhos, cwamp, twave
-  REAL*8                                       :: critvel, kincrit
+  REAL*8                                     :: wsed, partdiam
+  REAL*8                                     :: rhos, cwamp, twave
+  REAL*8                                     :: critvel, kincrit
 
   INTEGER                                    :: nsed=0, nsusp=0
   LOGICAL                                    :: res
@@ -296,7 +301,7 @@ ENDMODULE mod_sed
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_orbital
-  REAL, ALLOCATABLE, DIMENSION(:)            :: orb
+  REAL*8, ALLOCATABLE, DIMENSION(:)          :: orb
 ENDMODULE mod_orbital
 #endif
 

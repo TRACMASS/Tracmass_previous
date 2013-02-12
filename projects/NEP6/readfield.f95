@@ -74,7 +74,10 @@ SUBROUTINE readfields
 
   uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
   vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
-  ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
+  ssh       = get2DfieldNC(trim(dataprefix) ,'zeta')
+#ifdef explicit_w
+  wvel      = get3DfieldNC(trim(dataprefix) ,'omega')
+#endif
   where (uvel > 1000)
      uvel = 0
   end where
@@ -86,6 +89,14 @@ SUBROUTINE readfields
   end where
   hs(:imt,:jmt,2) = ssh(:imt,:jmt)
 
+#ifdef explicit_w
+  wflux(:,:,:,2) = 0.
+  do j=1,jmt
+    do i=1,imt
+      wflux(i,j,0:km-1,2) = wvel(i,j,1:km)*dxdy(i,j)
+    end do
+  end do
+#endif
 
   Cs_w = get1DfieldNC (trim(dataprefix), 'Cs_w')
   sc_w = get1DfieldNC (trim(dataprefix), 's_w')
@@ -105,13 +116,26 @@ SUBROUTINE readfields
      dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
      z_r(:,:,k) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
      dzt0 = (hc*sc_w(k) + depth*Cs_w(k)) / (hc + depth)
+#ifdef zgrid3Dt
+     dzt(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+#else
      dzt(:,:,k) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+#endif
   end do
+#ifdef zgrid3Dt
+  dzt0 = dzt(:,:,km,2)
+  dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
+  dzt(:,:,km,2) = ssh(:imt,:) - dzt0
+  dzt(:,:,:,1)=dzt(:,:,:,2)
+  dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,2)*0.5 + dzt(2:imt,:,:,2)*0.5
+  dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,2)*0.5 + dzt(:,2:jmt,:,2)*0.5
+#else
   dzt0 = dzt(:,:,km)
   dzt(:,:,1:km-1)=dzt(:,:,2:km)-dzt(:,:,1:km-1)
   dzt(:,:,km) = ssh(:imt,:) - dzt0
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:)*0.5 + dzt(2:imt,:,:)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:)*0.5 + dzt(:,2:jmt,:)*0.5
+#endif
 
   do k=1,km
      uflux(:,:,k,2)   = uvel(:imt,:,k) * dzu(:,:,k) * dyu(:imt,:)
@@ -127,6 +151,8 @@ SUBROUTINE readfields
   tem(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'temp')
   sal(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'salt')
   rho(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'rho')
+  ak2(:,:,:)        = get3DfieldNC(trim(dataprefix) ,   'AKt')
+  akt(:,:,0:km-1,2) = ak2(:,:,:)
 #endif
 
   return
@@ -144,11 +170,15 @@ contains
 #ifdef explicit_w
     wflux(:,:,:,1) = wflux(:,:,:,2)
 #endif
+#ifdef zgrid3Dt
+    dzt(:,:,:,1) = dzt(:,:,:,2)
+#endif
 
 #ifdef tempsalt
     tem(:,:,:,1)   = tem(:,:,:,2)
     sal(:,:,:,1)   = sal(:,:,:,2)
     rho(:,:,:,1)   = rho(:,:,:,2)
+    akt(:,:,:,1)   = akt(:,:,:,2)
 #endif
   end subroutine datasetswap
 

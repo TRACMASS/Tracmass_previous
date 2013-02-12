@@ -22,13 +22,13 @@
 #------------------------------------------------------------------------
 #  fl12  = -Dtwodim         # Turn off vertical velocities.
 #  fl13  = -Dfull_wflux     # Use a full 3D wflux field.
-#  fl14  = -Dexplicit_w     # Use a given vertical velocity.
+  fl14  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
 #  fl15  = -Dvarbottombox   # Variable bottom box to match actual depth
 #  fl16  = -Dfreesurface    # Variable bottom box to match actual depth
 #  fl17  = -Dzvec1D         # Cell depths defined as vector
-  fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
-#  fl17  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+#  fl17  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+  fl17  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
 #  fl18  = -Dselect         # Select only one trajectory (for debugging)
 #  fl19  = -Dtracer         # Stores a simulated tracer
@@ -38,7 +38,8 @@
 #  fl22  = -Ddiffusion      # Adds a diffusion on trajectory
 #------------------------------------------------------------------------
   fl23  = -Dregional       # Turns off periodic wrapping
-  fl24  = -Dlarval_fish    # Larval fish behaviors
+#  fl24  = -Dlarval_fish    # Larval fish behaviors
+  fl25  = -Droms
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)\

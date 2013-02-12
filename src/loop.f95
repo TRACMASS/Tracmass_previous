@@ -92,7 +92,7 @@ SUBROUTINE loop
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0 ,boundError=0
-  REAL                                       :: zz
+  REAL*8                                     :: zz
 
 #if defined sediment
   ! Specific for sediment code
@@ -449,10 +449,19 @@ SUBROUTINE loop
 #endif
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
+#ifdef regional
+           if (x1.lt.0.d0 .or. x1.gt.(dble(IMT)-0.5) .or. &
+     &         y1.lt.0.d0 .or. y1.gt.(dble(JMT)-0.5)) then
+                 nexit(NEND)=nexit(NEND)+1
+                 exit niterLoop
+           endif
+           if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! index for correct cell?
+#else
            if(x1.lt.0.d0) x1=x1+dble(IMT)           ! east-west cyclic
            if(x1.gt.dble(IMT)) x1=x1-dble(IMT)      ! east-west cyclic
            if(x1.ne.dble(idint(x1))) ib=idint(x1)+1 ! index for correct cell?
            if(ib.gt.IMT) ib=ib-IMT                  ! east-west cyclic
+#endif
            if(y1.ne.dble(idint(y1))) jb=idint(y1)+1 ! index for correct cell?
            
            call errorCheck('boundError', errCode)

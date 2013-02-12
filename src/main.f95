@@ -76,6 +76,9 @@ PROGRAM main
   open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  
        ,access='direct' ,form='unformatted' ,recl=36 ,status='replace')
 #endif
+#ifdef ncwrite
+  call nc_def_output
+#endif
   
   ! === Start main loop ===
   

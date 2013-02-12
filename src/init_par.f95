@@ -167,10 +167,10 @@ SUBROUTINE init_params
          count1d  = [ km]
          start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
          count2d  = [  1 ,  1 ,subGridImax-subGridImin + 1,  &
-                               subGridJmax-subGridJmin + 1]
+     &                         subGridJmax-subGridJmin + 1]
          start3d  = [  1, subGridImin, subGridJmin,  1]
          count3d  = [  1, subGridImax - subGridImin + 1,    & 
-                          subGridJmax - subGridJmin + 1, km]
+     &                    subGridJmax - subGridJmin + 1, km]
 
          READ (8,nml=INITRUNTIME)
          READ (8,nml=INITRUNDATE)
@@ -194,7 +194,7 @@ SUBROUTINE init_params
       dtmin    =  dstep * tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
-           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+     &     ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
 
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
@@ -261,10 +261,11 @@ SUBROUTINE init_params
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
 #ifdef zgrid3Dt
-      ALLOCATE ( dzt(imt,jmt,km,nst) )   
+      ALLOCATE ( dzt(imt,jmt,km,nst) )
+      ALLOCATE ( z_r(imt,jmt,km) )
 #elif  zgrid3D
-      ALLOCATE ( dzt(imt,jmt,km) )   
-      ALLOCATE ( z_r(imt,jmt,km) )   
+      ALLOCATE ( dzt(imt,jmt,km) )
+      ALLOCATE ( z_r(imt,jmt,km) )
 #endif /*zgrid3Dt*/
 #ifdef varbottombox
       ALLOCATE ( dztb(imt,jmt,nst) )   
@@ -279,7 +280,7 @@ SUBROUTINE init_params
       hs    = 0.
       uflux = 0.
       vflux = 0.
-#ifdef full_wflux
+#if defined full_wflux || defined explicit_w
       ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
 #else
       ALLOCATE ( wflux(0:km,2) )
@@ -293,6 +294,12 @@ SUBROUTINE init_params
       tem = 0.
       sal = 0.
       rho = 0.
+#ifdef roms
+      ALLOCATE ( akt(imt,jmt,0:km,nst) )
+      ALLOCATE ( ak2(imt,jmt,km) )
+      akt = 0.
+      ak2 = 0.
+#endif
 #endif
 #ifdef larval_fish
       ALLOCATE ( fish(ntracmax, nfish_var) )

@@ -6,7 +6,7 @@
 &INITRUNDESC
   !	
   caseName     = 'NEP6',
-  caseDesc     = 'Run15'/
+  caseDesc     = 'Run22'/
   ! 
   !
 &INITRUNGRID
@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 20,
+  intrun       = 200,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -60,7 +60,7 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva        = 1,
+  kriva        = 2,
   !
   ! === Directory where input fields are stored
   inDataDir       = '/Volumes/USB2TB/NEP6/run15/averages/',

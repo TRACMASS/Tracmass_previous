@@ -77,7 +77,7 @@ elseif(ijk.eq.2) then
 #endif
 elseif(ijk.eq.3) then
  ii=ka
-#ifdef full_wflux
+#if defined full_wflux || defined explicit_w
  uu=wflux(ia ,ja ,ka   ,1)
  um=wflux(ia ,ja ,ka-1 ,1)
 #else

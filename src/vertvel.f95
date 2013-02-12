@@ -1,7 +1,6 @@
 
 subroutine vertvel(rr,ia,iam,ja,ka)
 
-#ifndef explicit_w
   
   ! === Computes the vertical velocity by integrating ===
   ! === the continuity eq. from the bottom            ===
@@ -31,6 +30,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   real*8 rr,rg,uu,um,vv,vm
   integer ia,iam,ja,ka,k,n
     
+#ifndef explicit_w
   rg=1.d0-rr
   wflux=0.d0
   
@@ -46,7 +46,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
      vm=rg*vflux(ia ,ja-1,k,NST)+rr*vflux(ia ,ja-1,k,1)
 
 ! start ifs code
-#if defined ifs
+#if defined ifs || defined roms
     do n=1,NST
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
@@ -91,8 +91,8 @@ wflux(km,:) = 0.d0
      if (kin.le.kincrit) then   !för SKB
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
-#ifdef full_wflux
-     wflux(k)=wflux(ia,ja,k,1) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
+#if defined full_wflux || explicit_w
+     wflux(ia,ja,k,1)=wflux(ia,ja,k,1) + wsedtemp * dxdy(ia,ja)   ! *dx *dy *deg**2 
 #else
     do n=1,NST
      wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
@@ -106,8 +106,9 @@ wflux(km,:) = 0.d0
   ! === fisk!   ===
 
   k3loop: do k=0,km
-#ifdef full_wflux
-     wflux(k)=wflux(ia,ja,k,1) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
+#if defined full_wflux || defined explicit_w
+     wflux(ia,ja,k,1)=wflux(ia,ja,k,1) + wfish * dxdy(ia,ja)   ! *dx *dy *deg**2
+!     wflux(k)=wflux(ia,ja,k,1) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
 #else
     do n=1,NST
      wflux(k,n)=wflux(k,n) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
@@ -116,9 +117,7 @@ wflux(km,:) = 0.d0
   end do k3loop
 #endif
 ! end fish code
+#endif /* !explicit_w */
 
   return
-#endif
 end subroutine vertvel
-
- 

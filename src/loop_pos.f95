@@ -242,6 +242,8 @@ contains
        call vertvel(rb,ia,iam,ja,ka)
 #ifdef full_wflux
        uu=wflux(ia,ja,ka,1)
+#elif defined explicit_w
+       uu=rbg*wflux(ia,ja,ka,NST)+rb*wflux(ia,ja,ka,1)
 #else
        uu=rbg*wflux(ka,NST)+rb*wflux(ka,1)
 #endif
@@ -286,6 +288,8 @@ contains
        
 #ifdef full_wflux
        if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
+#elif defined explicit_w
+       if(rbg*wflux(ia,ja,ka-1,NST)+rb*wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
 #else
        if(rbg*wflux(ka-1,NST)+rb*wflux(ka-1,1).lt.0.d0) kb=ka-1
 #endif              

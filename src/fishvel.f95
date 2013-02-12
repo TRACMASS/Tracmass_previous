@@ -38,31 +38,31 @@ length = fish(ntrac,i_length)
 !--------------DEVELOPMENT / GROWTH-----------------------
 !EGGS
 If (stage(ntrac) .eq. f_egg)then
-ec1 = 2.835455e-1 !a
-ec2 = -4.766954e-3 !a2
-ec3 = 1.436144e-1 !T
-ec4 = -4.228248e-2 !T2
-ec5 = 3.565329e-2 !Ta
-ec6 = -1.362398e-3 !Ta2
-ec7 = 4.305655e-5 !a3
-ec8 = 2.173404e-5 !Ta3
-ec9 = -2.284878e-7 !a4
-ec10 = -1.691007e-07 !Ta4
-ec11 = 7.793980e-10 !a5
-ec12 = 7.520298e-10 !Ta5
-ec13 = -1.772402e-12 !a6
-ec14 = -2.054619e-12 !Ta6
-ec15 = 2.679053e-15 !a7
-ec16 = 3.517559e-15 !Ta7
-ec17 = -2.581572e-18 !a8
-ec18 = -3.681552e-18 !Ta8
-ec19 = 1.430693e-21 !a9
-ec20 = 2.153112e-21 !Ta9
-ec21 = -3.457755e-25 !a10
-ec22 = -5.387357e-25 !Ta10
-ec23 = -3.659724e-1 !intercept
+ec1 = 2.835455d-1 !a
+ec2 = -4.766954d-3 !a2
+ec3 = 1.436144d-1 !T
+ec4 = -4.228248d-2 !T2
+ec5 = 3.565329d-2 !Ta
+ec6 = -1.362398d-3 !Ta2
+ec7 = 4.305655d-5 !a3
+ec8 = 2.173404d-5 !Ta3
+ec9 = -2.284878d-7 !a4
+ec10 = -1.691007d-07 !Ta4
+ec11 = 7.793980d-10 !a5
+ec12 = 7.520298d-10 !Ta5
+ec13 = -1.772402d-12 !a6
+ec14 = -2.054619d-12 !Ta6
+ec15 = 2.679053d-15 !a7
+ec16 = 3.517559d-15 !Ta7
+ec17 = -2.581572d-18 !a8
+ec18 = -3.681552d-18 !Ta8
+ec19 = 1.430693d-21 !a9
+ec20 = 2.153112d-21 !Ta9
+ec21 = -3.457755d-25 !a10
+ec22 = -5.387357d-25 !Ta10
+ec23 = -3.659724d-1 !intercept
 
-age = age + dtmin/3600.
+age = age + dtmin/3600.d0
 fish(ntrac,i_age) = age
 est = ec1*age + ec2*age**2 + ec3*temp + ec4*temp**2 + ec5*temp*age + &
     & ec6*temp*age**2 + ec7*age**3 + ec8*temp*age**3 + ec9*age**4 + &
@@ -87,8 +87,8 @@ Elseif (istage .ge. 19)then
 Endif
 
 !Time to hatch
-hatch_hrs = 895.97*exp(-0.194*temp) !hrs to hatch at current temp
-egg_hatch = egg_hatch + (1 / hatch_hrs) * dtmin/3600. !accum. time to hatch
+hatch_hrs = 895.97d0*exp(-0.194d0*temp) !hrs to hatch at current temp
+egg_hatch = egg_hatch + (1 / hatch_hrs) * dtmin/3600.d0 !accum. time to hatch
 fish(ntrac,i_hatchtime) = egg_hatch
 
 If (egg_hatch .ge. 1)then
@@ -97,7 +97,7 @@ If (egg_hatch .ge. 1)then
       yolk_len=4.5
    Endif
    fish(ntrac,i_length) = yolk_len
-   fish(ntrac,i_age) = 0.0		!age is now days post hatch
+   fish(ntrac,i_age) = 0.0                 !age is now days post hatch
    print*,hatch_hrs,egg_hatch,hatch_len,yolk_len
    stop
 Endif
@@ -106,16 +106,16 @@ Endif
 If (temp .le. 0.0)then
    hatch_len = 4.0
 Else
-   hatch_len = 4.8462*temp**0.046 !hatch length (mm) at current T
+   hatch_len = 4.8462*temp**0.046d0 !hatch length (mm) at current T
 Endif
-yolk_len = yolk_len + hatch_len * (1 / hatch_hrs)*dtmin/3600. !accum. hatch length
+yolk_len = yolk_len + hatch_len * (1 / hatch_hrs)*dtmin/3600.d0 !accum. hatch length
 fish(ntrac,i_hatchlength) = yolk_len
 
 Endif !Egg if
 
 !YOLKSAC
 If (stage(ntrac) .eq. f_yolk)then
-   length = 4.505 * exp(7.854 * (1 - exp(-0.004 * age))) ! SL in mm
+   length = 4.505 * exp(7.854d0 * (1.d0 - exp(-0.004d0 * age))) ! SL in mm
    fish(ntrac,i_length) = length
 
    If (length .ge. 5.5)then
@@ -174,11 +174,11 @@ elseif (temp.ge.22.5)then
  visc=0.0008904
 endif
 
-egg_sg = -9.0E-5*group**2 + 0.0007*group + 1.0227  !specific gravity
-rhof = 1.E3 * egg_sg				!density
+egg_sg = -9.0d-5*group**2 + 0.0007d0*group + 1.0227d0  !specific gravity
+rhof = 1.d3 * egg_sg				!density
 
 !Stokes eq determines depth
- wfish = -(1.0/18.0)*((rhof-rho)/visc)*grav*(Dm**2) !add random variance
+ wfish = -(1.0d0/18.0d0)*((rhof-rho)/visc)*grav*(Dm**2) !add random variance
  
 !if (istage .eq. 21)then
   !print*,hatch_hrs,egg_hatch,hatch_len,yolk_len
