@@ -137,7 +137,7 @@
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 0,
-  seedDir      = '/export/scratch/kate/roms/tracmass/projects/NEP6/',
+  seedDir      = '/Users/kate/roms/tracmass/projects/NEP6/',
   !
   ! === Seed filename (or beginning of it)
   seedFile     = 'll.out'/
