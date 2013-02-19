@@ -784,7 +784,7 @@ return
           ! if trajectory under bottom of ocean, 
           ! then put in middle of deepest layer 
           ! (this should however be impossible)
-           if( z1.le.dble(KM-kmt(ib,jb)) ) then
+           if( z1.lt.dble(KM-kmt(ib,jb)) ) then
               print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb)), &
                    kmt(ia,ja),kmt(ib,jb),ntrac
                print *,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin,dxyz
