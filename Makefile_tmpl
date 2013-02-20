@@ -1,4 +1,4 @@
-PROJECT	          = tes
+PROJECT	          = rutgersNWA
 CASE              = test
 RUNFILE 	  = runtrm
 
