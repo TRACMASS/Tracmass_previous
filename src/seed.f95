@@ -129,7 +129,7 @@ CONTAINS
          
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (1.d0,ib,ibm,jb,kb)
-#ifdef full_wflux
+#if defined full_wflux || defined explicit_w
                vol=wflux(ib,jb,kb,1)
 #elif twodim
                vol=1.

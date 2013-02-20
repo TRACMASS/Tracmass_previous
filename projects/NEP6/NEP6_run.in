@@ -63,10 +63,10 @@
   kriva        = 2,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/archive/u1/uaf/kate/NEP6/run22/averages/',
+  inDataDir       = '/Volumes/USB2TB/NEP6/run15/averages/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/scratch/kate/NEP6/ormOut/',
+  outDataDir      = '/Volumes/USB2TB/NEP6/ormOut/',
   !
   ! === Name of current trajectory run
   outDataFile     = 'NEP6_test',
@@ -137,7 +137,7 @@
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 0,
-  seedDir      = '/export/scratch/kate/roms/tracmass/projects/NEP6/',
+  seedDir      = '/Users/kate/roms/tracmass/projects/NEP6/',
   !
   ! === Seed filename (or beginning of it)
   seedFile     = 'll.out'/
