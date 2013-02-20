@@ -27,7 +27,7 @@ SUBROUTINE loop
   USE mod_write
   USE mod_pos
   USE mod_coord
-
+  USE mod_print
   ! === Selectable moules ===
   USE mod_turb
   USE mod_streamfunctions
@@ -38,7 +38,6 @@ SUBROUTINE loop
 
   ! === Loop variables ===
   INTEGER                                    :: i,  j,  k, l, m
-  INTEGER                                    :: nrh0=0
   ! === Variables to interpolate fields ===
   REAL                                       :: temp, salt, dens
   REAL                                       :: temp2, salt2, dens2
@@ -51,22 +50,8 @@ SUBROUTINE loop
   REAL                                       :: walltime, walltot
   INTEGER                                    :: wallmin, wallsec
   
-  print *,'------------------------------------------------------'  
-  print *,'Files written in directory                  :  ' ,trim(outDataDir)
-  print *,'with file names starting with               :  ' ,trim(outDataFile)
-  print *,'Time periods (steps) between two GCM fields : ' ,iter
+  call print_start_loop
   
-  print 999,intstart,intspin,intrun,intend,nff,isec,idir,nqua,num,voltr,&
-       tmin0,tmax0,smin0,smax0,rmin0,rmax0
-  
-999 format(' intstart :',i7,'   intspin :',i7, &
-         /,'   intrun :',i7,'   intend  :',i7, &
-         /,'      nff :',i2,' isec :',i2,'  idir :',i2,' nqua=',i2,' num=',i7,&
-         /,'    voltr : ',f9.0,&
-         /,'    tmin0 : ',f7.2,'  tmax0 : ',f7.2, &
-         /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
-         /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
-
   dstep = 1.d0 / dble(iter)
   dtmin = dstep * tseas
     
@@ -149,7 +134,6 @@ SUBROUTINE loop
   !=== read ocean/atmosphere GCM data files               ===
   !==========================================================
   
-  print *,'------------------------------------------------------'
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
 !  tstep=dble(intstep) 
@@ -466,54 +450,16 @@ SUBROUTINE loop
         nrj(ntrac,6)=1
      end do ntracLoop
  
-call dtime(wallarray, walltime)
-#ifdef sediment
-     print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout, & 
-          nsed,nsusp,nexit
-599  format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
-          ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
-          ' nsusp=',i8,' nexit=',9i8)
-#elif defined ifs || rco || tes || orc || baltix || orca1 || orca025  || orca025L75 || orca12 || AusCOM
-     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
-799  format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
-          ' nerror=',i4,' in ocean/atm=',i8)
-#else
-     call fancyTimer('advection','stop') 
-     wallmin = int(walltime/60)
-     wallsec = walltime - wallmin*60
-     print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot, &
-          wallmin,wallsec
-799  format(i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10, ' dt=',i2.2,':',i2.2)
-#endif
-  
-   IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND.                &
-   &   seedTime /= 2) THEN
-      EXIT intsTimeLoop
-   END IF
-  
+     call dtime(wallarray, walltime)
+     call print_cycle_loop(walltime)
+
+     IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND. &
+          seedTime /= 2) THEN
+        EXIT intsTimeLoop
+     END IF
+     
   end do intsTimeLoop
-  
-  print *,ntractot ,' trajectories calculated'
-  print *,nout     ,' trajectories exited the space and time domain'
-  print *,nexit    ,' trajectories exited through the boundaries'
-#ifdef sediment
-  print *,nsed     ,' trajectories sedimented'
-  print *,nsusp    ,' trajectories resuspended'
-  call writedata(19) !end
-  
-#endif
-#ifdef tempsalt     
-  print *,nrh0,' trajectories outside density range'
-#endif
-  print *,nloop,' infinite loops'
-  print *,nerror,' error loops'
-  print *,ntractot-nout-nrh0-nerror,' trajectories in domain'
-  
-  call writepsi
-  
-  print *,'The very end of TRACMASS run ',outDataFile,' at'
-  call system('tput bel')
-  call system('date')
+  call print_end_loop
   
 return
      
@@ -554,12 +500,12 @@ return
        INTEGER,intent(out)                 :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
        INTEGER, save                       :: dxntrac, dyntrac
-       CHARACTER(70)                       :: thinline, thickline
+       CHARACTER(79)                       :: thinline, thickline
        
-       thickline = "========================================" // &
-                   "======================================="
-       thinline  = "----------------------------------------" // &
-                   "---------------------------------------"
+       thickline = "===============================================" // &
+                   "==============================================="
+       thinline  = "-----------------------------------------------" // &
+                   "-----------------------------------------------"
        errCode = 0
        !return
        select case (trim(teststr))
@@ -588,13 +534,10 @@ return
                 print *,'ERROR: dxyz is zero'
                 print *, thinline !-----------------------------------------
                 print *,'ntrac=',ntrac,' ints=', ints
-                print *,'ib=',ib,'jb=',jb,'kb=',kb
+                call print_pos
                 print *,'kmt=',kmt(ib,jb)
                 print *,'dz=',dz(kb)
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb)
-!                print *,'dztb=',dztb(ib,jb,1)
-!                print *,'rg*hs=',rg,hs(ib,jb,nsp)
-!                print *,'rr*hs=',rr,hs(ib,jb,nsm)
                 print *, thinline !-----------------------------------------
                 print *,'The trajectory is killed'
                 print *, thickline !========================================
@@ -613,8 +556,7 @@ return
                 print *, thickline !========================================
                 print *,'Warning: Trajectory leaving model area'
                 print *, thinline !-----------------------------------------
-                print *,'iaib',ia,ib,ja,jb,ka,kb
-                print *,'xyz',x0,x1,y0,y1,z0,z1
+                call print_pos
                 call print_ds
                 print *,'tt=',tt,ts
                 print *,'ntrac=',ntrac
@@ -636,8 +578,7 @@ return
                 print *, thickline !========================================
                 print *,'Warning: Trajectory on land'
                 print *, thinline !-----------------------------------------
-                print *,'land',ia,ib,ja,jb,ka,kb,kmt(ia,ja)
-                print *,'xyz',x0,x1,y0,y1,z0,z1
+                call print_pos
                 call print_ds
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
                 print *,'hs=',hs(ia,ja,nsm),hs(ia,ja,nsp),hs(ib,jb,nsm),hs(ib,jb,nsp)
@@ -665,11 +606,7 @@ return
              print *, thickline !========================================
              print *,'ERROR: Particle overshoot in i direction'
              print *, thinline !-----------------------------------------
-             print *,ib-1,x1,ib,ntrac,ib,jb,kb
-             x1=dble(ib-1)+0.5d0
-             ib=idint(x1)+1
-             print *,'error i',ib-1,x1,ib,ntrac,ib,jb,kb
-             print *,y1,z1
+             call print_pos
              print *, thinline !-----------------------------------------
              print *,'The run is terminated'
              print *, thickline !========================================
@@ -679,8 +616,7 @@ return
              print *, thickline !========================================
              print *,'ERROR: Particle overshoot in j direction'
              print *, thinline !-----------------------------------------
-             print *,'error j',jb-1,y1,jb,ntrac,x1,z1
-             print *,'error j',jb-1,y1,jb,ntrac,ib,jb,kb
+             call print_pos
              print *, thinline !-----------------------------------------
              print *,'The run is terminated'
              print *, thickline !========================================
@@ -691,8 +627,7 @@ return
              print *, thickline !========================================
              print *,'ERROR: Particle overshoot in k direction'
              print *, thinline !-----------------------------------------
-             print *,'error k',kb-1,z1,kb,ntrac,x1,y1
-             print *,'error k',kb-1,z1,kb,ntrac,ib,jb,kb
+             call print_pos
              print *, thinline !-----------------------------------------
              print *,'The run is terminated'
              print *, thickline !========================================
@@ -701,26 +636,30 @@ return
           end if
        case ('infLoopError')
           if(niter-nrj(ntrac,4).gt.30000) then ! break infinite loops
-!             nerror=nerror+1
              if (verbose == 1) then
                 print *, thickline !========================================
                 print *,'Warning: Particle in infinite loop '
-                print *,'ntrac:',ntrac
-                print *,'niter:',niter,'nrj:',nrj(ntrac,4)
-                print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
-                print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
-                print *,'ia=',ia,' ib=',ib,' ja=',ja,' jb=',jb, & 
-                     ' ka=',ka,' kb=',kb
-                print *,'x1=',x1,' x0=',x0,' y1=',y1,' y0=',y0, & 
-                     ' z1=',z1,' z0=',z0
-                print *,'uflux(ia )=',(rbg*uflux(ia ,ja,ka,nsp) + &
-                     rb*uflux(ia ,ja,ka,nsm))*ff
-                print *,'uflux(iam)=',(rbg*uflux(iam,ja,ka,nsp) + & 
-                     rb*uflux(iam,ja,ka,nsm))*ff
-                print *,'vflux(ja  )=',(rbg*vflux(ia,ja  ,ka,nsp) + & 
-                     rb*vflux(ia,ja  ,ka,nsm))*ff
-                print *,'vflux(ja-1)=',(rbg*vflux(ia,ja-1,ka,nsp) + & 
-                     rb*vflux(ia,ja-1,ka,nsm))*ff
+                print *, thinline !-----------------------------------------
+                print '(A,I7.7,A,I6.6,A,I7.7)', ' ntrac : ', ntrac,     & 
+                                          ' niter : ', niter,     &
+                                          '    nrj : ', nrj(ntrac,4)
+                print '(A,F16.4, A,E12.3)', '  dxdy :',dxdy(ib,jb), &
+                                            '          dxyz :  ',dxyz
+
+                print '(A,I4,A,F7.2,A,F7.2)',    &
+                     '    kmt: ', kmt(ib,ja), &
+                     '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
+                call print_pos
+
+                print '(A,F7.0,A,F7.0,A,F7.0,A,F7.0)',            &
+                     ' ufl(ia) : ',(rbg*uflux(ia ,ja,ka,nsp) +    &
+                                    rb*uflux(ia ,ja,ka,nsm))*ff,  &
+                     ' ufl(ib) : ', (rbg*uflux(iam,ja,ka,nsp) +   & 
+                                    rb*uflux(iam,ja,ka,nsm))*ff,  &
+                     ' vfl(ja) : ', (rbg*vflux(ia,ja  ,ka,nsp) +  & 
+                                    rb*vflux(ia,ja  ,ka,nsm))*ff, &
+                     ' vfl(jb) : ', (rbg*vflux(ia,ja-1,ka,nsp) +  & 
+                                    rb*vflux(ia,ja-1,ka,nsm))*ff 
                 print *, thinline !-----------------------------------------
              end if
              trj(ntrac,1)=x1
@@ -747,8 +686,7 @@ return
               print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
               print *,'ntrac=',ntrac,niter 
               call print_ds
-              print *,'ia=',ia,ib,ja,jb,ka,kb
-              print *,'x0=',x0,x1,y0,y1,z0,z1
+              call print_pos
               call cross_stat(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
               call cross_stat(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
               call cross_stat(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
@@ -814,14 +752,7 @@ return
                  call print_ds
                  print *,'---------------------------------------------------'
                  print *,"   ntrac = ",ntrac
-                 write (*,'(A7, I10, A7, I10, A7, I10)'), & 
-                      ' ia= ', ia, ' ja= ', ja, ' ka= ', ka
-                 write (*,'(A7, I10, A7, I10, A7, I10)'), & 
-                      ' ib= ', ib, ' jb= ', jb, ' kb= ', kb
-                 write (*,'(A7, F10.3, A7, F10.3, A7, F10.3)'), & 
-                      ' x0= ', x0, ' y0= ', y0, ' z0= ', z0
-                 write (*,'(A7, F10.3, A7, F10.3, A7, F10.3)'), & 
-                      ' x0= ', x0, ' y0= ', y0, ' z0= ', z0
+                 call print_pos
                  write (*,'(A7, I10, A7, I10, A7, I10)'), & 
                       ' k_inv= ', KM+1-kmt(ia,ja), ' kmt= ', kmt(ia,ja), &
                       'lnd= ', mask(ia,ja)
@@ -880,6 +811,15 @@ return
     !             write (*,FMT='(4E9.2)'), dsu,dsd,dsmin,dxyz
   end subroutine print_ds
 
+  subroutine print_pos
+    print '(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)', &
+         '      ia : ', ia,    '         ib : ', ib, &
+         '         ja : ', ja, '         jb : ', jb
+    print '(A,F7.2,A,F7.2,A,F7.2,A,F7.2)','      x1 : ', x1, &
+         '      x0 : ', x0, '      y1 : ', y1, '      y0 : ', y0 
+    print '(A,I4,A,I4)',    '      ka : ', ka, '         kb : ', kb
+    print '(A,F7.2,A,F7.2)','      z1 : ', z1, '      z0 : ', z0
+  end subroutine print_pos
 
   subroutine fancyTimer(timerText ,testStr)
     IMPLICIT NONE

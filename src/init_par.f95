@@ -218,6 +218,9 @@ SUBROUTINE init_params
             intmin = (24*startJD)/ngcm+3-ngcm
          END IF
       END IF startYearCond
+
+      call  gdate (baseJD+startJD+intrun*ngcm/24.-2 ,endYear , endMon ,endDay)
+
       tseas= dble(ngcm)*3600.d0
 
       ! --- ist -1 to imt ---

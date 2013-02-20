@@ -65,6 +65,7 @@ MODULE mod_traj
   ! === Particle counters ===
   INTEGER                                    :: nout=0, nloop=0, nerror=0
   INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
+  INTEGER                                    :: nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
 
   ! === Particle positions ===
@@ -207,8 +208,11 @@ MODULE mod_time
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
   ! === JD when the run starts
   REAL*8                                    :: startJD=-999, ttpart
-  INTEGER                                   :: startYear ,startMon ,startDay
-  INTEGER                                   :: startHour ,startMin ,startSec
+  INTEGER                                   :: startYear, startMon, startDay
+  INTEGER                                   :: startHour, startMin, startSec
+  INTEGER                                   :: endYear,   endMon,   endDay
+  INTEGER                                   :: endHour,   endMin,   endSec
+
   ! === Current JD
   REAL*8                                    :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
@@ -241,6 +245,7 @@ CONTAINS
     ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
     currJDtot = (ints+ttpart)*(real(ngcm)/24)-1
     call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
+
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1)
     currFrac = (currJDtot-int(currJDtot))*24
     currHour = int(currFrac)
