@@ -27,10 +27,8 @@ MODULE mod_param
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
-
 MODULE mod_coord
 ENDMODULE mod_coord
-
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_diff
@@ -440,6 +438,15 @@ CONTAINS
     sal(:,:,:,nsm)   = sal(:,:,:,nsp)
     rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
+=======
+       wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
+#endif
+#ifdef tempsalt
+       tem(:,:,:,nsm)   = tem(:,:,:,nsp)
+       sal(:,:,:,nsm)   = sal(:,:,:,nsp)
+       rho(:,:,:,nsm)   = rho(:,:,:,nsp)
+#endif
+    end if
   end subroutine datasetswap
 
 #if defined full_wflux
@@ -476,6 +483,8 @@ CONTAINS
     enddo kloop
   end subroutine calc_implicit_vertvel
 #endif full_wflux
+
+
 ENDMODULE mod_vel
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
