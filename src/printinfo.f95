@@ -159,10 +159,19 @@ CONTAINS
 !         /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
 !         /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
     print *, thinline !--------------------------------------------------- 
+    print *,'t-step        run        out        err '  // & 
+            '       tot   dt  model date'
+    print *, thinline !--------------------------------------------------- 
+
+
 
   end subroutine print_start_loop
 
-  subroutine print_cycle_loop(walltime)
+  subroutine print_cycle_loop()
+  ! === Timing ===
+    INTEGER, dimension(3)                      :: itimearray 
+    INTEGER                                    :: sysrate, sysmax
+    INTEGER, save                              :: currclock, lastclock=0
     REAL, dimension(2)                         :: wallarray 
     REAL                                       :: walltime, walltot
     INTEGER                                    :: wallmin, wallsec
@@ -178,11 +187,19 @@ CONTAINS
 799 format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
          ' nerror=',i4,' in ocean/atm=',i8)
 #else
+    call SYSTEM_CLOCK(currclock, sysrate, sysmax)
+    if (lastclock == 0) lastclock = currclock
+    walltime = (currclock - lastclock)/1000
+    lastclock = currclock
+    !call dtime(wallarray, walltime)
     wallmin = int(walltime/60)
     wallsec = walltime - wallmin*60
     print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot, &
-         wallmin,wallsec
-799 format(i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10, ' dt=',i2.2,':',i2.2)
+         wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin 
+799 format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
+         i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
+         i2.2, ':', i2.2)
+!799 format(i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10, ' dt=',i2.2,':',i2.2)
 #endif
   end subroutine print_cycle_loop
 

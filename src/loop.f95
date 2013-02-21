@@ -45,10 +45,6 @@ SUBROUTINE loop
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
-  ! === Timing ===
-  REAL, dimension(2)                         :: wallarray 
-  REAL                                       :: walltime, walltot
-  INTEGER                                    :: wallmin, wallsec
   
   call print_start_loop
   
@@ -148,7 +144,6 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  call dtime(wallarray, walltime)
   intsTimeLoop: do ints=intstart+1,intstart+intrun
 !  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
@@ -450,8 +445,7 @@ SUBROUTINE loop
         nrj(ntrac,6)=1
      end do ntracLoop
  
-     call dtime(wallarray, walltime)
-     call print_cycle_loop(walltime)
+     call print_cycle_loop()
 
      IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND. &
           seedTime /= 2) THEN
@@ -627,6 +621,7 @@ return
              print *, thickline !========================================
              print *,'ERROR: Particle overshoot in k direction'
              print *, thinline !-----------------------------------------
+             call print_grd
              call print_pos
              print *, thinline !-----------------------------------------
              print *,'The run is terminated'
@@ -643,12 +638,7 @@ return
                 print '(A,I7.7,A,I6.6,A,I7.7)', ' ntrac : ', ntrac,     & 
                                           ' niter : ', niter,     &
                                           '    nrj : ', nrj(ntrac,4)
-                print '(A,F16.4, A,E12.3)', '  dxdy :',dxdy(ib,jb), &
-                                            '          dxyz :  ',dxyz
-
-                print '(A,I4,A,F7.2,A,F7.2)',    &
-                     '    kmt: ', kmt(ib,ja), &
-                     '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
+                call print_grd
                 call print_pos
 
                 print '(A,F7.0,A,F7.0,A,F7.0,A,F7.0)',            &
@@ -810,6 +800,19 @@ return
     !write (*,FMT='(A, 5E9.2)'),' ds=',ds,dse,dsw,dsn,dss
     !             write (*,FMT='(4E9.2)'), dsu,dsd,dsmin,dxyz
   end subroutine print_ds
+
+  subroutine print_grd
+    print '(A,F16.4, A,E12.3)', '  dxdy :',dxdy(ib,jb), &
+         '          dxyz :  ',dxyz
+
+    print '(A,I4,A,F7.2,A,F7.2)',    &
+         '    kmt: ', kmt(ib,ja), &
+#if defined zgrid3Dt || defined zgrid3D
+         '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
+#else
+         '    dz(k) : ', dz(kb), '   dzt :  ', 0
+#endif
+       end subroutine print_grd
 
   subroutine print_pos
     print '(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)', &

@@ -31,7 +31,7 @@
 &INITRUNTIME
   !
   ! === Number of initial datasets
-  intmin       = 1,
+  intmin       = 100,
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
@@ -43,9 +43,9 @@
  &INITRUNDATE
   !
   startHour         = 12,
-  startDay          = 05,
-  startMon          = 05,
-  startYear         = 2005/
+  startDay          = 01,
+  startMon          = 01,
+  startYear         = 2000/
   !
   !
   &INITRUNWRITE
