@@ -804,7 +804,7 @@ return
         case ('airborneError')
            ! if trajectory above sea level,
            ! then put back in the middle of shallowest layer (evaporation)
-           if( z1.ge.dble(KM) ) then
+           if( z1.gt.dble(KM) ) then
               z1=dble(KM)-0.5d0
               kb=KM
               errCode = -50

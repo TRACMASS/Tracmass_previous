@@ -86,6 +86,7 @@ CONTAINS
          if (ijst <= 1)   cycle startLoop
          if (iist >= imt) cycle startLoop
          if (ijst >= jmt) cycle startLoop
+         if (ikst == km+1)  ikst = km
          if (ikst > km)   cycle startLoop
          if (kmt(iist,ijst) == 0) cycle startLoop
 
