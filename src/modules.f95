@@ -438,15 +438,6 @@ CONTAINS
     sal(:,:,:,nsm)   = sal(:,:,:,nsp)
     rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
-=======
-       wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
-#endif
-#ifdef tempsalt
-       tem(:,:,:,nsm)   = tem(:,:,:,nsp)
-       sal(:,:,:,nsm)   = sal(:,:,:,nsp)
-       rho(:,:,:,nsm)   = rho(:,:,:,nsp)
-#endif
-    end if
   end subroutine datasetswap
 
 #if defined full_wflux
