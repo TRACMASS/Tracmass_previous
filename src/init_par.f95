@@ -23,7 +23,10 @@ SUBROUTINE init_params
    USE mod_traj
    USE mod_dens
    USE mod_buoyancy
-   USE mod_streamfunctions
+   USE mod_streamxy
+   USE mod_streamv
+   USE mod_streamr
+   USE mod_stream_thermohaline
    USE mod_tracer
    USE mod_getfile
    
@@ -34,10 +37,14 @@ SUBROUTINE init_params
    USE mod_orbital
    USE mod_sed
 #endif
+#if defined larval_fish
+  USE mod_fish
+#endif /*fish*/
    IMPLICIT NONE
 
 !!----------------------------------------------------------------------------
    
+   INTEGER                                    :: iargc
    INTEGER                                    ::  argint1 ,argint2
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
@@ -132,20 +139,21 @@ SUBROUTINE init_params
    
    CLOSE (8)
 
-   print *,'Run file    : ',trim(projdir)//'/'//trim(Case)//'_run.in'
+   print *,' runfile =  ',trim(projdir)//'/'//trim(Case)//'_run.in'
+
    OPEN (8,file=trim(projdir)//'/'//trim(Case)//'_run.in',     &
         & status='OLD', delim='APOSTROPHE')
    READ (8,nml=INITRUNDESC)
    READ (8,nml=INITRUNGRID)
    SELECT CASE (subGrid)
    CASE (0)          
-      PRINT *,'Sub-grid    : Use the Full grid.'     
-      subGridImin =   1 
+      PRINT *,'Use the Full grid.'     
+      subGridImin =   1
       subGridJmin =   1
       subGridImax = imt
       subGridJmax = jmt 
    CASE (1)
-      PRINT *,'Sub-grid    : ', subGridImin ,subGridImax, &
+      PRINT *,'Use a subgrid: ', subGridImin ,subGridImax, &
            &   subGridJmin ,subGridJmax
       imt = subGridImax-subGridImin+1
       jmt = subGridJmax-subGridJmin+1
@@ -159,10 +167,10 @@ SUBROUTINE init_params
          count1d  = [ km]
          start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
          count2d  = [  1 ,  1 ,subGridImax-subGridImin + 1,  &
-                               subGridJmax-subGridJmin + 1]
+     &                         subGridJmax-subGridJmin + 1]
          start3d  = [  1, subGridImin, subGridJmin,  1]
          count3d  = [  1, subGridImax - subGridImin + 1,    & 
-                          subGridJmax - subGridJmin + 1, km]
+     &                    subGridJmax - subGridJmin + 1, km]
 
          READ (8,nml=INITRUNTIME)
          READ (8,nml=INITRUNDATE)
@@ -186,7 +194,8 @@ SUBROUTINE init_params
       dtmin    =  dstep * tseas
       baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
-           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+     &     ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
          CALL getarg(2,inparg)
@@ -210,8 +219,8 @@ SUBROUTINE init_params
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
             intmin      = (startJD)/(ngcm/24)+1
-         ELSE ! this needs to be verified
-            intmin      = (24*startJD)/ngcm+3-ngcm
+         ELSE ! this is a quick fix to avoid division by zero when ngcm < 24
+            intmin      = int(real(startJD)/(real(ngcm)/24)+1)
          END IF
       END IF startYearCond
 
@@ -252,12 +261,14 @@ SUBROUTINE init_params
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
 #ifdef zgrid3Dt
-      ALLOCATE ( dzt(imt,jmt,km,nst) )   
+      ALLOCATE ( dzt(imt,jmt,km,nst) )
+      ALLOCATE ( z_r(imt,jmt,km) )
 #elif  zgrid3D
-      ALLOCATE ( dzt(imt,jmt,km) )   
+      ALLOCATE ( dzt(imt,jmt,km) )
+      ALLOCATE ( z_r(imt,jmt,km) )
 #endif /*zgrid3Dt*/
 #ifdef varbottombox
-      ALLOCATE ( dztb(imt,jmt,nst) )  !should probably be changed to  dztb(imt,jmt)
+      ALLOCATE ( dztb(imt,jmt,nst) )   
 #endif /*varbottombox*/
       ALLOCATE ( dxdy(imt,jmt) )   
       ALLOCATE ( kmt(imt,jmt), dz(km) )
@@ -269,22 +280,13 @@ SUBROUTINE init_params
       hs    = 0.
       uflux = 0.
       vflux = 0.
-#ifdef full_wflux
-      ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km,NST) )
+#if defined full_wflux || defined explicit_w
+      ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km ,2) )
 #else
-      ALLOCATE ( wflux(0:km,NST) )
+      ALLOCATE ( wflux(0:km,2) )
 #endif
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
-      
-      ! === Init mod_traj ===
       ALLOCATE ( trj(ntracmax,NTRJ), nrj(ntracmax,NNRJ) )
-      ALLOCATE ( nexit(NEND) ) 
-      nrj = 0
-      trj = 0.d0
-      nexit = 0
-      ntractot = 0
-
-
 #ifdef tempsalt
       ALLOCATE ( tem(imt,jmt,km,nst) ) 
       ALLOCATE ( sal(imt,jmt,km,nst) )
@@ -292,6 +294,21 @@ SUBROUTINE init_params
       tem = 0.
       sal = 0.
       rho = 0.
+#ifdef roms
+      ALLOCATE ( akt(imt,jmt,0:km,nst) )
+      ALLOCATE ( ak2(imt,jmt,km) )
+      akt = 0.
+      ak2 = 0.
+#endif
+#endif
+#ifdef larval_fish
+      ALLOCATE ( fish(ntracmax, nfish_var) )
+      ALLOCATE ( stage(ntracmax) )
+      stage = f_egg
+      fish(:, i_age) = 0.00
+      fish(:, i_hatchtime) = 0.00
+      fish(:, i_hatchlength) = 0.0
+      fish(:, i_length) = 0.0
 #endif
 
       ! --- Allocate Lagrangian stream functions ---
@@ -324,8 +341,6 @@ SUBROUTINE init_params
       ! --- Allocate sedimentation data ---
 #ifdef sediment
       ALLOCATE (orb(km) )
-      nsed = 0
-      nsusp = 0
 #endif
 
 END SUBROUTINE init_params

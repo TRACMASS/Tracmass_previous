@@ -19,30 +19,39 @@ SUBROUTINE readfields
   IMPLICIT none
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   ! = Variables for filename generation 
-  CHARACTER (len=200)                     :: zfile
-  CHARACTER (len=200), SAVE               :: dataprefix,gridFileT,gridFileU,gridFileV,fieldFile
+  CHARACTER                                  :: dates(62)*17
+  CHARACTER (len=200)                        :: dataprefix, dstamp
+  INTEGER                                    :: intpart1 ,intpart2
+  INTEGER                                    :: ndates
 
   ! = Loop variables
-  INTEGER                                 :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
-  INTEGER                                 :: kbot,ktop
-  INTEGER, SAVE                           :: julian,julian5,nread,npremier,ndernier
-  INTEGER, SAVE                           :: ncidt,ncidu,ncidv,varidt,varidu,varidv
+  INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
+  INTEGER                                      :: kbot,ktop
+  INTEGER, SAVE                                :: julian
 
   ! = Variables used for getfield procedures
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)        :: temp2d_simp
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_simp
+  CHARACTER (len=200)                        :: gridFile ,fieldFile, zfile
 
-  REAL*4 						             :: dd,uint,vint,zint
+  INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=75
+
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)         	:: temp2d_simp
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)       	:: temp3d_simp
+
+  REAL*4 										:: dd,dmult,uint,vint,zint
   
 #ifdef tempsalt
  REAL*4, ALLOCATABLE, DIMENSION(:) :: tempb, saltb, rhob, depthb,latb
 #endif
 
  LOGICAL around
- 
- 
 
 !---------------------------------------------------------------
+
+#ifdef initxyt
+  alloCondGrid: if ( .not. allocated (ntimask) ) then
+     allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(NTID,IJKMAX2,3) )
+  end if alloCondGrid
+#endif
 
 
  alloCondUVW: if(.not. allocated (temp2d_simp)) then
@@ -50,13 +59,12 @@ SUBROUTINE readfields
 #ifdef tempsalt
    allocate ( tempb(KM), saltb(KM), rhob(KM), depthb(KM), latb(KM))
 #endif
-   end if alloCondUVW
-
-
-  
+ end if alloCondUVW
+ 
+  call datasetswap
 
 ! === Initialising fields ===
-initFieldcond: if(ints==intstart) then
+  initFieldcond: if(ints.eq.intstart) then
      hs     = 0.
      uflux  = 0.
      vflux  = 0.
@@ -70,235 +78,120 @@ initFieldcond: if(ints==intstart) then
  currDay=startDay
  currMon=startMon
  currYear=startYear
- nread=0
-
- if(nff==1) then
-  npremier=1             ; ndernier= fieldsPerFile
-  currYear=yearmin
- elseif(nff==-1) then
-  npremier=fieldsPerFile ; ndernier=1
-  currYear=yearmax
-  currMon=12
+ julian=1
+ if(ngcm.le.24) then
+  currHour=24-ngcm
+  currDay=startDay-5
+  currMon=startMon
  endif
- 
- 
-#ifdef seasonal
-  nsp=0
-  print *,'nff ggr denna',12/NST
-  if(ngcm/=365*24/NST) stop 7777
-#else
-  nsp=2 ; nsm=1
-#endif
-
      
-else ! i.e. when ints/=intstart
+else
+
+! ----------------------------------------------------------------
 
 ! === Update clockworks ===
-
-#ifdef seasonal
-  currMon=currMon+nff*12/NST
-#else
-  currMon=currMon+nff
-#endif
-
- if(ngcm>=730) then ! monthly or coarser time resolution
-
-  if(currMon > 12) then
-   currMon=currMon-12
-   currYear=currYear+1
-  elseif(currMon < 1) then
-   currMon=currMon+12
-   currYear=currYear-1
-  endif
-     
- else ! For the 5 day or more often GCM data
+  currDay=currDay+nff*ngcm/24
+  julian=julian+nff*ngcm/24
   
-! === Update clockworks ===
-  currHour= currHour+nff*ngcm
-  
-  if(currHour>=24) then
-   currHour= currHour-24
-   currDay=currDay+1
-  elseif(currHour<0) then 
-   currHour=currHour+24
-   currDay=currDay-1
-  endif
-  
-  if(currDay > idmax(currMon, currYear)) then 
-   currDay=currDay-idmax(currMon, currYear)
-   currMon=currMon+1
-   if(currMon == 13) then
-    currMon=1
-    currYear=currYear+1
-    if(currYear.eq.yearmax+1) currYear=yearmin
-   endif
+  if(currDay > idmax(currMon,1999)) then ! why 1999 and not currYear?????
+    currDay=currDay-idmax(currMon,1999)
+    currMon=currMon+1
+    if(currMon == 13) then
+       currMon=1
+       currYear=currYear+1
+     if(currYear.eq.yearmax+1) currYear=yearmin
+    endif
   elseif(currDay <=0) then
-   currMon=currMon-1
-   if(currMon == 0) then
-    currMon=12
-    currYear=currYear-1
-    if(currYear.eq.yearmin-1) currYear=yearmax
+    currMon=currMon-1
+    if(currMon == 0) then
+       currMon=12
+       currYear=currYear-1
+     if(currYear.eq.yearmin-1) currYear=yearmax
+    endif
+    currDay=currDay+idmax(currMon,1999)
    endif
-   currDay=currDay+idmax(currMon, currYear)
-  endif
-   
- endif
 
 endif initFieldcond
+! === Time number ===
+ntime=10000*currYear+100*currMon+currDay
 
- ntime=100*currYear+currMon
-
-#ifdef seasonal
- nsp=nsp+1
- nsm=nsp-1
- if(nsp==NST+1) then
-  nsp=1
- elseif(nsp==0) then
-  nsp=NST
- endif
- if(nsm==NST+1) then
-  nsm=1
- elseif(nsp==0) then
-  nsm=NST
- endif
- 
-!print *,'ntime=',ntime,ints,nsp,nsm,CurrMon,tem(IMT/2,100,75,:),vflux(IMT/2,100,75,:)
-
- if(abs(ints)>NST) return
- nread=CurrMon
-#else
-  call datasetswap
-  ntime=1000000*currYear+10000*currMon+100*currDay+currHour
-  julian   =  jdate(currYear  , currMon  , currDay) -  jdate(baseYear  ,baseMon  ,baseDay) +1
-  julian5=5*int(real(julian-1)/5.)+1
-  nread=nread+1
-  if(nread>fieldsPerFile) nread=1
-#endif
-
+! ------------------------------------------------------------
 
 ! === Find the file for this timestep ===
-start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
-start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
-  
 
- if(ngcm==6) then
-  dataprefix='xxxx/ORCA025.L75-SLB2_6h_yxxxx_d000-000_grid_'
-  write(dataprefix(1:4),'(i4)') currYear
-  write(dataprefix(27:30),'(i4)') currYear
-  if(julian5  <10) then
-   write(dataprefix(35:35),'(i1)') julian5
-  elseif(julian5  <100) then
-   write(dataprefix(34:35),'(i2)') julian5
-  else
-   write(dataprefix(33:35),'(i3)') julian5
-  endif
-  if(julian5+4    <10) then
-   write( dataprefix(39:39),'(i1)') julian5+4
-  elseif(julian5+4<100) then
-   write(dataprefix(38:39),'(i2)') julian5+4
-  else
-   write(dataprefix(37:39),'(i3)') julian5+4
-  endif
- elseif(ngcm==5*24) then
-  stop 3957 ! to be implemented
- elseif(ngcm>=730) then
-  dataprefix='1999/ORCA025.L75-SLB24_730h_19990101_19991231_grid_'
- endif
-
-
-
-if(nread==npremier) then
-
+ dataprefix='xxxx/ORCA025L75-SLB2_6h_yxxxx_dxxx-xxx_grid_'
+ write(dataprefix(1:4),'(i4)') currYear
+ write(dataprefix(26:29),'(i4)') currYear
+ print *,'dataprefix=',dataprefix,currday,julian
  fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
- gridFileT=trim(fieldFile)//'T.nc'   ! SSH + T + S
- print *,nread,gridFileT
- inquire(file=trim(gridFileT),exist=around)
- if(.not.around) then
-  zfile='gunzip -c '//trim(gridFileT)//'.gz > tmpT'
-  CALL system(zfile)
-  gridFileT='tmpT'
- endif
- ierr=NF90_OPEN(trim(gridFileT),NF90_NOWRITE,ncidt)
+ print *,'fieldFile=',fieldFile
 
+! Sea surface height
+gridFile=trim(fieldFile)//'T.nc'
+ print *,'gridFile=',gridFile
+ stop 4967
+inquire(file=trim(gridFile),exist=around)
+if(.not.around) then
+ zfile='gunzip -c '//trim(gridFile)//'.gz > tmp'
+ CALL system(zfile)
+ gridFile='tmp'
 endif
 
- print *,'nread=',nread
-
-
-ierr=NF90_INQ_VARID(ncidt,'sossheig',varidt)
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+ierr=NF90_INQ_VARID(ncid,'sossheig',varid)
 if(ierr.ne.0) then
- print *,'file not found:',trim(gridFileT)
+ print *,'file not found:',trim(gridFile)
  stop 3768
 endif
-
-
-
-ierr=NF90_GET_VAR(ncidt,varidt,temp2d_simp,start2d,count2d)
+ierr=NF90_GET_VAR(ncid,varid,temp2d_simp,start2d,count2d)
 if(ierr.ne.0) stop 3799
-!ierr=NF90_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 
 do j=1,JMT
  do i=1,IMT+1
   ii=i
-  if(ii==IMT+1) ii=1
-  hs(i,j,nsp)=temp2d_simp(ii,j)
-  if(hs(i,j,nsp)>100.) hs(i,j,nsp)=0.
-  if(abs(hs(i,j,nsp))>10.) then
-   print *,i,j,j,hs(i,j,nsp),kmt(ii,j)
-   stop 3956
-  endif
-  if(hs(i,j,nsp)/=0. .and. kmt(ii,j)==0.) then
-   print *,i,j,j,hs(i,j,nsp),kmt(ii,j)
-   stop 3957
-  endif
-  if(hs(i,j,nsp)==0. .and. kmt(ii,j)/=0.) then
-   print *,i,j,j,hs(i,j,nsp),kmt(ii,j)
-   stop 3958
-  endif
-
+  if(ii.eq.IMT+1) ii=1
+  hs(i,j,2)=temp2d_simp(ii,j)
  enddo
 enddo 
 
 do i=4,IMT
  ii=IMT+4-i
- hs(i,JMT+1,nsp)=hs(ii,JMT-3,nsp)  !  north fold 
+ hs(i,JMT+1,2)=hs(ii,JMT-3,2)  !  north fold 
 enddo
 
 #ifdef tempsalt 
 ! Temperature
 !gridFile = trim(fieldFile)//'T.nc'
-!ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-!if(ierr.ne.0) stop 5751
-ierr=NF90_INQ_VARID(ncidt,'votemper',varidt) 
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5751
+ierr=NF90_INQ_VARID(ncid,'votemper',varid) 
 if(ierr.ne.0) stop 3769
-ierr=NF90_GET_VAR(ncidt,varidt,temp3d_simp,start3d,count3d)
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
-!ierr=NF90_CLOSE(ncid)
+ierr=NF90_CLOSE(ncid)
 do i=1,IMT
  do j=1,JMT
   do k=1,kmt(i,j)
    kk=KM+1-k
-   tem(i,j,kk,nsp)=temp3d_simp(i,j,k)
+   tem(i,j,kk,2)=temp3d_simp(i,j,k)
   enddo
  enddo
 enddo
-
-print *,'ntime=',ntime,nread,trim(dataprefix),tem(IMT/2,JMT/2,75,nsp)
+   
 ! Salinity
-!ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-!if(ierr.ne.0) stop 5752
-ierr=NF90_INQ_VARID(ncidt,'vosaline',varidt) 
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5752
+ierr=NF90_INQ_VARID(ncid,'vosaline',varid) 
 if(ierr.ne.0) stop 3769
-ierr=NF90_GET_VAR(ncidt,varidt,temp3d_simp,start3d,count3d)
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
-if(nread.eq.20) then
-ierr=NF90_CLOSE(ncidt)
-endif
+ierr=NF90_CLOSE(ncid)
 do i=1,IMT
  do j=1,JMT
   do k=1,kmt(i,j)
    kk=KM+1-k
-   sal(i,j,kk,nsp)=temp3d_simp(i,j,k)
+   sal(i,j,kk,2)=temp3d_simp(i,j,k)
   enddo
  enddo
 enddo
@@ -309,119 +202,79 @@ do j=1,JMT
  do i=1,IMT
   do k=1,kmt(i,j)
    kk=KM+1-k
-   tempb(k)=tem(i,j,kk,nsp)
-   saltb(k)=sal(i,j,kk,nsp)
+   tempb(k)=tem(i,j,kk,2)
+   saltb(k)=sal(i,j,kk,2)
   enddo
   call statvd(tempb, saltb, rhob ,KM ,depthb ,latb)
   do k=1,kmt(i,j)
    kk=KM+1-k
-   rho(i,j,kk,nsp)=rhob(k)-1000.
+   rho(i,j,kk,2)=rhob(k)-1000.
   enddo
  enddo
 enddo
 
 #endif     
 
-if(nread==npremier) then
- ! u velocity
- gridFileU=trim(fieldFile)//'U.nc'
- inquire(file=trim(gridFileU),exist=around)
- if(.not.around) then
-  zfile='gunzip -c '//trim(gridFileU)//'.gz > tmpU'
-  CALL system(zfile)
-  gridFileU='tmpU'
- endif
- ierr=NF90_OPEN(trim(gridFileU),NF90_NOWRITE,ncidu)
- if(ierr.ne.0) stop 5753
+dmult=1.  ! amplification of the velocity amplitude by simple multiplication
+! u velocity
+gridFile=trim(fieldFile)//'U.nc'
+inquire(file=trim(gridFile),exist=around)
+if(.not.around) then
+ zfile='gunzip -c '//trim(gridFile)//'.gz > tmp'
+ CALL system(zfile)
+ gridFile='tmp'
 endif
 
-ierr=NF90_INQ_VARID(ncidu,'vozocrtx',varidu) 
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
+if(ierr.ne.0) stop 5753
+ierr=NF90_INQ_VARID(ncid,'vozocrtx',varid) 
 if(ierr.ne.0) stop 3769
-ierr=NF90_GET_VAR(ncidu,varidu,temp3d_simp,start3d,count3d)
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
-if(nread.eq.20) then
-ierr=NF90_CLOSE(ncidu)
-endif
-
-
-do i=1,IMT
- do j=1,JMT
-  do k=1,KM
-  if(temp3d_simp(i,j,k)>1.e10) temp3d_simp(i,j,k)=0.
-  
-  if(k> kmu(i,j) .and. temp3d_simp(i,j,k)/=0.) then
-   print *,i,j,k,kmu(i,j),temp3d_simp(i,j,k)
-   stop 3952
-  endif
-  if(k<=kmu(i,j) .and. temp3d_simp(i,j,k)==0.) stop 3953
-  enddo
- enddo
-enddo
-
+ierr=NF90_CLOSE(ncid)
 do i=1,IMT
  do j=1,JMT
   do k=1,kmu(i,j)
    kk=KM+1-k
    dd = dz(kk) 
-   if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i+1,j,nsp))
+   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i+1,j,2))
    if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
-   if(dd>1000.) stop 4067
-   uflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dyu(i,j) * dd 
+   uflux(i,j,kk,2)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
   enddo
  enddo
 enddo
-
 
 ! v velocity
-if(nread==npremier) then
-gridFileV=trim(fieldFile)//'V.nc'
-inquire(file=trim(gridFileV),exist=around)
+gridFile=trim(fieldFile)//'V.nc'
+inquire(file=trim(gridFile),exist=around)
 if(.not.around) then
- zfile='gunzip -c '//trim(gridFileV)//'.gz > tmpV'
+ zfile='gunzip -c '//trim(gridFile)//'.gz > tmp'
  CALL system(zfile)
- gridFileV='tmpV'
+ gridFile='tmp'
 endif
 
-ierr=NF90_OPEN(trim(gridFileV),NF90_NOWRITE,ncidv)
+ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
 if(ierr.ne.0) stop 5754
-endif
-ierr=NF90_INQ_VARID(ncidv,'vomecrty',varidv) ! kmt field
+ierr=NF90_INQ_VARID(ncid,'vomecrty',varid) ! kmt field
 if(ierr.ne.0) stop 3770
-ierr=NF90_GET_VAR(ncidv,varidv,temp3d_simp,start3d,count3d)
+ierr=NF90_GET_VAR(ncid,varid,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
-if(nread.eq.20) then
-ierr=NF90_CLOSE(ncidv)
-endif
-
-do i=1,IMT
- do j=1,JMT
-  do k=1,KM
-  if(temp3d_simp(i,j,k)>1.e10) temp3d_simp(i,j,k)=0.
-  if(k> kmv(i,j) .and. temp3d_simp(i,j,k)/=0.) then
-   print *,i,j,k,kmv(i,j),temp3d_simp(i,j,k)
-   stop 3954
-  endif
-  if(k<=kmv(i,j) .and. temp3d_simp(i,j,k)==0.) stop 3955
-  enddo
- enddo
-enddo
-
+ierr=NF90_CLOSE(ncid)
 
 !  north fold 
-!do i=4,IMT
-! ii=IMT+4-i
-! vflux(i,JMT,:,nsp)=-vflux(ii,JMT-3,:,nsp)
-!enddo
+do i=4,IMT
+ ii=IMT+4-i
+! vflux(i,JMT,:,2)=-vflux(ii,JMT-3,:,2)
+enddo
 
 do i=1,IMT
  do j=1,JMT
   do k=1,kmv(i,j)
    kk=KM+1-k
    dd = dz(kk) 
-   if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i,j+1,nsp))
+   if(k.eq.1) dd = dd + 0.5*(hs(i,j,2) + hs(i,j+1,2))
    if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
-   if(dd>1000.) stop 4068
-   vflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dxv(i,j) * dd 
+   vflux(i,j,kk,2)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
   enddo
  enddo
 enddo
@@ -435,20 +288,20 @@ do i=1,imt
  do j=1,jmt
  
   uint=0. ; vint=0. ; zint=0.
-  if(ktop.eq.KM) zint=hs(i,j,nsp)
+  if(ktop.eq.KM) zint=hs(i,j,2)
   do k=kbot,ktop
-   uint=uint+uflux(i,j,k,nsp) ! integrated transport
-   vint=vint+vflux(i,j,k,nsp)
+   uint=uint+uflux(i,j,k,2) ! integrated transport
+   vint=vint+vflux(i,j,k,2)
    zint=zint+dz(k)          ! total depth of drougued drifter
   enddo
   ! weighted transport for each layer
   do k=kbot,KM
    if(k.ne.KM) then
-    uflux(i,j,k,nsp)=uint*dz(k)/zint 
-    vflux(i,j,k,nsp)=vint*dz(k)/zint
+    uflux(i,j,k,2)=uint*dz(k)/zint 
+    vflux(i,j,k,2)=vint*dz(k)/zint
    else
-    uflux(i,j,k,nsp)=uint*(hs(i,j,nsp)+dz(k))/zint
-    vflux(i,j,k,nsp)=vint*(hs(i,j,nsp)+dz(k))/zint
+    uflux(i,j,k,2)=uint*(hs(i,j,2)+dz(k))/zint
+    vflux(i,j,k,2)=vint*(hs(i,j,2)+dz(k))/zint
    endif
   enddo
 
@@ -474,19 +327,21 @@ contains
 
   
   subroutine datasetswap
-    hs(:,:,nsm)      = hs(:,:,nsp)
-    uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
-    vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
+    hs(:,:,1)      = hs(:,:,2)
+    uflux(:,:,:,1) = uflux(:,:,:,2)
+    vflux(:,:,:,1) = vflux(:,:,:,2)
 #ifdef explicit_w
-    wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
+    wflux(:,:,:,1) = wflux(:,:,:,2)
 #endif
 
 #ifdef tempsalt
-    tem(:,:,:,nsm)   = tem(:,:,:,nsp)
-    sal(:,:,:,nsm)   = sal(:,:,:,nsp)
-    rho(:,:,:,nsm)   = rho(:,:,:,nsp)
+    tem(:,:,:,1)   = tem(:,:,:,2)
+    sal(:,:,:,1)   = sal(:,:,:,2)
+    rho(:,:,:,1)   = rho(:,:,:,2)
 #endif
   end subroutine datasetswap
   
 end subroutine readfields
+
+
 

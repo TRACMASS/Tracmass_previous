@@ -1,0 +1,18 @@
+import pytraj
+
+tr = pytraj.Trm('NEP6', 'NEP6')
+tr.load()                    #Load the last generated file
+tr.load(jd=1234)             #Load the file starting at 1234
+tr.load (filename"file.bin") #Load the file named file.bin   
+
+# the positions will be in tr as x and y, particle ID is ntrac and
+# time ntrac or jd.
+
+# Before using this module, set the environmental variable TRM 
+# to point to the directory with your TRACMASS project. Add the 
+# following line to the .profile, .bashrc, or other configuration
+# file in your home directory:
+
+#     export TRMDIR="/path/to/the/trm/root/dir/"        
+setenv TRMDIR /export/scratch/kate/roms/tracmass/
+

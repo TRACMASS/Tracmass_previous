@@ -125,10 +125,8 @@ SUBROUTINE setupgrid
 !    lat(i,j)=temp2d_doub(i,j)
 !  enddo
 !  enddo
-!  do j=JMT,1,-1
-!  print *,j,lat(IMT/2,j)
-!  enddo
-!  stop 3486
+!  print *,(lat(IMT/2,j),j=1,JMT)
+  
   
   
   

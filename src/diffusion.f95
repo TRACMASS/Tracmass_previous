@@ -18,8 +18,8 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
 	implicit none
  	INTEGER						:: ib,jb,kb		! Box indices
  	INTEGER						:: itno			! Number of iterations
-	REAL						:: xd, yd, zd	! Displacement
-	REAL						:: tmpX, tmpY, tmpZ		! Temporal position
+	REAL (KIND=DP)					:: xd, yd, zd	! Displacement
+	REAL (KIND=DP)					:: tmpX, tmpY, tmpZ		! Temporal position
 	INTEGER						:: tmpi, tmpj, tmpk		! Temporal box indices
 	REAL (KIND=DP), INTENT(OUT)	:: x1, y1, z1			! Final position
 	REAL (KIND=DP), INTENT(IN)	:: dt			! Time step
@@ -147,13 +147,13 @@ SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt)
 #endif
 	IMPLICIT NONE
 	
-	REAL						:: q1, q2, q3, q4, R
-	REAL, INTENT(OUT)			:: xd, yd, zd
+	REAL (KIND=DP)					:: q1, q2, q3, q4, R
+	REAL (KIND=DP), INTENT(OUT)			:: xd, yd, zd
 	REAL (KIND=DP), INTENT(IN)	:: dt
-!	REAL, PARAMETER				:: PI = 3.14159265358979323846
+!	REAL (KIND=DP), PARAMETER	:: PI = 3.14159265358979323846
  	INTEGER						:: ib,jb,kb		! Box indices
 #ifdef anisodiffusion 	
-	REAL*8						:: Rx, Ry, grdx, grdy, grad, theta, elip, xx, yy, hp, hm
+	REAL (KIND=DP)					:: Rx, Ry, grdx, grdy, grad, theta, elip, xx, yy, hp, hm
  	INTEGER						:: ip,im,jp,jm
 #endif
 		

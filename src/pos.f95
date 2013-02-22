@@ -19,7 +19,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
   !    r1       : the new position (coordinate)
   !====================================================================
   
-  USE mod_grid
+  USE mod_param
   USE mod_vel
   USE mod_turb
   IMPLICIT none
@@ -41,8 +41,8 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
      ii=ia
      im=ia-1
      if(im.eq.0) im=IMT
-     uu=(rg*uflux(ia,ja,ka,nsp)+rr*uflux(ia,ja,ka,nsm))*ff
-     um=(rg*uflux(im,ja,ka,nsp)+rr*uflux(im,ja,ka,nsm))*ff
+     uu=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff
+     um=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff
 #ifdef turb    
      if(r0.ne.dble(ii)) then
         uu=uu+upr(1,2)  
@@ -59,8 +59,8 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
 #endif
   elseif(ijk.eq.2) then
      ii=ja
-     uu=(rg*vflux(ia,ja  ,ka,nsp)+rr*vflux(ia,ja  ,ka,nsm))*ff
-     um=(rg*vflux(ia,ja-1,ka,nsp)+rr*vflux(ia,ja-1,ka,nsm))*ff
+     uu=(rg*vflux(ia,ja  ,ka,NST)+rr*vflux(ia,ja  ,ka,1))*ff
+     um=(rg*vflux(ia,ja-1,ka,NST)+rr*vflux(ia,ja-1,ka,1))*ff
 #ifdef turb    
      if(r0.ne.dble(ja  )) then
         uu=uu+upr(3,2)  
@@ -77,16 +77,12 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
 #endif
   elseif(ijk.eq.3) then
      ii=ka
-#ifdef full_wflux
-     uu=wflux(ia ,ja ,ka   ,nsm)
-     um=wflux(ia ,ja ,ka-1 ,nsm)
-     !uu=wflux(ia ,ja ,ka   ,1)
-     !um=wflux(ia ,ja ,ka-1 ,1)
-     uu=rg*wflux(ia ,ja, ka  ,NST)+rr*wflux(ia, ja, ka  ,1)
-     um=rg*wflux(ia, ja, ka-1,NST)+rr*wflux(ia, ja, ka-1,1)
+#if defined full_wflux | defined explicit_w
+     uu=wflux(ia ,ja ,ka   ,1)
+     um=wflux(ia ,ja ,ka-1 ,1)
 #else
-     uu=rg*wflux(ka  ,nsp)+rr*wflux(ka  ,nsm)
-     um=rg*wflux(ka-1,nsp)+rr*wflux(ka-1,nsm)
+     uu=rg*wflux(ka  ,NST)+rr*wflux(ka  ,1)
+     um=rg*wflux(ka-1,NST)+rr*wflux(ka-1,1)
 #endif
 #ifndef twodim   
 #ifdef turb    

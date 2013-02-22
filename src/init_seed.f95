@@ -41,7 +41,7 @@ SUBROUTINE init_seed()
 !-------------------------------------------------------------------------------
 #if ! defined baltix && ! defined rco
    seedPos = seedType
-   seedType = 1
+!  seedType = 1
    seedTime = 0
    seedAll = 0
 #endif
@@ -95,7 +95,8 @@ SUBROUTINE init_seed()
          fullSeedFile=trim(seedDir) // trim(fileStamp)
          PRINT *,' Particles are seeded from a dynamic listfile '
       ELSE
-         fullSeedFile=trim(seedFile)        
+         fullSeedFile=trim(seedDir) // trim(seedFile)
+!         fullSeedFile=trim(seedFile)        
          PRINT *,' Particles are seeded from a given listfile  '
       END IF
       
@@ -151,7 +152,7 @@ SUBROUTINE init_seed()
       ELSE
          PRINT *,'------------------------------------------------------'
          PRINT *,'*** ERROR!                                         ***'
-         PRINT *,'*** Seed files does not exisit                     ***' 
+         PRINT *,'*** Seed files does not exist                      ***' 
          PRINT *,'File name    : '//trim(fullSeedFile)
          PRINT *,'*** Run terminated.                                ***'
          STOP

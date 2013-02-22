@@ -15,7 +15,7 @@ USE mod_sed
 USE mod_orbital
 IMPLICIT none
 
-REAL*4   :: grav,rho,visc,xny,Dm,temp,dens,a1,a2,a3,a4
+REAL*8   :: grav,rho,visc,xny,Dm,temp,dens,a1,a2,a3,a4
 
 grav = 9.81 ! gravity
 Dm = partdiam/1000.0 ! change diameter from mm to m
@@ -75,7 +75,7 @@ USE mod_grid
 IMPLICIT none
 
 
-REAL botvel,uorb,surfvel,kin   !kin ska bort
+REAL*8 botvel,uorb,surfvel,kin   !kin ska bort
 INTEGER ib,jb,kb
 logical res 
 
@@ -118,7 +118,7 @@ USE mod_grid
 IMPLICIT none
 
 INTEGER k,l
-REAL dh,omega,pi,grav,H(km),zk(km),zk49(km),zk50(km),test
+REAL*8 dh,omega,pi,grav,H(km),zk(km),zk49(km),zk50(km),test
 
 dh=0.0
 pi = 2.*asin(1.)

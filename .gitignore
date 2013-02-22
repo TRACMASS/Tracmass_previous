@@ -3,4 +3,4 @@
 *.pyc
 *.log
 runtraj
-Makefile
+#Makefile
