@@ -121,6 +121,7 @@ MODULE mod_grid
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
+  INTEGER                                   :: subGridKmin ,subGridKmax
   CHARACTER(LEN=200)                        :: SubGridFile 
   INTEGER                                   :: degrade_space=0
 

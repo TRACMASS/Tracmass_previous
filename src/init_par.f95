@@ -57,7 +57,7 @@ SUBROUTINE init_params
    namelist /INITGRIDGRID/   IMT, JMT, KM, LBT, NEND
    namelist /INITGRIDNTRAC/  NTRACMAX
    namelist /INITGRIDDATE/   yearmin, yearmax, baseSec  ,baseMin  ,baseHour,   &
-                         &   baseDay  ,baseMon  ,baseYear
+                             baseDay  ,baseMon  ,baseYear
    namelist /INITGRIDTIME/   ngcm, iter, intmax ,fieldsPerFile
    
    ! ------------------------------
@@ -65,14 +65,15 @@ SUBROUTINE init_params
    ! ------------------------------
    namelist /INITRUNVER/     runVerNum
    namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax,          & 
-                             subGridJmin, subGridJmax ,SubGridFile,      &
-                             subGridID
+                             subGridJmin, subGridJmax,                   &
+                             subGridKmin, subGridKmax,                   &
+                             SubGridFile, subGridID
    namelist /INITRUNTIME/    intmin, intspin, intrun, intstep, degrade_time 
    namelist /INITRUNDATE/    startSec ,startMin ,startHour,              &
                              startDay ,startMon ,startYear,              &
                              ihour, iday, imon, iyear
-   namelist /INITRUNWRITE/   ncoor, twritetype, kriva,                                     &
-                         &   inDataDir ,outDataDir, topoDataDir,               &
+   namelist /INITRUNWRITE/   ncoor, twritetype, kriva,                   &
+                             inDataDir ,outDataDir, topoDataDir,         &
                              outDataFile ,intminInOutFile
    namelist /INITRUNSEED/    nff, isec, idir, nqua, partQuant,           &
                              seedType, seedPos, seedTime, seedAll,       &
@@ -83,7 +84,7 @@ SUBROUTINE init_params
    namelist /INITRUNDESC/    caseName, caseDesc  
 #ifdef tempsalt
    namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
-                         &    tmine, tmaxe, smine, smaxe, rmine, rmaxe
+                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
 #endif
 #if defined diffusion || turb 
    namelist /INITRUNDIFFUSION/ ah, av
@@ -143,28 +144,36 @@ SUBROUTINE init_params
       PRINT *,'Sub-grid    : Use the Full grid.'     
       subGridImin =   1 
       subGridJmin =   1
+      subGridKmin =   1
       subGridImax = imt
       subGridJmax = jmt 
+      subGridKmax = km 
    CASE (1)
       PRINT *,'Sub-grid    : ', subGridImin ,subGridImax, &
            &   subGridJmin ,subGridJmax
       imt = subGridImax-subGridImin+1
       jmt = subGridJmax-subGridJmin+1
+#if !defined(explicit_w) && !defined(twodim)
+      if ((subGridKmax-subGridKmin+1) < km) then
+         print *, 'ERROR!'
+         print *, 'subGridKmin and subGridKmax requires -Dtwodim  or -Dexplicit_w'
+         print *, 'to be selected in the project Makefile.'
+         stop
+      end if
+#endif
+      km  = subGridKmax-subGridKmin+1
    CASE default
       PRINT *,'==================== ERROR ===================='
       PRINT *,'This subGrid selection is not implemented yet.'
       PRINT *,'subGrid = ' ,subGrid
       STOP
    END SELECT
-         start1d  = [  1]
-         count1d  = [ km]
-         start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-         count2d  = [  1 ,  1 ,subGridImax-subGridImin + 1,  &
-                               subGridJmax-subGridJmin + 1]
-         start3d  = [  1, subGridImin, subGridJmin,  1]
-         count3d  = [  1, subGridImax - subGridImin + 1,    & 
-                          subGridJmax - subGridJmin + 1, km]
-
+         start1d  = [subGridKmin]
+         count1d  = [subGridKmax]
+         start2d  = [1,  1 ,subGridImin ,subGridJmin]
+         count2d  = [1,  1 ,imt,         jmt        ]
+         start3d  = [1, subGridImin, subGridJmin, subGridKmin]
+         count3d  = [1, imt,         jmt,         km         ]
          READ (8,nml=INITRUNTIME)
          READ (8,nml=INITRUNDATE)
          READ (8,nml=INITRUNWRITE)  

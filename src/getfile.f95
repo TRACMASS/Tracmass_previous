@@ -10,8 +10,6 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start3D  ,count3D ,map3D
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
   INTEGER                                    :: ncTpos=0
-  INTEGER                                    :: istag=0, jstag=0
-
   INTEGER                                    :: ierr, varid,ncid
   
 CONTAINS
@@ -38,11 +36,11 @@ CONTAINS
   function get1DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfieldNC
-    INTEGER,             DIMENSION(1)       :: d    
+    !INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
-  
-    d=count1d(1)+start1d(1)-1
-    allocate ( get1DfieldNC(d(1)) )
+
+    !d = count1d(1) + start1d(1) - 1
+    allocate ( get1DfieldNC(count1d(1)) )
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1, fieldFile, varName)    
@@ -71,8 +69,8 @@ CONTAINS
 
     start2d(map2d(3)) = ncTpos       
     s = start2d
-    s(3) = s(3) + istag
-    s(4) = s(4) + jstag
+    s(3) = s(3)
+    s(4) = s(4)
     s = s(map2d)
     c = count2d(map2d)
     d = c + s - 1
@@ -115,17 +113,12 @@ CONTAINS
        stop
     end if
     start3d(1) = ncTpos
-
-    s = start3d
-    s(2) = s(2) + istag
-    s(3) = s(3) + jstag
-    s = s(map3d)
-
-    !s = start3d(map3d)
+    s = start3d(map3d)
     c = count3d(map3d)
     d = c + s - 1
-    allocate ( field(d(1),d(2),d(3)), get3dfieldNC(imt+2,jmt,km) )
 
+    
+    allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt+2,jmt,km) )
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
