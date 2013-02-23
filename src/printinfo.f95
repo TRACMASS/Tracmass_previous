@@ -194,6 +194,8 @@ CONTAINS
     !call dtime(wallarray, walltime)
     wallmin = int(walltime/60)
     wallsec = walltime - wallmin*60
+
+    call updateClock
     print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot, &
          wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin 
 799 format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
