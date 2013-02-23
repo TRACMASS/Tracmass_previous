@@ -15,13 +15,16 @@
   !==               1 = Define subGrid in this file.
   !==               2 = Define subGrid with sep. file and subGridID.
   !==               3 = Define subGrid with sep. file and MPI.
-  subGrid      = 0,
+  subGrid      = 1,
   !
   ! === Used if SubGrid = 1
-  subGridImin  = 2,
-  subGridImax  = 1281,
-  subGridJmin  = 2,
-  subGridJmax  = 641,
+  subGridImin  =    1,
+  subGridImax  = 1440,
+  subGridJmin  =   1,
+  subGridJmax  = 720,
+  subGridKmin  = 49,
+  subGridKmax  = 50,
+
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
   ! === Used if SubGrid = 2
