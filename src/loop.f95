@@ -810,7 +810,7 @@ return
 #if defined zgrid3Dt || defined zgrid3D
          '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
 #else
-         '    dz(k) : ', dz(kb), '   dzt :  ', 0
+         '    dz(k) : ', dz(kb), '   dzt :  ', 0.0
 #endif
        end subroutine print_grd
 
