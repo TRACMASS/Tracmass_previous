@@ -22,8 +22,8 @@
   subGridImax  = 1440,
   subGridJmin  =   1,
   subGridJmax  = 720,
-  subGridKmin  = 49,
-  subGridKmax  = 50,
+  subGridKmin  =  1,  ! k-direction As defined by imput file
+  subGridKmax  =  2,
 
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
@@ -117,7 +117,7 @@
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 2,
+  SeedType = 1,
   SeedPos = 1,
   !
   ! ===   ===   ===   ===   ===
@@ -127,8 +127,8 @@
   ist2         = 1439,			  
   jst1         = 400,		 
   jst2         = 700,		 
-  kst1         = 49,		 
-  kst2         = 49,
+  kst1         = 2,		 
+  kst2         = 2,
   ! ===   ===   ===   ===   ===
   !
   ! ===   ===   ===   ===   ===
@@ -140,6 +140,8 @@
   !
   ! === Seed filename (or beginning of it)
   seedFile     = '/na_seed.asc',
+  seedparts    = 12,
+  seedpart_id  = 2,
   loneparticle = 0/!/809/!28376/
 
 
