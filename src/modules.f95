@@ -254,11 +254,12 @@ CONTAINS
     CurrMin  = int(currFrac)
     currSec  = int((currFrac - currMin) * 60)
 
-    if (ints > (intstart+intmax-1)) then
+    if (ints > (maxvelints-1)) then
        if (minvelints == 0) then
           loopints = ints - intmax * int(real(ints-intstart)/intmax)
        else
           loopints = ints - intmax * int(real(ints-minvelints)/intmax)
+          intmax = maxvelints - minvelints
        end if
     else
        loopints = ints

@@ -211,8 +211,12 @@ SUBROUTINE init_seed()
                             seedparts, ' groups, number ',      & 
                             seedpart_id, ' is seeded.'
    end if
-   print '(A,I7)','              Cells used : ', nsdMax
 
+   if (loneparticle>0) then
+      print '(A,I7)','WARNING! Loneparticle is set to : ', loneparticle
+   else
+      print '(A,I7)','              Cells used : ', nsdMax
+   end if
    SELECT CASE (seedTime)
   
    CASE (1)
