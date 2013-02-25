@@ -25,6 +25,7 @@ PROGRAM main
      intend   =  intmax
   elseif(intstep.lt.0) then ! backward
      intstart =  intmin+intrun
+     minvelints = minvelints + intrun
      intend   =  intmin
      intspin  = -intspin
      intrun   = -intrun    

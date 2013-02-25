@@ -58,7 +58,8 @@ SUBROUTINE init_params
    namelist /INITGRIDNTRAC/  NTRACMAX
    namelist /INITGRIDDATE/   yearmin, yearmax, baseSec  ,baseMin  ,baseHour,   &
                              baseDay  ,baseMon  ,baseYear
-   namelist /INITGRIDTIME/   ngcm, iter, intmax ,fieldsPerFile
+   namelist /INITGRIDTIME/   ngcm, iter, intmax ,fieldsPerFile,          &
+                             minvelJD, maxvelJD
    
    ! ------------------------------
    ! --- Parameters from run.in ---
@@ -229,6 +230,11 @@ SUBROUTINE init_params
          END IF
       END IF startYearCond
 
+      if (maxvelJD > 0) then
+         minvelints = (minvelJD)/(real(ngcm)/24.)+1
+         maxvelints = (maxvelJD)/(real(ngcm)/24.)+1
+         intmax = maxvelints - intmin
+      end if
       call  gdate (baseJD+startJD+intrun*ngcm/24.-2 ,endYear , endMon ,endDay)
 
       tseas= dble(ngcm)*3600.d0

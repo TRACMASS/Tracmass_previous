@@ -205,13 +205,15 @@ MODULE mod_time
   REAL*8                                    :: baseJD=0
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
+  ! === Timerange for velocity fields
+  REAL*8                                    :: minvelJD=0,   maxvelJD=0
+  INTEGER                                   :: minvelints, maxvelints
   ! === JD when the run starts
   REAL*8                                    :: startJD=-999, ttpart
   INTEGER                                   :: startYear, startMon, startDay
   INTEGER                                   :: startHour, startMin, startSec
   INTEGER                                   :: endYear,   endMon,   endDay
   INTEGER                                   :: endHour,   endMin,   endSec
-
   ! === Current JD
   REAL*8                                    :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
@@ -253,7 +255,11 @@ CONTAINS
     currSec  = int((currFrac - currMin) * 60)
 
     if (ints > (intstart+intmax-1)) then
-       loopints = ints - intmax * int(real(ints-intstart)/intmax)
+       if (minvelints == 0) then
+          loopints = ints - intmax * int(real(ints-intstart)/intmax)
+       else
+          loopints = ints - intmax * int(real(ints-minvelints)/intmax)
+       end if
     else
        loopints = ints
     end if
