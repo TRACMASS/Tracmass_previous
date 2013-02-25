@@ -24,10 +24,12 @@ MODULE mod_seed
    IMPLICIT NONE
   
    INTEGER                                    :: nff,  isec,  idir
-   INTEGER                                    :: nqua, num, nsd, nsdMax
+   INTEGER                                    :: nqua, num, nsdMax
    INTEGER                                    :: nsdTim
-   INTEGER                                    :: seedPos, seedTime, seedType
+   INTEGER                                    :: seedPos, seedTime
+   INTEGER                                    :: seedType
    INTEGER                                    :: seedAll, varSeedFile
+   INTEGER                                    :: seedparts, seedpart_id
    INTEGER                                    :: loneparticle
    INTEGER                                    :: ist1, ist2, jst1, jst2
    INTEGER                                    :: kst1, kst2, tst1, tst2

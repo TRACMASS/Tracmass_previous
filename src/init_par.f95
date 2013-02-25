@@ -64,11 +64,12 @@ SUBROUTINE init_params
    ! --- Parameters from run.in ---
    ! ------------------------------
    namelist /INITRUNVER/     runVerNum
-   namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax,          & 
+   namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax,          &
                              subGridJmin, subGridJmax,                   &
                              subGridKmin, subGridKmax,                   &
                              SubGridFile, subGridID
-   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep, degrade_time 
+   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep,           &
+                             degrade_time 
    namelist /INITRUNDATE/    startSec ,startMin ,startHour,              &
                              startDay ,startMon ,startYear,              &
                              ihour, iday, imon, iyear
@@ -80,7 +81,7 @@ SUBROUTINE init_params
                              ist1, ist2, jst1, jst2,                     &
                              kst1, kst2, tst1, tst2,                     &
                              varSeedFile, seedDir, seedFile, timeFile,   &
-                             loneparticle
+                             seedparts, seedpart_id, loneparticle
    namelist /INITRUNDESC/    caseName, caseDesc  
 #ifdef tempsalt
    namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
