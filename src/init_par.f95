@@ -198,9 +198,11 @@ SUBROUTINE init_params
          CALL getarg(2,inparg)
          if ( ARG_INT1 == 0) then
             read( inparg, '(i15)' ) ARG_INT1
+            write( inargstr1, '(A,i9.9 )' ) '_',ARG_INT1
          else
             read( inparg, '(f15.10)' ) ARG_INT1
-         end if
+            write( inargstr1, '(A,f9.9 )' ) '_',ARG_INT1
+         end if         
       END IF
 
       IF ((IARGC() > 2) ) THEN
@@ -208,11 +210,13 @@ SUBROUTINE init_params
          CALL getarg(3,inparg)
          if ( ARG_INT2 == 0) then
             read( inparg, '(i15)' ) ARG_INT2
+            write( inargstr2, '(A,i9.9)' ) '_',ARG_INT2
          else
             read( inparg, '(f15.10)' ) ARG_INT2
+            write( inargstr2, '(A,f9.9)' ) '_',ARG_INT2
          end if
       END IF
-
+    
       timax    =  24.*3600.*timax ! convert time lengths from days to seconds
       dstep    =  1.d0/dble(iter)
       dtmin    =  dstep * tseas

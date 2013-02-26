@@ -157,7 +157,7 @@ SUBROUTINE loop
      !=== write stream functions and "particle tracer"    ===
      !=======================================================
      if(mod(ints,120) == 0) then 
-      call writepsi 
+      call write_streamfunctions
       call writetracer
      endif
 

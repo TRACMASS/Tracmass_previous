@@ -6,6 +6,7 @@ module mod_write
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
   CHARACTER(LEN=200)                         :: outDataDir, outDataFile
+  CHARACTER(LEN=200)                         :: inargstr1='', inargstr2=''
   INTEGER                                    :: twritetype = 0
   INTEGER                                    :: fileseq = 0
 
@@ -16,20 +17,18 @@ CONTAINS
 
     IMPLICIT NONE
     CHARACTER(LEN=200)                         :: fullWritePref
-    CHARACTER(LEN=20)                          :: WriteStamp
+    CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
 
-    if (intminInOutFile.eq.2) then
-       writeStamp='00000000_000000'
-       write (writeStamp(1:8),'(i8.8)') intstart !,ints-intstart
-       write (writeStamp(10:15),'(i6.6)') max(ints-intstart,0)+1
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)//trim(writeStamp)
-    elseif (intminInOutFile.eq.1) then
-       writeStamp='00000000'
-       write (writeStamp,'(i8.8)') intstart
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)//trim(writeStamp)
-    else
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)
+    if ((intminInOutFile.eq.2) .or. (intminInOutFile.eq.3)) then
+       write (partstamp, '(A,i6.6)') '_', max(ints-intstart,0)+1
     end if
+    if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
+       write (intminstamp, '(A,i8.8)') '_', intstart
+    end if
+
+    fullWritePref =  trim(outDataDir)  // trim(outDataFile) //    &
+                     trim(inargstr1)   // trim(inargstr2)   //    & 
+                     trim(intminstamp) // trim(partstamp)
 
 #if defined textwrite
     open(56,file=trim(fullWritePref)//'_run.asc')    

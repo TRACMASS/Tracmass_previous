@@ -198,10 +198,14 @@ SUBROUTINE init_seed()
       END IF chFile2d
        
    END SELECT
-   print '(A,I7)','   Total number of cells : ', nsdMax + landsd
-   print '(A,I7)','   Cells masked as land  : ', landsd
+   print '(A,I7)','        Total number of cells : ', nsdMax + landsd
+   print '(A,I7)','        Cells masked as land  : ', landsd
 
    if (seedparts > 0) then
+      if (seedpart_id > seedparts) then
+         print *,"ERROR! seedpart_ID higher than number of groups"
+         stop
+      end if
       jj = nint(float(nsdMax)/seedparts) * (seedpart_id-1) + 1
       ji = min(jj+nsdMax/seedparts, nsdMax)
       nsdMax = ji - jj   
