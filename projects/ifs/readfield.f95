@@ -10,7 +10,7 @@ SUBROUTINE readfields
 !!   rho    -  Pressure [hPa]
 !!
 !!   If option -Dpottemp is activated in Makefile, tem is potential temperature
-!!   [K], and sal is moist potential temperature [K].
+!!   [K], and sal is equivalent ("moist") potential temperature [K].
 !!   If option -Denergy is activated in Makefile, tem is dry static energy
 !!   [kJ/kg] and sal is moist static energy [kJ/kg].
 !!
@@ -315,10 +315,9 @@ ENDDO
 
 #ifdef pottemp
 ! Potential temperature (dry)
-td(:,:,:) = tem(:,:,:,2) * ( pref/rho(:,:,:,2) )**(Rd/cp)
+td(:,:,:) = tem(:,:,:,2) * ( pref/rho(:,:,:,2) )**(Rd/cp) ![K]
 ! Potential temperature (wet)
-tw(:,:,:) = tem(:,:,:,2) * (1.d0 + 0.61 * sal(:,:,:,2)/1000.d0) &
-          &              * ( pref/rho(:,:,:,2) )**(Rd/cp)
+tw(:,:,:) = td(:,:,:) * Lv/cp * sal(:,:,:,2)/1000. ![K]
 
 tem(:,:,:,2) = td
 sal(:,:,:,2) = tw
@@ -326,12 +325,12 @@ sal(:,:,:,2) = tw
 
 #ifdef energy
 ! Dry static energy
-td(:,:,:) = cp * tem(:,:,:,2) + 0.5 * (zg(:,:,1:KM) + zg(:,:,0:KM-1))
+td(:,:,:) = cp * tem(:,:,:,2) + 0.5 * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![J/kg]
 ! Moist static energy
-tw(:,:,:) = td(:,:,:) + Lv * sal(:,:,:,2)/1000.
+tw(:,:,:) = td(:,:,:) + Lv * sal(:,:,:,2)/1000. ![J/kg]
 
-tem(:,:,:,2) = td * eunit
-sal(:,:,:,2) = tw * eunit
+tem(:,:,:,2) = td * eunit ![kJ/kg]
+sal(:,:,:,2) = tw * eunit ![kJ/kg]
 #endif
 
 CLOSE (14) 

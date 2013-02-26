@@ -93,16 +93,16 @@ SUBROUTINE setupgrid
   smin  =    0.d0 ![g/kg]
   smax  =   25.d0 ![g/kg]
 #ifdef energy
-  tmin  =  150.d0
-  tmax  = 1350.d0
-  smin  =  150.d0
-  smax  = 1400.d0
+  tmin  =  200.d0
+  tmax  = 1000.d0
+  smin  =  200.d0
+  smax  = 1000.d0
 #endif
 #ifdef pottemp
   tmin  =  200.d0
-  tmax  = 2000.d0
+  tmax  = 1000.d0
   smin  =  200.d0
-  smax  = 2000.d0
+  smax  = 1000.d0
 #endif
   dr    = (rmax-rmin)/dble(MR-1) ![hPa]
   dtemp = (tmax-tmin)/dble(MR-1) ![K]
