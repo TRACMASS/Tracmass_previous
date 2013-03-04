@@ -1,5 +1,5 @@
 import sys, os
-import ConfigParser
+import ConfigParser, json
 
 import numpy as np
 import pylab as pl
@@ -12,43 +12,58 @@ import figpref
 import lldist
 from postgresql import DB
 
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
 class Traj(object):
     """Main class for trajectory post-processing"""
-    def __init__(self, projname, casename=None, region=None):
+    def __init__(self, projname, casename=None, **kwargs):
         """ Setup variables and make sure everything needed is there """
         self.projname = projname
+        self.basedir =  os.path.dirname(os.path.abspath(__file__))
+        self.inkwargs = kwargs
         if casename is None:
             self.casename = projname
         else:
             self.casename = casename
-        self.region = region
+        self._load_presets('projects',kwargs)
+
         self.setup_njord()
 
-    def setup_njord(self):
+    def _load_presets(self, filepref, kwargs):
+        """Read and parse the config file"""
         cfg = ConfigParser.ConfigParser()
-        cfg.read(PROJECT_ROOT + "/projects.cfg")
-        if not self.projname in cfg.sections():
+        files = ["%s/%s.cfg" % (os.curdir, filepref),
+                 "%s/.%s.cfg" % (os.path.expanduser("~"), filepref),
+                 "%s/%s.cfg" % (self.basedir, filepref)]
+        for fnm in files:
+            cfg.read(fnm)
+            if self.projname in cfg.sections():
+                self.config_file = fnm
+                break
+        else:
             print "Project not included in config file"
             print "Geo-reference functionality will be limited"
             return
-        nmod = cfg.get(self.projname, 'njord_module')
-        ncls = cfg.get(self.projname, 'njord_class')
-        if self.region is None:
-            self.region = cfg.get(self.projname, 'map_region')
-
-        #try:
-        self.gcm = (__import__("njord." + nmod,
-                               fromlist=["njord"]).__dict__[ncls])()
+        
+        def splitkey(key, val):
+            if key in self.inkwargs.keys():
+                self.__dict__[key] = self.inkwargs[key]
+                del self.inkwargs[key]
+            else:
+                self.__dict__[key] = val
+            
+        for key,val in cfg.items(self.projname):
+            try:
+                splitkey(key, json.loads(val))
+            except ValueError:
+                splitkey(key, val)
+                
+    def setup_njord(self):
+        self.gcm = (__import__("njord." + self.njord_module,
+                             fromlist=["njord"]).__dict__[self.njord_class])()
         self.gcm.add_landmask()
         self.landmask = self.gcm.landmask
         self.llon = self.gcm.llon
         self.llat = self.gcm.llat
-        #except:
-        #print "Couldn't load the NJORD module." 
-        #print "Geo-reference functionality will be limited"""
-            
+       
     def trajsloaded(aFunc):
         """Decorator function to check if trajs are loaded."""
         def bFunc( *args, **kw ):
@@ -61,18 +76,19 @@ class Traj(object):
 
     def add_mp(self, map_region=None):
         if map_region is not None:
-            self.region = map_region
+            self.map_region = map_region
             if hasattr(self,'mp'): del self.mp
         try:
             import projmap
         except:
             raise ImportError("Module PROJMAP not available")            
         if not hasattr(self,'mp'):
-            self.mp = projmap.Projmap(self.region)
+            self.mp = projmap.Projmap(self.map_region)
             self.mpxll,self.mpyll = self.mp(self.llon,self.llat)
 
     @trajsloaded
-    def ijll(self,ps=None):
+    def ijll(self):
+        """Add vectors with lat-lon positions of particles."""
         from scipy.ndimage.interpolation import map_coordinates
         self.lon = map_coordinates(self.llon, [self.y,self.x])
         self.lat = map_coordinates(self.llat, [self.y,self.x])
@@ -83,13 +99,14 @@ class Traj(object):
 
     @trajsloaded
     def ij2utm(self,ps=None):
+        """Add vectors with UTM (km in cartesian grid) positions of particles."""
         from scipy.ndimage.interpolation import map_coordinates
         self.gcm.add_utmxy()
         self.utmx = map_coordinates(self.gcm.utmx, [self.y,self.x])
         self.utmy = map_coordinates(self.gcm.utmy, [self.y,self.x])
 
     @trajsloaded
-    def map(self,weights=[]):
+    def grid(self,weights=[]):
         """Create a field with number of particles in each gridcell"""
         xy = np.vstack( (self.x.astype(np.int), self.y.astype(np.int)) )
         if len(weights) == 0: weights = np.ones(xy.shape[1])
@@ -101,6 +118,7 @@ class Traj(object):
 
     @trajsloaded
     def calc_dists(self):
+        """Calculate distance and speed between all positions along all trajs."""
         if not hasattr(self, 'lon'): self.ijll()
         self.dists = self.lon * np.nan
         self.speed = self.lon * np.nan
@@ -118,8 +136,6 @@ class Traj(object):
             self.dists[mask2] = lldist.ll2dist(lonvecs,latvecs)[self.ntrac[mask2]]
             self.speed[mask2] = self.dists[mask2]/(jd2-jd1)/24/60/60
 
-
-
     @trajsloaded
     def field(self,fieldname):
         t = self.ints - self.ints.min()
@@ -136,12 +152,8 @@ class Traj(object):
         self.__dict__[fieldname] = b1 + b2*x + b3*y + b4*x*y
 
     @trajsloaded
-    def interp(self,fieldname):
-        pass
-
-    @trajsloaded
     def permanent_mask(self, mask):
-        """Delete all masked data"""
+        """Delete masked particle positions from all vectors."""
         for v in vars(self):
             try:
                 if len(self.__dict__[v]) == len(mask):
@@ -149,6 +161,29 @@ class Traj(object):
             except:
                 pass
         self.jdvec = np.unique(self.jd)
+
+    @trajsloaded
+    def mask_by_ntracvec(self, ntracvec, extra_vars=[]):
+        """ Create a subset of trajectories based on a vector of ntrac's"""
+        ntracvec = np.array(ntracvec)
+        ntracmax = ntracvec.max()
+        convec = np.zeros((ntracmax+1)).astype(np.bool)
+        convec[ntracvec] = True
+        mask = convec.copy()
+        nmask = self.ntrac <= ntracmax
+        ntracmask = (self.ntrac[:] * 0).astype(np.bool)
+
+        for jd in self.jdvec:
+            tmask = (self.jd == jd) & nmask
+            convec[:] = False
+            convec[self.ntrac[tmask]] = True
+            tempmask = ntracmask[tmask]
+            tempmask[np.nonzero((convec & mask))[0]-1] = True
+            ntracmask[tmask] = tempmask
+        subvars = ['ntrac','jd','x','y','z'] + extra_vars
+        for v in subvars:
+            self.__dict__[v] = self.__dict__[v][ntracmask]
+
 
     @trajsloaded
     def insert(self, database="traj"):
@@ -168,6 +203,22 @@ class Traj(object):
     @trajsloaded
     def scatter(self,mask=None, ntrac=None, jd=None, k1=None, k2=None,
                 c="g", clf=True, coord="latlon", land="nice", map_region=None):
+        """Plot particle positions on a map
+
+                 mask: Boolean vector inidcating which particles to plot
+                ntrac: Particle ID
+                   jd: Julian date to plot, has to be included in jdvec.
+                   k1: only plot particle deeper than k1
+                   k2: only plot particle shallower than k1
+                    c: color of particles
+                  clf: Clear figure  if True
+                coord: Use lat-lon coordinates if set to "latlon" (default),
+                           i-j coordinates if set to "ij" 
+                 land: Use landmask from basemap if set to "nice" (default),
+                           landmask from model if set to "model". 
+           map_region: Use other map_regions than set by config file
+
+        """
         if (not hasattr(self,'mp'))  & (coord=="latlon"):
             self.add_mp(map_region)
         if (not hasattr(self,'lon')) & (coord=="latlon"):
@@ -213,7 +264,6 @@ class Traj(object):
         #self.mp.plot(xl,yl,'0.5')
         """
         if jd: pl.title(pl.num2date(jd).strftime("%Y-%m-%d %H:%M"))
-     
         return scH
         
     @trajsloaded
@@ -240,30 +290,41 @@ class Traj(object):
 
     @trajsloaded
     def export(self,filename='',filetype="mat"):
+        """Export trajecotires to a MATLAB .mat file"""  
         import scipy.io as sio
 
         if type(self.intstart) == int:
             intstart = self.intstart
         else:
-            instart = self.intstart.min()
-            
+            instart = self.intstart.min()            
         if not filename:
             filename = ( "%s_%s_%i_%i_%i_%i_%i.%s" %
-                         (self.projname,self.casename,
-                          intstart,
-                          self.ints.min(),self.ints.max(),
-                          self.ntrac.min(),self.ntrac.max(),filetype)
+                         (self.projname, self.casename, intstart,
+                          self.ints.min(), self.ints.max(),
+                          self.ntrac.min(), self.ntrac.max(), filetype)
                          )
-        sio.savemat(filename, {'ints':self.ints,
-                               'jd':self.jd,
-                               'ntrac':self.ntrac,
-                               'x':self.x,
-
-                               'y':self.y})
+        sio.savemat(filename, {'jd':    self.jd,
+                               'ntrac': self.ntrac,
+                               'x':     self.x,
+                               'y':     self.y})
 
             
         
 
- 
+    def zip(self,xarr,yarr):
+        """
+        Transform data in a ziplike fashion. Matrices will be flatten with ravel 
+
+        Example:
+
+        >>> xarr = np.array([1,2,3])
+        >>> yarr = np.array([5,6,7])
+        >>> self.zip(xarr, yarr)
+        array([[1, 5],
+               [2, 6],
+               [3, 7]])
+
+        """
+        return np.vstack((np.ravel(xarr), np.ravel(yarr))).T
 
     trajsloaded = staticmethod(trajsloaded)

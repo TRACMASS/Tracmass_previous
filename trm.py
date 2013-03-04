@@ -38,13 +38,9 @@ class Trm(Traj):
            export TRMDIR="/path/to/the/trm/root/dir/"                     
     """
 
-
-    def __init__(self,projname, casename=None, region=None,
-                 datadir="", datafile="", trmdir=""):
-        super(Trm, self).__init__(projname, casename, region)
-        if trmdir:
-            self.trmdir = trmdir
-        else:
+    def __init__(self,projname, casename=None, **kwargs):
+        super(Trm, self).__init__(projname, casename, **kwargs)
+        if not hasattr(self, 'trmdir'):
             self.trmdir = os.getenv('TRMDIR')
             if self.trmdir is None:
                 raise EnvironmentError, """ Trmdir is not set.
@@ -59,14 +55,8 @@ class Trm(Traj):
         self.nlgrid = parse(self.trmdir,self.projname,self.projname,"grid")
         self.nlrun =  parse(self.trmdir,self.projname,self.casename,"run")
 
-        if datadir:
-            self.datadir = datadir
-        else:
-            self.datadir = self.nlrun.outDataDir
-        if datafile:
-            self.datafile = datafile
-        else:
-            self.datafile=self.nlrun.outDataFile
+        if not hasattr(self, 'datadir'): self.datadir = self.nlrun.outDataDir
+        if not hasattr(self, 'datafile'): self.datafile=self.nlrun.outDataFile
 
         self.base_iso = pl.date2num(dtm(
             self.nlgrid.baseYear,
@@ -75,21 +65,35 @@ class Trm(Traj):
         self.imt = self.nlgrid.IMT
         self.jmt = self.nlgrid.JMT
 
-    def read_bin(self, filename):
+    @property
+    def dtype(self):
+        return np.dtype([('ntrac','i4'), ('ints','f8'), 
+                         ('x','f4'), ('y','f4'), ('z','f4')])
+
+    def read_bin(self, filename, count=-1):
         """Read binary output from TRACMASS"""
-        dtp = np.dtype([('ntrac','i4'), ('ints','f8'), 
-                        ('x','f4'), ('y','f4'), ('z','f4')])
-        #with open(filename) as fd:
-        return np.fromfile(open(filename), dtp)
-        #return runvec
+        return np.fromfile(open(filename), self.dtype, count=count)
+
     def read_asc(self, filename):
         """Read ascii output from TRACMASS"""
-        dtp = np.dtype([('ntrac','i4'), ('ints','f8'), 
-                        ('x','f4'), ('y','f4'), ('z','f4')])
-        return np.genfromtxt(filename, dtp)
+        return np.genfromtxt(filename, self.dtype)
 
-    def load(self, jdstart=0, intstart=0, ftype="run", stype='bin',
-             filename='', rawdata=False, nogmt=False):
+    def read_jdrange(self, filename):
+        """Read last reacord in binary file"""
+        with open(os.path.join(self.datadir, filename)) as fH:
+            try:
+                row = np.fromfile(fH, self.dtype, 1)
+                self.firstjd = row['ints'][0]
+                fH.seek(0,2)
+                fH.seek(fH.tell()-self.dtype.itemsize, 0)
+                row = np.fromfile(fH, self.dtype)
+                self.lastjd = row['ints'][0]
+                self.jdrange =  self.lastjd - self.firstjd + 1
+            except:
+                self.firstjd = self.lastjd = self.jdrange = 0
+                
+    def load(self, ftype="run", stype='bin', part=None, filename='',
+             jdstart=0, intstart=0, rawdata=False, nogmt=False):
         """Load a tracmass output file. Add data to class instance."""
         if jdstart != 0:
             ints = (jdstart+self.base_iso) * 24./self.nlgrid.ngcm  + 1
@@ -109,6 +113,7 @@ class Trm(Traj):
             print "Unknown file format, data file should be bin or asc"
             raise
         if rawdata is True: self.runtraj = runtraj
+        self.filename = filename
         tvec = ['ntrac', 'ints', 'x', 'y', 'z']
         for tv in tvec:
             self.__dict__[tv] = runtraj[:][tv]
@@ -135,7 +140,6 @@ class Trm(Traj):
             self.jd = (self.ints * self.nlgrid.ngcm/24. +self.base_iso) 
         self.jdvec = np.unique(self.jd)
         if hasattr(self,'lon'):self.ijll()
-
 
     @Traj.trajsloaded
     def fld2trajs(self, fieldname, mask=None, k=0):
@@ -235,8 +239,53 @@ class Trm(Traj):
         listpos = np.nonzero(datearr == datearr.max())[0][0]
         return os.path.basename(flist[listpos])
 
+    def parse_filename(self,filename):        
+        """Extract info about file from filename"""
+        fdict = {}
+        plist = filename[len(self.nlrun.outDataFile)+1:].split('_')
+        fdict['ftype'],fdict['stype'] = plist[-1].split('.')
+        for n in plist[:-1]:
+            if   'r' in n : fdict['rank'] = int(n[1:])
+            elif 'p' in n : fdict['part'] = int(n[1:])
+            elif 'a' in n : fdict['arg1'] = int(n[1:])
+            elif 'b' in n : fdict['arg2'] = int(n[1:])
+            elif 't' in n : fdict['ints'] = int(n[1:])
+            else :
+                try:
+                    fdict['ints'] = int(n[1:])
+                except:
+                    fdict['stuff'] = n
+        return fdict
+
+
+    def list_partfiles(self, jdstart=None, intstart=None, rank=None,
+                       filename='', stype='bin'):
+        """ Create list of all parts of a file"""
+        if jdstart is not None:
+            ints = (jdstart+self.base_iso) * 24./self.nlgrid.ngcm  + 1
+            filepref = "%s%08i" % (self.datafile, ints)
+            self.jd = jdstart
+        elif intstart != None:
+            filepref = "%s%08i" % (self.datafile, intstart)
+        elif filename == '':
+            fnlist = self.currfile().split('_')
+            if len(fnlist) < 3:
+                return list(self.currfile())
+            else:
+               filepref = "_".join(fnlist[:-2])
+        else:
+            filepref = "_".join(self.currfile().split('_')[:-2])
+        flist = glob.glob("%s/%s_*_run.%s"% (self.datadir, filepref, stype))
+        return [os.path.basename(f) for f in flist]
+
+        
+        for tp in ['run','err','in','out','kll']:
+            flist = glob.glob("%s/%s*_%s.*"%
+                              (self.datadir, self.nlrun.outDataFile, tp))
+            self.__dict__[tp + "files"] = flist
+
     def listfiles(self):
-        """ Create lists of all output files connected to current case"""
+        """ Create list of all output files connected to current case"""
         for tp in ['run','err','in','out','kll']:
             flist = glob.glob("%s/%s*_%s.*"%
                               (self.datadir, self.nlrun.outDataFile, tp))
@@ -246,4 +295,29 @@ class Trm(Traj):
     def ls(self):
         self.listfiles()
         for f in self.runfiles: print f
-            
+
+    def __str__(self):
+        """Print statistics about current instance"""
+        alist = ['projname','casename', 'trmdir', 'datadir',
+                 'njord_module', 'njord_class', 'imt', 'jmt']
+        print ""
+        print "="*79
+        for a in alist:
+            print a.rjust(15) + " : " + str(self.__dict__[a])
+        if hasattr(self.nlrun, 'seedparts'):
+            print "%s : %i" % ("seedparts".rjust(15),  self.nlrun.seedparts)
+            print "%s : %i" % ("seedpart_id".rjust(15),self.nlrun.seedpart_id)
+
+        if hasattr(self,'x'):
+            print ""
+            print "%s : %s" % ("file".rjust(15), self.filename)
+            print "%s : %s - %s" % (
+                "time range".rjust(15),
+                pl.num2date(self.jdvec.min()).strftime('%Y-%m-%d'),
+                pl.num2date(self.jdvec.max()).strftime('%Y-%m-%d'))
+            print "%s : %i" % ("timesteps".rjust(15), len(self.jdvec))
+            print "%s : %i" % ("particles".rjust(15),
+                               len(np.unique(self.ntrac)))
+            print "%s : %i" % ("positions".rjust(15), len(self.ntrac))
+
+        return ''

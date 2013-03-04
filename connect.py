@@ -1,4 +1,4 @@
-import sys
+import sys,os
 import datetime
 import glob
 from datetime import datetime as dtm
@@ -7,9 +7,11 @@ import csv
 
 import numpy as np
 import pylab as pl
+import tables as td
 import scipy.io
 from matplotlib.colors import LogNorm
 from scipy.spatial import cKDTree
+from mp_kdtree import mpKDTree
 import matplotlib.cm as cm
 
 from hitta import GBRY
@@ -37,12 +39,16 @@ class Matrix(trm.Trm):
     """
 
     
-    def __init__(self,projname,casename="", datadir="", datafile="",
-                 ormdir="", griddir="",radius=2):
-        super(Matrix,self).__init__(projname, casename,
-                                    datadir, datafile, ormdir)
+    def __init__(self,projname,casename="", radius=2, **kwargs):
+        super(Matrix,self).__init__(projname, casename, **kwargs)
         self.radius = radius
+        self.filetype = "hdf"
+        
         self.add_default_regmask()
+        if not hasattr(self, 'conmatdir'):
+            self.conmatdir = os.path.join(os.getcwd(), 'conmatfiles')
+        if not os.path.exists(self.conmatdir): os.makedirs(self.conmatdir)
+        
                 
     def generate_regmat(self, di=20, dj=20, mask=[]):
         """Create region matrix defining the regions used for connectiv."""
@@ -87,29 +93,54 @@ class Matrix(trm.Trm):
         self.disci = self.disci[duse]
         self.discj = self.discj[duse]
         self.discn = np.arange(1,len(self.discj)+1)
-        self.discKD = cKDTree(list(np.vstack((np.ravel(self.disci),
-                                              np.ravel(self.discj))).T))
+        #self.discKD = cKDTree(list(np.vstack((np.ravel(self.disci),
+        #                                      np.ravel(self.discj))).T))
+        self.discKD = mpKDTree(self.zip(self.disci, self.discj))
         self.nreg = self.discn.max()+1
+
     @trm.Traj.trajsloaded
-    def regvec_from_discs(self,mask=False):
+    def regvec_from_discs(self,mask=False, vecmask=False):
         """Generate a vector with region IDs"""
         if not mask:
             self.add_default_regmask()
             mask = self.mask
-        self.generate_regdiscs(mask)
-        dist,ij = self.discKD.query(list(np.vstack((self.x,self.y)).T), 1)
+        if not hasattr(self, 'nreg'): self.generate_regdiscs(mask)
+        if vecmask is False:
+            xvec = self.x; yvec = self.y
+        else:
+            xvec = self.x[vecmask]; yvec = self.y[vecmask]
+
+        #dist,ij = self.discKD.query(list(np.vstack((xvec, yvec)).T), 1)
+        #self.reg = self.discn[ij]
+        #self.reg[dist>self.radius] = 0
+
+        dist,ij = self.discKD.parallel_query(self.zip(xvec, yvec), 1)
         self.reg = self.discn[ij]
         self.reg[dist>self.radius] = 0
 
+    @property
+    def dtmax(self):
+        if not 'dtmax' in self.__dict__.keys():
+            if not hasattr(self, 'x'):
+                raise AttributeError, "No particle trajectories loaded."
+            self.__dict__['dtmax'] = int(self.jd.max() - self.jd.min()) + 1
+        return self.__dict__['dtmax']
+    @dtmax.setter
+    def dtmax(self,val):
+        self.__dict__['dtmax'] = val
+
+
     @trm.Traj.trajsloaded
-    def calc_conmat(self,jd=None,dt=20):
+    def calc_conmat(self, jd=None, dt=20, write=False):
         """Create connectivity matrix using a regions matrix."""
         if not jd: jd = self.jd.min()
-        if not hasattr(self,'reg'):
-             self.regvec_from_discs()
+        if not hasattr(self,'reg'): self.regvec_from_discs()
         tmask1 = self.jd == jd
         tmask2 = self.jd == jd + dt
-        ntracmax = max(self.ntrac[tmask1].max(), self.ntrac[tmask2].max())
+        try:
+            ntracmax = max(self.ntrac[tmask1].max(), self.ntrac[tmask2].max())
+        except ValueError:
+            return False
 
         convec = np.zeros((2, ntracmax+1))
         convec[0,self.ntrac[tmask1]] = self.reg[tmask1]
@@ -121,11 +152,33 @@ class Matrix(trm.Trm):
         self.conmat = np.zeros((self.nreg,self.nreg))
         self.conmat.flat[:len(sums)] = sums
 
+        def write_hdf(jd, dt):
+            filename = os.path.join(self.conmatdir,"conmat_%s_%s_%06i.h5" %
+                                    (self.projname, self.casename, jd))
+            shape = (self.dtmax, self.nreg, self.nreg)
+            atom = td.UInt32Atom()
+            #filters = td.Filters(complevel=5, complib='zlib')
+            with td.openFile(filename, 'a') as h5f:
+                if hasattr(h5f.root, 'conmat'):
+                    ca = h5f.root.conmat
+                else:
+                    ca = h5f.createCArray(h5f.root, 'conmat', atom, shape)
+                ca[dt,:,:] = self.conmat.astype(np.uint32)
+
+        def write_npz(jd, dt):
+            conmatfile = ("conmat_%s_%s_%06i_%04i.npz" %
+                          (self.projname, self.casename, jd, dt))
+            np.savez(os.path.join(self.conmatdir, conmatfile),
+                     conmat=self.conmat.astype(np.uint32), jd=jd, dt=dt)
+
+        if write is True:
+            write_hdf(jd, dt)
+
+
     def __getitem__(self,val):
-        djd = 5
         if isinstance(val[0], slice):
             jd1 = val[0].start; jd2 = val[0].stop
-            if val[0].step: djd = val[0].step
+            if val[0].step: self.djd = val[0].step
         else:
             jd1 = val[0]; jd2 = jd1 + 1
         if isinstance(val[1], slice):
@@ -133,20 +186,59 @@ class Matrix(trm.Trm):
         else:
             dt1 = val[1]; dt2 = dt1 + 1
 
-        for n1,jd in enumerate(np.arange(jd1, jd2, djd)):
+        for n1,jd in enumerate(np.arange(jd1+1, jd2+1, self.djd)):
             for n2,dt in enumerate(np.arange(dt1,dt2)):
-                cmobj = np.load('conmatfiles/conmat_%04i_%04i.npz' %
-                                (jd,dt))
+                prefix = "conmat_%s_%s_%i" % (self.projname,self.casename,jd)
+                predir = os.path.join(self.conmatdir,prefix)
+                if self.filetype is "npz":
+                    cmobj = np.load('%s_%04i.npz' % (predir,dt))['conmat']
+                else:
+                    with td.openFile( "%s.h5" % predir, 'r') as h5f:
+                        cmobj = h5f.root.conmat[dt,:,:]            
                 try:
-                    conmat += cmobj['conmat']
+                    conmat += cmobj
                 except UnboundLocalError:
-                    conmat = cmobj['conmat']
-                cmobj.close()
-        conmat[0:2,:] = 0
-        conmat[:,0:2] = 0
-        conmat[conmat==0] = np.nan
+                    conmat = cmobj
+        #conmat[0,:] = 0
+        #conmat[:,0] = 0
+        #conmat[conmat==0] = np.nan
         return conmat
 
+    def open_hdfconmatfile(self):
+        if not hasattr(self,'reg'): self.regvec_from_discs()
+        self.h5filename = os.path.join(self.conmatdir,"conmat_%s_%s.h5" %
+                                       (self.projname, self.casename))
+        jdvec = int((self.jdmax-self.jdmin+1)/self.djd)+1
+        shape = (jdvec, self.dtmax, self.nreg, self.nreg)
+        iatom = td.UInt32Atom()
+        fatom = td.FloatCol()
+        batom = td.BoolAtom()
+        filtr = td.Filters(complevel=5, complib='zlib')
+        self.h5f = h5f = td.openFile(self.h5filename, 'a')
+        if not hasattr(h5f.root, 'conmat'):
+            crc = h5f.createCArray
+            cnmat = crc(h5f.root, 'conmat', iatom,  shape, filters=filtr)
+            jdvec = crc(h5f.root, 'jdvec',  fatom, (shape[0],))
+            exist = crc(h5f.root, 'exist',  batom, (shape[0],shape[1]))
+            jdvec[:] = np.arange(self.jdmin, self.jdmax+1, self.djd)
+            exist[:] = False
+        else:
+            cnmat = h5f.root.conmat
+            jdvec = h5f.root.jdvec
+            exist = h5f.root.exist
+        return cnmat, jdvec, exist
+        """
+        hf =  td.openFile('test.h5', 'a')
+        for n,jd in enumerate(arange(tr.jdmin,tr.jdmax+1,tr.djd)):
+            for dt in arange(120):
+                try:
+                    c[n,dt,:,:] = tr[jd,dt,:]
+                    e[n,dt] = True
+                except IOError:
+                    print "Nope"
+                print jd,dt
+        """
+    
     @trm.Traj.trajsloaded
     def multiplot(self,jd1=730120.0, djd=60, dt=20):
 
@@ -154,6 +246,7 @@ class Matrix(trm.Trm):
             self.generate_regdiscs()
             self.x = self.disci
             self.y = self.discj
+        if not hasattr(self,'lon'):
             self.ijll()
 
         figpref.presentation()
@@ -284,18 +377,6 @@ def rsquared(dt, jd=0):
     mask = ~np.isnan(np.ravel(co[jd,dt]))
     return linregress(ravel(imat)[mask], ravel(jmat)[mask])[2]        
     
-def all_conmats(mask,jd1=730120.0,jd2=730360.0, djd=5):
-    """Generate connectivity matrices for all trm runs and dt's"""
-    co = Matrix('rutgersNWA')
-    for jd in np.arange(jd1,jd2,djd):
-        co.load(jd)
-        co.regvec_from_discs(mask)
-        for dt in np.arange(1,120):
-            co.calc_conmat(dt=dt)
-            np.load('conmatfiles/conmat_%04i_%04i.npz' % (jd-jd1,dt),
-                     conmat=co.conmat)
-            print jd-jd1,dt
-
 
 def npz_to_csv(datadir):
     """Convert conmat npz files to csv"""
