@@ -1,12 +1,15 @@
 
 subroutine vertvel(rr,ia,iam,ja,ka)
 
+#ifndef explicit_w
   
   ! === Computes the vertical velocity by integrating ===
   ! === the continuity eq. from the bottom            ===
+  ! === for the nsm and nsp velocity time steps       ===
   
   USE mod_param
   USE mod_vel
+  USE mod_grid
   USE mod_turb
 #if defined ifs || defined larval_fish
   USE mod_grid
@@ -24,33 +27,38 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   
 #if defined sediment
   REAL*8 wsedtemp
-  REAL*8 kin
+  REAL kin
 #endif
   
-  real*8 rr,rg,uu,um,vv,vm
-  integer ia,iam,ja,ka,k,n
-    
-#ifndef explicit_w
+  real*8                                     :: rr, rg, uu, um, vv, vm
+  integer                                    :: ia, iam, ja, ka, k,n
+  integer                                    :: n1, n2
+
+
   rg=1.d0-rr
   wflux=0.d0
   
+  n1=min(nsm,nsp)
+  n2=max(nsm,nsp)
+
 #ifdef twodim
   return
   
 ! start 3D code
 #else
+
   kloop: do k=1,ka
-     uu=rg*uflux(ia ,ja  ,k,NST)+rr*uflux(ia ,ja  ,k,1)
-     um=rg*uflux(iam,ja  ,k,NST)+rr*uflux(iam,ja  ,k,1)
-     vv=rg*vflux(ia ,ja  ,k,NST)+rr*vflux(ia ,ja  ,k,1)
-     vm=rg*vflux(ia ,ja-1,k,NST)+rr*vflux(ia ,ja-1,k,1)
+     uu=rg*uflux(ia ,ja  ,k,nsp)+rr*uflux(ia ,ja  ,k,nsm)
+     um=rg*uflux(iam,ja  ,k,nsp)+rr*uflux(iam,ja  ,k,nsm)
+     vv=rg*vflux(ia ,ja  ,k,nsp)+rr*vflux(ia ,ja  ,k,nsm)
+     vm=rg*vflux(ia ,ja-1,k,nsp)+rr*vflux(ia ,ja-1,k,nsm)
 
 ! start ifs code
 #if defined ifs || defined roms
-    do n=1,NST
+    do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
-     + (dzt(ia,ja,k,2)-dzt(ia,ja,k,1))*dxdy(ia,ja)/tseas )  ! time change of the mass the in grid box
+     + (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )  ! time change of the mass the in grid box
     enddo
 #endif
 !end ifs code
@@ -58,9 +66,9 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 ! start ocean code
 #ifndef ifs
 #ifdef  full_wflux
-     wflux(ia,ja,k,1)=wflux(ia,ja,k-1,1) - ff * ( uu - um + vv - vm )
+     wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
 #else
-    do n=1,NST
+    do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
     enddo
@@ -84,17 +92,17 @@ wflux(km,:) = 0.d0
   
   k2loop: do k=0,km
      wsedtemp=0.d0
-     kin=(uflux(ia,ja,k,1)*uflux(ia,ja,k,1)+ &
-          vflux(ia,ja,k,1)*vflux(ia,ja,k,1))*0.5d0
+     kin=(uflux(ia,ja,k,nsm)*uflux(ia,ja,k,nsm)+ &
+          vflux(ia,ja,k,nsm)*vflux(ia,ja,k,nsm))*0.5d0
      !if (kin.le.3000000) then   !för RCO
      !wsedtemp=wsed*(3000000-kin)/3000000
      if (kin.le.kincrit) then   !för SKB
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
 #if defined full_wflux || explicit_w
-     wflux(ia,ja,k,1)=wflux(ia,ja,k,1) + wsedtemp * dxdy(ia,ja)   ! *dx *dy *deg**2 
+     wflux(ia,ja,k,nsm)=wflux(ia,ja,k,nsm) + wsedtemp * dxdy(ia,ja)   ! *dx *dy *deg**2 
 #else
-    do n=1,NST
+    do n=n1,n2
      wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
     enddo
 #endif
@@ -106,11 +114,11 @@ wflux(km,:) = 0.d0
   ! === fisk!   ===
 
   k3loop: do k=0,km
-#if defined full_wflux || defined explicit_w
-     wflux(ia,ja,k,1)=wflux(ia,ja,k,1) + wfish * dxdy(ia,ja)   ! *dx *dy *deg**2
-!     wflux(k)=wflux(ia,ja,k,1) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
+#ifdef full_wflux
+     wflux(ia,ja,k,nsm)=wflux(ia,ja,k,nsm) + wfish * dxdy(ia,ja)   ! *dx *dy *deg**2
+!     wflux(k)=wflux(ia,ja,k,nsm) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
 #else
-    do n=1,NST
+    do n=n1,n2
      wflux(k,n)=wflux(k,n) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
     enddo
 #endif

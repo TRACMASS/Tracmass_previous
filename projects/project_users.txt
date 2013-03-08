@@ -1,0 +1,55 @@
+
+Project				Users			Activity				GCM					comment
+
+AusCOM     		    KD,JB			sleep					MOM
+baltix         		KD,JK,HC,AE		active					NEMO
+casco				BJ
+ecco025        		BJ
+eccoSOSE			BJ
+gomoos				BJ
+hycom				BJ
+ifs            		JK,KD									IFS
+jplNOW				BJ
+jplSCB				BJ
+multcol				BJ
+ncarCSM				BJ
+orc            		KD				sleep					NEMO
+orca025        		KD				active					NEMO
+orca025L75     		KD,JN			active					NEMO
+orca1   			KD,JN			active					NEMO       
+orca12				KD,JN			active					NEMO
+oscar				BJ
+online_tempale		BJ
+rco            		KD,JK			sleep					RCO
+rutgersCORAL		BJ
+rutgersNWA			BJ
+sed            		KD				sleep					RCO					
+sim					KD 				sleep					AS3D
+singapore			KD,BT			sleep					ROMS
+tes					KD				active					Academic fields
+TOPAZ				BJ
+tun					KD				sleep					ROMS				
+
+atm            		KD				to be deleted
+occ            		KD				to be deleted
+sks					KD				to be deleted
+pal            		KD				to be deleted
+
+"sleep" is when a project is not used but might be used in the future. These code will not be uppdated.
+"active" is when ideally the codes should be updated when changes are being made so that the code can be compiled and run with no errors
+"to be deleted" is when the project will NEVER EVER be used again
+
+Active TRACMASS code contributers:
+
+BJ=Bror Jönsson
+JK=Joakim Kjellsson
+KD=Kristofer Döös
+
+
+TRACMASS code users:
+
+AE=Anders Engqvist
+BT=Bijoy Thompson
+JB=Jaclyn Brown
+JN=Jenny Nilsson
+HC=Hanna Corell

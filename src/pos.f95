@@ -19,7 +19,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
   !    r1       : the new position (coordinate)
   !====================================================================
   
-  USE mod_param
+  USE mod_grid
   USE mod_vel
   USE mod_turb
   IMPLICIT none
@@ -36,18 +36,17 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
   endif
 #endif
   
-  
   if(ijk.eq.1) then
      ii=ia
      im=ia-1
      if(im.eq.0) im=IMT
-     uu=(rg*uflux(ia,ja,ka,NST)+rr*uflux(ia,ja,ka,1))*ff
-     um=(rg*uflux(im,ja,ka,NST)+rr*uflux(im,ja,ka,1))*ff
+     uu=(rg*uflux(ia,ja,ka,nsp)+rr*uflux(ia,ja,ka,nsm))*ff
+     um=(rg*uflux(im,ja,ka,nsp)+rr*uflux(im,ja,ka,nsm))*ff
 #ifdef turb    
      if(r0.ne.dble(ii)) then
-        uu=uu+upr(1,2)  
+        uu=uu+upr(1,2)
      else
-        uu=uu+upr(1,1)  
+        uu=uu+upr(1,1)
         ! add u' from previous iterative time step if on box wall
      endif
      if(r0.ne.dble(im)) then
@@ -57,10 +56,11 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
+
   elseif(ijk.eq.2) then
      ii=ja
-     uu=(rg*vflux(ia,ja  ,ka,NST)+rr*vflux(ia,ja  ,ka,1))*ff
-     um=(rg*vflux(ia,ja-1,ka,NST)+rr*vflux(ia,ja-1,ka,1))*ff
+     uu=(rg*vflux(ia,ja  ,ka,nsp)+rr*vflux(ia,ja  ,ka,nsm))*ff
+     um=(rg*vflux(ia,ja-1,ka,nsp)+rr*vflux(ia,ja-1,ka,nsm))*ff
 #ifdef turb    
      if(r0.ne.dble(ja  )) then
         uu=uu+upr(3,2)  
@@ -76,15 +76,16 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
      endif
 #endif
   elseif(ijk.eq.3) then
-     ii=ka
-#if defined full_wflux | defined explicit_w
-     uu=wflux(ia ,ja ,ka   ,1)
-     um=wflux(ia ,ja ,ka-1 ,1)
+     ii = ka
+#if defined full_wflux || defined explicit_w
+!     uu = wflux(ia ,ja ,ka   ,nsm)
+!     um = wflux(ia ,ja ,ka-1 ,nsm)
+     uu = rg * wflux(ia ,ja, ka  ,nsp) + rr * wflux(ia, ja, ka  ,nsm)
+     um = rg * wflux(ia, ja, ka-1,nsp) + rr * wflux(ia, ja, ka-1,nsm)
 #else
-     uu=rg*wflux(ka  ,NST)+rr*wflux(ka  ,1)
-     um=rg*wflux(ka-1,NST)+rr*wflux(ka-1,1)
+     uu = rg * wflux(ka  ,nsp) + rr * wflux(ka  ,nsm)
+     um = rg * wflux(ka-1,nsp) + rr * wflux(ka-1,nsm)
 #endif
-#ifndef twodim   
 #ifdef turb    
      if(r0.ne.dble(ka  )) then
         uu=uu+upr(5,2)  
@@ -99,19 +100,18 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
-#endif
   endif
-  
+
   !
   ! note: consider in future to improve the code below for accuracy 
   ! in case of um-uu = small; also see subroutine cross
   if(um.ne.uu) then
-     r1= (r0+(-dble(ii-1) + um/(uu-um))) * dexp( (uu-um)*ds ) + dble(ii-1) - um/(uu-um)
+     r1= (r0+(-dble(ii-1) + um/(uu-um))) * &
+          dexp( (uu-um)*ds ) + dble(ii-1) - um/(uu-um)
   else
      r1=r0+uu*ds
   endif
   !if(abs(um/(uu-um)).gt.1.d10) print *,'possible precision problem?',um/(uu-um),uu,um,ijk,ia,ja,ka,r0,r1,ds,rr
-  
   return
 #endif
 end subroutine pos_orgn

@@ -1,5 +1,5 @@
 MODULE mod_seed
-!!------------------------------------------------------------------------------!!
+!!------------------------------------------------------------------------------
 !!
 !!       MODULE: mod_seed
 !!
@@ -18,44 +18,40 @@ MODULE mod_seed
    USE mod_grid
    USE mod_buoyancy
    USE mod_vel
-   USE mod_traj
+   USE mod_traj, only: ntractot, ntrac, x1, y1, z1, trj, nrj
+   USE mod_write
    
    IMPLICIT NONE
   
-   INTEGER                                    ::    nff,  isec,  idir,         &
-                                               &   nqua,   num,   nsd, nsdMax, &
-                                               & nsdTim,                       &
-                                               & seedPos, seedTime, seedType,  &
-                                               & seedAll, varSeedFile,         &
-                                               & ist1, ist2, jst1, jst2,       &
-                                               & kst1, kst2, tst1, tst2,       &
-                                               & iist, ijst, ikst, jsd, jst,   &
-                                               &  ijt,  ikt,  jjt, jkt, ntractot
+   INTEGER                                    :: nff,  isec,  idir
+   INTEGER                                    :: nqua, num, nsdMax
+   INTEGER                                    :: nsdTim
+   INTEGER                                    :: seedPos, seedTime
+   INTEGER                                    :: seedType
+   INTEGER                                    :: seedAll, varSeedFile
+   INTEGER                                    :: seedparts, seedpart_id
+   INTEGER                                    :: loneparticle
+   INTEGER                                    :: ist1, ist2, jst1, jst2
+   INTEGER                                    :: kst1, kst2, tst1, tst2
+   INTEGER                                    :: iist, ijst, ikst, jsd, jst
+   INTEGER                                    :: ijt,  ikt,  jjt, jkt
    INTEGER*8                                  :: itim
    INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seed_ijk, seed_set
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
    REAL*8 , ALLOCATABLE, DIMENSION(:,:)       :: seed_xyz
    CHARACTER(LEN=200)                         :: seedDir, seedFile, timeFile
-!!
-!!------------------------------------------------------------------------------
+
   
 CONTAINS
 
-
    SUBROUTINE seed (tt,ts)
 
-!!------------------------------------------------------------------------------
-      
-      INTEGER                                  :: errCode,         &
-                                                & ib, jb, kb, ibm, &
-                                                &  i,  j,  k,   l, &
-                                                &  m, ntrac
-      REAL*8                                   :: temp,salt,dens
-      REAL*8                                   :: tt, ts,     &
-                                                & x1, y1, z1, &
-                                                & vol, subvol
-
-!!------------------------------------------------------------------------------
+     INTEGER                                  :: errCode
+     INTEGER                                  :: ib, jb, kb, ibm
+     INTEGER                                  :: i, j, k, l, m
+     REAL                                     :: temp,salt,dens
+     REAL*8                                   :: tt, ts
+     REAL*8                                   :: vol, subvol
 
       ! --------------------------------------------
       ! --- Check if ntime is in vector seed_tim ---
@@ -72,7 +68,6 @@ CONTAINS
             END IF
          END DO findTime
       END IF
-      
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---
       !----------------------------------------
@@ -89,9 +84,6 @@ CONTAINS
          if (ikst == km+1)  ikst = km
          if (ikst > km)   cycle startLoop
          if (kmt(iist,ijst) == 0) cycle startLoop
-
-
-
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
@@ -123,27 +115,27 @@ CONTAINS
          SELECT CASE (isec)
          
             CASE (1)  ! Through eastern meridional-vertical surface
-               vol = uflux (iist,ijst,ikst,1)
+               vol = uflux (iist,ijst,ikst,nsm)
          
             CASE (2)  ! Through northern zonal-vertical surface
-               vol = vflux (iist,ijst,ikst,1)
+               vol = vflux (iist,ijst,ikst,nsm)
          
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (1.d0,ib,ibm,jb,kb)
 #if defined full_wflux || defined explicit_w
-               vol=wflux(ib,jb,kb,1)
+               vol=wflux(ib,jb,kb,nsm)
 #elif twodim
                vol=1.
 #else 
-               vol=wflux(kb,1)
+               vol=wflux(kb,nsm)
 #endif
          
             CASE (4 ,5)   ! Total volume/mass transport through grid box
                IF (KM+1-kmt(iist,ijst) > kb) THEN
                   CYCLE startLoop
                ELSE
-                  vol = uflux (ib, jb, kb, 1) + uflux (ibm, jb  , kb, 1) + & 
-                  &     vflux (ib, jb, kb, 1) + vflux (ib , jb-1, kb, 1)
+                  vol = uflux (ib, jb, kb,nsm) + uflux (ibm, jb  , kb,nsm) + & 
+                  &     vflux (ib, jb, kb,nsm) + vflux (ib , jb-1, kb,nsm)
                ENDIF
                IF (vol == 0.d0) cycle startLoop
          
@@ -174,7 +166,7 @@ CONTAINS
 #endif /*varbottombox*/
 #ifdef freesurface
             IF (kb == KM) THEN
-               vol = vol+hs(ib,jb,1)
+               vol = vol+hs(ib,jb,nsm)
             END IF
             vol = vol*dxdy(ib,jb)
 #endif /*freesurface*/
@@ -212,21 +204,15 @@ CONTAINS
          ! --------------------------------------------------
          ijjLoop: DO jjt=1,ijt
             kkkLoop: DO jkt=1,ikt          
-            
-!            IF ( ib /= iist ) PRINT*,iist,ib
-!            IF ( jb /= ijst ) PRINT*,ijst,jb
-!            IF ( kb /= ikst ) PRINT*,ikst,kb
-            ib = iist
-            jb = ijst
-            kb = ikst
+               ib = iist
+               jb = ijst
+               kb = ikst
 
-            SELECT CASE (isec)
+               SELECT CASE (isec)
                CASE (1)   ! Meridional-vertical section
-                  
                   x1 = DBLE (ib) 
                   y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
                   z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
-                  
                   IF (idir == 1) THEN
                      ib = iist+1
                   ELSE IF (idir == -1) THEN
@@ -234,11 +220,9 @@ CONTAINS
                   END IF
                   
                CASE (2)   ! Zonal-vertical section
-                  
                   x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                   y1 = DBLE (jb)
                   z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
-                  
                   IF (idir == 1) THEN
                      jb = ijst+1
                   ELSE IF (idir == -1) THEN
@@ -249,7 +233,6 @@ CONTAINS
                   x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                   y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                   z1 = DBLE (kb)
-                  
                   IF (idir == 1) THEN
                      kb = ikst+1
                   ELSE IF (idir == -1) THEN
@@ -285,36 +268,30 @@ CONTAINS
                ntractot = ntractot+1
                ntrac = ntractot
            
-#ifdef select
-               ! Selects only one single trajectory
-               if(ntrac.ne.57562) then 
+               ! Only one particle for diagnistics purposes
+               if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then
                   nrj(ntrac,6)=1
                   cycle kkkLoop
                endif
-#endif /*select*/
-           
+
                ! ts - time, fractions of ints
                ! tt - time [s] rel to start
-!               ts = ff * DBLE (ints-intstep) / tstep
+               ! ts = ff * DBLE (ints-intstep) / tstep
                ts = DBLE (ints-1) 
                tt = ts * tseas
                
                ! ------------------------------------------------------------
-               ! --- Put the new trajectory into the matrices trj and nrj ---
+               ! --- Put the new particle into the vectors trj and nrj ---
                ! ------------------------------------------------------------
                trj(ntrac,1:7) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
                nrj(ntrac,1:5) = [ ib, jb, kb,  0, IDINT(ts)]
                nrj(ntrac,7)=1
            
+               !Save initial particle position
+               call writedata(10) !ini
+
             END DO kkkLoop
          END DO ijjLoop   
-            
       END DO startLoop
-
    END SUBROUTINE seed
-
 END MODULE mod_seed
-
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
-

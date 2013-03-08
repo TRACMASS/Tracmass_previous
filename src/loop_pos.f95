@@ -3,18 +3,8 @@ module mod_pos
   USE mod_grid
   USE mod_vel
   USE mod_loopvars
-#ifdef streamxy
-  USE mod_streamxy
-#endif
-#ifdef streamv
-  USE mod_streamv
-#endif
-#ifdef streamr
-  USE mod_streamr
-#endif
-#ifdef stream_thermohaline
-  USE mod_stream_thermohaline
-#endif
+  USE mod_time
+  USE mod_streamfunctions
   USE mod_psi
     
   IMPLICIT none
@@ -25,10 +15,10 @@ contains
     
     INTEGER                                    :: mra,mta,msa
     INTEGER                                    :: mrb,mtb,msb
-    REAL*8                                     :: uu
+    REAL                                       :: uu
     INTEGER                                    :: ia, iam, ja, ka,k
     INTEGER                                    :: ib, jb, kb
-    REAL*8                                     :: temp,salt,dens
+    REAL                                       :: temp,salt,dens
     REAL*8                                     :: dza,dzb, zz
     REAL*8, INTENT(IN)                         :: x0, y0, z0
     REAL*8, INTENT(OUT)                        :: x1, y1, z1
@@ -38,7 +28,7 @@ contains
     scrivi=.false.
     if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
-       uu=(rbg*uflux(ia,ja,ka,NST)+rb*uflux(ia ,ja,ka,1))*ff
+       uu=(rbg*uflux(ia,ja,ka,nsp)+rb*uflux(ia ,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
           ib=ia+1
           if(ib.gt.IMT) ib=ib-IMT 
@@ -85,11 +75,11 @@ contains
        if(msa.gt.MR) msa=MR
 #endif 
 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,dble(subvol*ff))
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
-       uu=(rbg*uflux(iam,ja,ka,NST)+rb*uflux(iam,ja,ka,1))*ff
+       uu=(rbg*uflux(iam,ja,ka,nsp)+rb*uflux(iam,ja,ka,nsm))*ff
        if(uu.lt.0.d0) then
           ib=iam
        endif
@@ -134,12 +124,12 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,dble(subvol*ff))
+       call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
 
     elseif(ds==dsn) then ! northward grid-cell exit
        
        scrivi=.false.
-       uu=(rbg*vflux(ia,ja,ka,NST)+rb*vflux(ia,ja,ka,1))*ff
+       uu=(rbg*vflux(ia,ja,ka,nsp)+rb*vflux(ia,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
           jb=ja+1
        endif
@@ -183,12 +173,12 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,dble(subvol*ff))
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
 
     elseif(ds==dss) then ! southward grid-cell exit
        
        scrivi=.false.
-       uu=(rbg*vflux(ia,ja-1,ka,NST)+rb*vflux(ia,ja-1,ka,1))*ff
+       uu=(rbg*vflux(ia,ja-1,ka,nsp)+rb*vflux(ia,ja-1,ka,nsm))*ff
        if(uu.lt.0.d0) then
           jb=ja-1
 #ifndef ifs 
@@ -235,25 +225,25 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,dble(subvol*ff))
+       call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
        
     elseif(ds==dsu) then ! upward grid-cell exit
        scrivi=.false.
        call vertvel(rb,ia,iam,ja,ka)
 #ifdef full_wflux
-       uu=wflux(ia,ja,ka,1)
+       uu=wflux(ia,ja,ka,nsm)
 #elif defined explicit_w
-       uu=rbg*wflux(ia,ja,ka,NST)+rb*wflux(ia,ja,ka,1)
+       uu=rbg*wflux(ia,ja,ka,nsp)+rb*wflux(ia,ja,ka,nsm)
 #else
-       uu=rbg*wflux(ka,NST)+rb*wflux(ka,1)
+       uu=rbg*wflux(ka,nsp)+rb*wflux(ka,nsm)
 #endif
        if(uu.gt.0.d0) then
           kb=ka+1
        endif
        z1=dble(ka)
-       if(kb==KM+1) then    ! prevent "evaporation" and put particle from the surface
-          kb=KM           
-          z1=dble(KM)-0.5d0 ! to the middle of the surface layer
+       if(kb==KM+1) then    ! prevent "evaporation" and put particle from
+          kb=KM             ! the surface to the middle of the surface layer
+          z1=dble(KM)-0.5d0 !
        endif
 #if defined timeanalyt
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
@@ -280,18 +270,18 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,dble(subvol*ff))
+       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,real(subvol*ff))
 
     elseif(ds==dsd) then ! downward grid-cell exit
        scrivi=.false.
        call vertvel(rb,ia,iam,ja,ka)
        
 #ifdef full_wflux
-       if(wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
+       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
 #elif defined explicit_w
-       if(rbg*wflux(ia,ja,ka-1,NST)+rb*wflux(ia,ja,ka-1,1).lt.0.d0) kb=ka-1
+       if(rbg*wflux(ia,ja,ka-1,nsp)+rb*wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
 #else
-       if(rbg*wflux(ka-1,NST)+rb*wflux(ka-1,1).lt.0.d0) kb=ka-1
+       if(rbg*wflux(ka-1,nsp)+rb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
 #endif              
        z1=dble(ka-1)
 #if defined timeanalyt
@@ -337,7 +327,7 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,dble(subvol*ff))
+       call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
 
     elseif( ds==dsc .or. ds==dsmin) then  
        ! shortest time is the time-steping 
@@ -354,20 +344,23 @@ contains
           
           ! move if atmosphere, freeze if ocean
           ib=ia ; jb=ja ; kb=ka
-#ifdef ifs
-          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
-#else
-          x1=x0 ; y1=y0 ; z1=z0 
-#endif  
+!          print *,'convergence for ',ib,jb,kb,x0,y0,z0
+!#ifdef ifs
+!          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
+!          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
+!          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+!#else
+!          x1=x0 ; y1=y0 ; z1=z0 
+!          print *,ib,jb,kb,x1,y1,z1
+!#endif  
           ! If there is at least one spatial solution 
           ! but the shortest cross time is the time step
-       else
+       endif
+!       else
           call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
           call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
           call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
-       endif
+!       endif
 #endif
     endif
     

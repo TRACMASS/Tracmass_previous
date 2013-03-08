@@ -5,7 +5,7 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'test',
+  caseName     = '_seed200_',
   caseDesc     = 'Looking at chl growth in lagrangian space'/
   ! 
   !
@@ -44,8 +44,8 @@
   !
   startHour         = 0,
   startDay          = 01,
-  startMon          = 02,
-  startYear         = 2000/
+  startMon          = 01,
+  startYear         = 1959/
   !
   !
   &INITRUNWRITE
@@ -63,13 +63,13 @@
   kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/Volumes/rutgersNWA/',
+  inDataDir       = '/projData/rutgers/NWA/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Volumes/rutgersNWA/ormOut/',
+  outDataDir      = '/Volumes/keronHD3/ormOut/rutgersNWA_seed200/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'rutgersNWAtest',
+  outDataFile     = 'rutgersNWA_seed200_',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -136,7 +136,9 @@
   seedDir      = '/Users/bror/git/orm/projects/rutgersNWA/',
   !
   ! === Seed filename (or beginning of it)
-  seedFile     = 'test.seed'/
+  seedFile     = 'test.seed',
+  loneparticle = 0/!/809/!28376/
+/
 
 
 
@@ -165,20 +167,26 @@ $INITRUNEND
   ienw(1) =   1,
   iene(1) =   2,
   jens(1) =   1,
-  jenn(1) = 257,
+  jenn(1) = 361,
 !
-  ienw(2) =   1,
-  iene(2) = 257,
-  jens(2) = 380,
-  jenn(2) = 385,
+  ienw(2) = 720,
+  iene(2) = 721,
+  jens(2) =   1,
+  jenn(2) = 361,
 !
   ienw(3) =   1,
-  iene(3) = 385,
+  iene(3) = 721,
   jens(3) =   1,
   jenn(3) =   2,
 
-  ienw(4) = 255,
-  iene(4) = 257,
-  jens(4) =   1,
-  jenn(4) = 385,
+  ienw(4) =   1,
+  iene(4) = 721,
+  jens(4) = 360,
+  jenn(4) = 361,
+
+  ienw(5) = 205,
+  iene(5) = 208,
+  jens(5) = 164,
+  jenn(5) = 167,
+
   timax =  36500./  ! maximum time length of a trajectory in days

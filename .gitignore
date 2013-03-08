@@ -3,4 +3,8 @@
 *.pyc
 *.log
 runtraj
-#Makefile
+runtracmass
+runtrm
+build
+callgrind*
+gmon.out

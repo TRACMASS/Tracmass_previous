@@ -63,7 +63,7 @@
   kriva        = 2,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/Volumes/USB2TB/NEP6/run15/averages/',
+  inDataDir       = '/Volumes/USB2TB/NEP6/run22/averages/',
   !
   ! === Directory where output files are saved
   outDataDir      = '/Volumes/USB2TB/NEP6/ormOut/',

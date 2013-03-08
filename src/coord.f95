@@ -10,7 +10,7 @@ IMPLICIT none
 
 INTEGER i,j,k,kk,mois(12)
 REAL*8 rlatt,rlatu!,radian,radius
-REAL*8 :: a
+REAL :: a
 
 #if defined occ
 REAL*8 b1,b2,b3,b4,z

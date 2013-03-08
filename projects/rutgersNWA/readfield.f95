@@ -60,16 +60,14 @@ SUBROUTINE readfields
   intpart2    = floor((ints)/24.)
   dstamp      = 'nwa_avg_XXXXX.nc'
 
-  write (dstamp(9:13),'(I5)') & 
+  write (dstamp(9:13),'(I5.5)') & 
        int(currJDtot) - 714782
-  dataprefix  = trim(inDataDir) // '/2000/' // dstamp
+  dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
-  print *,dataprefix
-
-  uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
-  vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
-  ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
-  hs(:,:,2) = ssh
+  uvel        = get3DfieldNC(trim(dataprefix) ,   'u')
+  vvel        = get3DfieldNC(trim(dataprefix) ,   'v')
+  ssh         = get2dfieldNC(trim(dataprefix) ,'zeta')
+  hs(:,:,2)   = ssh
 
   where (uvel > 1000)
      uvel = 0
@@ -105,27 +103,4 @@ SUBROUTINE readfields
   end if
 
   return
-
- !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
- 
-contains
-
-  
-  subroutine datasetswap
-    hs(:,:,1)      = hs(:,:,2)
-    uflux(:,:,:,1) = uflux(:,:,:,2)
-    vflux(:,:,:,1) = vflux(:,:,:,2)
-#ifdef explicit_w
-    wflux(:,:,:,1) = wflux(:,:,:,2)
-#endif
-
-#ifdef tempsalt
-    tem(:,:,:,1)   = tem(:,:,:,2)
-    sal(:,:,:,1)   = sal(:,:,:,2)
-    rho(:,:,:,1)   = rho(:,:,:,2)
-#endif
-  end subroutine datasetswap
-
-
 end subroutine readfields

@@ -5,18 +5,8 @@ subroutine writepsi
   USE mod_param
   USE mod_name
   USE mod_time
-#ifdef streamxy
-  USE mod_streamxy
-#endif
-#ifdef streamv
-  USE mod_streamv
-#endif
-#ifdef streamr
-  USE mod_streamr
-#endif
-#ifdef stream_thermohaline
-  USE mod_stream_thermohaline
-#endif
+  USE mod_streamfunctions
+
 IMPLICIT none
 
 #ifdef streamxy

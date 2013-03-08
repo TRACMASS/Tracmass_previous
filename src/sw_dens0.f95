@@ -3,32 +3,32 @@
 function sw_dens0 (t,s)
   
   IMPLICIT NONE
-  REAL*8, INTENT(IN)                        :: t(:),s(:)
-  REAL*8, ALLOCATABLE, DIMENSION (:)        :: sw_dens0
+  REAL, INTENT(IN)                        :: t(:),s(:)       
+  REAL, ALLOCATABLE, DIMENSION (:)        :: sw_dens0
   
-  REAL*8, ALLOCATABLE, DIMENSION (:)        :: dens_temp
+  REAL, ALLOCATABLE, DIMENSION (:)         :: dens_temp
   
   
-  INTEGER                                   :: kmm
-  INTEGER                                   :: km
-  REAL*8, PARAMETER                         :: a0 = 999.842594
-  REAL*8, PARAMETER                         :: a1 =   6.793952e-2
-  REAL*8, PARAMETER                         :: a2 =  -9.095290e-3
-  REAL*8, PARAMETER                         :: a3 =   1.001685e-4
-  REAL*8, PARAMETER                         :: a4 =  -1.120083e-6
-  REAL*8, PARAMETER                         :: a5 =   6.536332e-9
+  INTEGER                                  :: kmm
+  INTEGER                                  :: km
+  REAL, PARAMETER                          :: a0 = 999.842594
+  REAL, PARAMETER                          :: a1 =   6.793952e-2
+  REAL, PARAMETER                          :: a2 =  -9.095290e-3
+  REAL, PARAMETER                          :: a3 =   1.001685e-4
+  REAL, PARAMETER                          :: a4 =  -1.120083e-6
+  REAL, PARAMETER                          :: a5 =   6.536332e-9
     
-  REAL*8, PARAMETER                         :: b0 =  8.24493e-1
-  REAL*8, PARAMETER                         :: b1 = -4.0899e-3
-  REAL*8, PARAMETER                         :: b2 =  7.6438e-5
-  REAL*8, PARAMETER                         :: b3 = -8.2467e-7
-  REAL*8, PARAMETER                         :: b4 =  5.3875e-9
+  REAL, PARAMETER                          :: b0 =  8.24493e-1
+  REAL, PARAMETER                          :: b1 = -4.0899e-3
+  REAL, PARAMETER                          :: b2 =  7.6438e-5
+  REAL, PARAMETER                          :: b3 = -8.2467e-7
+  REAL, PARAMETER                          :: b4 =  5.3875e-9
   
-  REAL*8, PARAMETER                         :: c0 = -5.72466e-3
-  REAL*8, PARAMETER                         :: c1 = +1.0227e-4
-  REAL*8, PARAMETER                         :: c2 = -1.6546e-6
+  REAL, PARAMETER                          :: c0 = -5.72466e-3
+  REAL, PARAMETER                          :: c1 = +1.0227e-4
+  REAL, PARAMETER                          :: c2 = -1.6546e-6
   
-  REAL*8, PARAMETER                         :: d0 = 4.8314e-4
+  REAL, PARAMETER                          :: d0 = 4.8314e-4
 
   km = size(s)
   allocate ( dens_temp(km) ,sw_dens0(km) )

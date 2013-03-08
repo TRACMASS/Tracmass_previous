@@ -29,8 +29,8 @@ $INITGRIDNTRAC
 $INITGRIDTIME
   !
   !ngcm         =730,        !  hours between GCM datasets
-  ngcm          =24,         !  hours between GCM datasets
-  iter          = 1000,         !  iteration between two gcm data sets  (always =1 for timeanalyt)
+  ngcm          = 1,         !  hours between GCM datasets
+  iter          = 10,         !  iteration between two gcm data sets  (always =1 for timeanalyt)
   intmax       = 146000,          !  maximum length of GCM fields
   fieldsPerFile = 1/            !
   !

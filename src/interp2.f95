@@ -6,18 +6,20 @@ subroutine interp2(i,j,k,temp,salt,dens)
   ! === can be called as either ia,ja,ka or ib,jb,kb
   ! === used to calculate the thermohaline stream function with -Dstream_thermohaline
   
+  USE mod_grid
   USE mod_param
   USE mod_loopvars
-  USE mod_dens
+  USE mod_time
+  USE mod_vel
   IMPLICIT none
   
-  real*8 temp,salt,dens
+  real temp,salt,dens
   
   integer i,j,k
   
-  temp=rbg*tem(i,j,k,NST)+rb*tem(i,j,k,1)
-  salt=rbg*sal(i,j,k,NST)+rb*sal(i,j,k,1)
-  dens=rbg*rho(i,j,k,NST)+rb*rho(i,j,k,1)
+  temp=rbg*tem(i,j,k,nsp)+rb*tem(i,j,k,nsm)
+  salt=rbg*sal(i,j,k,nsp)+rb*sal(i,j,k,nsm)
+  dens=rbg*rho(i,j,k,nsp)+rb*rho(i,j,k,nsm)
   
   return
 end subroutine interp2

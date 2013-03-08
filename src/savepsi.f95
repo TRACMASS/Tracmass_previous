@@ -2,18 +2,7 @@ module mod_psi
 
   USE mod_loopvars
   USE mod_grid
-#ifdef streamxy
-  USE mod_streamxy
-#endif
-#ifdef streamr
-  USE mod_streamr
-#endif
-#ifdef streamv
-  USE mod_streamv
-#endif
-#ifdef stream_thermohaline
-  USE mod_stream_thermohaline
-#endif
+  USE mod_streamfunctions
 
   CONTAINS
 
@@ -30,8 +19,8 @@ IMPLICIT NONE
 INTEGER             :: ia,ja,ka   !where to write
 REAL*8              :: x1,y1,z1
 INTEGER             :: xy, dir !1 - zonal, 2 - meridional, 3 - vertical
-REAL*8              :: flux
-REAL*8              :: temp,salt,dens
+REAL                :: flux
+REAL                :: temp,salt,dens
 INTEGER             :: mrb,mtb,msb
 INTEGER             :: mta,msa,m
 
