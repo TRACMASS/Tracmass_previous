@@ -24,7 +24,8 @@ SUBROUTINE init_seed()
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:)     :: seedMask
    CHARACTER(LEN=50)                          :: fileStamp
    CHARACTER(LEN=200)                         :: fullSeedFile
-   CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6,i12)"
+   CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6)"
+!   CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6,i12)"
    CHARACTER(LEN=*), PARAMETER                :: timform = "(42x      ,i12)"
 #if ! defined baltix && ! defined rco
    CHARACTER(LEN=*), PARAMETER                :: ijkform = "(6i6)"
@@ -36,7 +37,7 @@ SUBROUTINE init_seed()
 !-------------------------------------------------------------------------------
 #if ! defined baltix && ! defined rco
    seedPos = seedType
-   seedType = 1
+!  seedType = 1
    seedTime = 0
    seedAll = 0
 #endif

@@ -114,6 +114,7 @@ CONTAINS
     start3d(1) = ncTpos
     s = start3d(map3d)
     c = count3d(map3d)
+
     d = c + s - 1
 
     allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt+2,jmt,km) )

@@ -22,6 +22,8 @@
   subGridImax  = 225,
   subGridJmin  = 2,
   subGridJmax  = 641,
+  subGridKmin  =  1,  ! k-direction As defined by imput file
+  subGridKmax  =  50,
   ! === Used if SubGrid = 2 or 3
   SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
   ! === Used if SubGrid = 2

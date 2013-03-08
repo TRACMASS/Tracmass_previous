@@ -1,4 +1,4 @@
-subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
+subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
 #ifndef timeanalyt 
   !====================================================================
   ! computes new position (r0 --> r1) of trajectory after time ds
@@ -22,9 +22,10 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr)
   USE mod_grid
   USE mod_vel
   USE mod_turb
+  USE mod_loopvars
   IMPLICIT none
 
-  real*8 r0,r1,rr,rg,ds,uu,um,vv,vm,en
+  real*8 r0,r1,uu,um,vv,vm,en
   integer ijk,ia,ja,ka,ii,im
   
   rg=1.d0-rr

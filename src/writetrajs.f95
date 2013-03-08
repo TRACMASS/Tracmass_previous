@@ -88,6 +88,7 @@ CONTAINS
     USE mod_pos
     USE mod_traj
     USE mod_loopvars
+    USE mod_buoyancy
     
     IMPLICIT NONE
 

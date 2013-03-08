@@ -41,7 +41,7 @@ SUBROUTINE setupgrid
 
 
 ! === Template for setting up grids. Move the code from readfile.f95
-  allocate ( mask(imt,jmt), depth(imt,jmt) )
+  allocate ( depth(imt,jmt) )
 
   !Order is   t  k  i  j 
   map2d    = [3, 4, 1, 2]
@@ -83,6 +83,6 @@ SUBROUTINE setupgrid
   !   mask(:, 2:jmt) = 0
   !end where
 
-  !where (mask==0) kmt=0
+  where (mask==0) kmt=0
 
 end SUBROUTINE setupgrid

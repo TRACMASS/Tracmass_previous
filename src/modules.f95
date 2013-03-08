@@ -106,6 +106,7 @@ MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
 #ifdef zgrid3Dt
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu,dzv,z_r
 #elif zgrid3D
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt,dzu,dzv
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
@@ -392,6 +393,7 @@ MODULE mod_buoyancy
   REAL*4                                    :: tmine ,tmaxe
   REAL*4                                    :: smine ,smaxe
   REAL*4                                    :: rmine ,rmaxe
+  REAL                                      :: temp, salt, dens
 ENDMODULE mod_buoyancy
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 

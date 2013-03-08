@@ -50,7 +50,7 @@ SUBROUTINE loop
 #endif /*larval_fish*/
 
   ! === Variables to interpolate fields ===
-  REAL                                       :: temp, salt, dens
+! REAL                                       :: temp, salt, dens
   REAL                                       :: temp2, salt2, dens2
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
@@ -346,9 +346,9 @@ SUBROUTINE loop
            call cross_time(2,ia,ja,ka,y0,dsn,dss,rr) ! merid
            call cross_time(3,ia,ja,ka,z0,dsu,dsd,rr) ! vert
 #else
-           call cross_stat(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-           call cross_stat(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-           call cross_stat(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+           call cross_stat(1,ia,ja,ka,x0,dse,dsw) ! zonal
+           call cross_stat(2,ia,ja,ka,y0,dsn,dss) ! meridional
+           call cross_stat(3,ia,ja,ka,z0,dsu,dsd) ! vertical
 #endif /*timeanalyt*/
            ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
            call errorCheck('dsCrossError', errCode)
@@ -695,9 +695,9 @@ return
               print *,'ntrac=',ntrac,niter 
               call print_ds
               call print_pos
-              call cross_stat(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-              call cross_stat(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-              call cross_stat(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+              call cross_stat(1,ia,ja,ka,x0,dse,dsw) ! zonal
+              call cross_stat(2,ia,ja,ka,y0,dsn,dss) ! meridional
+              call cross_stat(3,ia,ja,ka,z0,dsu,dsd) ! vertical
               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
               nrj(ntrac,6)=1
@@ -825,7 +825,9 @@ return
 
     print '(A,I4,A,F7.2,A,F7.2)',    &
          '    kmt: ', kmt(ib,ja), &
-#if defined zgrid3Dt || defined zgrid3D
+#if defined zgrid3Dt
+         '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb,nsm)
+#elif defined zgrid3D
          '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
 #else
          '    dz(k) : ', dz(kb), '   dzt :  ', 0.0

@@ -38,8 +38,8 @@ contains
        call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
        call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) 
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr)
+       call pos_orgn(2,ia,ja,ka,y0,y1) 
+       call pos_orgn(3,ia,ja,ka,z0,z1)
 #endif /*timeanalyt*/
 
 #if defined streamr 
@@ -88,8 +88,8 @@ contains
        call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
        call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+       call pos_orgn(2,ia,ja,ka,y0,y1) ! meridional position
+       call pos_orgn(3,ia,ja,ka,z0,z1) ! vertical position
 #endif
 !       scrivi=.true.      
 #if defined streamr 
@@ -138,8 +138,8 @@ contains
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
        call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+       call pos_orgn(1,ia,ja,ka,x0,x1) ! zonal position
+       call pos_orgn(3,ia,ja,ka,z0,z1) ! vertical position
 #endif
 #if defined streamr 
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
@@ -190,8 +190,8 @@ contains
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
        call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+       call pos_orgn(1,ia,ja,ka,x0,x1) ! zonal position
+       call pos_orgn(3,ia,ja,ka,z0,z1) ! vertical position
 #endif
 #if defined streamr 
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
@@ -249,8 +249,8 @@ contains
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
        call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr)
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr)
+       call pos_orgn(1,ia,ja,ka,x0,x1)
+       call pos_orgn(2,ia,ja,ka,y0,y1)
 #endif
 
 #if defined stream_thermohaline
@@ -288,8 +288,8 @@ contains
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
        call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr)
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr)
+       call pos_orgn(1,ia,ja,ka,x0,x1)
+       call pos_orgn(2,ia,ja,ka,y0,y1)
 #endif
 #ifdef sediment
        if(kb==KM-kmt(ia,ja)) then
@@ -346,9 +346,9 @@ contains
           ib=ia ; jb=ja ; kb=ka
 !          print *,'convergence for ',ib,jb,kb,x0,y0,z0
 !#ifdef ifs
-!          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-!          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-!          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+!          call pos_orgn(1,ia,ja,ka,x0,x1) ! zonal crossing 
+!          call pos_orgn(2,ia,ja,ka,y0,y1) ! merid. crossing 
+!          call pos_orgn(3,ia,ja,ka,z0,z1) ! vert. crossing 
 !#else
 !          x1=x0 ; y1=y0 ; z1=z0 
 !          print *,ib,jb,kb,x1,y1,z1
@@ -357,9 +357,9 @@ contains
           ! but the shortest cross time is the time step
        endif
 !       else
-          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+          call pos_orgn(1,ia,ja,ka,x0,x1) ! zonal crossing 
+          call pos_orgn(2,ia,ja,ka,y0,y1) ! merid. crossing 
+          call pos_orgn(3,ia,ja,ka,z0,z1) ! vert. crossing 
 !       endif
 #endif
     endif
