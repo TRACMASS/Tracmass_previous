@@ -26,7 +26,6 @@ SUBROUTINE loop
   USE mod_traj
   USE mod_write
   USE mod_pos
-  USE mod_coord
   USE mod_print
   ! === Selectable moules ===
   USE mod_turb

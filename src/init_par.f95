@@ -12,7 +12,6 @@ SUBROUTINE init_params
 !!----------------------------------------------------------------------------
    USE mod_param
    USE mod_seed
-   USE mod_coord
    USE mod_grid
    USE mod_name
    USE mod_time 

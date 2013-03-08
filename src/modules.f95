@@ -27,15 +27,6 @@ MODULE mod_param
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
-MODULE mod_coord
-ENDMODULE mod_coord
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_diff
-	INTEGER                             :: dummy	
-ENDMODULE mod_diff
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
   REAL*8                                     :: ds, dsmin
@@ -54,18 +45,14 @@ MODULE mod_traj
   INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
   INTEGER                                    :: NEND
   INTEGER                                    :: ntrac, ntractot=0
-
-
   ! === Particle arrays ===
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
-
   ! === Particle counters ===
   INTEGER                                    :: nout=0, nloop=0, nerror=0
   INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
   INTEGER                                    :: nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
-
   ! === Particle positions ===
   INTEGER                                    :: ia, ja, ka, iam
   INTEGER                                    :: ib, jb, kb, ibm
