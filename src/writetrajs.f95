@@ -9,6 +9,7 @@ module mod_write
   CHARACTER(LEN=200)                         :: inargstr1='', inargstr2=''
   INTEGER                                    :: twritetype = 0
   INTEGER                                    :: fileseq = 0
+  CHARACTER(LEN=20)                          :: rankstamp=''
 
 CONTAINS
 
@@ -18,15 +19,14 @@ CONTAINS
     IMPLICIT NONE
     CHARACTER(LEN=200)                         :: fullWritePref
     CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
-    CHARACTER(LEN=20)                          :: rankstamp=''
 
     if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
        write (intminstamp, '(A,i8.8)') '_t', intstart
     end if
     if ((intminInOutFile.eq.2) .or. (intminInOutFile.eq.3)) then
-       write (partstamp, '(A,i6.6)') '_p', max(ints-intstart,0)+1
-    end if
-    if (seedparts>0) write (rankstamp, '(A,i2.2)') '_r', seedpart_id  
+         write (partstamp, '(A,i6.6)') '_p', max(ints-intstart,0)+1
+      end if
+
     fullWritePref =  trim(outDataDir)  // trim(outDataFile) //    &
                      trim(inargstr1)   // trim(inargstr2)   //    & 
                      trim(intminstamp) // trim(partstamp)   //    &
@@ -85,12 +85,12 @@ CONTAINS
   end subroutine close_outfiles
 
   subroutine writedata(sel)
-    
     USE mod_time
     USE mod_pos
     USE mod_traj
     USE mod_loopvars
-    
+
+
     IMPLICIT NONE
 
     REAL                                 :: vort
@@ -100,7 +100,9 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosKll=0
     REAL                                 :: x14 ,y14 ,z14
     REAL*8                               :: twrite
-
+    ! === Variables to interpolate fields ===
+    REAL                                       :: temp, salt, dens
+    REAL                                       :: temp2, salt2, dens2
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
