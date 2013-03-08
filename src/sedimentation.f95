@@ -70,7 +70,7 @@ USE mod_param
 USE mod_sed
 USE mod_orbital
 USE mod_vel
-USE mod_coord
+
 USE mod_grid
 IMPLICIT none
 
