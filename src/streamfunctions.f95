@@ -14,7 +14,7 @@ contains
 
 subroutine pos_stream_funcs_1()
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -53,7 +53,7 @@ subroutine pos_stream_funcs_1()
 
      subroutine pos_stream_funcs_2()
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -90,7 +90,7 @@ subroutine pos_stream_funcs_1()
 
      subroutine pos_stream_funcs_3()
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -127,7 +127,7 @@ subroutine pos_stream_funcs_1()
 
      subroutine pos_stream_funcs_4()
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1

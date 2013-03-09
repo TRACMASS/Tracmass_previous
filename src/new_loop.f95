@@ -31,6 +31,7 @@ SUBROUTINE loop
   USE mod_turb
   USE mod_streamfunctions
   USE mod_tracer
+  USE mod_particle
   USE mod_sed
 
   IMPLICIT none
@@ -38,9 +39,6 @@ SUBROUTINE loop
   ! === Loop variables ===
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: nrh0=0
-  ! === Variables to interpolate fields ===
-  REAL                                       :: temp, salt, dens
-  REAL                                       :: temp2, salt2, dens2
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
@@ -220,7 +218,7 @@ SUBROUTINE loop
         if(trj(ntrac,4) == trj(ntrac,7)) then
 #ifdef tempsalt
         call interp(nrj(ntrac,1),nrj(ntrac,2),nrj(ntrac,3),&
-        trj(ntrac,1),trj(ntrac,2),trj(ntrac,3),temp,salt,dens,1)
+        trj(ntrac,1),trj(ntrac,2),trj(ntrac,3),1)
 #endif
         call writedata(10)
         endif
@@ -444,7 +442,7 @@ SUBROUTINE loop
 
            
 #if defined tempsalt
-               call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+               call interp (ib,jb,kb,x1,y1,z1,1) 
 !               if (temp < tmine .or. temp > tmaxe .or. &
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then

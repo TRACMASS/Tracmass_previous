@@ -32,8 +32,8 @@ SUBROUTINE readfields
   CHARACTER (len=50)                         :: varName
 
   ! = Variables for converting from S to Z
-  REAL*8,       ALLOCATABLE, DIMENSION(:)      :: sc_r,Cs_r
-  REAL*8,       ALLOCATABLE, DIMENSION(:)      :: sc_w,Cs_w
+  REAL*8,       ALLOCATABLE, DIMENSION(:)    :: sc_r,Cs_r
+  REAL*8,       ALLOCATABLE, DIMENSION(:)    :: sc_w,Cs_w
   INTEGER                                    :: hc
 
   ! = Input fields from GCM
@@ -112,12 +112,14 @@ SUBROUTINE readfields
   !dzt(:,:,1:km-1)=dzt(:,:,2:km)-dzt(:,:,1:km-1)
   !dzt(:,:,km) = dzt0-ssh
 
+  z_w(:,:,0,2) = depth
   do k=1,km
      dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
-     z_r(:,:,k) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+     z_r(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
      dzt0 = (hc*sc_w(k) + depth*Cs_w(k)) / (hc + depth)
 #ifdef zgrid3Dt
-     dzt(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+     z_w(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+     dzt(:,:,k,2) = z_w(:,:,k,2)
 #else
      dzt(:,:,k) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
 #endif
@@ -151,9 +153,12 @@ SUBROUTINE readfields
   tem(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'temp')
   sal(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'salt')
   rho(:,:,:,2)      = get3DfieldNC(trim(dataprefix) ,   'rho')
+#ifdef larval_fish
+  srflux(:,:,2)     = get2DfieldNC(trim(dataprefix) ,   'swrad')
 ! Note: this works as long as surface AKt is zero.
   ak2(:,:,:)        = get3DfieldNC(trim(dataprefix) ,   'AKt')
   akt(:,:,0:km-1,2) = ak2(:,:,:)
+#endif
 #endif
 
   return

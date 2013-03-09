@@ -276,8 +276,13 @@ SUBROUTINE init_params
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
       ALLOCATE ( mask(imt,jmt) )
+#ifdef larval_fish
+      ALLOCATE ( lat(imt,jmt), lon(imt,jmt) )
+      ALLOCATE ( srflux(imt,jmt,nst) )
+#endif
 #ifdef roms
-      ALLOCATE ( z_r(imt,jmt,km) )
+      ALLOCATE ( z_r(imt,jmt,km,nst) )
+      ALLOCATE ( z_w(imt,jmt,0:km,nst) )
 #endif
 #ifdef zgrid3Dt
       ALLOCATE ( dzt(imt,jmt,km,nst) )   

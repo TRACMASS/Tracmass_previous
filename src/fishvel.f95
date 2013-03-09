@@ -14,13 +14,16 @@
 ! Stage is a function of age and temperature
 ! CMP 11/13/12
 
-subroutine fishvel(temp,dens)  ! If called from loop.F
+subroutine fishvel        ! If called from loop.F
 USE mod_param
 USE mod_fish
 USE mod_loopvars
+USE mod_particle
+USE mod_time
+USE mod_traj
 IMPLICIT none
 
-REAL*8   :: grav,rho,visc,Dm,rhof,temp,dens
+REAL*8   :: rho,visc,Dm,rhof
 REAL*8   :: age, egg_hatch, yolk_len, length
 REAL*8   :: est, group, egg_sg, hatch_hrs, hatch_len
 REAL*8   :: ec1,ec2,ec3,ec4,ec5,ec6,ec7,ec8,ec9,ec10
@@ -153,7 +156,7 @@ Endif !Yolk if
 !EGGS
 !If (stage(ntrac) .eq. f_egg)then
 
-grav = 9.81 ! gravity
+!grav = 9.81 ! gravity
 Dm = fishdiam/1000.0 ! change diameter from mm to m
 
 rho=dens+1025.0  ! If called from loop.F

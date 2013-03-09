@@ -256,7 +256,7 @@ CONTAINS
            ! ------------------------------------------------------ 
 
 #ifdef tempsalt 
-               CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+               CALL interp (ib,jb,kb,x1,y1,z1,1) 
                IF (temp < tmin0 .OR. temp > tmax0 .OR. &
                &   salt < smin0 .OR. salt > smax0 .OR. &
                &   dens < rmin0 .OR. dens > rmax0      ) THEN

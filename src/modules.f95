@@ -101,12 +101,16 @@ MODULE mod_grid
   REAL*8                                    :: dxyz
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
+#ifdef larval_fish
+  REAL, ALLOCATABLE, DIMENSION(:,:)         :: lat, lon
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: srflux
+#endif
 
   ! === Vertical grids ===
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
 #ifdef zgrid3Dt
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu,dzv,z_r
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt,z_r,z_w
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu,dzv
 #elif zgrid3D
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt,dzu,dzv
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
@@ -393,7 +397,6 @@ MODULE mod_buoyancy
   REAL*4                                    :: tmine ,tmaxe
   REAL*4                                    :: smine ,smaxe
   REAL*4                                    :: rmine ,rmaxe
-  REAL                                      :: temp, salt, dens
 ENDMODULE mod_buoyancy
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -411,6 +414,21 @@ ENDMODULE mod_domain
 MODULE mod_dens
 
 ENDMODULE mod_dens
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_particle
+  USE mod_grid
+
+  REAL                                      :: temp, salt, dens
+  REAL                                      :: temp2(nst), salt2(nst)
+  REAL                                      :: dens2(nst)
+#ifdef larval_fish
+  REAL                                      :: flat1, flon1
+  REAL                                      :: depth1, depth2(nst), flen1
+#endif
+ENDMODULE mod_particle
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
@@ -453,6 +471,16 @@ CONTAINS
     tem(:,:,:,nsm)   = tem(:,:,:,nsp)
     sal(:,:,:,nsm)   = sal(:,:,:,nsp)
     rho(:,:,:,nsm)   = rho(:,:,:,nsp)
+#endif
+#ifdef larval_fish
+    srflux(:,:,nsm)  = srflux(:,:,nsp)
+#endif
+#ifdef zgrid3Dt
+    dzt(:,:,:,nsm)   = dzt(:,:,:,nsp)
+#ifdef roms
+    z_r(:,:,:,nsm)   = z_r(:,:,:,nsp)
+    z_w(:,:,:,nsm)   = z_w(:,:,:,nsp)
+#endif
 #endif
   end subroutine datasetswap
 

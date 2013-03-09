@@ -20,6 +20,7 @@ SUBROUTINE loop
   USE mod_loopvars
   USE mod_grid
   USE mod_buoyancy
+  USE mod_particle
   USE mod_seed
   USE mod_domain
   USE mod_vel
@@ -49,9 +50,6 @@ SUBROUTINE loop
   INTEGER                                    :: istage
 #endif /*larval_fish*/
 
-  ! === Variables to interpolate fields ===
-! REAL                                       :: temp, salt, dens
-  REAL                                       :: temp2, salt2, dens2
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0 ,boundError=0
@@ -260,7 +258,7 @@ SUBROUTINE loop
 #ifdef larval_fish
            ! Find settling velocity for active gridbox ===
 !           rhof = fish(ntrac,i_density)
-           call fishvel(temp,dens)
+           call fishvel
 #endif /*larval_fish*/
            ! === change velocity fields &  === 
            ! === store trajectory position ===
@@ -439,7 +437,7 @@ SUBROUTINE loop
 
            
 #if defined tempsalt
-               call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+               call interp (ib,jb,kb,x1,y1,z1,1) 
 !               if (temp < tmine .or. temp > tmaxe .or. &
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then

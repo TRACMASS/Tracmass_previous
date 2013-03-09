@@ -53,6 +53,10 @@ SUBROUTINE setupgrid
   print *, trim(gridfile)
   dxv(:imt,:) = get2DfieldNC(trim(gridfile), 'pm')
   dyu(:imt,:) = get2DfieldNC(trim(gridfile), 'pn')
+#ifdef larval_fish
+  lat(:imt,:) = get2DfieldNC(trim(gridfile), 'lat_rho')
+  lon(:imt,:) = get2DfieldNC(trim(gridfile), 'lon_rho')
+#endif
   print *,"Read pm and pn"
 
 

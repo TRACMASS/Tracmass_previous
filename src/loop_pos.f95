@@ -43,7 +43,7 @@ contains
 #endif /*timeanalyt*/
 
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -93,7 +93,7 @@ contains
 #endif
 !       scrivi=.true.      
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -142,7 +142,7 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1) ! vertical position
 #endif
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -194,7 +194,7 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1) ! vertical position
 #endif
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
