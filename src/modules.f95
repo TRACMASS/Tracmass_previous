@@ -427,6 +427,7 @@ MODULE mod_particle
 #ifdef larval_fish
   REAL                                      :: flat1, flon1
   REAL                                      :: depth1, depth2(nst), flen1
+  REAL                                      :: light, srflx, srflx2(nst)
 #endif
 ENDMODULE mod_particle
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

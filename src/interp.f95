@@ -14,7 +14,7 @@ USE mod_vel
 USE mod_loopvars
 IMPLICIT none
 
-REAL*8  :: x1,y1,z1,ax,ay,az
+REAL*8  :: x1,y1,z1,ax,ay,az,az2
 
 REAL    :: tppp,tppm,tpmp,tpmm,tmpp,tmpm,tmmp,tmmm
 REAL    :: sppp,sppm,spmp,spmm,smpp,smpm,smmp,smmm
@@ -23,7 +23,7 @@ REAL    :: zppp,zppm,zpmp,zpmm,zmpp,zmpm,zmmp,zmmm
 REAL    :: latpp,latpm,latmp,latmm
 REAL    :: lonpp,lonpm,lonmp,lonmm
 
-INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it
+INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
 
 ! determining nearest centers of boxes
       if(x1.le.dble(ib)-dble(.5)) then
@@ -58,6 +58,9 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it
        if(kp.gt.km) kp=km
        kn=kb
       endif
+
+      kp2=kb
+      kn2=kb-1
 
       ax=dble(ip)-x1
       if(ax.gt.100.d0) then
@@ -158,14 +161,14 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it
 #endif
 
 #ifdef larval_fish
-        zppp=z_r(ip,jp,kp,it)
-        zppm=z_r(ip,jp,kn,it)
-        zpmp=z_r(ip,jm,kp,it)
-        zpmm=z_r(ip,jm,kn,it)
-        zmpp=z_r(im,jp,kp,it)
-        zmpm=z_r(im,jp,kn,it)
-        zmmp=z_r(im,jm,kp,it)
-        zmmm=z_r(im,jm,kn,it)
+        zppp=z_w(ip,jp,kp2,it)
+        zppm=z_w(ip,jp,kn2,it)
+        zpmp=z_w(ip,jm,kp2,it)
+        zpmm=z_w(ip,jm,kn2,it)
+        zmpp=z_w(im,jp,kp2,it)
+        zmpm=z_w(im,jp,kn2,it)
+        zmmp=z_w(im,jm,kp2,it)
+        zmmm=z_w(im,jm,kn2,it)
 #endif
 
       temp2(it)=tppp*(1.-ax)*(1.-ay)*(1.-az) &
