@@ -22,6 +22,7 @@ REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
 REAL    :: zppp,zppm,zpmp,zpmm,zmpp,zmpm,zmmp,zmmm
 REAL    :: latpp,latpm,latmp,latmm
 REAL    :: lonpp,lonpm,lonmp,lonmm
+REAL    :: srfpp,srfpm,srfmp,srfmm
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
 
@@ -73,6 +74,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
       endif
       ay=(dble(jp)-y1)
       az=(dble(kp)-z1)
+      az2=(dble(kp2)-z1)
 
 ! temperature, salinity, density calculation
       do it = 1,ns
@@ -169,44 +171,54 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
         zmpm=z_w(im,jp,kn2,it)
         zmmp=z_w(im,jm,kp2,it)
         zmmm=z_w(im,jm,kn2,it)
+
+        srfpp=srflux(ip,jp)
+        srfpm=srflux(ip,jm)
+        srfmp=srflux(im,jp)
+        srfmm=srflux(im,jm)
 #endif
 
-      temp2(it)=tppp*(1.-ax)*(1.-ay)*(1.-az) &
-              + tmpp*    ax *(1.-ay)*(1.-az) &
-              + tpmp*(1.-ax)*    ay *(1.-az) &
-              + tmmp*    ax *    ay *(1.-az) &
-              + tppm*(1.-ax)*(1.-ay)*    az  &
-              + tmpm*    ax *(1.-ay)*    az  &
-              + tpmm*(1.-ax)*    ay *    az  &
-              + tmmm*    ax *    ay *    az
+        temp2(it)=tppp*(1.-ax)*(1.-ay)*(1.-az) &
+                + tmpp*    ax *(1.-ay)*(1.-az) &
+                + tpmp*(1.-ax)*    ay *(1.-az) &
+                + tmmp*    ax *    ay *(1.-az) &
+                + tppm*(1.-ax)*(1.-ay)*    az  &
+                + tmpm*    ax *(1.-ay)*    az  &
+                + tpmm*(1.-ax)*    ay *    az  &
+                + tmmm*    ax *    ay *    az
 
-      salt2(it)=sppp*(1.-ax)*(1.-ay)*(1.-az) &
-              + smpp*    ax *(1.-ay)*(1.-az) &
-              + spmp*(1.-ax)*    ay *(1.-az) &
-              + smmp*    ax *    ay *(1.-az) &
-              + sppm*(1.-ax)*(1.-ay)*    az  &
-              + smpm*    ax *(1.-ay)*    az  &
-              + spmm*(1.-ax)*    ay *    az  &
-              + smmm*    ax *    ay *    az
+        salt2(it)=sppp*(1.-ax)*(1.-ay)*(1.-az) &
+                + smpp*    ax *(1.-ay)*(1.-az) &
+                + spmp*(1.-ax)*    ay *(1.-az) &
+                + smmp*    ax *    ay *(1.-az) &
+                + sppm*(1.-ax)*(1.-ay)*    az  &
+                + smpm*    ax *(1.-ay)*    az  &
+                + spmm*(1.-ax)*    ay *    az  &
+                + smmm*    ax *    ay *    az
 
-      dens2(it)=rppp*(1.-ax)*(1.-ay)*(1.-az) &
-              + rmpp*    ax *(1.-ay)*(1.-az) &
-              + rpmp*(1.-ax)*    ay *(1.-az) &
-              + rmmp*    ax *    ay *(1.-az) &
-              + rppm*(1.-ax)*(1.-ay)*    az  &
-              + rmpm*    ax *(1.-ay)*    az  &
-              + rpmm*(1.-ax)*    ay *    az  &
-              + rmmm*    ax *    ay *    az
+        dens2(it)=rppp*(1.-ax)*(1.-ay)*(1.-az) &
+                + rmpp*    ax *(1.-ay)*(1.-az) &
+                + rpmp*(1.-ax)*    ay *(1.-az) &
+                + rmmp*    ax *    ay *(1.-az) &
+                + rppm*(1.-ax)*(1.-ay)*    az  &
+                + rmpm*    ax *(1.-ay)*    az  &
+                + rpmm*(1.-ax)*    ay *    az  &
+                + rmmm*    ax *    ay *    az
 
 #ifdef larval_fish
-      depth2(it)=zppp*(1.-ax)*(1.-ay)*(1.-az) &
-               + zmpp*    ax *(1.-ay)*(1.-az) &
-               + zpmp*(1.-ax)*    ay *(1.-az) &
-               + zmmp*    ax *    ay *(1.-az) &
-               + zppm*(1.-ax)*(1.-ay)*    az  &
-               + zmpm*    ax *(1.-ay)*    az  &
-               + zpmm*(1.-ax)*    ay *    az  &
-               + zmmm*    ax *    ay *    az
+        depth2(it)=zppp*(1.-ax)*(1.-ay)*(1.-az2) &
+                 + zmpp*    ax *(1.-ay)*(1.-az2) &
+                 + zpmp*(1.-ax)*    ay *(1.-az2) &
+                 + zmmp*    ax *    ay *(1.-az2) &
+                 + zppm*(1.-ax)*(1.-ay)*    az2  &
+                 + zmpm*    ax *(1.-ay)*    az2  &
+                 + zpmm*(1.-ax)*    ay *    az2  &
+                 + zmmm*    ax *    ay *    az2
+
+        srflx2(it) = srfpp*(1.-ax)*(1.-ay) &
+                   + srfmp*    ax *(1.-ay) &
+                   + srfpm*(1.-ax)*    ay  &
+                   + srfmm*    ax *    ay
 #endif
       end do
 
@@ -223,8 +235,9 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
 #ifdef larval_fish
       if (ns == 1) then
         depth1=depth2(1)
+        srflx=srflx2(1)
       else
-        depth1=rg*depth2(nsp)+rr*depth2(nsm)
+        srflx=rg*srflx2(nsp)+rr*srflx2(nsm)
       endif
 
       latpp=lat(ip,jp)
