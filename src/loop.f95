@@ -39,8 +39,8 @@ SUBROUTINE loop
   INTEGER                                    :: i,  j,  k, l, m
   INTEGER                                    :: nrh0=0
   ! === Variables to interpolate fields ===
-  REAL                                       :: temp, salt, dens
-  REAL                                       :: temp2, salt2, dens2
+ ! REAL                                       :: temp, salt, dens
+ ! REAL                                       :: temp2, salt2, dens2
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
@@ -341,7 +341,9 @@ SUBROUTINE loop
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
 
+#ifdef turb
            call turbuflux(ia,ja,ka,rr,dt)
+#endif /*turb*/
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
 #ifdef timeanalyt
@@ -438,8 +440,10 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
-           if (x1 < 0) exit niterloop
 
+#ifndef tes
+           if (x1 < 1) exit niterloop
+#endif
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 

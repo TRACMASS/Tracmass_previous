@@ -40,13 +40,8 @@ MODULE mod_diff
 	INTEGER                             :: dummy	
 ENDMODULE mod_diff
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-<<<<<<< HEAD
 
 
-=======
-
-
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
   REAL*8                                     :: rr, rb, rg, rbg
@@ -292,8 +287,6 @@ MODULE mod_vel
   INTEGER                                    :: degrade_time=0, degrade_space=0
     integer, save                            :: degrade_counter = 0
 
-<<<<<<< HEAD
-
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 !MODULE mod_dens
 #ifdef tempsalt
@@ -301,14 +294,11 @@ MODULE mod_vel
 #endif
 !ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-=======
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
 
 CONTAINS
  
   subroutine datasetswap
 
-<<<<<<< HEAD
     USE  mod_grid
     IMPLICIT NONE
 
@@ -327,24 +317,6 @@ CONTAINS
        rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
     end if
-=======
-    IMPLICIT NONE
-
-    if (degrade_counter < 1) then
-       hs(:,:,1)      = hs(:,:,2)
-       uflux(:,:,:,1) = uflux(:,:,:,2)
-       vflux(:,:,:,1) = vflux(:,:,:,2)
-#ifdef explicit_w || full_wflux
-       wflux(:,:,:,1) = wflux(:,:,:,2)
-#endif
-#ifdef tempsalt
-       tem(:,:,:,1)   = tem(:,:,:,2)
-       sal(:,:,:,1)   = sal(:,:,:,2)
-       rho(:,:,:,1)   = rho(:,:,:,2)
-#endif
-    end if
- 
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
   end subroutine datasetswap
 
 #if defined full_wflux
@@ -380,11 +352,7 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   2) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-<<<<<<< HEAD
-#endif 
-=======
 #endif full_wflux
->>>>>>> 2e74dee8c8270c9603e6db57755dda1c5c6378f9
 
 
 ENDMODULE mod_vel
@@ -410,7 +378,17 @@ MODULE mod_traj
   INTEGER                                    :: ib, jb, kb, ibm
   REAL*8                                     :: x0, y0, z0
   REAL*8                                     :: x1, y1, z1
+  REAL                                       :: temp, salt, dens
 ENDMODULE mod_traj
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_turb
+#ifdef turb
+  REAL upr(12,2)
+#endif
+ENDMODULE mod_turb
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 

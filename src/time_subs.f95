@@ -233,7 +233,7 @@ INTEGER :: ijk,ia,ja,ka,iim,iil,ii
 REAL*8  :: uu,um,vv,vm,xi,xi0,const,ga,erf0,aa,bb,daw0,r0,r1,dsmin,dxyz,tt,ts,rijk
 REAL*8  :: s15aff,dawson,s15adf,s15aef,errfun
 REAL*8  :: f0,f1,dzs,dzu1,dzu2,s0,ss,ss0,ds,rr,rg
-REAL*8,  PARAMETER ::  EPS=1.d-10
+REAL*8,  PARAMETER ::  EPS=1.d-11
 
 #ifdef twodim  
 if(ijk.eq.3) then
@@ -907,7 +907,10 @@ if (aa.eq.0.d0) then
      endif
      return
    else
-     if(dabs(bb).le.eps) stop 4537
+     if(dabs(bb).le.eps) then
+	  print *,'bb=',bb,eps
+      stop 4537
+     endif
      ga = -(f0*um+aa*dble(iim))/bb -ss0
      if (s0+ga.ge.0.d0) then
        if (bb.gt.0.d0) then
