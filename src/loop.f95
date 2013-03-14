@@ -284,7 +284,7 @@ SUBROUTINE loop
            ja  = jb
            ka  = kb
 
-           call calc_dxyz
+           call calc_dxyz(intrpr, intrpg)
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)

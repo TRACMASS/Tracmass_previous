@@ -132,10 +132,11 @@ CONTAINS
     l2d = 6367 * c * 1000
   end function l2d
 
-  subroutine calc_dxyz
+  subroutine calc_dxyz(intrpr, intrpg)
 
     use mod_traj, only: ib,jb,kb
     implicit none
+    REAL*8                                    :: intrpr, intrpg
 
     ! T-box volume in m3
 #ifdef zgrid3Dt 
