@@ -19,7 +19,6 @@ CONTAINS
   function getScalarNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL                                    :: getScalarNC
-    INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
   
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
@@ -36,10 +35,8 @@ CONTAINS
   function get1DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfieldNC
-    !INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
 
-    !d = count1d(1) + start1d(1) - 1
     allocate ( get1DfieldNC(count1d(1)) )
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
@@ -57,7 +54,7 @@ CONTAINS
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2DfieldNC
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: field
-    INTEGER,             DIMENSION(4)       :: d, s, c, dimids
+    INTEGER,             DIMENSION(4)       :: s, c, dimids
     INTEGER                                 :: ncid, i
 
     if (ncTpos == 0) then
@@ -73,8 +70,7 @@ CONTAINS
     s(4) = s(4)
     s = s(map2d)
     c = count2d(map2d)
-    d = c + s - 1
-    allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
+    allocate ( field(c(1),c(2)), get2dfieldNC(imt+2,jmt) )
     field=0; get2dfieldNC=0
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
@@ -102,7 +98,7 @@ CONTAINS
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: field
     REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: get3dfieldNC
-    INTEGER,             DIMENSION(4)       :: d, s, c
+    INTEGER,             DIMENSION(4)       :: s, c
     INTEGER                                 :: i,j,k
 
     if (ncTpos == 0) then
@@ -114,8 +110,6 @@ CONTAINS
     start3d(1) = ncTpos
     s = start3d(map3d)
     c = count3d(map3d)
-
-    d = c + s - 1
 
     allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt+2,jmt,km) )
 

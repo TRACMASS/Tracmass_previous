@@ -73,6 +73,6 @@ $(OBJDIR):
 
 .PHONY : clean
 clean :
-	-rm -rf build
-	-rm $(RUNFILE)
+	rm -rf build
+	rm -f $(RUNFILE)
 
