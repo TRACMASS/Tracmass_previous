@@ -172,10 +172,10 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
         zmmp=z_w(im,jm,kp2,it)
         zmmm=z_w(im,jm,kn2,it)
 
-        srfpp=srflux(ip,jp)
-        srfpm=srflux(ip,jm)
-        srfmp=srflux(im,jp)
-        srfmm=srflux(im,jm)
+        srfpp=srflux(ip,jp,it)
+        srfpm=srflux(ip,jm,it)
+        srfmp=srflux(im,jp,it)
+        srfmm=srflux(im,jm,it)
 #endif
 
         temp2(it)=tppp*(1.-ax)*(1.-ay)*(1.-az) &
