@@ -341,7 +341,7 @@ SUBROUTINE loop
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
            ! === calculate the turbulent velocities ===
-           call turbuflux(ia,ja,ka,rr,dt)
+           call turbuflux(ia,ja,ka)
 
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)

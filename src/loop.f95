@@ -335,7 +335,7 @@ SUBROUTINE loop
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
 
-           call turbuflux(ia,ja,ka,rr,dt)
+           call turbuflux(ia,ja,ka)
            ! === calculate the vertical velocity ===
            call vertvel(rr,ia,iam,ja,ka)
 #ifdef timeanalyt
@@ -438,9 +438,6 @@ SUBROUTINE loop
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,1) 
-#ifdef larval_fish
-               call light
-#endif
 !               if (temp < tmine .or. temp > tmaxe .or. &
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then

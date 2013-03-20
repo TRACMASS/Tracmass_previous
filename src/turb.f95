@@ -4,16 +4,19 @@ MODULE mod_turb
   
 CONTAINS
 
-  subroutine turbuflux(ia,ja,ka,rr,dt)
+  subroutine turbuflux(ia,ja,ka)
 
     ! computes the paramterised turbulent velocities u' and v' into upr
   
     USE mod_param
+    USE mod_time
+    USE mod_grid
+    USE mod_loopvars
     USE mod_vel
-    !USE mod_diffusion
+    USE mod_diffusion
     IMPLICIT none
     
-    REAL*8         :: uv(12),rr,rg,localW,dt !,en
+    REAL*8         :: uv(12),localW !,dt !,en
     REAL*4         :: qran(12),amp
     INTEGER        :: ia,ja,ka,im,jm,n
 #ifdef turb      
@@ -99,7 +102,7 @@ CONTAINS
        ! === The turbulent is evenly spread between the 
        ! === top and bottom of box if not a bottom box
 
-#ifdef full_wflux
+#if defined full_wflux || defined explicit_w
        localW=wflux(ia,ja,ka-1,nsm)
 #else
        localW=wflux(ka-1,nsm)

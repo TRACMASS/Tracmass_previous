@@ -2,16 +2,16 @@
 !
 ! Compute light now from average light over the day at that point.
 !
-subroutine light
+subroutine light_spot
 USE mod_param
 USE mod_particle
 USE mod_time
 IMPLICIT none
 
-INTEGER :: iday, month, year
+INTEGER :: month, year
 real*8, parameter :: deg2rad = pi / 180.0
 real*8  :: Dangle, Hangle, LatRad
-real*8  :: cff1, cff2, hour, yday
+real*8  :: cff, cff1, cff2, hour, yday
 
 !  DIURNAL_SRFLUX option: Modulate shortwave radiation SRFLX (which is
 !                         read and interpolated elsewhere) by the local
@@ -32,19 +32,18 @@ real*8  :: cff1, cff2, hour, yday
 !
 !  Assume time is in modified Julian day.  Get hour and year day.
 !
-!   CALL caldate (r_date, tdays(ng), year, yday, month, iday, hour)
       call updateClock
       hour = currHour + currMin/60.0 + currSec/3600.0
       yday = currJDyr
 !
 !  Estimate solar declination angle (radians).
 !
-      Dangle=23.44_r8*COS((172.0_r8-yday)*2.0_r8*pi/365.25_r8)
+      Dangle=23.44d0*COS((172.0d0-yday)*2.0d0*pi/365.25d0)
       Dangle=Dangle*deg2rad
 !
 !  Compute hour angle (radians).
 !
-      Hangle=(12.0_r8-hour)*pi/12.0_r8
+      Hangle=(12.0d0-hour)*pi/12.0d0
 !
 !  Local daylight is a function of the declination (Dangle) and hour
 !  angle adjusted for the local meridian (Hangle-lonr(i,j)/15.0).
@@ -65,22 +64,21 @@ real*8  :: cff1, cff2, hour, yday
 !  Normalization = (1/2*pi)*INTEGRAL{ABS(a+b*COS(t)) dt}  from 0 to 2*pi
 !                = (a*ARCCOS(-a/b)+SQRT(b**2-a**2))/pi    for |a| < |b|
 !
-          light=MAX(0.0_r8, srflx)
+          light=MAX(0.0d0, srflx)
           IF (ABS(cff1) > ABS(cff2)) THEN
-           IF (cff1*cff2.gt.0.0_r8) THEN
+           IF (cff1*cff2.gt.0.0d0) THEN
               cff=cff1                                 ! All day case
-              light=MAX(0.0_r8, light/cff*        &
+              light=MAX(0.0d0, light/cff*        &
      &               (cff1+cff2*COS(Hangle-flon1*deg2rad)))
             ELSE
-              light=0.0_r8                        ! All night
-case
+              light=0.0d0                        ! All night case
             END IF
           ELSE
             cff=(cff1*ACOS(-cff1/cff2)+SQRT((cff2+cff1)*(cff2-cff1)))/pi
             IF (cff .lt. 10.e-10) THEN
-              light=0.0_r8
+              light=0.0d0
             ELSE
-              light=MAX(0.0_r8, light/cff*         &
+              light=MAX(0.0d0, light/cff*         &
      &               (cff1+cff2*COS(Hangle-flon1*deg2rad)))
             END IF
           END IF
@@ -88,5 +86,5 @@ case
 
 
 return
-end subroutine light
+end subroutine light_spot
 #endif

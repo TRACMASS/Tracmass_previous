@@ -566,9 +566,8 @@ ENDMODULE mod_tracer
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #if defined diffusion || turb 
-!#ifdef diffusion
 MODULE mod_diffusion
-  REAL                                       :: ah, av
+  REAL                                       :: Ah, Av
 ENDMODULE mod_diffusion
 #endif
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

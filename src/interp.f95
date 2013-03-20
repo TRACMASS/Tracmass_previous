@@ -176,6 +176,17 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
         srfpm=srflux(ip,jm,it)
         srfmp=srflux(im,jp,it)
         srfmm=srflux(im,jm,it)
+#ifdef roms
+        if (srfpp.gt.1.e30) srfpp=srflux(ib,jb,it)
+        if (srfpm.gt.1.e30) srfpm=srflux(ib,jb,it)
+        if (srfmp.gt.1.e30) srfmp=srflux(ib,jb,it)
+        if (srfmm.gt.1.e30) srfmm=srflux(ib,jb,it)
+#else
+        if (srfpp.eq.0.) srfpp=srflux(ib,jb,it)
+        if (srfpm.eq.0.) srfpm=srflux(ib,jb,it)
+        if (srfmp.eq.0.) srfmp=srflux(ib,jb,it)
+        if (srfmm.eq.0.) srfmm=srflux(ib,jb,it)
+#endif
 #endif
 
         temp2(it)=tppp*(1.-ax)*(1.-ay)*(1.-az) &
@@ -257,6 +268,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns,it,kn2,kp2
             + latmp*    ax *(1.-ay) &
             + latpm*(1.-ax)*    ay  &
             + latmm*    ax *    ay
+      call light_spot
 #endif
 
 return
