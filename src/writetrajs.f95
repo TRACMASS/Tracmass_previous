@@ -143,7 +143,7 @@ CONTAINS
 #ifdef larval_fish
        flen1 = fish(ntrac,i_length)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,flen1
+                     salt,dens,flat1,flon1,depth1,light,flen1
 #else
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 #endif
@@ -164,7 +164,7 @@ CONTAINS
 #ifdef larval_fish
           flen1 = fish(ntrac,i_length)
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,flen1
+                     salt,dens,flat1,flon1,depth1,light,flen1
 #else
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 #endif
@@ -193,7 +193,7 @@ CONTAINS
 #ifdef larval_fish
        flen1 = fish(ntrac,i_length)
        write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,flen1
+                     salt,dens,flat1,flon1,depth1,light,flen1
 #else
        write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
             ,temp,salt,dens  
@@ -211,7 +211,7 @@ CONTAINS
 #ifdef larval_fish
        flen1 = fish(ntrac,i_length)
        write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,flen1
+                     salt,dens,flat1,flon1,depth1,light,flen1
 #else
        write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
             ,temp,salt,dens  
@@ -239,7 +239,7 @@ CONTAINS
 #ifdef larval_fish
        flen1 = fish(ntrac,i_length)
        write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,flen1
+                     temp,salt,dens,flat1,flon1,depth1,light,flen1
 #else
        write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14
 #endif
@@ -258,7 +258,7 @@ CONTAINS
 #ifdef larval_fish
           flen1 = fish(ntrac,i_length)
           write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,flen1
+                     temp,salt,dens,flat1,flon1,depth1,light,flen1
 #else
           write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
 #endif
@@ -274,7 +274,7 @@ CONTAINS
 #ifdef larval_fish
        flen1 = fish(ntrac,i_length)
        write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,flen1
+                     temp,salt,dens,flat1,flon1,depth1,light,flen1
 #else
        write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14   
 #endif
@@ -286,7 +286,7 @@ CONTAINS
 #ifdef larval_fish
        flen1 = fish(ntrac,i_length)
        write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,flen1
+                     temp,salt,dens,flat1,flon1,depth1,light,flen1
 #else
        write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14   
 #endif

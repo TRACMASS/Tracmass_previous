@@ -438,6 +438,9 @@ SUBROUTINE loop
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,1) 
+#ifdef larval_fish
+               call light
+#endif
 !               if (temp < tmine .or. temp > tmaxe .or. &
 !               &   salt < smine .or. salt > smaxe .or. &
 !               &   dens < rmine .or. dens > rmaxe      ) then
