@@ -585,7 +585,8 @@ MODULE mod_fish
   INTEGER, parameter :: f_yolk = 2
   INTEGER, parameter :: f_pre = 3
   INTEGER, parameter :: f_post = 4
-  INTEGER, parameter :: i_age = 1
+  INTEGER, parameter :: f_juv = 5
+  INTEGER, parameter :: i_jd = 1
   INTEGER, parameter :: i_hatchtime = 2
   INTEGER, parameter :: i_hatchlength = 3
   INTEGER, parameter :: i_length = 4

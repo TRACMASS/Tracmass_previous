@@ -13,7 +13,9 @@ CONTAINS
     USE mod_grid
     USE mod_loopvars
     USE mod_vel
+#if defined turb || defined diffusion
     USE mod_diffusion
+#endif
     IMPLICIT none
     
     REAL*8         :: uv(12),localW !,dt !,en

@@ -45,9 +45,11 @@ SUBROUTINE loop
   
 #if defined larval_fish
   ! Specific for fish code
-  REAL*8                                     :: rhof    ! density of fish
-  REAL*8                                     :: est, group, egg_sg, age
-  INTEGER                                    :: istage
+    REAL*8                                   :: hatchJD
+    REAL*8                                   :: age, egg_hatch, yolk_len, length
+    REAL*8                                   :: hatch_hrs, hatch_len
+    REAL*8                                   :: r1, r2, r, theta
+    INTEGER                                  :: clock
 #endif /*larval_fish*/
 
   ! === Error Evaluation ===
@@ -861,4 +863,3 @@ return
 !!$    end select
   end subroutine fancyTimer
 end subroutine loop
-
