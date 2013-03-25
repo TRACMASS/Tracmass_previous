@@ -20,17 +20,8 @@ CONTAINS
     CHARACTER(LEN=200)                         :: fullWritePref
     CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
 
-    if (intminInOutFile.eq.2) then
-       writeStamp='00000000_000000'
-       write (writeStamp(1:8),'(i8.8)') intstart !,ints-intstart
-       write (writeStamp(10:15),'(i6.6)') max(ints-intstart,0)+1
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)//trim(writeStamp)
     if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
        write (intminstamp, '(A,i8.8)') '_t', intstart
-       write (writeStamp,'(i8.8)') intstart
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)//trim(writeStamp)
-    else
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)
     end if
     if ((intminInOutFile.eq.2) .or. (intminInOutFile.eq.3)) then
          write (partstamp, '(A,i6.6)') '_p', max(ints-intstart,0)+1
@@ -94,16 +85,11 @@ CONTAINS
   end subroutine close_outfiles
 
   subroutine writedata(sel)
-    
     USE mod_time
-    USE mod_grid
     USE mod_pos
     USE mod_traj
     USE mod_loopvars
-    USE mod_particle
-#ifdef larval_fish
-    USE mod_fish
-#endif
+
 
     IMPLICIT NONE
 
@@ -116,7 +102,7 @@ CONTAINS
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
-
+    REAL                                       :: temp2, salt2, dens2
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -136,7 +122,7 @@ CONTAINS
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
-         ,f12.2,3f6.2,8f10.2 )
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
     !566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
     !         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
@@ -154,13 +140,7 @@ CONTAINS
 #if defined textwrite 
     select case (sel)
     case (10)
-#ifdef larval_fish
-       flen1 = fish(ntrac,i_length)
-       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,light,flen1
-#else
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-#endif
     case (11)
        if(  (kriva == 1 .AND. nrj(ntrac,4) == niter-1      ) .or. &
             (kriva == 2 .AND. scrivi                       ) .or. &
@@ -170,18 +150,12 @@ CONTAINS
           &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
             (kriva == 6 .AND. .not.scrivi                  ) ) then
 #if defined tempsalt
-           call interp(ib,jb,kb,x1,y1,z1,1) 
+           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
-#ifdef larval_fish
-          flen1 = fish(ntrac,i_length)
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,light,flen1
-#else
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-#endif
 #endif        
        endif
     case (13)
@@ -197,21 +171,14 @@ CONTAINS
     case (16)
        if(kriva.ne.0 ) then
 #if defined tempsalt
-           call interp(ib,jb,kb,x1,y1,z1,1) 
+           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
 #endif
           write(56,566) ntrac,ints,x1,y1,z1, &
                tt/tday,t0/tday,subvol,temp,salt,dens
        end if
     case (17)
-       call interp(ib,jb,kb,x1,y1,z1,1) 
-#ifdef larval_fish
-       flen1 = fish(ntrac,i_length)
-       write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,light,flen1
-#else
        write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
             ,temp,salt,dens  
-#endif
     case (19)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
@@ -222,14 +189,8 @@ CONTAINS
        enddo
        close(34)
     case (40)
-#ifdef larval_fish
-       flen1 = fish(ntrac,i_length)
-       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-                     salt,dens,flat1,flon1,depth1,light,flen1
-#else
        write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
             ,temp,salt,dens  
-#endif
     case (99) !switch
        
     end select
@@ -250,13 +211,7 @@ CONTAINS
     select case (sel)       
     case (10) !in
        recPosIn = recPosIn + 1
-#ifdef larval_fish
-       flen1 = fish(ntrac,i_length)
-       write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,light,flen1
-#else
        write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14
-#endif
        return
     case (11)
        if(  (kriva == 1 .and. nrj(ntrac,4)  ==  niter-1    ) .or. &
@@ -266,18 +221,12 @@ CONTAINS
             (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva == 6 .and. .not.scrivi                  ) ) then
 #if defined tempsalt
-          call interp(ib,jb,kb,x1,y1,z1,2)
+          call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
           call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
           recPosRun = recPosRun+1
-#ifdef larval_fish
-          flen1 = fish(ntrac,i_length)
-          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,light,flen1
-#else
           write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
-#endif
        end if
     case (13)
        recPosKll = recPosKll + 1
@@ -287,25 +236,13 @@ CONTAINS
        write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14   
     case (17) !out
        recPosOut = recPosOut + 1
-#ifdef larval_fish
-       flen1 = fish(ntrac,i_length)
-       write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,light,flen1
-#else
        write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14   
-#endif
     case (19) !end
        recPosOut = recPosOut + 1
        write(unit=75 ,rec=recPosOut) ntrac,twrite,x14,y14,z14
     case (40) !error
        recPosErr=recPosErr + 1    
-#ifdef larval_fish
-       flen1 = fish(ntrac,i_length)
-       write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14, &
-                     temp,salt,dens,flat1,flon1,depth1,light,flen1
-#else
        write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14   
-#endif
     case (99) !switch
        if ((recPosRun > 50000000).and.(intminInOutFile.eq.2)) then
           call close_outfiles
