@@ -1,7 +1,7 @@
 
 
-MODULE mod_precdef		! Precision definitions
-  INTEGER, PARAMETER		            :: DP = SELECTED_REAL_KIND(15, 307)
+MODULE mod_precdef             ! Precision definitions
+  INTEGER, PARAMETER                       :: DP = SELECTED_REAL_KIND(15, 307)
 ENDMODULE mod_precdef
 
 
@@ -19,12 +19,21 @@ MODULE mod_param
 
   REAL*8, PARAMETER                         :: grav = 9.81
   REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
-  REAL*8, PARAMETER                         :: radius = 6371229.d0 
-  REAL*8, PARAMETER                         :: radian = pi/180.d0  
-  REAL*8, PARAMETER                         :: deg=radius*radian   
+  REAL*8, PARAMETER                         :: radius = 6371229.d0
+  REAL*8, PARAMETER                         :: radian = pi/180.d0
+  REAL*8, PARAMETER                         :: deg=radius*radian
   REAL*8, PARAMETER                         :: tday=24.d0 * 3600.d0
   INTEGER                                   :: idmax(12,1000:3000)
 ENDMODULE mod_param
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+MODULE mod_coord
+ENDMODULE mod_coord
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_diff
+	INTEGER                             :: dummy	
+ENDMODULE mod_diff
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -37,6 +46,7 @@ MODULE mod_loopvars
   REAL*8                                     :: ss0
   INTEGER                                    :: lbas
   REAL*8                                     :: subvol
+  REAL*8                                     :: rr, rb, rg, rbg
 ENDMODULE mod_loopvars
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -45,14 +55,18 @@ MODULE mod_traj
   INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
   INTEGER                                    :: NEND
   INTEGER                                    :: ntrac, ntractot=0
+
+
   ! === Particle arrays ===
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj
+
   ! === Particle counters ===
   INTEGER                                    :: nout=0, nloop=0, nerror=0
   INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
   INTEGER                                    :: nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
+
   ! === Particle positions ===
   INTEGER                                    :: ia, ja, ka, iam
   INTEGER                                    :: ib, jb, kb, ibm
@@ -64,6 +78,7 @@ ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
   USE mod_param
+  USE mod_loopvars
   IMPLICIT NONE
 
   INTEGER                                   :: IMT, JMT, KM
@@ -86,16 +101,21 @@ MODULE mod_grid
   REAL*8                                    :: dxyz
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
+#ifdef larval_fish
+  REAL, ALLOCATABLE, DIMENSION(:,:)         :: lat, lon
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: srflux
+#endif
 
   ! === Vertical grids ===
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
-#ifdef zgrid3Dt 
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
+#ifdef zgrid3Dt
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt,z_r,z_w
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu,dzv
 #elif zgrid3D
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt,dzu,dzv
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #endif /*zgrid3Dt*/
-#ifdef varbottombox 
+#ifdef varbottombox
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
 #ifdef ifs
@@ -109,12 +129,12 @@ MODULE mod_grid
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
   INTEGER                                   :: subGridKmin ,subGridKmax
-  CHARACTER(LEN=200)                        :: SubGridFile 
+  CHARACTER(LEN=200)                        :: SubGridFile
   INTEGER                                   :: degrade_space=0
 
 #ifdef ifs
   REAL*8, PARAMETER                         :: R_d = 287.05d0
-  REAL*8, PARAMETER                         :: L_v = 2.5d0 * 1e+6   
+  REAL*8, PARAMETER                         :: L_v = 2.5d0 * 1e+6
   REAL*8, PARAMETER                         :: c_d = 1004.d0
 #endif
 
@@ -162,7 +182,7 @@ CONTAINS
        print *,'----------------------------------------------------------'
        !print *,'dzt  = ', dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
        print *,'dxdy = ', dxdy(ib,jb)
-       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
+       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb
        print *,'----------------------------------------------------------'
        print *,'The run is terminated'
        print *,'=========================================================='
@@ -182,7 +202,7 @@ MODULE mod_time
   INTEGER                                   :: intmin    ,intmax
   !type for datetimes
   type DATETIME
-     REAL*8                                 :: JD=0 
+     REAL*8                                 :: JD=0
      REAL                                   :: frac=0, yd=0
      INTEGER                                :: Year, Mon, Day
      INTEGER                                :: Hour, Min, Sec
@@ -205,12 +225,12 @@ MODULE mod_time
   ! === Current JD
   REAL*8                                    :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
-  INTEGER                                   :: currHour, currMin, currSec 
+  INTEGER                                   :: currHour, currMin, currSec
   ! === Looping time
   INTEGER                                   :: loopints, loopintstart
   REAL*8                                    :: loopJD, loopJDyr, loopFrac
   INTEGER                                   :: loopYear  ,loopMon  ,loopDay
-  INTEGER                                   :: loopHour, loopMin, loopSec 
+  INTEGER                                   :: loopHour, loopMin, loopSec
   ! Old stuff
   INTEGER                                   :: iyear ,imon ,iday ,ihour
   INTEGER                                   :: yearmin ,yearmax
@@ -314,13 +334,13 @@ CONTAINS
     if(ds == dsmin) then ! transform ds to dt in seconds
        !            dt=dt  ! this makes dt more accurate
     else
-       dt = ds * dxyz 
+       dt = ds * dxyz
     endif
 #else
     if(ds == dsmin) then ! transform ds to dt in seconds
        dt=dtmin  ! this makes dt more accurate
     else
-       dt = ds * dxyz 
+       dt = ds * dxyz
     endif
 #endif /*regulardt*/
     if(dt.lt.0.d0) then
@@ -342,7 +362,7 @@ CONTAINS
        if(dt == dtmin) then
           ts=ts+dstep
           tss=tss+1.d0
-       elseif(dt == dtreg) then  
+       elseif(dt == dtreg) then
           ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
           !                 ts=ts+dtreg/tseas
           tss=dble(nint(tss+dt/dtmin))
@@ -391,17 +411,33 @@ ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_dens
 
 ENDMODULE mod_dens
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_particle
+  USE mod_grid
+
+  REAL                                      :: temp, salt, dens
+  REAL                                      :: temp2(nst), salt2(nst)
+  REAL                                      :: dens2(nst)
+#ifdef larval_fish
+  REAL                                      :: flat1, flon1
+  REAL                                      :: depth1, depth2(nst), flen1
+  REAL                                      :: light, srflx, srflx2(nst)
+#endif
+ENDMODULE mod_particle
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
-#if defined full_wflux
+#if defined full_wflux || defined explicit_w
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
@@ -411,13 +447,17 @@ MODULE mod_vel
   REAL*8                                     :: ff
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
+#ifdef roms
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: akt
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: ak2
+#endif
 #endif
   INTEGER                                    :: degrade_time=0, degrade_space=0
     integer, save                            :: degrade_counter = 0
 
 
 CONTAINS
- 
+
   subroutine datasetswap
 
     USE  mod_grid
@@ -434,6 +474,16 @@ CONTAINS
     sal(:,:,:,nsm)   = sal(:,:,:,nsp)
     rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
+#ifdef larval_fish
+    srflux(:,:,nsm)  = srflux(:,:,nsp)
+#endif
+#ifdef zgrid3Dt
+    dzt(:,:,:,nsm)   = dzt(:,:,:,nsp)
+#ifdef roms
+    z_r(:,:,:,nsm)   = z_r(:,:,:,nsp)
+    z_w(:,:,:,nsm)   = z_w(:,:,:,nsp)
+#endif
+#endif
   end subroutine datasetswap
 
 #if defined full_wflux
@@ -442,17 +492,17 @@ CONTAINS
     IMPLICIT none
     ! = Loop variables
     INTEGER                                    :: k
-    
-    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1, nsp)  -  &
-                                   uflux(2:imt,   2:jmt,   1, nsp)  +  &
-                                   vflux(2:imt,   1:jmt-2, 1, nsp)  -  & 
-                                   vflux(2:imt,   2:jmt,   1, nsp)
-    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1, nsp)  +  &
-                                   vflux(1,       1:jmt-1, 1, nsp)  -  &
-                                   vflux(1,       2:jmt,   1, nsp)
-    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1, nsp)  -  &
-                                   uflux(2:imt,   1,       1, nsp)  -  &
-                                   vflux(2:imt,   1,       1, nsp) 
+
+    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1,   nsp)  -   &
+                                   uflux(2:imt,   2:jmt,   1,   nsp)   +  &
+                                   vflux(2:imt,   1:jmt-2, 1,   nsp)  -   &
+                                   vflux(2:imt,   2:jmt,   1,   nsp)
+    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1,   nsp)   +  &
+                                   vflux(1,       1:jmt-1, 1,   nsp)  -   &
+                                   vflux(1,       2:jmt,   1,   nsp)
+    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1,   nsp) -    &
+                                   uflux(2:imt,   1,       1,   nsp)  -  &
+                                   vflux(2:imt,   1,       1,   nsp)
     kloop: do k=2,km
        wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
                                  uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
@@ -469,7 +519,7 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   nsp) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-#endif full_wflux
+#endif /* full_wflux */
 
 
 ENDMODULE mod_vel
@@ -517,10 +567,31 @@ ENDMODULE mod_tracer
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 #if defined diffusion || turb 
-!#ifdef diffusion
 MODULE mod_diffusion
-  REAL                                       :: ah, av
+  REAL                                       :: Ah, Av
 ENDMODULE mod_diffusion
+#endif
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+#ifdef larval_fish
+MODULE mod_fish
+  REAL*8 :: wfish
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: fish
+  INTEGER, ALLOCATABLE, DIMENSION(:)           :: stage
+  INTEGER, parameter :: nfish_var = 4
+  REAL*8, parameter  :: fishdiam = 1.4
+  INTEGER, parameter :: f_egg = 1
+  INTEGER, parameter :: f_yolk = 2
+  INTEGER, parameter :: f_pre = 3
+  INTEGER, parameter :: f_post = 4
+  INTEGER, parameter :: f_juv = 5
+  INTEGER, parameter :: i_jd = 1
+  INTEGER, parameter :: i_hatchtime = 2
+  INTEGER, parameter :: i_hatchlength = 3
+  INTEGER, parameter :: i_length = 4
+ENDMODULE mod_fish
 #endif
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 

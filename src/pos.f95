@@ -44,7 +44,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
 #ifdef turb    
      if(r0.ne.dble(ii)) then
-        uu=uu+upr(1,2)  
+        uu=uu+upr(1,2)
      else
         uu=uu+upr(1,1)
         ! add u' from previous iterative time step if on box wall
@@ -77,7 +77,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
 #endif
   elseif(ijk.eq.3) then
      ii = ka
-#ifdef full_wflux
+#if defined full_wflux || defined explicit_w
      uu = intrpg * wflux(ia ,ja, ka  ,NST) + intrpr * wflux(ia, ja, ka  ,1)
      um = intrpg * wflux(ia, ja, ka-1,NST) + intrpr * wflux(ia, ja, ka-1,1)
 #else
@@ -104,7 +104,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   ! note: consider in future to improve the code below for accuracy 
   ! in case of um-uu = small; also see subroutine cross
   if(um.ne.uu) then
-     r1= (r0+(-dble(ii-1) + um/(uu-um))) * & 
+     r1= (r0+(-dble(ii-1) + um/(uu-um))) * &
           dexp( (uu-um)*ds ) + dble(ii-1) - um/(uu-um)
   else
      r1=r0+uu*ds

@@ -13,6 +13,9 @@ module mod_print
   USE mod_traj
   USE mod_write
   USE mod_pos
+#if defined diffusion || defined turb
+  USE mod_diffusion
+#endif
 
   ! === Selectable moules ===
   USE mod_turb
@@ -74,6 +77,7 @@ CONTAINS
 #endif
 #if defined turb
     print *,' - Sub-grid turbulence parameterisation'
+    print *,' - Diffusion param: Ah=',ah,'m2/s and Av=',av,'m2/s'
 #endif
 #if defined diffusion
     print *,' - Diffusion param: Ah=',ah,'m2/s and Av=',av,'m2/s'

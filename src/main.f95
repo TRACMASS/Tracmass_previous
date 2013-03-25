@@ -30,7 +30,7 @@ PROGRAM main
      intspin  = -intspin
      intrun   = -intrun    
   end if modrundirCond
- 
+
  call setupgrid
   if (minval(dxv) < 0) then
      print *, " "

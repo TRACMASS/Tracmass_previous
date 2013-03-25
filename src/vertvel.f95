@@ -12,7 +12,7 @@ subroutine vertvel(ia,iam,ja,ka)
   USE mod_time, only: intrpr, intrpg
   USE mod_grid
   USE mod_turb
-#ifdef ifs
+#if defined ifs || defined larval_fish
   USE mod_grid
 #endif
 #ifdef sediment
@@ -20,6 +20,9 @@ subroutine vertvel(ia,iam,ja,ka)
   USE mod_orbital
   USE mod_grid
 #endif
+#if defined larval_fish
+  USE mod_fish
+#endif /*fish*/
   
   IMPLICIT none
   
@@ -30,20 +33,20 @@ subroutine vertvel(ia,iam,ja,ka)
   real*8                                     :: uu, um, vv, vm
   integer                                    :: ia, iam, ja, ka, k,n
   integer                                    :: n1, n2
+
   
   
   wflux=0.d0
-
+  
   n1=min(nsm,nsp)
   n2=max(nsm,nsp)
- 
-  
+
 #ifdef twodim
   return
   
 ! start 3D code
 #else
- 
+
   kloop: do k=1,ka
      uu = intrpg * uflux(ia ,ja  ,k,nsp) + intrpr * uflux(ia ,ja  ,k,nsm)
      um = intrpg * uflux(iam,ja  ,k,nsp) + intrpr * uflux(iam,ja  ,k,nsm)
@@ -51,7 +54,7 @@ subroutine vertvel(ia,iam,ja,ka)
      vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
 
 ! start ifs code
-#if defined ifs
+#if defined ifs || defined roms
     do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
@@ -96,8 +99,8 @@ wflux(km,:) = 0.d0
      if (kin.le.kincrit) then   !för SKB
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
-#ifdef full_wflux
-     wflux(k)=wflux(ia,ja,k,nsm) +  wsedtemp * dxdy(ia,ja) 
+#if defined full_wflux || explicit_w
+     wflux(ia,ja,k,nsm)=wflux(ia,ja,k,nsm) + wsedtemp * dxdy(ia,ja)   ! *dx *dy *deg**2 
 #else
     do n=n1,n2
      wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)
@@ -107,10 +110,22 @@ wflux(km,:) = 0.d0
 #endif   
 ! end sediment code
   
-!#endif
-  return
+#ifdef larval_fish
+  ! === fisk!   ===
+
+  k3loop: do k=0,km
+#ifdef full_wflux
+     wflux(ia,ja,k,nsm)=wflux(ia,ja,k,nsm) + wfish * dxdy(ia,ja)   ! *dx *dy *deg**2
+!     wflux(k)=wflux(ia,ja,k,nsm) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
+#else
+    do n=n1,n2
+     wflux(k,n)=wflux(k,n) +  wfish * dxdy(ia,ja)     ! *dx *dy *deg**2
+    enddo
 #endif
+  end do k3loop
+#endif
+! end fish code
+#endif /* !explicit_w */
 
+  return
 end subroutine vertvel
-
- 

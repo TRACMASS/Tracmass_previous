@@ -2,7 +2,7 @@
 MODULE mod_getfile
   USE mod_grid
   USE netcdf
-  
+
   IMPLICIT NONE
 
   INTEGER, DIMENSION(1)                      :: start1D  ,count1D
@@ -19,11 +19,10 @@ CONTAINS
   function getScalarNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL                                    :: getScalarNC
-    INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
   
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printReadError(1, fieldFile, varName)    
+    if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid ,getScalarNC)
@@ -36,14 +35,12 @@ CONTAINS
   function get1DfieldNC (fieldFile ,varName)
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE,   DIMENSION(:)       :: get1dfieldNC
-    !INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
 
-    !d = count1d(1) + start1d(1) - 1
     allocate ( get1DfieldNC(count1d(1)) )
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
-    if(ierr.ne.0) call printReadError(1, fieldFile, varName)    
+    if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid ,get1DfieldNC ,start1d ,count1d)
@@ -57,7 +54,7 @@ CONTAINS
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: get2DfieldNC
     REAL, ALLOCATABLE,   DIMENSION(:,:)     :: field
-    INTEGER,             DIMENSION(4)       :: d, s, c, dimids
+    INTEGER,             DIMENSION(4)       :: s, c, dimids
     INTEGER                                 :: ncid, i
 
     if (ncTpos == 0) then
@@ -73,8 +70,7 @@ CONTAINS
     s(4) = s(4)
     s = s(map2d)
     c = count2d(map2d)
-    d = c + s - 1
-    allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
+    allocate ( field(c(1),c(2)), get2dfieldNC(imt+2,jmt) )
     field=0; get2dfieldNC=0
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
@@ -84,7 +80,7 @@ CONTAINS
     ierr=NF90_GET_VAR(ncid ,varid , field, s,c)
     if(ierr.ne.0) call printReadError(3, fieldFile, varName)
     ierr=NF90_CLOSE(ncid)
- 
+
     if ( all(map2d(1:2) == (/3,4/),DIM=1) .or. &
          all(map2d(2:3) == (/3,4/),DIM=1) ) then
        get2DfieldNC(1:imt,:) = field
@@ -94,7 +90,6 @@ CONTAINS
        end do
     end if
 
-
  end function get2DfieldNC
   
   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -103,7 +98,7 @@ CONTAINS
     CHARACTER (len=*)                       :: fieldFile ,varName 
     REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: field
     REAL, ALLOCATABLE, DIMENSION(:,:,:)     :: get3dfieldNC
-    INTEGER,             DIMENSION(4)       :: d, s, c
+    INTEGER,             DIMENSION(4)       :: s, c
     INTEGER                                 :: i,j,k
 
     if (ncTpos == 0) then
@@ -115,9 +110,7 @@ CONTAINS
     start3d(1) = ncTpos
     s = start3d(map3d)
     c = count3d(map3d)
-    d = c + s - 1
 
-    
     allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt+2,jmt,km) )
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1, fieldFile, varName)
@@ -125,8 +118,6 @@ CONTAINS
     if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid ,field, s, c)
     if(ierr.ne.0) call printReadError(3, fieldFile, varName)
-
-
 
     if  (all(map3d == (/1,2,3,4/),DIM=1) ) then
        get3DfieldNC(:imt,:,:) = field
@@ -159,7 +150,7 @@ CONTAINS
 
   subroutine printReadError(sel, fieldFile, varName)
     USE netcdf
-    CHARACTER (len=*)                       :: fieldFile,VarName
+    CHARACTER (len=*)                       :: fieldFile,VarName 
     INTEGER                                 :: sel, ndims, v,dimln
     INTEGER, DIMENSION(4)                   :: dimvec
     CHARACTER(len=20)                       :: dimname

@@ -32,6 +32,9 @@ SUBROUTINE init_params
    USE mod_orbital
    USE mod_sed
 #endif
+#if defined larval_fish
+  USE mod_fish
+#endif /*fish*/
    IMPLICIT NONE
 
 !!----------------------------------------------------------------------------
@@ -142,7 +145,7 @@ SUBROUTINE init_params
    READ (8,nml=INITRUNGRID)
    SELECT CASE (subGrid)
    CASE (0)          
-      PRINT *,'Sub-grid    : Use the Full grid.'     
+      PRINT *,'Sub-grid    : Use the Full grid.'
       subGridImin =   1 
       subGridJmin =   1
       subGridKmin =   1
@@ -157,7 +160,7 @@ SUBROUTINE init_params
 #if !defined(explicit_w) && !defined(twodim)
       if ((subGridKmax-subGridKmin+1) < km) then
          print *, 'ERROR!'
-         print *, 'subGridKmin and subGridKmax requires -Dtwodim  or -Dexplicit_w'
+         print *, 'subGridKmin and subGridKmax requires -Dtwodim or -Dexplicit_w'
          print *, 'to be selected in the project Makefile.'
          stop
       end if
@@ -276,13 +279,21 @@ SUBROUTINE init_params
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
       ALLOCATE ( mask(imt,jmt) )
+#ifdef larval_fish
+      ALLOCATE ( lat(imt,jmt), lon(imt,jmt) )
+      ALLOCATE ( srflux(imt,jmt,nst) )
+#endif
+#ifdef roms
+      ALLOCATE ( z_r(imt,jmt,km,nst) )
+      ALLOCATE ( z_w(imt,jmt,0:km,nst) )
+#endif
 #ifdef zgrid3Dt
       ALLOCATE ( dzt(imt,jmt,km,nst) )   
 #elif  zgrid3D
       ALLOCATE ( dzt(imt,jmt,km) )   
 #endif /*zgrid3Dt*/
 #ifdef varbottombox
-      ALLOCATE ( dztb(imt,jmt,nst) )  !should probably be changed to  dztb(imt,jmt)
+      ALLOCATE ( dztb(imt,jmt,nst) )    !should probably be changed to dztb(imt,jmt)
 #endif /*varbottombox*/
       ALLOCATE ( dxdy(imt,jmt) )   
       ALLOCATE ( kmt(imt,jmt), dz(km) )
@@ -294,16 +305,16 @@ SUBROUTINE init_params
       hs    = 0.
       uflux = 0.
       vflux = 0.
-#ifdef full_wflux
-      ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km,NST) )
+#if defined full_wflux || defined explicit_w
+      ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km ,NST) )
 #else
       ALLOCATE ( wflux(0:km,NST) )
 #endif
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
-      
+
       ! === Init mod_traj ===
       ALLOCATE ( trj(ntracmax,NTRJ), nrj(ntracmax,NNRJ) )
-      ALLOCATE ( nexit(NEND) ) 
+      ALLOCATE ( nexit(NEND) )
       nrj = 0
       trj = 0.d0
       nexit = 0
@@ -317,6 +328,21 @@ SUBROUTINE init_params
       tem = 0.
       sal = 0.
       rho = 0.
+#ifdef roms
+      ALLOCATE ( akt(imt,jmt,0:km,nst) )
+      ALLOCATE ( ak2(imt,jmt,km) )
+      akt = 0.
+      ak2 = 0.
+#endif
+#endif
+#ifdef larval_fish
+ ALLOCATE ( fish(ntracmax, nfish_var) )
+ ALLOCATE ( stage(ntracmax) )
+ stage = f_egg
+ fish(:, i_jd) = 0.00
+ fish(:, i_hatchtime) = 0.00
+ fish(:, i_hatchlength) = 0.0
+ fish(:, i_length) = 0.0
 #endif
 
       ! --- Allocate Lagrangian stream functions ---

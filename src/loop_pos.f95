@@ -43,7 +43,7 @@ contains
 #endif /*timeanalyt*/
 
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -93,7 +93,7 @@ contains
 #endif
 !       scrivi=.true.      
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -142,7 +142,7 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
 #endif
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -194,7 +194,7 @@ contains
        call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
 #endif
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
+!       call interp(ib,jb,kb,x1,y1,z1,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -232,6 +232,8 @@ contains
        call vertvel(intrpb,ia,iam,ja,ka)
 #ifdef full_wflux
        uu=wflux(ia,ja,ka,nsm)
+#elif defined explicit_w
+       uu=rbg*wflux(ia,ja,ka,nsp)+rb*wflux(ia,ja,ka,nsm)
 #else
        uu=intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm)
 #endif
@@ -239,7 +241,7 @@ contains
           kb=ka+1
        endif
        z1=dble(ka)
-       if(kb==KM+1) then    ! prevent "evaporation" and put particle from 
+       if(kb==KM+1) then    ! prevent "evaporation" and put particle from
           kb=KM             ! the surface to the middle of the surface layer
           z1=dble(KM)-0.5d0 !
        endif
@@ -276,6 +278,8 @@ contains
        
 #ifdef full_wflux
        if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
+#elif defined explicit_w
+       if(rbg*wflux(ia,ja,ka-1,nsp)+rb*wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
 #else
        if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
 #endif              

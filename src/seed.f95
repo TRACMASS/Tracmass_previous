@@ -81,6 +81,7 @@ CONTAINS
          if (ijst <= 1)   cycle startLoop
          if (iist >= imt) cycle startLoop
          if (ijst >= jmt) cycle startLoop
+         if (ikst == km+1)  ikst = km
          if (ikst > km)   cycle startLoop
          if (kmt(iist,ijst) == 0) cycle startLoop
          IF (seedTime == 2 .AND. seedAll == 2) THEN
@@ -121,7 +122,7 @@ CONTAINS
          
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (1.d0,ib,ibm,jb,kb)
-#ifdef full_wflux
+#if defined full_wflux || defined explicit_w
                vol=wflux(ib,jb,kb,nsm)
 #elif twodim
                vol=1.
@@ -255,7 +256,7 @@ CONTAINS
            ! ------------------------------------------------------ 
 
 #ifdef tempsalt 
-               CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+               CALL interp (ib,jb,kb,x1,y1,z1,1) 
                IF (temp < tmin0 .OR. temp > tmax0 .OR. &
                &   salt < smin0 .OR. salt > smax0 .OR. &
                &   dens < rmin0 .OR. dens > rmax0      ) THEN
@@ -268,11 +269,11 @@ CONTAINS
                ntrac = ntractot
            
                ! Only one particle for diagnistics purposes
-               if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
+               if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then
                   nrj(ntrac,6)=1
                   cycle kkkLoop
                endif
-               
+
                ! ts - time, fractions of ints
                ! tt - time [s] rel to start
                ! ts = ff * DBLE (ints-intstep) / tstep
@@ -285,10 +286,10 @@ CONTAINS
                trj(ntrac,1:7) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
                nrj(ntrac,1:5) = [ ib, jb, kb,  0, IDINT(ts)]
                nrj(ntrac,7)=1
-
+           
                !Save initial particle position
                call writedata(10) !ini
-           
+
             END DO kkkLoop
          END DO ijjLoop   
       END DO startLoop
