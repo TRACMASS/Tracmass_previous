@@ -48,6 +48,7 @@ SUBROUTINE init_params
    CHARACTER (LEN=200)                        ::  projdir, ormdir
 
    real*8                                     :: jd
+   integer                                    :: iargc
 
 !!----------------------------------------------------------------------------
 !!-------------------- R E A D   F R O M   N A M E L I S T S -----------------
