@@ -1,5 +1,4 @@
 
-
 Lagrangian trajectory code for ocean and atmospheric general circulation models
 
 TRACMASS makes it possible to estimate water paths, Lagrangian stream functions (barotropic and overturning), exchange times, particle sedimentation, etc.
@@ -17,6 +16,7 @@ Installation on Mac Os X
 Download and install macports (www.macports.org)
 Install the following ports:
 
+```sh
  sudo port install openmpi +gcc45 +valgrind
  sudo port install netcdf +openmpi +netcdf4 
  sudo port install netcdf-fortran +gcc45 +openmpi
@@ -30,5 +30,6 @@ Copy Makefile_tmpl to Makefile, change PROJECT and CASE in Makefile to your proj
 
 run:
 
+```bash
  make
  ./runtrm
