@@ -1,6 +1,5 @@
 
 
-
 Lagrangian trajectory code for ocean and atmospheric general circulation models
 
 TRACMASS makes it possible to estimate water paths, Lagrangian stream functions (barotropic and overturning), exchange times, particle sedimentation, etc.
@@ -24,3 +23,12 @@ Install the following ports:
  sudo port install git-core 
  sudo port install git-extras
 
+
+Compile
+=======
+Copy Makefile_tmpl to Makefile, change PROJECT and CASE in Makefile to your projectname.
+
+run:
+
+ make
+ ./runtrm
