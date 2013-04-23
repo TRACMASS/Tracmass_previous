@@ -8,3 +8,6 @@ runtrm
 build
 callgrind*
 gmon.out
+\#*
+*\~
+Makefile

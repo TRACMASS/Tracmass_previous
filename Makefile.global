@@ -10,8 +10,8 @@ ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 OBJDIR           := build
 
 ifeq ($(NETCDFLIBS),"automatic")
-	LIB_DIR = $(shell nc-config --flibs)
-	LNK_FLAGS = -I$(shell nc-config --includedir)
+	LNK_FLAGS = $(shell nc-config --flibs)
+	INC_DIR = -I$(shell nc-config --includedir)
 endif
 ifeq ($(NETCDFLIBS),"macports")
 	LIB_DIR           = -L/opt/local/lib
