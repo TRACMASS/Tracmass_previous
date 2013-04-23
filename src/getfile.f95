@@ -112,7 +112,6 @@ CONTAINS
     c = count3d(map3d)
 
     allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt+2,jmt,km) )
-
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)

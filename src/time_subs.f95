@@ -1,6 +1,6 @@
 #ifdef timeanalyt 
 
-subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,dxyz,rr)
+subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,dxyz)
 
   ! subroutine to compute time (sp,sn) when trajectory 
   ! crosses face of box (ia,ja,ka) with the time analytical sceme by Vries and Döös (2001)
@@ -19,7 +19,7 @@ subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,dxyz,rr)
   !  tt       : Time in seconds of the trajectory relative to the code start 
   !  dsmin    : Timestep in sec divided by Volume of the grid-cell
   !  dxyz     : Volume of current grid-cell
-  !  rr       : Time interpolation constant between 0 and 1 
+  !  intrpr       : Time interpolation constant between 0 and 1 
   !
   !
   !  Output:
@@ -48,15 +48,15 @@ subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,dxyz,rr)
 
 USE mod_param
 USE mod_vel
-USE mod_grid
+USE mod_grid, only: imt,jmt,km
 USE mod_turb
-USE mod_time, only: ts,tt
-USE mod_loopvars, only: dsmin, dxyz
+USE mod_time, only: ts, tt, intrpr, intrpg
+USE mod_loopvars, only: dsmin
 IMPLICIT NONE
 
 INTEGER :: iim,loop,iil,ii,ijk,ia,ja,ka
-REAL*8  :: uu,um,vv,vm,ss,aa,r0,sp,sn,dsmin,ts,tt,dxyz
-REAL*8  :: f0,f1,dzs,dzu1,dzu2,rijk,s0,ss0,rr,rg
+REAL*8  :: uu,um,vv,vm,ss,aa,r0,sp,sn,dxyz
+REAL*8  :: f0,f1,dzs,dzu1,dzu2,rijk,s0,ss0
 REAL*8,  PARAMETER ::  EPS=1.d-10
 !_______________________________________________________________________________
 
@@ -68,7 +68,6 @@ if(ijk.eq.3) return
 
 s0=tt/dxyz
 ss0=dble(idint(ts))*tseas/dxyz
-rg=1.d0-rr
 
 loop=0 ; rijk=0.d0 ; ss=UNDEF ; f0=0.d0 ; f1=0.d0
 
@@ -146,7 +145,7 @@ elseif(ijk.eq.3) then
  endif
 #endif
  if (ka.eq.km) then
-  dzs= dz(km)+rg*hs(ia,ja,nsp)+rr*hs(ia,ja,nsm)
+  dzs= dz(km)+intrpg*hs(ia,ja,nsp)+intrpr*hs(ia,ja,nsm)
   dzu1=dz(km)+hs(ia,ja,nsp)
   dzu2=dz(km)+hs(ia,ja,nsm)
   if(dabs(dzu1).le.eps) stop 4956
@@ -196,7 +195,7 @@ return
 end subroutine cross_time
 !_______________________________________________________________________
 
-subroutine pos_time(ijk,ia,ja,ka,r0,r1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+subroutine pos_time(ijk,ia,ja,ka,r0,r1,ts,tt,dsmin,dxyz,ss0,ds)
   ! subroutine to compute  the new position (r0) of the trajectory 
   !
   !  Input:
@@ -213,7 +212,7 @@ subroutine pos_time(ijk,ia,ja,ka,r0,r1,ts,tt,dsmin,dxyz,ss0,ds,rr)
   !  dxyz     : Volume of current grid-cell
   !  ss0      : dble(idint(ts))*tseas/dxyz
   !  ds       : Min time to face crossing calc in cross
-  !  rr       : Time interpolation constant between 0 and 1 
+  !  intrpr       : Time interpolation constant between 0 and 1 
   !
   !
   !  Output:
@@ -228,13 +227,14 @@ USE mod_param
 USE mod_vel
 USE mod_grid
 USE mod_turb
+USE mod_time, only: intrpr, intrpg
 IMPLICIT NONE
 
 REAL*8,  PARAMETER ::  xilim=3.0d0,xxlim=1.d-7
 INTEGER :: ijk,ia,ja,ka,iim,iil,ii
 REAL*8  :: uu,um,vv,vm,xi,xi0,const,ga,erf0,aa,bb,daw0,r0,r1,dsmin,dxyz,tt,ts,rijk
 REAL*8  :: s15aff,dawson,s15adf,s15aef,errfun
-REAL*8  :: f0,f1,dzs,dzu1,dzu2,s0,ss,ss0,ds,rr,rg
+REAL*8  :: f0,f1,dzs,dzu1,dzu2,s0,ss,ss0,ds
 REAL*8,  PARAMETER ::  EPS=1.d-10
 
 #ifdef twodim  
@@ -247,8 +247,8 @@ endif
 
 s0=tt/dxyz-ds
 ss=ts*tseas/dxyz
-!rr=1.d0-rg
-rg=1.d0-rr
+!intrpr=1.d0-intrpg
+intrpg=1.d0-intrpr
 f0=0.d0 ; f1=0.d0
 
 
@@ -326,7 +326,7 @@ elseif(ijk.eq.3) then
  endif
 #endif
  if (ka.eq.km) then
-  dzs= dz(km)+rg*hs(ia,ja,nsp)+rr*hs(ia,ja,nsm)
+  dzs= dz(km)+intrpg*hs(ia,ja,nsp)+intrpr*hs(ia,ja,nsm)
   dzu1=dz(km)+hs(ia,ja,nsp)
   dzu2=dz(km)+hs(ia,ja,nsm  )
   if(dabs(dzu1).le.eps) stop 4966

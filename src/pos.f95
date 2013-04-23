@@ -1,4 +1,4 @@
-subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
+subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
 #ifndef timeanalyt 
   !====================================================================
   ! computes new position (r0 --> r1) of trajectory after time ds
@@ -11,7 +11,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
   !    r0       : original non-dimensional position in the ijk-direction
   !                   of particle (fractions of a grid box side in the 
   !                                corresponding direction)
-  !    rr       : time interpolation constant between 0 and 1 
+  !    intrpr   : time interpolation constant between 0 and 1 
   !    sp       : crossing time to reach the grid box wall (units=s/m3)
   !
   !  Output:
@@ -19,16 +19,15 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
   !    r1       : the new position (coordinate)
   !====================================================================
   
-  USE mod_grid
-  USE mod_vel
+  USE mod_grid, only: imt, jmt, nsm, nsp
+  USE mod_vel, only: uflux, vflux, wflux, ff
   USE mod_turb
-  USE mod_loopvars
+  USE mod_time, only: intrpr, intrpg
   IMPLICIT none
 
-  real*8 r0,r1,uu,um,vv,vm,en
-  integer ijk,ia,ja,ka,ii,im
+  real*8                                     :: r0, r1, ds, uu, um, vv, vm, en
+  integer                                    :: ijk, ia, ja, ka, ii, im
   
-  rg=1.d0-rr
   
 #ifdef twodim   
   if(ijk.eq.3) then
@@ -41,8 +40,8 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
      ii=ia
      im=ia-1
      if(im.eq.0) im=IMT
-     uu=(rg*uflux(ia,ja,ka,nsp)+rr*uflux(ia,ja,ka,nsm))*ff
-     um=(rg*uflux(im,ja,ka,nsp)+rr*uflux(im,ja,ka,nsm))*ff
+     uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
+     um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
 #ifdef turb    
      if(r0.ne.dble(ii)) then
         uu=uu+upr(1,2)
@@ -60,8 +59,8 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
 
   elseif(ijk.eq.2) then
      ii=ja
-     uu=(rg*vflux(ia,ja  ,ka,nsp)+rr*vflux(ia,ja  ,ka,nsm))*ff
-     um=(rg*vflux(ia,ja-1,ka,nsp)+rr*vflux(ia,ja-1,ka,nsm))*ff
+     uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
+     um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
 #ifdef turb    
      if(r0.ne.dble(ja  )) then
         uu=uu+upr(3,2)  
@@ -79,13 +78,11 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
   elseif(ijk.eq.3) then
      ii = ka
 #if defined full_wflux || defined explicit_w
-!     uu = wflux(ia ,ja ,ka   ,nsm)
-!     um = wflux(ia ,ja ,ka-1 ,nsm)
-     uu = rg * wflux(ia ,ja, ka  ,nsp) + rr * wflux(ia, ja, ka  ,nsm)
-     um = rg * wflux(ia, ja, ka-1,nsp) + rr * wflux(ia, ja, ka-1,nsm)
+     uu = intrpg * wflux(ia ,ja, ka  ,nsp) + intrpr * wflux(ia, ja, ka  ,nsm)
+     um = intrpg * wflux(ia, ja, ka-1,nsp) + intrpr * wflux(ia, ja, ka-1,nsm)
 #else
-     uu = rg * wflux(ka  ,nsp) + rr * wflux(ka  ,nsm)
-     um = rg * wflux(ka-1,nsp) + rr * wflux(ka-1,nsm)
+     uu = intrpg * wflux(ka  ,nsp) + intrpr * wflux(ka  ,nsm)
+     um = intrpg * wflux(ka-1,nsp) + intrpr * wflux(ka-1,nsm)
 #endif
 #ifdef turb    
      if(r0.ne.dble(ka  )) then
@@ -112,7 +109,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1)
   else
      r1=r0+uu*ds
   endif
-  !if(abs(um/(uu-um)).gt.1.d10) print *,'possible precision problem?',um/(uu-um),uu,um,ijk,ia,ja,ka,r0,r1,ds,rr
+  !if(abs(um/(uu-um)).gt.1.d10) print *,'possible precision problem?',um/(uu-um),uu,um,ijk,ia,ja,ka,r0,r1,ds,intrpr  
   return
 #endif
 end subroutine pos_orgn

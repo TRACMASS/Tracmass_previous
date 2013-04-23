@@ -13,7 +13,6 @@ module mod_print
   USE mod_traj
   USE mod_write
   USE mod_pos
-  USE mod_coord
 #if defined diffusion || defined turb
   USE mod_diffusion
 #endif

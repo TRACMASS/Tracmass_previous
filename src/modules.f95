@@ -152,19 +152,19 @@ CONTAINS
     l2d = 6367 * c * 1000
   end function l2d
 
-  subroutine calc_dxyz
+  subroutine calc_dxyz(intrpr, intrpg)
 
     use mod_traj, only: ib,jb,kb
-!    use mod_time
     implicit none
+    REAL*8                                    :: intrpr, intrpg
 
     ! T-box volume in m3
-#ifdef zgrid3Dt
-    dxyz = rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
+#ifdef zgrid3Dt 
+    dxyz = intrpg*dzt(ib,jb,kb,nsp)+intrpr*dzt(ib,jb,kb,nsm)
 #elif  zgrid3D
     dxyz=dzt(ib,jb,kb)
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+    if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #else
     dxyz=dz(kb)
@@ -172,7 +172,7 @@ CONTAINS
     if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+    if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #endif /*zgrid3Dt*/
     dxyz=dxyz*dxdy(ib,jb)
@@ -193,7 +193,6 @@ CONTAINS
 
 ENDMODULE mod_grid
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
@@ -245,7 +244,8 @@ MODULE mod_time
   REAL*8                                    :: tseas, tyear, dtmin,voltr
   REAL*8                                    :: tstep, dstep, tss, partQuant
   REAL*8                                    :: ts, tt
-
+  REAL*8                                    :: intrpr, intrpg
+  REAL*8                                    :: intrpb, intrpbg
 CONTAINS
 
   subroutine updateClock  
@@ -262,11 +262,12 @@ CONTAINS
     CurrMin  = int(currFrac)
     currSec  = int((currFrac - currMin) * 60)
 
-    if (ints > (intstart+intmax-1)) then
+    if (ints > (maxvelints-1)) then
        if (minvelints == 0) then
           loopints = ints - intmax * int(real(ints-intstart)/intmax)
        else
           loopints = ints - intmax * int(real(ints-minvelints)/intmax)
+          intmax = maxvelints - minvelints
        end if
     else
        loopints = ints
@@ -324,7 +325,7 @@ CONTAINS
   end function jdate
 
   subroutine calc_time
-    USE mod_loopvars
+    USE mod_loopvars, only: ds, dsc, dsmin
     use mod_grid, only: dxyz
     USE mod_param, only: iter
     IMPLICIT NONE
@@ -381,8 +382,8 @@ CONTAINS
 #endif /*regulardt*/
     end if
     ! === time interpolation constant ===
-    rbg=dmod(ts,1.d0)
-    rb =1.d0-rbg
+    intrpbg=dmod(ts,1.d0) 
+    intrpb =1.d0-intrpbg
   end subroutine calc_time
 
 ENDMODULE mod_time
@@ -503,19 +504,19 @@ CONTAINS
                                    uflux(2:imt,   1,       1,   nsp)  -  &
                                    vflux(2:imt,   1,       1,   nsp)
     kloop: do k=2,km
-       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, 2)   +  &
-                                 uflux(1:imt-1, 2:jmt,   k,   2)  -   &
-                                 uflux(2:imt,   2:jmt,   k,   2)   +  &
-                                 vflux(2:imt,   1:jmt-1, k,   2)  -   &
-                                 vflux(2:imt,   2:jmt,   k,   2)
-       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, 2)  -   &
-                                 uflux(1,       2:jmt,   k,   2)   +  &
-                                 vflux(1,       1:jmt-1, k,   2)  -   &
-                                 vflux(1,       2:jmt,   k,   2)
-       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, 2)   +  &
-                                 uflux(1:imt-1, 1,       k,   2) -    &
-                                 uflux(2:imt,   1,       k,   2)  -  &
-                                 vflux(2:imt,   1,       k,   2)
+       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
+                                 uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
+                                 uflux(2:imt,   2:jmt,   k,   nsp)  +  &
+                                 vflux(2:imt,   1:jmt-1, k,   nsp)  -  & 
+                                 vflux(2:imt,   2:jmt,   k,   nsp) 
+       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, nsp)  -  &
+                                 uflux(1,       2:jmt,   k,   nsp)  +  &
+                                 vflux(1,       1:jmt-1, k,   nsp)  -  &
+                                 vflux(1,       2:jmt,   k,   nsp)
+       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, nsp)  +  &
+                                 uflux(1:imt-1, 1,       k,   nsp)  -  &
+                                 uflux(2:imt,   1,       k,   nsp)  -  &
+                                 vflux(2:imt,   1,       k,   nsp) 
     enddo kloop
   end subroutine calc_implicit_vertvel
 #endif /* full_wflux */

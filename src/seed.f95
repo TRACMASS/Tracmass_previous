@@ -29,7 +29,7 @@ MODULE mod_seed
    INTEGER                                    :: seedPos, seedTime
    INTEGER                                    :: seedType
    INTEGER                                    :: seedAll, varSeedFile
-   INTEGER                                    :: seedparts, seedpart_id
+   INTEGER                                    :: seedparts=0, seedpart_id
    INTEGER                                    :: loneparticle
    INTEGER                                    :: ist1, ist2, jst1, jst2
    INTEGER                                    :: kst1, kst2, tst1, tst2

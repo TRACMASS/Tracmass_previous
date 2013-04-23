@@ -1,5 +1,5 @@
 
-subroutine vertvel(rr,ia,iam,ja,ka)
+subroutine vertvel(ia,iam,ja,ka)
 
 #ifndef explicit_w
   
@@ -9,6 +9,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   
   USE mod_param
   USE mod_vel
+  USE mod_time, only: intrpr, intrpg
   USE mod_grid
   USE mod_turb
 #if defined ifs || defined larval_fish
@@ -26,16 +27,15 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   IMPLICIT none
   
 #if defined sediment
-  REAL*8 wsedtemp
   REAL kin
 #endif
   
-  real*8                                     :: rr, rg, uu, um, vv, vm
+  real*8                                     :: uu, um, vv, vm
   integer                                    :: ia, iam, ja, ka, k,n
   integer                                    :: n1, n2
 
-
-  rg=1.d0-rr
+  
+  
   wflux=0.d0
   
   n1=min(nsm,nsp)
@@ -48,10 +48,10 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #else
 
   kloop: do k=1,ka
-     uu=rg*uflux(ia ,ja  ,k,nsp)+rr*uflux(ia ,ja  ,k,nsm)
-     um=rg*uflux(iam,ja  ,k,nsp)+rr*uflux(iam,ja  ,k,nsm)
-     vv=rg*vflux(ia ,ja  ,k,nsp)+rr*vflux(ia ,ja  ,k,nsm)
-     vm=rg*vflux(ia ,ja-1,k,nsp)+rr*vflux(ia ,ja-1,k,nsm)
+     uu = intrpg * uflux(ia ,ja  ,k,nsp) + intrpr * uflux(ia ,ja  ,k,nsm)
+     um = intrpg * uflux(iam,ja  ,k,nsp) + intrpr * uflux(iam,ja  ,k,nsm)
+     vv = intrpg * vflux(ia ,ja  ,k,nsp) + intrpr * vflux(ia ,ja  ,k,nsm)
+     vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
 
 ! start ifs code
 #if defined ifs || defined roms
@@ -103,7 +103,7 @@ wflux(km,:) = 0.d0
      wflux(ia,ja,k,nsm)=wflux(ia,ja,k,nsm) + wsedtemp * dxdy(ia,ja)   ! *dx *dy *deg**2 
 #else
     do n=n1,n2
-     wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)     ! *dx *dy *deg**2 
+     wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)
     enddo
 #endif
   end do k2loop

@@ -1,7 +1,7 @@
 SUBROUTINE setupgrid
   
   USE netcdf
-
+  
   USE mod_param
   USE mod_vel
   USE mod_time

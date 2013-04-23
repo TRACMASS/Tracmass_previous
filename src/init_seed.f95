@@ -16,6 +16,7 @@ SUBROUTINE init_seed()
    USE mod_seed
    USE mod_time
    USE mod_param
+   USE mod_write, only: rankstamp
 
    IMPLICIT NONE
 
@@ -202,6 +203,10 @@ SUBROUTINE init_seed()
    print '(A,I7)','   Cells masked as land  : ', landsd
 
    if (seedparts > 0) then
+      if (seedpart_id > seedparts) then
+         print *,"ERROR! seedpart_ID higher than number of groups"
+         stop
+      end if
       jj = nint(float(nsdMax)/seedparts) * (seedpart_id-1) + 1
       ji = min(jj+nsdMax/seedparts, nsdMax)
       nsdMax = ji - jj
@@ -210,9 +215,15 @@ SUBROUTINE init_seed()
       print '(A,I2,A,I2,A)', '   seedpart is active with ', &
                             seedparts, ' groups, number ',      &
                             seedpart_id, ' is seeded.'
+      if (seedparts>0) write (rankstamp, '(A,i2.2)') '_r', seedpart_id  
    end if
    print '(A,I7)','              Cells used : ', nsdMax
 
+   if (loneparticle>0) then
+      print '(A,I7)','WARNING! Loneparticle is set to : ', loneparticle
+   else
+      print '(A,I7)','              Cells used : ', nsdMax
+   end if
    SELECT CASE (seedTime)
 
    CASE (1)

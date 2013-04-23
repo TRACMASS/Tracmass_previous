@@ -15,7 +15,7 @@ subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
   !             ijk-direction of particle 
   !             (fractions of a grid box side in the 
   !              corresponding direction)
-  !  rr       : time interpolation constant between 0 and 1 
+  !  intrpr       : time interpolation constant between 0 and 1 
   !
   !
   !  Output:
@@ -23,24 +23,21 @@ subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
   !    sp,sn   : crossing time to reach the grid box wall 
   !              (in units of s/m3)
   
-USE mod_param
-USE mod_grid
-USE mod_vel
-USE mod_turb
-USE mod_time, only: tt, dtreg
+USE mod_grid, only: undef, imt, jmt, nsm, nsp
+USE mod_vel, only: uflux, vflux, wflux, ff
+USE mod_turb, only:
+USE mod_time, only: tt, dtreg, intrpr, intrpg
 IMPLICIT none
 
-real*8 r0,ba,sp,sn,uu,um,vv,vm
-integer ijk,ia,ja,ka,ii,im
-
-rg=1.d0-rr
+real*8                                       :: r0, ba, sp, sn, uu, um, vv, vm
+integer                                      :: ijk, ia, ja, ka, ii, im
 
 if(ijk.eq.1) then
  ii=ia
  im=ia-1
  if(im.eq.0) im=IMT
- uu=(rg*uflux(ia,ja,ka,nsp)+rr*uflux(ia,ja,ka,nsm))*ff
- um=(rg*uflux(im,ja,ka,nsp)+rr*uflux(im,ja,ka,nsm))*ff
+ uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
+ um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
 #ifdef turb   
  if(r0.ne.dble(ii)) then
   uu=uu+upr(1,2)  
@@ -55,8 +52,8 @@ if(ijk.eq.1) then
 #endif
 elseif(ijk.eq.2) then
  ii=ja
- uu=(rg*vflux(ia,ja  ,ka,nsp)+rr*vflux(ia,ja  ,ka,nsm))*ff
- um=(rg*vflux(ia,ja-1,ka,nsp)+rr*vflux(ia,ja-1,ka,nsm))*ff
+ uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
+ um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
 #ifdef turb    
  if(r0.ne.dble(ja  )) then
   uu=uu+upr(3,2)  
@@ -75,8 +72,8 @@ elseif(ijk.eq.3) then
  uu=wflux(ia ,ja ,ka   ,nsm)
  um=wflux(ia ,ja ,ka-1 ,nsm)
 #else
- uu=rg*wflux(ka  ,nsp)+rr*wflux(ka  ,nsm)
- um=rg*wflux(ka-1,nsp)+rr*wflux(ka-1,nsm)
+ uu=intrpg*wflux(ka  ,nsp)+intrpr*wflux(ka  ,nsm)
+ um=intrpg*wflux(ka-1,nsp)+intrpr*wflux(ka-1,nsm)
 #endif
 
 #ifndef twodim   

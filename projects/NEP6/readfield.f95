@@ -73,11 +73,11 @@ SUBROUTINE readfields
 !
 ! First run22 file is 1999, yearday 351, currJDtot 728279 - but it
 ! is labeled with 00005.
-  write (dstamp(10:14),'(I5.5)') int(currJDtot) - 728279 + 5
+!  write (dstamp(10:14),'(I5.5)') int(currJDtot) - 728279 + 5
 
 ! First run23 file is 1999, yearday 351, currJDtot 730105 - but it
 ! is labeled with 00005.
-!  write (dstamp(10:14),'(I5.5)') int(currJDtot) - 730105 + 5
+  write (dstamp(10:14),'(I5.5)') int(currJDtot) - 730105 + 5
 
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1

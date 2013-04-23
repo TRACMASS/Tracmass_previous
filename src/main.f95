@@ -21,10 +21,8 @@ PROGRAM main
   call writesetup_main
 
   modrundirCond: if(intstep.gt.0) then ! forward 
-!  modrundirCond: if(nff == 1) then ! forward 
      intstart =  intmin          
      intend   =  intmax
-!  elseif(nff == -1) then ! backward
   elseif(intstep.lt.0) then ! backward
      intstart =  intmin+intrun
      minvelints = minvelints + intrun

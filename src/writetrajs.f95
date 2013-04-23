@@ -6,8 +6,10 @@ module mod_write
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
   CHARACTER(LEN=200)                         :: outDataDir, outDataFile
+  CHARACTER(LEN=200)                         :: inargstr1='', inargstr2=''
   INTEGER                                    :: twritetype = 0
   INTEGER                                    :: fileseq = 0
+  CHARACTER(LEN=20)                          :: rankstamp=''
 
 CONTAINS
 
@@ -16,45 +18,46 @@ CONTAINS
 
     IMPLICIT NONE
     CHARACTER(LEN=200)                         :: fullWritePref
-    CHARACTER(LEN=20)                          :: WriteStamp
+    CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
 
-    if (intminInOutFile.eq.2) then
-       writeStamp='00000000_000000'
-       write (writeStamp(1:8),'(i8.8)') intstart !,ints-intstart
-       write (writeStamp(10:15),'(i6.6)') max(ints-intstart,0)+1
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)//trim(writeStamp)
-    elseif (intminInOutFile.eq.1) then
-       writeStamp='00000000'
-       write (writeStamp,'(i8.8)') intstart
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)//trim(writeStamp)
-    else
-       fullWritePref =  trim(outDataDir)//trim(outDataFile)
+    if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
+       write (intminstamp, '(A,i8.8)') '_t', intstart
     end if
+    if ((intminInOutFile.eq.2) .or. (intminInOutFile.eq.3)) then
+         write (partstamp, '(A,i6.6)') '_p', max(ints-intstart,0)+1
+      end if
+
+    fullWritePref =  trim(outDataDir)  // trim(outDataFile) //    &
+                     trim(inargstr1)   // trim(inargstr2)   //    & 
+                     trim(intminstamp) // trim(partstamp)   //    &
+                     trim(rankstamp)
 
 #if defined textwrite
-    open(56,file=trim(fullWritePref)//'_run.asc')    
-    open(57,file=trim(fullWritePref)//'_out.asc')  
-    open(58,file=trim(fullWritePref)//'_ini.asc')   
-    open(59,file=trim(fullWritePref)//'_err.asc')
+    open(56, file=trim(fullWritePref)//'_run.asc')    
+    open(57, file=trim(fullWritePref)//'_out.asc')  
+    open(58, file=trim(fullWritePref)//'_ini.asc')   
+    open(59, file=trim(fullWritePref)//'_err.asc')
 #endif
+
 #if defined binwrite
-    open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
 #endif
+
 #if defined csvwrite
-    open(unit=85 ,file=trim(fullWritePref)//'_out.csv', status='replace')
-    open(unit=86 ,file=trim(fullWritePref)//'_run.csv', status='replace')
-    open(unit=87 ,file=trim(fullWritePref)//'_kll.csv', status='replace')
-    open(unit=88 ,file=trim(fullWritePref)//'_ini.csv',  status='replace')
-    open(unit=89 ,file=trim(fullWritePref)//'_err.csv', status='replace')
+    open(unit=85, file=trim(fullWritePref)//'_out.csv', status='replace')
+    open(unit=86, file=trim(fullWritePref)//'_run.csv', status='replace')
+    open(unit=87, file=trim(fullWritePref)//'_kll.csv', status='replace')
+    open(unit=88, file=trim(fullWritePref)//'_ini.csv', status='replace')
+    open(unit=89, file=trim(fullWritePref)//'_err.csv', status='replace')
 #endif
   end subroutine open_outfiles
 
@@ -84,7 +87,6 @@ CONTAINS
   subroutine writedata(sel)
     
     USE mod_time
-    USE mod_grid
     USE mod_pos
     USE mod_traj
     USE mod_loopvars

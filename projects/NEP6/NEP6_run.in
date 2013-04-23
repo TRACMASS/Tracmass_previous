@@ -72,7 +72,7 @@
   !
   ! === Directory where input fields are stored
 !  inDataDir       = '/Volumes/USB2TB/NEP6/run22/averages/',
-  inDataDir       = '/archive/u1/uaf/kate/NEP6/run22/averages/',
+  inDataDir       = '/archive/u1/uaf/kate/NEP6/run23/averages/',
   !
   ! === Directory where output files are saved
 !  outDataDir      = '/Volumes/USB2TB/NEP6/ormOut/',

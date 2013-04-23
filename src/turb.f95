@@ -9,7 +9,7 @@ CONTAINS
     ! computes the paramterised turbulent velocities u' and v' into upr
   
     USE mod_param
-    USE mod_time
+    USE mod_time, only: intrpr, intrpg
     USE mod_grid
     USE mod_loopvars
     USE mod_vel
@@ -45,18 +45,16 @@ CONTAINS
     !  qran=30.*qran-15. ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
     qran=amp*qran-0.5*amp ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
     
-    rg=1.d0-rr
-    
     im=ia-1
     if(im.eq.0) im=IMT
     jm=ja-1
   
 #if defined timestep
     ! time interpolated velocities
-    uv(1)=(rg*uflux(ia,ja,ka,nsp)+rr*uflux(ia,ja,ka,nsm))*ff ! western u
-    uv(2)=(rg*uflux(im,ja,ka,nsp)+rr*uflux(im,ja,ka,nsm))*ff ! eastern u
-    uv(3)=(rg*vflux(ia,ja,ka,nsp)+rr*vflux(ia,ja,ka,nsm))*ff ! northern v
-    uv(4)=(rg*vflux(ia,jm,ka,nsp)+rr*vflux(ia,jm,ka,nsm))*ff ! southern v
+    uv(1)=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff ! west u
+    uv(2)=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff ! east u
+    uv(3)=(intrpg*vflux(ia,ja,ka,nsp)+intrpr*vflux(ia,ja,ka,nsm))*ff ! north v
+    uv(4)=(intrpg*vflux(ia,jm,ka,nsp)+intrpr*vflux(ia,jm,ka,nsm))*ff ! south v
 #elif defined timeanalyt
     uv( 1)=uflux(ia,ja,ka,nsm)*ff ! western u at t-1
     uv( 2)=uflux(im,ja,ka,nsm)*ff ! eastern u at t-1

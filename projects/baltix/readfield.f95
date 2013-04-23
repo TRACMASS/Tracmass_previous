@@ -20,7 +20,7 @@ SUBROUTINE readfields
    USE netcdf
    USE mod_param
    USE mod_vel
-
+   
    USE mod_time
    USE mod_grid
    USE mod_name

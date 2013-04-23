@@ -38,7 +38,7 @@
 #  fl22  = -Ddiffusion      # Adds a diffusion on trajectory
 #------------------------------------------------------------------------
   fl23  = -Dregional       # Turns off periodic wrapping
-  fl24  = -Dlarval_fish    # Larval fish behaviors
+#  fl24  = -Dlarval_fish    # Larval fish behaviors
   fl25  = -Droms
 #========================================================================
 

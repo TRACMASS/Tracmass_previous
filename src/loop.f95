@@ -13,10 +13,10 @@ SUBROUTINE loop
 !!          See tracmass manual for schematic of the structure.
 !!
 !!
-!!---------------------------------------------------------------------------
-  USE mod_param
-  USE mod_name
-  USE mod_time
+!!---------------------------------------------------------------------------          
+  USE mod_param, only:
+  USE mod_name, only:
+  USE mod_time, only:
   USE mod_loopvars
   USE mod_grid
   USE mod_buoyancy
@@ -27,7 +27,6 @@ SUBROUTINE loop
   USE mod_traj
   USE mod_write
   USE mod_pos
-  USE mod_coord
   USE mod_print
   ! === Selectable moules ===
   USE mod_turb
@@ -68,20 +67,20 @@ SUBROUTINE loop
   
 #ifdef rerun
  I=0 ; j=0 ; k=0 ; l=0
-  print *,'rerun with initial points from ', & 
-       trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
-  open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
+ print *,'rerun with initial points from ', & 
+      trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
+ open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
-  read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,z1,tt,t0,subvol,temp,salt,dens
+ read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,z1,tt,t0,subvol,temp,salt,dens
 !  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
 #if defined orca025
-  if(    rlat == dble(jenn(1))) then
-     nrj(ntrac,8)=0     ! Southern boundary
-     i=i+1
-     nout=nout+1
-  elseif(rlon == dble(iene(3))) then
-     nrj(ntrac,8)=0    ! East
+ if(rlat == dble(jenn(1))) then
+    nrj(ntrac,8)=0     ! Southern boundary
+    i=i+1
+    nout=nout+1
+ elseif(rlon == dble(iene(3))) then
+    nrj(ntrac,8)=0    ! East
      j=j+1
      nout=nout+1
   elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
@@ -127,8 +126,8 @@ SUBROUTINE loop
 41 continue
   m=i+j+k+l
   print *,'Lagrangian decomposition distribution in %: ',     &
-  100.*float(i)/float(i+j+k+l),100.*float(j)/float(i+j+k+l),  &
-  100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
+       100.*float(i)/float(i+j+k+l),100.*float(j)/float(i+j+k+l),  &
+       100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
 
   do ntrac=1,ntracmax ! eliminate the unwanted trajectories
    if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
@@ -168,7 +167,7 @@ SUBROUTINE loop
      !=== write stream functions and "particle tracer"    ===
      !=======================================================
      if(mod(ints,120) == 0) then 
-      call writepsi 
+      call write_streamfunctions
       call writetracer
      endif
 
@@ -280,10 +279,10 @@ SUBROUTINE loop
               cycle ntracLoop
            endif
            nrj(ntrac,7)=0
-           rg=dmod(ts,1.d0) ! time interpolation constant between 0 and 1
-           rr=1.d0-rg
-           if(rg.lt.0.d0 .or.rg.gt.1.d0) then
-              print *,'rg=',rg
+           intrpg = dmod(ts,1.d0) ! time interpolation constant between 0 and 1
+           intrpr = 1.d0-intrpg
+           if(intrpg.lt.0.d0 .or.intrpg.gt.1.d0) then
+              print *,'intrpg=',intrpg
               exit intsTimeLoop
            endif
            
@@ -303,7 +302,7 @@ SUBROUTINE loop
            ja  = jb
            ka  = kb
 
-           call calc_dxyz
+           call calc_dxyz(intrpr, intrpg)
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
            call errorCheck('infLoopError'  ,errCode)
@@ -339,12 +338,12 @@ SUBROUTINE loop
 
            call turbuflux(ia,ja,ka)
            ! === calculate the vertical velocity ===
-           call vertvel(rr,ia,iam,ja,ka)
+           call vertvel(ia,iam,ja,ka)
 #ifdef timeanalyt
            ss0=dble(idint(ts))*tseas/dxyz
-           call cross_time(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-           call cross_time(2,ia,ja,ka,y0,dsn,dss,rr) ! merid
-           call cross_time(3,ia,ja,ka,z0,dsu,dsd,rr) ! vert
+           call cross_time(1,ia,ja,ka,x0,dse,dsw) ! zonal
+           call cross_time(2,ia,ja,ka,y0,dsn,dss) ! merid
+           call cross_time(3,ia,ja,ka,z0,dsu,dsd) ! vert
 #else
            call cross_stat(1,ia,ja,ka,x0,dse,dsw) ! zonal
            call cross_stat(2,ia,ja,ka,y0,dsn,dss) ! meridional
@@ -353,7 +352,7 @@ SUBROUTINE loop
            ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-
+   
            call calc_time
            ! === calculate the new positions of the particle ===
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
@@ -513,7 +512,7 @@ return
        REAL, save                          :: dxmax = 0, dymax = 0
        INTEGER, save                       :: dxntrac, dyntrac
        CHARACTER(79)                       :: thinline, thickline
-
+       
        thickline = "===============================================" // &
                    "==============================================="
        thinline  = "-----------------------------------------------" // &
@@ -660,14 +659,14 @@ return
                 call print_pos
 
                 print '(A,F7.0,A,F7.0,A,F7.0,A,F7.0)',            &
-                     ' ufl(ia) : ',(rbg*uflux(ia ,ja,ka,nsp) +    &
-                                    rb*uflux(ia ,ja,ka,nsm))*ff,  &
-                     ' ufl(ib) : ', (rbg*uflux(iam,ja,ka,nsp) +   &
-                                    rb*uflux(iam,ja,ka,nsm))*ff,  &
-                     ' vfl(ja) : ', (rbg*vflux(ia,ja  ,ka,nsp) +  &
-                                    rb*vflux(ia,ja  ,ka,nsm))*ff, &
-                     ' vfl(jb) : ', (rbg*vflux(ia,ja-1,ka,nsp) +  &
-                                    rb*vflux(ia,ja-1,ka,nsm))*ff
+                     ' ufl(ia) : ',(intrpbg*uflux(ia ,ja,ka,nsp) +    &
+                                    intrpb*uflux(ia ,ja,ka,nsm))*ff,  &
+                     ' ufl(ib) : ', (intrpbg*uflux(iam,ja,ka,nsp) +   & 
+                                    intrpb*uflux(iam,ja,ka,nsm))*ff,  &
+                     ' vfl(ja) : ', (intrpbg*vflux(ia,ja  ,ka,nsp) +  & 
+                                    intrpb*vflux(ia,ja  ,ka,nsm))*ff, &
+                     ' vfl(jb) : ', (intrpbg*vflux(ia,ja-1,ka,nsp) +  & 
+                                    intrpb*vflux(ia,ja-1,ka,nsm))*ff 
                 print *, thinline !-----------------------------------------
              end if
              trj(ntrac,1)=x1
