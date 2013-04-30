@@ -38,7 +38,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       =6000,
+  intrun       = 12000,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -47,8 +47,8 @@
   !
   startHour         = 12,
   startDay          = 01,
-  startMon          = 012,
-  startYear         = 2008/
+  startMon          = 01,
+  startYear         = 2001/
   !
   !
   &INITRUNWRITE
@@ -65,16 +65,20 @@
   !                 5 = write at chosen intervals
   kriva        = 1,
   !
-  ! === Directory where input fields are stored
-  inDataDir       = '/projData/ECCO/025/',
+   ! === Directory where input fields are stored
+  inDataDir       = '/netdata/brorfred/projData/ecco025/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Volumes/keronHD4/ormOut/',
+  outDataDir      = '/netdata/brorfred/ormOut/',
   !
   ! === Name of current trajectory run
   outDataFile     = 'ecco025Test',
   !
-  ! === Should intmin be included to the outfile?
+  ! === Should intmin or partnumber be included to the outfile?
+  ! nff:            0 = Nope
+  !                 1 = Add intmin
+  !                 2 = Add partnumber if outfile is chunked.
+  !                 3 = Add both intmin and partnumber.
   intminInOutFile = 2/
   ! === Name of rerun file
   !namep          = 'op.fw.n0'
@@ -126,7 +130,7 @@
   ist1         = 1,		 
   ist2         = -1,			  
   jst1         = 1,		 
-  jst2         = -1,		 
+  jst2         = 700,		 
   kst1         = 2,		 
   kst2         = 2,
   ! ===   ===   ===   ===   ===
@@ -140,9 +144,10 @@
   !
   ! === Seed filename (or beginning of it)
   seedFile     = '/na_seed.asc',
-  seedparts    = 12,
+  seedparts    = 8,
   seedpart_id  = 2,
-  loneparticle = 1/!/809/!28376/
+  loneparticle = 0,
+/
 
 
 

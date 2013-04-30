@@ -1,8 +1,6 @@
-# Makfile for orca12
-#========================================================================
-  INPUT_INT1        = intmin            # Variables set from command line
+  INPUT_INT1        = seedpart_id       # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
-#------------------------------------------------------------------------
+#========================================================================
     fl01   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
 #   fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
 #   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
