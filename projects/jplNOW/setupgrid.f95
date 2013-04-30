@@ -1,15 +1,15 @@
 SUBROUTINE setupgrid
   
-  USE netcdf
-  USE mod_param
-  USE mod_vel
+  !USE mod_param, only:
+  !USE mod_vel, only:
   
-  USE mod_time
-  USE mod_grid
-  USE mod_name
-  USE mod_vel
-  USE mod_getfile
-
+  !USE mod_time, only:
+  USE mod_grid, only: imt, jmt, km, dyu, dxv, dxdy, kmt, mask, depth
+  USE mod_name, only: indatadir
+  !USE mod_vel, only:
+  USE mod_getfile, only: get2DfieldNC, ncTpos, map2d, map3d
+  USE mod_write, only: twritetype
+  
   IMPLICIT none
   ! =============================================================
   !    ===  Set up the grid ===
@@ -33,15 +33,10 @@ SUBROUTINE setupgrid
   !  dyu -
   ! -------------------------------------------------------------
 
-
-
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
 
-
-! === Template for setting up grids. Move the code from readfile.f95
-  allocate ( mask(imt,jmt), depth(imt,jmt) )
-
+  allocate ( depth(imt,jmt) )
   !Order is   t  k  i  j 
   map2d    = [3, 4, 1, 2]
   map3d    = [2, 3, 4, 1]
@@ -62,6 +57,20 @@ SUBROUTINE setupgrid
   depth = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'h')
   mask = get2DfieldNC(trim(inDataDir) // "scb_grid.nc" , 'mask_rho')
   kmt = 40 
-  where (mask==0) kmt=0
-  
+  where (mask(2:imt,:) == 1) 
+     mask(1:imt-1,:) = 1
+  end where
+  where (mask(:, 2:jmt) == 1) 
+     mask(:,1:jmt-1) = 1
+  end where
+  !where (mask(2:imt,:) == 0) 
+  !   mask(1:imt-1,:) = 0
+  !end where
+  !where (mask(:, 2:jmt) == 0) 
+  !   mask(:,1:jmt-1) = 0
+  !end where
+
+
+  where (mask==0) kmt=0  
+
 end SUBROUTINE setupgrid

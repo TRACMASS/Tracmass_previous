@@ -1,14 +1,13 @@
 SUBROUTINE readfields
 
   USE netcdf
-  USE mod_param
-  USE mod_vel
-  
-  USE mod_time
-  USE mod_grid
-  USE mod_name
-  USE mod_vel
-  USE mod_getfile
+  USE mod_time, only: ints, intstep, updateclock, & 
+       currYear,currMon,currDay,currHour
+  USE mod_name, only: inDataDir
+  USE mod_grid, only: imt, jmt, km, kmt, mask, depth
+  USE mod_grid, only: dyu, dxv, dzu, dzv, dzt, dxdy
+  USE mod_vel, only: uflux, vflux, uvel, vvel, hs, datasetswap
+  USE mod_getfile, only: getScalarNC,get1DfieldNC, get2dfieldNC, get3dfieldNC
   
 #ifdef tempsalt
   USE mod_dens
@@ -30,6 +29,7 @@ SUBROUTINE readfields
   ! = Variables used for getfield procedures
   CHARACTER (len=200)                        :: gridFile ,fieldFile
   CHARACTER (len=50)                         :: varName
+  INTEGER                                    :: ncid, ierr
 
   ! = Variables for converting from S to Z
   REAL,       ALLOCATABLE, DIMENSION(:)      :: sc_r,Cs_r
@@ -51,7 +51,6 @@ SUBROUTINE readfields
   sc_r = 0
   Cs_r = 0
 
-
   call datasetswap
   call updateClock
 
@@ -64,9 +63,7 @@ SUBROUTINE readfields
        currYear,currMon,currDay,currHour+3
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
-
-  print *,dataprefix
-
+ 
   uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
   vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
   ssh       = get2dfieldNC(trim(dataprefix) ,'zeta')
@@ -98,7 +95,6 @@ SUBROUTINE readfields
      uflux = -uflux
      vflux = -vflux
   end if
-
   return
-
+ 
 end subroutine readfields

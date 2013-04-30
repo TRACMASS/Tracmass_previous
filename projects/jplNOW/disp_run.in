@@ -5,7 +5,7 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'test',
+  caseName     = 'disp',
   caseDesc     = 'Looking at chl growth in lagrangian space'/
   ! 
   !
@@ -69,10 +69,10 @@
   outDataDir      = '/Volumes/keronHD4/ormOut/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'jplNOWtest',
+  outDataFile     = 'jplNOWdisp',
   !
   ! === Should intmin be included to the outfile?
-  intminInOutFile = 1/
+  intminInOutFile = 2/
   ! === Name of rerun file
   !namep          = 'op.fw.n0'
   
@@ -107,7 +107,7 @@
   nqua        = 1, 
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant= 9,     
+  partQuant= 64,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
