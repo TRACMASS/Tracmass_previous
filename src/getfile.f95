@@ -68,13 +68,10 @@ CONTAINS
     end if
 
     start2d(map2d(3)) = ncTpos       
-    s = start2d
-    s(3) = s(3)
-    s(4) = s(4)
-    s = s(map2d)
+    s = start2d(map2d)
     c = count2d(map2d)
     d = c + s - 1
-    allocate ( field(d(1),d(2)), get2dfieldNC(imt+2,jmt) )
+    allocate ( field(c(1),c(2)), get2dfieldNC(imt+2,jmt) )
     field=0; get2dfieldNC=0
 
     ierr=NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
@@ -84,7 +81,7 @@ CONTAINS
     ierr=NF90_GET_VAR(ncid ,varid , field, s,c)
     if(ierr.ne.0) call printReadError(3, fieldFile, varName)
     ierr=NF90_CLOSE(ncid)
- 
+
     if ( all(map2d(1:2) == (/3,4/),DIM=1) .or. &
          all(map2d(2:3) == (/3,4/),DIM=1) ) then
        get2DfieldNC(1:imt,:) = field
@@ -93,7 +90,6 @@ CONTAINS
           get2DfieldNC(i,:) = field(:,i)
        end do
     end if
-
 
  end function get2DfieldNC
   
@@ -117,7 +113,6 @@ CONTAINS
     c = count3d(map3d)
     d = c + s - 1
 
-    
     allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt+2,jmt,km) )
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1, fieldFile, varName)

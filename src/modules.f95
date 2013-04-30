@@ -79,6 +79,7 @@ MODULE mod_grid
   INTEGER                                   :: nsm=1     ,nsp=2
   REAL*8                                    :: dx,dy
   REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
   REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
@@ -400,19 +401,19 @@ ENDMODULE mod_dens
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
+  USE mod_grid
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
-#if defined full_wflux
+#if defined explicit_w || full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
   REAL*8                                     :: ff
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
-  INTEGER                                    :: degrade_time=0, degrade_space=0
+  INTEGER                                    :: degrade_time=0
     integer, save                            :: degrade_counter = 0
 
 

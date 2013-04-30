@@ -230,7 +230,7 @@ contains
     elseif(ds==dsu) then ! upward grid-cell exit
        scrivi=.false.
        call vertvel(intrpb,ia,iam,ja,ka)
-#ifdef full_wflux
+#ifdef explicit_w || full_wflux
        uu=wflux(ia,ja,ka,nsm)
 #else
        uu=intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm)
@@ -274,7 +274,7 @@ contains
        scrivi=.false.
        call vertvel(intrpb,ia,iam,ja,ka)
        
-#ifdef full_wflux
+#ifdef explicit_w || full_wflux
        if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
 #else
        if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1

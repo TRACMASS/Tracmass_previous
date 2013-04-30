@@ -11,16 +11,16 @@ subroutine interp2(i,j,k,temp,salt,dens)
   USE mod_loopvars
   USE mod_time
   USE mod_vel
+  USE mod_dens
   IMPLICIT none
   
   real temp,salt,dens
   
   integer i,j,k
   
-  temp=rbg*tem(i,j,k,nsp)+rb*tem(i,j,k,nsm)
-  salt=rbg*sal(i,j,k,nsp)+rb*sal(i,j,k,nsm)
-  dens=rbg*rho(i,j,k,nsp)+rb*rho(i,j,k,nsm)
-  
+  temp=intrpbg*tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm)
+  salt=intrpbg*sal(i,j,k,nsp)+intrpb*sal(i,j,k,nsm)
+  dens=intrpbg*rho(i,j,k,nsp)+intrpb*rho(i,j,k,nsm)
   return
 end subroutine interp2
 #endif

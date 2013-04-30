@@ -86,7 +86,6 @@ CONTAINS
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
-         
 #if defined baltix || defined rco
          ! -------------------------------------------------
          ! --- Test if it is time to launch the particle ---
@@ -121,8 +120,8 @@ CONTAINS
          
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (1.d0,ib,ibm,jb,kb)
-#ifdef full_wflux
-               vol=wflux(ib,jb,kb,nsm)
+#ifdef explicit_w || full_wflux
+               vol = wflux(ib,jb,kb,nsm)
 #elif twodim
                vol=1.
 #else 

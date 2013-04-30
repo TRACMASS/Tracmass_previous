@@ -19,7 +19,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   !    r1       : the new position (coordinate)
   !====================================================================
   
-  USE mod_grid, only: imt, jmt, nsm, nsp
+  USE mod_grid, only: imt, jmt, nsm, nsp, nst
   USE mod_vel, only: uflux, vflux, wflux, ff
   USE mod_turb
   USE mod_time, only: intrpr, intrpg
@@ -77,7 +77,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
 #endif
   elseif(ijk.eq.3) then
      ii = ka
-#ifdef full_wflux
+#ifdef explicit_w || full_wflux
      uu = intrpg * wflux(ia ,ja, ka  ,NST) + intrpr * wflux(ia, ja, ka  ,1)
      um = intrpg * wflux(ia, ja, ka-1,NST) + intrpr * wflux(ia, ja, ka-1,1)
 #else

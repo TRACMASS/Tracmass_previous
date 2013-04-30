@@ -1,7 +1,5 @@
 
 subroutine vertvel(ia,iam,ja,ka)
-
-#ifndef explicit_w
   
   ! === Computes the vertical velocity by integrating ===
   ! === the continuity eq. from the bottom            ===
@@ -31,18 +29,15 @@ subroutine vertvel(ia,iam,ja,ka)
   integer                                    :: ia, iam, ja, ka, k,n
   integer                                    :: n1, n2
   
-  
-  wflux=0.d0
+
+#if defined twodim || explicit_w
+  return
+
+! start 3D code
+#else
 
   n1=min(nsm,nsp)
   n2=max(nsm,nsp)
- 
-  
-#ifdef twodim
-  return
-  
-! start 3D code
-#else
  
   kloop: do k=1,ka
      uu = intrpg * uflux(ia ,ja  ,k,nsp) + intrpr * uflux(ia ,ja  ,k,nsm)
@@ -62,9 +57,9 @@ subroutine vertvel(ia,iam,ja,ka)
 
 ! start ocean code
 #ifndef ifs
-#ifdef  full_wflux
+#ifdef full_wflux
      wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
-#else
+#else 
     do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
@@ -96,7 +91,7 @@ wflux(km,:) = 0.d0
      if (kin.le.kincrit) then   !för SKB
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
-#ifdef full_wflux
+#ifdef explicit_w || full_wflux
      wflux(k)=wflux(ia,ja,k,nsm) +  wsedtemp * dxdy(ia,ja) 
 #else
     do n=n1,n2
@@ -107,9 +102,7 @@ wflux(km,:) = 0.d0
 #endif   
 ! end sediment code
   
-!#endif
   return
-#endif
 
 end subroutine vertvel
 

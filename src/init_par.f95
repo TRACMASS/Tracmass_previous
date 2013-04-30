@@ -197,10 +197,10 @@ SUBROUTINE init_params
          CALL getarg(2,inparg)
          if ( ARG_INT1 == 0) then
             read( inparg, '(i15)' ) ARG_INT1
-            write( inargstr1, '(A,i9.9 )' ) '_',ARG_INT1
+            write( inargstr1, '(A,i9.9 )' ) '_a',ARG_INT1
          else
             read( inparg, '(f15.10)' ) ARG_INT1
-            write( inargstr1, '(A,f9.9 )' ) '_',ARG_INT1
+            write( inargstr1, '(A,i9.9 )' ) '_a',int(ARG_INT1)
          end if         
       END IF
 
@@ -209,10 +209,10 @@ SUBROUTINE init_params
          CALL getarg(3,inparg)
          if ( ARG_INT2 == 0) then
             read( inparg, '(i15)' ) ARG_INT2
-            write( inargstr2, '(A,i9.9)' ) '_',ARG_INT2
+            write( inargstr2, '(A,i9.9)' ) '_b',ARG_INT2
          else
             read( inparg, '(f15.10)' ) ARG_INT2
-            write( inargstr2, '(A,f9.9)' ) '_',ARG_INT2
+            write( inargstr2, '(A,i9.9)' ) '_b',int(ARG_INT2)
          end if
       END IF
     
@@ -276,6 +276,9 @@ SUBROUTINE init_params
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
       ALLOCATE ( mask(imt,jmt) )
+      dyt = 0
+      dxv = 0
+      dyu = 0
 #ifdef zgrid3Dt
       ALLOCATE ( dzt(imt,jmt,km,nst) )   
 #elif  zgrid3D
@@ -291,14 +294,15 @@ SUBROUTINE init_params
       ! --- sea-surface height, and trajectory data                   ---
       ALLOCATE ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
       ALLOCATE ( hs(imt+1,jmt+1,nst) )
-      hs    = 0.
-      uflux = 0.
-      vflux = 0.
-#ifdef full_wflux
+#ifdef explicit_w || full_wflux
       ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km,NST) )
 #else
       ALLOCATE ( wflux(0:km,NST) )
 #endif
+      hs    = 0.
+      uflux = 0.
+      vflux = 0.
+      wflux = 0.d0
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       
       ! === Init mod_traj ===
