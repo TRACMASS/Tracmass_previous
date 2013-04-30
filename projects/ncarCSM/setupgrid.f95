@@ -37,43 +37,31 @@ SUBROUTINE setupgrid
 
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
-  CHARACTER (len=200)                        :: gridFileXY, gridFileZ
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: kmask
-
-  alloCondGrid: if ( .not. allocated (kmask) ) then
-     allocate ( kmask(IMT+2,JMT,KM) )
-  end if alloCondGrid
+  CHARACTER (len=200)                        :: gridFile
   
-  start1d  = [  1]
-  count1d  = [ km]
-  !Order is     t    k            i            j
-  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-  map2d    = [  4 ,  3 ,          2 ,          1]  
-  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-  count3d  = [  1 , km ,subGridImax ,subGridJmax]
-  map3d    = [  4 ,  3 ,          2 ,          1]  
+  !Order is   t  k  i  j
+  map2d    = [3, 4, 1, 1]  
+  map3d    = [2, 3, 4, 1]  
   
-  gridFileXY = trim(inDataDir)//'grid_cell_xy.nc'
-  gridFileZ  = trim(inDataDir)//'grid_cell_z.nc'
+  gridFile = trim(indatadir) // 'ccsm3t31savedd.pop.h.0002-03-01.nc'
   
-  dz   = get1DfieldNC(trim(gridFileZ)  ,'dz')  / 100.
-  dyu  = get2DfieldNC(trim(gridFileXY) ,'DYU') / 100.
-  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
+  ncTpos = 1
+  dz   = get1DfieldNC(trim(gridFile)  ,'dz') / 100.
+  dyu  = get2DfieldNC(trim(gridFile) ,'DYU') / 100.
+  dxv  = get2DfieldNC(trim(gridFile) ,'DXU') / 100.
   dxdy = dxv * dyu
- 
-  dzt = 0
-  kmask  = get3DfieldNC(trim(gridFileZ) ,'SALT')
+  kmt  = get2DfieldNC(trim(gridFile) ,'KMT')
   do j=1,jmt
      do i=1,imt
         do k=1,km
-           kk=km+1-k
-           if(kmask(i,j,k) .le. 1000.) then
-              kmt(i,j)=k
-              dzt(i,j,k) = dz(kk)
-           end if
+           dzt(i,j,k) = dz(km+1-k)
         enddo
      enddo
   enddo
+
+  where (kmt>0)
+     mask = 1
+  end where
+
 
 end SUBROUTINE setupgrid

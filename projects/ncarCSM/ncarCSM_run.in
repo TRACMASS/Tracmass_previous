@@ -64,11 +64,11 @@
   kriva    = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir    = '/projData/CSMBGC/Ar_run/',
+  inDataDir    = 'projects/ncarCSM/',
   !
   ! === Directory where output files are saved
   !outDataDir   = '/Users/doos/data/orc12/',
-  outDataDir   = '/Users/bror/ormOut/',
+  outDataDir   = 'projects/ncarCSM/',
   !
   ! === name of current trajectory run
   outDataFile     = 'csmTest'/
@@ -86,7 +86,7 @@ $INITRUNSEED
   !==               2 = Seed particles zonal(x-z)
   !==               3 = Seed particles horiz(x-y)
   !==               4 = Seed particles in the middle of T-box
-  isec     = 3,
+  isec     = 4,
   !==idir:          1 = follow positive direction (eastward/northward)  
   !==              -1 = follow negative direction (westward/southward)
   !==               0 = both directions
@@ -117,8 +117,10 @@ $INITRUNSEED
   ist2     = 70,		 
   jst1     = 50,
   jst2     = 70,
-  kst1     =  1,		 
-  kst2     =  -1/
+  kst1     = 24,		 
+  kst2     = 25,
+  loneparticle = 0
+  /
   !
   !
 $INITRUNTEMPSALT
@@ -144,8 +146,12 @@ $INITRUNTEMPSALT
   !
   !
 $INITRUNEND	
-  ienw(1) =   10,	
-  iene(1) =   90,	
-  jens(1) =   10,	
-  jenn(1) =   90,	
+  ienw(1) =   1,	
+  iene(1) =   100,	
+  jens(1) =   1,	
+  jenn(1) =   1,
+  ienw(2) =   1,	
+  iene(2) =   1,	
+  jens(2) =   1,	
+  jenn(2) =   100,
   timax =  36500./  ! maximum time length of a trajectory in days
