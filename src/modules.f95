@@ -27,15 +27,6 @@ MODULE mod_param
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
-MODULE mod_coord
-ENDMODULE mod_coord
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_diff
-	INTEGER                             :: dummy	
-ENDMODULE mod_diff
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
   REAL*8                                     :: ds, dsmin
@@ -54,18 +45,14 @@ MODULE mod_traj
   INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
   INTEGER                                    :: NEND
   INTEGER                                    :: ntrac, ntractot=0
-
-
   ! === Particle arrays ===
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
-
   ! === Particle counters ===
   INTEGER                                    :: nout=0, nloop=0, nerror=0
   INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
   INTEGER                                    :: nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
-
   ! === Particle positions ===
   INTEGER                                    :: ia, ja, ka, iam
   INTEGER                                    :: ib, jb, kb, ibm
@@ -145,18 +132,19 @@ CONTAINS
     l2d = 6367 * c * 1000
   end function l2d
 
-  subroutine calc_dxyz
+  subroutine calc_dxyz(intrpr, intrpg)
 
     use mod_traj, only: ib,jb,kb
     implicit none
+    REAL*8                                    :: intrpr, intrpg
 
     ! T-box volume in m3
 #ifdef zgrid3Dt 
-    dxyz = rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
+    dxyz = intrpg*dzt(ib,jb,kb,nsp)+intrpr*dzt(ib,jb,kb,nsm)
 #elif  zgrid3D
     dxyz=dzt(ib,jb,kb)
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+    if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #else
     dxyz=dz(kb)
@@ -164,7 +152,7 @@ CONTAINS
     if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+    if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
 #endif /*freesurface*/
 #endif /*zgrid3Dt*/
     dxyz=dxyz*dxdy(ib,jb)
@@ -236,8 +224,8 @@ MODULE mod_time
   REAL*8                                    :: tseas, tyear, dtmin,voltr
   REAL*8                                    :: tstep, dstep, tss, partQuant
   REAL*8                                    :: ts, tt
-  REAL*8                                    :: rr, rb, rg, rbg
-
+  REAL*8                                    :: intrpr, intrpg
+  REAL*8                                    :: intrpb, intrpbg
 CONTAINS
 
   subroutine updateClock  
@@ -374,8 +362,8 @@ CONTAINS
 #endif /*regulardt*/
     end if
     ! === time interpolation constant ===
-    rbg=dmod(ts,1.d0) 
-    rb =1.d0-rbg
+    intrpbg=dmod(ts,1.d0) 
+    intrpb =1.d0-intrpbg
   end subroutine calc_time
 
 ENDMODULE mod_time
@@ -455,30 +443,30 @@ CONTAINS
     ! = Loop variables
     INTEGER                                    :: k
     
-    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1,   nsp)  -   &
-                                   uflux(2:imt,   2:jmt,   1,   nsp)   +  &
-                                   vflux(2:imt,   1:jmt-2, 1,   nsp)  -   & 
-                                   vflux(2:imt,   2:jmt,   1,   nsp)
-    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1,   nsp)   +  &
-                                   vflux(1,       1:jmt-1, 1,   nsp)  -   &
-                                   vflux(1,       2:jmt,   1,   nsp)
-    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1,   nsp) -    &
-                                   uflux(2:imt,   1,       1,   nsp)  -  &
-                                   vflux(2:imt,   1,       1,   nsp) 
+    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1, nsp)  -  &
+                                   uflux(2:imt,   2:jmt,   1, nsp)  +  &
+                                   vflux(2:imt,   1:jmt-2, 1, nsp)  -  & 
+                                   vflux(2:imt,   2:jmt,   1, nsp)
+    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1, nsp)  +  &
+                                   vflux(1,       1:jmt-1, 1, nsp)  -  &
+                                   vflux(1,       2:jmt,   1, nsp)
+    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1, nsp)  -  &
+                                   uflux(2:imt,   1,       1, nsp)  -  &
+                                   vflux(2:imt,   1,       1, nsp) 
     kloop: do k=2,km
-       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, 2)   +  &
-                                 uflux(1:imt-1, 2:jmt,   k,   2)  -   &
-                                 uflux(2:imt,   2:jmt,   k,   2)   +  &
-                                 vflux(2:imt,   1:jmt-1, k,   2)  -   & 
-                                 vflux(2:imt,   2:jmt,   k,   2) 
-       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, 2)  -   &
-                                 uflux(1,       2:jmt,   k,   2)   +  &
-                                 vflux(1,       1:jmt-1, k,   2)  -   &
-                                 vflux(1,       2:jmt,   k,   2)
-       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, 2)   +  &
-                                 uflux(1:imt-1, 1,       k,   2) -    &
-                                 uflux(2:imt,   1,       k,   2)  -  &
-                                 vflux(2:imt,   1,       k,   2) 
+       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
+                                 uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
+                                 uflux(2:imt,   2:jmt,   k,   nsp)  +  &
+                                 vflux(2:imt,   1:jmt-1, k,   nsp)  -  & 
+                                 vflux(2:imt,   2:jmt,   k,   nsp) 
+       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, nsp)  -  &
+                                 uflux(1,       2:jmt,   k,   nsp)  +  &
+                                 vflux(1,       1:jmt-1, k,   nsp)  -  &
+                                 vflux(1,       2:jmt,   k,   nsp)
+       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, nsp)  +  &
+                                 uflux(1:imt-1, 1,       k,   nsp)  -  &
+                                 uflux(2:imt,   1,       k,   nsp)  -  &
+                                 vflux(2:imt,   1,       k,   nsp) 
     enddo kloop
   end subroutine calc_implicit_vertvel
 #endif full_wflux

@@ -10,7 +10,7 @@
 !
 !============================================================================
 SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
-	USE mod_coord
+	
 	USE mod_grid
 	USE mod_param
 	USE mod_precdef
@@ -143,7 +143,7 @@ SUBROUTINE displacement(xd, yd, zd, ib, jb, kb, dt)
 	USE mod_param
 #ifdef anisodiffusion
 	USE mod_grid
-	USE mod_coord
+	
 #endif
 	IMPLICIT NONE
 	

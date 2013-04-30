@@ -9,6 +9,7 @@ module mod_write
   CHARACTER(LEN=200)                         :: inargstr1='', inargstr2=''
   INTEGER                                    :: twritetype = 0
   INTEGER                                    :: fileseq = 0
+  CHARACTER(LEN=20)                          :: rankstamp=''
 
 CONTAINS
 
@@ -19,41 +20,44 @@ CONTAINS
     CHARACTER(LEN=200)                         :: fullWritePref
     CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
 
-    if ((intminInOutFile.eq.2) .or. (intminInOutFile.eq.3)) then
-       write (partstamp, '(A,i6.6)') '_', max(ints-intstart,0)+1
-    end if
     if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
-       write (intminstamp, '(A,i8.8)') '_', intstart
+       write (intminstamp, '(A,i8.8)') '_t', intstart
     end if
+    if ((intminInOutFile.eq.2) .or. (intminInOutFile.eq.3)) then
+         write (partstamp, '(A,i6.6)') '_p', max(ints-intstart,0)+1
+      end if
 
     fullWritePref =  trim(outDataDir)  // trim(outDataFile) //    &
                      trim(inargstr1)   // trim(inargstr2)   //    & 
-                     trim(intminstamp) // trim(partstamp)
+                     trim(intminstamp) // trim(partstamp)   //    &
+                     trim(rankstamp)
 
 #if defined textwrite
-    open(56,file=trim(fullWritePref)//'_run.asc')    
-    open(57,file=trim(fullWritePref)//'_out.asc')  
-    open(58,file=trim(fullWritePref)//'_ini.asc')   
-    open(59,file=trim(fullWritePref)//'_err.asc')
+    open(56, file=trim(fullWritePref)//'_run.asc')    
+    open(57, file=trim(fullWritePref)//'_out.asc')  
+    open(58, file=trim(fullWritePref)//'_ini.asc')   
+    open(59, file=trim(fullWritePref)//'_err.asc')
 #endif
+
 #if defined binwrite
-    open(unit=75 ,file=trim(fullWritePref)//'_out.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=76 ,file=trim(fullWritePref)//'_run.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=77 ,file=trim(fullWritePref)//'_kll.bin' &
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=79 ,file=trim(fullWritePref)//'_err.bin' &  
-         ,access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &  
+         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
 #endif
+
 #if defined csvwrite
-    open(unit=85 ,file=trim(fullWritePref)//'_out.csv', status='replace')
-    open(unit=86 ,file=trim(fullWritePref)//'_run.csv', status='replace')
-    open(unit=87 ,file=trim(fullWritePref)//'_kll.csv', status='replace')
-    open(unit=88 ,file=trim(fullWritePref)//'_ini.csv',  status='replace')
-    open(unit=89 ,file=trim(fullWritePref)//'_err.csv', status='replace')
+    open(unit=85, file=trim(fullWritePref)//'_out.csv', status='replace')
+    open(unit=86, file=trim(fullWritePref)//'_run.csv', status='replace')
+    open(unit=87, file=trim(fullWritePref)//'_kll.csv', status='replace')
+    open(unit=88, file=trim(fullWritePref)//'_ini.csv', status='replace')
+    open(unit=89, file=trim(fullWritePref)//'_err.csv', status='replace')
 #endif
   end subroutine open_outfiles
 
@@ -81,12 +85,12 @@ CONTAINS
   end subroutine close_outfiles
 
   subroutine writedata(sel)
-    
     USE mod_time
     USE mod_pos
     USE mod_traj
     USE mod_loopvars
-    
+
+
     IMPLICIT NONE
 
     REAL                                 :: vort
@@ -96,7 +100,9 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosKll=0
     REAL                                 :: x14 ,y14 ,z14
     REAL*8                               :: twrite
-
+    ! === Variables to interpolate fields ===
+    REAL                                       :: temp, salt, dens
+    REAL                                       :: temp2, salt2, dens2
 #if defined for || sim 
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )

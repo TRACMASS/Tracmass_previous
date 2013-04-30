@@ -3,7 +3,7 @@ module mod_pos
   USE mod_grid
   USE mod_vel
   USE mod_loopvars
-  USE mod_time
+  USE mod_time, only: intrpb, intrpbg
   USE mod_streamfunctions
   USE mod_psi
     
@@ -28,18 +28,18 @@ contains
     scrivi=.false.
     if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
-       uu=(rbg*uflux(ia,ja,ka,nsp)+rb*uflux(ia ,ja,ka,nsm))*ff
+       uu=(intrpbg*uflux(ia,ja,ka,nsp)+intrpb*uflux(ia ,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
           ib=ia+1
           if(ib.gt.IMT) ib=ib-IMT 
        endif
        x1=dble(ia)
 #if defined timeanalyt
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
 #else
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) 
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr)
+       call pos_orgn(2,ia,ja,ka,y0,y1,ds) 
+       call pos_orgn(3,ia,ja,ka,z0,z1,ds)
 #endif /*timeanalyt*/
 
 #if defined streamr 
@@ -79,17 +79,17 @@ contains
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
-       uu=(rbg*uflux(iam,ja,ka,nsp)+rb*uflux(iam,ja,ka,nsm))*ff
+       uu=(intrpbg*uflux(iam,ja,ka,nsp)+intrpb*uflux(iam,ja,ka,nsm))*ff
        if(uu.lt.0.d0) then
           ib=iam
        endif
        x1=dble(iam)
 #if defined timeanalyt
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
 #else
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! meridional position
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+       call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! meridional position
+       call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
 #endif
 !       scrivi=.true.      
 #if defined streamr 
@@ -129,17 +129,17 @@ contains
     elseif(ds==dsn) then ! northward grid-cell exit
        
        scrivi=.false.
-       uu=(rbg*vflux(ia,ja,ka,nsp)+rb*vflux(ia,ja,ka,nsm))*ff
+       uu=(intrpbg*vflux(ia,ja,ka,nsp)+intrpb*vflux(ia,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
           jb=ja+1
        endif
        y1=dble(ja)
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+       call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal position
+       call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
 #endif
 #if defined streamr 
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
@@ -178,7 +178,7 @@ contains
     elseif(ds==dss) then ! southward grid-cell exit
        
        scrivi=.false.
-       uu=(rbg*vflux(ia,ja-1,ka,nsp)+rb*vflux(ia,ja-1,ka,nsm))*ff
+       uu=(intrpbg*vflux(ia,ja-1,ka,nsp)+intrpb*vflux(ia,ja-1,ka,nsm))*ff
        if(uu.lt.0.d0) then
           jb=ja-1
 #ifndef ifs 
@@ -187,11 +187,11 @@ contains
        endif
        y1=dble(ja-1)
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal position
-       call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vertical position
+       call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal position
+       call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
 #endif
 #if defined streamr 
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
@@ -229,11 +229,11 @@ contains
        
     elseif(ds==dsu) then ! upward grid-cell exit
        scrivi=.false.
-       call vertvel(rb,ia,iam,ja,ka)
+       call vertvel(intrpb,ia,iam,ja,ka)
 #ifdef full_wflux
        uu=wflux(ia,ja,ka,nsm)
 #else
-       uu=rbg*wflux(ka,nsp)+rb*wflux(ka,nsm)
+       uu=intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm)
 #endif
        if(uu.gt.0.d0) then
           kb=ka+1
@@ -244,11 +244,11 @@ contains
           z1=dble(KM)-0.5d0 !
        endif
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr)
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr)
+       call pos_orgn(1,ia,ja,ka,x0,x1,ds)
+       call pos_orgn(2,ia,ja,ka,y0,y1,ds)
 #endif
 
 #if defined stream_thermohaline
@@ -272,20 +272,20 @@ contains
 
     elseif(ds==dsd) then ! downward grid-cell exit
        scrivi=.false.
-       call vertvel(rb,ia,iam,ja,ka)
+       call vertvel(intrpb,ia,iam,ja,ka)
        
 #ifdef full_wflux
        if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
 #else
-       if(rbg*wflux(ka-1,nsp)+rb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
+       if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
 #endif              
        z1=dble(ka-1)
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
 #else
-       call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr)
-       call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr)
+       call pos_orgn(1,ia,ja,ka,x0,x1,ds)
+       call pos_orgn(2,ia,ja,ka,y0,y1,ds)
 #endif
 #ifdef sediment
        if(kb==KM-kmt(ia,ja)) then
@@ -329,9 +329,9 @@ contains
        ! shortest time is the time-steping 
        scrivi=.true.
 #ifdef timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
 #else           
        ! If there is no spatial solution, 
        ! which should correspond to a convergence zone
@@ -342,9 +342,9 @@ contains
           ib=ia ; jb=ja ; kb=ka
 !          print *,'convergence for ',ib,jb,kb,x0,y0,z0
 !#ifdef ifs
-!          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-!          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-!          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+!          call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
+!          call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
+!          call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
 !#else
 !          x1=x0 ; y1=y0 ; z1=z0 
 !          print *,ib,jb,kb,x1,y1,z1
@@ -353,9 +353,9 @@ contains
           ! but the shortest cross time is the time step
        endif
 !       else
-          call pos_orgn(1,ia,ja,ka,x0,x1,ds,rr) ! zonal crossing 
-          call pos_orgn(2,ia,ja,ka,y0,y1,ds,rr) ! merid. crossing 
-          call pos_orgn(3,ia,ja,ka,z0,z1,ds,rr) ! vert. crossing 
+          call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
+          call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
+          call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
 !       endif
 #endif
     endif
