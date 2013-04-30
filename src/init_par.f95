@@ -104,9 +104,9 @@ SUBROUTINE init_params
       CALL getarg(1,Case)
    END IF
 
-   CALL getenv('ORMPROJDIR',projdir)
+   CALL getenv('TRMPROJDIR',projdir)
    if (len(trim(projdir)) == 0) then
-      CALL getenv('ORMDIR',ormdir)
+      CALL getenv('TRMDIR',ormdir)
       if (len(trim(ormdir)) .ne. 0) then
          projdir = trim(ormdir)//'/'//'projects/'//trim(Project)//'/'
       else

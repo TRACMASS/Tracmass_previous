@@ -68,11 +68,13 @@ SUBROUTINE setupgrid
      dytt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j+1) )
   end do
 
+  dxtt(:,jmt) = dxtt(:,jmt-1)
+  dytt(:,jmt) = dytt(:,jmt-1)
+
   dxv(1:imt-1,:) = dxtt(1:imt-1,:)/2 + dxtt(2:imt,:)/2
   dyu(:,1:jmt-1) = dytt(:,1:jmt-1)/2 + dytt(:,2:jmt)/2
   dxv(imt,:) = dxtt(imt,:)/2 + dxtt(1,:)/2
   dxdy = dyu * dxv                                                          
-
 
   dz_inv = get1DfieldNC(trim(gridfile), 'DEPTH_T')
   dz_inv(1:km-1) = dz_inv(2:km)-dz_inv(1:km-1)
