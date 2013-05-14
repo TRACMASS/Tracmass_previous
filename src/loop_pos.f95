@@ -291,17 +291,17 @@ contains
        if(kb==KM-kmt(ia,ja)) then
           nsed=nsed+1
           nrj(ntrac,6)=2
-          trj(ntrac,1)=x1
-          trj(ntrac,2)=y1
-          trj(ntrac,3)=z1
-          trj(ntrac,4)=tt
-          trj(ntrac,5)=subvol
-          nrj(ntrac,1)=ib
-          nrj(ntrac,2)=jb
-          nrj(ntrac,3)=ka
-          nrj(ntrac,4)=niter
-          nrj(ntrac,5)=idint(ts)
-          nrj(ntrac,7)=1
+          trj(1,ntrac)=x1
+          trj(2,ntrac)=y1
+          trj(3,ntrac)=z1
+          trj(4,ntrac)=tt
+          trj(5,ntrac)=subvol
+          nrj(1,ntrac)=ib
+          nrj(2,ntrac)=jb
+          nrj(3,ntrac)=ka
+          nrj(4,ntrac)=niter
+          nrj(5,ntrac)=idint(ts)
+          nrj(7,ntrac)=1
           !call writedata(13)
           !cycle ntracLoop
        endif

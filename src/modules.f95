@@ -266,6 +266,8 @@ ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
 MODULE mod_dens
 
+
+
 ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
 
@@ -281,18 +283,14 @@ MODULE mod_vel
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: hs
   REAL*8                                     :: ff
+
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
+
   INTEGER                                    :: degrade_time=0, degrade_space=0
     integer, save                            :: degrade_counter = 0
 
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-!MODULE mod_dens
-#ifdef tempsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
-#endif
-!ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 CONTAINS

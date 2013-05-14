@@ -56,18 +56,18 @@ MODULE tracmass
   
   
 
-  x1     = trj(ntrac,1)         ! Current grid position  x
-  y1     = trj(ntrac,2)         ! Current grid position  y
-  z1     = trj(ntrac,3)         ! Current grid position  z
-  tt     = trj(ntrac,4)
-  subvol = trj(ntrac,5)
-  arct   = trj(ntrac,6)
-  t0     = trj(ntrac,7)
-  ib     = nrj(ntrac,1)         ! Current grid index  x
-  jb     = nrj(ntrac,2)         ! Current grid index  y
-  kb     = nrj(ntrac,3)         ! Current grid index  z
-  niter  = nrj(ntrac,4)
-  ts     = dble(nrj(ntrac,5))
+  x1     = trj(1,ntrac)         ! Current grid position  x
+  y1     = trj(2,ntrac)         ! Current grid position  y
+  z1     = trj(3,ntrac)         ! Current grid position  z
+  tt     = trj(4,ntrac)
+  subvol = trj(5,ntrac)
+  arct   = trj(6,ntrac)
+  t0     = trj(7,ntrac)
+  ib     = nrj(1,ntrac)         ! Current grid index  x
+  jb     = nrj(2,ntrac)         ! Current grid index  y
+  kb     = nrj(3,ntrac)         ! Current grid index  z
+  niter  = nrj(4,ntrac)
+  ts     = dble(nrj(5,ntrac))
   tss    = 0.d0
 
 
@@ -81,7 +81,7 @@ MODULE tracmass
  ka=kb
 
 
-  nrj(ntrac,7)=0
+  nrj(7,ntrac)=0
   rg=dmod(ts,1.d0) ! time interpolation constant between 0 and 1
   rr=1.d0-rg
   if(rg.lt.0.d0 .or.rg.gt.1.d0) then
@@ -111,7 +111,7 @@ MODULE tracmass
      print *,'k=',ka,kb,KM+1-kmt(ia,ja),kmt(ia,ja)
      ! goto 1500
      nerror=nerror+1
-     nrj(ntrac,6)=1
+     nrj(6,ntrac)=1
      cycle ntracLoop
   endif
   

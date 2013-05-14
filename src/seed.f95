@@ -269,7 +269,7 @@ CONTAINS
            
                ! Only one particle for diagnistics purposes
                if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
-                  nrj(ntrac,6)=1
+                  nrj(6,ntrac)=1
                   cycle kkkLoop
                endif
            
@@ -282,9 +282,9 @@ CONTAINS
                ! ------------------------------------------------------------
                ! --- Put the new trajectory into the matrices trj and nrj ---
                ! ------------------------------------------------------------
-               trj(ntrac,1:7) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
-               nrj(ntrac,1:5) = [ ib, jb, kb,  0, IDINT(ts)]
-               nrj(ntrac,7)=1
+               trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
+               nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
+               nrj(7,ntrac)=1
            
             END DO kkkLoop
          END DO ijjLoop   

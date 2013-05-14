@@ -80,18 +80,18 @@ SUBROUTINE loop
 
 #if defined orca025
   if(    rlat == dble(jenn(1))) then
-     nrj(ntrac,8)=0     ! Southern boundary
+     nrj(8,ntrac)=0     ! Southern boundary
      i=i+1
      nout=nout+1
   elseif(rlon == dble(iene(3))) then
-     nrj(ntrac,8)=0    ! East
+     nrj(8,ntrac)=0    ! East
      j=j+1
      nout=nout+1
   elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
-     nrj(ntrac,8)=1    ! back to the warm pool
+     nrj(8,ntrac)=1    ! back to the warm pool
      k=k+1
   else
-     nrj(ntrac,8)=0 
+     nrj(8,ntrac)=0 
      l=l+1   
      nout=nout+1
   endif
@@ -99,13 +99,13 @@ SUBROUTINE loop
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined orca025L75
   if( tt-t0 >365.*1000. .and. temp > tmax0 ) then
-     nrj(ntrac,8)=1     ! warm end points
+     nrj(8,ntrac)=1     ! warm end points
      i=i+1
   elseif( tt-t0 >365.*1000. .and. temp <= tmax0 ) then
-     nrj(ntrac,8)=2    ! cold end points
+     nrj(8,ntrac)=2    ! cold end points
      j=j+1
   else                 ! too short
-     nrj(ntrac,8)=0 
+     nrj(8,ntrac)=0 
      k=k+1
      nout=nout+1
   endif
@@ -114,11 +114,11 @@ SUBROUTINE loop
 
 #elif defined ifs
   if(rlat == dble(jenn(1))) then
-     nrj(ntrac,8)=1    ! Southern boundary
+     nrj(8,ntrac)=1    ! Southern boundary
   elseif(rlat == dble(jens(2))) then
-     nrj(ntrac,8)=2    ! Northern boundary 
+     nrj(8,ntrac)=2    ! Northern boundary 
   else
-     nrj(ntrac,8)=0
+     nrj(8,ntrac)=0
      print 566,ntrac,niter,rlon,rlat,zz
      stop 4957
   endif /*orc*/
@@ -134,7 +134,7 @@ SUBROUTINE loop
   100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
 
   do ntrac=1,ntracmax ! eliminate the unwanted trajectories
-   if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
+   if(nrj(8,ntrac) == 0) nrj(6,ntrac)=1 
   enddo
   
 #else
@@ -194,41 +194,41 @@ SUBROUTINE loop
      ntracLoop: do ntrac=1,ntractot  
      
         ! === Test if the trajectory is dead   ===
-        if(nrj(ntrac,6) == 1) cycle ntracLoop
+        if(nrj(6,ntrac) == 1) cycle ntracLoop
         
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
-        x1     =  trj(ntrac,1)
-        y1     =  trj(ntrac,2)
-        z1     =  trj(ntrac,3)
-        tt     =  trj(ntrac,4)
-        subvol =  trj(ntrac,5)
-        t0     =  trj(ntrac,7)
+        x1     =  trj(1,ntrac)
+        y1     =  trj(2,ntrac)
+        z1     =  trj(3,ntrac)
+        tt     =  trj(4,ntrac)
+        subvol =  trj(5,ntrac)
+        t0     =  trj(7,ntrac)
         
-        ib     =  nrj(ntrac,1)
-        jb     =  nrj(ntrac,2)
-        kb     =  nrj(ntrac,3)
-        niter  =  nrj(ntrac,4)
-        ts     =  dble(nrj(ntrac,5))
+        ib     =  nrj(1,ntrac)
+        jb     =  nrj(2,ntrac)
+        kb     =  nrj(3,ntrac)
+        niter  =  nrj(4,ntrac)
+        ts     =  dble(nrj(5,ntrac))
         tss    =  0.d0
         
         ! === Write initial data to in.asc file ===
         ! If t0 = tt (first step) 
         
-        if(trj(ntrac,4) == trj(ntrac,7)) then
+        if(trj(4,ntrac) == trj(7,ntrac)) then
 #ifdef tempsalt
-        call interp(nrj(ntrac,1),nrj(ntrac,2),nrj(ntrac,3),&
-        trj(ntrac,1),trj(ntrac,2),trj(ntrac,3),temp,salt,dens,1)
+        call interp(nrj(1,ntrac),nrj(2,ntrac),nrj(3,ntrac),&
+        trj(1,ntrac),trj(2,ntrac),trj(3,ntrac),temp,salt,dens,1)
 #endif
         call writedata(10)
         endif
 
 #ifdef rerun
-        lbas=nrj(ntrac,8)
+        lbas=nrj(8,ntrac)
         if(lbas.lt.1 .or.lbas.gt.LBT) then
            print *,'lbas=',lbas,'ntrac=',ntrac
-           print *,'trj(ntrac,:)=',trj(ntrac,:)
-           print *,'nrj(ntrac,:)=',nrj(ntrac,:)
+           print *,'trj(:,ntrac)=',trj(:,ntrac)
+           print *,'nrj(:,ntrac)=',nrj(:,ntrac)
            exit intsTimeLoop
         endif
 #endif /*rerun*/
@@ -236,23 +236,23 @@ SUBROUTINE loop
         ! === Check if water velocities are === 
         ! === large enough for resuspention ===
         ! === of sedimentated trajectories  ===   
-        if( nrj(ntrac,6) == 2 ) then
+        if( nrj(6,ntrac) == 2 ) then
            call resusp(res,ib,jb,kb)
            if(res) then
               ! === updating model time for  ===
               ! === resuspended trajectories ===
               ts=dble(ints-2)
-              nrj(ntrac,5)=ints-2
+              nrj(5,ntrac)=ints-2
               tt=tseas*dble(ints-2)
-              trj(ntrac,4)=tt
+              trj(4,ntrac)=tt
               ! === resuspension to bottom layer ===
               ! === kb same as before            ===
-              nrj(ntrac,3)=kb
+              nrj(3,ntrac)=kb
               z1=z1+0.5d0
               ! z1=z1+0.1  !resusp l?gre i boxen
-              trj(ntrac,3)=z1
+              trj(3,ntrac)=z1
               ! === change flag to put trajectory back in circulation ===
-              nrj(ntrac,6)=0
+              nrj(6,ntrac)=0
               nsed=nsed-1
               nsusp=nsusp+1
            else
@@ -271,24 +271,24 @@ SUBROUTINE loop
            ! === change velocity fields &  === 
            ! === store trajectory position ===
            if( niter.ne.1 .and. tss == dble(iter) &
-                .and. nrj(ntrac,7).ne.1 ) then
-              trj(ntrac,1)=x1
-              trj(ntrac,2)=y1
-              trj(ntrac,3)=z1
-              trj(ntrac,4)=tt
-              trj(ntrac,5)=subvol
-              nrj(ntrac,1)=ib
-              nrj(ntrac,2)=jb
-              nrj(ntrac,3)=kb
-              nrj(ntrac,4)=niter
-              nrj(ntrac,5)=idint(ts)
-              nrj(ntrac,7)=1
+                .and. nrj(7,ntrac).ne.1 ) then
+              trj(1,ntrac)=x1
+              trj(2,ntrac)=y1
+              trj(3,ntrac)=z1
+              trj(4,ntrac)=tt
+              trj(5,ntrac)=subvol
+              nrj(1,ntrac)=ib
+              nrj(2,ntrac)=jb
+              nrj(3,ntrac)=kb
+              nrj(4,ntrac)=niter
+              nrj(5,ntrac)=idint(ts)
+              nrj(7,ntrac)=1
               cycle ntracLoop
            endif
-           nrj(ntrac,7)=0
+           nrj(7,ntrac)=0
            rg=dmod(ts,1.d0) ! time interpolation constant between 0 and 1
            rr=1.d0-rg
-           if(rg.lt.0.d0 .or.rg.gt.1.d0) then
+           if(rg < 0.d0 .OR. rg > 1.d0) then
               print *,'rg=',rg
               exit intsTimeLoop
            endif
@@ -379,7 +379,7 @@ SUBROUTINE loop
               print *,ka,kb,z0,z1
               print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
               nerror=nerror+1
-              nrj(ntrac,6)=1
+              nrj(6,ntrac)=1
               cycle ntracLoop
               !stop 4967
            endif
@@ -397,7 +397,7 @@ SUBROUTINE loop
               print *,ka,kb,z0,z1
               print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
               nerror=nerror+1
-              nrj(ntrac,6)=1
+              nrj(6,ntrac)=1
               cycle ntracLoop
            endif
 #endif
@@ -467,7 +467,7 @@ SUBROUTINE loop
 
         nout=nout+1
         call writedata(17)
-        nrj(ntrac,6)=1
+        nrj(6,ntrac)=1
      end do ntracLoop
      
 #ifdef sediment
@@ -488,6 +488,7 @@ SUBROUTINE loop
   
    IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND.                &
    &   seedTime /= 2) THEN
+      PRINT*,' All trajectories finished '
       EXIT intsTimeLoop
    END IF
   
@@ -604,7 +605,7 @@ return
              errCode = -39
              if (strict==1) stop 40961
              call writedata(40)
-             nrj(ntrac,6)=1
+             nrj(6,ntrac)=1
           endif          
 
        case ('boundError')
@@ -629,7 +630,7 @@ return
              errCode = -50
              if (strict==1) stop
              call writedata(40)
-             nrj(ntrac,6)=1
+             nrj(6,ntrac)=1
           endif
 
        case ('landError')
@@ -657,7 +658,7 @@ return
              landError = landError +1
              errCode = -40             
              call writedata(40)
-             nrj(ntrac,6)=1
+             nrj(6,ntrac)=1
              if (strict==1) stop 
           endif
           case ('coordboxError')
@@ -702,14 +703,14 @@ return
              stop
           end if
        case ('infLoopError')
-          if(niter-nrj(ntrac,4).gt.30000) then ! break infinite loops
+          if(niter-nrj(4,ntrac).gt.30000) then ! break infinite loops
              nloop=nloop+1             
 !             nerror=nerror+1
              if (verbose == 1) then
                 print *, thickline !========================================
                 print *,'Warning: Particle in infinite loop '
                 print *,'ntrac:',ntrac
-                print *,'niter:',niter,'nrj:',nrj(ntrac,4)
+                print *,'niter:',niter,'nrj:',nrj(4,ntrac)
                 print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
                 print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
                 print *,'ia=',ia,' ib=',ib,' ja=',ja,' jb=',jb, & 
@@ -726,18 +727,18 @@ return
                      rb*vflux(ia,ja-1,ka,nsm))*ff
                 print *, thinline !-----------------------------------------
              end if
-             trj(ntrac,1)=x1
-             trj(ntrac,2)=y1
-             trj(ntrac,3)=z1
-             trj(ntrac,4)=tt
-             trj(ntrac,5)=subvol
-             nrj(ntrac,1)=ib
-             nrj(ntrac,2)=jb
-             nrj(ntrac,3)=kb
-             nrj(ntrac,4)=niter
-             nrj(ntrac,5)=idint(ts)
-             nrj(ntrac,6)=0  ! 0=continue trajectory, 1=end trajectory
-             nrj(ntrac,7)=1
+             trj(1,ntrac)=x1
+             trj(2,ntrac)=y1
+             trj(3,ntrac)=z1
+             trj(4,ntrac)=tt
+             trj(5,ntrac)=subvol
+             nrj(1,ntrac)=ib
+             nrj(2,ntrac)=jb
+             nrj(3,ntrac)=kb
+             nrj(4,ntrac)=niter
+             nrj(5,ntrac)=idint(ts)
+             nrj(6,ntrac)=0  ! 0=continue trajectory, 1=end trajectory
+             nrj(7,ntrac)=1
              errCode = -48
           end if
        case ('bottomError')
@@ -756,7 +757,7 @@ return
               call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
-              nrj(ntrac,6)=1
+              nrj(6,ntrac)=1
  !             stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
@@ -832,7 +833,7 @@ return
                  print *, thickline !========================================
               end if
               nerror=nerror+1
-              nrj(ntrac,6)=1
+              nrj(6,ntrac)=1
               errCode = -56
            end if
         case ('longjump')
