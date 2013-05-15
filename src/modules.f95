@@ -377,6 +377,7 @@ MODULE mod_traj
   REAL*8                                     :: x0, y0, z0
   REAL*8                                     :: x1, y1, z1
   REAL                                       :: temp, salt, dens
+  REAL*8                                     :: rlon,rlat
 ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
