@@ -9,16 +9,16 @@
    fl05   = -Dmonthly       # Monthly GCM data
    fl06   = -Dseasonal      # More than two data sets in the central memory 
 #------------------------------------------------------------------------
-   fl07   = -Dtempsalt      # Include temp and salt
+#   fl07   = -Dtempsalt      # Include temp and salt
    fl08   = -Dtextwrite     # Write results to textfile
 #  fl09   = -Dbinwrite      # Write results to binaryfile
 #  fl10   = -Dmysqlwrite    # Write results to mysql
 #------------------------------------------------------------------------
-   fl11  = -Dstreamxy       # Calculates the barotropic stream function.
-   fl12  = -Dstreamr        #    vertical stream function, z=density
-   fl13  = -Dstreamts       #    vertical stream function, z=temp&salt
-   fl14  = -Dstreamv        #    vertical stream function, z=depth
-   fl15  = -Dstream_thermohaline        #    psi(T,S)
+#   fl11  = -Dstreamxy       # Calculates the barotropic stream function.
+#   fl12  = -Dstreamr        #    vertical stream function, z=density
+#   fl13  = -Dstreamts       #    vertical stream function, z=temp&salt
+#   fl14  = -Dstreamv        #    vertical stream function, z=depth
+#   fl15  = -Dstream_thermohaline        #    psi(T,S)
 #   fl16  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    

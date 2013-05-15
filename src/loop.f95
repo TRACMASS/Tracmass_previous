@@ -441,9 +441,9 @@ SUBROUTINE loop
               endif
            enddo LBTLOOP
 
-#ifndef tes
-           if (x1 < 1) exit niterloop
-#endif
+!#ifndef tes  ! why was this included before?????
+!           if (x1 < 1) exit niterloop
+!#endif
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
@@ -891,14 +891,15 @@ return
        print *,'=========================================================='
        print *,'ERROR: Negative box volume                                '
        print *,'----------------------------------------------------------'
-       print *,'dzt  = ', dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
+       print *,'dzt  = ', dxyz,dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
        print *,'dxdy = ', dxdy(ib,jb)
-       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
+       print *,'hs = ', rg,hs(ib,jb,nsp),rr,hs(ib,jb,nsm)
+       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb,' nsp/nsm  = ', nsp,nsm
        print *,'----------------------------------------------------------'
        print *,'The run is terminated'
        print *,'=========================================================='
        errCode = -60
-       !stop
+       stop
     end if
   end subroutine calc_dxyz
 

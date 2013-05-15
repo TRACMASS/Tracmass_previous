@@ -23,7 +23,7 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=10000/               ! Maximum number of trajectories allowed
+  NTRACMAX=4415040/               ! Maximum number of trajectories allowed
   !
   !
 $INITGRIDTIME
@@ -36,15 +36,15 @@ $INITGRIDTIME
   !
 $INITGRIDDATE
   !
-  yearmin        = 1200,
-  yearmax        = 1203,
+  yearmin        = 2006,
+  yearmax        = 2009,
   ! === Reference basetime for the velocity field.
   baseSec        = 0,
   baseMin        = 0,
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 1200/
+  baseYear       = 2006/
   !
 $INITGRIDARC
    arcscale      = 0.00001/       ! scaling factor for length output in the orig arc m -> 100 km  

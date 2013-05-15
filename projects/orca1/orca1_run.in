@@ -1,5 +1,5 @@
 &INITRUNDESC
-  caseName     = 'ORCA025-SMB01',
+  caseName     = 'xxx',
   caseDesc     = 'Global Ocean trajectories'
 /
 &INITRUNGRID
@@ -32,7 +32,7 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  =    1,
-  intspin =   48,  
+  intspin =    1,  
   intrun  =120000,         ! = 73*24
   intstep = 0
 /
@@ -74,7 +74,7 @@
   kriva           = 1,
   inDataDir='/Users/doos/data/orca/orca1/'
   outDataDir='/Users/doos/data/orca/orca1/data_out/'
-  outDataFile     = 'cb_bering1'
+  outDataFile     = 'salt_tracer'
   intminInOutFile = 0
   /
   !
@@ -116,16 +116,16 @@ $INITRUNSEED
   ! -1 indicates max value in grid.
   !
   nff         = 1,
-  isec        = 2,
-  idir        = 1,
+  isec        = 4,
+  idir        = 0,
   nqua        = 1,
   partQuant   = 1,
   seedType    = 1,
-  ist1        = 110,! AtlEq=220; Ber=110
-  ist2        = 120,! AtlEq=305; Ber=120
-  jst1        = 246,! AtlEq=147; Ber=
-  jst2        = 246,! AtlEq=147; Ber=
-  kst1        =   1,
+  ist1        = 1,! AtlEq=220; Ber=110
+  ist2        = 360,! AtlEq=305; Ber=120
+  jst1        = 1,! AtlEq=147; Ber=
+  jst2        = 292,! AtlEq=147; Ber=
+  kst1        =  42,
   kst2        =  42,
   varSeedFile = 0,
   seedDir     = ' ',
@@ -203,10 +203,16 @@ $INITRUNSEDIMENT
 !    jenn =  147,    1,    1,  
 !    timax = 36500000./ ! 100 millennia
 ! Bering Straight
-    ienw =  110,    1,    1,    
-    iene =  120,    1,    1,   
-    jens =  246,    1,    1,      
-    jenn =  246,    1,    1,  
+!    ienw =  110,    1,    1,    
+!    iene =  120,    1,    1,   
+!    jens =  246,    1,    1,      
+!    jenn =  246,    1,    1,  
+!    timax = 36500000./ ! 100 millennia
+! No end section
+    ienw =  1,    1,    1,    
+    iene =  1,    1,    1,   
+    jens =  1,    1,    1,      
+    jenn =  1,    1,    1,  
     timax = 36500000./ ! 100 millennia
      
     

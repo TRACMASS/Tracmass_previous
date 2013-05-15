@@ -74,7 +74,7 @@ SUBROUTINE init_seed()
       PRINT *,'    jst          : ', jst1,jst2
       PRINT *,'    kst          : ', kst1,kst2
       PRINT *,'    Cells seeded : ', nsdMax
-  
+      if(nsdMax==0) stop 7272
    
    CASE (2)      ! Seed particles according to indices given in a list
    

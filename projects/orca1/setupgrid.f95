@@ -158,6 +158,13 @@ SUBROUTINE setupgrid
   if(ierr.ne.0) stop 3767
   ierr=NF90_GET_VAR(ncid,varid,kmt,start2d,count2d)
   
+  ! exclude Caspian Sea
+  do i=330,350
+   do j=200,240
+    kmt(i,j)=0
+   enddo
+  enddo
+  
   ! === Read and compute the depth of the bottom T point ===
   allocate (  botbox(IMT,JMT,3) )
   allocate( temp3d_doub(IMT,JMT,KM) )
@@ -231,11 +238,12 @@ SUBROUTINE setupgrid
 
   ierr=NF90_CLOSE(ncid)
 
-
+mask=1
   ! Bottom box 
   do j=1,JMT
     do i=1,IMT
       if(kmt(i,j).ne.0) then
+       mask(i,j)=1
         dztb(i,j,1)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
         if(botbox(i+subGridImin-1,j+subGridJmin-1,3).eq.0.) then
           print *,i,j,kmt(i,j),botbox(i+subGridImin-1,j+subGridJmin-1,3)

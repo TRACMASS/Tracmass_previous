@@ -87,7 +87,6 @@ initFieldcond: if(ints==intstart) then
  
 #ifdef seasonal
   nsp=0
-  print *,'nff ggr denna',12/NST
   if(ngcm/=365*24/min(12,NST)) stop 7777
 #else
   nsp=2 ; nsm=1
@@ -109,6 +108,7 @@ else ! i.e. when ints/=intstart
   if(currMon > 12) then
    currMon=currMon-12
    currYear=currYear+1
+   if(currYear==yearmax+1) currYear=yearmin
   elseif(currMon < 1) then
    currMon=currMon+12
    currYear=currYear-1
@@ -133,7 +133,7 @@ else ! i.e. when ints/=intstart
    if(currMon == 13) then
     currMon=1
     currYear=currYear+1
-    if(currYear.eq.yearmax+1) currYear=yearmin
+    if(currYear==yearmax+1) currYear=yearmin
    endif
   elseif(currDay <=0) then
    currMon=currMon-1
@@ -173,16 +173,20 @@ ntime=100*currYear+currMon
 
 nread=CurrMon
 
+ !print *,'nsm=',nsm,' nsp=',nsp,' ints=',ints
+
+
 ! === Find the file for this timestep ===
 start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
 start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
   
 dataprefix='ORCA1-MSP1_MM_xxxx0101_xxxx1231_grid_'
+dataprefix='ORCA1-SS21_MM_xxxx0101_xxxx1231_grid_'
 
 write(dataprefix(15:18),'(i4)') currYear
 write(dataprefix(24:27),'(i4)') currYear
 
-fieldFile = trim(inDataDir)//'fields/msp1/'//trim(dataprefix)
+fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
 
 !print *,nread, fieldFile
 
