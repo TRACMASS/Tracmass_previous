@@ -115,8 +115,10 @@ SUBROUTINE loop
 #elif defined ifs
   if(rlat == dble(jenn(1))) then
      nrj(8,ntrac)=1    ! Southern boundary
+     i = i + 1
   elseif(rlat == dble(jens(2))) then
-     nrj(8,ntrac)=2    ! Northern boundary 
+     nrj(8,ntrac)=2    ! Northern boundary
+     j = j + 1 
   else
      nrj(8,ntrac)=0
      print 566,ntrac,niter,rlon,rlat,zz
@@ -159,8 +161,8 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  intsTimeLoop: do ints=intstart+1,intstart+intrun
-!  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
+!  intsTimeLoop: do ints=intstart+1,intstart+intrun
+  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
@@ -176,8 +178,8 @@ SUBROUTINE loop
       call writetracer
      endif
 
-!    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
-    intspinCond: if(ints <= intstart+intspin) then
+    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+!    intspinCond: if(ints <= intstart+intspin) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)
         call fancyTimer('seeding','stop')

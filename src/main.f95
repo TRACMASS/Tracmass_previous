@@ -25,11 +25,13 @@ PROGRAM main
   modrundirCond: if(intstep.gt.0) then ! forward 
      intstart =  intmin          
      intend   =  intmax
+     nff      =  1
   elseif(intstep.lt.0) then ! backward
      intstart =  intmin+intrun
      intend   =  intmin
      intspin  = -intspin
-     intrun   = -intrun    
+     intrun   = -intrun
+     nff      =  -1    
   end if modrundirCond
  
  call setupgrid
