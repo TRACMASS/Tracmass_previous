@@ -36,7 +36,7 @@ SUBROUTINE loop
   IMPLICIT none
 
   ! === Loop variables ===
-  INTEGER                                    :: i,  j,  k, l, m
+  INTEGER                                    :: i,  j,  k, l, m, n
   INTEGER                                    :: nrh0=0
   ! === Variables to interpolate fields ===
  ! REAL                                       :: temp, salt, dens
@@ -45,7 +45,11 @@ SUBROUTINE loop
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
-
+  
+  INTEGER, DIMENSION(LBT)                    ::  dist
+  
+  dist = 0
+  
   print *,'------------------------------------------------------'  
   print *,'Files written in directory                  :  ' ,trim(outDataDir)
   print *,'with file names starting with               :  ' ,trim(outDataFile)
@@ -113,28 +117,41 @@ SUBROUTINE loop
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 
 #elif defined ifs
-  if(rlat == dble(jenn(1))) then
-     nrj(8,ntrac)=1    ! Southern boundary
-     i = i + 1
-  elseif(rlat == dble(jens(2))) then
-     nrj(8,ntrac)=2    ! Northern boundary
-     j = j + 1 
-  else
-     nrj(8,ntrac)=0
+  lbasLoop: do n=1,LBT
+     if( dble(ienw(n)) <= rlon .and. rlon <= dble(iene(n)) .and. &
+         dble(jens(n)) <= rlat .and. rlat <= dble(jenn(n))  ) then
+        
+        nrj(8,ntrac) = n
+        
+        dist(n) = dist(n) + 1
+        
+        cycle lbasLoop
+        
+     endif
+  enddo lbasLoop
+  
+  if( nrj(8,ntrac) == 0 ) then
      print 566,ntrac,niter,rlon,rlat,zz
      stop 4957
-  endif /*orc*/
+  endif
+  
 566 format(i8,i7,2f8.2,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #endif
  
   goto 40
 41 continue
+#ifdef ifs
+  print *,'Lagrangian decomposition distribution in %: '
+  do n=1,LBT
+     PRINT*,100.*float(dist(n))/float(sum(dist))
+  enddo
+#else
   m=i+j+k+l
   print *,'Lagrangian decomposition distribution in %: ',     &
   100.*float(i)/float(i+j+k+l),100.*float(j)/float(i+j+k+l),  &
   100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
-
+#endif
   do ntrac=1,ntracmax ! eliminate the unwanted trajectories
    if(nrj(8,ntrac) == 0) nrj(6,ntrac)=1 
   enddo
