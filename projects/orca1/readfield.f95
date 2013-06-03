@@ -225,10 +225,13 @@ do j=1,JMT
  enddo
 enddo 
 
-do i=4,IMT
- ii=IMT+4-i
- hs(i,JMT+1,nsp)=hs(ii,JMT-3,nsp)  !  north fold 
-enddo
+
+!print *, hs(:,JMT+1,nsp)
+!stop 4057
+!do i=4,IMT
+! ii=IMT+4-i
+! hs(i,JMT+1,nsp)=hs(ii,JMT-3,nsp)  !  north fold 
+!enddo
 
 #ifdef tempsalt 
 ! Temperature

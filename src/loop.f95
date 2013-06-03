@@ -386,21 +386,31 @@ SUBROUTINE loop
            ! === north fold cyclic for the ORCA grids ===
 #if defined orc || orca1 || orca12 
             if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+  !            print *,'v',(rbg*vflux(ia,ja,ka,nsp) + rb*vflux(ia,ja,ka,nsm))*ff
               x1 = dble(IMT+2) - x1
               ib=idint(x1)+1
               jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
- !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
+ !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1
+  !            print *,'v',(rbg*vflux(ia,jb,ka,nsp) + rb*vflux(ia,jb,ka,nsm))*ff
            elseif(y1 > dble(JMT-1)) then
-              print *,'north of northfold for ntrac=',ntrac
-              print *,ia,ib,x0,x1
-              print *,ja,jb,y0,y1
-              print *,ka,kb,z0,z1
-              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-              nerror=nerror+1
-              nrj(6,ntrac)=1
-              cycle ntracLoop
-              !stop 4967
+             print *,'north of northfold for ntrac=',ntrac
+             x1 = dble(IMT+2) - x1
+             ib=idint(x1)+1
+             jb=JMT-1
+             y1= dble(JMT-1) -y1 + dble(JMT-1)
+             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+
+!              print *,ia,ib,x0,x1
+!              print *,ja,jb,y0,y1
+!              print *,ka,kb,z0,z1
+!              print *,kmt(ia,ja),kmt(ib,jb)
+!              print *,'v',(rbg*vflux(ia,ja  ,ka,nsp) + rb*vflux(ia,ja  ,ka,nsm))*ff
+!              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+!              nerror=nerror+1
+!              nrj(6,ntrac)=1
+!              stop 4967
+!              cycle ntracLoop
            endif
 #elif defined orca025 || orca025L75
            if( y1 == dble(JMT-1) ) then
@@ -504,7 +514,8 @@ SUBROUTINE loop
      print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot 
 799  format('timestep=',i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10)
 #endif
-  
+ call flush
+
    IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND.                &
    &   seedTime /= 2) THEN
       PRINT*,' All trajectories finished '
@@ -570,7 +581,7 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verbose = 0
+       INTEGER                             :: verbose = 1
        INTEGER                             :: strict  = 0
        INTEGER                             :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0

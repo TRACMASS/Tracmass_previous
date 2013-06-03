@@ -133,8 +133,9 @@ CONTAINS
                IF (KM+1-kmt(iist,ijst) > kb) THEN
                   CYCLE startLoop
                ELSE
-                  vol = uflux (ib, jb, kb,nsm) + uflux (ibm, jb  , kb,nsm) + & 
-                  &     vflux (ib, jb, kb,nsm) + vflux (ib , jb-1, kb,nsm)
+!                  vol = uflux (ib, jb, kb,nsm) + uflux (ibm, jb  , kb,nsm) + & 
+!                  &     vflux (ib, jb, kb,nsm) + vflux (ib , jb-1, kb,nsm)
+                  vol = 1.  ! This is a quick fix so the code continues ??????????
                ENDIF
                IF (vol == 0.d0) cycle startLoop
          
@@ -148,7 +149,6 @@ CONTAINS
          ! Volume/mass transport needs to be positive   
          vol = ABS (vol)
       
-        
          ! Calculate transport of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
 #ifdef zgrid3Dt
@@ -167,8 +167,9 @@ CONTAINS
             IF (kb == KM) THEN
                vol = vol+hs(ib,jb,nsm)
             END IF
-            vol = vol*dxdy(ib,jb)
+            vol = vol*dxdy(ib,jb)*1.e-6  ! volume in millions of m3
 #endif /*freesurface*/
+
          END IF
           
          ! Number of trajectories for box (iist,ijst,ikst)
@@ -186,11 +187,10 @@ CONTAINS
          IF (num == 0 .AND. nqua /= 4) THEN
             num=1
          END IF
-     
          ijt    = NINT (SQRT (FLOAT(num)) ) 
          ikt    = NINT (FLOAT (num) / FLOAT (ijt))
          subvol = vol / DBLE (ijt*ikt)
-     
+
          IF (subvol == 0.d0) THEN
             PRINT*,' Transport of particle is zero!!!'
             PRINT*,' vol =',vol

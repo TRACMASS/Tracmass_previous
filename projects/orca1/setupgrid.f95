@@ -230,11 +230,18 @@ SUBROUTINE setupgrid
   enddo
 
   !  north fold (probably unnecessary)
-  do i=4,IMT
-    ii=IMT+4-i
-    kmv(i,JMT)=kmv(ii,JMT-3)
-    botbox(i,JMT,2)=botbox(ii,JMT-3,2)
-  enddo
+!  do i=4,IMT
+!    ii=IMT+4-i
+!    kmv(i,JMT)=kmv(ii,JMT-3)
+!    botbox(i,JMT,2)=botbox(ii,JMT-3,2)
+!  enddo
+
+! check the north fold border fits
+!do i=3,IMT
+!ii=IMT+3-i
+!print *,kmv(i,JMT-1),kmv(ii,JMT-1),kmv(i,JMT-1)-kmv(ii,JMT-1)
+!enddo
+!stop 3957
 
   ierr=NF90_CLOSE(ncid)
 
@@ -264,13 +271,19 @@ mask=1
 !  currYear = startYear 
   
   
-!open(21,file=trim(inDataDir)//'topo/longlat',form='unformatted')
-!write(21) long
-!write(21) lat
-!write(21) kmt
-!write(21) kmu
-!write(21) kmv
-!close(21)
+open(21,file=trim(inDataDir)//'topo/longlat',form='unformatted')
+write(21) long
+write(21) lat
+write(21) kmt
+write(21) kmu
+write(21) kmv
+write(21) dxdy
+!write(21) e1t
+!write(21) e2t
+write(21) botbox
+close(21)
+print *,dxdy
+stop 4596
 
 !kmt(220:305,147)=1 ! Find the Equator in the Atlantic
 !kmt(110:120,246)=1 ! Find Bering Straight

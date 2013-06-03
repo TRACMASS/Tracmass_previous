@@ -71,10 +71,10 @@
   ! intminInOutFile : ??????????????????????????????????????????
   !
   ncoor           = 0,
-  kriva           = 1,
-  inDataDir='/Users/doos/data/orca/orca1/'
-  outDataDir='/Users/doos/data/orca/orca1/data_out/'
-  outDataFile     = 'salt_tracer'
+  kriva           = 5,
+  inDataDir=   '/Users/doos/data/orca/orca1/'
+  outDataDir=  '/Users/doos/data/orca/orca1/data_out/'
+  outDataFile= 'salt_tracer_surf2'
   intminInOutFile = 0
   /
   !
@@ -118,14 +118,14 @@ $INITRUNSEED
   nff         = 1,
   isec        = 4,
   idir        = 0,
-  nqua        = 1,
-  partQuant   = 1,
+  nqua        = 3,
+  partQuant   = 99999999999999,
   seedType    = 1,
-  ist1        = 1,! AtlEq=220; Ber=110
-  ist2        = 360,! AtlEq=305; Ber=120
-  jst1        = 1,! AtlEq=147; Ber=
-  jst2        = 292,! AtlEq=147; Ber=
-  kst1        =  42,
+  ist1        = 1, !1,! AtlEq=220; Ber=110
+  ist2        = 360, !360,! AtlEq=305; Ber=120
+  jst1        =   1,! AtlEq=147; Ber=
+  jst2        = 288,! AtlEq=147; Ber=
+  kst1        =   1,
   kst2        =  42,
   varSeedFile = 0,
   seedDir     = ' ',

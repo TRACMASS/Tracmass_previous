@@ -60,7 +60,7 @@
             (kriva == 3                                 ) .or. &
             (kriva == 4 .AND. niter == 1                ) .or. &
             (kriva == 5 .AND.                                  &
-          &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
+          &  MOD((REAL(tt)-REAL(t0)), 10.*365.*tday) == 0.d0     ) .or. &
             (kriva == 6 .AND. .not.scrivi               )        ) then
 #if defined tempsalt
            call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 

@@ -33,7 +33,7 @@ write(54) psi_ts
 close(54)
 #endif
 
-print *,'stream functions written'
+!print *,'stream functions written'
 
 return
 end subroutine writepsi
