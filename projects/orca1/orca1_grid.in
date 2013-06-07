@@ -23,15 +23,15 @@ $INITGRIDGRID
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=2176805/               ! Maximum number of trajectories allowed
+  NTRACMAX=17147343/               ! Maximum number of trajectories allowed
   !
   !
 $INITGRIDTIME
   !
   ngcm          =  730,          ! 6,5*24,365*24/12=730,365*24/2=4380 hours between GCM datasets
   iter          =   20,          ! iteration between two gcm data sets
-  intmax        =    12,          ! maximum length of GCM fields
-  fieldsPerFile =    12 / ! 1460 1,2920
+  intmax        =   12,          ! maximum length of GCM fields
+  fieldsPerFile =   12 / ! 1460 1,2920
   !
   !
 $INITGRIDDATE

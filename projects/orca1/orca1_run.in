@@ -119,13 +119,13 @@ $INITRUNSEED
   isec        = 4,
   idir        = 0,
   nqua        = 3,
-  partQuant   = 99999999999999,
+  partQuant   = 2.d4,
   seedType    = 1,
   ist1        = 1, !1,! AtlEq=220; Ber=110
   ist2        = 360, !360,! AtlEq=305; Ber=120
   jst1        =   1,! AtlEq=147; Ber=
   jst2        = 288,! AtlEq=147; Ber=
-  kst1        =   1,
+  kst1        =  17,
   kst2        =  42,
   varSeedFile = 0,
   seedDir     = ' ',

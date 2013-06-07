@@ -129,7 +129,7 @@ CONTAINS
                vol=wflux(kb,nsm)
 #endif
          
-            CASE (4 ,5)   ! Total volume/mass transport through grid box
+            CASE (4 ,5)   ! Total volume/mass of a grid box
                IF (KM+1-kmt(iist,ijst) > kb) THEN
                   CYCLE startLoop
                ELSE
@@ -149,7 +149,7 @@ CONTAINS
          ! Volume/mass transport needs to be positive   
          vol = ABS (vol)
       
-         ! Calculate transport of each individual trajectory
+         ! Calculate volume/mass of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
 #ifdef zgrid3Dt
             vol = dzt(ib,jb,kb,1)

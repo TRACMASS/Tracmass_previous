@@ -68,7 +68,11 @@
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
+#if defined tempsalt
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+#else
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
+#endif        
 #endif        
        endif
     case (13)

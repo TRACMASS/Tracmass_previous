@@ -61,7 +61,7 @@ SUBROUTINE loop
 999 format(' intstart :',i7,'   intspin :',i7, &
          /,'   intrun :',i7,'   intend  :',i7, &
          /,'      nff :',i2,' isec :',i2,'  idir :',i2,' nqua=',i2,' num=',i7,&
-         /,'    voltr : ',f9.0,&
+         /,'    voltr : ',e12.4,&
          /,'    tmin0 : ',f7.2,'  tmax0 : ',f7.2, &
          /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)

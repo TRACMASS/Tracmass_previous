@@ -26,16 +26,17 @@ SUBROUTINE readfields
   INTEGER                                 :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
   INTEGER                                 :: kbot,ktop
   INTEGER, SAVE                           :: nread,npremier,ndernier
-  INTEGER, SAVE                           :: ncidt,ncidu,ncidv,varidt,varidu,varidv
+  INTEGER, SAVE                           :: ncidt,ncidu,ncidv
+  INTEGER, SAVE                           :: varidt,varidu,varidue,varidv,varidve
 
   ! = Variables used for getfield procedures
 
  ! INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=75
 
   REAL*4, ALLOCATABLE, DIMENSION(:,:)        :: temp2d_simp
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_simp
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_simp,temp3d_eddy
 
-  REAL*4 						             :: dd,dmult,uint,vint,zint
+  REAL*4 						             :: dd,uint,vint,zint
   
 #ifdef tempsalt
  REAL*4, ALLOCATABLE, DIMENSION(:) :: tempb, saltb, rhob, depthb,latb
@@ -49,7 +50,7 @@ SUBROUTINE readfields
 
 
  alloCondUVW: if(.not. allocated (temp2d_simp)) then
-   allocate ( temp3d_simp(IMT,JMT,KM), temp2d_simp(IMT,JMT)  )
+   allocate ( temp3d_simp(IMT,JMT,KM), temp3d_eddy(IMT,JMT,KM), temp2d_simp(IMT,JMT)  )
 #ifdef tempsalt
    allocate ( tempb(KM), saltb(KM), rhob(KM), depthb(KM), latb(KM))
 #endif
@@ -291,7 +292,6 @@ enddo
 
 #endif     
 
-dmult=1.  ! amplification of the velocity amplitude by simple multiplication
 if(nread.eq.npremier) then
  ! u velocity
  gridFileU=trim(fieldFile)//'U.nc'
@@ -304,14 +304,22 @@ if(nread.eq.npremier) then
  ierr=NF90_OPEN(trim(gridFileU),NF90_NOWRITE,ncidu)
  if(ierr.ne.0) stop 5753
 endif
-
+! u mean
 ierr=NF90_INQ_VARID(ncidu,'vozocrtx',varidu) 
 if(ierr.ne.0) stop 3771
 ierr=NF90_GET_VAR(ncidu,varidu,temp3d_simp,start3d,count3d)
+if(ierr.ne.0) stop 3798
+! u eddy
+ierr=NF90_INQ_VARID(ncidu,'vozoeivu',varidue) 
+if(ierr.ne.0) stop 3772
+ierr=NF90_GET_VAR(ncidu,varidue,temp3d_eddy,start3d,count3d)
 if(ierr.ne.0) stop 3799
+
 if(nread==ndernier) then
 ierr=NF90_CLOSE(ncidu)
+if(ierr.ne.0) stop 6464
 endif
+
 
 do i=1,IMT
  do j=1,JMT
@@ -320,7 +328,7 @@ do i=1,IMT
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i+1,j,nsp))
    if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
-   uflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
+   uflux(i,j,kk,nsp)=(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dyu(i,j) * dd 
   enddo
  enddo
 enddo
@@ -335,23 +343,25 @@ if(.not.around) then
  CALL system(zfile)
  gridFileV='tmpV'
 endif
-
 ierr=NF90_OPEN(trim(gridFileV),NF90_NOWRITE,ncidv)
 if(ierr.ne.0) stop 5754
 endif
-ierr=NF90_INQ_VARID(ncidv,'vomecrty',varidv) ! kmt field
+!v mean
+ierr=NF90_INQ_VARID(ncidv,'vomecrty',varidv) 
 if(ierr.ne.0) stop 3770
 ierr=NF90_GET_VAR(ncidv,varidv,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
+! v eddy
+ierr=NF90_INQ_VARID(ncidv,'vomeeivv',varidve) 
+if(ierr.ne.0) stop 3773
+ierr=NF90_GET_VAR(ncidv,varidve,temp3d_eddy,start3d,count3d)
+if(ierr.ne.0) stop 3799
+
 if(nread==ndernier) then
 ierr=NF90_CLOSE(ncidv)
+if(ierr.ne.0) stop 6465
 endif
 
-!  north fold 
-!do i=4,IMT
-! ii=IMT+4-i
-! vflux(i,JMT,:,nsp)=-vflux(ii,JMT-3,:,nsp)
-!enddo
 
 do i=1,IMT
  do j=1,JMT
@@ -360,7 +370,7 @@ do i=1,IMT
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i,j+1,nsp))
    if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
-   vflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
+   vflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dxv(i,j) * dd 
   enddo
  enddo
 enddo
