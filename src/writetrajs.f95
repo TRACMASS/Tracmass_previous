@@ -2,6 +2,7 @@
 module mod_write
 
   USE mod_time, only: intstart,ints
+  USE mod_name, only: casename, case
 
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
