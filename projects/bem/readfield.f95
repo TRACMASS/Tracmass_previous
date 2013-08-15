@@ -39,16 +39,16 @@ SUBROUTINE readfields
   call updateClock
 
   dataprefix  =  trim(indatadir)//"ecom.cdf"
-  nctpos = ints-17533082+1
+  nctpos = ints-17568146+1
 
   uvel = get3DfieldNC(trim(dataprefix) ,   'u') * 9.155553e-05
   vvel = get3DfieldNC(trim(dataprefix) ,   'v') * 9.155553e-05
   !wvel = get3DfieldNC(trim(dataprefix) ,   'w')
-  ssh  = get2dfieldNC(trim(dataprefix) ,'elev') * 0.000122074
+  ssh  = get2dfieldNC(trim(dataprefix) , 'elev') * 0.000122074
   stoz = get1DfieldNC (trim(dataprefix), 'sigma')
 
-uvel(1:imt-1, :, :) = uvel(2:imt ,:, :)
-vvel(:, 1:jmt-1, :) = vvel(:, 2:jmt, :)
+  uvel(1:imt-1, :, :) = uvel(2:imt ,:, :)
+  vvel(:, 1:jmt-1, :) = vvel(:, 2:jmt, :)
 
   do k=1,km
      dzt(:,:,k) = (ssh + depth) * stoz(km-k+1)
