@@ -40,7 +40,6 @@ SUBROUTINE init_params
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
-   CHARACTER (LEN=23)                         ::  Project, Case
    CHARACTER (LEN=200)                        ::  projdir, ormdir
 
    real*8                                     :: jd
@@ -99,7 +98,7 @@ SUBROUTINE init_params
    
    Project  = PROJECT_NAME
    Case     = CASE_NAME
-   
+
    IF ((IARGC() > 0) )  THEN
       CALL getarg(1,Case)
    END IF
@@ -169,102 +168,107 @@ SUBROUTINE init_params
       PRINT *,'subGrid = ' ,subGrid
       STOP
    END SELECT
-         start1d  = [subGridKmin]
-         count1d  = [subGridKmax]
-         start2d  = [1,  1 ,subGridImin ,subGridJmin]
-         count2d  = [1,  1 ,imt,         jmt        ]
-         start3d  = [1, subGridImin, subGridJmin, subGridKmin]
-         count3d  = [1, imt,         jmt,         km         ]
-         READ (8,nml=INITRUNTIME)
-         READ (8,nml=INITRUNDATE)
-         READ (8,nml=INITRUNWRITE)  
-         READ (8,nml=INITRUNSEED)
+   start1d  = [subGridKmin]
+   count1d  = [subGridKmax]
+   start2d  = [1,  1 ,subGridImin ,subGridJmin]
+   count2d  = [1,  1 ,imt,         jmt        ]
+   start3d  = [1, subGridImin, subGridJmin, subGridKmin]
+   count3d  = [1, imt,         jmt,         km         ]
+   READ (8,nml=INITRUNTIME)
+   READ (8,nml=INITRUNDATE)
+   READ (8,nml=INITRUNWRITE)  
+   
+
+
+   READ (8,nml=INITRUNSEED)
 #ifdef tempsalt
-         READ (8,nml=INITRUNTEMPSALT)
+   READ (8,nml=INITRUNTEMPSALT)
 #endif
 #if defined diffusion || turb 
-         READ (8,nml=INITRUNDIFFUSION)
+   READ (8,nml=INITRUNDIFFUSION)
 #endif
 #ifdef sediment
-         READ (8,nml=INITRUNSEDIMENT)
+   READ (8,nml=INITRUNSEDIMENT)
 #endif
-         READ(8,nml=INITRUNEND)
+   READ(8,nml=INITRUNEND)
          
-      CLOSE (8)
+   CLOSE (8)
 
-      IF ((IARGC() > 1) )  THEN
-         ARG_INT1 = 0.1
-         CALL getarg(2,inparg)
-         if ( ARG_INT1 == 0) then
-            read( inparg, '(i15)' ) ARG_INT1
-            write( inargstr1, '(A,i9.9 )' ) '_a',ARG_INT1
-         else
-            read( inparg, '(f15.10)' ) ARG_INT1
-            write( inargstr1, '(A,i9.9 )' ) '_a',int(ARG_INT1)
-         end if         
-      END IF
-
-      IF ((IARGC() > 2) ) THEN
-          ARG_INT2 = 0.1
-         CALL getarg(3,inparg)
-         if ( ARG_INT2 == 0) then
-            read( inparg, '(i15)' ) ARG_INT2
-            write( inargstr2, '(A,i9.9)' ) '_b',ARG_INT2
-         else
-            read( inparg, '(f15.10)' ) ARG_INT2
-            write( inargstr2, '(A,i9.9)' ) '_b',int(ARG_INT2)
-         end if
-      END IF
-    
-      timax    =  24.*3600.*timax ! convert time lengths from days to seconds
-      dstep    =  1.d0/dble(iter)
-      dtmin    =  dstep * tseas
-      baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
-      if (startJD < 1) then
-         startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
-              ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+   IF ((IARGC() > 1) )  THEN
+      ARG_INT1 = 0.1
+      CALL getarg(2,inparg)
+      if ( ARG_INT1 == 0) then
+         read( inparg, '(i15)' ) ARG_INT1
+         write( inargstr1, '(A,i9.9 )' ) '_a',ARG_INT1
+      else
+         read( inparg, '(f15.10)' ) ARG_INT1
+         write( inargstr1, '(A,i9.9 )' ) '_a',int(ARG_INT1)
       end if
-
-      startYearCond: IF (startYear /= 0) THEN
-         IF (ngcm >= 24) THEN 
-            intmin = (startJD)/(real(ngcm)/24.)+1
-         ELSE ! this needs to be verified
-            intmin = (24*startJD)/ngcm+3-ngcm
-         END IF
-      END IF startYearCond
-
-      if (maxvelJD > 0) then
-         minvelints = (minvelJD)/(real(ngcm)/24.)+1
-         maxvelints = (maxvelJD)/(real(ngcm)/24.)+1
-         intmax = maxvelints - intmin
+   END IF
+   
+   IF ((IARGC() > 2) ) THEN
+      ARG_INT2 = 0.1
+      CALL getarg(3,inparg)
+      if ( ARG_INT2 == 0) then
+         read( inparg, '(i15)' ) ARG_INT2
+         write( inargstr2, '(A,i9.9)' ) '_b',ARG_INT2
+      else
+         read( inparg, '(f15.10)' ) ARG_INT2
+         write( inargstr2, '(A,i9.9)' ) '_b',int(ARG_INT2)
       end if
-      call  gdate (baseJD+startJD+intrun*ngcm/24.-2 ,endYear , endMon ,endDay)
+   END IF
+   
+   timax    =  24.*3600.*timax ! convert time lengths from days to seconds
+   dstep    =  1.d0/dble(iter)
+   dtmin    =  dstep * tseas
+   baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
+   if (startJD < 1) then
+      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
+           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+   end if
 
-      tseas= dble(ngcm)*3600.d0
+   startYearCond: IF (startYear /= 0) THEN
+      IF (ngcm >= 24) THEN 
+         intmin = (startJD)/(real(ngcm)/24.)+1
+      ELSE ! this needs to be verified
+         intmin = (24*startJD)/ngcm+3-ngcm
+      END IF
+   END IF startYearCond
 
-      ! --- ist -1 to imt ---
-      IF ( ist1 == -1) THEN 
-         ist1 = IMT
-      END IF
-      IF ( ist2 == -1) THEN 
-         ist2 = IMT
-      END IF
+   if (maxvelJD > 0) then
+      minvelints = (minvelJD)/(real(ngcm)/24.)+1
+      maxvelints = (maxvelJD)/(real(ngcm)/24.)+1
+      intmax = maxvelints - intmin
+   end if
+   call  gdate (baseJD+startJD+intrun*ngcm/24.-2 ,endYear , endMon ,endDay)
+
+   tseas= dble(ngcm)*3600.d0
+
+   ! --- ist -1 to imt ---
+   IF ( ist1 == -1) THEN 
+      ist1 = IMT
+   END IF
+   IF ( ist2 == -1) THEN 
+      ist2 = IMT
+   END IF
       
-      ! --- jst -1 to jmt ---
-      IF ( jst1 == -1) THEN
-         jst1=jmt
-      END IF
-      IF ( jst2 == -1) THEN
-         jst2=jmt
-      END IF
+   ! --- jst -1 to jmt ---
+   IF ( jst1 == -1) THEN
+      jst1=jmt
+   END IF
+   IF ( jst2 == -1) THEN
+      jst2=jmt
+   END IF
     
-      ! --- kst -1 to km ---
-      IF ( kst1 == -1) THEN
-         kst1 = KM
-      END IF
-      IF ( kst2 == -1) THEN 
-         kst2 = KM
-      END IF
+   ! --- kst -1 to km ---
+   IF ( kst1 == -1) THEN
+      kst1 = KM
+   END IF
+   IF ( kst2 == -1) THEN 
+      kst2 = KM
+   END IF
+
+   if (outDataFile == '')  outdataFile = Case
 
 !!---------------------------------------------------------------------------
 !!------------------------ A L L O C A T I O N S ----------------------------
