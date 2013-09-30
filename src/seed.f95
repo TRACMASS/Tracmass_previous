@@ -138,7 +138,6 @@ CONTAINS
                IF (vol == 0.d0) cycle startLoop
          
          END SELECT
-      
          ! If the particle is forced to move in positive/negative direction
          IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0) .OR. (vol == 0.) ) THEN
             CYCLE startLoop
@@ -181,7 +180,6 @@ CONTAINS
             CASE (4)
                num = partQuant
          END SELECT
-         
          IF (num == 0 .AND. nqua /= 4) THEN
             num=1
          END IF
@@ -191,9 +189,11 @@ CONTAINS
          subvol = vol / DBLE (ijt*ikt)
      
          IF (subvol == 0.d0) THEN
-            PRINT*,' Transport of particle is zero!!!'
-            PRINT*,' vol =',vol
-            PRINT*,' subvol =',subvol
+            print *, ' Transport of particle is zero!!!'
+            print *, '    vol :', vol
+            print *, '  uflux :', uflux (ib, jb, kb,nsm)
+            print *, '  vflux :', vflux (ib, jb, kb,nsm)
+            print *, ' subvol : ',subvol
             STOP
          ENDIF
          
@@ -248,7 +248,6 @@ CONTAINS
                   z1 = seed_xyz (jsd,3)
                
                END SELECT
-           
            ! ------------------------------------------------------
            ! --- Check properties of water mass at initial time ---
            ! ------------------------------------------------------ 
