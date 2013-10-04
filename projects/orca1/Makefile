@@ -3,11 +3,12 @@
   INPUT_INT1 = intmin       # Variables set from command line
   INPUT_INT2 = intrun       # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-   fl01   = -Dtimestep      # Time steps with analytical stationary scheme differential Eqs.
+   fl01   = -Dstationary    # Stationary velocity fields with analytical solution
+#  fl01   = -Dtimestep      # Time steps with analytical stationary scheme differential Eqs.
 #  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
-   fl02   = -Dregulardt     # Regular time steps to be used with -Dtimestep
-   fl05   = -Dmonthly       # Monthly GCM data
-   fl06   = -Dseasonal      # More than two data sets in the central memory 
+#  fl02   = -Dregulardt     # Regular time steps to be used with -Dtimestep
+#  fl05   = -Dmonthly       # Monthly GCM data
+#  fl06   = -Dseasonal      # More than two data sets in the central memory 
 #------------------------------------------------------------------------
 #   fl07   = -Dtempsalt      # Include temp and salt
    fl08   = -Dtextwrite     # Write results to textfile

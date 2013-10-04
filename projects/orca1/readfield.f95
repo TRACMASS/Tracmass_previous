@@ -89,6 +89,8 @@ initFieldcond: if(ints==intstart) then
 #ifdef seasonal
   nsp=0
   if(ngcm/=365*24/min(12,NST)) stop 7777
+#elif stationary
+  nsp=1 ; nsm=1 ; degrade_counter = 1
 #else
   nsp=2 ; nsm=1
 #endif
@@ -189,7 +191,11 @@ write(dataprefix(24:27),'(i4)') currYear
 
 fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
 
-!print *,nread, fieldFile
+#if stationary
+fieldFile = trim(inDataDir)//'fields/ORCA1.L64-SSF02_1475-1500_grid_'
+#endif
+
+print *,nread, fieldFile
 
 if(nread==npremier) then
 
@@ -320,15 +326,18 @@ ierr=NF90_CLOSE(ncidu)
 if(ierr.ne.0) stop 6464
 endif
 
-
-do i=1,IMT
+ do i=1,IMT
  do j=1,JMT
   do k=1,kmu(i,j)
    kk=KM+1-k
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i+1,j,nsp))
-   if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
+   if(k.eq.kmu(i,j)) dd = botbox(i,j,1)
    uflux(i,j,kk,nsp)=(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dyu(i,j) * dd 
+   if(uflux(i,j,kk,nsp)==0.) then
+    print *,i,j,k, (temp3d_eddy(i,j,kk),kk=k,KM)
+    stop 4967
+   endif
   enddo
  enddo
 enddo
@@ -362,15 +371,14 @@ ierr=NF90_CLOSE(ncidv)
 if(ierr.ne.0) stop 6465
 endif
 
-
 do i=1,IMT
  do j=1,JMT
   do k=1,kmv(i,j)
    kk=KM+1-k
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i,j+1,nsp))
-   if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
-   vflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dxv(i,j) * dd 
+   if(k.eq.kmv(i,j)) dd = botbox(i,j,2)
+   vflux(i,j,kk,nsp)=(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dxv(i,j) * dd 
   enddo
  enddo
 enddo

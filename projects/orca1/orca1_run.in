@@ -33,8 +33,9 @@
   !
   intmin  =    1,
   intspin =    1,  
-  intrun  =120000,         ! = 73*24
-  intstep = 0
+  intrun  =    1,         ! = 73*24
+  intstep =    0,
+  degrade_time =9999
 /
   !
 &INITRUNDATE
@@ -71,10 +72,10 @@
   ! intminInOutFile : ??????????????????????????????????????????
   !
   ncoor           = 0,
-  kriva           = 5,
+  kriva           = 1,
   inDataDir=   '/Users/doos/data/orca/orca1/'
   outDataDir=  '/Users/doos/data/orca/orca1/data_out/'
-  outDataFile= 'salt_tracer_surf2'
+  outDataFile= 'thermohaline'
   intminInOutFile = 0
   /
   !
@@ -116,17 +117,17 @@ $INITRUNSEED
   ! -1 indicates max value in grid.
   !
   nff         = 1,
-  isec        = 4,
+  isec        = 2,
   idir        = 0,
-  nqua        = 3,
-  partQuant   = 2.d4,
+  nqua        = 1,
+  partQuant   = 1,
   seedType    = 1,
-  ist1        = 1, !1,! AtlEq=220; Ber=110
-  ist2        = 360, !360,! AtlEq=305; Ber=120
-  jst1        =   1,! AtlEq=147; Ber=
-  jst2        = 288,! AtlEq=147; Ber=
-  kst1        =  17,
-  kst2        =  42,
+  ist1        = 220, !1,! AtlEq=220; Ber=110
+  ist2        = 305, !360,! AtlEq=305; Ber=120
+  jst1        = 147,! AtlEq=147; Ber=
+  jst2        = 147,! AtlEq=147; Ber= ; northernmost=288
+  kst1        =   1,
+  kst2        =  64,
   varSeedFile = 0,
   seedDir     = ' ',
   seedFile    = ' '
@@ -213,6 +214,10 @@ $INITRUNSEDIMENT
     iene =  1,    1,    1,   
     jens =  1,    1,    1,      
     jenn =  1,    1,    1,  
-    timax = 36500000./ ! 100 millennia
+    timax = 365250./ ! 1 millenia
+!    timax = 36525./ ! 1 century
+!    timax = 366000./ ! 1 millenia
+!    timax = 3660000./ ! 10 millenia
+!    timax = 36500000./ ! 100 millennia
      
     

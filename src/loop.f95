@@ -356,6 +356,8 @@ SUBROUTINE loop
                 1.d0 - tt/tseas*dble(iter) )
            dt=dtreg
            dsmin=dt/dxyz
+#elif stationary
+           dsmin=UNDEF
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
@@ -375,8 +377,8 @@ SUBROUTINE loop
            call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
            call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
 #endif /*timeanalyt*/
-           ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
-           call errorCheck('dsCrossError', errCode)
+          ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
+          call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call calc_time
            ! === calculate the new positions of the particle ===    
@@ -581,7 +583,7 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verbose = 1
+       INTEGER                             :: verbose = 0
        INTEGER                             :: strict  = 0
        INTEGER                             :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
@@ -733,13 +735,14 @@ return
              stop
           end if
        case ('infLoopError')
-          if(niter-nrj(4,ntrac).gt.30000) then ! break infinite loops
+          if(niter-nrj(4,ntrac) > 30000) then ! break infinite loops
              nloop=nloop+1             
 !             nerror=nerror+1
              if (verbose == 1) then
                 print *, thickline !========================================
                 print *,'Warning: Particle in infinite loop '
                 print *,'ntrac:',ntrac
+                print *,'tt:',tt/tday/365.
                 print *,'niter:',niter,'nrj:',nrj(4,ntrac)
                 print *,'dxdy:',dxdy(ib,jb),'dxyz:',dxyz
                 print *,'kmt:',kmt(ia-1,ja-1),'dz(k):',dz(ka-1)
@@ -757,9 +760,16 @@ return
                      rb*vflux(ia,ja-1,ka,nsm))*ff
                 print *, thinline !-----------------------------------------
              end if
-             trj(1,ntrac)=x1
-             trj(2,ntrac)=y1
-             trj(3,ntrac)=z1
+!             ka=ka-10
+!             kb=ka
+!             ia=ia-1
+!             ia=ib
+!             x1=dble(ib)-0.5d0
+!             y1=dble(jb)-0.5d0
+!             z1=dble(kb)-0.5d0
+             trj(1,ntrac)=x1 !dble(ib)-0.5d0  !x1
+             trj(2,ntrac)=y1 !dble(jb)-0.5d0 ! y1
+             trj(3,ntrac)=z1 !dble(kb)-0.5d0 ! z1
              trj(4,ntrac)=tt
              trj(5,ntrac)=subvol
              nrj(1,ntrac)=ib
@@ -767,7 +777,7 @@ return
              nrj(3,ntrac)=kb
              nrj(4,ntrac)=niter
              nrj(5,ntrac)=idint(ts)
-             nrj(6,ntrac)=0  ! 0=continue trajectory, 1=end trajectory
+             nrj(6,ntrac)=1  ! 0=continue trajectory, 1=end trajectory
              nrj(7,ntrac)=1
              errCode = -48
           end if
@@ -957,6 +967,8 @@ return
            else
             dt = ds * dxyz 
            endif
+#elif stationary
+           dt = ds * dxyz 
 #else
            if(ds == dsmin) then ! transform ds to dt in seconds
               dt=dtmin  ! this makes dt more accurate
@@ -965,9 +977,11 @@ return
            endif
 #endif /*regulardt*/
            if(dt.lt.0.d0) then
-              print *,'dt=',dt
               stop 4968
            endif
+#ifdef stationary
+              tt=tt+dt
+#else
            ! === if time step makes the integration ===
            ! === exceed the time when fields change ===
            if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
@@ -1002,6 +1016,7 @@ return
               endif
 #endif /*regulardt*/
            end if
+#endif /*stationary*/
            ! === time interpolation constant ===
            rbg=dmod(ts,1.d0) 
            rb =1.d0-rbg

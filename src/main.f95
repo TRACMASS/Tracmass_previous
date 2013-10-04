@@ -60,6 +60,11 @@ PROGRAM main
   elseif(nqua.eq.3) then 
      voltr=partQuant
   endif
+
+#if defined stationary
+  iter=1
+#endif
+
   
   writeStamp='00000000'
   write (writeStamp,'(i8.8)') intstart
@@ -121,6 +126,8 @@ CONTAINS
     print *,' - Analytical time scheme used to solve the differential Eqs.'
 #elif defined timestep
     print *,' - Time steps with analytical stationary scheme used to solve the differential Eqs.'
+#elif defined stationary
+    print *,' - Stationary velocity fiels with analytical stationary scheme used to solve the differential Eqs.'
 #endif
 #if defined tempsalt
 #if defined ifs

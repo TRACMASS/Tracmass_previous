@@ -181,10 +181,18 @@ MODULE mod_grid
 #elif orca025L75
   INTEGER, PARAMETER                        :: NST=4
 #endif
+#elif stationary
+  INTEGER, PARAMETER                        :: NST=1
 #else
   INTEGER, PARAMETER                        :: NST=2
 #endif
+
+#if stationary
+  INTEGER                                   :: nsm=1     ,nsp=1
+#else
   INTEGER                                   :: nsm=1     ,nsp=2
+#endif
+
   REAL*8                                    :: dx,dy
   REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox

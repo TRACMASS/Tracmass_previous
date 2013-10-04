@@ -28,7 +28,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
 #endif
   
   real*8                                     :: rr, rg, uu, um, vv, vm
-  integer                                    :: ia, iam, ja, ka, k,n
+  integer                                    :: ia, iam, ja, ka, k, n
   integer                                    :: n1, n2
   
   
