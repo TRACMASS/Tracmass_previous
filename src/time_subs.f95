@@ -1,9 +1,35 @@
 #ifdef timeanalyt 
-
+  !
+  ! The subroutines related to the time-analytical option of TRCAMSS are located in this file below 
+  ! The schemes are by Vries and Döös (2001) and Döös et al. (2013)
+  !
+  !         um-------------------------------------------uu
+  !          |                                            |
+  !          |                                            |
+  !          |                                            |
+  !          |                                            |
+  !          |                                            |
+  !        (r0)-->                                        |
+  !          |            *                               |
+  !          |                  *                         |
+  !          |                         *                  |
+  !          |                             *              |
+  !          |                                  *         |
+  !          |                                       *    |
+  !          |                                          * |
+  !          |                                           (r1)
+  !          |                                            |
+  !          |                                            |
+  !          |                                            |
+  !          |                                            |
+  !          |                                            |
+  !         vm ------------------------------------------vv
+  !         ssiim                                         ssii
+  !
 subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,ts,tt,dsmin,dxyz,rr)
 
   ! subroutine to compute time (sp,sn) when trajectory 
-  ! crosses face of box (ia,ja,ka) with the time analytical sceme by Vries and Döös (2001)
+  ! crosses face of box (ia,ja,ka) 
   ! two crossings are considered for each direction:  
   ! east and west for longitudinal directions, etc.  
   !
@@ -45,7 +71,10 @@ subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn,ts,tt,dsmin,dxyz,rr)
   ! that would degrade convergency
   ! first, the accuracy parameter xxlim is used for minimizing f(x); then,
   ! xxlim is used to minimize the numerical error in the time variable ss 
+  !
+  !
 
+  !
 USE mod_param
 USE mod_vel
 USE mod_grid
@@ -55,39 +84,40 @@ IMPLICIT NONE
 INTEGER :: iim,loop,iil,ii,ijk,ia,ja,ka
 REAL*8  :: uu,um,vv,vm,ss,aa,r0,sp,sn,dsmin,ts,tt,dxyz
 REAL*8  :: f0,f1,dzs,dzu1,dzu2,rijk,s0,ss0,rr,rg
-REAL*8,  PARAMETER ::  EPS=1.d-10
 !_______________________________________________________________________________
 
 sp=UNDEF ; sn=UNDEF
 
 #ifdef twodim  
-if(ijk.eq.3) return
+if(ijk==3) return
 #endif 
 
+if(dxyz<EPS) stop 8701
+if(dsmin==1.d0) stop 8702
 s0=tt/dxyz
 ss0=dble(idint(ts))*tseas/dxyz
 rg=1.d0-rr
 
 loop=0 ; rijk=0.d0 ; ss=UNDEF ; f0=0.d0 ; f1=0.d0
 
-if(ijk.eq.1) then
+if(ijk==1) then
  ii=ia
  iim=ia-1
  iil=iim
- if(iim.eq.0) iil = imt
+ if(iim==0) iil = imt
  uu=uflux(ii ,ja,ka,nsp)
  um=uflux(iil,ja,ka,nsp)
  vv=uflux(ii ,ja,ka,nsm)
  vm=uflux(iil,ja,ka,nsm)
 #ifdef turb   
- if(r0.ne.dble(ja)) then
+ if(r0/=dble(ja)) then
   uu=uu+upr(7,2)  
   vv=vv+upr(1,2)  
  else  ! add u' from previous iterative time step if on box wall
   uu=uu+upr(7,1) 
   vv=vv+upr(1,1)  
  endif
- if(r0.ne.dble(ja-1)) then
+ if(r0=/dble(ja-1)) then
   um=um+upr(8,2)
   vm=vm+upr(2,2)
  else  ! add u' from previous iterative time step if on box wall
@@ -143,36 +173,47 @@ elseif(ijk.eq.3) then
   vm=vm+upr(12,1)  
  endif
 #endif
- if (ka.eq.km) then
+ if (ka==km) then
   dzs= dz(km)+rg*hs(ia,ja,nsp)+rr*hs(ia,ja,nsm)
   dzu1=dz(km)+hs(ia,ja,nsp)
   dzu2=dz(km)+hs(ia,ja,nsm)
-  if(dabs(dzu1).le.eps) stop 4956
-  if(dabs(dzu2).le.eps) stop 4957
+  if(dabs(dzu1)<eps) stop 8705
+  if(dabs(dzu2)<eps) stop 8706
   f0=dzs/dzu1
   f1=dzs/dzu2
+!  print *, dzs, dzu1, dzu2,f0,f1
+!  print *, dz(km),rg,hs(ia,ja,nsp),rr,hs(ia,ja,nsm)
+!  print *, ia,ja,ka,nsp,nsm
+!  stop 8800
   uu=uu*f0
   um=um*f0
   vv=vv*f1
   vm=vm*f1
-  if(dabs(f0).le.eps) stop 4958
-  if(dabs(f1).le.eps) stop 4959
+  if(dabs(f0).le.eps) stop 8707
+  if(dabs(f1).le.eps) stop 8708
   f0=1.d0/f0
   f1=1.d0/f1
  endif 
 endif
 
+!if(uu==vv .and. um==vm) then
+! print *,'warning for stationary fields'
+! print *,ijk,ia,ja,ka,r0,sp,sn,ts,tt,dsmin,dxyz,rr
+! print *,uu,vv,um,vm
+! call cross(ijk,ia,ja,ka,r0,sp,sn,rr) 
+! return
+!endif
+
 aa = -(vv-uu-vm+um)
 ! ----- a > 0
-!     if (aa.gt.0.d0) then
-     if (aa.gt.EPS) then
+!     if (aa.gt.EPS) then
+     if (aa>0.d0) then
       call apos (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
 ! ----- a < 0      
-     elseif (aa.lt.-EPS) then
-!     elseif (aa.lt.0.d0) then
+!     elseif (aa.lt.-EPS) then
+     elseif (aa<0.d0) then
       call amin (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
 ! ----- a = 0 
-!     elseif (aa.eq.0.d0) then
       else
       if (aa.ne.0.d0) print *,'anil eps=',aa
       call anil (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
@@ -233,7 +274,6 @@ INTEGER :: ijk,ia,ja,ka,iim,iil,ii
 REAL*8  :: uu,um,vv,vm,xi,xi0,const,ga,erf0,aa,bb,daw0,r0,r1,dsmin,dxyz,tt,ts,rijk
 REAL*8  :: s15aff,dawson,s15adf,s15aef,errfun
 REAL*8  :: f0,f1,dzs,dzu1,dzu2,s0,ss,ss0,ds,rr,rg
-REAL*8,  PARAMETER ::  EPS=1.d-11
 
 #ifdef twodim  
 if(ijk.eq.3) then
@@ -245,7 +285,6 @@ endif
 
 s0=tt/dxyz-ds
 ss=ts*tseas/dxyz
-!rr=1.d0-rg
 rg=1.d0-rr
 f0=0.d0 ; f1=0.d0
 
@@ -342,10 +381,19 @@ elseif(ijk.eq.3) then
  endif 
 endif
 
+!if(uu==vv .and. um==vm) then
+! print *,'pos'
+! print *,ijk,ia,ja,ka,r0,r1,ds,rr
+! print *,uu,vv,um,vm
+! call pos_orgn(ijk,ia,ja,ka,r0,r1,ds,rr) 
+!
+! return
+!endif
+
+
 if(dabs(dsmin).le.eps) stop 4981
 aa = -(vv-uu-vm+um)/dsmin
 bb = um-uu
-
 
 if(aa.ne.0.d0) then
 if(f0.eq.0.d0) then
@@ -357,13 +405,18 @@ else
 endif
 endif
 
-if (aa.gt.0.d0) then
+!if(dabs(f0)<EPS) then
+! print *,'f0',f0,vv-uu-vm+um,vv,uu,vm,um
+!! stop 8841
+!endif
+
+if (aa>0.d0) then
  const=2.d0*const/dsqrt(2.d0*aa)
  xi0=(bb+aa*(s0-ss0))/dsqrt(2.d0*aa)
  xi =(bb+aa*(ss-ss0))/dsqrt(2.d0*aa)
  daw0 = s15aff(xi0) !      daw0 = s15aff(xi0,ifail)
  r1 = dawson (const,daw0,r0+ga,xi0,xi) -ga
-elseif (aa.lt.0.d0) then
+elseif (aa<0.d0) then
  const=const*sqrt(pi/(-2.d0*aa))
  xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
  xi =(bb+aa*(ss-ss0))/dsqrt(-2.d0*aa)
@@ -375,7 +428,7 @@ elseif (aa.lt.0.d0) then
   erf0 = - s15aef(xi0)     !       erf0 = - s15aef(xi0, ifail)
  endif
  r1 = errfun (const,erf0,r0+ga,xi0,xi) -ga 
-elseif (aa.eq.0.d0) then
+elseif (aa==0.d0) then
  if (f0.eq.0.d0) then
   f0=1.d0
   f1=1.d0
@@ -383,8 +436,10 @@ elseif (aa.eq.0.d0) then
  aa = um-uu
  bb =(f0*um-f1*vm)/dsmin
  xi = ss-s0
- if (aa.eq.0.d0) then
+! if (aa.eq.0.d0) then
+ if (dabs(aa)<EPS) then
   r1 = r0 - xi*(-f0*um+0.5d0*bb*(s0-ss0+ss-ss0))
+!  print *,'aa,r1',aa,r1
  else
   ga = (r0-dble(iim)) + (bb*(s0-ss0-1.d0/aa)-f0*um)/aa
   r1 = r0 + ga*(dexp(-aa*xi) - 1.d0) -bb*xi/aa
@@ -406,7 +461,6 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
-REAL*8,  PARAMETER ::  EPS=1.d-10
 REAL*8,  PARAMETER ::  xxlim=1.d-7
 INTEGER :: ii,iim,iconfig,i,loop
 REAL*8  :: uu,um,vv,vm,xi0,xin,ssii,ssiim,xerr,xf1,xi,xi00,xia,xib,xibf
@@ -414,6 +468,7 @@ REAL*8  :: aa,bb,ga,const,daw0,s15aff,xf,xf2,xiaf,dawson
 REAL*8  :: rijk,r0,ss,f0,f1,s0,ss0,dsmin    
 
 aa = -(vv-uu-vm+um)/dsmin
+if(aa<EPS) stop 8771
 bb = um-uu
 xi0=(bb+aa*(s0-ss0))/dsqrt(2.d0*aa)
 
@@ -425,8 +480,8 @@ if (uu.eq.0.d0 .and. vv.eq.0.d0) then
   xin=-dsqrt(xi0*xi0-xin)
   ss= 2.d0*(xin-xi0)/dsqrt(2.d0*aa) + s0
   return
- else
-  return ! no solution
+ else ! no solution
+  return 
  endif
 elseif (um.eq.0.d0 .and. vm.eq.0.d0 ) then
  xin =-dlog(r0-iim)
@@ -435,8 +490,7 @@ elseif (um.eq.0.d0 .and. vm.eq.0.d0 ) then
   xin=-dsqrt(xi0*xi0-xin)
   ss= 2.d0*(xin-xi0)/dsqrt(2.d0*aa) + s0
   return
- else
-! no solution
+ else ! no solution
   return
  endif
 endif
@@ -444,13 +498,27 @@ endif
 if (f0.eq.0.d0) then
  ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)
  const = (um*vv-uu*vm)/(vv-uu-vm+um)
- ssii = uu/(uu-vv)
- ssiim= um/(um-vm)
+ ssii=uu-vv
+ if(ssii/=0.d0) ssii = uu/ssii
+ ssiim=um-vm
+ if(ssiim/=0.d0) ssiim = um/ssiim
 else
  ga = -dble(iim) + (f1*vm-f0*um)/(vv-uu-vm+um)
  const = (f0*um*(vv-vm)+f1*vm*(um-uu))/(vv-uu-vm+um)
- ssii = (uu+um*(f0-1.d0))/(uu-vv+um*(f0-1.d0)+vm*(1.d0-f1))
- ssiim= f0*um/(f0*um-f1*vm)
+! ssii = (uu+um*(f0-1.d0))/(uu-vv+um*(f0-1.d0)+vm*(1.d0-f1))
+ ssii = uu-vv+um*(f0-1.d0)+vm*(1.d0-f1)
+ if(dabs(ssii)>EPS) then
+  ssii = (uu+um*(f0-1.d0))/ssii
+ else
+  stop 8777
+ endif
+! ssiim= f0*um/(f0*um-f1*vm)
+ ssiim= (f0*um-f1*vm)
+ if(dabs(ssii)>EPS) then
+  ssiim= f0*um/ssiim
+ else
+  stop 8779
+ endif
 endif
 const = 2.d0*const/dsqrt(2.d0*aa)
 daw0 = s15aff(xi0)     !  daw0 = s15aff(xi0, ifail)
@@ -465,7 +533,7 @@ if (ssii.le.0.d0 .or. ssii.ge.1.d0) then
   xi00=(vm-vv)/dsqrt(2.d0*aa)
  else
 ! 2b) configuration: --- no solution, try rijk=iim
-!print *,'configuration: --- no solution, try rijk=iim',ssii,uu,vv
+ ! print *,'2b configuration: --- no solution, try rijk=iim=',iim,ssii,uu,vv
   rijk=dble(iim)
   goto 3000
  endif 
@@ -571,7 +639,7 @@ xibf=xf
 100   continue
      loop=loop+1
      if(loop.eq.80) then
-!      print *, ' loop stop', xi0, xi00, xi, xf, ntrac, loop
+      print *, ' loop stop', xi0, xi00, xi, xf, ntrac, loop
       if (dabs(xf).gt.100*xxlim) loop=1000
 !      print *, 'loopnr', abs(xf),xxlim,100*xxlim, loop
 !       if (xerr.eq.UNDEF) loop=1000
@@ -589,6 +657,8 @@ xibf=xf
       xi = 0.5d0*(xi+xib)
      else
  !     ic=3   What is this????????? Should it be iconfig=3 ?????????????????????
+       iconfig=3 ! ?????????????
+! print *,'What is this?????',xi,xin
       xi = xin 
      endif
 
@@ -641,20 +711,25 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
-REAL*8,  PARAMETER ::  EPS=1.d-10
 REAL*8,  PARAMETER ::  xilim=3.0d0,xxlim=1.d-7
 INTEGER :: ii,iim,iconfig,i,loop
 REAL*8  :: uu,um,vv,vm,xib,xia,xi00,xi0,xf1,xf,xf2,xin,xibf,xi,xerr,xiaf
 REAL*8  :: aa,bb,ga,s15aef,s15adf,erf0,const,errfun
 REAL*8  :: rijk,r0,ss,f0,f1,s0,ss0,ssii,ssiim,dsmin   
 
+if(dabs(dsmin)<eps) stop 8801
 aa = -(vv-uu-vm+um)/dsmin
 bb = um-uu
 xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
+if(aa>=EPS) then
+ print *,aa,vv,uu,vm,um,dsmin,xi0
+ stop 8802
+endif
+!print *,'amin',aa,bb,xi0
 
 
 ! 1) ii or iim ---> land point 
-     if (uu.eq.0.d0 .and. vv.eq.0.d0) then
+     if (uu==0.d0 .and. vv==0.d0) then
       rijk = dble(iim)
       xin =-dlog(ii-r0) 
       xin =-dsqrt(xi0*xi0+xin)
@@ -668,34 +743,31 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
       return
      endif 
 
-     if (f0.eq.0.d0) then
+     if (f0==0.d0) then
+      if(dabs(vv-uu-vm+um)<EPS) stop 8803
       ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)
       const = (um*vv-uu*vm)/(vv-uu-vm+um)
-     if(dabs(uu-vv).le.eps) stop 4993
-      ssii = uu/(uu-vv)
-     if(dabs(um-vm).le.eps) stop 4994
-      ssiim= um/(um-vm)
+      ssii=uu-vv
+      if(ssii/=0.d0) ssii = uu/ssii
+      ssiim=um-vm
+      if(ssiim/=0.d0) ssiim = um/ssiim
      else
+      if(vv-uu-vm+um==0.d0) stop 8806
       ga = -dble(iim) + (f1*vm-f0*um)/(vv-uu-vm+um)
       const = (f0*um*(vv-vm)+f1*vm*(um-uu))/(vv-uu-vm+um)
-     if(dabs(uu-vv+um*(f0-1.d0)+vm*(1.-f1)).le.eps) stop 4995
-      ssii = (uu+um*(f0-1.d0))/(uu-vv+um*(f0-1.d0)+vm*(1.-f1))
-     if(dabs(f0*um-f1*vm).le.eps) stop 4996
+      if(uu-vv+um*(f0-1.d0)+vm*(1.d0-f1)==0.d0) stop 8808
+      ssii = (uu+um*(f0-1.d0))/(uu-vv+um*(f0-1.d0)+vm*(1.d0-f1))
+      if(f0*um-f1*vm==0.d0) stop 8810
       ssiim= f0*um/(f0*um-f1*vm)
      endif
      const = const*sqrt(pi/(-2.d0*aa))
      if (xi0.gt.xilim) then
 ! complementary error function
-!      erf0 = s15adf(xi0, ifail)
       erf0 = s15adf(xi0)
      elseif(xi0.lt.-xilim) then
-!      erf0 = -s15adf(-xi0, ifail)
       erf0 = -s15adf(-xi0)
      else
 ! error function
-!      erf0 = -s15aef(xi0, ifail)
-!print *,'erf0',xi0
-!stop 5906
       erf0 = -s15aef(xi0)
      endif
 ! minus-velocity at xi0
@@ -816,8 +888,14 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
       goto 300
      endif
      xf1 = xf1+xf1
-     if(xf1.eq.0.) stop 59785
-     xin = xi - xf/xf1
+!     if(xf1.eq.0.) stop 59785
+!     if(dabs(xf1)<EPS) stop 8827
+!     xin = xi - xf/xf1
+     if(xf1==1.d0) then
+      xin=xi 
+     else
+      xin=xi-xf/xf1
+     endif
      if ( dabs(xf).gt.100.d0 .or.(xf*xibf.gt.0.d0 .and. (xf1*xibf.gt.0.d0 .or.xin.gt.xia)) )then
       xib = xi
       xibf= xf
@@ -844,27 +922,14 @@ xi0=(bb+aa*(s0-ss0))/dsqrt(-2.d0*aa)
       ssiim= xi
       goto 200
      endif
-     if (xerr.eq.UNDEF) xi = ssiim
+     if (xerr==UNDEF) xi = ssiim
 
      endif
 300   continue
      ss= 2.d0*(xi0-xi)/dsqrt(-2.d0*aa) + s0 
-!     nstat(iconfig,1,2)=nstat(iconfig,1,2)+1
-!     nstat(iconfig,2,2)=nstat(iconfig,2,2)+loop
-     if (xi.ne.xi0) then
-      xin=dabs( xf/((xi-xi0)*xf1) )
-!      accu(1)=accu(1)+1.0
-!      accu(2)=accu(2)+xin
-!      if (xin.gt.xxlim.and.ntrac.le.100) print *,ntrac,xin,xf1,ss-s0
-     endif
+     if (xi.ne.xi0) xin=dabs( xf/((xi-xi0)*xf1) )
      if (loop.eq.1000.or.ss-s0.lt.0.d0) then
-      if (ss-s0.lt.0.d0) print *, ' ss-s0 is negative '
-!      print *, '- time cross =', ss, s0, loop
-!      print *, aa,uu,um,vv,vm
-!      print *, iconfig,r0,rijk
-!       print *, xi0,xi00,xib,xf1,xibf,xi,xf
-!      print *, bb,ga,const,erf0
-!      STOP
+     if (ss-s0.lt.0.d0) print *, ' ss-s0 is negative '
      endif
 
 return
@@ -879,7 +944,6 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
-REAL*8,  PARAMETER ::  EPS=1.d-10
 REAL*8,  PARAMETER :: xxlim=1.d-7
 INTEGER :: ii,iim
 REAL*8  :: aa,bb,ga,dsmin,uu,um,vv,vm,ss,ssii,ssiim
@@ -894,77 +958,89 @@ endif
 
 aa = um-uu
 bb =(f0*um-f1*vm)/dsmin 
+!if(dabs(bb)<EPS) then
+! print *,'bb=',bb,f0*um,f1*vm,dsmin
+!endif
 
 if (aa.eq.0.d0) then
-   if (bb.eq.0.d0) then
-     ga = f0*um
-     if (ga.gt.0.d0) then
-       rijk=dble(ii)
-       ss=s0+(rijk-r0)/ga
-     elseif (ga.lt.0.) then
-       rijk=dble(iim)
-       ss=s0+(rijk-r0)/ga
-     endif
-     return
+ if (bb.eq.0.d0) then
+  ga = f0*um
+  if(ga.gt.0.d0) then
+   rijk=dble(ii)
+   ss=s0+(rijk-r0)/ga
+  elseif (ga.lt.0.d0) then
+   rijk=dble(iim)
+   ss=s0+(rijk-r0)/ga
+  endif
+  return
+ else
+  if(dabs(bb).le.eps) then
+   print *,'bb=',bb,eps
+   stop 4537
+  endif
+  ga = -(f0*um+aa*dble(iim))/bb -ss0
+  if(s0+ga.ge.0.d0) then
+   if (bb.gt.0.d0) then
+    rijk=dble(iim)
    else
-     if(dabs(bb).le.eps) then
-	  print *,'bb=',bb,eps
-      stop 4537
-     endif
-     ga = -(f0*um+aa*dble(iim))/bb -ss0
-     if (s0+ga.ge.0.d0) then
-       if (bb.gt.0.d0) then
-         rijk=dble(iim)
-       else
-         rijk=dble(ii)
-       endif
-       ss=-ga+dsqrt( (s0+ga)**2-2.d0*(rijk-r0)/bb )
-     else
-       if (bb.gt.0.d0) then
-         rijk=dble(ii)
-       else
-         rijk=dble(iim)
-       endif         
-       if ( (s0+ga)**2 .ge. 2.d0*(rijk-r0)/bb ) then
-         ss=-ga-dsqrt( (s0+ga)**2-2.d0*(rijk-r0)/bb )
-       else
-         if (bb.gt.0.d0) then
-           rijk=dble(iim)
-         else
-           rijk=dble(ii)
-         endif
-         ss=-ga+dsqrt( (s0+ga)**2-2.d0*(rijk-r0)/bb )
-       endif
-     endif         
+    rijk=dble(ii)
    endif
-   return
+   ss=-ga+dsqrt( (s0+ga)**2-2.d0*(rijk-r0)/bb )
+  else
+   if (bb.gt.0.d0) then
+    rijk=dble(ii)
+   else
+    rijk=dble(iim)
+   endif         
+   if ( (s0+ga)**2 .ge. 2.d0*(rijk-r0)/bb ) then
+    ss=-ga-dsqrt( (s0+ga)**2-2.d0*(rijk-r0)/bb )
+   else
+    if (bb.gt.0.d0) then
+     rijk=dble(iim)
+    else
+     rijk=dble(ii)
+    endif
+    ss=-ga+dsqrt( (s0+ga)**2-2.d0*(rijk-r0)/bb )
+   endif
+  endif         
+ endif
+ return
 else
-  if (bb.eq.0.d0) then  ! b=0: stationary velocity fields !!!
-    if (uu.gt.0.d0) then
-      xi=1.d0+(r0-dble(ii))*(uu-um)/(uu-um*(f0-1.d0))        
-      if (xi.gt.0.) then
-        rijk=dble(ii)
-        if (um.ne.uu) then
-          ss= s0 - 1.d0/(uu-um)*dlog(xi)
-        else
-          ss= s0 + (dble(ii)-r0)/(uu-um*(f0-1.)) 
-        endif
-        if (ss.le.0.d0) ss=UNDEF
-        return
-      endif
+ if (bb.eq.0.d0) then  ! b=0: stationary velocity fields !!!
+  if (uu.gt.0.d0) then
+   if(dabs((uu-um*(f0-1.d0)))<EPS) stop 8842
+   xi=1.d0+(r0-dble(ii))*(uu-um)/(uu-um*(f0-1.d0))        
+   if(xi>0.d0) then
+    if(xi<EPS) stop 8843
+    rijk=dble(ii)
+    if(um.ne.uu) then
+     if(dabs(uu-um)<eps) stop 8843
+     ss= s0 - 1.d0/(uu-um)*dlog(xi)
+    else
+     if(dabs(uu-um*(f0-1.d0))<eps) stop 8844
+     ss= s0 + (dble(ii)-r0)/(uu-um*(f0-1.d0)) 
     endif
-    if (um.lt.0.d0) then
-      xi=1.d0+(r0-dble(iim))*(uu-um)/(f0*um)        
-      if (xi.gt.0.d0) then
-        rijk=dble(iim)
-        if (um.ne.uu) then
-          ss= s0 - 1.d0/(uu-um)*dlog(xi)
-        else
-          ss= s0 + (dble(iim)-r0)/(f0*um)
-        endif
-        if (ss.le.0.d0) ss=UNDEF
-      endif
+    if(ss<eps) stop 8845
+    if (ss.le.0.d0) ss=UNDEF
+    return
+   endif
+  endif
+  if (um.lt.0.d0) then
+   if(f0*um<eps) stop 8847
+   xi=1.d0+(r0-dble(iim))*(uu-um)/(f0*um)        
+   if(xi.gt.0.d0) then
+    rijk=dble(iim)
+    if (um.ne.uu) then
+     if(dabs(uu-um)<eps) stop 8849
+     ss= s0 - 1.d0/(uu-um)*dlog(xi)
+    else
+     if(dabs(f0*um)<eps) stop 8851
+     ss= s0 + (dble(iim)-r0)/(f0*um)
     endif
+      if(ss<eps) stop 8853
+   if (ss.le.0.d0) ss=UNDEF
+   endif
+   endif
 !   ssii = dsmin+dsmin
 !   ssiim= dsmin+dsmin
         return
@@ -972,6 +1048,7 @@ else
         ssii = (f0*um-aa)/bb
         ssiim= f0*um/bb
        endif
+       if(dabs(aa)<eps) stop 8855
        ga = (r0-dble(iim)) + (bb*(s0-ss0-1.d0/aa)-f0*um )/aa
        xi0 = 0.d0
 ! ''velocity'' at xi0
@@ -1001,7 +1078,7 @@ else
         endif 
        endif
        xf=(r0-dble(ii))+ga*(dexp(-aa*xi00)-1.d0)-bb*xi00/aa
-       if (xf.lt.0.) goto 3000
+       if (xf.lt.0.d0) goto 3000
        rijk=dble(ii)
        xib =xi00
        xibf=xf
@@ -1009,7 +1086,7 @@ else
         if (xf1*(xi00-xi0).gt.-(r0-rijk)) then
          xi00=xi0
          xf=r0-rijk
-!          if (b.ne.0.) goto 1000
+ !         if (bb.ne.0.d0) goto 1000
         endif
        else
         if (ssiim.gt.0. .or. ssiim.lt.dsmin .and.vm.gt.0.d0) then
@@ -1033,7 +1110,7 @@ else
          xi00=ss0+dsmin-s0
         endif 
        else
-        if (vm.gt.0.) then
+        if (vm.gt.0.d0) then
 ! 3c) configuration: -- 0 ++
          if (s0-ss0.ge.ssiim) return
          iconfig = 7   
@@ -1069,15 +1146,15 @@ else
         xi=xi0-0.05d0
         do i=1,100
          xi = xi+0.05d0
-         xf = (r0-rijk)+ga*(dexp(-sign(1.d0,aa)*xi)-1.d0)-bb*xi/(aa*dabs(aa)) 
-         xf1= (-bb/aa-aa*ga*dexp(-sign(1.d0,aa)*xi))/dabs(aa)         
+         xf = (r0-rijk)+ga*(dexp(-dsign(1.d0,aa)*xi)-1.d0)-bb*xi/(aa*dabs(aa)) 
+         xf1= (-bb/aa-aa*ga*dexp(-dsign(1.d0,aa)*xi))/dabs(aa)         
 !         print *, ' loop', xi, xf, xf1
         enddo
         loop=1000
        else
 
        xi = xi00 
-       xf1= (-bb/aa-aa*ga*dexp(-sign(1.d0,aa)*xi))/dabs(aa) 
+       xf1= (-bb/aa-aa*ga*dexp(-dsign(1.d0,aa)*xi))/dabs(aa) 
        xia = xi0
        xiaf= r0-rijk
        xerr = xxlim
@@ -1091,6 +1168,8 @@ else
 !         if (xerr.eq.UNDEF) loop=1000
         goto 400
        endif
+       
+       if(dabs(xf1)<eps) stop 8859
        xin = xi - xf/xf1
      if ( dabs(xf).gt.100.d0 .or.(xf*xibf.gt.0.d0 .and. (xf1*xibf.lt.0.d0 .or.xin.lt.xia)) ) then
         xib = xi
@@ -1103,8 +1182,8 @@ else
        else
         xi = xin      
        endif
-       xf = (r0-rijk)+ga*(dexp(-sign(1.d0,aa)*xi)-1.d0)-bb*xi/(aa*dabs(aa)) 
-       xf1= (-bb/aa-aa*ga*dexp(-sign(1.d0,aa)*xi) )/dabs(aa) 
+       xf = (r0-rijk)+ga*(dexp(-dsign(1.d0,aa)*xi)-1.d0)-bb*xi/(aa*dabs(aa)) 
+       xf1= (-bb/aa-aa*ga*dexp(-dsign(1.d0,aa)*xi) )/dabs(aa) 
        if (dabs(xf).ge.xerr) then
         goto 100
        elseif ( dabs(xf).gt.xxlim*dabs(xf1*(xi-xi0)).and. dabs(xf).lt.ssii ) then
@@ -1120,7 +1199,7 @@ else
        endif
 400     continue
        ss= s0 + xi/dabs(aa)
-       if (xi.ne.0.) then
+       if (xi.ne.0.d0) then
         xin=dabs( xf/((xi-xi0)*xf1) )
 !        accu(1)=accu(1)+1.0
 !        accu(2)=accu(2)+xin
@@ -1208,11 +1287,14 @@ IMPLICIT NONE
 INTEGER, PARAMETER ::  NMAX=6  ! Denna ska kollas och testas med högre värden
 REAL*8,  PARAMETER ::  H=0.4d0,A1=2.d0/3.d0,A2=0.4d0,A3=2.d0/7.d0
 
-REAL*8 :: s15aff,x,dd1,dd2,e1,e2,sum,x2,xp,xx,c(NMAX),pisqin
-INTEGER i,init,n0
+REAL*8        :: s15aff,x,dd1,dd2,e1,e2,sum,x2,xp,xx,pisqin
+REAL*8, SAVE  :: c(NMAX)
 
-SAVE init,c
-DATA init/0/ !  Flag is 0 if we need to initialize, else 1.
+INTEGER       :: i,n0
+INTEGER, SAVE :: init=0
+
+!SAVE init,c
+!DATA init/0/ !  Flag is 0 if we need to initialize, else 1.
 
 init=0
 pisqin=1.d0/dsqrt(pi)
@@ -1259,7 +1341,7 @@ FUNCTION s15aef(x)
 IMPLICIT NONE
 REAL*8 ::  s15aef,x,gammp
 
-if(x.lt.0.d0)then
+if(x<0.d0)then
  s15aef=-gammp(0.5d0,x**2)
 else
  s15aef= gammp(0.5d0,x**2)
@@ -1274,14 +1356,14 @@ end function s15aef
 FUNCTION gammp(a,x)
 
 ! USES gcf,gser
-!Returns the incomplete gamma function P(a; x).
+! Returns the incomplete gamma function P(a,x).
 
 IMPLICIT NONE
 REAL*8  :: a,gammp,x,gammcf,gamser,gln
 
-if(x.lt.0.d0 .or.a.le.0.d0) print *, 'bad arguments in gammp'
+if(x<0.d0 .or.a<=0.d0) print *, 'bad arguments in gammp'
 
-if(x.lt.a+1.d0) then ! Use the series representation.
+if(x<a+1.d0) then ! Use the series representation.
  call gser(gamser,a,x,gln)
  gammp=gamser
 else ! Use the continued fraction representation
@@ -1289,12 +1371,13 @@ else ! Use the continued fraction representation
  gammp=1.d0-gammcf ! and take its complement.
 endif
 
- return
+return
 end function gammp
 
 !______________________________________________________________________________
 
 SUBROUTINE gcf(gammcf,a,x,gln)
+USE mod_param
 IMPLICIT NONE
 
 ! USES gammln
@@ -1303,7 +1386,7 @@ IMPLICIT NONE
 !FPMIN is a number near the smallest representable floating-point number.
 
 INTEGER, PARAMETER ::  ITMAX=1000
-REAL*8,  PARAMETER ::  EPS=3.d-7,FPMIN=1.d-30
+REAL*8,  PARAMETER ::  FPMIN=1.d-30
 REAL*8  :: a,gammcf,gln,x,an,b,c,d,del,h,gammln
 INTEGER :: i
 
@@ -1317,19 +1400,20 @@ do i=1,ITMAX  ! Iterate to convergence.
  an=-dble(i)*(dble(i)-a)
  b=b+2.d0
  d=an*d+b
- if(dabs(d).lt.FPMIN) d=FPMIN
+ if(dabs(d)<FPMIN) d=FPMIN
  c=b+an/c
- if(dabs(c).lt.FPMIN) c=FPMIN
+ if(dabs(c)<FPMIN) c=FPMIN
  d=1.d0/d
  del=d*c
  h=h*del
- if(dabs(del-1.d0).lt.EPS) goto 1
+ if(dabs(del-1.d0)<EPS) goto 1
 enddo
  
 print *, 'a too large, ITMAX too small in gcf',dabs(del-1.d0),EPS,del
 print *,'cd=',an
-stop 43957
-1 gammcf=exp(-x+a*dlog(x)-gln)*h  ! Put factors in front.
+stop 8780
+
+1 gammcf=dexp(-x+a*dlog(x)-gln)*h  ! Put factors in front.
 
 return
 end subroutine gcf
@@ -1361,6 +1445,7 @@ do j=1,6
  ser=ser+cof(j)/y
 enddo 
 
+if(x<1.d-10) stop 8890
 gammln=tmp+dlog(stp*ser/x)
  
 return
@@ -1376,10 +1461,12 @@ SUBROUTINE gser(gamser,a,x,gln)
 !Returns the incomplete gamma function P(a; x) evaluated by its series 
 ! representation as gamser. Also returns  as gln.
 
+USE mod_param
 IMPLICIT NONE
 
-REAL*8,  PARAMETER ::  EPS=3.d-7
-INTEGER, PARAMETER ::  ITMAX=100
+!REAL*8,  PARAMETER ::  EPS=3.d-7
+!REAL*8,  PARAMETER ::  EPS=1.d-10
+INTEGER, PARAMETER ::  ITMAX=1000
 
 REAL*8  :: a,gamser,gln,x,ap,del,sum,gammln
 INTEGER n
@@ -1404,6 +1491,7 @@ do n=1,ITMAX
 enddo
  
 print *, 'a too large, ITMAX too small in gser'
+stop 8860
 
 1 gamser=sum*dexp(-x+a*dlog(x)-gln)
 
@@ -1436,9 +1524,9 @@ FUNCTION gammq(a,x)
 IMPLICIT NONE
 REAL*8  :: a,gammq,x,gammcf,gamser,gln 
 
-if(x.lt.0.d0 .or. a.le.0.d0) print *, 'bad arguments in gammq' 
+if(x<0.d0 .or. a<=0.d0) print *, 'bad arguments in gammq' 
 
-if(x.lt.a+1.d0) then 
+if(x<a+1.d0) then 
  call gser(gamser,a,x,gln) 
  gammq=1.d0-gamser ! and take its complement. 
 else ! Use the continued fraction representation. 

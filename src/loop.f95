@@ -478,11 +478,11 @@ SUBROUTINE loop
            
 #if defined tempsalt
                call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-!               if (temp < tmine .or. temp > tmaxe .or. &
-!               &   salt < smine .or. salt > smaxe .or. &
-!               &   dens < rmine .or. dens > rmaxe      ) then
-                if (temp > tmaxe .and. salt < smine .and.  &
-               &   (tt-t0)/tday > 365.      ) then
+               if (temp < tmine .or. temp > tmaxe .or. &
+               &   salt < smine .or. salt > smaxe .or. &
+               &   dens < rmine .or. dens > rmaxe      ) then
+!                if (temp > tmaxe .and. salt < smine .and.  &
+!               &   (tt-t0)/tday > 365.      ) then           ! what is this shit?
                  nexit(NEND)=nexit(NEND)+1
                  exit niterLoop                                
                endif
@@ -786,7 +786,7 @@ return
           ! then put in middle of deepest layer 
           ! (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
-              print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
+              print *,'below bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
               print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
               print *,'ntrac=',ntrac,niter 
               call print_ds
@@ -797,7 +797,7 @@ return
               call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
-              nrj(6,ntrac)=1
+ !             nrj(6,ntrac)=1
  !             stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49

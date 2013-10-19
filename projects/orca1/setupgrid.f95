@@ -62,7 +62,8 @@ SUBROUTINE setupgrid
 
   ! === Open mesh file ===
   if(KM==42) then
-   gridFile = trim(inDataDir)//'topo/mesh_mask_ecearth_42l.nc'
+ !  gridFile = trim(inDataDir)//'topo/mesh_mask_ecearth_42l.nc'
+   gridFile = trim(inDataDir)//'topo/mesh_mask_ORCA1_ecearth2_42l.nc'
   elseif(KM==64) then
    gridFile = trim(inDataDir)//'topo/mesh_mask_orca1l64.nc'
   endif
@@ -193,6 +194,7 @@ SUBROUTINE setupgrid
   allocate( temp3d_doub(IMT,JMT,KM) )
   
   botbox=0.
+! layer thickness at T points
   ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
   if(ierr.ne.0) stop 3763
   ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
@@ -207,7 +209,8 @@ SUBROUTINE setupgrid
       endif
     enddo
   enddo
-  
+
+! layer thickness at u points
   ierr=NF90_INQ_VARID(ncid,'e3u',varid) 
   if(ierr.ne.0) stop 3763
   ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
@@ -222,7 +225,8 @@ SUBROUTINE setupgrid
       endif
     enddo
   enddo
-  
+
+! layer thickness at v points
   ierr=NF90_INQ_VARID(ncid,'e3v',varid) 
   if(ierr.ne.0) stop 3763
   ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
@@ -236,8 +240,7 @@ SUBROUTINE setupgrid
       endif
     enddo
   enddo
-
-  
+    
 mask=0
   do j=1,JMT
     do i=1,IMT
@@ -320,7 +323,7 @@ mask=0
 !  currYear = startYear 
   
   
-!open(21,file=trim(inDataDir)//'topo/coord_orca1l64',form='unformatted')
+!open(21,file=trim(inDataDir)//'topo/coord_orca1l42',form='unformatted')
 !write(21) long
 !write(21) lat
 !write(21) e3t_0

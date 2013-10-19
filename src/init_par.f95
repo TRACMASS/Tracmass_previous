@@ -200,6 +200,11 @@ SUBROUTINE init_params
             read( inparg, '(f15.10)' ) ARG_INT2
          end if
       END IF
+      
+#ifdef timeanalyt
+      iter=1
+#endif
+
 
       timax    =  24.*3600.*timax ! convert time lengths from days to seconds
       dstep    =  1.d0/dble(iter)

@@ -55,10 +55,7 @@ SUBROUTINE readfields
    allocate ( tempb(KM), saltb(KM), rhob(KM), depthb(KM), latb(KM))
 #endif
    end if alloCondUVW
-
-
   
-
 ! === Initialising fields ===
 initFieldcond: if(ints==intstart) then
      hs     = 0.
@@ -83,12 +80,16 @@ initFieldcond: if(ints==intstart) then
   npremier=fieldsPerFile ; ndernier=1
   currYear=yearmax
   currMon=12
+!#if stationary
+!   currMon=1
+!#endif
  endif
  
  
 #ifdef seasonal
   nsp=0
   if(ngcm/=365*24/min(12,NST)) stop 7777
+  degrade_counter = 0
 #elif stationary
   nsp=1 ; nsm=1 ; degrade_counter = 1
 #else
@@ -176,26 +177,35 @@ ntime=100*currYear+currMon
 
 nread=CurrMon
 
- !print *,'nsm=',nsm,' nsp=',nsp,' ints=',ints
+#if stationary
+nread=1
+#endif
+
+ ! print *,'currMon', currMon,nread, npremier,ndernier,nsm,nsp
+
 
 
 ! === Find the file for this timestep ===
-start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
+!start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
+start2D  = [subGridImin ,subGridJmin ,  nread , 1 ]
 start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
   
-dataprefix='ORCA1-MSP1_MM_xxxx0101_xxxx1231_grid_'
-dataprefix='ORCA1-SS21_MM_xxxx0101_xxxx1231_grid_'
+!dataprefix='ORCA1-MSP1_MM_xxxx0101_xxxx1231_grid_'
+!dataprefix='ORCA1-SS21_MM_xxxx0101_xxxx1231_grid_'
+dataprefix='ORCA1-SHC1_MM_19960101_19961231_grid_' !EC-Earth
 
 write(dataprefix(15:18),'(i4)') currYear
 write(dataprefix(24:27),'(i4)') currYear
 
-fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
 
 #if stationary
 fieldFile = trim(inDataDir)//'fields/ORCA1.L64-SSF02_1475-1500_grid_'
+#elif seasonal
+fieldFile = trim(inDataDir)//'orca1/'//trim(dataprefix)
+#else
+fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
 #endif
 
-print *,nread, fieldFile
 
 if(nread==npremier) then
 
@@ -213,8 +223,8 @@ endif
 
 
 ierr=NF90_INQ_VARID(ncidt,'sossheig',varidt)
-if(ierr.ne.0) then
- print *,'file not found:',trim(gridFileT)
+if(ierr/=0) then
+ print *,'file not found:',nread,npremier,ierr, ncidt, varidt,trim(gridFileT)
  stop 3768
 endif
 
@@ -326,6 +336,8 @@ ierr=NF90_CLOSE(ncidu)
 if(ierr.ne.0) stop 6464
 endif
 
+!temp3d_eddy=0.
+
  do i=1,IMT
  do j=1,JMT
   do k=1,kmu(i,j)
@@ -370,6 +382,8 @@ if(nread==ndernier) then
 ierr=NF90_CLOSE(ncidv)
 if(ierr.ne.0) stop 6465
 endif
+
+!temp3d_eddy=0.
 
 do i=1,IMT
  do j=1,JMT

@@ -19,6 +19,7 @@ MODULE mod_param
   REAL*8                                    :: tseas,tyear,dtmin,voltr
   REAL*8                                    :: tstep,dstep,tss,partQuant
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
+  REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small number epsilon
 
   REAL*8, PARAMETER                         :: grav = 9.81
   REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
@@ -296,7 +297,7 @@ MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
 
-  INTEGER                                    :: degrade_time=0, degrade_space=0
+  INTEGER, SAVE                              :: degrade_time=0, degrade_space=0
     integer, save                            :: degrade_counter = 0
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

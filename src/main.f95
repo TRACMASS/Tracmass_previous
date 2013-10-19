@@ -63,6 +63,12 @@ PROGRAM main
 
 #if defined stationary
   iter=1
+  intmin=1 
+  if(nff>0) then
+   intspin =1 ; intrun=1
+  elseif(nff<0) then
+   intspin =-1 ; intrun=-1
+  endif
 #endif
 
   
