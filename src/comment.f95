@@ -44,7 +44,7 @@
 !       |                                            |
 !       |                                            |
 !  ja-1 ----------------vflux(ia,ja-1)----------------
-!     ia-1                                          ia
+!     ia-1                                           ia
 !
 ! Inside a grid box the zonal transport can be obtinaed by interpolating linearly
 ! uflux(x)=uflux(ia-1)+(x-x(ia-1))(uflux(i)-uflux(ia-1))  where x is in model index coordinates
