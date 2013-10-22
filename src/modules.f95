@@ -300,7 +300,7 @@ MODULE mod_vel
   INTEGER, SAVE                              :: degrade_time=0, degrade_space=0
     integer, save                            :: degrade_counter = 0
 
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
 
 CONTAINS
  
@@ -359,7 +359,7 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   2) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-#endif 
+#endif full_wflux
 
 
 ENDMODULE mod_vel
