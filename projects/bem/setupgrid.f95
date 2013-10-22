@@ -37,32 +37,50 @@ SUBROUTINE setupgrid
 
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
+  CHARACTER (len=200)                        :: gridfile
 
+
+! === Template for setting up grids. Move the code from readfile.f95
+  allocate ( depth(imt,jmt) )
+
+  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
+  !Order is   t  k  i  j 
+  map2d    = [3, 4, 1, 2]
+  map3d    = [2, 3, 4, 1]
+
+  gridfile =  trim(indatadir)//"ecom.cdf"
+
+  ncTpos = 1
+  print *, trim(gridfile)
+  dxv = get2DfieldNC(trim(gridfile), 'h1')
+  dyu = get2DfieldNC(trim(gridfile), 'h2')
+
+  !dxv(1:imt-1,:) = dxv(2:imt,:)-dxv(1:imt-1,:)
+  !dyu(:,1:jmt-1) = dyu(:,2:jmt)-dyu(:,1:jmt-1)
+  !dxv(imt:imt+1,:) = dxv(imt-2:imt-1,:)
+  !dyu(:,jmt) = dyu(:,jmt-1)
+  dxdy = dyu*dxv
   
+  depth = get2DfieldNC(trim(gridfile), 'depth')
+  !mask = get2DfieldNC(trim(gridfile), 'mask_rho')
+  kmt = km
 
+  mask = 1
+  where (depth == -99999) 
+     depth = 1
+     mask = 0
+  end where
 
-kmt=KM ! flat bottom
+  !where (mask(1:imt-1,:) == 0) 
+  !   mask(2:imt,:) = 0
+  !end where
+  !where (mask(:, 2:jmt) == 0) 
+  !   mask(:,1:jmt-1) = 0
+  !end where
+  !where (mask(:, 1:jmt-1) == 0) 
+  !   mask(:, 2:jmt) = 0
+  !end where
 
-!dxdeg=dx*deg
-!dydeg=dy*deg
-
-! Nicoletta Fabboni velocities, which have analytical solutions
-dx=250. 
-dy=dx
-
-dxdy=dx*dy
-dz=10.
-
-mask=1
-
-!print *,'dx=',dx,dxdeg,deg
-!print *,'dy=',dy,dydeg
-
-
-
-! ===
-
-
-
+  !where (mask==0) kmt=0
 
 end SUBROUTINE setupgrid

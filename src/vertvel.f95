@@ -9,7 +9,7 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   
   USE mod_param
   USE mod_vel
-  USE mod_time
+  USE mod_grid
   USE mod_turb
 #ifdef ifs
   USE mod_grid
@@ -27,8 +27,10 @@ subroutine vertvel(rr,ia,iam,ja,ka)
   REAL kin
 #endif
   
-  real*8 rr,rg,uu,um,vv,vm
-  integer ia,iam,ja,ka,k,n
+  real*8                                     :: rr, rg, uu, um, vv, vm
+  integer                                    :: ia, iam, ja, ka, k, n
+  integer                                    :: n1, n2
+  
   
   rg=1.d0-rr
   wflux=0.d0

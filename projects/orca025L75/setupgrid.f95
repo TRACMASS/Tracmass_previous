@@ -246,6 +246,7 @@ SUBROUTINE setupgrid
       endif
     enddo
   enddo
+  detta ligger helt galet!
 
 ! Initialise time
 !  currSec = startSec 

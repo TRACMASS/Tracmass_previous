@@ -7,30 +7,30 @@
   ! 
   GCMname    = 'MITgcm',
   GCMsource  = 'http://mitgcm.org/',
-  gridName   = 'eccoSOSE',
-  gridSource = 'http://www.mit.edu/%7Emmazloff/SOSE.html',
-  gridDesc   = '1/6 deg run for the Sourhern Ocean with data ass.'/
+  gridName   = 'ecco025_ll',
+  gridSource = 'http://eccco2.jpl.gov',
+  gridDesc   = '1/4 deg global run projected from cube grid to lat-lon.'/
   !
   !
 $INITGRIDGRID
   ! 
-  IMT      = 2160,
-  JMT      = 320,
-  KM       = 42,
+  IMT      = 1440,
+  JMT      = 720,
+  KM       = 50,
   LBT      = 5,
   NEND     = 6/              ! NEND = LBT +1
   !
   !
 $INITGRIDNTRAC
   !
-  NTRACMAX=7000000/          ! 7*1000*1000 
+  NTRACMAX=7000000/          ! Maximum number of particles to be seeded
   !
   !
 $INITGRIDTIME
   !
-  ngcm          = 120,      ! (5*24) hours between GCM datasets
+  ngcm          = 72,       ! hours between GCM datasets
   iter          = 5,        ! iteration between two gcm data sets
-  intmax        = 730,      ! maximum length of RCO fields
+  intmax        = 450,      ! Number of GCM fields
   fieldsPerFile = 1/
   !
   !
@@ -44,7 +44,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 2001/
+  baseYear       = 1/
   !
   !
 $INITGRIDARC
