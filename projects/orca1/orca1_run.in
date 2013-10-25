@@ -1,5 +1,5 @@
 &INITRUNDESC
-  caseName     = 'ORCA025-SMB01',
+  caseName     = 'xxx',
   caseDesc     = 'Global Ocean trajectories'
 /
 &INITRUNGRID
@@ -32,9 +32,10 @@
   ! intstep : "1" if forward in time  "-1" if backward in time
   !
   intmin  =    1,
-  intspin =   48,  
-  intrun  =120000,         ! = 73*24
-  intstep = 0
+  intspin =    1,  ! should be -1 for backwart
+  intrun  =    12000,         ! = 73*24
+  intstep =    0,
+  degrade_time =0 !9999=stationry
 /
   !
 &INITRUNDATE
@@ -47,7 +48,7 @@
   startHour        =    0,
   startDay         =    1,
   startMon         =    1,
-  startYear        =    0 ! 1197 eller 1200 
+  startYear        =    1996 !0 ! 1197 eller 1200 
 / 
   !
   !
@@ -71,10 +72,10 @@
   ! intminInOutFile : ??????????????????????????????????????????
   !
   ncoor           = 0,
-  kriva           = 1,
-  inDataDir='/Users/doos/data/orca/orca1/'
-  outDataDir='/Users/doos/data/orca/orca1/data_out/'
-  outDataFile     = 'cb_bering1'
+  kriva           = 6,
+  inDataDir=   '/Users/doos/data/ecearth/' !'/Users/doos/data/orca/orca1/'
+  outDataDir=  '/Users/doos/data/ecearth/data_out/' !'/Users/doos/data/orca/orca1/data_out/'
+  outDataFile= 'th_seasonal_south_iter12'
   intminInOutFile = 0
   /
   !
@@ -117,16 +118,16 @@ $INITRUNSEED
   !
   nff         = 1,
   isec        = 2,
-  idir        = 1,
-  nqua        = 1,
-  partQuant   = 1,
+  idir        = -1,
+  nqua        = 2,
+  partQuant   = 1000,
   seedType    = 1,
-  ist1        = 110,! AtlEq=220; Ber=110
-  ist2        = 120,! AtlEq=305; Ber=120
-  jst1        = 246,! AtlEq=147; Ber=
-  jst2        = 246,! AtlEq=147; Ber=
+  ist1        = 220, !1,! AtlEq=220; Ber=110
+  ist2        = 315, !360,! AtlEq=305; Ber=120
+  jst1        = 119, !114, ! 95,! AtlEq=147; Ber=
+  jst2        = 119, !123, !110,! AtlEq=147; Ber= ; northernmost=288
   kst1        =   1,
-  kst2        =  42,
+  kst2        =  42, !64,
   varSeedFile = 0,
   seedDir     = ' ',
   seedFile    = ' '
@@ -136,17 +137,17 @@ $INITRUNSEED
   ! water mass properties with minimum & maximum on temp, salt and density
   !
   ! for starting a trajectory (active only with option tempsalt) 
-  tmin0 = -500,
-  tmax0 =  500.,
-  smin0 = -500.,
-  smax0 =  500.,
+  tmin0 =   2., !18.,
+  tmax0 =   5., !22.,  
+  smin0 =   34.7 !36.1, 
+  smax0 =   35.3 !36.5, 
   rmin0 = -500.,
   rmax0 =  500.,
   ! for ending a trajectory
-  tmine = -500.,
-  tmaxe =  500,
-  smine = -500,
-  smaxe =  500.,
+  tmine = -500., !-1., !0.,
+  tmaxe =  500., ! 4., !30.,
+  smine = -500., !33.9,
+  smaxe =  500., !35.2,
   rmine = -500.,
   rmaxe =  500./
 
@@ -186,6 +187,19 @@ $INITRUNSEDIMENT
   ! ==================================
   ! defining end sections
   ! timax : maximum time length of a trajectory in days
+  ! Not the NA
+    ienw =  110,    220,    1,    
+    iene =  120,    315,    1,   
+    jens =  246,    119,    1,      
+    jenn =  246,    147,    1,  
+    timax = 366000./ ! 1 millenia
+! Bering Straight &Equator in the Atlantic
+!    ienw =  110,      1,    1,    
+!    iene =  120,    360,    1,   
+!    jens =  246,      1,    1,      
+!    jenn =  246,    119,    1,  
+!    timax = 36525./ ! 1 century
+!    timax = 36520./
 !    ienw =  220,    1,    1,    
 !    iene =  305,    1,    1,   
 !    jens =  148,    1,    1,      
@@ -203,10 +217,20 @@ $INITRUNSEDIMENT
 !    jenn =  147,    1,    1,  
 !    timax = 36500000./ ! 100 millennia
 ! Bering Straight
-    ienw =  110,    1,    1,    
-    iene =  120,    1,    1,   
-    jens =  246,    1,    1,      
-    jenn =  246,    1,    1,  
-    timax = 36500000./ ! 100 millennia
+!    ienw =  110,    1,    1,    
+!    iene =  120,    1,    1,   
+!    jens =  246,    1,    1,      
+!    jenn =  246,    1,    1,  
+!    timax = 36500000./ ! 100 millennia
+! No end section
+!    ienw =  1,    1,    1,    
+!    iene =  1,    1,    1,   
+!    jens =  1,    1,    1,      
+!    jenn =  1,    1,    1,  
+!    timax = 3652./ ! 1 decade
+!    timax = 36525./ ! 1 century
+!    timax = 366000./ ! 1 millenia
+!    timax = 3660000./ ! 10 millenia
+!    timax = 36500000./ ! 100 millennia
      
     

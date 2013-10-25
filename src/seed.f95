@@ -128,12 +128,13 @@ CONTAINS
                vol=wflux(kb,nsm)
 #endif
          
-            CASE (4 ,5)   ! Total volume/mass transport through grid box
+            CASE (4 ,5)   ! Total volume/mass of a grid box
                IF (KM+1-kmt(iist,ijst) > kb) THEN
                   CYCLE startLoop
                ELSE
-                  vol = uflux (ib, jb, kb,nsm) + uflux (ibm, jb  , kb,nsm) + & 
-                  &     vflux (ib, jb, kb,nsm) + vflux (ib , jb-1, kb,nsm)
+!                  vol = uflux (ib, jb, kb,nsm) + uflux (ibm, jb  , kb,nsm) + & 
+!                  &     vflux (ib, jb, kb,nsm) + vflux (ib , jb-1, kb,nsm)
+                  vol = 1.  ! This is a quick fix so the code continues ??????????
                ENDIF
                IF (vol == 0.d0) cycle startLoop
          
@@ -146,8 +147,7 @@ CONTAINS
          ! Volume/mass transport needs to be positive   
          vol = ABS (vol)
       
-        
-         ! Calculate transport of each individual trajectory
+         ! Calculate volume/mass of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
 #ifdef zgrid3Dt
             vol = dzt(ib,jb,kb,1)
@@ -165,8 +165,9 @@ CONTAINS
             IF (kb == KM) THEN
                vol = vol+hs(ib,jb,nsm)
             END IF
-            vol = vol*dxdy(ib,jb)
+            vol = vol*dxdy(ib,jb)*1.e-6  ! volume in millions of m3
 #endif /*freesurface*/
+
          END IF
           
          ! Number of trajectories for box (iist,ijst,ikst)
@@ -183,11 +184,10 @@ CONTAINS
          IF (num == 0 .AND. nqua /= 4) THEN
             num=1
          END IF
-     
          ijt    = NINT (SQRT (FLOAT(num)) ) 
          ikt    = NINT (FLOAT (num) / FLOAT (ijt))
          subvol = vol / DBLE (ijt*ikt)
-     
+
          IF (subvol == 0.d0) THEN
             print *, ' Transport of particle is zero!!!'
             print *, '    vol :', vol
@@ -215,6 +215,8 @@ CONTAINS
                      ib = iist+1
                   ELSE IF (idir == -1) THEN
                      ib=iist 
+                  else
+                     stop 6020
                   END IF
                   
                CASE (2)   ! Zonal-vertical section
@@ -225,6 +227,8 @@ CONTAINS
                      jb = ijst+1
                   ELSE IF (idir == -1) THEN
                      jb = ijst
+                  else
+                     stop 6020
                   END IF 
               
                CASE (3)   ! Horizontal section                  
@@ -235,6 +239,8 @@ CONTAINS
                      kb = ikst+1
                   ELSE IF (idir == -1) THEN
                      kb = ikst
+                  else
+                     stop 6020
                   END IF
                   
                CASE (4)   ! Spread even inside box                  
@@ -267,7 +273,7 @@ CONTAINS
            
                ! Only one particle for diagnistics purposes
                if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
-                  nrj(ntrac,6)=1
+                  nrj(6,ntrac)=1
                   cycle kkkLoop
                endif
                
@@ -280,9 +286,9 @@ CONTAINS
                ! ------------------------------------------------------------
                ! --- Put the new particle into the vectors trj and nrj ---
                ! ------------------------------------------------------------
-               trj(ntrac,1:7) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
-               nrj(ntrac,1:5) = [ ib, jb, kb,  0, IDINT(ts)]
-               nrj(ntrac,7)=1
+               trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
+               nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
+               nrj(7,ntrac)=1
 
                !Save initial particle position
                call writedata(10) !ini

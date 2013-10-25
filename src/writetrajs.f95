@@ -90,7 +90,7 @@ CONTAINS
     USE mod_pos
     USE mod_traj
     USE mod_loopvars
-
+    USE mod_name
 
     IMPLICIT NONE
 
@@ -143,10 +143,10 @@ CONTAINS
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
     case (11)
-       if(  (kriva == 1 .AND. nrj(ntrac,4) == niter-1      ) .or. &
-            (kriva == 2 .AND. scrivi                       ) .or. &
-            (kriva == 3                                    ) .or. &
-            (kriva == 4 .AND. niter == 1                   ) .or. &
+       if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
+            (kriva == 2 .AND. scrivi                    ) .or. &
+            (kriva == 3                                 ) .or. &
+            (kriva == 4 .AND. niter == 1                ) .or. &
             (kriva == 5 .AND.                                  &
           &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
             (kriva == 6 .AND. .not.scrivi                  ) ) then
@@ -156,7 +156,11 @@ CONTAINS
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
+#if defined tempsalt
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+#else
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
+#endif        
 #endif        
        endif
     case (13)
@@ -184,8 +188,8 @@ CONTAINS
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
        do n=1,ntracmax
-        if(nrj(n,1).ne.0) then
-         write(34,566) n,nrj(n,4),trj(n,1),trj(n,2),trj(n,3),trj(n,4)/tday,trj(n,7)/tday
+        if(nrj(1,n).ne.0) then
+         write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
       endif
        enddo
        close(34)
@@ -215,10 +219,10 @@ CONTAINS
        write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(ntrac,4)  ==  niter-1    ) .or. &
-            (kriva == 2 .and. scrivi                       ) .or. &
-            (kriva == 3                                    ) .or. &
-            (kriva == 4 .and. niter == 1                   ) .or. &
+       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+            (kriva == 2 .and. scrivi                    ) .or. &
+            (kriva == 3                                 ) .or. &
+            (kriva == 4 .and. niter == 1                ) .or. &
             (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva == 6 .and. .not.scrivi                  ) ) then
 #if defined tempsalt
@@ -274,10 +278,10 @@ CONTAINS
        write(88,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(ntrac,4)  ==  niter-1    ) .or. &
-            (kriva == 2 .and. scrivi                       ) .or. &
-            (kriva == 3                                    ) .or. &
-            (kriva == 4 .and. niter == 1                   ) .or. &
+       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+            (kriva == 2 .and. scrivi                    ) .or. &
+            (kriva == 3                                 ) .or. &
+            (kriva == 4 .and. niter == 1                ) .or. &
             (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva == 6 .and. .not.scrivi                  )  ) then
           !!!! CALL FIELD-INTERP !!!!

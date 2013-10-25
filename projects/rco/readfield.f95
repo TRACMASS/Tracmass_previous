@@ -536,8 +536,8 @@ enddo
 
 #endif
 
-uflux(:,:,:,2) = uflux(:,:,:,2)
-vflux(:,:,:,2) = vflux(:,:,:,2)
+uflux(:,:,:,2) = uflux(:,:,:,2) 
+vflux(:,:,:,2) = vflux(:,:,:,2) 
 
 !deallocate ( snap1d, rd2d )
 !deallocate ( rd1d_a, rd1d_b )

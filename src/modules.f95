@@ -16,6 +16,7 @@ MODULE mod_param
 #endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
+  REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small number epsilon
 
   REAL*8, PARAMETER                         :: grav = 9.81
   REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
@@ -410,9 +411,11 @@ MODULE mod_vel
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*8                                     :: ff
+
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
+
   INTEGER                                    :: degrade_time=0
     integer, save                            :: degrade_counter = 0
 

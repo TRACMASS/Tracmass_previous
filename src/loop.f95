@@ -36,10 +36,10 @@ SUBROUTINE loop
   IMPLICIT none
 
   ! === Loop variables ===
-  INTEGER                                    :: i,  j,  k, l, m
+  INTEGER                                    :: i,  j,  k, l, m, n
   ! === Variables to interpolate fields ===
-  REAL                                       :: temp, salt, dens
-  REAL                                       :: temp2, salt2, dens2
+ ! REAL                                       :: temp, salt, dens
+ ! REAL                                       :: temp2, salt2, dens2
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
@@ -64,19 +64,19 @@ SUBROUTINE loop
 !  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
 #if defined orca025
- if(rlat == dble(jenn(1))) then
-    nrj(ntrac,8)=0     ! Southern boundary
-    i=i+1
-    nout=nout+1
- elseif(rlon == dble(iene(3))) then
-    nrj(ntrac,8)=0    ! East
+  if(    rlat == dble(jenn(1))) then
+     nrj(8,ntrac)=0     ! Southern boundary
+     i=i+1
+     nout=nout+1
+  elseif(rlon == dble(iene(3))) then
+     nrj(8,ntrac)=0    ! East
      j=j+1
      nout=nout+1
   elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
-     nrj(ntrac,8)=1    ! back to the warm pool
+     nrj(8,ntrac)=1    ! back to the warm pool
      k=k+1
   else
-     nrj(ntrac,8)=0 
+     nrj(8,ntrac)=0 
      l=l+1   
      nout=nout+1
   endif
@@ -84,13 +84,13 @@ SUBROUTINE loop
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #elif defined orca025L75
   if( tt-t0 >365.*1000. .and. temp > tmax0 ) then
-     nrj(ntrac,8)=1     ! warm end points
+     nrj(8,ntrac)=1     ! warm end points
      i=i+1
   elseif( tt-t0 >365.*1000. .and. temp <= tmax0 ) then
-     nrj(ntrac,8)=2    ! cold end points
+     nrj(8,ntrac)=2    ! cold end points
      j=j+1
   else                 ! too short
-     nrj(ntrac,8)=0 
+     nrj(8,ntrac)=0 
      k=k+1
      nout=nout+1
   endif
@@ -98,28 +98,43 @@ SUBROUTINE loop
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 
 #elif defined ifs
-  if(rlat == dble(jenn(1))) then
-     nrj(ntrac,8)=1    ! Southern boundary
-  elseif(rlat == dble(jens(2))) then
-     nrj(ntrac,8)=2    ! Northern boundary 
-  else
-     nrj(ntrac,8)=0
+  lbasLoop: do n=1,LBT
+     if( dble(ienw(n)) <= rlon .and. rlon <= dble(iene(n)) .and. &
+         dble(jens(n)) <= rlat .and. rlat <= dble(jenn(n))  ) then
+        
+        nrj(8,ntrac) = n
+        
+        dist(n) = dist(n) + 1
+        
+        cycle lbasLoop
+        
+     endif
+  enddo lbasLoop
+  
+  if( nrj(8,ntrac) == 0 ) then
      print 566,ntrac,niter,rlon,rlat,zz
      stop 4957
-  endif /*orc*/
+  endif
+  
 566 format(i8,i7,2f8.2,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #endif
  
   goto 40
 41 continue
+#ifdef ifs
+  print *,'Lagrangian decomposition distribution in %: '
+  do n=1,LBT
+     PRINT*,100.*float(dist(n))/float(sum(dist))
+  enddo
+#else
   m=i+j+k+l
   print *,'Lagrangian decomposition distribution in %: ',     &
-       100.*float(i)/float(i+j+k+l),100.*float(j)/float(i+j+k+l),  &
-       100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
-
+  100.*float(i)/float(i+j+k+l),100.*float(j)/float(i+j+k+l),  &
+  100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
+#endif
   do ntrac=1,ntracmax ! eliminate the unwanted trajectories
-   if(nrj(ntrac,8) == 0) nrj(ntrac,6)=1 
+   if(nrj(8,ntrac) == 0) nrj(6,ntrac)=1 
   enddo
   
 #else
@@ -143,8 +158,8 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-  intsTimeLoop: do ints=intstart+1,intstart+intrun
-!  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
+!  intsTimeLoop: do ints=intstart+1,intstart+intrun
+  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
@@ -160,8 +175,8 @@ SUBROUTINE loop
       call writetracer
      endif
 
-!    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
-    intspinCond: if(ints <= intstart+intspin) then
+    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+!    intspinCond: if(ints <= intstart+intspin) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)
         call fancyTimer('seeding','stop')
@@ -182,30 +197,30 @@ SUBROUTINE loop
      ntracLoop: do ntrac=1,ntractot  
      
         ! === Test if the trajectory is dead   ===
-        if(nrj(ntrac,6) == 1) cycle ntracLoop
+        if(nrj(6,ntrac) == 1) cycle ntracLoop
         
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
-        x1     =  trj(ntrac,1)
-        y1     =  trj(ntrac,2)
-        z1     =  trj(ntrac,3)
-        tt     =  trj(ntrac,4)
-        subvol =  trj(ntrac,5)
-        t0     =  trj(ntrac,7)
+        x1     =  trj(1,ntrac)
+        y1     =  trj(2,ntrac)
+        z1     =  trj(3,ntrac)
+        tt     =  trj(4,ntrac)
+        subvol =  trj(5,ntrac)
+        t0     =  trj(7,ntrac)
         
-        ib     =  nrj(ntrac,1)
-        jb     =  nrj(ntrac,2)
-        kb     =  nrj(ntrac,3)
-        niter  =  nrj(ntrac,4)
-        ts     =  dble(nrj(ntrac,5))
+        ib     =  nrj(1,ntrac)
+        jb     =  nrj(2,ntrac)
+        kb     =  nrj(3,ntrac)
+        niter  =  nrj(4,ntrac)
+        ts     =  dble(nrj(5,ntrac))
         tss    =  0.d0
         
 #ifdef rerun
-        lbas=nrj(ntrac,8)
+        lbas=nrj(8,ntrac)
         if(lbas.lt.1 .or.lbas.gt.LBT) then
            print *,'lbas=',lbas,'ntrac=',ntrac
-           print *,'trj(ntrac,:)=',trj(ntrac,:)
-           print *,'nrj(ntrac,:)=',nrj(ntrac,:)
+           print *,'trj(:,ntrac)=',trj(:,ntrac)
+           print *,'nrj(:,ntrac)=',nrj(:,ntrac)
            exit intsTimeLoop
         endif
 #endif /*rerun*/
@@ -213,23 +228,23 @@ SUBROUTINE loop
         ! === Check if water velocities are === 
         ! === large enough for resuspention ===
         ! === of sedimentated trajectories  ===   
-        if( nrj(ntrac,6) == 2 ) then
+        if( nrj(6,ntrac) == 2 ) then
            call resusp(res,ib,jb,kb)
            if(res) then
               ! === updating model time for  ===
               ! === resuspended trajectories ===
               ts=dble(ints-2)
-              nrj(ntrac,5)=ints-2
+              nrj(5,ntrac)=ints-2
               tt=tseas*dble(ints-2)
-              trj(ntrac,4)=tt
+              trj(4,ntrac)=tt
               ! === resuspension to bottom layer ===
               ! === kb same as before            ===
-              nrj(ntrac,3)=kb
+              nrj(3,ntrac)=kb
               z1=z1+0.5d0
               ! z1=z1+0.1  !resusp l?gre i boxen
-              trj(ntrac,3)=z1
+              trj(3,ntrac)=z1
               ! === change flag to put trajectory back in circulation ===
-              nrj(ntrac,6)=0
+              nrj(6,ntrac)=0
               nsed=nsed-1
               nsusp=nsusp+1
            else
@@ -248,21 +263,21 @@ SUBROUTINE loop
            ! === change velocity fields &  === 
            ! === store trajectory position ===
            if( niter.ne.1 .and. tss == dble(iter) &
-                .and. nrj(ntrac,7).ne.1 ) then
-              trj(ntrac,1)=x1
-              trj(ntrac,2)=y1
-              trj(ntrac,3)=z1
-              trj(ntrac,4)=tt
-              trj(ntrac,5)=subvol
-              nrj(ntrac,1)=ib
-              nrj(ntrac,2)=jb
-              nrj(ntrac,3)=kb
-              nrj(ntrac,4)=niter
-              nrj(ntrac,5)=idint(ts)
-              nrj(ntrac,7)=1
+                .and. nrj(7,ntrac).ne.1 ) then
+              trj(1,ntrac)=x1
+              trj(2,ntrac)=y1
+              trj(3,ntrac)=z1
+              trj(4,ntrac)=tt
+              trj(5,ntrac)=subvol
+              nrj(1,ntrac)=ib
+              nrj(2,ntrac)=jb
+              nrj(3,ntrac)=kb
+              nrj(4,ntrac)=niter
+              nrj(5,ntrac)=idint(ts)
+              nrj(7,ntrac)=1
               cycle ntracLoop
            endif
-           nrj(ntrac,7)=0
+           nrj(7,ntrac)=0
            intrpg = dmod(ts,1.d0) ! time interpolation constant between 0 and 1
            intrpr = 1.d0-intrpg
            if(intrpg.lt.0.d0 .or.intrpg.gt.1.d0) then
@@ -314,6 +329,8 @@ SUBROUTINE loop
                 1.d0 - tt/tseas*dble(iter) )
            dt=dtreg
            dsmin=dt/dxyz
+#elif stationary
+           dsmin=UNDEF
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
@@ -343,21 +360,31 @@ SUBROUTINE loop
            ! === north fold cyclic for the ORCA grids ===
 #if defined orc || orca1 || orca12 
             if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+  !            print *,'v',(rbg*vflux(ia,ja,ka,nsp) + rb*vflux(ia,ja,ka,nsm))*ff
               x1 = dble(IMT+2) - x1
               ib=idint(x1)+1
               jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
  !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
+  !            print *,'v',(rbg*vflux(ia,jb,ka,nsp) + rb*vflux(ia,jb,ka,nsm))*ff
            elseif(y1 > dble(JMT-1)) then
-              print *,'north of northfold for ntrac=',ntrac
-              print *,ia,ib,x0,x1
-              print *,ja,jb,y0,y1
-              print *,ka,kb,z0,z1
-              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-              nerror=nerror+1
-              nrj(ntrac,6)=1
-              cycle ntracLoop
-              !stop 4967
+             print *,'north of northfold for ntrac=',ntrac
+             x1 = dble(IMT+2) - x1
+             ib=idint(x1)+1
+             jb=JMT-1
+             y1= dble(JMT-1) -y1 + dble(JMT-1)
+             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+
+!              print *,ia,ib,x0,x1
+!              print *,ja,jb,y0,y1
+!              print *,ka,kb,z0,z1
+!              print *,kmt(ia,ja),kmt(ib,jb)
+!              print *,'v',(rbg*vflux(ia,ja  ,ka,nsp) + rb*vflux(ia,ja  ,ka,nsm))*ff
+!              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+!              nerror=nerror+1
+!              nrj(6,ntrac)=1
+!              stop 4967
+!              cycle ntracLoop
            endif
 #elif defined orca025 || orca025L75
            if( y1 == dble(JMT-1) ) then
@@ -373,7 +400,7 @@ SUBROUTINE loop
               print *,ka,kb,z0,z1
               print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
               nerror=nerror+1
-              nrj(ntrac,6)=1
+              nrj(6,ntrac)=1
               cycle ntracLoop
            endif
 #endif
@@ -416,8 +443,10 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
-           if (x1 < 0) exit niterloop
 
+!#ifndef tes  ! why was this included before?????
+!           if (x1 < 1) exit niterloop
+!#endif
            
 #if defined tempsalt
            call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
@@ -440,8 +469,8 @@ SUBROUTINE loop
         end do niterLoop
 
         nout=nout+1
-        call writedata(17) !out
-        nrj(ntrac,6)=1
+        call writedata(17)
+        nrj(6,ntrac)=1
      end do ntracLoop
  
      call print_cycle_loop()
@@ -539,7 +568,7 @@ return
              errCode = -39
              if (strict==1) stop 40961
              call writedata(40)
-             nrj(ntrac,6)=1
+             nrj(6,ntrac)=1
           endif          
 
        case ('boundError')
@@ -562,7 +591,8 @@ return
              boundError = boundError +1
              errCode = -50
              if (strict==1) stop
-             nrj(ntrac,6)=1
+             call writedata(40)
+             nrj(6,ntrac)=1
           endif
 
        case ('landError')
@@ -589,7 +619,7 @@ return
              landError = landError +1
              errCode = -40             
              call writedata(40)
-             nrj(ntrac,6)=1
+             nrj(6,ntrac)=1
              if (strict==1) stop 
           endif
           case ('coordboxError')
@@ -629,7 +659,7 @@ return
              stop
           end if
        case ('infLoopError')
-          if(niter-nrj(ntrac,4).gt.30000) then ! break infinite loops
+          if(niter-nrj(4,ntrac) > 30000) then ! break infinite loops
              if (verbose == 1) then
                 print *, thickline !========================================
                 print *,'Warning: Particle in infinite loop '
@@ -652,17 +682,19 @@ return
                 print *, thinline !-----------------------------------------
              end if
              trj(ntrac,1)=x1
-             trj(ntrac,2)=y1
-             trj(ntrac,3)=z1
-             trj(ntrac,4)=tt
-             trj(ntrac,5)=subvol
-             nrj(ntrac,1)=ib
-             nrj(ntrac,2)=jb
-             nrj(ntrac,3)=kb
-             nrj(ntrac,4)=niter
-             nrj(ntrac,5)=idint(ts)
-             nrj(ntrac,6) = 1  ! 0=continue trajectory, 1=end trajectory
-             nrj(ntrac,7)=1
+!             z1=dble(kb)-0.5d0
+             trj(1,ntrac)=x1 !dble(ib)-0.5d0  !x1
+             trj(2,ntrac)=y1 !dble(jb)-0.5d0 ! y1
+             trj(3,ntrac)=z1 !dble(kb)-0.5d0 ! z1
+             trj(4,ntrac)=tt
+             trj(5,ntrac)=subvol
+             nrj(1,ntrac)=ib
+             nrj(2,ntrac)=jb
+             nrj(3,ntrac)=kb
+             nrj(4,ntrac)=niter
+             nrj(5,ntrac)=idint(ts)
+             nrj(6,ntrac)=1  ! 0=continue trajectory, 1=end trajectory
+             nrj(7,ntrac)=1
              nloop=nloop+1             
              errCode = -48
           end if
@@ -671,7 +703,7 @@ return
           ! then put in middle of deepest layer 
           ! (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
-              print *,'under bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
+              print *,'below bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
               print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
               print *,'ntrac=',ntrac,niter 
               call print_ds
@@ -681,7 +713,7 @@ return
               call cross_stat(3,ia,ja,ka,z0,dsu,dsd) ! vertical
               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
-              nrj(ntrac,6)=1
+ !             nrj(6,ntrac)=1
  !             stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
@@ -750,7 +782,7 @@ return
                  print *, thickline !========================================
               end if
               nerror=nerror+1
-              nrj(ntrac,6)=1
+              nrj(6,ntrac)=1
               errCode = -56
            end if
         case ('longjump')
@@ -785,6 +817,41 @@ return
         end select
       end subroutine errorCheck
 
+  subroutine calc_dxyz
+    ! T-box volume in m3
+#ifdef zgrid3Dt 
+    dxyz=rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
+#elif  zgrid3D
+    dxyz=dzt(ib,jb,kb)
+#ifdef freesurface
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+#endif /*freesurface*/
+#else
+    dxyz=dz(kb)
+#ifdef varbottombox
+    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
+#endif /*varbottombox*/
+#ifdef freesurface
+    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
+#endif /*freesurface*/
+#endif /*zgrid3Dt*/
+    dxyz=dxyz*dxdy(ib,jb)
+    if (dxyz<0) then
+       print *,'=========================================================='
+       print *,'ERROR: Negative box volume                                '
+       print *,'----------------------------------------------------------'
+       print *,'dzt  = ', dxyz,dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
+       print *,'dxdy = ', dxdy(ib,jb)
+       print *,'hs = ', rg,hs(ib,jb,nsp),rr,hs(ib,jb,nsm)
+       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb,' nsp/nsm  = ', nsp,nsm
+       print *,'----------------------------------------------------------'
+       print *,'The run is terminated'
+       print *,'=========================================================='
+       errCode = -60
+       stop
+    end if
+  end subroutine calc_dxyz
+
   subroutine print_ds
     print *, '   ds = ', ds 
     print *, '  dse = ', dse
@@ -804,14 +871,77 @@ return
     print '(A,F16.4, A,E12.3)', '  dxdy :',dxdy(ib,jb), &
          '          dxyz :  ',dxyz
 
+  subroutine calc_time
+#ifdef regulardt
+           if(ds == dsmin) then ! transform ds to dt in seconds
+!            dt=dt  ! this makes dt more accurate
+           else
+            dt = ds * dxyz 
+           endif
+#elif stationary
+           dt = ds * dxyz 
+#else
+           if(ds == dsmin) then ! transform ds to dt in seconds
+              dt=dtmin  ! this makes dt more accurate
+           else
+              dt = ds * dxyz 
+           endif
+#endif /*regulardt*/
+           if(dt.lt.0.d0) then
+              stop 4968
+           endif
+#ifdef stationary
+              tt=tt+dt
+#else
+           ! === if time step makes the integration ===
+           ! === exceed the time when fields change ===
+           if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
+              dt=dble(idint(ts)+1)*tseas-tt
     print '(A,I4,A,F7.2,A,F7.2)',    &
          '    kmt: ', kmt(ib,ja), &
+              tss=dble(iter)
+              ds=dt/dxyz
+              dsc=ds
+           else
+              tt=tt+dt
 #if defined zgrid3Dt || defined zgrid3D
+              if(dt == dtmin) then
+                 ts=ts+dstep
+                 tss=tss+1.d0
          '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
+                 ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
+!                 ts=ts+dtreg/tseas
+                 tss=dble(nint(tss+dt/dtmin))
+              else
+                 ts=ts+dt/tseas
+                 tss=tss+dt/dtmin
+              endif
 #else
-         '    dz(k) : ', dz(kb), '   dzt :  ', 0.0
-#endif
-       end subroutine print_grd
+              if(dt == dtmin) then
+                 ts=ts+dstep
+                 tss=tss+1.d0
+              else
+                 ts =ts +dt/tseas
+                 tss=tss+dt/tseas*dble(iter)
+!                 tss=tss+dt/dtmin
+              endif
+#endif /*regulardt*/
+           end if
+#endif /*stationary*/
+           ! === time interpolation constant ===
+           rbg=dmod(ts,1.d0) 
+           rb =1.d0-rbg
+         end subroutine calc_time
+
+
+
+
+
+
+
+
+
+
 
   subroutine print_pos
     print '(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)', &

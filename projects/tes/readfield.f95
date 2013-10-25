@@ -93,8 +93,8 @@ do k=1,KM
 end do ! enddo k-loop
 
 ! zero at north and south boundaries 
-vflux(:,0  ,:,:)=0.
-vflux(:,JMT,:,:)=0.
+!vflux(:,0  ,:,:)=0.
+!vflux(:,JMT,:,:)=0.
 
 
 return

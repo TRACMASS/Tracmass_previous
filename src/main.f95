@@ -23,12 +23,14 @@ PROGRAM main
   modrundirCond: if(intstep.gt.0) then ! forward 
      intstart =  intmin          
      intend   =  intmax
+     nff      =  1
   elseif(intstep.lt.0) then ! backward
      intstart =  intmin+intrun
      minvelints = minvelints + intrun
      intend   =  intmin
      intspin  = -intspin
-     intrun   = -intrun    
+     intrun   = -intrun
+     nff      =  -1    
   end if modrundirCond
  
  call setupgrid
@@ -57,6 +59,17 @@ PROGRAM main
   elseif(nqua.eq.3) then 
      voltr=partQuant
   endif
+
+#if defined stationary
+  iter=1
+  intmin=1 
+  if(nff>0) then
+   intspin =1 ; intrun=1
+  elseif(nff<0) then
+   intspin =-1 ; intrun=-1
+  endif
+#endif
+
   
   call open_outfiles
   call loop

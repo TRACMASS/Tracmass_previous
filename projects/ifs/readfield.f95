@@ -10,7 +10,7 @@ SUBROUTINE readfields
 !!   rho    -  Pressure [hPa]
 !!
 !!   If option -Dpottemp is activated in Makefile, tem is potential temperature
-!!   [K], and sal is moist potential temperature [K].
+!!   [K], and sal is equivalent ("moist") potential temperature [K].
 !!   If option -Denergy is activated in Makefile, tem is dry static energy
 !!   [kJ/kg] and sal is moist static energy [kJ/kg].
 !!
@@ -241,13 +241,13 @@ DO k=1,KM
             im=IMT
          END IF
          
-         tem  (i,j,l,2) = 0.25*(th(i,jj)+th(im,jj)+th(i,jm)+th(im,jm))
-         sal  (i,j,l,2) = 0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm))
+         tem  (i,j,l,2) = 0.25*(th(i,jj)+th(im,jj)+th(i,jm)+th(im,jm)) ![K]
+         sal  (i,j,l,2) = 0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm)) ![g/kg]
          
-         pp = 0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm))
+         pp = 0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm)) ![Pa]
          dzt  (i,j,l,2) = ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit / grav
          
-         rho  (i,j,l,2) = 0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit
+         rho  (i,j,l,2) = 0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit ![hPa]
                   
          uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg / grav * &
          &     ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(i,jm)) )*punit
@@ -278,8 +278,8 @@ DO i = 1,IMT
    zg(i,:,KM) = 0.25 * (zh(i,1:JMT)+zh(i,2:NY)+zh(im,1:JMT)+zh(im,2:NY))
 END DO
 
-pref = 100000. * punit
-eunit = 1e-3
+pref = 100000. * punit ![hPa]
+eunit = 1e-3 ![kJ/kg]
 
 Rd = 287.05d0   ! Gas constant for dry air
 Lv = 2.5d+6     ! Latent heat for condensation of water vapor [J/kg]
@@ -299,15 +299,15 @@ DO k = KM,1,-1
          tv = ( 1.0 + 0.61 * sal(i,j,k,2)/1000. ) * tem(i,j,k,2)
          ! Pressure at current interface k
          pc = aa(k) + bb(k) * &
-         &         0.25 * (ph(i,j+1)+ph(im,j+1)+ph(i,j)+ph(im,j))
+         &         0.25 * (ph(i,j+1)+ph(im,j+1)+ph(i,j)+ph(im,j)) ![Pa]
          ! Pressure at interface k-1
          pm = aa(k-1) + bb(k-1) * &
-         &         0.25 * (ph(i,j+1)+ph(im,j+1)+ph(i,j)+ph(im,j))
+         &         0.25 * (ph(i,j+1)+ph(im,j+1)+ph(i,j)+ph(im,j)) ![Pa]
          IF (k-1 == 0) THEN
-            pm = 10.*punit
+            pm = 10. ![Pa]
          END IF
          ! Geopotential at interface k-1
-         zg(i,j,k-1) = zg(i,j,k) + Rd * tv * LOG (pc/pm)
+         zg(i,j,k-1) = zg(i,j,k) + Rd * tv * LOG (pc/pm) ![m2/s2]
       
       END DO
    END DO
@@ -315,10 +315,9 @@ ENDDO
 
 #ifdef pottemp
 ! Potential temperature (dry)
-td(:,:,:) = tem(:,:,:,2) * ( pref/rho(:,:,:,2) )**(Rd/cp)
+td(:,:,:) = tem(:,:,:,2) * ( pref/rho(:,:,:,2) )**(Rd/cp) ![K]
 ! Potential temperature (wet)
-tw(:,:,:) = tem(:,:,:,2) * (1.d0 + 0.61 * sal(:,:,:,2)/1000.d0) &
-          &              * ( pref/rho(:,:,:,2) )**(Rd/cp)
+tw(:,:,:) = td(:,:,:) * Lv/cp * sal(:,:,:,2)/1000. ![K]
 
 tem(:,:,:,2) = td
 sal(:,:,:,2) = tw
@@ -326,12 +325,12 @@ sal(:,:,:,2) = tw
 
 #ifdef energy
 ! Dry static energy
-td(:,:,:) = cp * tem(:,:,:,2) + 0.5 * (zg(:,:,1:KM) + zg(:,:,0:KM-1))
+td(:,:,:) = cp * tem(:,:,:,2) + 0.5 * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![J/kg]
 ! Moist static energy
-tw(:,:,:) = td(:,:,:) + Lv * sal(:,:,:,2)/1000.
+tw(:,:,:) = td(:,:,:) + Lv * sal(:,:,:,2)/1000. ![J/kg]
 
-tem(:,:,:,2) = td * eunit
-sal(:,:,:,2) = tw * eunit
+tem(:,:,:,2) = td * eunit ![kJ/kg]
+sal(:,:,:,2) = tw * eunit ![kJ/kg]
 #endif
 
 CLOSE (14) 
