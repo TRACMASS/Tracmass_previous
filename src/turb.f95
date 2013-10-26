@@ -1,24 +1,9 @@
-#ifdef turb    
-subroutine turbuflux(ia,ja,ka,rr,dt)
-  
-  ! computes the paramterised turbulent velocities u' and v' into upr
-  
-  USE mod_param
-
 MODULE mod_turb
   REAL upr(12,2)
-  IMPLICIT none
-  
-  REAL*8         :: uv(12),rr,rg,localW,dt !,en
-  REAL*4         :: qran(12),amp
-  INTEGER        :: ia,ja,ka,im,jm,n
 
-!amp=Ah/sqrt(dt)
-!amp=Ah/dtmin
-!amp=Ah/sqrt(dtmin)
+CONTAINS
+
   subroutine turbuflux(ia,ja,ka,dt)
-!print *,Ah,dt,amp
-amp=Ah/( dtmin**(1./3.) )
     ! computes the paramterised turbulent velocities u' and v' into upr
   
     USE mod_param
@@ -39,19 +24,19 @@ amp=Ah/( dtmin**(1./3.) )
     !stop 4967
     !  call random_number(qran) ! generates a random number between 0 and 1
     
-! random generated numbers between 0 and 1
-!do n=1,12
- !qran(n)=rand()
- CALL RANDOM_NUMBER (qran)
-!enddo
+    ! random generated numbers between 0 and 1
+    !do n=1,12
+    !qran(n)=rand()
+    CALL RANDOM_NUMBER (qran)
+    !enddo
 	
-!  qran=2.*qran-1. ! === Max. amplitude of turbulence with random numbers between -1 and 1
+    !  qran=2.*qran-1. ! === Max. amplitude of turbulence with random numbers between -1 and 1
                    ! === (varies with the same aplitude as the mean vel)
-  !qran=1.*qran-0.5  ! Reduced amplitude of turb.
-!  qran=4.*qran-2. ! ===  amplitude of turbulence with random numbers between -2 and 2
-!  qran=8.*qran-4. ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
-!  qran=30.*qran-15. ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
-  qran=amp*qran-0.5*amp ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
+    !qran=1.*qran-0.5  ! Reduced amplitude of turb.
+    !  qran=4.*qran-2. ! ===  amplitude of turbulence with random numbers between -2 and 2
+    !  qran=8.*qran-4. ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
+    !  qran=30.*qran-15. ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
+    qran=amp*qran-0.5*amp ! ===  amplitude of turbulence with random numbers between -2 and 2 only works with !  upr(:,1)=upr(:,2)
     
         im=ia-1
     if(im.eq.0) im=IMT
@@ -131,15 +116,12 @@ amp=Ah/( dtmin**(1./3.) )
        upr(12,n) = - upr(11,n)
     endif
 #endif
-
  enddo
 #endif
 #endif
  
- 
  return
-end subroutine turbuflux
 #endif
-  end subroutine turbuflux
+end subroutine turbuflux
 ENDMODULE mod_turb
 !_______________________________________________________________________
