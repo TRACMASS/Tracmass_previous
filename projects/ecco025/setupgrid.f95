@@ -33,95 +33,58 @@ SUBROUTINE setupgrid
   !  dyu -
   ! -------------------------------------------------------------
 
-
-  ! = ECCO Grid fields
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:)     :: gridDRC ,gridDRF
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: gridDXC ,gridDXG
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: gridDYC ,gridDYG
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: hFacW   ,hFacS
-  REAL, SAVE, ALLOCATABLE, DIMENSION(:,:)   :: gridRAC
-  REAL, DIMENSION(2)                        :: ttest1  ,ttest2
-  ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
+
+  REAL,          ALLOCATABLE, DIMENSION(:)   :: lat,lon,dz_inv
+  REAL,          ALLOCATABLE, DIMENSION(:,:) :: dytt,dxtt
   CHARACTER (len=200)                        :: gridfile
 
+  allocate ( lon(imt), lat(jmt), dz_inv(km) )
+  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt), mask(imt,jmt) )
+  call coordinat
 
-! === Template for setting up grids. Move the code from readfile.f95
-  allocate ( mask(imt,jmt), depth(imt,jmt) )
-
-  !Order is   t  k  i  j 
-
-  start1d  =  1
-  count1d  = 42
-  gridfile = trim(inDataDir) // '/grid/' // 'DRC.data'
-  gridDRC  = get1dfield()
-  gridfile = trim(inDataDir) // '/grid/' // 'DRF.data'
-  gridDRF  = get1dfield()
-  
-  start2d  = [   1,  1]
-  count2d  = [2160,320]
-  start3d  = [   1,  1, 1]
-  count3d  = [2160,320,42]
-  gridfile = trim(inDataDir) // '/grid/' // 'DXC.data'
-  gridDXC  = get2dfield()
-  gridfile = trim(inDataDir) // '/grid/' // 'RAC.data'
-  gridRAC  = get2dfield()
-  gridfile = trim(inDataDir) // '/grid/' // 'DXG.data'
-  gridDXG  = get2dfield()
-  gridfile = trim(inDataDir) // '/grid/' // 'DYC.data'
-  gridDYC  = get2dfield()
-  gridfile = trim(inDataDir) // '/grid/' // 'DXG.data'
-  gridDYG  = get2dfield() 
-  gridfile = trim(inDataDir) // '/grid/' // 'hFacW.data'
-  hFacW    = get3dfield()
-  gridfile = trim(inDataDir) // '/grid/' // 'hFacS.data'
-  hFacW    = get3dfield()
-
-  dxdy     = gridDXC*gridDYC
-  dz       = gridDRC(km:1:-1)
-  kmt      = sum(ceiling(hFacW),3)
-
-
-
-
-
-
-
-
-
-
-
-
-
+  map2d    = [3, 4, 1, 1]
+  map3d    = [2, 3, 4, 1]
   ncTpos = 1
-  print *, trim(gridfile)
-  dxv(:-2,:) = get2DfieldNC(trim(gridfile), 'x_rho')
-  dyu(:-2,:) = get2DfieldNC(trim(gridfile), 'y_rho')
+  gridfile = trim(inDataDir) // 'UVEL.1440x720x50.20050204.nc'
 
-  dxv(1:imt-1,:) = dxv(2:imt,:)-dxv(1:imt-1,:)
-  dyu(:,1:jmt-1) = dyu(:,2:jmt)-dyu(:,1:jmt-1)
-  dxv(imt:imt+1,:) = dxv(imt-2:imt-1,:)
-  dyu(:,jmt) = dyu(:,jmt-1)
-  dxdy = dyu*dxv
+  count1d  = imt
+  lon =  get1DfieldNC(trim(gridfile) , 'LONGITUDE_T')
+  count1d  = jmt
+  lat =  get1DfieldNC(trim(gridfile) , 'LATITUDE_T')
+  count1d  = km
 
-  depth = get2DfieldNC(trim(gridfile), 'h')
-  mask = get2DfieldNC(trim(gridfile), 'mask_rho')
-  kmt = 40 
+  do i=1,imt-1
+     do j=1,jmt-1
+        dxtt(i,j) = l2d( lon(i), lon(i+1), lat(j), lat(j) )
+        dytt(i,j) = l2d( lon(i), lon(i), lat(j), lat(j+1) )
+     end do
+  end do
 
-  where (mask(2:imt,:) == 0) 
-     mask(1:imt-1,:) = 0
-  end where
+  do j=1,jmt-1
+     dxtt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j) )
+     dytt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j+1) )
+  end do
+
+  dxv(1:imt-1,:) = dxtt(1:imt-1,:)/2 + dxtt(2:imt,:)/2
+  dyu(:,1:jmt-1) = dytt(:,1:jmt-1)/2 + dytt(:,2:jmt)/2
+  dxv(imt,:) = dxtt(imt,:)/2 + dxtt(1,:)/2
+  dxdy = dyu * dxv                                                          
+
+  dz_inv = get1DfieldNC(trim(gridfile), 'DEPTH_T')
+  dz_inv(1:km-1) = dz_inv(2:km)-dz_inv(1:km-1)
+  dz_inv(km) = dz_inv(km-1)
+  dz = dz_inv(km:1:-1)
+ 
+  uvel = get3DfieldNC(trim(inDataDir)//'SALT.1440x720x50.20050812.nc', 'SALT')
+
+  mask = 1
+  where (uvel(:,:,1) < 0) mask = 0
   
-  where (mask(1:imt-1,:) == 0) 
-     mask(2:imt,:) = 0
-  end where
-  where (mask(:, 2:jmt) == 0) 
-     mask(:,1:jmt-1) = 0
-  end where
-  where (mask(:, 1:jmt-1) == 0) 
-     mask(:, 2:jmt) = 0
-  end where
+  kmt = 50
+  
 
-  where (mask==0) kmt=0
+
+
 
 end SUBROUTINE setupgrid

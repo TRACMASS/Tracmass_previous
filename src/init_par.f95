@@ -9,8 +9,6 @@ SUBROUTINE init_params
 !!          and Lagrangian stream functions.
 !!
 !!
-!!
-!!
 !!----------------------------------------------------------------------------
    USE mod_param
    USE mod_seed
@@ -21,7 +19,7 @@ SUBROUTINE init_params
    USE mod_domain
    USE mod_vel
    USE mod_traj
-   USE mod_dens
+ !  USE mod_dens
    USE mod_buoyancy
    USE mod_streamfunctions
    USE mod_tracer
@@ -65,19 +63,22 @@ SUBROUTINE init_params
    ! --- Parameters from run.in ---
    ! ------------------------------
    namelist /INITRUNVER/     runVerNum
-   namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax ,subGridJmin,   &
-                         &   subGridJmax ,SubGridFile, subGridID
-   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep 
-   namelist /INITRUNDATE/    startSec ,startMin ,startHour,                    &
-                         &   startDay ,startMon ,startYear,                    &
-                         &   ihour, iday, imon, iyear
+   namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax,          & 
+                             subGridJmin, subGridJmax ,SubGridFile,      &
+                             subGridID
+   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep, degrade_time 
+   namelist /INITRUNDATE/    startSec ,startMin ,startHour,              &
+                             startDay ,startMon ,startYear,              &
+                             ihour, iday, imon, iyear
    namelist /INITRUNWRITE/   ncoor, twritetype, kriva,                                     &
                          &   inDataDir ,outDataDir, topoDataDir,               &
                              outDataFile ,intminInOutFile
-   namelist /INITRUNSEED/    nff, isec, idir, nqua, partQuant,                 &
-                         &   seedType, seedPos, seedTime, seedAll,             &
-                         &   ist1, ist2, jst1, jst2, kst1, kst2, tst1, tst2,   &
-                             varSeedFile, seedDir, seedFile, timeFile
+   namelist /INITRUNSEED/    nff, isec, idir, nqua, partQuant,           &
+                             seedType, seedPos, seedTime, seedAll,       &
+                             ist1, ist2, jst1, jst2,                     &
+                             kst1, kst2, tst1, tst2,                     &
+                             varSeedFile, seedDir, seedFile, timeFile,   &
+                             loneparticle
    namelist /INITRUNDESC/    caseName, caseDesc  
 #ifdef tempsalt
    namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
@@ -96,9 +97,8 @@ SUBROUTINE init_params
    Project  = PROJECT_NAME
    Case     = CASE_NAME
    
-   IF ( (IARGC() == 1 ) .OR. (IARGC() == 4 ) )  then
-      CALL getarg(IARGC(),inparg)
-      Case = inparg
+   IF ((IARGC() > 0) )  THEN
+      CALL getarg(1,Case)
    END IF
 
    CALL getenv('ORMPROJDIR',projdir)
@@ -181,12 +181,6 @@ SUBROUTINE init_params
          
       CLOSE (8)
 
-      timax    =  24.*3600.*timax ! convert time lengths from days to seconds
-      dstep    =  1.d0/dble(iter)
-      dtmin    =  dstep * tseas
-      baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
-      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
-           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
       IF ((IARGC() > 1) )  THEN
          ARG_INT1 = 0.1
          CALL getarg(2,inparg)
@@ -196,7 +190,7 @@ SUBROUTINE init_params
             read( inparg, '(f15.10)' ) ARG_INT1
          end if
       END IF
-    
+
       IF ((IARGC() > 2) ) THEN
           ARG_INT2 = 0.1
          CALL getarg(3,inparg)
@@ -206,16 +200,26 @@ SUBROUTINE init_params
             read( inparg, '(f15.10)' ) ARG_INT2
          end if
       END IF
+      
+#ifdef timeanalyt
+      iter=1
+#endif
 
+
+      timax    =  24.*3600.*timax ! convert time lengths from days to seconds
+      dstep    =  1.d0/dble(iter)
+      dtmin    =  dstep * tseas
+      baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
+      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
+           ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+  
       startYearCond: IF (startYear /= 0) THEN
          IF (ngcm >= 24) THEN 
-            intmin      = (startJD)/(ngcm/24)+1
+            intmin = (startJD)/(real(ngcm)/24.)+1
          ELSE ! this needs to be verified
-            intmin      = (24*startJD)/ngcm+3-ngcm
+            intmin = (24*startJD)/ngcm+3-ngcm
          END IF
       END IF startYearCond
-
-      ! tseas - the time step between data sets in [s]
       tseas= dble(ngcm)*3600.d0
 
       ! --- ist -1 to imt ---
@@ -251,6 +255,7 @@ SUBROUTINE init_params
       ALLOCATE ( csu (0:jmt), cst(jmt)  ) 
       ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
+      ALLOCATE ( mask(imt,jmt) )
 #ifdef zgrid3Dt
       ALLOCATE ( dzt(imt,jmt,km,nst) )   
 #elif  zgrid3D
@@ -277,7 +282,7 @@ SUBROUTINE init_params
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       
       ! === Init mod_traj ===
-      ALLOCATE ( trj(ntracmax,NTRJ), nrj(ntracmax,NNRJ) )
+      ALLOCATE ( trj(NTRJ,ntracmax), nrj(NNRJ,ntracmax) )
       ALLOCATE ( nexit(NEND) ) 
       nrj = 0
       trj = 0.d0

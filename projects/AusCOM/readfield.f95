@@ -261,26 +261,4 @@ ntime=10000*iyear+100*imon+iday
 !   DEALLOCATE ( tempb, saltb, rhob, depthb, latb )
 #endif
 
-
-  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-  
-
-contains
-  
-  
-  subroutine datasetswap
-    hs(:,:,1)      = hs(:,:,2)
-    uflux(:,:,:,1) = uflux(:,:,:,2)
-    vflux(:,:,:,1) = vflux(:,:,:,2)
-#ifdef explicit_w
-    wflux(:,:,:,1) = wflux(:,:,:,2)
-#endif
-#ifdef tempsalt
-    tem(:,:,:,1)   = tem(:,:,:,2)
-    sal(:,:,:,1)   = sal(:,:,:,2)
-    rho(:,:,:,1)   = rho(:,:,:,2)
-#endif
-  end subroutine datasetswap
-
-
 end subroutine readfields

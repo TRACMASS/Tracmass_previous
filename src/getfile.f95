@@ -185,8 +185,8 @@ CONTAINS
        print *,'Error when trying to read the field   ',VarName
        print *, 'start1d =  ' ,start1d
        print *, 'count1d =  ' ,count1d
-       print *, 'start2d =  ' ,start2d
-       print *, 'count2d =  ' ,count2d
+       print *, 'start2d =  ' ,start2d(map2d)
+       print *, 'count2d =  ' ,count2d(map2d)
        print *, 'start3d =  ' ,start3d(map3d)
        print *, 'count3d =  ' ,count3d(map3d)
        print *, '-------------------------------------------------'

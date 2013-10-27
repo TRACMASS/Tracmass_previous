@@ -13,7 +13,7 @@ SUBROUTINE readfields
   use mod_seed
 
 #ifdef tempsalt
-  USE mod_dens
+!  USE mod_dens
   USE mod_stat
 #endif
   IMPLICIT none
@@ -26,16 +26,17 @@ SUBROUTINE readfields
   INTEGER                                 :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
   INTEGER                                 :: kbot,ktop
   INTEGER, SAVE                           :: nread,npremier,ndernier
-  INTEGER, SAVE                           :: ncidt,ncidu,ncidv,varidt,varidu,varidv
+  INTEGER, SAVE                           :: ncidt,ncidu,ncidv
+  INTEGER, SAVE                           :: varidt,varidu,varidue,varidv,varidve
 
   ! = Variables used for getfield procedures
 
  ! INTEGER, PARAMETER :: IMTG=1440,JMTG=1021,KMM=75
 
   REAL*4, ALLOCATABLE, DIMENSION(:,:)        :: temp2d_simp
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_simp
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_simp,temp3d_eddy
 
-  REAL*4 						             :: dd,dmult,uint,vint,zint
+  REAL*4 						             :: dd,uint,vint,zint
   
 #ifdef tempsalt
  REAL*4, ALLOCATABLE, DIMENSION(:) :: tempb, saltb, rhob, depthb,latb
@@ -49,15 +50,12 @@ SUBROUTINE readfields
 
 
  alloCondUVW: if(.not. allocated (temp2d_simp)) then
-   allocate ( temp3d_simp(IMT,JMT,KM), temp2d_simp(IMT,JMT)  )
+   allocate ( temp3d_simp(IMT,JMT,KM), temp3d_eddy(IMT,JMT,KM), temp2d_simp(IMT,JMT)  )
 #ifdef tempsalt
    allocate ( tempb(KM), saltb(KM), rhob(KM), depthb(KM), latb(KM))
 #endif
    end if alloCondUVW
-
-
   
-
 ! === Initialising fields ===
 initFieldcond: if(ints==intstart) then
      hs     = 0.
@@ -82,13 +80,18 @@ initFieldcond: if(ints==intstart) then
   npremier=fieldsPerFile ; ndernier=1
   currYear=yearmax
   currMon=12
+!#if stationary
+!   currMon=1
+!#endif
  endif
  
  
 #ifdef seasonal
   nsp=0
-  print *,'nff ggr denna',12/NST
   if(ngcm/=365*24/min(12,NST)) stop 7777
+  degrade_counter = 0
+#elif stationary
+  nsp=1 ; nsm=1 ; degrade_counter = 1
 #else
   nsp=2 ; nsm=1
 #endif
@@ -109,6 +112,7 @@ else ! i.e. when ints/=intstart
   if(currMon > 12) then
    currMon=currMon-12
    currYear=currYear+1
+   if(currYear==yearmax+1) currYear=yearmin
   elseif(currMon < 1) then
    currMon=currMon+12
    currYear=currYear-1
@@ -133,7 +137,7 @@ else ! i.e. when ints/=intstart
    if(currMon == 13) then
     currMon=1
     currYear=currYear+1
-    if(currYear.eq.yearmax+1) currYear=yearmin
+    if(currYear==yearmax+1) currYear=yearmin
    endif
   elseif(currDay <=0) then
    currMon=currMon-1
@@ -173,18 +177,35 @@ ntime=100*currYear+currMon
 
 nread=CurrMon
 
+#if stationary
+nread=1
+#endif
+
+ ! print *,'currMon', currMon,nread, npremier,ndernier,nsm,nsp
+
+
+
 ! === Find the file for this timestep ===
-start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
+!start2D  = [subGridImin ,subGridJmin ,  1 , nread ]
+start2D  = [subGridImin ,subGridJmin ,  nread , 1 ]
 start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
   
-dataprefix='ORCA1-MSP1_MM_xxxx0101_xxxx1231_grid_'
+!dataprefix='ORCA1-MSP1_MM_xxxx0101_xxxx1231_grid_'
+!dataprefix='ORCA1-SS21_MM_xxxx0101_xxxx1231_grid_'
+dataprefix='ORCA1-SHC1_MM_19960101_19961231_grid_' !EC-Earth
 
 write(dataprefix(15:18),'(i4)') currYear
 write(dataprefix(24:27),'(i4)') currYear
 
-fieldFile = trim(inDataDir)//'fields/msp1/'//trim(dataprefix)
 
-!print *,nread, fieldFile
+#if stationary
+fieldFile = trim(inDataDir)//'fields/ORCA1.L64-SSF02_1475-1500_grid_'
+#elif seasonal
+fieldFile = trim(inDataDir)//'orca1/'//trim(dataprefix)
+#else
+fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)
+#endif
+
 
 if(nread==npremier) then
 
@@ -202,8 +223,8 @@ endif
 
 
 ierr=NF90_INQ_VARID(ncidt,'sossheig',varidt)
-if(ierr.ne.0) then
- print *,'file not found:',trim(gridFileT)
+if(ierr/=0) then
+ print *,'file not found:',nread,npremier,ierr, ncidt, varidt,trim(gridFileT)
  stop 3768
 endif
 
@@ -221,10 +242,13 @@ do j=1,JMT
  enddo
 enddo 
 
-do i=4,IMT
- ii=IMT+4-i
- hs(i,JMT+1,nsp)=hs(ii,JMT-3,nsp)  !  north fold 
-enddo
+
+!print *, hs(:,JMT+1,nsp)
+!stop 4057
+!do i=4,IMT
+! ii=IMT+4-i
+! hs(i,JMT+1,nsp)=hs(ii,JMT-3,nsp)  !  north fold 
+!enddo
 
 #ifdef tempsalt 
 ! Temperature
@@ -284,7 +308,6 @@ enddo
 
 #endif     
 
-dmult=1.  ! amplification of the velocity amplitude by simple multiplication
 if(nread.eq.npremier) then
  ! u velocity
  gridFileU=trim(fieldFile)//'U.nc'
@@ -297,23 +320,36 @@ if(nread.eq.npremier) then
  ierr=NF90_OPEN(trim(gridFileU),NF90_NOWRITE,ncidu)
  if(ierr.ne.0) stop 5753
 endif
-
+! u mean
 ierr=NF90_INQ_VARID(ncidu,'vozocrtx',varidu) 
 if(ierr.ne.0) stop 3771
 ierr=NF90_GET_VAR(ncidu,varidu,temp3d_simp,start3d,count3d)
+if(ierr.ne.0) stop 3798
+! u eddy
+ierr=NF90_INQ_VARID(ncidu,'vozoeivu',varidue) 
+if(ierr.ne.0) stop 3772
+ierr=NF90_GET_VAR(ncidu,varidue,temp3d_eddy,start3d,count3d)
 if(ierr.ne.0) stop 3799
+
 if(nread==ndernier) then
 ierr=NF90_CLOSE(ncidu)
+if(ierr.ne.0) stop 6464
 endif
 
-do i=1,IMT
+!temp3d_eddy=0.
+
+ do i=1,IMT
  do j=1,JMT
   do k=1,kmu(i,j)
    kk=KM+1-k
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i+1,j,nsp))
-   if(k.eq.kmu(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,1)
-   uflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dyu(i,j) * dd * dmult
+   if(k.eq.kmu(i,j)) dd = botbox(i,j,1)
+   uflux(i,j,kk,nsp)=(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dyu(i,j) * dd 
+   if(uflux(i,j,kk,nsp)==0.) then
+    print *,i,j,k, (temp3d_eddy(i,j,kk),kk=k,KM)
+    stop 4967
+   endif
   enddo
  enddo
 enddo
@@ -328,23 +364,26 @@ if(.not.around) then
  CALL system(zfile)
  gridFileV='tmpV'
 endif
-
 ierr=NF90_OPEN(trim(gridFileV),NF90_NOWRITE,ncidv)
 if(ierr.ne.0) stop 5754
 endif
-ierr=NF90_INQ_VARID(ncidv,'vomecrty',varidv) ! kmt field
+!v mean
+ierr=NF90_INQ_VARID(ncidv,'vomecrty',varidv) 
 if(ierr.ne.0) stop 3770
 ierr=NF90_GET_VAR(ncidv,varidv,temp3d_simp,start3d,count3d)
 if(ierr.ne.0) stop 3799
+! v eddy
+ierr=NF90_INQ_VARID(ncidv,'vomeeivv',varidve) 
+if(ierr.ne.0) stop 3773
+ierr=NF90_GET_VAR(ncidv,varidve,temp3d_eddy,start3d,count3d)
+if(ierr.ne.0) stop 3799
+
 if(nread==ndernier) then
 ierr=NF90_CLOSE(ncidv)
+if(ierr.ne.0) stop 6465
 endif
 
-!  north fold 
-!do i=4,IMT
-! ii=IMT+4-i
-! vflux(i,JMT,:,nsp)=-vflux(ii,JMT-3,:,nsp)
-!enddo
+!temp3d_eddy=0.
 
 do i=1,IMT
  do j=1,JMT
@@ -352,8 +391,8 @@ do i=1,IMT
    kk=KM+1-k
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i,j+1,nsp))
-   if(k.eq.kmv(i,j)) dd = botbox(i+subGridImin-1,j+subGridJmin-1,2)
-   vflux(i,j,kk,nsp)=temp3d_simp(i,j,k) * dxv(i,j) * dd * dmult
+   if(k.eq.kmv(i,j)) dd = botbox(i,j,2)
+   vflux(i,j,kk,nsp)=(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dxv(i,j) * dd 
   enddo
  enddo
 enddo
@@ -397,28 +436,6 @@ enddo
 #endif
 
   return
-  
-  
-   !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
- 
-contains
-
-  
-  subroutine datasetswap
-    hs(:,:,nsm)      = hs(:,:,nsp)
-    uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
-    vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
-#ifdef explicit_w
-    wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
-#endif
-
-#ifdef tempsalt
-    tem(:,:,:,nsm)   = tem(:,:,:,nsp)
-    sal(:,:,:,nsm)   = sal(:,:,:,nsp)
-    rho(:,:,:,nsm)   = rho(:,:,:,nsp)
-#endif
-  end subroutine datasetswap
   
 end subroutine readfields
 

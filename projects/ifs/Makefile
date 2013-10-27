@@ -39,6 +39,7 @@
 #  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #  fl26  = -Dcoarse         # Adds a diffusion on trajectory
+   fl27  = -Denergy
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \

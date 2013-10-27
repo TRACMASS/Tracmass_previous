@@ -7,8 +7,9 @@ subroutine interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,ns)
 !
 !     This subroutine should be improved in order to include time interpolation   
 
-USE mod_param
+USE mod_grid
 USE mod_dens
+USE mod_vel
 IMPLICIT none
 
 REAL*8  :: x1,y1,z1,ax,ay,az
