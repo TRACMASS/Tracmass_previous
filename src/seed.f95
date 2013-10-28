@@ -215,8 +215,9 @@ CONTAINS
                      ib = iist+1
                   ELSE IF (idir == -1) THEN
                      ib=iist 
-                  else
-                     stop 6020
+                  !else
+                  !   print *, "idir neither 1 nor -1. Merid-vert. seed failed"
+                  !   stop 6020
                   END IF
                   
                CASE (2)   ! Zonal-vertical section
@@ -227,8 +228,9 @@ CONTAINS
                      jb = ijst+1
                   ELSE IF (idir == -1) THEN
                      jb = ijst
-                  else
-                     stop 6020
+                  !else
+                  !   print *, "idir neither 1 nor -1. Zonal-vert seed failed"
+                  !   stop 6020
                   END IF 
               
                CASE (3)   ! Horizontal section                  
@@ -239,8 +241,9 @@ CONTAINS
                      kb = ikst+1
                   ELSE IF (idir == -1) THEN
                      kb = ikst
-                  else
-                     stop 6020
+                  !else
+                  !   print *, "idir neither 1 nor -1. Horizontal seed failed"
+                  !   stop 6020
                   END IF
                   
                CASE (4)   ! Spread even inside box                  
