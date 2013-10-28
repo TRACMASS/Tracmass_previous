@@ -199,8 +199,8 @@ SUBROUTINE init_seed()
       END IF chFile2d
        
    END SELECT
-   print '(A,I7)','        Total number of cells : ', nsdMax + landsd
-   print '(A,I7)','        Cells masked as land  : ', landsd
+   print '(A,I9)','        Total number of cells : ', nsdMax + landsd
+   print '(A,I9)','         Cells masked as land : ', landsd
 
    if (seedparts > 0) then
       if (seedpart_id > seedparts) then
@@ -221,7 +221,7 @@ SUBROUTINE init_seed()
    if (loneparticle>0) then
       print '(A,I7)','WARNING! Loneparticle is set to : ', loneparticle
    else
-      print '(A,I7)','              Cells used : ', nsdMax
+      print '(A,I9)','                   Cells used : ', nsdMax
    end if
    SELECT CASE (seedTime)
   

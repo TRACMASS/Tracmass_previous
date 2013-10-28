@@ -16,7 +16,7 @@ MODULE mod_param
 #endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
-  REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small number epsilon
+  REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small epsilon
 
   REAL*8, PARAMETER                         :: grav = 9.81
   REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
@@ -168,8 +168,7 @@ CONTAINS
        print *,'----------------------------------------------------------'
        print *,'The run is terminated'
        print *,'=========================================================='
-       !errCode = -60
-       !stop
+       stop
     end if
   end subroutine calc_dxyz
 
@@ -318,6 +317,8 @@ CONTAINS
     else
        dt = ds * dxyz 
     endif
+#elif stationary
+      dt = ds * dxyz 
 #else
     if(ds == dsmin) then ! transform ds to dt in seconds
        dt=dtmin  ! this makes dt more accurate
@@ -329,6 +330,9 @@ CONTAINS
        print *,'dt=',dt
        stop 4968
     endif
+#ifdef stationary
+              tt=tt+dt
+#else
     ! === if time step makes the integration ===
     ! === exceed the time when fields change ===
     if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
@@ -363,6 +367,7 @@ CONTAINS
        endif
 #endif /*regulardt*/
     end if
+#endif /*stationary*/
     ! === time interpolation constant ===
     intrpbg=dmod(ts,1.d0) 
     intrpb =1.d0-intrpbg
@@ -411,11 +416,9 @@ MODULE mod_vel
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*8                                     :: ff
-
 #ifdef tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
 #endif
-
   INTEGER                                    :: degrade_time=0
     integer, save                            :: degrade_counter = 0
 

@@ -158,8 +158,8 @@ SUBROUTINE loop
   !=== Start main time loop                               ===
   !==========================================================
   !==========================================================
-!  intsTimeLoop: do ints=intstart+1,intstart+intrun
-  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
+  intsTimeLoop: do ints=intstart+1,intstart+intrun
+!  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
@@ -175,8 +175,8 @@ SUBROUTINE loop
       call writetracer
      endif
 
-    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
-!    intspinCond: if(ints <= intstart+intspin) then
+!    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
+    intspinCond: if(ints <= intstart+intspin) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)
         call fancyTimer('seeding','stop')
@@ -443,10 +443,6 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo LBTLOOP
-
-!#ifndef tes  ! why was this included before?????
-!           if (x1 < 1) exit niterloop
-!#endif
            
 #if defined tempsalt
            call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
@@ -703,7 +699,7 @@ return
           ! then put in middle of deepest layer 
           ! (this should however be impossible)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
-              print *,'below bottom !!!!!!!',z1,dble(KM-kmt(ib,jb))
+              print *,'Particle below bottom',z1,dble(KM-kmt(ib,jb))
               print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
               print *,'ntrac=',ntrac,niter 
               call print_ds
@@ -817,41 +813,6 @@ return
         end select
       end subroutine errorCheck
 
-  subroutine calc_dxyz
-    ! T-box volume in m3
-#ifdef zgrid3Dt 
-    dxyz=rg*dzt(ib,jb,kb,nsp)+rr*dzt(ib,jb,kb,nsm)
-#elif  zgrid3D
-    dxyz=dzt(ib,jb,kb)
-#ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
-#endif /*freesurface*/
-#else
-    dxyz=dz(kb)
-#ifdef varbottombox
-    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
-#endif /*varbottombox*/
-#ifdef freesurface
-    if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)
-#endif /*freesurface*/
-#endif /*zgrid3Dt*/
-    dxyz=dxyz*dxdy(ib,jb)
-    if (dxyz<0) then
-       print *,'=========================================================='
-       print *,'ERROR: Negative box volume                                '
-       print *,'----------------------------------------------------------'
-       print *,'dzt  = ', dxyz,dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
-       print *,'dxdy = ', dxdy(ib,jb)
-       print *,'hs = ', rg,hs(ib,jb,nsp),rr,hs(ib,jb,nsm)
-       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb,' nsp/nsm  = ', nsp,nsm
-       print *,'----------------------------------------------------------'
-       print *,'The run is terminated'
-       print *,'=========================================================='
-       errCode = -60
-       stop
-    end if
-  end subroutine calc_dxyz
-
   subroutine print_ds
     print *, '   ds = ', ds 
     print *, '  dse = ', dse
@@ -870,78 +831,15 @@ return
   subroutine print_grd
     print '(A,F16.4, A,E12.3)', '  dxdy :',dxdy(ib,jb), &
          '          dxyz :  ',dxyz
-
-  subroutine calc_time
-#ifdef regulardt
-           if(ds == dsmin) then ! transform ds to dt in seconds
-!            dt=dt  ! this makes dt more accurate
-           else
-            dt = ds * dxyz 
-           endif
-#elif stationary
-           dt = ds * dxyz 
-#else
-           if(ds == dsmin) then ! transform ds to dt in seconds
-              dt=dtmin  ! this makes dt more accurate
-           else
-              dt = ds * dxyz 
-           endif
-#endif /*regulardt*/
-           if(dt.lt.0.d0) then
-              stop 4968
-           endif
-#ifdef stationary
-              tt=tt+dt
-#else
-           ! === if time step makes the integration ===
-           ! === exceed the time when fields change ===
-           if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
-              dt=dble(idint(ts)+1)*tseas-tt
     print '(A,I4,A,F7.2,A,F7.2)',    &
          '    kmt: ', kmt(ib,ja), &
-              tss=dble(iter)
-              ds=dt/dxyz
-              dsc=ds
-           else
-              tt=tt+dt
 #if defined zgrid3Dt || defined zgrid3D
-              if(dt == dtmin) then
-                 ts=ts+dstep
-                 tss=tss+1.d0
          '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
-                 ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
-!                 ts=ts+dtreg/tseas
-                 tss=dble(nint(tss+dt/dtmin))
-              else
-                 ts=ts+dt/tseas
-                 tss=tss+dt/dtmin
-              endif
+
 #else
-              if(dt == dtmin) then
-                 ts=ts+dstep
-                 tss=tss+1.d0
-              else
-                 ts =ts +dt/tseas
-                 tss=tss+dt/tseas*dble(iter)
-!                 tss=tss+dt/dtmin
-              endif
-#endif /*regulardt*/
-           end if
-#endif /*stationary*/
-           ! === time interpolation constant ===
-           rbg=dmod(ts,1.d0) 
-           rb =1.d0-rbg
-         end subroutine calc_time
-
-
-
-
-
-
-
-
-
-
+         '    dz(k) : ', dz(kb), '   dzt :  ', 0.0
+#endif
+       end subroutine print_grd
 
   subroutine print_pos
     print '(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)', &
