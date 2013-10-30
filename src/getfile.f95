@@ -1,8 +1,9 @@
 
 MODULE mod_getfile
   USE mod_grid
+#ifndef no_netcdf
   USE netcdf
-  
+#endif
   IMPLICIT NONE
 
   INTEGER, DIMENSION(1)                      :: start1D  ,count1D
@@ -11,8 +12,9 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
   INTEGER                                    :: ncTpos=0
   INTEGER                                    :: ierr, varid,ncid
-  
-CONTAINS
+
+#ifndef no_netcdf
+  CONTAINS
 
  !===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -153,7 +155,7 @@ CONTAINS
 
 
   subroutine printReadError(sel, fieldFile, varName)
-    USE netcdf
+ 
     CHARACTER (len=*)                       :: fieldFile,VarName
     INTEGER                                 :: sel, ndims, v,dimln
     INTEGER, DIMENSION(4)                   :: dimvec
@@ -189,6 +191,7 @@ CONTAINS
        
     end select
   end subroutine printReadError
+#endif
 end MODULE mod_getfile
 
 

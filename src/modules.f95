@@ -137,7 +137,7 @@ CONTAINS
   subroutine calc_dxyz(intrpr, intrpg)
 
     use mod_traj, only: ib,jb,kb
-    implicit none
+    IMPLICIT NONE
     REAL*8                                    :: intrpr, intrpg
 
     ! T-box volume in m3

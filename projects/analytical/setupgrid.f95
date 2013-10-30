@@ -1,6 +1,5 @@
 SUBROUTINE setupgrid
   
-  USE netcdf
   USE mod_param
   USE mod_vel
   
@@ -8,7 +7,6 @@ SUBROUTINE setupgrid
   USE mod_grid
   USE mod_name
   USE mod_vel
-  USE mod_getfile
 
   IMPLICIT none
   ! =============================================================

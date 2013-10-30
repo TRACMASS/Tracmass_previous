@@ -15,7 +15,7 @@
   subGridJmin  = 400,
   subGridJmax  = 1000,
   ! === Used if SubGrid = 2 or 3
-  SubGridFile  = '/Users/bror/svn/orm/grd/templ.asc',
+  SubGridFile  = '',
   ! === Used if SubGrid = 2
   subGridID    = 1/
   !
@@ -57,20 +57,16 @@
   !kriva    = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir    = '/Users/doos/Documents/kod/tracmass/data_in/',
-  !inDataDir    = '/Users/doos/data/tes/',
-  !inDataDir    = '/Volumes/Resa2/data/ifs/',
+  inDataDir    = './',
   !
   ! === Directory where output files are saved
-  !outDataDir   = '/Users/doos/Documents/kod/tracmass/data_out/',
-  outDataDir   = '/Users/doos/data/tes/data_out/',
+  outDataDir   = './',
   !
   !
   !
   !
   ! === name of current trajectory run
-  !outDataFile     ='analyt1n'/
-  outDataFile     ='timestep1000n'/
+  outDataFile     =''/
   !
   !
   intminInOutFile=0/

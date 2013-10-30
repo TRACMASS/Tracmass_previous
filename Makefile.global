@@ -9,6 +9,11 @@ CASE_FLAG         = -DCASE_NAME=\'$(CASE)\'
 ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 OBJDIR           := build
 
+ifeq ($(NETCDFLIBS),"none")
+	LIB_DIR = 
+	INC_DIR = 
+	ORM_FLAGS += -Dno_netcdf
+endif
 ifeq ($(NETCDFLIBS),"automatic")
 	LIB_DIR = $(shell nc-config --flibs)
 	INC_DIR = -I$(shell nc-config --includedir)
@@ -24,8 +29,6 @@ ifeq ($(NETCDFLIBS),"fink")
         LNK_FLAGS         = -lnetcdf -lnetcdff
 endif
 
-#================================================================  
-
 ifeq ($(F95COMPILER),"gfortran")
 #	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2 
 	FF_FLAGS         = -c -x f95-cpp-input #-gdwarf-2 
@@ -40,8 +43,6 @@ ifeq ($(F95COMPILER),"g95")
 endif
 
 CC                = gcc -O  $(INC_DIR)
-
-#================================================================
 
 ACTVEL = empty.o
 
