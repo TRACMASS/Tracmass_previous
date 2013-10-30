@@ -25,7 +25,7 @@ subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
   
 USE mod_grid, only: undef, imt, jmt, nsm, nsp
 USE mod_vel, only: uflux, vflux, wflux, ff
-USE mod_turb, only:
+USE mod_active_particles, only: upr
 USE mod_time, only: dtreg, intrpr, intrpg
 IMPLICIT none
 

@@ -28,7 +28,7 @@ SUBROUTINE loop
   USE mod_pos
   USE mod_print
   ! === Selectable moules ===
-  USE mod_turb
+  USE mod_active_particles
   USE mod_streamfunctions
   USE mod_tracer
   USE mod_sed
@@ -147,19 +147,17 @@ SUBROUTINE loop
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
 !  tstep=dble(intstep) 
-  ints=intstart
+  ints = intstart
   call updateclock
   call readfields   ! initial dataset
-  ntrac=0
+  call active_init
+  ntrac = 0
   call fancyTimer('initialize dataset','stop')
 
   !==========================================================
-  !==========================================================
   !=== Start main time loop                               ===
   !==========================================================
-  !==========================================================
   intsTimeLoop: do ints=intstart+1,intstart+intrun
-!  intsTimeLoop: do ints=intstart+nff,intstart+intrun,nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
@@ -184,6 +182,8 @@ SUBROUTINE loop
         dt = 0.d0
      end if intspinCond
 
+
+     call active_ints(ints)
      !=== Check if the output file should be switched. ===
      call writedata(99)! switch
 
@@ -224,57 +224,27 @@ SUBROUTINE loop
            exit intsTimeLoop
         endif
 #endif /*rerun*/
-#ifdef sediment
-        ! === Check if water velocities are === 
-        ! === large enough for resuspention ===
-        ! === of sedimentated trajectories  ===   
-        if( nrj(6,ntrac) == 2 ) then
-           call resusp(res,ib,jb,kb)
-           if(res) then
-              ! === updating model time for  ===
-              ! === resuspended trajectories ===
-              ts=dble(ints-2)
-              nrj(5,ntrac)=ints-2
-              tt=tseas*dble(ints-2)
-              trj(4,ntrac)=tt
-              ! === resuspension to bottom layer ===
-              ! === kb same as before            ===
-              nrj(3,ntrac)=kb
-              z1=z1+0.5d0
-              ! z1=z1+0.1  !resusp l?gre i boxen
-              trj(3,ntrac)=z1
-              ! === change flag to put trajectory back in circulation ===
-              nrj(6,ntrac)=0
-              nsed=nsed-1
-              nsusp=nsusp+1
-           else
-              cycle ntracLoop 
-           endif
-        endif
-#endif  /*sediment*/    
+
+        call active_ntrac(ntrac)
           ! ===  start loop for each trajectory ===
         scrivi=.true.
         niterLoop: do        
            niter=niter+1 ! iterative step of trajectory
-#ifdef sediment
-           ! Find settling velocity for active gridbox ===
-           call sedvel(temp,dens) 
-#endif /*sediment*/
            ! === change velocity fields &  === 
            ! === store trajectory position ===
            if( niter.ne.1 .and. tss == dble(iter) &
                 .and. nrj(7,ntrac).ne.1 ) then
-              trj(1,ntrac)=x1
-              trj(2,ntrac)=y1
-              trj(3,ntrac)=z1
-              trj(4,ntrac)=tt
-              trj(5,ntrac)=subvol
-              nrj(1,ntrac)=ib
-              nrj(2,ntrac)=jb
-              nrj(3,ntrac)=kb
-              nrj(4,ntrac)=niter
-              nrj(5,ntrac)=idint(ts)
-              nrj(7,ntrac)=1
+              trj(1,ntrac) = x1
+              trj(2,ntrac) = y1
+              trj(3,ntrac) = z1
+              trj(4,ntrac) = tt
+              trj(5,ntrac) = subvol
+              nrj(1,ntrac) = ib
+              nrj(2,ntrac) = jb
+              nrj(3,ntrac) = kb
+              nrj(4,ntrac) = niter
+              nrj(5,ntrac) = idint(ts)
+              nrj(7,ntrac) = 1
               cycle ntracLoop
            endif
            nrj(7,ntrac)=0
@@ -311,7 +281,6 @@ SUBROUTINE loop
               tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
            end if
 #endif /*tracer*/
-           
            call writedata(11)
            
            !==============================================! 
@@ -334,8 +303,8 @@ SUBROUTINE loop
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
-
-           call turbuflux(ia,ja,ka,dt)
+           call active_niter 
+           !call turbuflux(ia,ja,ka,dt)
            ! === calculate the vertical velocity ===
            call vertvel(ia,iam,ja,ka)
 #ifdef timeanalyt
@@ -360,13 +329,10 @@ SUBROUTINE loop
            ! === north fold cyclic for the ORCA grids ===
 #if defined orc || orca1 || orca12 
             if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-  !            print *,'v',(rbg*vflux(ia,ja,ka,nsp) + rb*vflux(ia,ja,ka,nsm))*ff
               x1 = dble(IMT+2) - x1
               ib=idint(x1)+1
               jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
- !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1,kmt(ib,jb+1),kmt(ib,jb)
-  !            print *,'v',(rbg*vflux(ia,jb,ka,nsp) + rb*vflux(ia,jb,ka,nsm))*ff
            elseif(y1 > dble(JMT-1)) then
              print *,'north of northfold for ntrac=',ntrac
              x1 = dble(IMT+2) - x1
@@ -374,21 +340,9 @@ SUBROUTINE loop
              jb=JMT-1
              y1= dble(JMT-1) -y1 + dble(JMT-1)
              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-
-!              print *,ia,ib,x0,x1
-!              print *,ja,jb,y0,y1
-!              print *,ka,kb,z0,z1
-!              print *,kmt(ia,ja),kmt(ib,jb)
-!              print *,'v',(rbg*vflux(ia,ja  ,ka,nsp) + rb*vflux(ia,ja  ,ka,nsm))*ff
-!              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-!              nerror=nerror+1
-!              nrj(6,ntrac)=1
-!              stop 4967
-!              cycle ntracLoop
            endif
 #elif defined orca025 || orca025L75
            if( y1 == dble(JMT-1) ) then
- !              print *,'North fold for',ntrac
               x1 = dble(IMT+3) - x1
               y1 = dble(JMT-2)
               ib=idint(x1)
@@ -420,13 +374,10 @@ SUBROUTINE loop
 
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-           
            call errorCheck('bottomError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-
            call errorCheck('airborneError', errCode)
            call errorCheck('corrdepthError', errCode)
            call errorCheck('cornerError', errCode)
@@ -454,8 +405,7 @@ SUBROUTINE loop
                  nexit(NEND)=nexit(NEND)+1
                  exit niterLoop                                
                endif
-#endif 
-           
+#endif       
            ! === stop trajectory if the choosen time or ===
            ! === water mass properties are exceeded     ===
            if(tt-t0.gt.timax) then

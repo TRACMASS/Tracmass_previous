@@ -21,7 +21,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   
   USE mod_grid, only: imt, jmt, nsm, nsp, nst
   USE mod_vel, only: uflux, vflux, wflux, ff
-  USE mod_turb
+  USE mod_active_particles, only: upr
   USE mod_time, only: intrpr, intrpg
   IMPLICIT none
 

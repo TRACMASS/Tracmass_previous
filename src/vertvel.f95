@@ -9,7 +9,7 @@ subroutine vertvel(ia,iam,ja,ka)
   USE mod_vel
   USE mod_time, only: intrpr, intrpg
   USE mod_grid
-  USE mod_turb
+  USE mod_active_particles, only: upr
 #ifdef ifs
   USE mod_grid
 #endif

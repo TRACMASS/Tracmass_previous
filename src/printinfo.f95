@@ -15,7 +15,7 @@ module mod_print
   USE mod_pos
 
   ! === Selectable moules ===
-  USE mod_turb
+  USE mod_active_particles
   USE mod_streamfunctions
   USE mod_tracer
   USE mod_sed
@@ -73,7 +73,7 @@ CONTAINS
 #endif
 #endif
 #if defined turb
-    print *,' - Sub-grid turbulence parameterisation'
+    print *, "FIX ACTPART OUTPUT"
 #endif
 #if defined diffusion
     print *,' - Diffusion param: Ah=',ah,'m2/s and Av=',av,'m2/s'
