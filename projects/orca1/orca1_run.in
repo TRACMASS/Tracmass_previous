@@ -75,7 +75,7 @@
   kriva           = 6,
   inDataDir=   '/Users/doos/data/ecearth/' !'/Users/doos/data/orca/orca1/'
   outDataDir=  '/Users/doos/data/ecearth/data_out/' !'/Users/doos/data/orca/orca1/data_out/'
-  outDataFile= 'th_seasonal_south_iter12'
+  outDataFile= 'th_seasonal_south_iter12b'
   intminInOutFile = 0
   /
   !

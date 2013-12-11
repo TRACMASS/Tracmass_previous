@@ -359,7 +359,7 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   2) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-#endif full_wflux
+#endif 
 
 
 ENDMODULE mod_vel

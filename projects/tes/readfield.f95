@@ -134,10 +134,13 @@ do k=1,KM
 !   uflux(i,j,k,2)=dy*deg*dz(k)*cox*( -0.05 +omtime/5000.+ dcos(omtime) + 0.5*dsin(omtime*2.) + 2.*dsin(omtime*10.))
 !   vflux(i,j,k,2)=dx*deg*dz(k)*coy*( -0.025 + dsin(omtime) + 0.5*dcos(omtime*2.) + 0.5*dcos(omtime/2))
 
-! Nicoletta Fabboni velocities, which have analytical solutions
+! Interia oscillation velocities, which have analytical solutions for the trajectories
    uflux(i,j,k,2)=dy*dz(k)*( ug*dexp(-gammag*omtime) &
-                            + (u0-ug)*dexp(-gamma*omtime)*cos(fcor*omtime) )
+                             + (u0-ug)*dexp(-gamma*omtime)*cos(fcor*omtime) )
    vflux(i,j,k,2)=dx*dz(k)*(  -(u0-ug)*dexp(-gamma*omtime)*sin(fcor*omtime) )
+! Munk Gyre velocities, which have analytical solutions for the trajectories (barotropic stream lines)
+!   uflux(i,j,k,2)=dy*dz(k)*( ? )
+!   vflux(i,j,k,2)=dx*dz(k)*( ? )
 
 
 
