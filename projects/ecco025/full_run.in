@@ -69,7 +69,7 @@
   inDataDir       = '/netdata/brorfred/projData/ecco025/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/netdata/brorfred/ormOut/',
+  outDataDir      = '/netdata/brorfred/ormOut/ecco025/',
   !
   ! === Name of current trajectory run
   outDataFile     = 'ecco025Test',
