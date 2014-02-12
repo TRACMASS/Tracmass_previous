@@ -146,23 +146,9 @@ prefix = '0000/uvtqzp_00000000.0000'
 WRITE (prefix(1:4),'(i4)') iyear
 WRITE (prefix(13:16),'(i4)') iyear
 
-IF (imon < 10) THEN
-   WRITE (prefix(18:18),'(i1)') imon
-ELSE
-   WRITE (prefix(17:18),'(i2)') imon
-END IF
-
-IF (iday < 10) THEN
-   WRITE (prefix(20:20),'(i1)') iday
-ELSE
-   WRITE (prefix(19:20),'(i2)') iday
-END IF
-
-IF (ihour < 10) THEN
-   WRITE (prefix(23:23),'(i1)') ihour
-ELSE
-   WRITE (prefix(22:23),'(i2)') ihour
-END IF
+WRITE (prefix(17:18),'(i2.2)') imon
+WRITE (prefix(19:20),'(i2.2)') iday
+WRITE (prefix(22:23),'(i2.2)') ihour
 
 fieldFile = TRIM(inDataDir)//'era/'//TRIM(prefix)//'.grb'
 
@@ -259,6 +245,7 @@ DO k=1,KM
    END DO
 
 END DO
+
 
 
 !!
