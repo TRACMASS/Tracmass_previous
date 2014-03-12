@@ -36,12 +36,11 @@ SUBROUTINE setupgrid
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
   REAL,          ALLOCATABLE, DIMENSION(:)   :: lat,lon
-  INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: mask
   REAL,          ALLOCATABLE, DIMENSION(:,:) :: dytt,dxtt
   CHARACTER (len=200)                        :: gridfile
 
   allocate ( lon(imt), lat(jmt) )
-  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt), mask(imt,jmt)  )
+  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt) )
   call coordinat
 
   gridfile = trim(inDataDir) // 'oscar_vel2009.nc'

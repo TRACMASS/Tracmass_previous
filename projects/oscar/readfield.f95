@@ -52,7 +52,7 @@ SUBROUTINE readfields
   if (ncTpos >= fieldsPerFile) ncTpos=0
   intpart2 = floor((ints)/float(iter))
   ndates   = intpart2
-  call gdate (2449944 + ndates, year,month,day)
+  call gdate (dble(2449944. + ndates), year,month,day)
   fileName = 'oscar_vel0000.nc'
   write(fileName(10:13),'(i4)') year
   ncFile   = trim(inDataDir)//fileName
