@@ -69,7 +69,8 @@ MODULE mod_getfile
        stop
     end if
 
-    start2d(map2d(3)) = ncTpos       
+    start2d(1) = ncTpos
+    !start2d(map2d(3)) = ncTpos       
     s = start2d(map2d)
     c = count2d(map2d)
     d = c + s - 1
