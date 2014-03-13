@@ -48,22 +48,24 @@ SUBROUTINE readfields
 
 
   call datasetswap
+  call updateClock
 
   if (ncTpos >= fieldsPerFile) ncTpos=0
-  intpart2 = floor((ints)/float(iter))
-  ndates   = intpart2
-  call gdate (dble(2449944. + ndates), year,month,day)
+ 
   fileName = 'oscar_vel0000.nc'
-  write(fileName(10:13),'(i4)') year
+  write(fileName(10:13),'(i4)') int(loopYear)
   ncFile   = trim(inDataDir)//fileName
   inquire(file=ncFile,exist=around)
-  if(.not.around) stop 4556
+  if(.not.around) then 
+     print *, trim(ncFile) // ' doesnt exists' 
+     stop
+  end if
   nread = mod(ints/5,18) + 1
   ncTpos = ncTpos + 1
 
   ! === Velocities ===
   !Use  t=1  i=2  j=3  k=4
-  map2d    = [1, 2, 3, 4]   
+  map2d    = [3, 4, 2, 1]   
 
   uvel(:,:,1) =  cshift(get2DfieldNC(trim(ncFile), 'u'),481,1)
   vvel(:,:,1) =  cshift(get2DfieldNC(trim(ncFile), 'v'),481,1)

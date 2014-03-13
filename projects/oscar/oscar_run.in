@@ -45,7 +45,7 @@
   startHour   = 00,
   startDay    = 01,
   startMon    = 01,
-  startYear   = 2004/
+  startYear   = 2013/
   !
   !
   &INITRUNWRITE
@@ -53,6 +53,7 @@
   !                 1 = output in long/lat coordinates
   ncoor       = 0,      
   !
+  twritetype = 2,
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets
   !                 2 = write each grid-crossing and timne change
@@ -62,10 +63,10 @@
   kriva       = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir   = '/projData/OSCAR/thrdDeg/',
+  inDataDir   = '/local/bjonsson/projData/oscar/thrdDeg/',
   !
   ! === Directory where output files are saved
-  outDataDir  = '/Users/bror/ormOut/',
+  outDataDir  = '',
   !
   ! === Name of current trajectory run
   outDataFile = 'oscar',
@@ -106,7 +107,7 @@
   nqua        = 1, 
   !
   ! === Particles seeded (part/cell or m3s-1/part or m3/part)
-  partQuant   = 1,     
+  partQuant   = 32,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -118,10 +119,10 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1        = 500,		 
-  ist2        = 505,			  
-  jst1        = 300,		 
-  jst2        = 400,		 
+  ist1        = 170,		 
+  ist2        = 240,			  
+  jst1        = 170,		 
+  jst2        = 220,		 
   kst1        = 1,		 
   kst2        = 1,
   ! ===   ===   ===   ===   ===

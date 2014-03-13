@@ -79,12 +79,9 @@ SUBROUTINE setupgrid
   dxdy = dyu * dxv                                                          
   
 
-  start2d  = [ subGridImin, subGridJmin, 1 ,1]
-  count2d  = [ subGridImax, subGridJmax, 1 ,1]
-  !Use  t=1  i=2  j=3  k=4
-  !map2d    = [2, 3, 1, 1]
 
   kmt = 1
+  mask = 1
   dz  = 10
   ncTpos = 1
       
