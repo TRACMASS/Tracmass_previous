@@ -1,0 +1,34 @@
+&GRIDSIZE
+   !! Length, width and depth of grid in [m]
+   xmin = 0.0, 
+   xmax = 800000.0, 
+   ymin = -250000.0,
+   ymax =  250000.0,
+   zmin = 0.0,
+   zmax = 1000.0
+/
+
+&WAVE
+   !! Wave length in [km]
+   Lx = 400.0, 
+   
+   !! wave amplitude in y direction [km]
+   Ay = 50.0,
+   
+   !! e-folding depth scale
+   !! so that speed decreases with depth [m]
+   Hz = 100.0,
+   
+   !! width of jet in y [km]
+   lambda = 40.0, 
+   
+   !! phase speed of wave in x [km/day]
+   !! 10 km/day approx. 0.1 m/s
+   cx = 10.0,
+   
+   !! speed at jet center [km/day]
+   !! 200 km/day approx. 2.3 m/s
+   sc = 200.0
+/
+   
+   
