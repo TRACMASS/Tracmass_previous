@@ -3,6 +3,7 @@ Project				Users			Activity				GCM					comment
 
 AusCOM     		    KD,JB			sleep					MOM
 baltix         		KD,JK,HC,AE		active					NEMO
+bower-gulf          JK              active                  TEST                
 casco				BJ
 ecco025        		BJ
 eccoSOSE			BJ

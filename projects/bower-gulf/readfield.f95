@@ -338,9 +338,9 @@ SUBROUTINE readfields
    !! Print the fields to binary files for testing
    !!
    
-   open(unit=11,file='psi.bin',form='unformatted')
-   write(11) psi,dPsidy,dPsidx
-   close(11)
+   !open(unit=11,file='psi.bin',form='unformatted')
+   !write(11) psi,dPsidy,dPsidx
+   !close(11)
    !stop
    
    !!------------------------------------------------------------------------------  
