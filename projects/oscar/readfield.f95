@@ -63,6 +63,7 @@ SUBROUTINE readfields
   nread = mod(ints/5,18) + 1
   ncTpos = ncTpos + 1
 
+
   ! === Velocities ===
   !Use  t=1  i=2  j=3  k=4
   map2d    = [3, 4, 2, 1]   

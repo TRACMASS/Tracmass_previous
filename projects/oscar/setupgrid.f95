@@ -83,6 +83,5 @@ SUBROUTINE setupgrid
   kmt = 1
   mask = 1
   dz  = 10
-  ncTpos = 1
       
 end SUBROUTINE setupgrid
