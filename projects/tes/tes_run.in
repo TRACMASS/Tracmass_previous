@@ -1,6 +1,6 @@
 &INITRUNDESC
   caseName     = 'Academic',
-  caseDesc     = 'Rectangular ocean'/
+  caseDesc     = 'Rectangular ocean'
 &INITRUNGRID
   !
   !==subGrid:  0 = Use full grid.

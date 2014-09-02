@@ -202,7 +202,10 @@ MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
-
+  
+  real*8                                    :: xmin, xmax, ymin, ymax, &
+  &                                            zmin, zmax
+  
   ! === Vertical grids ===
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
 #ifdef zgrid3Dt 

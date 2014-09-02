@@ -33,7 +33,7 @@
   !
   intmin  =    1,
   intspin =    1,  
-  intrun  =    240,      
+  intrun  =    500,      
   intstep =    0,
   degrade_time =0
 /
@@ -126,8 +126,8 @@ $INITRUNSEED
   ist2        =  1, 
   jst1        = 50, 
   jst2        = 50, 
-  kst1        =  1,
-  kst2        =  1,
+  kst1        =  10,
+  kst2        =  10,
   varSeedFile =  0,
   seedDir     = ' ',
   seedFile    = ' '

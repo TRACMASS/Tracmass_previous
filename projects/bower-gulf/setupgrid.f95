@@ -31,19 +31,9 @@ subroutine setupgrid
   
    implicit none
    
-   !! Domain length, width and depth
-   real(4)                                  ::  xmin, xmax, ymin, ymax, zmin, zmax
+   ! -------------------------------------------------------------
    
    
-   !!
-   !! Read in data from namelist and set up grid
-   !!                       
-   
-   namelist /GRIDSIZE/  xmin, xmax, ymin, ymax, zmin, zmax
-   
-   open (unit=11,file='projects/bower-gulf/namelist',status='old',delim='apostrophe')
-   read (11,nml=GRIDSIZE) 
-   close (11)
    
    !! x grid
    dx   = (xmax - xmin) / (imt - 1)
