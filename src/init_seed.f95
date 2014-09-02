@@ -57,7 +57,7 @@ SUBROUTINE init_seed()
       END IF      
       DO ji=ist1,ist2
          DO jj=jst1,jst2
-            IF (mask(ji,jj) .ne. 0) THEN 
+            IF (mask(ji,jj)/=0) THEN 
               DO jk=kst1,kst2
                  nsd = nsd+1
                  seed_ijk (nsd,1:3) = [ ji, jj, jk ]
@@ -66,7 +66,7 @@ SUBROUTINE init_seed()
             END IF
          END DO
       END DO
-     
+
       nsdMax = nsd
       PRINT *,'------------------------------------------------------'
       PRINT *,' Particles are seeded using ist, jst, kst             '

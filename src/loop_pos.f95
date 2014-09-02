@@ -23,15 +23,20 @@ contains
     REAL*8, INTENT(IN)                         :: x0, y0, z0
     REAL*8, INTENT(OUT)                        :: x1, y1, z1
         
+    if(abs(ia-ib)>1 .or. abs(ja-jb)>1) then
+     print *,ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1
+     stop 2856
+    endif
+
     ! === calculate the new positions ===
     ! === of the trajectory           ===    
     scrivi=.false.
     if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
        uu=(rbg*uflux(ia,ja,ka,nsp)+rb*uflux(ia ,ja,ka,nsm))*ff
-       if(uu.gt.0.d0) then
+       if(uu>0.d0) then
           ib=ia+1
-          if(ib.gt.IMT) ib=ib-IMT 
+          if(ib>IMT) ib=ib-IMT 
        endif
        x1=dble(ia)
 #if defined timeanalyt
@@ -46,33 +51,33 @@ contains
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
-       if(mrb.lt.1 ) mrb=1
-       if(mrb.gt.MR) mrb=MR
+       if(mrb<1 ) mrb=1
+       if(mrb>MR) mrb=MR
 #if defined streamts 
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
 #endif 
 #endif 
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
-       if(mta.lt.1 ) mta=1
-       if(mta.gt.MR) mta=MR
+       if(mta<1 ) mta=1
+       if(mta>MR) mta=MR
        msa=(salt-smin)/dsalt+1
-       if(msa.lt.1 ) msa=1
-       if(msa.gt.MR) msa=MR
+       if(msa<1 ) msa=1
+       if(msa>MR) msa=MR
 #endif 
 
        call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))
@@ -80,7 +85,7 @@ contains
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
        uu=(rbg*uflux(iam,ja,ka,nsp)+rb*uflux(iam,ja,ka,nsm))*ff
-       if(uu.lt.0.d0) then
+       if(uu<0.d0) then
           ib=iam
        endif
        x1=dble(iam)
@@ -96,33 +101,33 @@ contains
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
-       if(mrb.lt.1 ) mrb=1
-       if(mrb.gt.MR) mrb=MR
+       if(mrb<1 ) mrb=1
+       if(mrb>MR) mrb=MR
 #if defined streamts 
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
 #endif 
 #endif 
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
-       if(mta.lt.1 ) mta=1
-       if(mta.gt.MR) mta=MR
+       if(mta<1 ) mta=1
+       if(mta>MR) mta=MR
        msa=(salt-smin)/dsalt+1
-       if(msa.lt.1 ) msa=1
-       if(msa.gt.MR) msa=MR
+       if(msa<1 ) msa=1
+       if(msa>MR) msa=MR
 #endif 
        call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
 
@@ -130,10 +135,11 @@ contains
        
        scrivi=.false.
        uu=(rbg*vflux(ia,ja,ka,nsp)+rb*vflux(ia,ja,ka,nsm))*ff
-       if(uu.gt.0.d0) then
+       if(uu>0.d0) then
           jb=ja+1
        endif
        y1=dble(ja)
+
 #if defined timeanalyt
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
        call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
@@ -145,33 +151,33 @@ contains
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
-       if(mrb.lt.1 ) mrb=1
-       if(mrb.gt.MR) mrb=MR
+       if(mrb<1 ) mrb=1
+       if(mrb>MR) mrb=MR
 #if defined streamts 
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
 #endif 
 #endif 
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
-       if(mta.lt.1 ) mta=1
-       if(mta.gt.MR) mta=MR
+       if(mta<1 ) mta=1
+       if(mta>MR) mta=MR
        msa=(salt-smin)/dsalt+1
-       if(msa.lt.1 ) msa=1
-       if(msa.gt.MR) msa=MR
+       if(msa<1 ) msa=1
+       if(msa>MR) msa=MR
 #endif 
        call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
 
@@ -179,7 +185,7 @@ contains
        
        scrivi=.false.
        uu=(rbg*vflux(ia,ja-1,ka,nsp)+rb*vflux(ia,ja-1,ka,nsm))*ff
-       if(uu.lt.0.d0) then
+       if(uu<0.d0) then
           jb=ja-1
 #ifndef ifs 
         if(jb==0) stop 34578
@@ -197,33 +203,33 @@ contains
 !       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
-       if(mrb.lt.1 ) mrb=1
-       if(mrb.gt.MR) mrb=MR
+       if(mrb<1 ) mrb=1
+       if(mrb>MR) mrb=MR
 #if defined streamts 
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
 #endif 
 #endif 
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
-       if(mta.lt.1 ) mta=1
-       if(mta.gt.MR) mta=MR
+       if(mta<1 ) mta=1
+       if(mta>MR) mta=MR
        msa=(salt-smin)/dsalt+1
-       if(msa.lt.1 ) msa=1
-       if(msa.gt.MR) msa=MR
+       if(msa<1 ) msa=1
+       if(msa>MR) msa=MR
 #endif 
        call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
        
@@ -235,7 +241,7 @@ contains
 #else
        uu=rbg*wflux(ka,nsp)+rb*wflux(ka,nsm)
 #endif
-       if(uu.gt.0.d0) then
+       if(uu>0.d0) then
           kb=ka+1
        endif
        z1=dble(ka)
@@ -255,18 +261,18 @@ contains
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
-       if(mta.lt.1 ) mta=1
-       if(mta.gt.MR) mta=MR
+       if(mta<1 ) mta=1
+       if(mta>MR) mta=MR
        msa=(salt-smin)/dsalt+1
-       if(msa.lt.1 ) msa=1
-       if(msa.gt.MR) msa=MR
+       if(msa<1 ) msa=1
+       if(msa>MR) msa=MR
 #endif 
        call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,real(subvol*ff))
 
@@ -275,9 +281,9 @@ contains
        call vertvel(rb,ia,iam,ja,ka)
        
 #ifdef full_wflux
-       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
+       if(wflux(ia,ja,ka-1,nsm)<0.d0) kb=ka-1
 #else
-       if(rbg*wflux(ka-1,nsp)+rb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
+       if(rbg*wflux(ka-1,nsp)+rb*wflux(ka-1,nsm)<0.d0) kb=ka-1
 #endif              
        z1=dble(ka-1)
 #if defined timeanalyt
@@ -310,18 +316,18 @@ contains
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
        mtb=int((temp-tmin)/dtemp)+1
-       if(mtb.lt.1 ) mtb=1
-       if(mtb.gt.MR) mtb=MR
+       if(mtb<1 ) mtb=1
+       if(mtb>MR) mtb=MR
        msb=int((salt-smin)/dsalt)+1
-       if(msb.lt.1 ) msb=1
-       if(msb.gt.MR) msb=MR
+       if(msb<1 ) msb=1
+       if(msb>MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
-       if(mta.lt.1 ) mta=1
-       if(mta.gt.MR) mta=MR
+       if(mta<1 ) mta=1
+       if(mta>MR) mta=MR
        msa=(salt-smin)/dsalt+1
-       if(msa.lt.1 ) msa=1
-       if(msa.gt.MR) msa=MR
+       if(msa<1 ) msa=1
+       if(msa>MR) msa=MR
 #endif 
        call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
 
@@ -329,8 +335,11 @@ contains
        ! shortest time is the time-steping 
        scrivi=.true.
 #ifdef timeanalyt
+!       print *,'pos_time',1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr
        call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+ !      print *,'loop_pos dsc0',ia,ja,ka,y0,y1,ts,tt,ds,dsc,dsmin,dxyz,ss0,ds,rr
        call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr)
+!       print *,'loop_pos dsc1',ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds,rr
        call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds,rr)
 #else           
        ! If there is no spatial solution, 
@@ -382,7 +391,7 @@ contains
 !       if(dza.ne.dzb) then
 !		zz=dble(int(z1))+1.d0 - (1.d0-z1+dble(int(z1)))*dza/dzb 
 !	
-!		if( zz.le.dble(int(z1)) .or. zz.ge.dble(int(z1)+1) ) then
+!		if( zz<=dble(int(z1)) .or. zz>=dble(int(z1)+1) ) then
 !	 		print *, 'fel',zz,z1,dble(int(z1))
 !	 		print *,'z0,z1=',z0,z1
 !	 		print *,'nytt z1=',zz
@@ -403,6 +412,14 @@ contains
 !	endif
 !#endif /*varbottombox*/
 !#endif /*baltix*/
+
+    if(abs(x0-x1)>1 .or. abs(y0-y1)>1) then
+     if(x0/=dble(IMT) .and. x1/=dble(IMT) ) then
+      print *,ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1
+      stop 2857
+     endif
+    endif
+
 
     
   end subroutine pos

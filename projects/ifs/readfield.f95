@@ -180,7 +180,8 @@ END IF
 !! Set a environment variable WGRIB, e.g. export WGRIB=/home/user/bin/wgrib
 !!
 
-string = '$WGRIB '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
+!string = '$WGRIB '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
+string = '/usr/bin/wgrib '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
 &        TRIM(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
 CALL SYSTEM(string)
 

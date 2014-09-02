@@ -72,10 +72,10 @@
   ! intminInOutFile : ??????????????????????????????????????????
   !
   ncoor           = 0,
-  kriva           = 6,
+  kriva           = 4,
   inDataDir=   '/Users/doos/data/ecearth/' !'/Users/doos/data/orca/orca1/'
   outDataDir=  '/Users/doos/data/ecearth/data_out/' !'/Users/doos/data/orca/orca1/data_out/'
-  outDataFile= 'th_seasonal_south_iter12'
+  outDataFile= 'orca1_analyt'
   intminInOutFile = 0
   /
   !
@@ -123,10 +123,10 @@ $INITRUNSEED
   partQuant   = 1000,
   seedType    = 1,
   ist1        = 220, !1,! AtlEq=220; Ber=110
-  ist2        = 315, !360,! AtlEq=305; Ber=120
-  jst1        = 119, !114, ! 95,! AtlEq=147; Ber=
-  jst2        = 119, !123, !110,! AtlEq=147; Ber= ; northernmost=288
-  kst1        =   1,
+  ist2        = 250, !360,! AtlEq=305; Ber=120
+  jst1        = 100, !114, ! 95,! AtlEq=147; Ber=
+  jst2        = 200, !123, !110,! AtlEq=147; Ber= ; northernmost=288
+  kst1        =  40,
   kst2        =  42, !64,
   varSeedFile = 0,
   seedDir     = ' ',
@@ -188,11 +188,12 @@ $INITRUNSEDIMENT
   ! defining end sections
   ! timax : maximum time length of a trajectory in days
   ! Not the NA
-    ienw =  110,    220,    1,    
-    iene =  120,    315,    1,   
-    jens =  246,    119,    1,      
-    jenn =  246,    147,    1,  
-    timax = 366000./ ! 1 millenia
+!    ienw =  110,    220,    1,    
+!    iene =  120,    315,    1,   
+!    jens =  246,    119,    1,      
+!    jenn =  246,    147,    1,  
+!    timax = 360./ ! 1 year
+!    timax = 366000./ ! 1 millenia
 ! Bering Straight &Equator in the Atlantic
 !    ienw =  110,      1,    1,    
 !    iene =  120,    360,    1,   
@@ -223,12 +224,12 @@ $INITRUNSEDIMENT
 !    jenn =  246,    1,    1,  
 !    timax = 36500000./ ! 100 millennia
 ! No end section
-!    ienw =  1,    1,    1,    
-!    iene =  1,    1,    1,   
-!    jens =  1,    1,    1,      
-!    jenn =  1,    1,    1,  
+    ienw =  1,    1,    1,    
+    iene =  1,    1,    1,   
+    jens =  1,    1,    1,      
+    jenn =  1,    1,    1,  
 !    timax = 3652./ ! 1 decade
-!    timax = 36525./ ! 1 century
+    timax = 36525./ ! 1 century
 !    timax = 366000./ ! 1 millenia
 !    timax = 3660000./ ! 10 millenia
 !    timax = 36500000./ ! 100 millennia

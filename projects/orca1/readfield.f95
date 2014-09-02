@@ -345,7 +345,7 @@ endif
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i+1,j,nsp))
    if(k.eq.kmu(i,j)) dd = botbox(i,j,1)
-   uflux(i,j,kk,nsp)=(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dyu(i,j) * dd 
+   uflux(i,j,kk,nsp)=1.*(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dyu(i,j) * dd 
    if(uflux(i,j,kk,nsp)==0.) then
     print *,i,j,k, (temp3d_eddy(i,j,kk),kk=k,KM)
     stop 4967
@@ -392,7 +392,7 @@ do i=1,IMT
    dd = dz(kk) 
    if(k.eq.1) dd = dd + 0.5*(hs(i,j,nsp) + hs(i,j+1,nsp))
    if(k.eq.kmv(i,j)) dd = botbox(i,j,2)
-   vflux(i,j,kk,nsp)=(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dxv(i,j) * dd 
+   vflux(i,j,kk,nsp)=1.*(temp3d_simp(i,j,k)+temp3d_eddy(i,j,k)) * dxv(i,j) * dd 
   enddo
  enddo
 enddo

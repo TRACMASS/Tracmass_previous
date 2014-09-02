@@ -158,9 +158,10 @@ CONTAINS
 #elif  zgrid1D
             vol = dz(kb)
 #endif /*zgrid*/
+#ifndef zgrid3Dt
 #ifdef varbottombox
             IF (kb == KM+1-kmt(ib,jb)) THEN
-               vol = dztb (ib,jb,1)
+               vol = dztb (ib,jb)
             END IF
 #endif /*varbottombox*/
 #ifdef freesurface
@@ -169,6 +170,7 @@ CONTAINS
             END IF
             vol = vol*dxdy(ib,jb)*1.e-6  ! volume in millions of m3
 #endif /*freesurface*/
+#endif /*zgrid3Dt*/
 
          END IF
           

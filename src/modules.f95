@@ -1,6 +1,8 @@
 
 
 MODULE mod_precdef		! Precision definitions
+  INTEGER, PARAMETER		            :: QP = selected_real_kind (32)
+!  INTEGER, PARAMETER		            :: DP = QP
   INTEGER, PARAMETER		            :: DP = SELECTED_REAL_KIND(15, 307)
 ENDMODULE mod_precdef
 
@@ -19,7 +21,7 @@ MODULE mod_param
   REAL*8                                    :: tseas,tyear,dtmin,voltr
   REAL*8                                    :: tstep,dstep,tss,partQuant
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
-  REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small number epsilon
+  REAL*8, PARAMETER                         :: EPS=1.d-12 ! the small number epsilon
 
   REAL*8, PARAMETER                         :: grav = 9.81
   REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
@@ -212,7 +214,7 @@ MODULE mod_grid
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #endif /*zgrid3Dt*/
 #ifdef varbottombox 
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
+  REAL, ALLOCATABLE, DIMENSION(:,:)         :: dztb
 #endif /*varbottombox*/
 #ifdef ifs
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa,bb
@@ -359,7 +361,7 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   2) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-#endif full_wflux
+#endif 
 
 
 ENDMODULE mod_vel
