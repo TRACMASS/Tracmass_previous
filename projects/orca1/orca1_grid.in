@@ -36,8 +36,8 @@ $INITGRIDTIME
   !
 $INITGRIDDATE
   !
-  yearmin        = 1996,
-  yearmax        = 1999,
+  yearmin        = 2005,
+  yearmax        = 2005,
   ! === Reference basetime for the velocity field.
   baseSec        = 0,
   baseMin        = 0,

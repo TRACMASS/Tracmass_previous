@@ -34,7 +34,8 @@
   intmin  = 1,
   intspin = 1,  
   intrun  = 1000,         ! = 73*20*10
-  intstep = 1
+  intstep =    0,
+  degrade_time =0 !9999=stationry
 /
   !
 &INITRUNDATE
@@ -42,10 +43,12 @@
   ! START TIME
   ! ===================================
   !
-  startHour         = 0,
-  startDay          = 5,
-  startMon          = 1,
-  startYear         = 1996
+  startSec         =    0,
+  startMIN         =    0,
+  startHour        =    0,
+  startDay         =    5,
+  startMon         =    1,
+  startYear        =    1996  
 / 
   !
   !
@@ -67,11 +70,14 @@
   ! inDataDir  : Directory where input fields are stored
   ! outDataDir : Directory where output files are saved
   !
-  ncoor           = 1,
-  kriva           = 2,
-  inDataDir       = '/Users/doos/data/orca/orca12/'
+  ncoor           = 0,
+  kriva           = 1,
+!  inDataDir       = '/Volumes/Atlanten/data/orca/orca12/' 
+ inDataDir       = '/Volumes/Resa/data/orca/orca12/' 
+!  inDataDir       = '/Users/doos/data/orca/orca12/'
   outDataDir      = '/Users/doos/data/orca/orca12/data_out/'
-  outDataFile     = 'orca12_test'
+!  outDataFile     = 'orca12_timeanalyt_k6'
+  outDataFile     = 'orca12_timestep_iter_12000'
   intminInOutFile = 0
   /
   !
@@ -115,19 +121,19 @@ $INITRUNSEED
   ! -1 indicates max value in grid.
   !
   nff         = 1,
-  isec        = 1,
+  isec        = 2,
   idir        = -1,
   nqua        = 1,
   partQuant   = 1,
   seedType    = 1,
-  ist1        =  250,
-  ist2        =  250,
-  jst1        =  200,
-  jst2        =  400,
-  kst1        =   66, 
-  kst2        =   66,
+  ist1        = 320,
+  ist2        = 480,
+  jst1        = 360,
+  jst2        = 360,
+  kst1        = 1, 
+  kst2        = 75,
   varSeedFile = 0,
-  seedDir     = ' ',
+  seedDir     = '',
   seedFile    = ''
 /
   !
@@ -183,10 +189,59 @@ $INITRUNSEDIMENT
   ! ==================================
   ! END of THE RUN
   ! ==================================
-  iene =   50,   500, 9000, 9000,  ! eastern end section
-  ienw =    1,   450,    0,    0,  ! western end section
-  jens =    0,     0,    0,  350,  ! southern end section
-  jenn = 9000, 9000,    50,  400,  ! northern end section
-  timax = 3650000./                ! timax : maximum time length of a trajectory in days
+  ! defining end sections
+  ! timax : maximum time length of a trajectory in days
+  ! No end section
+    ienw =  1,     498,    1,    1, 
+    iene =  2,     600, 9000, 9000,   
+    jens =  1,       1,    1,  398,    
+    jenn =  9000, 9000,    2,  600,
+  ! Not the NA
+!    ienw =  110,    220,    1,    
+!    iene =  120,    315,    1,   
+!    jens =  246,    119,    1,      
+!    jenn =  246,    147,    1,  
+!    timax = 360./ ! 1 year
+!    timax = 366000./ ! 1 millenia
+! Bering Straight &Equator in the Atlantic
+!    ienw =  110,      1,    1,    
+!    iene =  120,    360,    1,   
+!    jens =  246,      1,    1,      
+!    jenn =  246,    119,    1,  
+!    timax = 36525./ ! 1 century
+!    timax = 36520./
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  148,    1,    1,      
+!    jenn =  200,    1,    1,  
+!    timax = 99999999999./
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  100,    1,    1,      
+!    jenn =  146,    1,    1,  
+!    timax = 99999999999./
+! Equator in the Atlantic
+!    ienw =  220,    1,    1,    
+!    iene =  305,    1,    1,   
+!    jens =  147,    1,    1,      
+!    jenn =  147,    1,    1,  
+!    timax = 36500000./ ! 100 millennia
+! Bering Straight
+!    ienw =  110,    1,    1,    
+!    iene =  120,    1,    1,   
+!    jens =  246,    1,    1,      
+!    jenn =  246,    1,    1,  
+!    timax = 36500000./ ! 100 millennia
+! No end section
+!    ienw =  1,    1,    1,    
+!    iene =  1,    1,    1,   
+!    jens =  1,    1,    1,      
+!    jenn =  1,    1,    1,  
+    timax = 160./ ! 1 decade
+!    timax = 3652./ ! 1 decade
+!    timax = 36525./ ! 1 century
+!    timax = 366000./ ! 1 millenia
+!    timax = 3660000./ ! 10 millenia
+!    timax = 36500000./ ! 100 millennia
     
     

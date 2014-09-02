@@ -44,7 +44,7 @@
 &INITRUNWRITE
   !==ncoor:         0 = output in model coordinates
   !==               1 = output in long/lat coordinates
-  ncoor   = 0,      
+  ncoor   = 6,      
   !
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets (each ints)
@@ -53,8 +53,8 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-  kriva    = 3,
-  !kriva    = 1,
+  !kriva    = 6,
+  kriva    = 1,
   !
   ! === Directory where input fields are stored
   inDataDir    = '/Users/doos/Documents/kod/tracmass/data_in/',
@@ -69,8 +69,9 @@
   !
   !
   ! === name of current trajectory run
-  !outDataFile     ='analyt1n'/
-  outDataFile     ='timestep1000n'/
+  !outDataFile     ='analyt_iner_k1'/
+  outDataFile     ='dt120000_iner_k1'/
+  !outDataFile     ='dt1_gyre_k6'/
   !
   !
   intminInOutFile=0/
@@ -113,8 +114,8 @@ $INITRUNSEED
   ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
   !
-  ist1     =  10,		 
-  ist2     =  10,		 
+  ist1     =  31, !10, !5, !9,		 
+  ist2     =  31, !99, !45, !9,		 
   jst1     =  50,
   jst2     =  50,
   kst1     =   5,		 
@@ -174,6 +175,7 @@ $INITRUNEND
   iene =   1,
   jens =   1,
   jenn =   1,
-  timax = 10./  ! maximum time length of a trajectory in days
+  !timax =  365000./  ! maximum time length of a trajectory in days
+  timax =  20./  ! maximum time length of a trajectory in days
 
 

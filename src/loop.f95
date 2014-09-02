@@ -67,7 +67,8 @@ SUBROUTINE loop
          /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
 
   dstep = 1.d0 / dble(iter)
-  dtmin = dstep * tseas
+!  dtmin = dstep * tseas  ! less accurate than the following
+  dtmin = tseas / dble(iter) 
     
   !==========================================================
   !===   Read in end positions from a previous run        === 
@@ -387,35 +388,35 @@ SUBROUTINE loop
 
            ! === north fold cyclic for the ORCA grids ===
 #if defined orc || orca1 || orca12 
+           if(subGrid==0) then
             if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-  !            print *,'v',(rbg*vflux(ia,ja,ka,nsp) + rb*vflux(ia,ja,ka,nsm))*ff
               x1 = dble(IMT+2) - x1
               ib=idint(x1)+1
               jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
- !             print *,'Changed to',ntrac,ib,jb,kb,x1,y1,z1
-  !            print *,'v',(rbg*vflux(ia,jb,ka,nsp) + rb*vflux(ia,jb,ka,nsm))*ff
-           elseif(y1 > dble(JMT-1)) then
-             print *,'north of northfold for ntrac=',ntrac
-             x1 = dble(IMT+2) - x1
-             ib=idint(x1)+1
-             jb=JMT-1
-             y1= dble(JMT-1) -y1 + dble(JMT-1)
-             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+             elseif(y1 > dble(JMT-1)) then
+              print *,'north of northfold for ntrac=',ntrac,' JMT=',JMT,' y1=',y1
+!              x1 = dble(IMT+2) - x1
+!              ib=idint(x1)+1
+!              jb=JMT-1
+!              y1= dble(JMT-1) -y1 + dble(JMT-1)
+!              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
 
-!              print *,ia,ib,x0,x1
-!              print *,ja,jb,y0,y1
-!              print *,ka,kb,z0,z1
-!              print *,kmt(ia,ja),kmt(ib,jb)
-!              print *,'v',(rbg*vflux(ia,ja  ,ka,nsp) + rb*vflux(ia,ja  ,ka,nsm))*ff
-!              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-!              nerror=nerror+1
-!              nrj(6,ntrac)=1
-!              stop 4967
+              print *,ia,ib,x0,x1
+              print *,ja,jb,y0,y1
+              print *,ka,kb,z0,z1
+              print *,kmt(ia,ja),kmt(ib,jb)
+              print *,'v',(rbg*vflux(ia,ja  ,ka,nsp) + rb*vflux(ia,ja  ,ka,nsm))*ff
+              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+              nerror=nerror+1
+              nrj(6,ntrac)=1
+              stop 4967
 !              cycle ntracLoop
+            endif
            endif
 #elif defined orca025 || orca025L75
            if( y1 == dble(JMT-1) ) then
+           if(subGrid==0) then
  !              print *,'North fold for',ntrac
               x1 = dble(IMT+3) - x1
               y1 = dble(JMT-2)
@@ -429,7 +430,9 @@ SUBROUTINE loop
               print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
               nerror=nerror+1
               nrj(6,ntrac)=1
-              cycle ntracLoop
+              stop 4966
+!              cycle ntracLoop
+            endif
            endif
 #endif
            ! === Cyclic world ocean/atmosphere === 
@@ -583,7 +586,7 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*)                   :: teststr    
-       INTEGER                             :: verbose = 0
+       INTEGER                             :: verbose = 1
        INTEGER                             :: strict  = 0
        INTEGER                             :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
@@ -792,13 +795,13 @@ return
               call print_ds
               print *,'ia=',ia,ib,ja,jb,ka,kb
               print *,'x0=',x0,x1,y0,y1,z0,z1
-              call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
-              call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
-              call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
+!              call cross(1,ia,ja,ka,x0,dse,dsw,rr) ! zonal
+!              call cross(2,ia,ja,ka,y0,dsn,dss,rr) ! meridional
+!              call cross(3,ia,ja,ka,z0,dsu,dsd,rr) ! vertical
               print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
  !             nrj(6,ntrac)=1
- !             stop 3957
+              stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if
@@ -920,7 +923,7 @@ return
 #else
     dxyz=dz(kb)
 #ifdef varbottombox
-    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
+    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb)
 #endif /*varbottombox*/
 #ifdef freesurface
     if(kb == KM) dxyz=dxyz+rg*hs(ib,jb,nsp)+rr*hs(ib,jb,nsm)

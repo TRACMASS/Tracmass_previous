@@ -46,7 +46,8 @@ SUBROUTINE setupgrid
   
   REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t !,rhom
   CHARACTER (len=200)                         :: gridFile
-  
+  REAL*4									  :: long(IMT,JMT),lat(IMT,JMT)
+  REAL*8                                      :: e3t_0(KM)
 !    INTEGER, PARAMETER :: IMTG=4320 ,JMTG=3059
 
 
@@ -60,10 +61,9 @@ SUBROUTINE setupgrid
   count3D  = [         imt,        jmt , KM , 1 ]
   map3D    = [          1 ,          2 ,  3 , 4 ] 
 
-
   ! === Open mesh file ===
   gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
-!  print *,trim(gridFile)
+  print *,trim(gridFile)
   ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
   if(ierr.ne.0) stop 3751
 
@@ -110,25 +110,25 @@ SUBROUTINE setupgrid
     
 ! extras for analysis to be commented out
 ! === Read dy for u points ===
-!  ierr=NF90_INQ_VARID(ncid,'glamu',varid) 
-!  if(ierr.ne.0) stop 3764
-!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-!  if(ierr.ne.0) stop 3799
-!  do i=1,IMT
-!  do  j=1,JMT
-!    long(i,j)=temp2d_doub(i,j)
-!    if(long(i,j).lt.0.) long(i,j)=long(i,j)+360.
-!  enddo
-!  enddo
-!  ierr=NF90_INQ_VARID(ncid,'gphiv',varid) 
-!  if(ierr.ne.0) stop 3764
-!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-!  if(ierr.ne.0) stop 3799
-!  do i=1,IMT
-!  do  j=1,JMT
-!    lat(i,j)=temp2d_doub(i,j)
-!  enddo
-!  enddo
+  ierr=NF90_INQ_VARID(ncid,'glamu',varid) 
+  if(ierr.ne.0) stop 3765
+  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
+  if(ierr.ne.0) stop 3799
+  do i=1,IMT
+  do  j=1,JMT
+    long(i,j)=temp2d_doub(i,j)
+    if(long(i,j).lt.0.) long(i,j)=long(i,j)+360.
+  enddo
+  enddo
+  ierr=NF90_INQ_VARID(ncid,'gphiv',varid) 
+  if(ierr.ne.0) stop 3767
+  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
+  if(ierr.ne.0) stop 3799
+  do i=1,IMT
+  do  j=1,JMT
+    lat(i,j)=temp2d_doub(i,j)
+  enddo
+  enddo
 !  print *,(lat(IMT/2,j),j=1,JMT)
   
   
@@ -150,6 +150,7 @@ SUBROUTINE setupgrid
   if(ierr.ne.0) stop 3777
   ierr=NF90_GET_VAR(ncid ,varid ,zw(1:KM) ,start1d ,count1d)
   if(ierr.ne.0) stop 3778
+  e3t_0=zw(1:KM)
   do k=1,km
     kk=km+1-k
     dz(kk)=zw(k)
@@ -180,11 +181,12 @@ SUBROUTINE setupgrid
       enddo
   enddo
   
-!  north fold 
+if(subGrid==0) then !  north fold 
   do i=4,IMT
     ii=IMT+4-i
     kmv(i,JMT)=kmv(ii,JMT-3)
   enddo
+endif
 
   
   DEALLOCATE( temp2d_int ) 
@@ -197,7 +199,7 @@ SUBROUTINE setupgrid
   ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
   do i=1,IMT
       do j=1,JMT
-          if(kmt(i,j).ne.0) dztb(i,j,1)=temp3d_doub(i,j,kmt(i,j))
+          if(kmt(i,j).ne.0) dztb(i,j)=temp3d_doub(i,j,kmt(i,j))
       enddo
   enddo
   
@@ -205,27 +207,61 @@ SUBROUTINE setupgrid
   ierr=NF90_CLOSE(ncid)
 
 
-
-
   ! dz is independent of x,y except at bottom
   do j=1,JMT
       do i=1,IMT
           if(kmt(i,j).eq.0) then
-              dztb(i,j,1)=0.
+              dztb(i,j)=0.
           endif
       enddo
   enddo
+    
   
-  dztb(:,:,2)=dztb(:,:,1)  ! this and the third "time" dimension is probably unnecessary
+  mask=0
+  do j=1,JMT
+    do i=1,IMT
+      if(kmt(i,j).ne.0) mask(i,j)=1
+    enddo
+  enddo
 
+!  print *,(mask(100,j),j=1,JMT)
   
-!open(21,file='/Users/doos/data/orca/orca12/topo/longlat',form='unformatted')
+  ! extras for analysis to be commented out
+! === Read dy for u points ===
+!  ierr=NF90_INQ_VARID(ncid,'nav_lon',varid) 
+!  if(ierr.ne.0) stop 3768
+!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
+!  if(ierr.ne.0) stop 3799
+!  do i=1,IMT
+!  do  j=1,JMT
+!    long(i,j)=temp2d_doub(i,j)
+!    if(long(i,j).lt.0.) long(i,j)=long(i,j)+360.
+!  enddo
+!  enddo
+!  ierr=NF90_INQ_VARID(ncid,'nav_lat',varid) 
+!  if(ierr.ne.0) stop 3769
+!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
+!  if(ierr.ne.0) stop 3799
+!  do i=1,IMT
+!  do  j=1,JMT
+!    lat(i,j)=temp2d_doub(i,j)
+!  enddo
+!  enddo
+!  do j=JMT,1,-1
+!  print *,j,lat(IMT/2,j)
+!  enddo
+
+!open(21,file=trim(inDataDir)//'topo/coord_orca12',form='unformatted')
 !write(21) long
 !write(21) lat
+!write(21) e3t_0
 !write(21) kmt
 !write(21) kmu
 !write(21) kmv
+!write(21) dxdy
+!write(21) botbox
 !close(21)
-!stop 3956
+!print *,imt
+!stop 4596
 
 end SUBROUTINE setupgrid

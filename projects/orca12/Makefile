@@ -21,7 +21,7 @@
                             # calculated in an identical previous run.    
 #   fl12  = -Dinitxyt       # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-   fl13  = -Dtwodim         # Turn off vertical velocities.
+#  fl13  = -Dtwodim         # Turn off vertical velocities.
 #  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
