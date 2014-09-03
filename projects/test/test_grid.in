@@ -1,0 +1,57 @@
+&INITGRIDVER
+  ! ===	Used to	check if this file has the correct syntax
+  gridVerNum  =	2/
+  !
+  !
+ &INITGRIDDESC
+  !
+  GCMname     = 'Test case with Gulf Stream',
+  GCMsource   = 'bower-gulf',
+  gridName    = '',
+  gridSource  = '',
+  gridDesc    = ''/
+  !
+  !
+$INITGRIDGRID
+  !
+  IMT      = 100,  
+  JMT      = 100,  
+  KM       = 40,   
+  LBT      = 3,
+  NEND     = 4,                   ! NEND = LBT +1
+  !
+  xmin     = 0.,
+  xmax     = 800000.,
+  ymin     = -250000.,
+  ymax     = 250000.,
+  zmin     = 0.,
+  zmax     = 200.
+  /
+  !
+  !
+$INITGRIDNTRAC
+  !
+  NTRACMAX=50000/               ! Maximum number of trajectories allowed
+  !
+  !
+$INITGRIDTIME
+  ngcm          =  1,          !hours between GCM datasets
+  iter          =  1,          !sub steps between time steps
+  intmax        =  100,        !maximum length of GCM fields
+  fieldsPerFile =  100 /       !stationary=1, seasonal=12,----1460 1,2920
+  !
+  !
+$INITGRIDDATE
+  !
+  yearmin        = 2000,
+  yearmax        = 2014,
+  ! === Reference basetime for the velocity field.
+  baseSec        = 0,
+  baseMin        = 0,
+  baseHour       = 0,
+  baseDay        = 1,
+  baseMon        = 1,
+  baseYear       = 2000/
+  !
+$INITGRIDARC
+   arcscale      = 0.00001/       ! scaling factor for length output in the orig arc m -> 100 km  

@@ -53,7 +53,8 @@ SUBROUTINE init_params
    ! -------------------------------
    namelist /INITGRIDVER/    gridVerNum
    namelist /INITGRIDDESC/   GCMname, GCMsource, gridName, gridSource, gridDesc
-   namelist /INITGRIDGRID/   IMT, JMT, KM, LBT, NEND
+   namelist /INITGRIDGRID/   IMT, JMT, KM, LBT, NEND, &
+&                            xmin, xmax, ymin, ymax, zmin, zmax
    namelist /INITGRIDNTRAC/  NTRACMAX
    namelist /INITGRIDDATE/   yearmin, yearmax, baseSec  ,baseMin  ,baseHour,   &
                          &   baseDay  ,baseMon  ,baseYear

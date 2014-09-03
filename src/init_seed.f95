@@ -45,7 +45,6 @@ SUBROUTINE init_seed()
    !             ! defined by ist1, ist2, jst1, jst2, kst1, kst2 
       
       nsdMax = (kst2-kst1+1)*(jst2-jst1+1)*(ist2-ist1+1)
-      
       ALLOCATE ( seed_ijk(nsdMax, 3), seed_set(nsdMax, 2) )
       
       seed_ijk = 0

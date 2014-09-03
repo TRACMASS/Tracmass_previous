@@ -26,7 +26,7 @@ rutgersNWA			BJ
 sed            		KD				sleep					RCO					
 sim					KD 				sleep					AS3D
 singapore			KD,BT			sleep					ROMS
-tes					KD				active					Academic fields
+test				KD,JK			active					Academic fields
 TOPAZ				BJ
 tun					KD				sleep					ROMS				
 
@@ -35,7 +35,7 @@ occ            		KD				to be deleted
 sks					KD				to be deleted
 pal            		KD				to be deleted
 
-"sleep" is when a project is not used but might be used in the future. These code will not be uppdated.
+"sleep" is when a project is not used but might be used in the future. These code will not be updated.
 "active" is when ideally the codes should be updated when changes are being made so that the code can be compiled and run with no errors
 "to be deleted" is when the project will NEVER EVER be used again
 

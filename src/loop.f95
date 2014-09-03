@@ -516,7 +516,7 @@ SUBROUTINE loop
      print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot 
 799  format('timestep=',i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10)
 #endif
- call flush
+ call flush(799)
 
    IF (ntractot /= 0 .AND. ntractot - nout - nerror == 0  .AND.                &
    &   seedTime /= 2) THEN
