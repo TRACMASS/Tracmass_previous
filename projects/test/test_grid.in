@@ -6,7 +6,7 @@
  &INITGRIDDESC
   !
   GCMname     = 'Test case with Gulf Stream',
-  GCMsource   = '',
+  GCMsource   = 'bower-gulf',
   gridName    = '',
   gridSource  = '',
   gridDesc    = ''/
@@ -18,7 +18,15 @@ $INITGRIDGRID
   JMT      = 100,  
   KM       = 40,   
   LBT      = 3,
-  NEND     = 4/                   ! NEND = LBT +1
+  NEND     = 4,                   ! NEND = LBT +1
+  !
+  xmin     = 0.,
+  xmax     = 800000.,
+  ymin     = -250000.,
+  ymax     = 250000.,
+  zmin     = 0.,
+  zmax     = 200.
+  /
   !
   !
 $INITGRIDNTRAC

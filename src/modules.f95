@@ -413,7 +413,7 @@ MODULE mod_name
   CHARACTER(LEN=200)                         :: GCMname   ,GCMsource
   CHARACTER(LEN=200)                         :: gridName  ,gridSource
   CHARACTER(LEN=200)                         :: gridDesc
-  CHARACTER(LEN=200)                         :: caseName  ,caseDesc
+  CHARACTER(LEN=200)                         :: caseName  ,caseDesc, testcase
 ENDMODULE mod_name
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 

@@ -1,4 +1,4 @@
-SUBROUTINE readfields
+subroutine readfields
 !!---------------------------------------------------------------------------------
 !!
 !!
@@ -14,18 +14,13 @@ SUBROUTINE readfields
 !!      3) time-oscillation1   - 3 different fields with oscillations  
 !!         time-oscillation2
 !!         time-oscillation3 
-!!      4) Nicoletta-Fabboni   - Oscillatory field with analytical solutions
+!!      4) nicoletta-fabboni   - Oscillatory field with analytical solutions
 !!      5) bower-gulf          - Idealised gulf stream model from Bower (JPO,1991) 
 !!   
 !!
 !!   History: 
 !!      
-!!      Sep 2014, JK: Examples 1-4 by K. Doos and example 5 merged
-!!
-!!   
-!!   Joakim Kjellsson
-!!   British Antarctic Survey
-!!   August 2014
+!!      Sep 2014, JK: Examples 1-4 by KD and example 5 merged
 !!
 !!
 !!
@@ -52,21 +47,21 @@ SUBROUTINE readfields
    !! Loop/dummy variables
    integer                                  ::  ji, jj, jk, jn, jim, jip, jjm, jjp, &
    &                                            jkm, jkp, jnm, jnp
-   real                                     ::  x, y, z, t, alpha, beta, yc
+   real(8)                                  ::  x, y, z, t 
    real(4), allocatable, dimension(:,:,:)   ::  dPsidx, dPsidy
    
-   !! Grid 
-   real(4)                                  ::  xmin, xmax, ymin, ymax, zmin, zmax
+   !! Time 
    character(len=4), dimension(4)           ::  hour
    character(len=2), dimension(12)          ::  month
    character(len=2), dimension(31)          ::  date
    
-   !! For 
+   !! For circular and oscillations
    real(8), save                            ::  cox, coy, om, co, uwe, dl
    real(8), save                            ::  ug, u0, gamma, gammag, fcor
    
    !! For gulf stream function
    real(4)                                  ::  Lx, kx, Ay, Hz, lambda, cx, sc, psi0
+   real(4)                                  ::  alpha, beta, yc
    real(4), allocatable, dimension(:,:,:,:) ::  psi
    !!                                           km/d -> m/s
    real(4), parameter                       ::  kmd = 1000.0 / (60.0*60.0*24.0)
@@ -76,11 +71,14 @@ SUBROUTINE readfields
    real(4), parameter                       ::  tlow = 10.0  !![C]
    real(4), parameter                       ::  slow = 33.0  !![PSU]
 #endif
-      
    
-   !!------------------------------------------------------------------------------
+   !!------------------------------------------------------------------------------   
+    
+   !!
+   !! Set name of testcase
+   !!
    
-   namelist /GRIDSIZE/  xmin, xmax, ymin, ymax, zmin, zmax
+   testcase = trim(GCMsource)
    
    !!------------------------------------------------------------------------------
    
@@ -97,27 +95,6 @@ SUBROUTINE readfields
    !!
    
    call datasetswap
-   
-   !!------------------------------------------------------------------------------
-   !! === Grid is determined from a namelist and is read here and in setupgrid.f95
-   !!------------------------------------------------------------------------------
-   
-   open (unit=11,file='projects/bower-gulf/namelist',status='old',delim='apostrophe')
-   read (11,nml=GRIDSIZE) 
-   close (11)
-   
-   !! We assume a horizontal grid that is 800 x 500 km 
-   !! and 1000 m depth                                 
-   
-   !! x grid
-   dx   = (xmax - xmin) / (imt - 1)
-   
-   !! y grid
-   dy   = (ymax - ymin) / (jmt - 1)
-   
-   
-   !!------------------------------------------------------------------------------
-   
    
    !!------------------------------------------------------------------------------
    
@@ -191,9 +168,9 @@ SUBROUTINE readfields
    !! Set parameters specific for each test case
    !!
    
-   if ( testcase == 'circular-stationary' .or. &
-      & testcase == 'circular-evolving'   .or. &
-      & testcase == 'time-oscillation3'        ) then
+   if ( trim(testcase) == 'circular-stationary' .or. &
+      & trim(testcase) == 'circular-evolving'   .or. &
+      & trim(testcase) == 'time-oscillation3'        ) then
       
       t = dble(ints) / dble(5) + 1.
       
@@ -202,7 +179,7 @@ SUBROUTINE readfields
       
    end if
    
-   if ( testcase == 'nicoletta-fabboni') then
+   if ( trim(testcase) == 'nicoletta-fabboni') then
       
       ug     = 0.04  
       u0     = 0.5 
@@ -214,13 +191,13 @@ SUBROUTINE readfields
 
    end if
    
-   if (testcase == 'circular-evolving') then
+   if (trim(testcase) == 'circular-evolving') then
       
       !! === Parameters for circular time evolving field
       uwe = -0.4d0
       dl  = dble(ints) * 0.01d0 * pi
    
-   else if (testcase == 'bower-gulf') then
+   else if (trim(testcase) == 'bower-gulf') then
       
       !! === Parameters for Amy Bowers gulf stream ===
       
@@ -254,7 +231,7 @@ SUBROUTINE readfields
    
    !!------------------------------------------------------------------------------
    
-   if (testcase == 'bower-gulf') then
+   if (trim(testcase) == 'bower-gulf') then
          
       !!
       !! Calculate stream function for this time step
@@ -310,7 +287,7 @@ SUBROUTINE readfields
    
    do jk=1,km
       
-      if (testcase == 'circular-stationary') then
+      if (trim(testcase) == 'circular-stationary') then
          
          !!----------------------------------
          !! === Circular stationary field ===
@@ -319,14 +296,14 @@ SUBROUTINE readfields
             
             do ji = 1,imt
                
-               uflux(ji,jj,jk,nsp) = -cox * dy * deg * dz(k) * dble(jj-1-jmt/2) / dble(jmt-1) 
-               vflux(ji,jj,jk,nsp) =  cox * dx * deg * dz(k) * dble(ji-1-imt/2) / dble(imt-1)
+               uflux(ji,jj,jk,nsp) = -cox * dy * deg * dz(jk) * dble(jj-1-jmt/2) / dble(jmt-1) 
+               vflux(ji,jj,jk,nsp) =  cox * dx * deg * dz(jk) * dble(ji-1-imt/2) / dble(imt-1)
             
             end do
             
          end do
          
-      else if (testcase == 'circular-evolving') then
+      else if (trim(testcase) == 'circular-evolving') then
           
          !!----------------------------------------
          !! === Time evolving oscillating field ===
@@ -335,14 +312,14 @@ SUBROUTINE readfields
             
             do ji=1,imt
          
-               uflux(ji,jj,jk,nsp) = dy * deg * dz(k) * cox * &
+               uflux(ji,jj,jk,nsp) = dy * deg * dz(jk) * cox * &
                &                     ( dcos( PI * dble(ji-1-imt/2)/dble(imt-1)   + dl) *  &
                &                       dsin(-PI * dble(jj-1-jmt/2)/dble(jmt-1) ) + uwe    &
                &                       + dcos(t) )
                
-               vflux(ji,jj,jk,nsp) = dx * deg * dz(k) * coy * &
-               &                     ( dsin( PI * dble(i-1-imt/2)/dble(imt-1)    + dl) *  & 
-               &                       dcos( PI * dble(j-1-jmt/2)/dble(jmt-1) )           &
+               vflux(ji,jj,jk,nsp) = dx * deg * dz(jk) * coy * &
+               &                     ( dsin( PI * dble(ji-1-imt/2)/dble(imt-1)    + dl) *  & 
+               &                       dcos( PI * dble(jj-1-jmt/2)/dble(jmt-1) )           &
                &                       + dsin(t) )
                
             end do
@@ -350,7 +327,7 @@ SUBROUTINE readfields
          end do
       
          
-      else if (testcase == 'time-oscillation1') then   
+      else if (trim(testcase) == 'time-oscillation1') then   
          
          !!---------------------------------------------------------
          !! === Spatially constant field that oscillates in time ===
@@ -359,15 +336,15 @@ SUBROUTINE readfields
             
             do ji=1,imt
                
-               uflux(ji,jj,jk,nsp) = dy * deg * dz(k) * (dcos(t)-0.01  + dcos(t/pi))
-               vflux(ji,jj,jk,nsp) = dx * deg * dz(k) * (dsin(t)-0.001 + dsin(t/pi))
+               uflux(ji,jj,jk,nsp) = dy * deg * dz(jk) * (dcos(t)-0.01  + dcos(t/pi))
+               vflux(ji,jj,jk,nsp) = dx * deg * dz(jk) * (dsin(t)-0.001 + dsin(t/pi))
                
             end do
             
          end do
          
          
-      else if (testcase == 'time-oscillation2') then
+      else if (trim(testcase) == 'time-oscillation2') then
          
          !!---------------------------------------------------------
          !! === Spatially constant field that oscillates in time ===
@@ -376,15 +353,15 @@ SUBROUTINE readfields
             
             do ji=1,imt
                
-               uflux(ji,jj,jk,nsp) = dy * deg * dz(k) * (-0.01  + dcos(t/pi))
-               vflux(ji,jj,jk,nsp) = dx * deg * dz(k) * (-0.001 + dsin(t/pi))
+               uflux(ji,jj,jk,nsp) = dy * deg * dz(jk) * (-0.01  + dcos(t/pi))
+               vflux(ji,jj,jk,nsp) = dx * deg * dz(jk) * (-0.001 + dsin(t/pi))
                
             end do
             
          end do
       
          
-      else if (testcase == 'time-oscillation3') then
+      else if (trim(testcase) == 'time-oscillation3') then
          
          !!---------------------------------------------------------
          !! === Spatially constant field that oscillates in time ===
@@ -393,11 +370,11 @@ SUBROUTINE readfields
             
             do ji=1,imt
                
-               uflux(ji,jj,jk,nsp) = dy * deg * dz(k) * cox *                &
+               uflux(ji,jj,jk,nsp) = dy * deg * dz(jk) * cox *                &
                &                     ( -0.05 + t/5000.    + dcos(t) +        &
                &                        0.5  * dsin(t*2.) + 2. * dsin(t*10.) )
                
-               vflux(ji,jj,jk,nsp) = dx * deg * dz(k) * coy *                &
+               vflux(ji,jj,jk,nsp) = dx * deg * dz(jk) * coy *                &
                &                     ( -0.025 + dsin(t) + 0.5 * dcos(t*2.) + &
                &                        0.5 * dcos(t/2)                      )
                
@@ -406,19 +383,19 @@ SUBROUTINE readfields
          end do
          
          
-      else if (testcase == 'nicoletta-fabboni') then
+      else if (trim(testcase) == 'nicoletta-fabboni') then
          
          !!----------------------------------------------------------------------
          !! === Nicoletta Fabboni velocities, which have analytical solutions ===
          !!----------------------------------------------------------------------
-         uflux(1:imt,1:jmt,jk,nsp) = dy * dz(k) * ( ug * dexp(-gammag*t) + &
+         uflux(1:imt,1:jmt,jk,nsp) = dy * dz(jk) * ( ug * dexp(-gammag*t) + &
          &                           (u0-ug) * dexp(-gamma*t) * cos(fcor*t) )
          
-         vflux(1:imt,1:jmt,jk,nsp) = dx * dz(k) * (-(u0-ug) * dexp(-gamma*t) * &
+         vflux(1:imt,1:jmt,jk,nsp) = dx * dz(jk) * (-(u0-ug) * dexp(-gamma*t) * &
          &                           sin(fcor*t) )
       
          
-      else if (testcase == 'bower-gulf') then
+      else if (trim(testcase) == 'bower-gulf') then
          
          !!-------------------------------------------------
          !! === Idealised gulf stream model by Amy Bower ===
@@ -471,12 +448,12 @@ SUBROUTINE readfields
             y = float(jj) * dy     + ymin
             z = float(jk) * dz(jk) + zmin
             
-            if (testcase == 'circular-stationary'   .or. &
-                testcase == 'circular-evolving'     .or. &
-                testcase == 'time-oscillation1'     .or. & 
-                testcase == 'time-oscillation2'     .or. & 
-                testcase == 'time-oscillation3'     .or. & 
-                testcase == 'nicoletta-fabboni'          ) then
+            if (trim(testcase) == 'circular-stationary'   .or. &
+                trim(testcase) == 'circular-evolving'     .or. &
+                trim(testcase) == 'time-oscillation1'     .or. & 
+                trim(testcase) == 'time-oscillation2'     .or. & 
+                trim(testcase) == 'time-oscillation3'     .or. & 
+                trim(testcase) == 'nicoletta-fabboni'          ) then
                
                !! 
                !! Simplified distribution of T,S and rho
@@ -485,7 +462,7 @@ SUBROUTINE readfields
                sal(ji,jj,jk,nsp) = 30.
                rho(ji,jj,jk,nsp) = (28. - 20.) * float(km-k) / float(km) + 20. 
             
-            else if (testcase == 'bower-gulf') then
+            else if (trim(testcase) == 'bower-gulf') then
                
                !!
                !! Set up a simple distribution of temperature and salinity 
@@ -512,7 +489,7 @@ SUBROUTINE readfields
    
    end do
    
-   if (testcase == 'bower-gulf') then
+   if (trim(testcase) == 'bower-gulf') then
       
       do jj=1,jmt
          
@@ -531,18 +508,7 @@ SUBROUTINE readfields
    !!------------------------------------------------------------------------------
    !!------------------------------------------------------------------------------  
    
-   !!
-   !! Print the fields to binary files for testing
-   !!
-   
-   !open(unit=11,file='psi.bin',form='unformatted')
-   !write(11) psi,dPsidy,dPsidx
-   !close(11)
-   !stop
-   
-   !!------------------------------------------------------------------------------  
-   
-   if (testcase == 'bower-gulf') then
+   if (trim(testcase) == 'bower-gulf') then
       deallocate ( psi, dPsidx, dPsidy )
    end if
    
