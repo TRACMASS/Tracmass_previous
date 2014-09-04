@@ -177,7 +177,9 @@ ENDMODULE mod_grid
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
-  ! === Timestep increasing with one for each new velocity field
+  ! Variables and routines for timekeeping
+
+  !Timestep increasing with one for each new velocity field
   INTEGER                                   :: ints      ,intstart ,intend
   INTEGER                                   :: intrun    ,intspin  ,intstep
   INTEGER                                   :: intmin    ,intmax
@@ -264,10 +266,8 @@ CONTAINS
   end subroutine updateClock
   
   subroutine gdate (rjd, year,month,day)
-    !                                                                      
-    !---computes the gregorian calendar date (year,month,day)              
-    !   given the julian date (jd).                                        
-    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
+    !Computes the gregorian calendar date given a julian date (jd).
+    !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
     REAL*8                                   :: rjd
     INTEGER                                  :: jd
     INTEGER                                  :: year ,month ,day
@@ -292,9 +292,8 @@ CONTAINS
   end subroutine gdate
 
   INTEGER function jdate (year, month, day)
-    !---COMPUTES THE JULIAN DATE (JD) GIVEN A GREGORIAN CALENDAR
-    !   DATE (YEAR,MONTH,DAY).
-    !   Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
+    !Computes the julian date (JD) given a gregorian calendar date.
+    !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
     INTEGER                                  :: year, month ,day
     INTEGER                                  :: i, j, k
     i     = year
