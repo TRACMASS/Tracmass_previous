@@ -86,9 +86,9 @@ wflux(km,:) = 0.d0
      wsedtemp=0.d0
      kin=(uflux(ia,ja,k,nsm)*uflux(ia,ja,k,nsm)+ &
           vflux(ia,ja,k,nsm)*vflux(ia,ja,k,nsm))*0.5d0
-     !if (kin.le.3000000) then   !för RCO
+     !if (kin.le.3000000) then   !for RCO
      !wsedtemp=wsed*(3000000-kin)/3000000
-     if (kin.le.kincrit) then   !för SKB
+     if (kin.le.kincrit) then   !for SKB
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
 #ifdef explicit_w || full_wflux
