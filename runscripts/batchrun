@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cat projects/jplSCB/batch_overlap_ints.asc |while read line
+do 
+    ./runtraj jplSCB "${line}" 192
+done

@@ -1,0 +1,80 @@
+
+PROJMAKE           := $(wildcard projects/$(PROJECT)/Makefile.prj)
+ifneq ($(strip $(PROJMAKE)),)
+	include projects/$(PROJECT)/Makefile.prj
+endif
+
+PROJECT_FLAG      = -DPROJECT_NAME=\'$(PROJECT)\'
+CASE_FLAG         = -DCASE_NAME=\'$(CASE)\'
+ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
+OBJDIR           := build
+
+ifeq ($(NETCDFLIBS),"none")
+	LIB_DIR = 
+	INC_DIR = 
+	ORM_FLAGS += -Dno_netcdf
+endif
+ifeq ($(NETCDFLIBS),"automatic")
+	LIB_DIR = $(shell nc-config --flibs)
+	INC_DIR = -I$(shell nc-config --includedir)
+endif
+ifeq ($(NETCDFLIBS),"macports")
+	LIB_DIR           = -L/opt/local/lib
+	INC_DIR           = -I/opt/local/include/
+	LNK_FLAGS         = -lnetcdf -lnetcdff 
+endif
+ifeq ($(NETCDFLIBS),"fink")
+        LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
+        INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include
+        LNK_FLAGS         = -lnetcdf -lnetcdff
+endif
+
+ifeq ($(F95COMPILER),"gfortran")
+#	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2 
+	FF_FLAGS         = -c -x f95-cpp-input #-gdwarf-2 
+	#F90_FLAGS        =-fno-underscoring 
+	FF               = gfortran $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg
+
+endif
+ifeq ($(F95COMPILER),"g95")
+	FF_FLAGS         = -c -cpp -fendian=big
+	F90_FLAGS        = -O3 -C  -g  -fno-underscoring
+	FF               = /Applications/fort/g95/bin/i386-apple-darwin8.11.1-g95 $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
+endif
+
+CC                = gcc -O  $(INC_DIR)
+
+ACTVEL = empty.o
+
+VPATH = src:projects/$(PROJECT):src/active_particles
+
+all: runfile
+
+objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
+	            seed.o init_seed.o sw_stat.o $(ACTVEL) getfile.o \
+                    vertvel.o coord.o cross.o init_par.o time_subs.o \
+                    interp.o interp2.o pos.o \
+                    sw_seck.o sw_pres.o sw_dens0.o \
+                    writepsi.o writetracer.o printinfo.o loop.o main.o \
+		    setupgrid.o readfield.o diffusion.o)
+
+
+runfile : $(objects)
+	$(FF)  -J$(OBJDIR) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
+
+$(OBJDIR)/%.o : %.f95
+	$(FF) -J$(OBJDIR) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
+
+
+
+$(objects) : | $(OBJDIR)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+
+.PHONY : clean
+clean :
+	-rm -rf build
+	-rm $(RUNFILE)
+
