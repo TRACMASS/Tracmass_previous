@@ -1,13 +1,13 @@
 PROJECT	          = analytical
 CASE              = analytical
-RUNFILE 	  = runtrm
+RUNFILE 	      = runtrm
 
 #F95COMPILER        = "g95"
 F95COMPILER        = "gfortran"
 F95COMPILER        = "ifort"
 
-NETCDFLIBS	   = "none"
-NETCDFLIBS         = "automatic"
+NETCDFLIBS	       = "none"
+#NETCDFLIBS        = "automatic"
 #NETCDFLIBS        = "macports"
 #NETCDFLIBS        = "fink"
 #NETCDFLIBS        = "source"
