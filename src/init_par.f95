@@ -268,6 +268,20 @@ SUBROUTINE init_params
       kst2 = KM
    END IF
 
+   if (len(trim(inDataDir)) == 0) then
+      CALL getenv('TRMINDATADIR', projdir)
+      if (len(trim(projdir)) .ne. 0) then
+         inDataDir = trim(projdir) // trim(Project) // '/'
+      end if
+   end if
+
+   if (len(trim(outDataDir)) == 0) then
+      CALL getenv('TRMOUTDATADIR', projdir)
+      if (len(trim(projdir)) .ne. 0) then
+         outDataDir = trim(projdir) // trim(Project) // '/'
+      end if
+   end if
+
    if (outDataFile == '')  outdataFile = Case
 
 !!---------------------------------------------------------------------------
