@@ -41,8 +41,10 @@ MODULE mod_loopvars
 ENDMODULE mod_loopvars
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_traj
+
+  ! Variables connected to particle positions.
+
   INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
   INTEGER                                    :: NEND
   INTEGER                                    :: ntrac, ntractot=0
@@ -51,8 +53,6 @@ MODULE mod_traj
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
   ! === Particle counters ===
   INTEGER                                    :: nout=0, nloop=0, nerror=0
-  INTEGER                                    :: nnorth=0, ndrake=0, ngyre=0
-  INTEGER                                    :: nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
   ! === Particle positions ===
   INTEGER                                    :: ia, ja, ka, iam
@@ -70,12 +70,12 @@ MODULE mod_grid
   INTEGER                                   :: IMT, JMT, KM
 #ifdef seasonal
 #if orca1
-  INTEGER, PARAMETER                        :: NST=48
+  INTEGER, PARAMETER                        :: nst=48
 #elif orca025L75
-  INTEGER, PARAMETER                        :: NST=4
+  INTEGER, PARAMETER                        :: nst=4
 #endif
 #else
-  INTEGER, PARAMETER                        :: NST=2
+  INTEGER, PARAMETER                        :: nst=2
 #endif
   INTEGER                                   :: nsm=1     ,nsp=2
   REAL*8                                    :: dx,dy
@@ -101,10 +101,10 @@ MODULE mod_grid
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
 #ifdef ifs
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa,bb
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa, bb
 #endif
-  REAL*8                                    :: rmin ,tmin ,smin,&
-  &                                            rmax ,smax ,tmax
+  REAL*8                                    :: rmin, tmin, smin
+  REAL*8                                    :: rmax, tmax, smax
   REAL*8                                    :: dr ,dtemp ,dsalt
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
