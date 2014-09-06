@@ -1,15 +1,7 @@
 SUBROUTINE init_params
-!!----------------------------------------------------------------------------
-!!
-!!
-!!       SUBROUTINE: init_params
-!!
-!!          Loads parameters from the namelists run.in and grid.in
-!!          Allocates matrices for trajectory data, GCM fields,
-!!          and Lagrangian stream functions.
-!!
-!!
-!!----------------------------------------------------------------------------
+! Loads parameters from the namelists (projname).in and (casename).in.
+! Allocates matrices and set time variables.
+
    USE mod_param
    USE mod_seed
    USE mod_grid
@@ -44,55 +36,37 @@ SUBROUTINE init_params
 
    real*8                                     :: jd
 
-!!----------------------------------------------------------------------------
-!!-------------------- R E A D   F R O M   N A M E L I S T S -----------------
-!!----------------------------------------------------------------------------
-   ! -------------------------------
-   ! --- Parameters from grid.in ---
-   ! -------------------------------
-   namelist /INITGRIDVER/    gridVerNum
-   namelist /INITGRIDDESC/   GCMname, GCMsource, gridName, gridSource, gridDesc
-   namelist /INITGRIDGRID/   IMT, JMT, KM, LBT, NEND
-   namelist /INITGRIDNTRAC/  NTRACMAX
-   namelist /INITGRIDDATE/   yearmin, yearmax, baseSec  ,baseMin  ,baseHour,   &
-                             baseDay  ,baseMon  ,baseYear
-   namelist /INITGRIDTIME/   ngcm, iter, intmax ,fieldsPerFile,          &
-                             minvelJD, maxvelJD
-   
-   ! ------------------------------
-   ! --- Parameters from run.in ---
-   ! ------------------------------
-   namelist /INITRUNVER/     runVerNum
-   namelist /INITRUNGRID/    subGrid ,subGridImin ,subGridImax,          &
-                             subGridJmin, subGridJmax,                   &
-                             subGridKmin, subGridKmax,                   &
-                             SubGridFile, subGridID
-   namelist /INITRUNTIME/    intmin, intspin, intrun, intstep,           &
-                             degrade_time 
-   namelist /INITRUNDATE/    startSec ,startMin ,startHour,              &
-                             startDay ,startMon ,startYear,              &
-                             ihour, iday, imon, iyear
-   namelist /INITRUNWRITE/   ncoor, twritetype, kriva,                   &
-                             inDataDir ,outDataDir, topoDataDir,         &
-                             outDataFile ,intminInOutFile
-   namelist /INITRUNSEED/    nff, isec, idir, nqua, partQuant,           &
-                             seedType, seedPos, seedTime, seedAll,       &
-                             ist1, ist2, jst1, jst2,                     &
-                             kst1, kst2, tst1, tst2,                     &
-                             varSeedFile, seedDir, seedFile, timeFile,   &
-                             seedparts, seedpart_id, loneparticle
-   namelist /INITRUNDESC/    caseName, caseDesc  
-#ifdef tempsalt
-   namelist /INITRUNTEMPSALT/ tmin0, tmax0, smin0, smax0, rmin0, rmax0, &
-                              tmine, tmaxe, smine, smaxe, rmine, rmaxe
-#endif
+! Setup namelists
+   namelist /INIT_NAMELIST_VERSION/    gridVerNum
+   namelist /INIT_GRID_DESCRIPTION/    GCMname, GCMsource, gridName, gridSource,&
+                                       gridDesc, inDataDir
+   namelist /INIT_CASE_DESCRIPTION/    caseName, caseDesc
+   namelist /INIT_GRID_SIZE/           imt, jmt, km, nst, subGrid, subGridImin, &
+                                       subGridImax, subGridJmin, subGridJmax,   &
+                                       SubGridFile, subGridID
+   namelist /INIT_BASE_TIME/           baseSec, baseMin, baseHour, baseDay,     &
+                                       baseMon, baseYear
+   namelist /INIT_GRID_TIME/           fieldsPerFile, ngcm, iter, intmax,       &
+                                       minvelJD, maxvelJD
+   namelist /INIT_START_DATE/          startHour, startDay, startMon, startYear,&
+                                       startJd, intmin
+   namelist /INIT_RUN_TIME/            intspin, intrun
+   namelist /INIT_WRITE_TRAJS/         twritetype, kriva, outDataDir,           &
+                                       outDataFile, intminInOutFile
+   namelist /INIT_SEEDING/             nff, isec, idir, nqua, partQuant,        &
+                                       ntracmax, loneparticle, SeedType, ist1,  &
+                                       ist2, jst1, jst2, kst1, kst2, tst1, tst2,&
+                                       seedDir, seedFile, varSeedFile, seedTime,&
+                                       seedAll, seedPos, seedparts, seedpart_id
+   namelist /INIT_KILLZONES/           nend, ienw, iene, jens, jenn, timax
+   namelist /INIT_TEMP_SALT/           tmin0, tmax0, smin0, smax0, rmin0, rmax0,&
+                                       tmine, tmaxe, smine, smaxe, rmine, rmaxe
 #if defined diffusion || turb 
-   namelist /INITRUNDIFFUSION/ ah, av
+   namelist /INIT_DIFFUSION/            ah, av
 #endif
 #ifdef sediment
-   namelist /INITRUNSEDIMENT/  partdiam, rhos, cwamp, twave, critvel
+   namelist /INIT_SEDIMENT/            partdiam, rhos, cwamp, twave, critvel
 #endif
-   namelist /INITRUNEND/ ienw, iene, jens, jenn, timax
 
 !!--------------------------------------------------------------------------  
    
@@ -113,32 +87,64 @@ SUBROUTINE init_params
       end if
    end if
 
-   OPEN (8,file=trim(projdir)//'/'//trim(Project)//'_grid.in',    &
-       & status='OLD', delim='APOSTROPHE')
-   
-      ! -- Check if the namefiles has correct version number. 
-      READ (8,nml=INITGRIDVER)
-         IF (gridVerNum < 1) THEN
-            PRINT *,'==================== ERROR ===================='
-            PRINT *,'Your grid namefile seems to be out of date.'
-            PRINT *,'Check the version_grid.txt file for changes.'
-            PRINT *,'You have to edit the version number in you grid'
-            PRINT *,'manually when done.'
-            STOP
-         END IF
-      READ (8,nml=INITGRIDDESC)
-      READ (8,nml=INITGRIDGRID)
-      READ (8,nml=INITGRIDNTRAC)
-      READ (8,nml=INITGRIDTIME)
-      READ (8,nml=INITGRIDDATE)
-   
+   OPEN (8,file=trim(projdir)//'/'//trim(Project)//'.in',    &
+        & status='OLD', delim='APOSTROPHE')
+   ! -- Check if the namefiles has correct version number. 
+   READ (8,nml=INIT_NAMELIST_VERSION)
+   IF (gridVerNum < 6) THEN
+      PRINT *,'                     ERROR                     '
+      PRINT *,'Your namefile out of date. The latest version is described at:'
+      PRINT *,'http://docs.tracmass.org/namelist.html'
+      PRINT *,'Change gridVerNum to 6 when done.'
+      STOP
+   END IF
+   READ (8,nml=INIT_CASE_DESCRIPTION)
+   READ (8,nml=INIT_GRID_SIZE)
+   READ (8,nml=INIT_BASE_TIME)
+   READ (8,nml=INIT_GRID_TIME)
+   READ (8,nml=INIT_START_DATE)
+   READ (8,nml=INIT_RUN_TIME)
+   READ (8,nml=INIT_WRITE_TRAJS)
+   READ (8,nml=INIT_SEEDING)
+   READ (8,nml=INIT_KILLZONES)
+   READ (8,nml=INIT_TEMP_SALT)
+#if defined diffusion || turb 
+   READ (8,nml=INIT_DIFFUSION)
+#endif
+#ifdef sediment
+   READ (8,nml=INIT_SEDIMENT)   
+#endif
    CLOSE (8)
 
-   print *,'Run file    : ',trim(projdir)//'/'//trim(Case)//'_run.in'
-   OPEN (8,file=trim(projdir)//'/'//trim(Case)//'_run.in',     &
+   print *,'Run file    : ',trim(projdir)//'/'//trim(Case)//'.in'
+   OPEN (8,file=trim(projdir)//'/'//trim(Case)//'.in',     &
         & status='OLD', delim='APOSTROPHE')
-   READ (8,nml=INITRUNDESC)
-   READ (8,nml=INITRUNGRID)
+   READ (8,nml=INIT_NAMELIST_VERSION)
+   IF (gridVerNum < 6) THEN
+      PRINT *,'                     ERROR                     '
+      PRINT *,'Your namefile out of date. The latest version is described at:'
+      PRINT *,'http://docs.tracmass.org/namelist.html'
+      PRINT *,'Change gridVerNum to 6 when done.'
+      STOP
+   END IF
+   READ (8,nml=INIT_CASE_DESCRIPTION)
+   READ (8,nml=INIT_GRID_SIZE)
+   READ (8,nml=INIT_BASE_TIME)
+   READ (8,nml=INIT_GRID_TIME)
+   READ (8,nml=INIT_START_DATE)
+   READ (8,nml=INIT_RUN_TIME)
+   READ (8,nml=INIT_WRITE_TRAJS)
+   READ (8,nml=INIT_SEEDING)
+   READ (8,nml=INIT_KILLZONES)
+   READ (8,nml=INIT_TEMP_SALT)
+#if defined diffusion || turb 
+   READ (8,nml=INIT_DIFFUSION)
+#endif
+#ifdef sediment
+   READ (8,nml=INIT_SEDIMENT)   
+#endif
+   CLOSE (8)
+
    SELECT CASE (subGrid)
    CASE (0)          
       PRINT *,'Sub-grid    : Use the Full grid.'     
@@ -174,26 +180,7 @@ SUBROUTINE init_params
    count2d  = [1,  1 ,imt,         jmt        ]
    start3d  = [1, subGridImin, subGridJmin, subGridKmin]
    count3d  = [1, imt,         jmt,         km         ]
-   READ (8,nml=INITRUNTIME)
-   READ (8,nml=INITRUNDATE)
-   READ (8,nml=INITRUNWRITE)  
    
-
-
-   READ (8,nml=INITRUNSEED)
-#ifdef tempsalt
-   READ (8,nml=INITRUNTEMPSALT)
-#endif
-#if defined diffusion || turb 
-   READ (8,nml=INITRUNDIFFUSION)
-#endif
-#ifdef sediment
-   READ (8,nml=INITRUNSEDIMENT)
-#endif
-   READ(8,nml=INITRUNEND)
-         
-   CLOSE (8)
-
    IF ((IARGC() > 1) )  THEN
       ARG_INT1 = 0.1
       CALL getarg(2,inparg)

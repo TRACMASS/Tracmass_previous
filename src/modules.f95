@@ -52,7 +52,7 @@ MODULE mod_traj
   REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
   ! === Particle counters ===
-  INTEGER                                    :: nout=0, nloop=0, nerror=0
+  INTEGER                                    :: nout=0, nloop=0, nerror=0, nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
   ! === Particle positions ===
   INTEGER                                    :: ia, ja, ka, iam
@@ -70,12 +70,12 @@ MODULE mod_grid
   INTEGER                                   :: IMT, JMT, KM
 #ifdef seasonal
 #if orca1
-  INTEGER, PARAMETER                        :: nst=48
+  INTEGER                                   :: nst=48
 #elif orca025L75
-  INTEGER, PARAMETER                        :: nst=4
+  INTEGER                                   :: nst=4
 #endif
 #else
-  INTEGER, PARAMETER                        :: nst=2
+  INTEGER                                   :: nst=2
 #endif
   INTEGER                                   :: nsm=1     ,nsp=2
   REAL*8                                    :: dx,dy
