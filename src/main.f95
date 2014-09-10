@@ -1,4 +1,4 @@
-PROGRAM main
+PROGRAM TRACMASS
  
   USE mod_param
   USE mod_seed
@@ -78,6 +78,6 @@ PROGRAM main
   return
 
 
-end PROGRAM main
+end PROGRAM TRACMASS
 
 

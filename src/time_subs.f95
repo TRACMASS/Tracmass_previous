@@ -1,7 +1,7 @@
 #ifdef timeanalyt 
   !
   ! The subroutines related to the time-analytical option of TRCAMSS are located in this file below 
-  ! The schemes are by Vries and Döös (2001) and Döös et al. (2013)
+  ! The schemes are by Vries and Doos (2001) and Doos et al. (2013)
   !
   !         um-------------------------------------------uu
   !          |                                            |
@@ -1287,7 +1287,7 @@ function s15aff(x)
 
 USE mod_param
 IMPLICIT NONE
-INTEGER, PARAMETER ::  NMAX=6  ! Denna ska kollas och testas med högre värden
+INTEGER, PARAMETER ::  NMAX=6  ! Test this with higher values
 REAL*8,  PARAMETER ::  H=0.4d0,A1=2.d0/3.d0,A2=0.4d0,A3=2.d0/7.d0
 
 REAL*8        :: s15aff,x,dd1,dd2,e1,e2,sum,x2,xp,xx,pisqin
