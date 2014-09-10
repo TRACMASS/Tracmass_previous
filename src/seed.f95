@@ -40,6 +40,8 @@ MODULE mod_seed
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
    REAL*8 , ALLOCATABLE, DIMENSION(:,:)       :: seed_xyz
    CHARACTER(LEN=200)                         :: seedDir, seedFile, timeFile
+   integer                                    :: numseedsubints
+   REAL, DIMENSION(50)                        :: seedsubints = -1
 
   
 CONTAINS
@@ -47,6 +49,7 @@ CONTAINS
    SUBROUTINE seed (tt,ts)
 
      INTEGER                                  :: errCode
+     INTEGER                                  :: subtimesteps = 1, subtstep
      INTEGER                                  :: ib, jb, kb, ibm
      INTEGER                                  :: i, j, k, l, m
      REAL                                     :: temp,salt,dens
@@ -171,15 +174,18 @@ CONTAINS
          END IF
           
          ! Number of trajectories for box (iist,ijst,ikst)
-         SELECT CASE (nqua)
-            CASE (1)
+         SELECT case (nqua)
+            case (1)
                num = partQuant
-            CASE (2)
+            case (2)
                num = vol/partQuant
-            CASE (3)
+            case (3)
                num = vol/partQuant
-            CASE (4)
+            case (4)
                num = partQuant
+            case (5)
+               num = partQuant
+               subtimesteps = numseedsubints
          END SELECT
          IF (num == 0 .AND. nqua /= 4) THEN
             num=1
@@ -200,104 +206,96 @@ CONTAINS
          ! --------------------------------------------------
          ! --- Determine start position for each particle ---
          ! --------------------------------------------------
-         ijjLoop: DO jjt=1,ijt
-            kkkLoop: DO jkt=1,ikt          
-               ib = iist
-               jb = ijst
-               kb = ikst
+         subtimestepLoop: DO subtstep = 1, subtimesteps
+            ijjLoop: DO jjt=1,ijt
+               kkkLoop: DO jkt=1,ikt          
+                  ib = iist
+                  jb = ijst
+                  kb = ikst
 
-               SELECT CASE (isec)
-               CASE (1)   ! Meridional-vertical section
-                  x1 = DBLE (ib) 
-                  y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
-                  z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
-                  IF (idir == 1) THEN
-                     ib = iist+1
-                  ELSE IF (idir == -1) THEN
-                     ib=iist 
-                  !else
-                  !   print *, "idir neither 1 nor -1. Merid-vert. seed failed"
-                  !   stop 6020
-                  END IF
-                  
-               CASE (2)   ! Zonal-vertical section
-                  x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
-                  y1 = DBLE (jb)
-                  z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
-                  IF (idir == 1) THEN
-                     jb = ijst+1
-                  ELSE IF (idir == -1) THEN
-                     jb = ijst
-                  !else
-                  !   print *, "idir neither 1 nor -1. Zonal-vert seed failed"
-                  !   stop 6020
-                  END IF 
-              
-               CASE (3)   ! Horizontal section                  
-                  x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
-                  y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
-                  z1 = DBLE (kb)
-                  IF (idir == 1) THEN
-                     kb = ikst+1
-                  ELSE IF (idir == -1) THEN
-                     kb = ikst
-                  !else
-                  !   print *, "idir neither 1 nor -1. Horizontal seed failed"
-                  !   stop 6020
-                  END IF
-                  
-               CASE (4)   ! Spread even inside box                  
-                  x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt) - 0.5d0) / DBLE(ijt)
-                  y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt) - 0.5d0) / DBLE(ikt)
-                  z1 = DBLE (kb-1) + 0.5d0
-                                 
-               CASE (5)                  
-                  x1 = seed_xyz (jsd,1)
-                  y1 = seed_xyz (jsd,2) 
-                  z1 = seed_xyz (jsd,3)
-               
-               END SELECT
-           ! ------------------------------------------------------
-           ! --- Check properties of water mass at initial time ---
-           ! ------------------------------------------------------ 
+                  SELECT CASE (isec)
+                  CASE (1)   ! Meridional-vertical section
+                     x1 = DBLE (ib) 
+                     y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
+                     z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
+                     IF (idir == 1) THEN
+                        ib = iist+1
+                     ELSE IF (idir == -1) THEN
+                        ib=iist 
+                     END IF
+
+                  CASE (2)   ! Zonal-vertical section
+                     x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
+                     y1 = DBLE (jb)
+                     z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
+                     IF (idir == 1) THEN
+                        jb = ijst+1
+                     ELSE IF (idir == -1) THEN
+                        jb = ijst
+                     END IF
+
+                  CASE (3)   ! Horizontal section                  
+                     x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
+                     y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
+                     z1 = DBLE (kb)
+                     IF (idir == 1) THEN
+                        kb = ikst+1
+                     ELSE IF (idir == -1) THEN
+                        kb = ikst
+                     END IF
+
+                  CASE (4)   ! Spread evenly inside box                  
+                     x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt) - 0.5d0) / DBLE(ijt)
+                     y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt) - 0.5d0) / DBLE(ikt)
+                     z1 = DBLE (kb-1) + 0.5d0
+
+                  CASE (5)                  
+                     x1 = seed_xyz (jsd,1)
+                     y1 = seed_xyz (jsd,2) 
+                     z1 = seed_xyz (jsd,3)
+
+                  END SELECT
+                  ! ------------------------------------------------------
+                  ! --- Check properties of water mass at initial time ---
+                  ! ------------------------------------------------------ 
 
 #ifdef tempsalt 
-               CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-               IF (temp < tmin0 .OR. temp > tmax0 .OR. &
-               &   salt < smin0 .OR. salt > smax0 .OR. &
-               &   dens < rmin0 .OR. dens > rmax0      ) THEN
-                  CYCLE kkkLoop 
-               END IF
+                  CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+                  IF (temp < tmin0 .OR. temp > tmax0 .OR. &
+                       &   salt < smin0 .OR. salt > smax0 .OR. &
+                       &   dens < rmin0 .OR. dens > rmax0      ) THEN
+                     CYCLE kkkLoop 
+                  END IF
 #endif /*tempsalt*/
 
-               ! Update trajectory numbers
-               ntractot = ntractot+1
-               ntrac = ntractot
-           
-               ! Only one particle for diagnistics purposes
-               if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
-                  nrj(6,ntrac)=1
-                  cycle kkkLoop
-               endif
-               
-               ! ts - time, fractions of ints
-               ! tt - time [s] rel to start
-               ! ts = ff * DBLE (ints-intstep) / tstep
-               ts = DBLE (ints-1) 
-               tt = ts * tseas
-               
-               ! ------------------------------------------------------------
-               ! --- Put the new particle into the vectors trj and nrj ---
-               ! ------------------------------------------------------------
-               trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
-               nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
-               nrj(7,ntrac)=1
+                  ! Update trajectory numbers
+                  ntractot = ntractot+1
+                  ntrac = ntractot
 
-               !Save initial particle position
-               call writedata(10) !ini
-           
-            END DO kkkLoop
-         END DO ijjLoop   
+                  ! Only one particle for diagnistics purposes
+                  if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
+                     nrj(6,ntrac)=1
+                     cycle kkkLoop
+                  endif
+
+                  ! ts - time, fractions of ints
+                  ! tt - time [s] rel to start
+                  ! ts = ff * DBLE (ints-intstep) / tstep
+                  ts = DBLE (ints-1) + seedsubints(subtstep)
+                  tt = ts * tseas
+                  ! ------------------------------------------------------------
+                  ! --- Put the new particle into the vectors trj and nrj ---
+                  ! ------------------------------------------------------------
+                  trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
+                  nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
+                  nrj(7,ntrac)=1
+
+                  !Save initial particle position
+                  call writedata(10) !ini
+
+               END DO kkkLoop
+            END DO ijjLoop
+         end DO subtimestepLoop
       END DO startLoop
    END SUBROUTINE seed
 END MODULE mod_seed

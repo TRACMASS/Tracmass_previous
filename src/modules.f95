@@ -49,7 +49,7 @@ MODULE mod_traj
   INTEGER                                    :: NEND
   INTEGER                                    :: ntrac, ntractot=0
   ! === Particle arrays ===
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: trj
+  REAL*8, ALLOCATABLE,  DIMENSION(:,:)       :: trj
   INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
   ! === Particle counters ===
   INTEGER                                    :: nout=0, nloop=0, nerror=0, nrh0=0
@@ -542,6 +542,10 @@ MODULE mod_sed
 
   INTEGER                                    :: nsed=0, nsusp=0
   LOGICAL                                    :: res
+  INTEGER                                    :: numseedsubtimes=0
+  REAL, ALLOCATABLE, DIMENSION(:)            :: seedsubtimes
+
+
 #endif
 ENDMODULE mod_sed
 MODULE mod_orbital

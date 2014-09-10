@@ -37,35 +37,36 @@ SUBROUTINE init_params
    real*8                                     :: jd
 
 ! Setup namelists
-   namelist /INIT_NAMELIST_VERSION/    gridVerNum
-   namelist /INIT_GRID_DESCRIPTION/    GCMname, GCMsource, gridName, gridSource,&
-                                       gridDesc, inDataDir
-   namelist /INIT_CASE_DESCRIPTION/    caseName, caseDesc
-   namelist /INIT_GRID_SIZE/           imt, jmt, km, nst, subGrid, subGridImin, &
-                                       subGridImax, subGridJmin, subGridJmax,   &
-                                       SubGridFile, subGridID
-   namelist /INIT_BASE_TIME/           baseSec, baseMin, baseHour, baseDay,     &
-                                       baseMon, baseYear
-   namelist /INIT_GRID_TIME/           fieldsPerFile, ngcm, iter, intmax,       &
-                                       minvelJD, maxvelJD
-   namelist /INIT_START_DATE/          startHour, startDay, startMon, startYear,&
-                                       startJd, intmin
-   namelist /INIT_RUN_TIME/            intspin, intrun
-   namelist /INIT_WRITE_TRAJS/         twritetype, kriva, outDataDir,           &
-                                       outDataFile, intminInOutFile
-   namelist /INIT_SEEDING/             nff, isec, idir, nqua, partQuant,        &
-                                       ntracmax, loneparticle, SeedType, ist1,  &
-                                       ist2, jst1, jst2, kst1, kst2, tst1, tst2,&
-                                       seedDir, seedFile, varSeedFile, seedTime,&
-                                       seedAll, seedPos, seedparts, seedpart_id
-   namelist /INIT_KILLZONES/           nend, ienw, iene, jens, jenn, timax
-   namelist /INIT_TEMP_SALT/           tmin0, tmax0, smin0, smax0, rmin0, rmax0,&
-                                       tmine, tmaxe, smine, smaxe, rmine, rmaxe
+   namelist /INIT_NAMELIST_VERSION/ gridVerNum
+   namelist /INIT_GRID_DESCRIPTION/ GCMname, GCMsource, gridName, gridSource,&
+                                    gridDesc, inDataDir
+   namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
+   namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
+                                    subGridImax, subGridJmin, subGridJmax,   &
+                                    SubGridFile, subGridID
+   namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
+                                    baseMon, baseYear
+   namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
+                                    minvelJD, maxvelJD
+   namelist /INIT_START_DATE/       startHour, startDay, startMon, startYear,&
+                                    startJd, intmin
+   namelist /INIT_RUN_TIME/         intspin, intrun
+   namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir,           &
+                                    outDataFile, intminInOutFile
+   namelist /INIT_SEEDING/          nff, isec, idir, nqua, partQuant,        &
+                                    ntracmax, loneparticle, SeedType, ist1,  &
+                                    ist2, jst1, jst2, kst1, kst2, tst1, tst2,&
+                                    seedDir, seedFile, varSeedFile, seedTime,&
+                                    seedAll, seedPos, seedparts, seedpart_id,&
+                                    seedsubints
+   namelist /INIT_KILLZONES/        nend, ienw, iene, jens, jenn, timax
+   namelist /INIT_TEMP_SALT/        tmin0, tmax0, smin0, smax0, rmin0, rmax0,&
+                                    tmine, tmaxe, smine, smaxe, rmine, rmaxe
 #if defined diffusion || turb 
-   namelist /INIT_DIFFUSION/            ah, av
+   namelist /INIT_DIFFUSION/        ah, av
 #endif
 #ifdef sediment
-   namelist /INIT_SEDIMENT/            partdiam, rhos, cwamp, twave, critvel
+   namelist /INIT_SEDIMENT/         partdiam, rhos, cwamp, twave, critvel
 #endif
 
 !!--------------------------------------------------------------------------  
@@ -317,7 +318,15 @@ SUBROUTINE init_params
       trj = 0.d0
       nexit = 0
       ntractot = 0
-
+      numseedsubints = max(count(seedsubints /= -1), 1)
+      if (nqua == 5 .AND. seedsubints(1)==-1) then
+         print *,  "Error! "
+         print *,  "At least one element in numseedsubints must be " // &
+                   "given when nqua=5 is used." 
+         stop
+      elseif  (nqua /= 5) then
+         seedsubints(1) = 0
+      end if
 
 #ifdef tempsalt
       ALLOCATE ( tem(imt,jmt,km,nst) ) 
