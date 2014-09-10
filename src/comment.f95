@@ -4,14 +4,14 @@
 !                       Lagrangian trajectory code 
 !                             in fortran 95
 !                                 by
-!      Kristofer Döös, Bror Jönsson, Hanna Corell, Andrew Coward, 
+!      Kristofer Doos, Bror Jonsson, Hanna Corell, Andrew Coward, 
 !             Pedro de Vries, Donatella Faggioli, etc.
 !
 !  Department of Meteorology, Stockholm University (doos@misu.su.se)
 !
-! Döös,K., 1995: Inter-ocean exchange of water masses. JGR Vol. 100, No. C7, 13499-13514.
+! Doos,K., 1995: Inter-ocean exchange of water masses. JGR Vol. 100, No. C7, 13499-13514.
 !
-! Vries,P.de and K.Döös, 2001: Calculating Lagrangian trajectories using time-dependent
+! Vries,P.de and K.Doos, 2001: Calculating Lagrangian trajectories using time-dependent
 !                              velocity fields. JAOT Vol. 18, No. 6, 1092-1101.
 !
 ! Units in SI
@@ -116,7 +116,7 @@
 !__________ Time possibilities
 ! -Dtime        Time changing velocity fields
 ! -Dstat        Stationary velocity fields (does not work at the moment)
-! -Dtimeanalyt  Analytical time dependent option is based on Vries and Döös (JAOT,2001)  
+! -Dtimeanalyt  Analytical time dependent option is based on Vries and Doos (JAOT,2001)  
 !               It has to be reimplemented from old TRACMASS code 
 !_________________________________________________
 ! -Dsediment    Sediment code developed for RCO

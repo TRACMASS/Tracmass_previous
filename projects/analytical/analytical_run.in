@@ -27,7 +27,7 @@
   ! === Trajectory release period (timesteps) ===
   intspin = 1,    ! one single snapshot
   ! === Number of timesteps for the run.      ===
-  intrun  = 146000,
+  intrun  = 170,
   !intrun  = 14600,
   ! === Pos if forward  neg if backward       ===
   intstep = 1/

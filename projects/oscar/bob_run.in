@@ -5,8 +5,8 @@
   !
 &INITRUNDESC
   !	
-  caseName    = 'global',
-  caseDesc    = 'Follow global currents'/
+  caseName    = 'BoB',
+  caseDesc    = 'Dispersal in Bay of Bengal'/
   ! 
   !
 &INITRUNGRID
@@ -33,9 +33,9 @@
   ! === Number of initial datasets
   intmin      = 58800,
   ! === Trajectory release period (timesteps)
-  intspin     = 1,  !10*365/5
+  intspin     = 10,  !10*365/5
   ! === Trajectory run
-  intrun      = 500000,
+  intrun      = 15,
   ! === Pos if forward  neg if backward
   intstep     = 1/
   !
@@ -54,19 +54,20 @@
   ncoor       = 0,      
   !
   twritetype = 2,
+  !
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets
   !                 2 = write each grid-crossing and timne change
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva       = 1,
+  kriva       = 5,
   !
   ! === Directory where input fields are stored
-  inDataDir   = '/local/bjonsson/projData/oscar/thrdDeg/',
+  inDataDir   = '/projData/OSCAR/thrdDeg/',
   !
   ! === Directory where output files are saved
-  outDataDir  = '',
+  outDataDir  = '/Users/bror/ormOut/',
   !
   ! === Name of current trajectory run
   outDataFile = 'oscar',
@@ -107,7 +108,7 @@
   nqua        = 1, 
   !
   ! === Particles seeded (part/cell or m3s-1/part or m3/part)
-  partQuant   = 32,     
+  partQuant   = 16,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
@@ -119,8 +120,8 @@
   ! ===   ===   ===   ===   ===
   ! If seedType = 1, define area where particles are seeded. 
   ! -1 indicates max value in grid.
-  ist1        = 170,		 
-  ist2        = 240,			  
+  ist1        = 780,		 
+  ist2        = 835,			  
   jst1        = 170,		 
   jst2        = 220,		 
   kst1        = 1,		 
