@@ -35,10 +35,10 @@
 &INITRUNDATE
   !
   ! === Start time for this run
-  startHour         = 0,
+  startHour         = 1,
   startDay          = 1,
   startMon          = 1,
-  startYear         = 1989/
+  startYear         = 1988/
   !
   !
 &INITRUNWRITE
