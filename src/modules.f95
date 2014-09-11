@@ -1,6 +1,8 @@
 
 
 MODULE mod_precdef		! Precision definitions
+  INTEGER, PARAMETER		            :: QP = selected_real_kind (32)
+!  INTEGER, PARAMETER		            :: DP = QP
   INTEGER, PARAMETER		            :: DP = SELECTED_REAL_KIND(15, 307)
 ENDMODULE mod_precdef
 

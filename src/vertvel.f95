@@ -10,9 +10,7 @@ subroutine vertvel(ia,iam,ja,ka)
   USE mod_time, only: intrpr, intrpg
   USE mod_grid
   USE mod_active_particles, only: upr
-#ifdef ifs
   USE mod_grid
-#endif
 #ifdef sediment
   USE mod_sed
   USE mod_orbital
@@ -45,19 +43,16 @@ subroutine vertvel(ia,iam,ja,ka)
      vv = intrpg * vflux(ia ,ja  ,k,nsp) + intrpr * vflux(ia ,ja  ,k,nsm)
      vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
 
-! start ifs code
-#if defined ifs
-    do n=n1,n2
-     wflux(k,n) = wflux(k-1,n) - ff * &
-     ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n)  &
-     + (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )  ! time change of the mass the in grid box
+#if defined zgrid3Dt
+     do n=n1,n2
+        ! time change of the mass the in grid box
+        wflux(k,n) = wflux(k-1,n) - ff * &
+             ( uflux(ia,ja,k,n) - uflux(iam, ja,   k, n) +  & 
+               vflux(ia,ja,k,n) - vflux(ia,  ja-1, k, n) +  &
+               (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )
     enddo
-#endif
-!end ifs code
-
-! start ocean code
-#ifndef ifs
-#ifdef full_wflux
+#else
+#ifdef  full_wflux
      wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
 #else 
     do n=n1,n2
@@ -72,6 +67,17 @@ subroutine vertvel(ia,iam,ja,ka)
 #ifdef ifs
 wflux(0,:) = 0.d0
 wflux(km,:) = 0.d0
+#endif
+
+! Make sure the vertical velocity is always zero below and at the bottom
+#ifdef orca12
+do k=0,KM-kmt(ia,ja)
+ do n=n1,n2
+  if(wflux(k,n)/=0.d0) then
+  wflux(k,n)=0.d0
+  endif
+ enddo
+enddo
 #endif
 
 #endif
