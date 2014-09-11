@@ -35,10 +35,10 @@
 &INITRUNDATE
   !
   ! === Start time for this run
-  startHour         = 0,
+  startHour         = 1,
   startDay          = 1,
   startMon          = 1,
-  startYear         = 1989/
+  startYear         = 1988/
   !
   !
 &INITRUNWRITE
@@ -113,8 +113,8 @@ $INITRUNSEED
   ist2     =  10,		 
   jst1     =  50,
   jst2     =  50,
-  kst1     =   5,		 
-  kst2     =   5,
+  kst1     =  10,		 
+  kst2     =  10,
   varSeedFile = 0,
   seedFile    = 'mask?' /
   !

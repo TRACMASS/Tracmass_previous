@@ -52,6 +52,8 @@ $INIT_NAMELIST_VERSION
 /
 
 &INIT_START_DATE
+  startSec      = 0,
+  startMin      = 0,
   startHour     = 0,
   startDay      = 1,
   startMon      = 1,

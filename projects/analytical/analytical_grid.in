@@ -45,7 +45,7 @@ $INITGRIDDATE
   baseHour       = 0,
   baseDay        = 1,
   baseMon        = 1,
-  baseYear       = 1989/
+  baseYear       = 1988/
   !
 $INITGRIDARC
 !  arcscale      = 0.001/         ! orig arc meters -> km

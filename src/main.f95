@@ -20,11 +20,11 @@ PROGRAM TRACMASS
   call coordinat
   call writesetup_main
 
-  modrundirCond: if(intstep.gt.0) then ! forward 
+  modrundirCond: if(nff == 1) then ! forward 
      intstart =  intmin          
      intend   =  intmax
      nff      =  1
-  elseif(intstep.lt.0) then ! backward
+  elseif(nff == 2) then ! backward
      intstart =  intmin+intrun
      minvelints = minvelints + intrun
      intend   =  intmin
@@ -32,7 +32,7 @@ PROGRAM TRACMASS
      intrun   = -intrun
      nff      =  -1    
   end if modrundirCond
- 
+
  call setupgrid
   if (minval(dxv) < 0) then
      print *, " "
