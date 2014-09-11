@@ -41,46 +41,30 @@ SUBROUTINE setupgrid
 
 
 ! === Template for setting up grids. Move the code from readfile.f95
-  allocate ( mask(imt,jmt), depth(imt,jmt) )
+  !allocate ( mask(imt,jmt), depth(imt,jmt) )  !FC
+  allocate ( depth(imt,jmt) )  !FC
+  ALLOCATE ( z_r(imt,jmt,km,nst) )   !BJ
+  ALLOCATE ( z_w(imt,jmt,0:km,nst) ) !BJ
+
+  print*, 'imt=', imt
+  print*, 'jmt=', jmt
 
   !Order is   t  k  i  j 
   map2d    = [3, 4, 1, 2]
   map3d    = [2, 3, 4, 1]
 
-  gridfile =  trim(inDataDir) // "coral_grd.nc"
+  gridfile =  "/Volumes/R1/ROMS/CORAL/Inputs/Grid/coral_grd.nc"
 
   ncTpos = 1
   print *, trim(gridfile)
-  dxv(:-2,:) = get2DfieldNC(trim(gridfile), 'x_rho')
-  dyu(:-2,:) = get2DfieldNC(trim(gridfile), 'y_rho')
-  print *,"Read x_rho and y_rho"
+  dxv(:,:) = 1./get2DfieldNC(trim(gridfile), 'pm')
+  dyu(:,:) = 1./get2DfieldNC(trim(gridfile), 'pn')
 
-
-  dxv(1:imt-1,:) = dxv(2:imt,:)-dxv(1:imt-1,:)
-  dyu(:,1:jmt-1) = dyu(:,2:jmt)-dyu(:,1:jmt-1)
-  dxv(imt:imt+1,:) = dxv(imt-2:imt-1,:)
-  dyu(:,jmt) = dyu(:,jmt-1)
   dxdy = dyu*dxv
 
   
   depth = get2DfieldNC(trim(gridfile), 'h')
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')
   kmt = 50 
-
-  !where (mask(2:imt,:) == 0) 
-  !   mask(1:imt-1,:) = 0
-  !end where
-  
-  !where (mask(1:imt-1,:) == 0) 
-  !   mask(2:imt,:) = 0
-  !end where
-  !where (mask(:, 2:jmt) == 0) 
-  !   mask(:,1:jmt-1) = 0
-  !end where
-  !where (mask(:, 1:jmt-1) == 0) 
-  !   mask(:, 2:jmt) = 0
-  !end where
-
-  !where (mask==0) kmt=0
 
 end SUBROUTINE setupgrid

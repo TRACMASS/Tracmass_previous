@@ -29,7 +29,7 @@ $INITGRIDNTRAC
 $INITGRIDTIME
   !
   ngcm    = 24,              ! hours between GCM datasets
-  iter    = 12,              ! iteration between two gcm data sets
+  iter    = 4,               ! iteration between two gcm data sets
   intmax  = 730,  !10*365/5  ! maximum length of RCO fields
   fieldsPerFile = 31/
   !

@@ -91,6 +91,7 @@ MODULE mod_grid
 
   ! === Vertical grids ===
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r,z_w
 #ifdef zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D

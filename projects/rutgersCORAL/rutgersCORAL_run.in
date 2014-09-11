@@ -5,8 +5,8 @@
   !
 &INITRUNDESC
   !	
-  caseName     = 'test',
-  caseDesc     = 'RUN13'/
+  caseName     = 'RUN16',
+  caseDesc     = 'lagrangian experiment to evaluate potential connectivity for coral in the Indonesian Archipelago'/
   ! 
   !
 &INITRUNGRID
@@ -15,7 +15,7 @@
   !==               1 = Define subGrid in this file.
   !==               2 = Define subGrid with sep. file and subGridID.
   !==               3 = Define subGrid with sep. file and MPI.
-  subGrid      = 1,
+  subGrid      = 0,
   !
   ! === Used if SubGrid = 1
   subGridImin  = 2,
@@ -35,7 +35,7 @@
   ! === Trajectory release period (timesteps)
   intspin      = 1,  !10*365/5
   ! === Trajectory run
-  intrun       = 20,
+  intrun       = 10,
   ! === Pos if forward  neg if backward
   intstep      = 1/
   !
@@ -44,8 +44,8 @@
   !
   startHour         = 12,
   startDay          = 01,
-  startMon          = 01,
-  startYear         = 2004/
+  startMon          = 03,
+  startYear         = 2003/
   !
   !
   &INITRUNWRITE
@@ -60,16 +60,16 @@
   !                 3 = write at each iteration (all the time)
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
-  kriva        = 2,
+  kriva        = 1,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/projData/rutgers/CORAL/',
+  inDataDir       = '/nfs/T3/ROMS/CORAL/RUN16/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Volumes/keronHD4/ormOut/',
+  outDataDir      = '/Volumes/R1/ROMS/CORAL/RUN16_TRACMASSv6/',
   !
   ! === Name of current trajectory run
-  outDataFile     = 'CORALtest',
+  outDataFile     = 'CT-test',
   !
   ! === Should intmin be included to the outfile?
   intminInOutFile = 1/
@@ -107,36 +107,51 @@
   nqua        = 1, 
   !
   ! === Particles seeded (particles/cell or m3s-1/particle or m3/particle)
-  partQuant= 1,     
+  partQuant= 3,     
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
   ! seedType:       1 = Seed an area defined by ist, jst, and kst.
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
-  SeedType = 1,
+  ! seedPos:        1 = List of positions are grid box indices
+  !                 2 = List of positions are exact positions
+  !                     in model coordinates.
+  ! seedTime:       1 = Seed particles at time steps given by
+  !                     tst1 <= t <= tst2
+  !                 2 = Seed particles at time steps given in list
+  ! seedAll:        1 = Seed all particles in spatial interval or list at
+  !                     each seed time step
+  !                 2 = Each particle is associated with one time step to
+  !                     be seeded at.
+  !                     Used if seedPos = 2 and seedTime = 2
+  SeedType = 2,
   SeedPos = 1,
+  seedTime = 0,
+  seedAll = 0,
   !
   ! ===   ===   ===   ===   ===
-  ! If seedType = 1, define area where particles are seeded. 
+  ! If seedType = 1, define area where particles are seeded.
   ! -1 indicates max value in grid.
-  ist1         = 200,		 
-  ist2         = 700,			  
-  jst1         = 100,		 
-  jst2         = 700,		 
-  kst1         = 50,		 
+  ist1         = 183,
+  ist2         = 183,
+  jst1         = 380,
+  jst2         = 380,
+  kst1         = 50,
   kst2         = 50,
+  tst1         = 1,
+  tst2         = 5,
   ! ===   ===   ===   ===   ===
-  !
+  !  
   ! ===   ===   ===   ===   ===
   ! If seedType = 2 or 3:
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 0,
-  seedDir      = '/Users/frederic/TRACMASS/orm/projects/CORAL/',
+  seedDir      = '/Users/frederic/tracmass/new_tracmass/projects/rutgersCORAL/',
   !
   ! === Seed filename (or beginning of it)
-  seedFile     = 'seed_run.in'/
+  seedFile     = 'seed_file.asc'/
 
 
 
