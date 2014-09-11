@@ -77,11 +77,11 @@ CONTAINS
          ikst  = seed_ijk (jsd,3)
          isec  = seed_set (jsd,1)
          idir  = seed_set (jsd,2)
-         if (iist <= 1)   cycle startLoop
-         if (ijst <= 1)   cycle startLoop
-         if (iist >= imt) cycle startLoop
-         if (ijst >= jmt) cycle startLoop
-         if (ikst > km)   cycle startLoop
+         if (iist <   1) cycle startLoop
+         if (ijst <   1) cycle startLoop
+         if (iist > imt) cycle startLoop
+         if (ijst > jmt) cycle startLoop
+         if (ikst >  km) cycle startLoop
          if (kmt(iist,ijst) == 0) cycle startLoop
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
