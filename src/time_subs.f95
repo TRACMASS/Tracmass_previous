@@ -1,7 +1,7 @@
 #ifdef timeanalyt 
   !
   ! The subroutines related to the time-analytical option of TRCAMSS are located in this file below 
-  ! The schemes are by Vries and Döös (2001) and Döös et al. (2013)
+  ! The schemes are by Vries and Doos (2001) and Doos et al. (2013)
   !
   !         um-------------------------------------------uu
   !          |                                            |
