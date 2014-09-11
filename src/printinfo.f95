@@ -159,7 +159,7 @@ CONTAINS
 !         /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
     print *, thinline !--------------------------------------------------- 
     print *,'t-step        run        out        err '  // & 
-            '       tot   dt  model date'
+            '       tot      dt      model date'
     print *, thinline !--------------------------------------------------- 
 
 
