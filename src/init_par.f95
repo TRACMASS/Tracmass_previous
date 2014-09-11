@@ -285,6 +285,7 @@ SUBROUTINE init_params
       dyt = 0
       dxv = 0
       dyu = 0
+
 #ifdef zgrid3Dt
       ALLOCATE ( dzt(imt,jmt,km,nst) )   
 #elif  zgrid3D
