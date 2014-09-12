@@ -10,18 +10,18 @@ ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 OBJDIR           := build
 
 ifeq ($(NETCDFLIBS),"automatic")
-	LIB_DIR = $(shell nc-config --flibs)
+	LNK_FLAGS = $(shell nc-config --flibs)
 	INC_DIR = -I$(shell nc-config --includedir)
 endif
 ifeq ($(NETCDFLIBS),"macports")
 	LIB_DIR           = -L/opt/local/lib
 	INC_DIR           = -I/opt/local/include/
-	LNK_FLAGS         = -lnetcdf -lnetcdff 
+	LNK_FLAGS         = $(LIB_DIR) -lnetcdf -lnetcdff 
 endif
 ifeq ($(NETCDFLIBS),"fink")
         LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
         INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include
-        LNK_FLAGS         = -lnetcdf -lnetcdff
+        LNK_FLAGS         = $(LIB_DIR) -lnetcdf -lnetcdff
 endif
 
 #================================================================  
@@ -30,9 +30,17 @@ ifeq ($(F95COMPILER),"gfortran")
 #	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2 
 	FF_FLAGS         = -c -x f95-cpp-input #-gdwarf-2 
 	F90_FLAGS        =-fno-underscoring 
-	FF               = gfortran $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg
-
+	FF               = gfortran $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 endif
+
+ifeq ($(F95COMPILER),"pgi")
+	FF_FLAGS         = -c -g -Mfree -Mpreprocess
+	F90_FLAGS        = -g
+	FF               = pgf90 $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
+	LNK_FLAGS = $(shell /import/local/pkg/netcdf/netcdf-4.1.pgi/bin/nc-config --flibs)
+	INC_DIR = -I$(shell /import/local/pkg/netcdf/netcdf-4.1.pgi/bin/nc-config --includedir)
+endif
+
 ifeq ($(F95COMPILER),"g95")
 	FF_FLAGS         = -c -cpp -fendian=big
 	F90_FLAGS        = -O3 -C  -g  -fno-underscoring
@@ -57,11 +65,21 @@ objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
 		    setupgrid.o readfield.o diffusion.o)
 
 
+ifeq ($(F95COMPILER),"gfortran")
 runfile : $(objects)
 	$(FF)  -J$(OBJDIR) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
 
 $(OBJDIR)/%.o : %.f95
 	$(FF) -J$(OBJDIR) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
+endif
+
+ifeq ($(F95COMPILER),"pgi")
+runfile : $(objects)
+	$(FF)  -module $(OBJDIR) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
+
+$(OBJDIR)/%.o : %.f95
+	$(FF) -module $(OBJDIR) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
+endif
 
 
 

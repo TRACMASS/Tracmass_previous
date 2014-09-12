@@ -6,7 +6,7 @@
 &INITRUNDESC
   !	
   caseName     = 'NEP6',
-  caseDesc     = 'Run22'/
+  caseDesc     = 'Run23'/
   ! 
   !
 &INITRUNGRID
@@ -44,10 +44,16 @@
   !
  &INITRUNDATE
   !
-  startHour         = 12,
-  startDay          = 01,
-  startMon          = 01,
-  startYear         = 2004/
+  ! run22
+  !!startHour         = 12,
+  !!startDay          = 17,
+  !!startMon          = 12,
+  !!startYear         = 1994/
+  ! run23
+  startHour         = 0,
+  startDay          = 17,
+  startMon          = 12,
+  startYear         = 1999/
   !
   !
   &INITRUNWRITE
@@ -65,10 +71,12 @@
   kriva        = 2,
   !
   ! === Directory where input fields are stored
-  inDataDir       = '/Volumes/USB2TB/NEP6/run22/averages/',
+!  inDataDir       = '/Volumes/USB2TB/NEP6/run22/averages/',
+  inDataDir       = '/archive/u1/uaf/kate/NEP6/run23/averages/',
   !
   ! === Directory where output files are saved
-  outDataDir      = '/Volumes/USB2TB/NEP6/ormOut/',
+!  outDataDir      = '/Volumes/USB2TB/NEP6/ormOut/',
+  outDataDir      = '/scratch/kate/NEP6/ormOut/',
   !
   ! === Name of current trajectory run
   outDataFile     = 'NEP6_test',
@@ -139,11 +147,11 @@
   ! === Use variable seed file name ( constructed as
   !     /seedpath/seed0000.asc where 0000 is intstart.)
   varSeedFile  = 0,
-  seedDir      = '/Users/kate/roms/tracmass/projects/NEP6/',
+!  seedDir      = '/Users/kate/roms/tracmass/projects/NEP6/',
+  seedDir      = '/export/scratch/kate/roms/tracmass/projects/NEP6/',
   !
   ! === Seed filename (or beginning of it)
   seedFile     = 'll.out'/
-
 
 
   $INITRUNTEMPSALT
@@ -163,6 +171,18 @@
   smaxe =  500.,
   rmine = -100.,
   rmaxe =  500./
+
+
+!!
+!!------------------------------------------------------------------------------
+!! --- Set up sub grid parameterization of turbulence and/or diffusion ---
+!!
+!! Ah                  :  Horizontal diffusion in m2/s
+!! Av                  :  Vertical diffusion in m2/s
+!!------------------------------------------------------------------------------
+&INITRUNDIFFUSION
+  Ah      =  3., 
+  Av      =  0.0001/
 
 
 $INITRUNEND
