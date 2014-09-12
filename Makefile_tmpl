@@ -1,5 +1,5 @@
-PROJECT	          = analytical
-CASE              = analytical
+PROJECT	          = theoretical
+CASE              = theoretical
 RUNFILE 	      = runtrm
 
 #F95COMPILER        = "g95"
