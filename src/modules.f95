@@ -238,15 +238,15 @@ CONTAINS
   subroutine updateClock  
     USE mod_param, only: ngcm
     IMPLICIT NONE
-    ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
+    ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas 
     currJDtot = (ints+ttpart)*(dble(ngcm)/24) + 1
     call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1)
-    currFrac = (currJDtot-dble(int(currJDtot)))*24
-    currHour = int(currFrac)
+    currFrac = (currJDtot-dble(int(currJDtot,8)))*24
+    currHour = int(currFrac,8)
     currFrac = (currFrac - dble(currHour)) * 60
-    CurrMin  = int(currFrac)
-    currSec  = int((currFrac - dble(currMin)) * 60)
+    CurrMin  = int(currFrac,8)
+    currSec  = int((currFrac - dble(currMin)) * 60,8)
 
     if (ints > (maxvelints-1)) then
        if (minvelints == 0) then
@@ -261,11 +261,11 @@ CONTAINS
     loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1
     call  gdate (baseJD+loopJD-1 ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
-    loopFrac = (loopJD - dble(int(loopJD))) * 24
-    loopHour = int(loopFrac)
+    loopFrac = (loopJD - dble(int(loopJD,8))) * 24
+    loopHour = int(loopFrac,8)
     loopFrac = (loopFrac - dble(loopHour)) * 60
-    LoopMin  = int(loopFrac)
-    loopSec  = int((loopFrac - dble(loopMin)) * 60)
+    LoopMin  = int(loopFrac,8)
+    loopSec  = int((loopFrac - dble(loopMin)) * 60,8)
   end subroutine updateClock
   
   subroutine gdate (rjd, year,month,day)
@@ -329,7 +329,8 @@ CONTAINS
     endif
 #endif /*regulardt*/
     if(dt.lt.0.d0) then
-       print *,'dt=',dt
+       Print *,"Error! dt is less than zero."
+       print *,'dt=',dt,"ds=",ds,"dxyz=",dxyz,"dsmin=",dsmin
        stop 4968
     endif
 #ifdef stationary
@@ -338,9 +339,9 @@ CONTAINS
     ! === if time step makes the integration ===
     ! === exceed the time when fields change ===
     if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
-       dt=dble(idint(ts)+1)*tseas-tt
-       tt=dble(idint(ts)+1)*tseas
-       ts=dble(idint(ts)+1)
+       dt=dble(int(ts,8)+1)*tseas-tt
+       tt=dble(int(ts,8)+1)*tseas
+       ts=dble(int(ts,8)+1)
        tss=dble(iter)
        ds=dt/dxyz
        dsc=ds
@@ -351,7 +352,7 @@ CONTAINS
           ts=ts+dstep
           tss=tss+1.d0
        elseif(dt == dtreg) then  
-          ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
+          ts=nint((ts+dtreg/tseas)*dble(iter), 8)/dble(iter)
           !                 ts=ts+dtreg/tseas
           tss=dble(nint(tss+dt/dtmin))
        else
@@ -478,7 +479,7 @@ CONTAINS
                                  vflux(2:imt,   1,       k,   nsp) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-#endif full_wflux
+#endif /*full_wflux*/
 
 
 ENDMODULE mod_vel

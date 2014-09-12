@@ -275,7 +275,7 @@ SUBROUTINE loop
 
            ! === write trajectory ===                       
 #ifdef tracer
-           if(ts == dble(idint(ts))) then 
+           if(ts == dble(int(ts, 8))) then 
               tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
            end if
 #endif /*tracer*/
@@ -292,7 +292,7 @@ SUBROUTINE loop
            ! time variables (ds,...) are in seconds/m^3   !
            !==============================================! 
 #ifdef regulardt
-           dtreg=dtmin * ( dble(int(tt/tseas*dble(iter))) +  & 
+           dtreg=dtmin * ( dble(int(tt/tseas*dble(iter),8)) +  & 
                 1.d0 - tt/tseas*dble(iter) )
            dt=dtreg
            dsmin=dt/dxyz
@@ -306,7 +306,7 @@ SUBROUTINE loop
            ! === calculate the vertical velocity ===
            call vertvel(ia,iam,ja,ka)
 #ifdef timeanalyt
-           ss0=dble(idint(ts))*tseas/dxyz
+           ss0=dble(int(ts,8))*tseas/dxyz
            call cross_time(1,ia,ja,ka,x0,dse,dsw) ! zonal
            call cross_time(2,ia,ja,ka,y0,dsn,dss) ! merid
            call cross_time(3,ia,ja,ka,z0,dsu,dsd) ! vert
@@ -318,7 +318,6 @@ SUBROUTINE loop
            ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
-   
            call calc_time
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
