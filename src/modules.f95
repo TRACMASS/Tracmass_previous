@@ -319,8 +319,6 @@ CONTAINS
     else
        dt = ds * dxyz 
     endif
-#elif stationary
-      dt = ds * dxyz 
 #else
     if(ds == dsmin) then ! transform ds to dt in seconds
        dt=dtmin  ! this makes dt more accurate
@@ -333,9 +331,6 @@ CONTAINS
        print *,'dt=',dt,"ds=",ds,"dxyz=",dxyz,"dsmin=",dsmin
        stop 4968
     endif
-#ifdef stationary
-              tt=tt+dt
-#else
     ! === if time step makes the integration ===
     ! === exceed the time when fields change ===
     if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
@@ -370,7 +365,6 @@ CONTAINS
        endif
 #endif /*regulardt*/
     end if
-#endif /*stationary*/
     ! === time interpolation constant ===
     intrpbg=dmod(ts,1.d0) 
     intrpb =1.d0-intrpbg

@@ -296,8 +296,6 @@ SUBROUTINE loop
                 1.d0 - tt/tseas*dble(iter) )
            dt=dtreg
            dsmin=dt/dxyz
-#elif stationary
-           dsmin=UNDEF
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 

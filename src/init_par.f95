@@ -33,7 +33,6 @@ SUBROUTINE init_params
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
    CHARACTER (LEN=200)                        ::  projdir, ormdir
-
    real*8                                     :: jd
 
 ! Setup namelists
@@ -178,8 +177,8 @@ SUBROUTINE init_params
    END SELECT
    start1d  = [subGridKmin]
    count1d  = [subGridKmax]
-   start2d  = [1,  1 ,subGridImin ,subGridJmin]
-   count2d  = [1,  1 ,imt,         jmt        ]
+   start2d  = [1, 1,           subGridImin, subGridJmin]
+   count2d  = [1, 1,           imt,         jmt        ]
    start3d  = [1, subGridImin, subGridJmin, subGridKmin]
    count3d  = [1, imt,         jmt,         km         ]
    
