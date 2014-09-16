@@ -280,7 +280,6 @@ CONTAINS
 
                   ! ts - time, fractions of ints
                   ! tt - time [s] rel to start
-                  ! ts = ff * DBLE (ints-intstep) / tstep
                   ts = DBLE (ints-1) + seedsubints(subtstep)
                   tt = ts * tseas
                   ! ------------------------------------------------------------

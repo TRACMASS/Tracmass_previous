@@ -184,7 +184,7 @@ MODULE mod_time
 
   !Timestep increasing with one for each new velocity field
   INTEGER                                   :: ints      ,intstart ,intend
-  INTEGER                                   :: intrun    ,intspin  ,intstep
+  INTEGER                                   :: intrun    ,intspin
   INTEGER                                   :: intmin    ,intmax
   !type for datetimes
   type DATETIME
