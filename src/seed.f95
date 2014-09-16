@@ -13,13 +13,12 @@ MODULE mod_seed
 !!
 !!
 !!------------------------------------------------------------------------------
-   USE mod_param
-   USE mod_time
-   USE mod_grid
-   USE mod_buoyancy
-   USE mod_vel
-   USE mod_traj, only: ntractot, ntrac, x1, y1, z1, trj, nrj
-   USE mod_write
+
+   USE mod_time,  only: ints, ntime, tseas, tt, ts, partQuant
+   USE mod_grid,  only: imt, jmt, km, kmt, nsm, mask
+   USE mod_vel,   only: uflux, vflux, wflux, ff
+   USE mod_traj,  only: ntractot, ntrac, x1, y1, z1, trj, nrj
+   USE mod_write, only: writedata
    
    IMPLICIT NONE
   
@@ -126,7 +125,7 @@ CONTAINS
 #ifdef explicit_w || full_wflux
                vol = wflux(ib,jb,kb,nsm)
 #elif twodim
-               vol=1.
+               vol = 1.
 #else 
                vol=wflux(kb,nsm)
 #endif

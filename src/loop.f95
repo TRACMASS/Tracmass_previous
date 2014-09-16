@@ -14,19 +14,18 @@ SUBROUTINE loop
 !!
 !!
 !!---------------------------------------------------------------------------          
-  USE mod_param, only:
-  USE mod_name, only:
-  USE mod_time, only:
-  USE mod_loopvars
-  USE mod_grid
-  USE mod_buoyancy
-  USE mod_seed
-  USE mod_domain
-  USE mod_vel
-  USE mod_traj
-  USE mod_write
-  USE mod_pos
-  USE mod_print
+  USE mod_param,    only: ntracmax, undef, tday
+  USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
+                          niter, lbas, scrivi, subvol
+  USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, &
+                          mask, iter, nsm, nsp, hs, calc_dxyz
+  use mod_vel,      only: uflux, vflux, wflux
+  USE mod_seed,     only: ff, nff, seedTime, seed
+  USE mod_domain,   only: timax, jens, jenn, iene, ienw
+  USE mod_vel,      only: degrade_counter, degrade_time
+  USE mod_write,    only: writedata
+  USE mod_pos,      only: pos
+  USE mod_print,    only: print_start_loop, print_cycle_loop, print_end_loop
   ! === Selectable moules ===
   USE mod_active_particles
   USE mod_streamfunctions

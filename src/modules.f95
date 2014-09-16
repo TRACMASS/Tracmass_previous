@@ -11,11 +11,6 @@ ENDMODULE mod_precdef
 MODULE mod_param
   INTEGER                                   :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
-#ifdef streamts
-  INTEGER, PARAMETER                        :: LOV=3
-#else
-  INTEGER, PARAMETER                        :: LOV=1
-#endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
   REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small epsilon
@@ -46,7 +41,6 @@ ENDMODULE mod_loopvars
 MODULE mod_traj
 
   ! Variables connected to particle positions.
-
   INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
   INTEGER                                    :: NEND
   INTEGER                                    :: ntrac, ntractot=0
@@ -66,10 +60,10 @@ ENDMODULE mod_traj
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
-  USE mod_param
+  USE mod_param, only: pi, undef, iter
   IMPLICIT NONE
 
-  INTEGER                                   :: IMT, JMT, KM
+  INTEGER                                   :: imt, jmt, km
   INTEGER                                   :: nst=2
   INTEGER                                   :: nsm=1     ,nsp=2
   REAL*8                                    :: dx,dy
@@ -85,7 +79,7 @@ MODULE mod_grid
 
   ! === Vertical grids ===
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r,z_w
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r, z_w
 #ifdef zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D
@@ -396,7 +390,7 @@ ENDMODULE mod_dens
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
-  USE mod_grid
+  USE mod_grid, only: nsm, nsp
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
 #if defined explicit_w || full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
@@ -416,7 +410,7 @@ CONTAINS
  
   subroutine datasetswap
 
-    USE  mod_grid
+    USE  mod_grid, only: nsm,nsp,hs
     IMPLICIT NONE
 
     hs(:,:,nsm)      = hs(:,:,nsp)
@@ -434,35 +428,35 @@ CONTAINS
 
 #if defined full_wflux
   subroutine calc_implicit_vertvel
-    USE mod_grid
+
+    USE mod_grid, only: imt, jmt, km, nsm, nsp
     IMPLICIT none
-    ! = Loop variables
     INTEGER                                    :: k
     
-    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1, nsp)  -  &
-                                   uflux(2:imt,   2:jmt,   1, nsp)  +  &
-                                   vflux(2:imt,   1:jmt-2, 1, nsp)  -  & 
-                                   vflux(2:imt,   2:jmt,   1, nsp)
-    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1, nsp)  +  &
-                                   vflux(1,       1:jmt-1, 1, nsp)  -  &
-                                   vflux(1,       2:jmt,   1, nsp)
-    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1, nsp)  -  &
-                                   uflux(2:imt,   1,       1, nsp)  -  &
-                                   vflux(2:imt,   1,       1, nsp) 
+    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1,   nsp)  -  &
+                                   uflux(2:imt,   2:jmt,   1,   nsp)  +  &
+                                   vflux(2:imt,   1:jmt-2, 1,   nsp)  -  & 
+                                   vflux(2:imt,   2:jmt,   1,   nsp)
+    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1,   nsp)  +  &
+                                   vflux(1,       1:jmt-1, 1,   nsp)  -  &
+                                   vflux(1,       2:jmt,   1,   nsp)
+    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1,   nsp)  -  &
+                                   uflux(2:imt,   1,       1,   nsp)  -  &
+                                   vflux(2:imt,   1,       1,   nsp) 
     kloop: do k=2,km
-       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
-                                 uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
-                                 uflux(2:imt,   2:jmt,   k,   nsp)  +  &
-                                 vflux(2:imt,   1:jmt-1, k,   nsp)  -  & 
-                                 vflux(2:imt,   2:jmt,   k,   nsp) 
-       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, nsp)  -  &
-                                 uflux(1,       2:jmt,   k,   nsp)  +  &
-                                 vflux(1,       1:jmt-1, k,   nsp)  -  &
-                                 vflux(1,       2:jmt,   k,   nsp)
-       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, nsp)  +  &
-                                 uflux(1:imt-1, 1,       k,   nsp)  -  &
-                                 uflux(2:imt,   1,       k,   nsp)  -  &
-                                 vflux(2:imt,   1,       k,   nsp) 
+       wflux(2:imt,2:jmt,k,nsp) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
+                                   uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
+                                   uflux(2:imt,   2:jmt,   k,   nsp)  +  &
+                                   vflux(2:imt,   1:jmt-1, k,   nsp)  -  & 
+                                   vflux(2:imt,   2:jmt,   k,   nsp) 
+       wflux(1,2:jmt,k,nsp)     =  wflux(1,       2:jmt,   k-1, nsp)  -  &
+                                   uflux(1,       2:jmt,   k,   nsp)  +  &
+                                   vflux(1,       1:jmt-1, k,   nsp)  -  &
+                                   vflux(1,       2:jmt,   k,   nsp)
+       wflux(2:imt,1,  k, nsp)  =  wflux(2:imt,   1,       k-1, nsp)  +  &
+                                   uflux(1:imt-1, 1,       k,   nsp)  -  &
+                                   uflux(2:imt,   1,       k,   nsp)  -  &
+                                   vflux(2:imt,   1,       k,   nsp) 
     enddo kloop
   end subroutine calc_implicit_vertvel
 #endif /*full_wflux*/
@@ -498,6 +492,11 @@ MODULE mod_streamfunctions
 #endif
 #ifdef stream_thermohaline
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+#endif
+#ifdef streamts
+  INTEGER, PARAMETER                        :: LOV=3
+#else
+  INTEGER, PARAMETER                        :: LOV=1
 #endif
 ENDMODULE mod_streamfunctions
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

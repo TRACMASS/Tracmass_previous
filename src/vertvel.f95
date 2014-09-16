@@ -4,13 +4,9 @@ subroutine vertvel(ia,iam,ja,ka)
   ! === Computes the vertical velocity by integrating ===
   ! === the continuity eq. from the bottom            ===
   ! === for the nsm and nsp velocity time steps       ===
-  
-  USE mod_param
-  USE mod_vel
-  USE mod_time, only: intrpr, intrpg
-  USE mod_grid
+  USE mod_vel,              only: uflux, vflux, wflux, nsm, nsp, ff
+  USE mod_time,             only: intrpr, intrpg
   USE mod_active_particles, only: upr
-  USE mod_grid
 #ifdef sediment
   USE mod_sed
   USE mod_orbital
@@ -18,20 +14,15 @@ subroutine vertvel(ia,iam,ja,ka)
 #endif
   
   IMPLICIT none
-  
-#if defined sediment
-  REAL kin
-#endif
-  
+    
   real*8                                     :: uu, um, vv, vm
   integer                                    :: ia, iam, ja, ka, k,n
   integer                                    :: n1, n2
-  
 
+  REAL                                       :: kin 
+  
 #if defined twodim || explicit_w
   return
-
-! start 3D code
 #else
 
   n1=min(nsm,nsp)
@@ -72,18 +63,16 @@ wflux(km,:) = 0.d0
 ! Make sure the vertical velocity is always zero below and at the bottom
 #ifdef orca12
 do k=0,KM-kmt(ia,ja)
- do n=n1,n2
-  if(wflux(k,n)/=0.d0) then
-  wflux(k,n)=0.d0
-  endif
- enddo
+   do n=n1,n2
+      if(wflux(k,n)/=0.d0) then
+         wflux(k,n)=0.d0
+      endif
+   enddo
 enddo
 #endif
 
 #endif
-! end 3D code
 
-! start sediment code
 #ifdef sediment  
   ! === Godtyckligt vaerde paa kinetiska energin ===
   ! === daer wsed inte laengre paaverkar, 3e6.   ===
