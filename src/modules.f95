@@ -70,15 +70,7 @@ MODULE mod_grid
   IMPLICIT NONE
 
   INTEGER                                   :: IMT, JMT, KM
-#ifdef seasonal
-#if orca1
-  INTEGER                                   :: nst=48
-#elif orca025L75
-  INTEGER                                   :: nst=4
-#endif
-#else
   INTEGER                                   :: nst=2
-#endif
   INTEGER                                   :: nsm=1     ,nsp=2
   REAL*8                                    :: dx,dy
   REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
