@@ -356,22 +356,22 @@ SUBROUTINE init_params
 
       ! --- Allocate Lagrangian stream functions ---
 #ifdef streamxy
-      ALLOCATE ( stxyy(imt,jmt,lbt), stxyx(imt,jmt,lbt) )
+      ALLOCATE ( stxyy(imt,jmt,nend), stxyx(imt,jmt,nend) )
       stxyy=0.
       stxyx=0.
 #endif
 #ifdef streamv
-      ALLOCATE ( stxz(imt,km,lbt), styz(jmt,km,lbt) )
+      ALLOCATE ( stxz(imt,km,nend), styz(jmt,km,nend) )
       stxz=0.
       styz=0.
 #endif
 #ifdef streamr
-      ALLOCATE ( stxr(imt,mr,lbt,lov), styr(jmt,mr,lbt,lov) )
+      ALLOCATE ( stxr(imt,mr,nend,lov), styr(jmt,mr,nend,lov) )
       stxr=0.
       styr=0
 #endif
 #ifdef stream_thermohaline
-      ALLOCATE ( psi_ts(MR,MR,2,LBT) )
+      ALLOCATE ( psi_ts(MR,MR,2,nend) )
       psi_ts=0.
 #endif
 

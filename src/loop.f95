@@ -98,18 +98,14 @@ SUBROUTINE loop
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 
 #elif defined ifs
-  lbasLoop: do n=1,LBT
+  nendLoop: do n=1,nend
      if( dble(ienw(n)) <= rlon .and. rlon <= dble(iene(n)) .and. &
-         dble(jens(n)) <= rlat .and. rlat <= dble(jenn(n))  ) then
-        
+         dble(jens(n)) <= rlat .and. rlat <= dble(jenn(n))  ) then  
         nrj(8,ntrac) = n
-        
         dist(n) = dist(n) + 1
-        
         cycle lbasLoop
-        
      endif
-  enddo lbasLoop
+  enddo nendLoop
   
   if( nrj(8,ntrac) == 0 ) then
      print 566,ntrac,niter,rlon,rlat,zz
@@ -124,7 +120,7 @@ SUBROUTINE loop
 41 continue
 #ifdef ifs
   print *,'Lagrangian decomposition distribution in %: '
-  do n=1,LBT
+  do n=1,nend
      PRINT*,100.*float(dist(n))/float(sum(dist))
   enddo
 #else
@@ -215,7 +211,7 @@ SUBROUTINE loop
         
 #ifdef rerun
         lbas=nrj(8,ntrac)
-        if(lbas.lt.1 .or.lbas.gt.LBT) then
+        if(lbas.lt.1 .or.lbas.gt.nend) then
            print *,'lbas=',lbas,'ntrac=',ntrac
            print *,'trj(:,ntrac)=',trj(:,ntrac)
            print *,'nrj(:,ntrac)=',nrj(:,ntrac)
@@ -382,13 +378,13 @@ SUBROUTINE loop
            call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
            ! === end trajectory if outside chosen domain === 
-           LBTloop: do k=1,LBT
+           nendloop: do k=1,nend
               if(dble(ienw(k)) <= x1 .and. x1 <= dble(iene(k)) .and. &
                  dble(jens(k)) <= y1 .and. y1 <= dble(jenn(k))  ) then
                  nexit(k)=nexit(k)+1
                  exit niterLoop                                
               endif
-           enddo LBTLOOP
+           enddo nendloop
            
 #if defined tempsalt
            call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 

@@ -9,7 +9,7 @@ ENDMODULE mod_precdef
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_param
-  INTEGER                                   :: JMAX, LBT, NTRACMAX
+  INTEGER                                   :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
 #ifdef streamts
   INTEGER, PARAMETER                        :: LOV=3
