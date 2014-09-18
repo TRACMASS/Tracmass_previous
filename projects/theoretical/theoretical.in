@@ -1,14 +1,17 @@
+$INIT_NAMELIST_VERSION
+  gridVerNum  = 6
+/      
 &INIT_GRID_DESCRIPTION
          gcmname = Academic test run,
        gcmsource =       ,
         gridname =       ,
       gridsource =       ,
         griddesc =       ,
-       indatadir =     ./,
+       indatadir =     '',
 /
 &INIT_CASE_DESCRIPTION
-        casename = Academic,
-        casedesc = Rectangular ocean,
+        casename = 'Theoretical',
+        casedesc = 'Rectangular ocean',
 /
 &INIT_GRID_SIZE
              imt =    100,
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      3,
-      outdatadir =     ./,
-     outdatafile =       ,
+      outdatadir =     './',
+     outdatafile =      '',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     10,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile = mask?' ,
+         seeddir =     '',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
