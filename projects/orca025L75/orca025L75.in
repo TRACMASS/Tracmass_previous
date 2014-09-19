@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =   NEMO,
-       gcmsource = http://www.locean-ipsl.upmc.fr/opa/,
-        gridname = ORCA025,
-      gridsource = http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html,
-        griddesc = 1/4 deg run for the global Ocean.,
-       indatadir = /Users/doos/data/orca/orca025L75/,
+         gcmname = 'NEMO',
+       gcmsource = 'http://www.locean-ipsl.upmc.fr/opa/',
+        gridname = 'ORCA025',
+      gridsource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+        griddesc = '1/4 deg run for the global Ocean.',
+       indatadir = '/Users/doos/data/orca/orca025L75/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = ORCA025-SMB01,
-        casedesc = Global Ocean trajectories,
+        casename = 'ORCA025-SMB01',
+        casedesc = 'Global Ocean trajectories',
 /
 &INIT_GRID_SIZE
              imt =   1440,
@@ -20,7 +23,7 @@
      subgridimax =   1440,
      subgridjmin =      1,
      subgridjmax =   1021,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      6,
-      outdatadir = /Users/doos/data/orca/orca025L75/data_out/,
-     outdatafile = cb025L75_back1,
+      outdatadir = '/Users/doos/data/orca/orca025L75/data_out/',
+     outdatafile = 'cb025L75_back1',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     75,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =    ' ',
+        seedfile =    ' ',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

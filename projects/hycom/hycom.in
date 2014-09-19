@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =  HYCOM,
-       gcmsource = http://www.hycom.org/,
-        gridname = HYCOM GLBa0.0,
-      gridsource = http://www.hycom.org,
-        griddesc = 1/12 deg run for the global Ocean.,
-       indatadir = /projData/hycom/data/,
+         gcmname = 'HYCOM',
+       gcmsource = 'http://www.hycom.org/',
+        gridname = 'HYCOM GLBa0.0',
+      gridsource = 'http://www.hycom.org',
+        griddesc = '1/12 deg run for the global Ocean.',
+       indatadir = '/projData/hycom/data/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = orcaGlobal,
-        casedesc = Using Orca fields for fun and entertainment.,
+        casename = 'orcaGlobal',
+        casedesc = 'Using Orca fields for fun and entertainment.',
 /
 &INIT_GRID_SIZE
              imt =   4500,
@@ -20,7 +23,7 @@
      subgridimax =   2400,
      subgridjmin =    800,
      subgridjmax =   1300,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = /Users/bror/ormOut/,
-     outdatafile = hycom2Dim19,
+      outdatadir = '/Users/bror/ormOut/',
+     outdatafile = 'hycom2Dim19',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     19,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =     '',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

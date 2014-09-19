@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =    OPA,
-       gcmsource = http://www.locean-ipsl.upmc.fr/opa/,
-        gridname = multcol,
-      gridsource = Marina Levy,
-        griddesc = 1*1 km biogeochemical run in the North Atlantic,
-       indatadir =       ,
+         gcmname =  'OPA',
+       gcmsource = 'http://www.locean-ipsl.upmc.fr/opa/',
+        gridname = 'multcol',
+      gridsource = 'Marina Levy',
+        griddesc = '1*1 km biogeochemical run in the North Atlantic',
+       indatadir =     '',
 /
 &INIT_CASE_DESCRIPTION
-        casename = MultCol,
-        casedesc = Looking at chl growth in lagrangian space,
+        casename = 'MultCol',
+        casedesc = 'Looking at chl growth in lagrangian space',
 /
 &INIT_GRID_SIZE
              imt =    200,
@@ -20,7 +23,7 @@
      subgridimax =     -1,
      subgridjmin =     -1,
      subgridjmax =     -1,
-     subgridfile =       ,
+     subgridfile =     '',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir =     ./,
-     outdatafile =       ,
+      outdatadir =   './',
+     outdatafile =     '',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     30,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile = /Users/bror/maskust,
+         seeddir =     '',
+        seedfile = '/Users/bror/maskust',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

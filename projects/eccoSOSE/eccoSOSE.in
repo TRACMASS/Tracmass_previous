@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname = MITgcm,
-       gcmsource = http://mitgcm.org/,
-        gridname = eccoSOSE,
-      gridsource = http://www.mit.edu/%7Emmazloff/SOSE.html,
-        griddesc = 1/6 deg run for the Sourhern Ocean with data ass.,
-       indatadir = /Volumes/t2klumpen/projData/eccoSOSE/,
+         gcmname = 'MITgcm',
+       gcmsource = 'http://mitgcm.org/',
+        gridname = 'eccoSOSE',
+      gridsource = 'http://www.mit.edu/%7Emmazloff/SOSE.html',
+        griddesc = '1/6 deg run for the Sourhern Ocean with data ass.',
+       indatadir = '/Volumes/t2klumpen/projData/eccoSOSE/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = eccoTest,
-        casedesc = Looking at chl growth in lagrangian space,
+        casename = 'eccoTest',
+        casedesc = 'Looking at chl growth in lagrangian space',
 /
 &INIT_GRID_SIZE
              imt =   2160,
@@ -20,7 +23,7 @@
      subgridimax =     -1,
      subgridjmin =     -1,
      subgridjmax =     -1,
-     subgridfile =       ,
+     subgridfile =     '',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = /Users/bror/ormOut/,
-     outdatafile =       ,
+      outdatadir = '/Users/bror/ormOut/',
+     outdatafile =     '',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     -1,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =     '',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

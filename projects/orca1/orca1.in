@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =   NEMO,
-       gcmsource = http://www.locean-ipsl.upmc.fr/opa/,
-        gridname =  ORCA1,
-      gridsource = http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html,
-        griddesc = 1 deg run for the global Ocean.,
-       indatadir = /Users/doos/data/ecearth/,
+         gcmname = 'NEMO',
+       gcmsource = 'http://www.locean-ipsl.upmc.fr/opa/',
+        gridname = 'ORCA1',
+      gridsource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+        griddesc = '1 deg run for the global Ocean.',
+       indatadir = '/Users/doos/data/ecearth/',
 /
 &INIT_CASE_DESCRIPTION
-        casename =    xxx,
-        casedesc = Global Ocean trajectories,
+        casename =  'xxx',
+        casedesc = 'Global Ocean trajectories',
 /
 &INIT_GRID_SIZE
              imt =    360,
@@ -20,7 +23,7 @@
      subgridimax =   1440,
      subgridjmin =    330,
      subgridjmax =   1021,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      6,
-      outdatadir = /Users/doos/data/ecearth/data_out/,
-     outdatafile = th_seasonal_south_iter12,
+      outdatadir = '/Users/doos/data/ecearth/data_out/',
+     outdatafile = 'th_seasonal_south_iter12',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     42,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =    ' ',
+        seedfile =    ' ',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

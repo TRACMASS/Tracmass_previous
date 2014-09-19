@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =    rco,
-       gcmsource =    rco,
-        gridname =    rco,
-      gridsource =    rco,
-        griddesc =    rco,
-       indatadir = /nobackup/vagn2/x_joakj/data/rco/snaptobalticway/,
+         gcmname =  'rco',
+       gcmsource =  'rco',
+        gridname =  'rco',
+      gridsource =  'rco',
+        griddesc =  'rco',
+       indatadir = '/nobackup/vagn2/x_joakj/data/rco/snaptobalticway/',
 /
 &INIT_CASE_DESCRIPTION
-        casename =    RCO,
-        casedesc = Rossby Centre Ocean model for the Baltic Sea,
+        casename =  'RCO',
+        casedesc = 'Rossby Centre Ocean model for the Baltic Sea',
 /
 &INIT_GRID_SIZE
              imt =    320,
@@ -20,7 +23,7 @@
      subgridimax =   1000,
      subgridjmin =      1,
      subgridjmax =   1000,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      5,
-      outdatadir = /nobackup/vagn1/x_joakj/data/rco/,
-     outdatafile = RCO_turb0_1962,
+      outdatadir = '/nobackup/vagn1/x_joakj/data/rco/',
+     outdatafile = 'RCO_turb0_1962',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     41,
             tst1 = 1981010106,
             tst2 = 1981010112,
-         seeddir =       ,
-        seedfile = /home/x_joakj/kristofers_drifters/start_files/ijk_rco_start_1962.txt.perturbed,
+         seeddir =     '',
+        seedfile = '/home/x_joakj/kristofers_drifters/start_files/ijk_rco_start_1962.txt.perturbed',
      varseedfile =      0,
         seedtime =      2,
          seedall =      2,

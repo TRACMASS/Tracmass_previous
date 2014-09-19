@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =   NEMO,
-       gcmsource = http://www.locean-ipsl.upmc.fr/opa/,
-        gridname = BaltiX,
-      gridsource = Robinson Hordoir,
-        griddesc = 2 nm of the Baltic & North Sea,
-       indatadir = /Users/doos/data/baltix/,
+         gcmname = 'NEMO',
+       gcmsource = 'http://www.locean-ipsl.upmc.fr/opa/',
+        gridname = 'BaltiX',
+      gridsource = 'Robinson Hordoir',
+        griddesc = '2 nm of the Baltic & North Sea',
+       indatadir = '/Users/doos/data/baltix/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = BaltiX,
-        casedesc = BaltiX trajectories,
+        casename = 'BaltiX',
+        casedesc = 'BaltiX trajectories',
 /
 &INIT_GRID_SIZE
              imt =    619,
@@ -20,7 +23,7 @@
      subgridimax =    619,
      subgridjmin =      1,
      subgridjmax =    523,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      4,
-      outdatadir = /Users/doos/data/baltix/data_out/,
-     outdatafile = testae1,
+      outdatadir = '/Users/doos/data/baltix/data_out/',
+     outdatafile = 'testae1',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     80,
             tst1 = 1984010101,
             tst2 = 1984120106,
-         seeddir =       ,
-        seedfile = /Users/Jocke/Public/kristofers_drifters/xyz_start_2001.txt.perturbed,
+         seeddir =     '',
+        seedfile = '/Users/Jocke/Public/kristofers_drifters/xyz_start_2001.txt.perturbed',
      varseedfile =      0,
         seedtime =      1,
          seedall =      1,

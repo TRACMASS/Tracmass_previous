@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =  AVISO,
-       gcmsource = http://www.aviso.oceanobs.com/,
-        gridname =  oscar,
-      gridsource = http://podaac.jpl.nasa.gov/DATA_CATALOG/oscarinfo.html,
-        griddesc = 1/3 deg geostrophic fields based on satellite SSH.,
-       indatadir = /local/bjonsson/projData/oscar/thrdDeg/,
+         gcmname = 'AVISO',
+       gcmsource = 'http://www.aviso.oceanobs.com/',
+        gridname = 'oscar',
+      gridsource = 'http://podaac.jpl.nasa.gov/DATA_CATALOG/oscarinfo.html',
+        griddesc = '1/3 deg geostrophic fields based on satellite SSH.',
+       indatadir = '/local/bjonsson/projData/oscar/thrdDeg/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = global,
-        casedesc = Follow global currents,
+        casename = 'global',
+        casedesc = 'Follow global currents',
 /
 &INIT_GRID_SIZE
              imt =   1081,
@@ -20,7 +23,7 @@
      subgridimax =    116,
      subgridjmin =      1,
      subgridjmax =    100,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir =       ,
-     outdatafile =  oscar,
+      outdatadir =     '',
+     outdatafile = 'oscar',
  intmininoutfile =      1,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =      1,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir = /projData/gomoosOrm/seedfiles,
-        seedfile =   seed,
+         seeddir = '/projData/gomoosOrm/seedfiles',
+        seedfile = 'seed',
      varseedfile =      1,
         seedtime =      0,
          seedall =      0,

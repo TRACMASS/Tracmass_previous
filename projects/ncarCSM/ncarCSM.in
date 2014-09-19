@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname = Community Climate System Model CCSM/POP,
-       gcmsource = http://www.ccsm.ucar.edu/models/ccsm3.0/pop/,
-        gridname = Scott Doney CSMBGC 3deg runs,
-      gridsource = http://www.whoi.edu/sbl/liteSite.do?litesiteid=23412&articleId=35629,
-        griddesc = 3.5 deg run for the global Ocean.,
-       indatadir = projects/ncarCSM/,
+         gcmname = 'Community Climate System Model CCSM/POP',
+       gcmsource = 'http://www.ccsm.ucar.edu/models/ccsm3.0/pop/',
+        gridname = 'Scott Doney CSMBGC 3deg runs',
+      gridsource = 'http://www.whoi.edu/sbl/liteSite.do?litesiteid=23412&articleId=35629',
+        griddesc = '3.5 deg run for the global Ocean.',
+       indatadir = 'projects/ncarCSM/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = CSMBGCGlobal,
-        casedesc = Testing CSM fields for fun and entertainment.,
+        casename = 'CSMBGCGlobal',
+        casedesc = 'Testing CSM fields for fun and entertainment.',
 /
 &INIT_GRID_SIZE
              imt =    100,
@@ -20,7 +23,7 @@
      subgridimax =    116,
      subgridjmin =      1,
      subgridjmax =    100,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = projects/ncarCSM/,
-     outdatafile = csmTest,
+      outdatadir = 'projects/ncarCSM/',
+     outdatafile = 'csmTest',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     25,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =     '',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

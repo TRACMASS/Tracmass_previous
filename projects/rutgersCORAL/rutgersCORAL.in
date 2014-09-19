@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =   ROMS,
-       gcmsource = http://www.atmos.ucla.edu/cesr/ROMS_page.html,
-        gridname =  CORAL,
-      gridsource = Rutgers,
-        griddesc = Coral Triangle 5km Grid,
-       indatadir = /nfs/T3/ROMS/CORAL/RUN16/,
+         gcmname = 'ROMS',
+       gcmsource = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
+        gridname = 'CORAL',
+      gridsource = 'Rutgers',
+        griddesc = 'Coral Triangle 5km Grid',
+       indatadir = '/nfs/T3/ROMS/CORAL/RUN16/',
 /
 &INIT_CASE_DESCRIPTION
-        casename =  RUN16,
-        casedesc = lagrangian experiment to evaluate potential connectivity for coral in the Indonesian Archipelago,
+        casename = 'RUN16',
+        casedesc = 'lagrangian experiment to evaluate potential connectivity for coral in the Indonesian Archipelago',
 /
 &INIT_GRID_SIZE
              imt =   1281,
@@ -20,7 +23,7 @@
      subgridimax =   1281,
      subgridjmin =      2,
      subgridjmax =    641,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = /Volumes/R1/ROMS/CORAL/RUN16_TRACMASSv6/,
-     outdatafile = CT-test,
+      outdatadir = '/Volumes/R1/ROMS/CORAL/RUN16_TRACMASSv6/',
+     outdatafile = 'CT-test',
  intmininoutfile =      1,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     50,
             tst1 =      1,
             tst2 =      5,
-         seeddir = /Users/frederic/tracmass/new_tracmass/projects/rutgersCORAL/,
-        seedfile = seed_file.asc,
+         seeddir = '/Users/frederic/tracmass/new_tracmass/projects/rutgersCORAL/',
+        seedfile = 'seed_file.asc',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

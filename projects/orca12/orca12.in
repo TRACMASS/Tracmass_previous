@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =   NEMO,
-       gcmsource = http://www.nemo-ocean.eu/,
-        gridname = ORCA12,
-      gridsource = http://www.nemo-ocean.eu/,
-        griddesc = 1/12 deg run for the global Ocean.,
-       indatadir = /Users/doos/data/orca/orca12/,
+         gcmname = 'NEMO',
+       gcmsource = 'http://www.nemo-ocean.eu/',
+        gridname = 'ORCA12',
+      gridsource = 'http://www.nemo-ocean.eu/',
+        griddesc = '1/12 deg run for the global Ocean.',
+       indatadir = '/Users/doos/data/orca/orca12/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = ORCA12,
-        casedesc = Global Ocean trajectories,
+        casename = 'ORCA12',
+        casedesc = 'Global Ocean trajectories',
 /
 &INIT_GRID_SIZE
              imt =   4320,
@@ -20,7 +23,7 @@
      subgridimax =   4000,
      subgridjmin =    800,
      subgridjmax =   1200,
-     subgridfile = templ.asc,
+     subgridfile = 'templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      2,
-      outdatadir = /Users/doos/data/orca/orca12/data_out/,
-     outdatafile = orca12_test,
+      outdatadir = '/Users/doos/data/orca/orca12/data_out/',
+     outdatafile = 'orca12_test',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     66,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =    ' ',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

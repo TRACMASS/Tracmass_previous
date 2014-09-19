@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname = Academic test run,
-       gcmsource =       ,
-        gridname =       ,
-      gridsource =       ,
-        griddesc =       ,
-       indatadir =       ,
+         gcmname = 'Academic test run',
+       gcmsource =     '',
+        gridname =     '',
+      gridsource =     '',
+        griddesc =     '',
+       indatadir =     '',
 /
 &INIT_CASE_DESCRIPTION
-        casename = Academic,
-        casedesc = Rectangular ocean,
+        casename = 'Academic',
+        casedesc = 'Rectangular ocean',
 /
 &INIT_GRID_SIZE
              imt =    320,
@@ -20,7 +23,7 @@
      subgridimax =     -1,
      subgridjmin =     -1,
      subgridjmax =     -1,
-     subgridfile =       ,
+     subgridfile =     '',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir =     ./,
-     outdatafile =       ,
+      outdatadir =   './',
+     outdatafile =     '',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     11,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =     '',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

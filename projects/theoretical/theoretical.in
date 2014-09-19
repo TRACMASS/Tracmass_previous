@@ -1,16 +1,16 @@
-$INIT_NAMELIST_VERSION
-  gridVerNum  = 6
-/      
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname = Academic test run,
-       gcmsource =       ,
-        gridname =       ,
-      gridsource =       ,
-        griddesc =       ,
-       indatadir =     '',
+         gcmname = 'Academic test run',
+       gcmsource =     '',
+        gridname =     '',
+      gridsource =     '',
+        griddesc =     '',
+       indatadir =   './',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'Theoretical',
+        casename = 'Academic',
         casedesc = 'Rectangular ocean',
 /
 &INIT_GRID_SIZE
@@ -23,7 +23,7 @@ $INIT_NAMELIST_VERSION
      subgridimax =   1000,
      subgridjmin =    400,
      subgridjmax =   1000,
-     subgridfile =       ,
+     subgridfile =     '',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -59,8 +59,8 @@ $INIT_NAMELIST_VERSION
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      3,
-      outdatadir =     './',
-     outdatafile =      '',
+      outdatadir =   './',
+     outdatafile =     '',
  intmininoutfile =      0,
 /
 &INIT_SEEDING

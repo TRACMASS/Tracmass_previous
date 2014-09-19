@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname = MITgcm,
-       gcmsource = http://mitgcm.org/,
-        gridname = ecco025_ll,
-      gridsource = http://eccco2.jpl.gov,
-        griddesc = 1/4 deg global run projected from cube grid to lat-lon.,
-       indatadir = /projData/ECCO/025/,
+         gcmname = 'MITgcm',
+       gcmsource = 'http://mitgcm.org/',
+        gridname = 'ecco025_ll',
+      gridsource = 'http://eccco2.jpl.gov',
+        griddesc = '1/4 deg global run projected from cube grid to lat-lon.',
+       indatadir = '/projData/ECCO/025/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = ecco025,
-        casedesc = Global ECCO 0.25 deg fields on a latlon grid,
+        casename = 'ecco025',
+        casedesc = 'Global ECCO 0.25 deg fields on a latlon grid',
 /
 &INIT_GRID_SIZE
              imt =   1440,
@@ -20,7 +23,7 @@
      subgridimax =   1440,
      subgridjmin =      1,
      subgridjmax =    720,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = /Volumes/keronHD4/ormOut/,
-     outdatafile = ecco025Test,
+      outdatadir = '/Volumes/keronHD4/ormOut/',
+     outdatafile = 'ecco025Test',
  intmininoutfile =      2,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =      2,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir = /Users/bror/git/orm/projects/ecco025/,
-        seedfile = /na_seed.asc,
+         seeddir = '/Users/bror/git/orm/projects/ecco025/',
+        seedfile = '/na_seed.asc',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

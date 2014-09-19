@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname = EraInterim,
-       gcmsource =       ,
-        gridname =       ,
-      gridsource =       ,
-        griddesc =       ,
-       indatadir = /nobackup/vagn2/x_joakj/data/ifs/,
+         gcmname = 'EraInterim',
+       gcmsource =     '',
+        gridname =     '',
+      gridsource =     '',
+        griddesc =     '',
+       indatadir = '/nobackup/vagn2/x_joakj/data/ifs/',
 /
 &INIT_CASE_DESCRIPTION
-        casename =    era,
-        casedesc =       ,
+        casename =  'era',
+        casedesc =     '',
 /
 &INIT_GRID_SIZE
              imt =    288,
@@ -20,7 +23,7 @@
      subgridimax =   1000,
      subgridjmin =    400,
      subgridjmax =   1000,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      0,
-      outdatadir = /nobackup/vagn2/x_joakj/data/ifs/,
-     outdatafile = era_test,
+      outdatadir = '/nobackup/vagn2/x_joakj/data/ifs/',
+     outdatafile = 'era_test',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     -1,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =       ,
-        seedfile =       ,
+         seeddir =     '',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,

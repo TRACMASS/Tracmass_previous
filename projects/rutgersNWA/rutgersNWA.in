@@ -1,14 +1,17 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
 &INIT_GRID_DESCRIPTION
-         gcmname =   ROMS,
-       gcmsource = http://www.atmos.ucla.edu/cesr/ROMS_page.html,
-        gridname = rutgersNWA,
-      gridsource = Rutgers,
-        griddesc = 7.5 km 50 yr simulation of the NW Atlantic,
-       indatadir = /Volumes/rutgersNWA/,
+         gcmname = 'ROMS',
+       gcmsource = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
+        gridname = 'rutgersNWA',
+      gridsource = 'Rutgers',
+        griddesc = '7.5 km 50 yr simulation of the NW Atlantic',
+       indatadir = '/Volumes/rutgersNWA/',
 /
 &INIT_CASE_DESCRIPTION
-        casename =   test,
-        casedesc = Looking at chl growth in lagrangian space,
+        casename = 'test',
+        casedesc = 'Looking at chl growth in lagrangian space',
 /
 &INIT_GRID_SIZE
              imt =    721,
@@ -20,7 +23,7 @@
      subgridimax =    116,
      subgridjmin =      1,
      subgridjmax =    100,
-     subgridfile = /Users/bror/svn/orm/grd/templ.asc,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
 &INIT_BASE_TIME
@@ -56,8 +59,8 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = /Volumes/rutgersNWA/ormOut/,
-     outdatafile = rutgersNWAtest,
+      outdatadir = '/Volumes/rutgersNWA/ormOut/',
+     outdatafile = 'rutgersNWAtest',
  intmininoutfile =      1,
 /
 &INIT_SEEDING
@@ -77,8 +80,8 @@
             kst2 =     40,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir = /Users/bror/git/orm/projects/rutgersNWA/,
-        seedfile = test.seed,
+         seeddir = '/Users/bror/git/orm/projects/rutgersNWA/',
+        seedfile = 'test.seed',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
