@@ -41,8 +41,8 @@ ENDMODULE mod_loopvars
 MODULE mod_traj
 
   ! Variables connected to particle positions.
-  INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
-  INTEGER                                    :: NEND
+  INTEGER, PARAMETER                         :: NNRJ=8, NTRJ=7
+  INTEGER                                    :: nend
   INTEGER                                    :: ntrac, ntractot=0
   ! === Particle arrays ===
   REAL*8, ALLOCATABLE,  DIMENSION(:,:)       :: trj
@@ -65,7 +65,8 @@ MODULE mod_grid
 
   INTEGER                                   :: imt, jmt, km
   INTEGER                                   :: nst=2
-  INTEGER                                   :: nsm=1     ,nsp=2
+  INTEGER                                   :: nsm=1,  nsp=2
+  INTEGER                                   :: wnsm=1, wnsp=2
   REAL*8                                    :: dx,dy
   REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
@@ -83,7 +84,7 @@ MODULE mod_grid
 #ifdef zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt,dzu,dzv
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt, dzu, dzv
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #endif /*zgrid3Dt*/
 #ifdef varbottombox 
@@ -131,11 +132,11 @@ CONTAINS
 
     ! T-box volume in m3
 #ifdef zgrid3Dt 
-    dxyz = intrpg*dzt(ib,jb,kb,nsp)+intrpr*dzt(ib,jb,kb,nsm)
+    dxyz = intrpg * dzt(ib,jb,kb,nsp) + intrpr * dzt(ib,jb,kb,nsm)
 #elif  zgrid3D
-    dxyz=dzt(ib,jb,kb)
+    dxyz = dzt(ib, jb, kb)
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
+    if(kb == KM) dxyz = dxyz + intrpg * hs(ib,jb,nsp) + intrpr * hs(ib,jb,nsm)
 #endif /*freesurface*/
 #else
     dxyz=dz(kb)
@@ -151,7 +152,6 @@ CONTAINS
        print *,'=========================================================='
        print *,'ERROR: Negative box volume                                '
        print *,'----------------------------------------------------------'
-       !print *,'dzt  = ', dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
        print *,'dxdy = ', dxdy(ib,jb)
        print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
        print *,'----------------------------------------------------------'
