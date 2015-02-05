@@ -32,27 +32,28 @@ SUBROUTINE init_params
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
-   CHARACTER (LEN=200)                        ::  projdir, ormdir
    real*8                                     :: jd
 
 ! Setup namelists
    namelist /INIT_NAMELIST_VERSION/ gridVerNum
    namelist /INIT_GRID_DESCRIPTION/ GCMname, GCMsource, gridName, gridSource,&
-                                    gridDesc, inDataDir
+                                    griddesc, inDataDir
    namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &
-                                    SubGridFile, subGridID
+                                    subGridKmin, subGridKmax, SubGridFile,   &
+                                    subGridID
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
-                                    baseMon, baseYear
+                                    baseMon, baseYear, jdoffset
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
                                     minvelJD, maxvelJD
    namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
                                     startDay, startMon, startYear,           &
                                     startJD, intmin
    namelist /INIT_RUN_TIME/         intspin, intrun
-   namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir,           &
-                                    outDataFile, intminInOutFile
+   namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
+                                    outdircase, intminInOutFile, outdirdate
+          
    namelist /INIT_SEEDING/          nff, isec, idir, nqua, partQuant,        &
                                     ntracmax, loneparticle, SeedType, ist1,  &
                                     ist2, jst1, jst2, kst1, kst2, tst1, tst2,&
@@ -99,6 +100,7 @@ SUBROUTINE init_params
       PRINT *,'Change gridVerNum to 6 when done.'
       STOP
    END IF
+   READ (8,nml=INIT_GRID_DESCRIPTION)
    READ (8,nml=INIT_CASE_DESCRIPTION)
    READ (8,nml=INIT_GRID_SIZE)
    READ (8,nml=INIT_BASE_TIME)
@@ -128,6 +130,7 @@ SUBROUTINE init_params
       PRINT *,'Change gridVerNum to 6 when done.'
       STOP
    END IF
+   READ (8,nml=INIT_GRID_DESCRIPTION)
    READ (8,nml=INIT_CASE_DESCRIPTION)
    READ (8,nml=INIT_GRID_SIZE)
    READ (8,nml=INIT_BASE_TIME)
@@ -182,7 +185,7 @@ SUBROUTINE init_params
    start3d  = [1, subGridImin, subGridJmin, subGridKmin]
    count3d  = [1, imt,         jmt,         km         ]
    
-   IF ((IARGC() > 1) )  THEN
+   if ((IARGC() > 1) )  then
       ARG_INT1 = 0.1
       CALL getarg(2,inparg)
       if ( ARG_INT1 == 0) then
@@ -192,8 +195,8 @@ SUBROUTINE init_params
          read( inparg, '(f15.10)' ) ARG_INT1
          write( inargstr1, '(A,i9.9 )' ) '_a',int(ARG_INT1)
       end if
-   END IF
-   
+   end if
+      
    IF ((IARGC() > 2) ) THEN
       ARG_INT2 = 0.1
       CALL getarg(3,inparg)
@@ -204,8 +207,8 @@ SUBROUTINE init_params
          read( inparg, '(f15.10)' ) ARG_INT2
          write( inargstr2, '(A,i9.9)' ) '_b',int(ARG_INT2)
       end if
-   END IF
-   
+   end if
+      
    timax    =  24.*3600.*timax ! convert time lengths from days to seconds
    dstep    =  1.d0/dble(iter)
    dtmin    =  dstep * tseas
@@ -275,17 +278,13 @@ SUBROUTINE init_params
    if (len(trim(inDataDir)) == 0) then
       CALL getenv('TRMINDATADIR', projdir)
       if (len(trim(projdir)) .ne. 0) then
+         print *, 'Using indatdir defined by TRMINDATADIR'
          inDataDir = trim(projdir) // trim(Project) // '/'
       end if
    end if
 
-   if (len(trim(outDataDir)) == 0) then
-      CALL getenv('TRMOUTDATADIR', projdir)
-      if (len(trim(projdir)) .ne. 0) then
-         outDataDir = trim(projdir) // trim(Project) // '/'
-      end if
-   end if
-
+   call setup_outdatadir
+      
    if (outDataFile == '')  outdataFile = Case
 
 !!---------------------------------------------------------------------------

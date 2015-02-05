@@ -2,32 +2,61 @@
 module mod_write
 
   USE mod_time, only: intstart,ints
-  USE mod_name, only: casename, case
+  USE mod_name, only: casename, case, Project
+  USE mod_time 
 
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
   CHARACTER(LEN=200)                         :: outDataDir, outDataFile
+  CHARACTER (LEN=200)                        ::  projdir, ormdir
   CHARACTER(LEN=200)                         :: inargstr1='', inargstr2=''
   INTEGER                                    :: twritetype = 0
   INTEGER                                    :: fileseq = 0
   CHARACTER(LEN=20)                          :: rankstamp=''
-
+  LOGICAL                                    :: outdirdate = .true.
+  LOGICAL                                    :: outdircase = .true.
+  CHARACTER (LEN=30)                         :: yearstr
+  
 CONTAINS
 
 
+  subroutine setup_outdatadir
+
+    if (len(trim(outDataDir)) == 0) then
+       CALL getenv('TRMOUTDATADIR', projdir)
+       if (len(trim(projdir)) .ne. 0) then
+          print *, 'Using outdatdir defined by TRMOUTDATADIR'
+          outDataDir = trim(projdir) // trim(Project) // '/'
+       end if
+    end if
+    if (outdircase .eqv. .true.) outDataDir = trim(outDataDir) // trim(Case) // '/'
+    if (outdirdate .eqv. .true.) then
+       yearstr = 'XXXXXXXX-XXXX'
+       write (yearstr(1:4),'(I4.4)') int(startYear)
+       write (yearstr(5:6),'(I2.2)') int(startMon)
+       write (yearstr(7:8),'(I2.2)') int(startDay)
+       write (yearstr(10:11),'(I2.2)') int(startHour)
+       write (yearstr(12:13),'(I2.2)') int(startMin)
+       outDataDir = trim(outDataDir)//trim(yearstr) // '/'
+    end if    
+    call system('mkdir -p ' // trim(outDataDir))
+    
+  end subroutine setup_outdatadir
+
+  
   subroutine open_outfiles
 
     IMPLICIT NONE
     CHARACTER(LEN=200)                         :: fullWritePref
     CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
-
+    
     if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
        write (intminstamp, '(A,i8.8)') '_t', intstart
     end if
     if ((intminInOutFile.eq.2) .or. (intminInOutFile.eq.3)) then
          write (partstamp, '(A,i6.6)') '_p', max(ints-intstart,0)+1
       end if
-
+      
     fullWritePref =  trim(outDataDir)  // trim(outDataFile) //    &
                      trim(inargstr1)   // trim(inargstr2)   //    & 
                      trim(intminstamp) // trim(partstamp)   //    &
