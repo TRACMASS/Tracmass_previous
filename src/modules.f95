@@ -185,6 +185,7 @@ MODULE mod_time
   REAL*8                                    :: baseJD=0
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
+  REAL*8                                    :: jdoffset=0  
   ! === Timerange for velocity fields
   REAL*8                                    :: minvelJD=0,   maxvelJD=0
   INTEGER                                   :: minvelints, maxvelints
@@ -226,7 +227,7 @@ CONTAINS
     IMPLICIT NONE
     ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas 
     currJDtot = (ints+ttpart)*(dble(ngcm)/24) + 1
-    call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
+    call  gdate (baseJD+currJDtot-1+jdoffset ,currYear , currMon ,currDay)
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1)
     currFrac = (currJDtot-dble(int(currJDtot,8)))*24
     currHour = int(currFrac,8)
@@ -245,7 +246,7 @@ CONTAINS
        loopints = ints
     end if
     loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1
-    call  gdate (baseJD+loopJD-1 ,loopYear, loopMon, loopDay)
+    call  gdate (baseJD+loopJD-1+jdoffset ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
     loopFrac = (loopJD - dble(int(loopJD,8))) * 24
     loopHour = int(loopFrac,8)
