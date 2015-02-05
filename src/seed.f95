@@ -15,7 +15,7 @@ MODULE mod_seed
 !!------------------------------------------------------------------------------
 
    USE mod_time,  only: ints, ntime, tseas, tt, ts, partQuant
-   USE mod_grid,  only: imt, jmt, km, kmt, nsm, mask
+   USE mod_grid,  only: imt, jmt, km, kmt, nsm, mask,dz
    USE mod_vel,   only: uflux, vflux, wflux, ff
    USE mod_traj,  only: ntractot, ntrac, x1, y1, z1, trj, nrj
    USE mod_write, only: writedata
@@ -88,6 +88,7 @@ CONTAINS
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
+
 #if defined baltix || defined rco
          ! -------------------------------------------------
          ! --- Test if it is time to launch the particle ---
