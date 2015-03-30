@@ -69,14 +69,10 @@ PROGRAM TRACMASS
    intspin =-1 ; intrun=-1
   endif
 #endif
-
   
   call open_outfiles
   call loop
   call close_outfiles
-
-  return
-
 
 end PROGRAM TRACMASS
 
