@@ -40,7 +40,7 @@ SUBROUTINE init_params
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
-   CHARACTER (LEN=200)                        ::  projdir, ormdir
+   CHARACTER (LEN=200)                        ::  projdir="", ormdir=""
 
    real*8                                     :: jd
 
