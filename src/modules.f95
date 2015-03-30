@@ -179,8 +179,8 @@ MODULE mod_time
      INTEGER                                :: Year, Mon, Day
      INTEGER                                :: Hour, Min, Sec
   end type DATETIME
-  type(DATETIME)                            :: basetime, starttime
-  type(DATETIME)                            :: currtime, looptime
+  type(DATETIME), SAVE                      :: basetime, starttime
+  type(DATETIME), SAVE                      :: currtime, looptime
   ! === Base for JD (When JD is 1)
   REAL*8                                    :: baseJD=0
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
