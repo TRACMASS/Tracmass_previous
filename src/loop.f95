@@ -146,7 +146,6 @@ SUBROUTINE loop
   
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
-!  tstep=dble(intstep) 
   ints = intstart
   call updateclock
   call readfields   ! initial dataset
@@ -173,7 +172,6 @@ SUBROUTINE loop
       call writetracer
      endif
 
-!    intspinCond: if(nff*ints <= nff*(intstart+intspin)) then
     intspinCond: if(ints <= intstart+intspin) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)

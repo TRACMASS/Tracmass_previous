@@ -40,7 +40,7 @@ SUBROUTINE init_params
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
-   CHARACTER (LEN=200)                        ::  projdir, ormdir
+   CHARACTER (LEN=200)                        ::  projdir="", ormdir=""
 
    real*8                                     :: jd
 
@@ -221,26 +221,45 @@ SUBROUTINE init_params
    timax    =  24.*3600.*timax ! convert time lengths from days to seconds
    dstep    =  1.d0/dble(iter)
    dtmin    =  dstep * tseas
-   baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)
+   baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)  + &  
+           ( dble((baseHour)*3600 + baseMin*60 + baseSec) / 86400 )
+
    if (startJD < 1) then
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
    end if
 
-   startYearCond: IF (startYear /= 0) THEN
-      IF (ngcm >= 24) THEN 
-         intmin = (startJD)/(real(ngcm)/24.)+1
-      ELSE ! this needs to be verified
-         intmin = (24*startJD)/ngcm+3-ngcm
-      END IF
-   END IF startYearCond
+   if (nff == 1) then
+      intmin = int(floor((startJD-1)/(real(ngcm)/24.) + 1))
+   else
+      intmin = int(ceiling((startJD-1)/(real(ngcm)/24.) + 1))
+   end if
 
+   if (endJD < 1) then
+      endJD  =  jdate(endYear ,endMon ,endDay) + 1 + &  
+           ( dble((endHour)*3600 + endMin*60 + endSec) / 86400 ) -baseJD
+   end if
+   if (endJD < startJD) then
+      endJD =  baseJD + startJD + intrun*ngcm/24. -2
+   end if
+   call  gdate (endJD ,endYear , endMon ,endDay)
+   endFrac = (endJD-int(endJD))*24
+   endHour = int(endFrac)
+   endFrac = (endFrac - endHour) * 60
+   EndMin  = int(endFrac)
+   endSec  = int((endFrac - currMin) * 60)
+
+   if (nff == 1) then
+      intmax = int(floor((endJD-1)/(real(ngcm)/24.) + 1))
+   else
+      intmax = int(ceiling((endJD-1)/(real(ngcm)/24.) + 1))
+   end if
+   
    if (maxvelJD > 0) then
       minvelints = (minvelJD)/(real(ngcm)/24.)+1
       maxvelints = (maxvelJD)/(real(ngcm)/24.)+1
       intmax = maxvelints - intmin
    end if
-   call  gdate (baseJD+startJD+intrun*ngcm/24.-2 ,endYear , endMon ,endDay)
 
    tseas= dble(ngcm)*3600.d0
 
@@ -251,15 +270,13 @@ SUBROUTINE init_params
    IF ( ist2 == -1) THEN 
       ist2 = IMT
    END IF
-      
    ! --- jst -1 to jmt ---
    IF ( jst1 == -1) THEN
       jst1=jmt
    END IF
    IF ( jst2 == -1) THEN
       jst2=jmt
-   END IF
-    
+   END IF 
    ! --- kst -1 to km ---
    IF ( kst1 == -1) THEN
       kst1 = KM

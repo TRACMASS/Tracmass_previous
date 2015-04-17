@@ -193,8 +193,8 @@ MODULE mod_time
      INTEGER                                :: Year, Mon, Day
      INTEGER                                :: Hour, Min, Sec
   end type DATETIME
-  type(DATETIME)                            :: basetime, starttime
-  type(DATETIME)                            :: currtime, looptime
+  type(DATETIME), SAVE                      :: basetime, starttime
+  type(DATETIME), SAVE                      :: currtime, looptime
   ! === Base for JD (When JD is 1)
   REAL*8                                    :: baseJD=0
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
@@ -206,7 +206,8 @@ MODULE mod_time
   REAL*8                                    :: startJD=-999, ttpart
   INTEGER                                   :: startYear, startMon, startDay
   INTEGER                                   :: startHour, startMin, startSec
-  INTEGER                                   :: endYear,   endMon,   endDay
+  REAL*8                                    :: endJD=-999, endFrac
+  INTEGER                                   :: endYear=0, endMon,   endDay
   INTEGER                                   :: endHour,   endMin,   endSec
   ! === Current JD
   REAL*8                                    :: currJDtot ,currJDyr,currfrac
@@ -238,7 +239,7 @@ CONTAINS
     USE mod_param, only: ngcm
     IMPLICIT NONE
     ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
-    currJDtot = (ints+ttpart)*(real(ngcm)/24)-1
+    currJDtot = (ints+ttpart)*(real(ngcm)/24) + 1
     call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
 
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1)
@@ -258,7 +259,7 @@ CONTAINS
     else
        loopints = ints
     end if
-    loopJD = (loopints+ttpart)*(real(ngcm)/24)-1
+    loopJD = (loopints + ttpart)*(real(ngcm)/24) + 1
     call  gdate (baseJD+loopJD-1 ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
     loopFrac = (loopJD - int(loopJD)) * 24
