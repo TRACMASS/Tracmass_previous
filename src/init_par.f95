@@ -217,6 +217,12 @@ SUBROUTINE init_params
    if (startJD < 1) then
       startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
+   else
+      call  gdate (baseJD + startJD ,startYear , startMon ,startDay)
+      startFrac = (startJD-int(startJD))*24
+      startHour = int(startFrac)
+      startFrac = (startFrac - startHour) * 60
+      startMin  = int(startFrac)
    end if
 
    if (nff == 1) then
