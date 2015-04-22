@@ -261,6 +261,7 @@ SUBROUTINE loop
            if(iam == 0) iam = IMT
            ja  = jb
            ka  = kb
+           
 
            call calc_dxyz(intrpr, intrpg)
            call errorCheck('dxyzError'     ,errCode)
@@ -347,6 +348,24 @@ SUBROUTINE loop
               nrj(6,ntrac)=1
               cycle ntracLoop
            endif
+           
+! === Cyclic Arctic in a global cylindrical projection ===
+            if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+              x1 = dble(IMT+2) - x1
+              ib=idint(x1)+1
+              jb=JMT-1
+              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+           elseif(y1 > dble(JMT-1)) then
+             print *,'north of northfold for ntrac=',ntrac
+             x1 = dble(IMT+2) - x1
+             ib=idint(x1)+1
+             jb=JMT-1
+             y1= dble(JMT-1) -y1 + dble(JMT-1)
+             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+           endif
+
+
+           
 #endif
            ! === Cyclic world ocean/atmosphere === 
            if(x1 <  0.d0    ) x1=x1+dble(IMT)       
@@ -362,15 +381,20 @@ SUBROUTINE loop
            if(y1 /= dble(idint(y1))) jb=idint(y1)+1
            if(z1 /= dble(idint(z1))) kb=idint(z1)+1 
 
-           call errorCheck('boundError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
-           call errorCheck('landError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
-           call errorCheck('bottomError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
-           call errorCheck('airborneError', errCode)
-           call errorCheck('corrdepthError', errCode)
-           call errorCheck('cornerError', errCode)
+           if (ja>jmt) ja = jmt - (ja - jmt)
+           if (jb>jmt) jb = jmt - (jb - jmt)
+
+           
+           !call errorCheck('boundError', errCode)
+           !if (errCode.ne.0) cycle ntracLoop
+           !=call errorCheck('landError', errCode)
+           !=if (errCode.ne.0) cycle ntracLoop
+           !=call errorCheck('bottomError', errCode)
+           !=if (errCode.ne.0) cycle ntracLoop
+           !=call errorCheck('airborneError', errCode)
+           !=call errorCheck('corrdepthError', errCode)
+           !=call errorCheck('cornerError', errCode)
+           
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
 #if defined diffusion     
@@ -384,6 +408,22 @@ SUBROUTINE loop
                  exit niterLoop                                
               endif
            enddo nendloop
+           
+          if(ia>imt .or. ib>imt .or. ja>jmt .or. jb>jmt &
+               .or. ia<1 .or. ib<1 .or. ja<1 .or. jb<1) then
+             print *,'Warning: Trajectory leaving model area'
+             call writedata(17)
+             nrj(6,ntrac)=1
+             exit niterLoop                                
+          end if
+
+
+
+
+
+
+
+           
            
 #if defined tempsalt
            call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
@@ -465,8 +505,47 @@ return
        thinline  = "-----------------------------------------------" // &
                    "-----------------------------------------------"
        errCode = 0
-       !return
+       
        select case (trim(teststr))
+       case ('infLoopError')
+          if(niter-nrj(4,ntrac) > 30000) then ! break infinite loops
+             if (verbose == 2) then
+                print *, thickline !========================================
+                print *,'Warning: Particle in infinite loop '
+                print *, thinline !-----------------------------------------
+                print '(A,I7.7,A,I6.6,A,I7.7)', ' ntrac : ', ntrac,     & 
+                                          ' niter : ', niter,     &
+                                          '    nrj : ', nrj(ntrac,4)
+                call print_grd
+                call print_pos
+
+                print '(A,F7.0,A,F7.0,A,F7.0,A,F7.0)',            &
+                     ' ufl(ia) : ',(intrpbg*uflux(ia ,ja,ka,nsp) +    &
+                                    intrpb*uflux(ia ,ja,ka,nsm))*ff,  &
+                     ' ufl(ib) : ', (intrpbg*uflux(iam,ja,ka,nsp) +   & 
+                                    intrpb*uflux(iam,ja,ka,nsm))*ff,  &
+                     ' vfl(ja) : ', (intrpbg*vflux(ia,ja  ,ka,nsp) +  & 
+                                    intrpb*vflux(ia,ja  ,ka,nsm))*ff, &
+                     ' vfl(jb) : ', (intrpbg*vflux(ia,ja-1,ka,nsp) +  & 
+                                    intrpb*vflux(ia,ja-1,ka,nsm))*ff 
+                print *, thinline !-----------------------------------------
+             end if
+!             z1=dble(kb)-0.5d0
+             trj(1,ntrac)=x1 !dble(ib)-0.5d0  !x1
+             trj(2,ntrac)=y1 !dble(jb)-0.5d0 ! y1
+             trj(3,ntrac)=z1 !dble(kb)-0.5d0 ! z1
+             trj(4,ntrac)=tt
+             trj(5,ntrac)=subvol
+             nrj(1,ntrac)=ib
+             nrj(2,ntrac)=jb
+             nrj(3,ntrac)=kb
+             nrj(4,ntrac)=niter
+             nrj(5,ntrac)=idint(ts)
+             nrj(6,ntrac)=1  ! 0=continue trajectory, 1=end trajectory
+             nrj(7,ntrac)=1
+             nloop=nloop+1             
+             errCode = -48
+          end if
        case ('ntracGTntracmax')
           if(ntrac.gt.ntracmax) then
              print *, thickline !========================================
@@ -593,46 +672,6 @@ return
              print *, thickline !========================================
              errCode = -46
              stop
-          end if
-       case ('infLoopError')
-          if(niter-nrj(4,ntrac) > 30000) then ! break infinite loops
-             if (verbose == 1) then
-                print *, thickline !========================================
-                print *,'Warning: Particle in infinite loop '
-                print *, thinline !-----------------------------------------
-                print '(A,I7.7,A,I6.6,A,I7.7)', ' ntrac : ', ntrac,     & 
-                                          ' niter : ', niter,     &
-                                          '    nrj : ', nrj(ntrac,4)
-                call print_grd
-                call print_pos
-
-                print '(A,F7.0,A,F7.0,A,F7.0,A,F7.0)',            &
-                     ' ufl(ia) : ',(intrpbg*uflux(ia ,ja,ka,nsp) +    &
-                                    intrpb*uflux(ia ,ja,ka,nsm))*ff,  &
-                     ' ufl(ib) : ', (intrpbg*uflux(iam,ja,ka,nsp) +   & 
-                                    intrpb*uflux(iam,ja,ka,nsm))*ff,  &
-                     ' vfl(ja) : ', (intrpbg*vflux(ia,ja  ,ka,nsp) +  & 
-                                    intrpb*vflux(ia,ja  ,ka,nsm))*ff, &
-                     ' vfl(jb) : ', (intrpbg*vflux(ia,ja-1,ka,nsp) +  & 
-                                    intrpb*vflux(ia,ja-1,ka,nsm))*ff 
-                print *, thinline !-----------------------------------------
-             end if
-             trj(ntrac,1)=x1
-!             z1=dble(kb)-0.5d0
-             trj(1,ntrac)=x1 !dble(ib)-0.5d0  !x1
-             trj(2,ntrac)=y1 !dble(jb)-0.5d0 ! y1
-             trj(3,ntrac)=z1 !dble(kb)-0.5d0 ! z1
-             trj(4,ntrac)=tt
-             trj(5,ntrac)=subvol
-             nrj(1,ntrac)=ib
-             nrj(2,ntrac)=jb
-             nrj(3,ntrac)=kb
-             nrj(4,ntrac)=niter
-             nrj(5,ntrac)=idint(ts)
-             nrj(6,ntrac)=1  ! 0=continue trajectory, 1=end trajectory
-             nrj(7,ntrac)=1
-             nloop=nloop+1             
-             errCode = -48
           end if
        case ('bottomError')
           ! if trajectory under bottom of ocean, 
