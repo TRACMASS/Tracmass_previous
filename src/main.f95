@@ -62,9 +62,6 @@ PROGRAM TRACMASS
   call loop
   call close_outfiles
 
-  return
-
-
 end PROGRAM TRACMASS
 
 
