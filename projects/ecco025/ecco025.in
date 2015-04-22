@@ -6,7 +6,7 @@
        gcmsource = 'http://mitgcm.org/',
         gridname = 'ecco025_ll',
       gridsource = 'http://eccco2.jpl.gov',
-        griddesc = '1/4 deg global run projected from cube grid to lat-lon.',
+        griddesc = '1/4 deg global run projected cube -> lat-lon.',
        indatadir = '/projData/ECCO/025/',
 /
 &INIT_CASE_DESCRIPTION
@@ -23,6 +23,8 @@
      subgridimax =   1440,
      subgridjmin =      1,
      subgridjmax =    720,
+     subgridkmin =      2,
+     subgridkmax =      2,
      subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
@@ -33,6 +35,7 @@
          baseday =      1,
          basemon =      1,
         baseyear =      1,
+        jdoffset =      1,
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
@@ -40,14 +43,14 @@
             iter =      5,
           intmax =    933,
         minveljd = 730486,
-        maxveljd = 733407,
+        maxveljd = 734137, !733407,
 /
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =     12,
-        startday =      5,
-        startmon =      5,
+       starthour =      0,
+        startday =      1,
+        startmon =      1,
        startyear =   2005,
          startjd =     -1,
           intmin =      1,
@@ -59,9 +62,11 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = '/Volumes/keronHD4/ormOut/',
-     outdatafile = 'ecco025Test',
+      outdatadir =     '',
+     outdatafile =     '',
  intmininoutfile =      2,
+      outdircase = .true.,
+      outdirdate = .true.,
 /
 &INIT_SEEDING
              nff =      1,
@@ -76,25 +81,25 @@
             ist2 =   1439,
             jst1 =    400,
             jst2 =    700,
-            kst1 =      2,
-            kst2 =      2,
+            kst1 =      1,
+            kst2 =      1,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir = '/Users/bror/git/orm/projects/ecco025/',
-        seedfile = '/na_seed.asc',
+         seeddir =     '',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
          seedpos =      1,
-       seedparts =     12,
-     seedpart_id =      2,
+       seedparts =      0,
+     seedpart_id =      0,
 /
 &INIT_KILLZONES
             nend =      6,
-            ienw =      0,
-            iene =      0,
-            jens =      0,
-            jenn =      0,
+            ienw =      1,
+            iene =      -1,
+            jens =      -1,
+            jenn =      -1,
            timax = 36500.0,
 /
 &INIT_TEMP_SALT
