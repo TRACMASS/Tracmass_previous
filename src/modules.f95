@@ -190,7 +190,7 @@ MODULE mod_time
   REAL*8                                    :: minvelJD=0,   maxvelJD=0
   INTEGER                                   :: minvelints, maxvelints
   ! === JD when the run starts
-  REAL*8                                    :: startJD=-999, ttpart
+  REAL*8                                    :: startJD=-999, ttpart, startFrac
   INTEGER                                   :: startYear, startMon, startDay
   INTEGER                                   :: startHour, startMin, startSec
   REAL*8                                    :: endJD=-999, endFrac
