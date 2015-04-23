@@ -5,12 +5,12 @@ subroutine vertvel(ia,iam,ja,ka)
   ! === the continuity eq. from the bottom            ===
   ! === for the nsm and nsp velocity time steps       ===
   USE mod_vel,              only: uflux, vflux, wflux, nsm, nsp, ff
-  USE mod_time,             only: intrpr, intrpg
+  USE mod_time,             only: intrpr, intrpg, tseas
   USE mod_active_particles, only: upr
+  USE mod_grid
 #ifdef sediment
   USE mod_sed
   USE mod_orbital
-  USE mod_grid
 #endif
   
   IMPLICIT none
@@ -24,16 +24,15 @@ subroutine vertvel(ia,iam,ja,ka)
 #if defined twodim || explicit_w
   return
 #else
-
+  
   n1=min(nsm,nsp)
   n2=max(nsm,nsp)
- 
+  
   kloop: do k=1,ka
      uu = intrpg * uflux(ia ,ja  ,k,nsp) + intrpr * uflux(ia ,ja  ,k,nsm)
      um = intrpg * uflux(iam,ja  ,k,nsp) + intrpr * uflux(iam,ja  ,k,nsm)
      vv = intrpg * vflux(ia ,ja  ,k,nsp) + intrpr * vflux(ia ,ja  ,k,nsm)
      vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
-
 #if defined zgrid3Dt
      do n=n1,n2
         ! time change of the mass the in grid box
@@ -43,7 +42,7 @@ subroutine vertvel(ia,iam,ja,ka)
                (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )
     enddo
 #else
-#ifdef  full_wflux
+#if defined  full_wflux
      wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
 #else 
     do n=n1,n2
@@ -54,6 +53,7 @@ subroutine vertvel(ia,iam,ja,ka)
 #endif
 !end ocean code
   end do kloop
+
 
 #ifdef ifs
 wflux(0,:) = 0.d0

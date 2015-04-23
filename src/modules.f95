@@ -59,6 +59,22 @@ ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_tempsalt
+  REAL*8                                     :: rmin, tmin, smin
+  REAL*8                                     :: rmax, tmax, smax
+  REAL*8                                     :: dr ,dtemp ,dsalt
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
+  REAL*4                                     :: tmin0 ,tmax0
+  REAL*4                                     :: smin0 ,smax0
+  REAL*4                                     :: rmin0 ,rmax0
+  REAL*4                                     :: tmine ,tmaxe
+  REAL*4                                     :: smine ,smaxe
+  REAL*4                                     :: rmine ,rmaxe
+end MODULE mod_tempsalt
+
+  ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
   USE mod_param, only: pi, undef, iter
   IMPLICIT NONE
@@ -79,9 +95,9 @@ MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
 
   ! === Vertical grids ===
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
+  REAL*8, ALLOCATABLE, DIMENSION(:)         :: zlev
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r, z_w
-#ifdef zgrid3Dt 
+#if defined zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt, dzu, dzv
@@ -93,14 +109,11 @@ MODULE mod_grid
 #ifdef ifs
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa, bb
 #endif
-  REAL*8                                    :: rmin, tmin, smin
-  REAL*8                                    :: rmax, tmax, smax
-  REAL*8                                    :: dr ,dtemp ,dsalt
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
-  INTEGER                                   :: subGridKmin ,subGridKmax
+  INTEGER                                   :: subGridKmin=1 ,subGridKmax=0
   CHARACTER(LEN=200)                        :: SubGridFile 
   INTEGER                                   :: degrade_space=0
 
@@ -185,7 +198,8 @@ MODULE mod_time
   REAL*8                                    :: baseJD=0
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
-  REAL*8                                    :: jdoffset=0  
+  REAL*8                                    :: jdoffset=0
+  LOGICAL                                   :: noleap=.false.
   ! === Timerange for velocity fields
   REAL*8                                    :: minvelJD=0,   maxvelJD=0
   INTEGER                                   :: minvelints, maxvelints
@@ -199,7 +213,8 @@ MODULE mod_time
   ! === Current JD
   REAL*8                                    :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
-  INTEGER                                   :: currHour, currMin, currSec 
+  INTEGER                                   :: currHour, currMin, currSec
+  INTEGER                                   :: leapoffset=0
   ! === Looping time
   INTEGER                                   :: loopints, loopintstart
   REAL*8                                    :: loopJD, loopJDyr, loopFrac
@@ -226,9 +241,17 @@ CONTAINS
     USE mod_param, only: ngcm
     IMPLICIT NONE
     ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas 
-    currJDtot = (ints+ttpart)*(dble(ngcm)/24) + 1
-    call  gdate (baseJD+currJDtot-1+jdoffset ,currYear , currMon ,currDay)
-    currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1)
+    currJDtot = (ints+ttpart)*(dble(ngcm)/24.)
+    call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
+                 currYear , currMon ,currDay)
+    currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
+    if ((mod(currYear, 4) == 0)  .and. (currJDyr>56) .and.     &
+         (currJDyr<(56 - leapoffset + ngcm/24.)) .and. noleap) then
+       leapoffset = leapoffset + 1
+       call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
+            currYear , currMon ,currDay)
+    end if
+    currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
     currFrac = (currJDtot-dble(int(currJDtot,8)))*24
     currHour = int(currFrac,8)
     currFrac = (currFrac - dble(currHour)) * 60
@@ -281,6 +304,13 @@ CONTAINS
     return
   end subroutine gdate
 
+  INTEGER function jd2ints(jd)
+    USE mod_param, only: ngcm
+    REAL*8                                    :: jd
+    jd2ints = int(floor((jd)/(real(ngcm)/24.))) 
+    return
+  end function jd2ints
+  
   INTEGER function jdate (year, month, day)
     !Computes the julian date (JD) given a gregorian calendar date.
     !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
@@ -363,12 +393,6 @@ ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
-  REAL*4                                    :: tmin0 ,tmax0
-  REAL*4                                    :: smin0 ,smax0
-  REAL*4                                    :: rmin0 ,rmax0
-  REAL*4                                    :: tmine ,tmaxe
-  REAL*4                                    :: smine ,smaxe
-  REAL*4                                    :: rmine ,rmaxe
 ENDMODULE mod_buoyancy
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -391,8 +415,8 @@ ENDMODULE mod_dens
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
-  USE mod_grid, only: nsm, nsp
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
+  USE mod_grid, only: nsm, nsp, dzt
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
 #if defined explicit_w || full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
@@ -400,23 +424,24 @@ MODULE mod_vel
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
   REAL*8                                     :: ff
-#ifdef tempsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
-#endif
   INTEGER                                    :: degrade_time=0
     integer, save                            :: degrade_counter = 0
-
 
 CONTAINS
  
   subroutine datasetswap
 
-    USE  mod_grid, only: nsm,nsp,hs
+    USE  mod_grid, only      : nsm,nsp,hs
+    USE  mod_tempsalt, only  : tem,sal,rho
+
     IMPLICIT NONE
 
     hs(:,:,nsm)      = hs(:,:,nsp)
     uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
     vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
+#if defined zgrid3Dt 
+    dzt(:,:,:,nsm)   = dzt(:,:,:,nsp)
+#endif
 #if defined explicit_w || full_wflux
     wflux(:,:,:,nsm) = wflux(:,:,:,nsp)
 #endif

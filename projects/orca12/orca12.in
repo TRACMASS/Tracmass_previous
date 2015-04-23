@@ -19,12 +19,12 @@
               km =     75,
              nst =      2,
          subgrid =      1,
-     subgridimin =   3500,
-     subgridimax =   4000,
-     subgridjmin =    800,
-     subgridjmax =   1200,
+     subgridimin =    3000,
+     subgridimax =    4000,
+     subgridjmin =    1000,
+     subgridjmax =    1500,
      subgridfile = 'templ.asc',
-       subgridid =      1,
+       subgridid =      0,
 /
 &INIT_BASE_TIME
          basesec =      0,
@@ -32,7 +32,7 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =   1996,
+        baseyear =      1,
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
@@ -45,10 +45,12 @@
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =      0,
+       starthour =     12,
         startday =      5,
         startmon =      1,
        startyear =   1996,
+        jdoffset =      3,
+          noleap =  .true., 
          startjd =     -1,
           intmin =      1,
 /
@@ -58,9 +60,9 @@
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
-           kriva =      2,
+           kriva =      6,
       outdatadir = '/Users/doos/data/orca/orca12/data_out/',
-     outdatafile = 'orca12_test',
+     outdatafile = 'orca12_timeanalyt_rekt_k6z',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -70,14 +72,14 @@
             nqua =      1,
        partquant =      1,
         ntracmax = 20000000,
-    loneparticle =     -1,
+    loneparticle =     17,
         seedtype =      1,
-            ist1 =    250,
-            ist2 =    250,
-            jst1 =    200,
-            jst2 =    400,
-            kst1 =     66,
-            kst2 =     66,
+            ist1 =    840,
+            ist2 =    849,
+            jst1 =    150,
+            jst2 =    159,
+            kst1 =     75,
+            kst2 =     75,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
@@ -90,11 +92,11 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =      5,
-            ienw = [1.0, 450.0, 0.0, 0.0],
-            iene = [50.0, 500.0, 9000.0, 9000.0],
-            jens = [0.0, 0.0, 0.0, 350.0],
-            jenn = [9000.0, 9000.0, 50.0, 400.0],
+            nend =      6,
+            ienw = 0, 0, 0, 0,
+            iene = 0, 0, 0, 0,
+            jens = 0, 0, 0, 0,
+            jenn = 0, 0, 0, 0,
            timax = 3650000.0,
 /
 &INIT_TEMP_SALT

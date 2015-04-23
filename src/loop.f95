@@ -17,7 +17,7 @@ SUBROUTINE loop
   USE mod_param,    only: ntracmax, undef, tday
   USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
                           niter, lbas, scrivi, subvol
-  USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, &
+  USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, dzt, &
                           mask, iter, nsm, nsp, hs, calc_dxyz
   use mod_vel,      only: uflux, vflux, wflux
   USE mod_seed,     only: ff, nff, seedTime, seed
@@ -26,6 +26,7 @@ SUBROUTINE loop
   USE mod_write,    only: writedata
   USE mod_pos,      only: pos
   USE mod_print,    only: print_start_loop, print_cycle_loop, print_end_loop
+  USE mod_tempsalt
   ! === Selectable moules ===
   USE mod_active_particles
   USE mod_streamfunctions
@@ -37,8 +38,8 @@ SUBROUTINE loop
   ! === Loop variables ===
   INTEGER                                    :: i,  j,  k, l, m, n
   ! === Variables to interpolate fields ===
- ! REAL                                       :: temp, salt, dens
- ! REAL                                       :: temp2, salt2, dens2
+  REAL                                       :: temp, salt, dens
+  REAL                                       :: temp2, salt2, dens2
   ! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
@@ -142,7 +143,7 @@ SUBROUTINE loop
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
   ints = intstart
-  call updateclock
+  call updateclock  
   call readfields   ! initial dataset
   call active_init
   ntrac = 0
@@ -188,7 +189,6 @@ SUBROUTINE loop
      call fancyTimer('advection','start')
 
      ntracLoop: do ntrac=1,ntractot  
-     
         ! === Test if the trajectory is dead   ===
         if(nrj(6,ntrac) == 1) cycle ntracLoop
         
@@ -221,7 +221,7 @@ SUBROUTINE loop
         call active_ntrac(ntrac)
           ! ===  start loop for each trajectory ===
         scrivi=.true.
-        niterLoop: do        
+        niterLoop: do           
            niter=niter+1 ! iterative step of trajectory
            ! === change velocity fields &  === 
            ! === store trajectory position ===
@@ -247,7 +247,7 @@ SUBROUTINE loop
               print *,'intrpg=',intrpg
               exit intsTimeLoop
            endif
-           
+
            ! === Cyclic world ocean/atmosphere === 
            IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
               x1 = x1 - DBLE(IMT)
@@ -300,7 +300,7 @@ SUBROUTINE loop
            ! === calculate the vertical velocity ===
            call vertvel(ia,iam,ja,ka)
 #ifdef timeanalyt
-           ss0=dble(int(ts,8))*tseas/dxyz
+!           ss0=dble(int(ts,8))*tseas/dxyz or should ssp be in the call cross_time?
            call cross_time(1,ia,ja,ka,x0,dse,dsw) ! zonal
            call cross_time(2,ia,ja,ka,y0,dsn,dss) ! merid
            call cross_time(3,ia,ja,ka,z0,dsu,dsd) ! vert
@@ -309,10 +309,12 @@ SUBROUTINE loop
            call cross_stat(2,ia,ja,ka,y0,dsn,dss) ! meridional
            call cross_stat(3,ia,ja,ka,z0,dsu,dsd) ! vertical
 #endif /*timeanalyt*/
+
            ds = min(dse, dsw, dsn, dss, dsu, dsd, dsmin)
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call calc_time
+
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
@@ -402,8 +404,8 @@ SUBROUTINE loop
 #endif
            ! === end trajectory if outside chosen domain === 
            nendloop: do k=1,nend
-              if(dble(ienw(k)) <= x1 .and. x1 <= dble(iene(k)) .and. &
-                 dble(jens(k)) <= y1 .and. y1 <= dble(jenn(k))  ) then
+              if(ienw(k) <= x1 .and. x1 <= iene(k) .and. &
+                 jens(k) <= y1 .and. y1 <= iene(k) ) then
                  nexit(k)=nexit(k)+1
                  exit niterLoop                                
               endif
@@ -587,8 +589,10 @@ return
           endif          
 
        case ('boundError')
-          if(ia>imt .or. ib>imt .or. ja>jmt .or. jb>jmt &
-               .or. ia<1 .or. ib<1 .or. ja<1 .or. jb<1) then
+          if(ia<1 .or. ia>imt .or. ib<1 .or. ib>imt .or.    &
+             ja<1 .or. ja>jmt .or. jb<1 .or. jb>jmt .or.    &
+             y0<1 .or. y0>jmt .or. y1<1 .or. y1>jmt         &
+             ) then
              if (verbose == 1) then
                 print *, thickline !========================================
                 print *,'Warning: Trajectory leaving model area'
@@ -813,7 +817,7 @@ return
     print '(A,I4,A,F7.2,A,F7.2)',    &
          '    kmt: ', kmt(ib,ja), &
 #if defined zgrid3Dt || defined zgrid3D
-         '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb)
+         '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb,1)
 
 #else
          '    dz(k) : ', dz(kb), '   dzt :  ', 0.0
@@ -837,7 +841,6 @@ return
     REAL ,SAVE                                 :: fullstamp1 ,fullstamp2
     REAL ,SAVE ,DIMENSION(2)                   :: timestamp1 ,timestamp2
     REAL                                       :: timeDiff
-!!$    
 !!$    select case (trim(testStr))
 !!$    case ('start')
 !!$       WRITE (6, FMT="(A)", ADVANCE="NO") ,' - Begin '//trim(timerText)

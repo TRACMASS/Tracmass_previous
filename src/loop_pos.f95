@@ -22,9 +22,9 @@ contains
     REAL*8                                     :: dza,dzb, zz
     REAL*8, INTENT(IN)                         :: x0, y0, z0
     REAL*8, INTENT(OUT)                        :: x1, y1, z1
-        
+      
     ! === calculate the new positions ===
-    ! === of the trajectory           ===    
+    ! === of the trajectory           ===
     scrivi=.false.
     if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
@@ -74,7 +74,6 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-
        call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))
         
     elseif(ds==dsw) then ! westward grid-cell exit
@@ -127,7 +126,6 @@ contains
        call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
 
     elseif(ds==dsn) then ! northward grid-cell exit
-       
        scrivi=.false.
        uu=(intrpbg*vflux(ia,ja,ka,nsp)+intrpb*vflux(ia,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
@@ -176,7 +174,6 @@ contains
        call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
 
     elseif(ds==dss) then ! southward grid-cell exit
-       
        scrivi=.false.
        uu=(intrpbg*vflux(ia,ja-1,ka,nsp)+intrpb*vflux(ia,ja-1,ka,nsm))*ff
        if(uu.lt.0.d0) then
@@ -229,8 +226,8 @@ contains
        
     elseif(ds==dsu) then ! upward grid-cell exit
        scrivi=.false.
-       call vertvel(intrpb,ia,iam,ja,ka)
-#ifdef explicit_w || full_wflux
+       call vertvel(ia,iam,ja,ka)
+#if defined explicit_w || full_wflux
        uu=wflux(ia,ja,ka,nsm)
 #else
        uu=intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm)
@@ -272,9 +269,9 @@ contains
 
     elseif(ds==dsd) then ! downward grid-cell exit
        scrivi=.false.
-       call vertvel(intrpb,ia,iam,ja,ka)
-       
-#ifdef explicit_w || full_wflux
+       call vertvel(ia, iam, ja, ka)
+     
+#if defined explicit_w || full_wflux
        if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
 #else
        if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
@@ -307,7 +304,7 @@ contains
        endif
 #endif
 #if defined stream_thermohaline
-! calculate the layers of temperature and salinity for both a-box and b-box
+! calculate the layers of temp and salt for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
        mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
@@ -325,32 +322,17 @@ contains
 #endif 
        call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
 
-    elseif( ds==dsc .or. ds==dsmin) then  
-       ! shortest time is the time-steping 
+    elseif( ds==dsc .or. ds==dsmin) then ! shortest time is the time-steping 
        scrivi=.true.
 #ifdef timeanalyt
        call pos_time(1,ia,ja,ka,x0,x1)
        call pos_time(2,ia,ja,ka,y0,y1)
        call pos_time(3,ia,ja,ka,z0,z1)
 #else           
-       ! If there is no spatial solution, 
-       ! which should correspond to a convergence zone
+       ! If there is no spatial solution, i.e. a convergence zone
        if(dse==UNDEF .and. dsw==UNDEF .and. dsn==UNDEF .and. & 
-          dss==UNDEF .and. dsu==UNDEF .and. dsd==UNDEF ) then
-          
-          ! move if atmosphere, freeze if ocean
+          dss==UNDEF .and. dsu==UNDEF .and. dsd==UNDEF ) then       
           ib=ia ; jb=ja ; kb=ka
-!          print *,'convergence for ',ib,jb,kb,x0,y0,z0
-!#ifdef ifs
-!          call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
-!          call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
-!          call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
-!#else
-!          x1=x0 ; y1=y0 ; z1=z0 
-!          print *,ib,jb,kb,x1,y1,z1
-!#endif  
-          ! If there is at least one spatial solution 
-          ! but the shortest cross time is the time step
        endif
 !       else
           call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
@@ -403,8 +385,7 @@ contains
 !	endif
 !#endif /*varbottombox*/
 !#endif /*baltix*/
-
-    
+ 
   end subroutine pos
   
 

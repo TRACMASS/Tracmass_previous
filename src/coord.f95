@@ -5,6 +5,8 @@ subroutine coordinat
 USE mod_param
 USE mod_grid
 USE mod_name
+USE mod_tempsalt
+
 IMPLICIT none
 
 INTEGER i,j,k,kk,mois(12)

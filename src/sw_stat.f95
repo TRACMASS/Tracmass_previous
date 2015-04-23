@@ -16,21 +16,21 @@ module mod_stat
   end interface
 
 contains
-  subroutine statvd(t, s, dens ,km ,depth ,lat)
+  subroutine statvd(tempvec, saltvec, dens ,km ,depth ,lat)
 
     IMPLICIT NONE
     
     INTEGER                                     :: km
-    REAL, ALLOCATABLE, DIMENSION(:)             :: t ,s ,dens0 ,pres 
-    REAL, ALLOCATABLE, DIMENSION(:)             :: depth ,lat ,seck ,dens
+    REAL, ALLOCATABLE, DIMENSION(:)             :: tempvec, saltvec
+    REAL, ALLOCATABLE, DIMENSION(:)             :: dens0, pres 
+    REAL, ALLOCATABLE, DIMENSION(:)             :: depth, lat, seck, dens
     
     allocate ( dens0(km) ,pres(km) ,seck(km))
     
-    dens0  = sw_dens0(t,s)
+    dens0  = sw_dens0(tempvec, saltvec)
     pres   = sw_pres(depth,lat)
-    seck   = sw_seck(t,s,pres)
-    
-    dens   = dens0/(1-(pres/10)/seck)
+    seck   = sw_seck(tempvec, saltvec, pres)
+    dens   = dens0 / (1 - (pres/10) / seck)
   end subroutine statvd
 
 
@@ -52,17 +52,17 @@ contains
     REAL, PARAMETER                          :: a4 =  -1.120083e-6
     REAL, PARAMETER                          :: a5 =   6.536332e-9
     
-    REAL, PARAMETER                          :: b0 =  8.24493e-1
-    REAL, PARAMETER                          :: b1 = -4.0899e-3
-    REAL, PARAMETER                          :: b2 =  7.6438e-5
-    REAL, PARAMETER                          :: b3 = -8.2467e-7
-    REAL, PARAMETER                          :: b4 =  5.3875e-9
+    REAL, PARAMETER                          :: b0 =   8.24493e-1
+    REAL, PARAMETER                          :: b1 =  -4.0899e-3
+    REAL, PARAMETER                          :: b2 =   7.6438e-5
+    REAL, PARAMETER                          :: b3 =  -8.2467e-7
+    REAL, PARAMETER                          :: b4 =   5.3875e-9
     
-    REAL, PARAMETER                          :: c0 = -5.72466e-3
-    REAL, PARAMETER                          :: c1 = +1.0227e-4
-    REAL, PARAMETER                          :: c2 = -1.6546e-6
+    REAL, PARAMETER                          :: c0 =  -5.72466e-3
+    REAL, PARAMETER                          :: c1 =   1.0227e-4
+    REAL, PARAMETER                          :: c2 =  -1.6546e-6
     
-    REAL, PARAMETER                          :: d0 = 4.8314e-4
+    REAL, PARAMETER                          :: d0 =   4.8314e-4
 
 !    allocate ( dens_temp(KM),dens_zero(KM) ,rho(KM) )
     REAL*4 t(KM),s(KM)  

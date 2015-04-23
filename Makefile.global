@@ -30,6 +30,8 @@ ifeq ($(NETCDFLIBS),"macports")
 	LNK_FLAGS         = -lnetcdf -lnetcdff 
 endif
 ifeq ($(NETCDFLIBS),"fink")
+#        LIB_DIR           = -L/sw/lib 
+#        INC_DIR           = -I/sw/include 
         LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
         INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include
         LNK_FLAGS         = -lnetcdf -lnetcdff
@@ -38,7 +40,7 @@ endif
 ifeq ($(F95COMPILER),"gfortran")
 #	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2 
 	FF_FLAGS         = -O3 -c -x f95-cpp-input #-gdwarf-2 
-    F90_FLAGS        = -fno-underscoring 
+        F90_FLAGS        = -fno-underscoring 
 	FF               = gfortran $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
 
 endif

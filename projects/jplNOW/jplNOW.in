@@ -18,7 +18,7 @@
              jmt =    257,
               km =     40,
              nst =      2,
-         subgrid =      0,
+         subgrid =      1,
      subgridimin =      1,
      subgridimax =    116,
      subgridjmin =      1,

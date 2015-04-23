@@ -12,6 +12,7 @@ subroutine interp2(i,j,k,temp,salt,dens)
   USE mod_time
   USE mod_vel
   USE mod_dens
+  USE mod_tempsalt
   IMPLICIT none
   
   real temp,salt,dens

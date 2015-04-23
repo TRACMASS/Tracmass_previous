@@ -14,12 +14,13 @@ MODULE mod_seed
 !!
 !!------------------------------------------------------------------------------
 
-   USE mod_time,  only: ints, ntime, tseas, tt, ts, partQuant
-   USE mod_grid,  only: imt, jmt, km, kmt, nsm, mask,dz
-   USE mod_vel,   only: uflux, vflux, wflux, ff
-   USE mod_traj,  only: ntractot, ntrac, x1, y1, z1, trj, nrj
-   USE mod_write, only: writedata
-   
+   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant
+   USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
+   USE mod_vel,   only    : uflux, vflux, wflux, ff
+   USE mod_traj,  only    : ntractot, ntrac, x1, y1, z1, trj, nrj
+   USE mod_write, only    : writedata
+   USE mod_tempsalt, only : rmax0, rmin0, tmax0, tmin0, smax0, smin0, &
+                            sal, tem, rho
    IMPLICIT NONE
   
    INTEGER                                    :: nff,  isec,  idir
@@ -123,7 +124,7 @@ CONTAINS
          
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (1.d0,ib,ibm,jb,kb)
-#ifdef explicit_w || full_wflux
+#if defined explicit_w || full_wflux
                vol = wflux(ib,jb,kb,nsm)
 #elif twodim
                vol = 1.
@@ -152,24 +153,24 @@ CONTAINS
       
          ! Calculate volume/mass of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
-#ifdef zgrid3Dt
+!#if defined zgrid3Dt
             vol = dzt(ib,jb,kb,1)
-#elif  zgrid3D
-            vol = dzt(ib,jb,kb)
-#elif  zgrid1D
-            vol = dz(kb)
-#endif /*zgrid*/
-#ifdef varbottombox
-            IF (kb == KM+1-kmt(ib,jb)) THEN
-               vol = dztb (ib,jb,1)
-            END IF
-#endif /*varbottombox*/
-#ifdef freesurface
-            IF (kb == KM) THEN
-               vol = vol+hs(ib,jb,nsm)
-            END IF
-            vol = vol*dxdy(ib,jb)*1.e-6  ! volume in millions of m3
-#endif /*freesurface*/
+!#elif  zgrid3D
+!            vol = dzt(ib,jb,kb)
+!#elif  zgrid1D
+!            vol = dz(kb)
+!#endif /*zgrid*/
+!#ifdef varbottombox
+!            IF (kb == KM+1-kmt(ib,jb)) THEN
+!               vol = dztb (ib,jb,1)
+!            END IF
+!#endif /*varbottombox*/
+!#ifdef freesurface
+!            IF (kb == KM) THEN
+!               vol = vol+hs(ib,jb,nsm)
+!            END IF
+!            vol = vol*dxdy(ib,jb)*1.e-6  ! volume in millions of m3
+!#endif /*freesurface*/
 
          END IF
           

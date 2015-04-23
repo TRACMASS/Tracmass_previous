@@ -123,15 +123,13 @@ MODULE mod_getfile
     c = count3d(map3d)
     d = c + s - 1
 
-    allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt+2,jmt,km) )
+    allocate ( field(c(1), c(2),c(3)), get3dfieldNC(imt,jmt,km) )
     ierr = NF90_OPEN(trim(fieldFile) ,NF90_NOWRITE ,ncid)
     if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2, fieldFile, varName)
     ierr=NF90_GET_VAR(ncid ,varid ,field, s, c)
     if(ierr.ne.0) call printReadError(3, fieldFile, varName)
-
-
 
     if  (all(map3d == (/1,2,3,4/),DIM=1) ) then
        get3DfieldNC(:imt,:,:) = field

@@ -181,7 +181,7 @@ CONTAINS
 599 format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
          ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
          ' nsusp=',i8,' nexit=',9i8)
-#elif defined ifs || rco || tes || orc || baltix || orca1 || orca025  || orca025L75 || orca12 || AusCOM
+#elif defined ifs || rco || tes || orc || baltix || orca1 || orca025  || orca025L75 || AusCOM
     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
 799 format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
          ' nerror=',i4,' in ocean/atm=',i8)

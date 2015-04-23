@@ -79,7 +79,7 @@ USE mod_precdef
 USE mod_param
 USE mod_vel
 USE mod_traj, only: ntrac
-USE mod_grid, only: imt,jmt,km
+USE mod_grid, only: dxyz,imt,jmt,km
 USE mod_time, only: ts, tt, tseas, intrpr, intrpg
 USE mod_loopvars, only: dsmin
 
@@ -280,7 +280,7 @@ subroutine pos_time(ijk,ia,ja,ka,r0,r1)
 USE mod_precdef
 USE mod_param
 USE mod_vel
-USE mod_grid, only: dxyz
+USE mod_grid, only: dxyz,imt
 USE mod_time, only: tt,ts,tseas,intrpr, intrpg
 USE mod_loopvars, only: ds, dsmin
 USE mod_precdef
@@ -524,6 +524,8 @@ REAL (DP)  :: rijk,ss,f0,f1,s0,ss0
 !REAL (DP),SAVE  :: alfamax
 REAL (8)  :: r0,dsmin
 
+print *,ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin
+
 alfa = -(vv-uu-vm+um)/dsmin
 !alfamax=max(abs(alfa),alfamax)
 !print *,alfa,alfamax
@@ -752,12 +754,12 @@ xibf=xf
      endif
      if (loop==1000.or.ss-s0<0.0_dp) then
       if (ss-s0<0.0_dp) print *,' ss-s0 is negative '
-!      print *, '+ time cross =', ss, s0,loop
-!      print *, alfa,uu,um,vv,vm
-!      print *, iconfig,r0,rijk
-!       print *, xi0,xi00,xib,xf1,xibf,xi,xf
-!      print *,ii,iim,abs(xf),xxlim,abs(xf1*(xi-xi0)),ssii,xerr
-!      STOP
+      print *, '+ time cross =', ss-s0, ss, s0,loop
+      print *, 'alfa',alfa,uu,um,vv,vm
+      print *, 'iconfig',iconfig,r0,rijk
+       print *, 'xi',xi-xi0,xi,xi0,2.*(xi-xi0)/sqrt(2.*alfa),s0
+      print *,'ii',ii,iim,abs(xf),xxlim,abs(xf1*(xi-xi0)),ssii,xerr
+      STOP 7235
      endif
 
 return
@@ -991,7 +993,10 @@ endif
      ss= 2.*(xi0-xi)/sqrt(-2.*alfa) + s0 
      if (xi/=xi0) xin=abs( xf/((xi-xi0)*xf1) )
      if (loop==1000.or.ss-s0<0.0_dp) then
-     if (ss-s0<0.0_dp) print *, ' ss-s0 is negative '
+      if (ss-s0<0.0_dp) then
+       print *, ' ss-s0 is negative '
+       stop 48967
+      endif
      endif
 
 return
@@ -1274,7 +1279,7 @@ else
         print *, '0 time cross =', ss, s0,loop
          print *, alfa,uu,um,vv,vm
          print *, iconfig,r0,rijk,xi0,xi00,xib,xf1,xibf,xi,xf
-!        STOP
+        STOP
        endif
 
       endif 

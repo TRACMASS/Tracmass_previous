@@ -11,7 +11,7 @@ SUBROUTINE init_params
    USE mod_vel
    USE mod_traj
  !  USE mod_dens
-   USE mod_buoyancy
+   USE mod_tempsalt
    USE mod_streamfunctions
    USE mod_tracer
    USE mod_getfile
@@ -44,12 +44,12 @@ SUBROUTINE init_params
                                     subGridKmin, subGridKmax, SubGridFile,   &
                                     subGridID
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
-                                    baseMon, baseYear, jdoffset
+                                    baseMon, baseYear
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
                                     minvelJD, maxvelJD
    namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
                                     startDay, startMon, startYear,           &
-                                    startJD, intmin
+                                    startJD, jdoffset, intmin, noleap
    namelist /INIT_RUN_TIME/         intspin, intrun
    namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
                                     outdircase, intminInOutFile, outdirdate
@@ -161,10 +161,14 @@ SUBROUTINE init_params
    CASE (1)
       PRINT *,'Sub-grid    : ', subGridImin ,subGridImax, &
            &   subGridJmin ,subGridJmax
-      imt = subGridImax-subGridImin+1
-      jmt = subGridJmax-subGridJmin+1
+      imt = subGridImax-subGridImin
+      jmt = subGridJmax-subGridJmin
+
+      
+	if (subGridKmax == 0) subGridKmax = km      
 #if !defined(explicit_w) && !defined(twodim)
       if ((subGridKmax-subGridKmin+1) < km) then
+      	print *, subGridKmax-subGridKmin+1, km
          print *, 'ERROR!'
          print *, 'subGridKmin and subGridKmax requires -Dtwodim  or -Dexplicit_w'
          print *, 'to be selected in the project Makefile.'
@@ -208,6 +212,11 @@ SUBROUTINE init_params
          write( inargstr2, '(A,i9.9)' ) '_b',int(ARG_INT2)
       end if
    end if
+   
+#ifdef timeanalyt
+      iter=1
+#endif
+
       
    timax    =  24.*3600.*timax ! convert time lengths from days to seconds
    dstep    =  1.d0/dble(iter)
@@ -226,9 +235,9 @@ SUBROUTINE init_params
    end if
 
    if (nff == 1) then
-      intmin = int(floor((startJD-1)/(real(ngcm)/24.) + 1))
+      intmin = jd2ints(startJD)
    else
-      intmin = int(ceiling((startJD-1)/(real(ngcm)/24.) + 1))
+      intmin = jd2ints(real(ceiling(startJD),8))
    end if
 
    if (endJD < 1) then
@@ -246,14 +255,14 @@ SUBROUTINE init_params
    endSec  = int((endFrac - currMin) * 60)
 
    if (nff == 1) then
-      intmax = int(floor((endJD-1)/(real(ngcm)/24.) + 1))
+      intmax = jd2ints(endJD)
    else
-      intmax = int(ceiling((endJD-1)/(real(ngcm)/24.) + 1))
+      intmax = jd2ints(real(ceiling(endJD),8))
    end if
    
    if (maxvelJD > 0) then
-      minvelints = (minvelJD)/(real(ngcm)/24.)+1
-      maxvelints = (maxvelJD)/(real(ngcm)/24.)+1
+      minvelints = jd2ints(minvelJD)
+      maxvelints = jd2ints(maxvelJD)
       intmax = maxvelints - intmin
    end if
 
@@ -300,20 +309,23 @@ SUBROUTINE init_params
       ! --- Allocate information about the coordinates and grid ---
 
       ALLOCATE ( csu (0:jmt), cst(jmt)  ) 
-      ALLOCATE ( phi(0:jmt),   zw(0:km) ) 
+      ALLOCATE ( phi(0:jmt),   zlev(0:km) ) 
       ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
       ALLOCATE ( mask(imt,jmt) )
+      mask = 1
       dyt = 0
       dxv = 0
       dyu = 0
 
 #ifdef zgrid3Dt
-      ALLOCATE ( dzt(imt,jmt,km,nst) )   
+      ALLOCATE ( dzt(imt,jmt,km,nst) )
+      dzt = 0
 #elif  zgrid3D
-      ALLOCATE ( dzt(imt,jmt,km) )   
+      ALLOCATE ( dzt(imt,jmt,km) )
+      dzt = 0
 #endif /*zgrid3Dt*/
 #ifdef varbottombox
-      ALLOCATE ( dztb(imt,jmt,nst) )  !should probably be changed to  dztb(imt,jmt)
+      ALLOCATE ( dztb(imt,jmt,nst) )
 #endif /*varbottombox*/
       ALLOCATE ( dxdy(imt,jmt) )   
       ALLOCATE ( kmt(imt,jmt), dz(km) )
