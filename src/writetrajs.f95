@@ -8,7 +8,7 @@ module mod_write
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
   CHARACTER(LEN=200)                         :: outDataDir, outDataFile
-  CHARACTER (LEN=200)                        ::  projdir, ormdir
+  CHARACTER (LEN=200)                        ::  projdir="", ormdir=""
   CHARACTER(LEN=200)                         :: inargstr1='', inargstr2=''
   INTEGER                                    :: twritetype = 0
   INTEGER                                    :: fileseq = 0
