@@ -15,6 +15,10 @@ CASE_FLAG         = -DCASE_NAME=\'$(CASE)\'
 ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 OBJDIR           := build
 
+ifeq ($(strip $(FF)),)
+	FF = $(F95COMPILER)
+endif
+
 ifeq ($(NETCDFLIBS),"none")
 	LIB_DIR =
 	INC_DIR =
@@ -25,36 +29,33 @@ ifeq ($(NETCDFLIBS),"automatic")
 	INC_DIR = -I$(shell nc-config --includedir)
 endif
 ifeq ($(NETCDFLIBS),"macports")
-	LIB_DIR           = -L/opt/local/lib
-	INC_DIR           = -I/opt/local/include/
-	LNK_FLAGS         = -lnetcdf -lnetcdff 
+	LIB_DIR          = -L/opt/local/lib
+	INC_DIR          = -I/opt/local/include/
+	LNK_FLAGS        = -lnetcdf -lnetcdff 
 endif
 ifeq ($(NETCDFLIBS),"fink")
-#        LIB_DIR           = -L/sw/lib 
-#        INC_DIR           = -I/sw/include 
-        LIB_DIR           = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
-        INC_DIR           = -I/sw/include -I/sw/lib/netcdf-gfortran/include
-        LNK_FLAGS         = -lnetcdf -lnetcdff
+        LIB_DIR          = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
+        INC_DIR          = -I/sw/include -I/sw/lib/netcdf-gfortran/include
+        LNK_FLAGS        = -lnetcdf -lnetcdff
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
 #	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2 
 	FF_FLAGS         = -O3 -c -x f95-cpp-input #-gdwarf-2 
         F90_FLAGS        = -fno-underscoring 
-	FF               = gfortran $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
-
+	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
 endif
 ifeq ($(F95COMPILER),"g95")
 	FF_FLAGS         = -c -cpp -fendian=big
 	F90_FLAGS        = -O3 -C  -g  -fno-underscoring
-	FF               = /Applications/fort/g95/bin/i386-apple-darwin8.11.1-g95 $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
+	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 endif
 
 ifeq ($(F95COMPILER),"ifort")
         FF_FLAGS         = -O3 -c -cpp -convert big_endian
         F90_FLAGS        = -free -assume nounderscore
-		ARG_FLAGS        += -Tf
-        FF               = ifort $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
+	ARG_FLAGS       += -Tf
+        FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 endif
 
 
@@ -77,7 +78,6 @@ objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
                     sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o printinfo.o loop.o main.o \
 		    setupgrid.o readfield.o diffusion.o)
-
 
 runfile : $(objects)
 	$(FF) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)

@@ -3,7 +3,7 @@ PROGRAM TRACMASS
   USE mod_seed, only:  nqua, nff, num
   USE mod_grid, only:  dyu, dxv
   USE mod_time, only:  intmin, intstart, intend, intspin, intrun, intmax, &
-                       partQuant, minvelints, voltr
+       partQuant, minvelints, voltr
   USE mod_write, only: open_outfiles, close_outfiles
   USE mod_print, only: print_header_main, writesetup_main
 #ifdef diffusion
@@ -17,7 +17,7 @@ PROGRAM TRACMASS
   call init_params
   call coordinat
   call writesetup_main
-
+  
   modrundirCond: if(nff == 1) then ! forward 
      intstart =  intmin          
      intend   =  intmax
@@ -30,7 +30,7 @@ PROGRAM TRACMASS
      nff      =  -1    
   end if modrundirCond
 
- call setupgrid
+  call setupgrid
 
   if (minval(dxv) < 0) then
      print *, " "
@@ -56,6 +56,7 @@ PROGRAM TRACMASS
      voltr = partQuant 
   elseif(nqua.eq.3) then 
      voltr = partQuant
+  end if
   
   call open_outfiles
   call loop
