@@ -1,0 +1,124 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
+&INIT_GRID_DESCRIPTION
+         gcmname = 'NEMO',
+       gcmsource = 'http://www.locean-ipsl.upmc.fr/opa/',
+        gridname = 'ORCA1',
+      gridsource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+        griddesc = '1 deg run for the global Ocean.',
+       indatadir = '/Users/doos/data/ecearth/',
+/
+&INIT_CASE_DESCRIPTION
+        casename =  'xxx',
+        casedesc = 'Global Ocean trajectories',
+/
+&INIT_GRID_SIZE
+             imt =    360,
+             jmt =    292,
+              km =     42,
+             nst =      2,
+         subgrid =      0,
+     subgridimin =     99,
+     subgridimax =   1440,
+     subgridjmin =    330,
+     subgridjmax =   1021,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
+       subgridid =      1,
+/
+&INIT_BASE_TIME
+         basesec =      0,
+         basemin =      0,
+        basehour =      0,
+         baseday =      1,
+         basemon =      1,
+        baseyear =   2000,
+/
+&INIT_GRID_TIME
+   fieldsperfile =     12,
+            ngcm =    730,
+            iter =     12,
+          intmax =     12,
+        minveljd =     -1,
+        maxveljd =     -1,
+/
+&INIT_START_DATE
+        startsec =      0,
+        startmin =      0,
+       starthour =      0,
+        startday =      1,
+        startmon =      1,
+       startyear =   1996,
+         startjd =     -1,
+          intmin =      1,
+/
+&INIT_RUN_TIME
+         intspin =      1,
+          intrun =  12000,
+/
+&INIT_WRITE_TRAJS
+      twritetype =      2,
+           kriva =      6,
+      outdatadir = '/Users/doos/data/ecearth/data_out/',
+     outdatafile = 'th_seasonal_south_iter12',
+ intmininoutfile =      0,
+/
+&INIT_SEEDING
+             nff =      1,
+            isec =      2,
+            idir =     -1,
+            nqua =      2,
+       partquant =   1000,
+        ntracmax =  50000,
+    loneparticle =     -1,
+        seedtype =      1,
+            ist1 =    220,
+            ist2 =    315,
+            jst1 =    119,
+            jst2 =    119,
+            kst1 =      1,
+            kst2 =     42,
+            tst1 =     -1,
+            tst2 =     -1,
+         seeddir =    ' ',
+        seedfile =    ' ',
+     varseedfile =      0,
+        seedtime =      0,
+         seedall =      0,
+         seedpos =      1,
+       seedparts =      0,
+     seedpart_id =      0,
+/
+&INIT_KILLZONES
+            nend =      4,
+            ienw = [110.0, 220.0, 1.0],
+            iene = [120.0, 315.0, 1.0],
+            jens = [246.0, 119.0, 1.0],
+            jenn = [246.0, 147.0, 1.0],
+           timax = 366000.0,
+/
+&INIT_TEMP_SALT
+           tmin0 =    2.0,
+           tmax0 =    5.0,
+           smin0 =   34.7,
+           smax0 =   35.3,
+           rmin0 = -500.0,
+           rmax0 =  500.0,
+           tmine = -500.0,
+           tmaxe =  500.0,
+           smine = -500.0,
+           smaxe =  500.0,
+           rmine = -500.0,
+           rmaxe =  500.0,
+/
+&INIT_DIFFUSION
+              ah =    0.0,
+              av =    0.0,
+/
+&INIT_SEDIMENT
+        partdiam =  0.001,
+            rhos = 2620.0,
+           cwamp =   20.0,
+           twave =    8.0,
+         critvel =    0.1,
+/

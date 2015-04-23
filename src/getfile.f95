@@ -12,6 +12,7 @@ MODULE mod_getfile
   INTEGER, DIMENSION(4)                      :: start4D  ,count4D ,map4D
   INTEGER                                    :: ncTpos=0
   INTEGER                                    :: ierr, varid,ncid
+  LOGICAL                                    :: file_exists
 
 #ifndef no_netcdf
   CONTAINS
@@ -41,6 +42,12 @@ MODULE mod_getfile
     !INTEGER,             DIMENSION(1)       :: d    
     INTEGER                                 :: varid ,ncid
 
+    INQUIRE(FILE=fieldFile, EXIST=file_exists)
+    if (file_exists .eqv. .false.) then
+       print *, 'The file ' // fieldFile // ' doesnt exist'
+       stop
+    end if
+    
     !d = count1d(1) + start1d(1) - 1
     allocate ( get1DfieldNC(count1d(1)) )
 

@@ -195,7 +195,7 @@ CONTAINS
     wallsec = walltime - wallmin*60
 
     call updateClock
-    print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror,ntractot, &
+    print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
          wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin 
 799 format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
          i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &

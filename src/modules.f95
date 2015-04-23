@@ -9,13 +9,8 @@ ENDMODULE mod_precdef
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_param
-  INTEGER                                   :: JMAX, LBT, NTRACMAX
+  INTEGER                                   :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
-#ifdef streamts
-  INTEGER, PARAMETER                        :: LOV=3
-#else
-  INTEGER, PARAMETER                        :: LOV=1
-#endif
   INTEGER                                   :: ncoor,kriva,iter,ngcm
   REAL*8, PARAMETER                         :: UNDEF=1.d20 
   REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small epsilon
@@ -46,9 +41,8 @@ ENDMODULE mod_loopvars
 MODULE mod_traj
 
   ! Variables connected to particle positions.
-
-  INTEGER, PARAMETER                         :: NNRJ=8,NTRJ=7
-  INTEGER                                    :: NEND
+  INTEGER, PARAMETER                         :: NNRJ=8, NTRJ=7
+  INTEGER                                    :: nend
   INTEGER                                    :: ntrac, ntractot=0
   ! === Particle arrays ===
   REAL*8, ALLOCATABLE,  DIMENSION(:,:)       :: trj
@@ -66,20 +60,13 @@ ENDMODULE mod_traj
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
-  USE mod_param
+  USE mod_param, only: pi, undef, iter
   IMPLICIT NONE
 
-  INTEGER                                   :: IMT, JMT, KM
-#ifdef seasonal
-#if orca1
-  INTEGER                                   :: nst=48
-#elif orca025L75
-  INTEGER                                   :: nst=4
-#endif
-#else
+  INTEGER                                   :: imt, jmt, km
   INTEGER                                   :: nst=2
-#endif
-  INTEGER                                   :: nsm=1     ,nsp=2
+  INTEGER                                   :: nsm=1,  nsp=2
+  INTEGER                                   :: wnsm=1, wnsp=2
   REAL*8                                    :: dx,dy
   REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
@@ -93,11 +80,11 @@ MODULE mod_grid
 
   ! === Vertical grids ===
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zw
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r,z_w
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r, z_w
 #ifdef zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
 #elif zgrid3D
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt,dzu,dzv
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt, dzu, dzv
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #endif /*zgrid3Dt*/
 #ifdef varbottombox 
@@ -145,11 +132,11 @@ CONTAINS
 
     ! T-box volume in m3
 #ifdef zgrid3Dt 
-    dxyz = intrpg*dzt(ib,jb,kb,nsp)+intrpr*dzt(ib,jb,kb,nsm)
+    dxyz = intrpg * dzt(ib,jb,kb,nsp) + intrpr * dzt(ib,jb,kb,nsm)
 #elif  zgrid3D
-    dxyz=dzt(ib,jb,kb)
+    dxyz = dzt(ib, jb, kb)
 #ifdef freesurface
-    if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
+    if(kb == KM) dxyz = dxyz + intrpg * hs(ib,jb,nsp) + intrpr * hs(ib,jb,nsm)
 #endif /*freesurface*/
 #else
     dxyz=dz(kb)
@@ -165,7 +152,6 @@ CONTAINS
        print *,'=========================================================='
        print *,'ERROR: Negative box volume                                '
        print *,'----------------------------------------------------------'
-       !print *,'dzt  = ', dxyz/dxdy(ib,jb), dz(kb), hs(ib,jb,:)
        print *,'dxdy = ', dxdy(ib,jb)
        print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
        print *,'----------------------------------------------------------'
@@ -184,7 +170,7 @@ MODULE mod_time
 
   !Timestep increasing with one for each new velocity field
   INTEGER                                   :: ints      ,intstart ,intend
-  INTEGER                                   :: intrun    ,intspin  ,intstep
+  INTEGER                                   :: intrun    ,intspin
   INTEGER                                   :: intmin    ,intmax
   !type for datetimes
   type DATETIME
@@ -199,11 +185,12 @@ MODULE mod_time
   REAL*8                                    :: baseJD=0
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
+  REAL*8                                    :: jdoffset=0  
   ! === Timerange for velocity fields
   REAL*8                                    :: minvelJD=0,   maxvelJD=0
   INTEGER                                   :: minvelints, maxvelints
   ! === JD when the run starts
-  REAL*8                                    :: startJD=-999, ttpart
+  REAL*8                                    :: startJD=-999, ttpart, startFrac
   INTEGER                                   :: startYear, startMon, startDay
   INTEGER                                   :: startHour, startMin, startSec
   REAL*8                                    :: endJD=-999, endFrac
@@ -238,16 +225,15 @@ CONTAINS
   subroutine updateClock  
     USE mod_param, only: ngcm
     IMPLICIT NONE
-    ttpart = anint((anint(tt)/tseas-floor(anint(tt)/tseas))*tseas)/tseas 
-    currJDtot = (ints+ttpart)*(real(ngcm)/24) + 1
-    call  gdate (baseJD+currJDtot-1 ,currYear , currMon ,currDay)
-
+    ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas 
+    currJDtot = (ints+ttpart)*(dble(ngcm)/24) + 1
+    call  gdate (baseJD+currJDtot-1+jdoffset ,currYear , currMon ,currDay)
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1)
-    currFrac = (currJDtot-int(currJDtot))*24
-    currHour = int(currFrac)
-    currFrac = (currFrac - currHour) * 60
-    CurrMin  = int(currFrac)
-    currSec  = int((currFrac - currMin) * 60)
+    currFrac = (currJDtot-dble(int(currJDtot,8)))*24
+    currHour = int(currFrac,8)
+    currFrac = (currFrac - dble(currHour)) * 60
+    CurrMin  = int(currFrac,8)
+    currSec  = int((currFrac - dble(currMin)) * 60,8)
 
     if (ints > (maxvelints-1)) then
        if (minvelints == 0) then
@@ -259,14 +245,14 @@ CONTAINS
     else
        loopints = ints
     end if
-    loopJD = (loopints + ttpart)*(real(ngcm)/24) + 1
-    call  gdate (baseJD+loopJD-1 ,loopYear, loopMon, loopDay)
+    loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1
+    call  gdate (baseJD+loopJD-1+jdoffset ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
-    loopFrac = (loopJD - int(loopJD)) * 24
-    loopHour = int(loopFrac)
-    loopFrac = (loopFrac - loopHour) * 60
-    LoopMin  = int(loopFrac)
-    loopSec  = int((loopFrac - loopMin) * 60)
+    loopFrac = (loopJD - dble(int(loopJD,8))) * 24
+    loopHour = int(loopFrac,8)
+    loopFrac = (loopFrac - dble(loopHour)) * 60
+    LoopMin  = int(loopFrac,8)
+    loopSec  = int((loopFrac - dble(loopMin)) * 60,8)
   end subroutine updateClock
   
   subroutine gdate (rjd, year,month,day)
@@ -320,8 +306,6 @@ CONTAINS
     else
        dt = ds * dxyz 
     endif
-#elif stationary
-      dt = ds * dxyz 
 #else
     if(ds == dsmin) then ! transform ds to dt in seconds
        dt=dtmin  ! this makes dt more accurate
@@ -330,18 +314,16 @@ CONTAINS
     endif
 #endif /*regulardt*/
     if(dt.lt.0.d0) then
-       print *,'dt=',dt
+       Print *,"Error! dt is less than zero."
+       print *,'dt=',dt,"ds=",ds,"dxyz=",dxyz,"dsmin=",dsmin
        stop 4968
     endif
-#ifdef stationary
-              tt=tt+dt
-#else
     ! === if time step makes the integration ===
     ! === exceed the time when fields change ===
     if(tss+dt/tseas*dble(iter).ge.dble(iter)) then
-       dt=dble(idint(ts)+1)*tseas-tt
-       tt=dble(idint(ts)+1)*tseas
-       ts=dble(idint(ts)+1)
+       dt=dble(int(ts,8)+1)*tseas-tt
+       tt=dble(int(ts,8)+1)*tseas
+       ts=dble(int(ts,8)+1)
        tss=dble(iter)
        ds=dt/dxyz
        dsc=ds
@@ -352,7 +334,7 @@ CONTAINS
           ts=ts+dstep
           tss=tss+1.d0
        elseif(dt == dtreg) then  
-          ts=nint((ts+dtreg/tseas)*dble(iter))/dble(iter)
+          ts=nint((ts+dtreg/tseas)*dble(iter), 8)/dble(iter)
           !                 ts=ts+dtreg/tseas
           tss=dble(nint(tss+dt/dtmin))
        else
@@ -370,7 +352,6 @@ CONTAINS
        endif
 #endif /*regulardt*/
     end if
-#endif /*stationary*/
     ! === time interpolation constant ===
     intrpbg=dmod(ts,1.d0) 
     intrpb =1.d0-intrpbg
@@ -410,7 +391,7 @@ ENDMODULE mod_dens
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
-  USE mod_grid
+  USE mod_grid, only: nsm, nsp
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux ,vflux
 #if defined explicit_w || full_wflux
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
@@ -430,7 +411,7 @@ CONTAINS
  
   subroutine datasetswap
 
-    USE  mod_grid
+    USE  mod_grid, only: nsm,nsp,hs
     IMPLICIT NONE
 
     hs(:,:,nsm)      = hs(:,:,nsp)
@@ -448,38 +429,38 @@ CONTAINS
 
 #if defined full_wflux
   subroutine calc_implicit_vertvel
-    USE mod_grid
+
+    USE mod_grid, only: imt, jmt, km, nsm, nsp
     IMPLICIT none
-    ! = Loop variables
     INTEGER                                    :: k
     
-    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1, nsp)  -  &
-                                   uflux(2:imt,   2:jmt,   1, nsp)  +  &
-                                   vflux(2:imt,   1:jmt-2, 1, nsp)  -  & 
-                                   vflux(2:imt,   2:jmt,   1, nsp)
-    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1, nsp)  +  &
-                                   vflux(1,       1:jmt-1, 1, nsp)  -  &
-                                   vflux(1,       2:jmt,   1, nsp)
-    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1, nsp)  -  &
-                                   uflux(2:imt,   1,       1, nsp)  -  &
-                                   vflux(2:imt,   1,       1, nsp) 
+    wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1,   nsp)  -  &
+                                   uflux(2:imt,   2:jmt,   1,   nsp)  +  &
+                                   vflux(2:imt,   1:jmt-2, 1,   nsp)  -  & 
+                                   vflux(2:imt,   2:jmt,   1,   nsp)
+    wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1,   nsp)  +  &
+                                   vflux(1,       1:jmt-1, 1,   nsp)  -  &
+                                   vflux(1,       2:jmt,   1,   nsp)
+    wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1,   nsp)  -  &
+                                   uflux(2:imt,   1,       1,   nsp)  -  &
+                                   vflux(2:imt,   1,       1,   nsp) 
     kloop: do k=2,km
-       wflux(2:imt,2:jmt,k,2) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
-                                 uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
-                                 uflux(2:imt,   2:jmt,   k,   nsp)  +  &
-                                 vflux(2:imt,   1:jmt-1, k,   nsp)  -  & 
-                                 vflux(2:imt,   2:jmt,   k,   nsp) 
-       wflux(1,2:jmt,k,2)     =  wflux(1,       2:jmt,   k-1, nsp)  -  &
-                                 uflux(1,       2:jmt,   k,   nsp)  +  &
-                                 vflux(1,       1:jmt-1, k,   nsp)  -  &
-                                 vflux(1,       2:jmt,   k,   nsp)
-       wflux(2:imt,1,  k,2)   =  wflux(2:imt,   1,       k-1, nsp)  +  &
-                                 uflux(1:imt-1, 1,       k,   nsp)  -  &
-                                 uflux(2:imt,   1,       k,   nsp)  -  &
-                                 vflux(2:imt,   1,       k,   nsp) 
+       wflux(2:imt,2:jmt,k,nsp) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
+                                   uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
+                                   uflux(2:imt,   2:jmt,   k,   nsp)  +  &
+                                   vflux(2:imt,   1:jmt-1, k,   nsp)  -  & 
+                                   vflux(2:imt,   2:jmt,   k,   nsp) 
+       wflux(1,2:jmt,k,nsp)     =  wflux(1,       2:jmt,   k-1, nsp)  -  &
+                                   uflux(1,       2:jmt,   k,   nsp)  +  &
+                                   vflux(1,       1:jmt-1, k,   nsp)  -  &
+                                   vflux(1,       2:jmt,   k,   nsp)
+       wflux(2:imt,1,  k, nsp)  =  wflux(2:imt,   1,       k-1, nsp)  +  &
+                                   uflux(1:imt-1, 1,       k,   nsp)  -  &
+                                   uflux(2:imt,   1,       k,   nsp)  -  &
+                                   vflux(2:imt,   1,       k,   nsp) 
     enddo kloop
   end subroutine calc_implicit_vertvel
-#endif full_wflux
+#endif /*full_wflux*/
 
 
 ENDMODULE mod_vel
@@ -512,6 +493,11 @@ MODULE mod_streamfunctions
 #endif
 #ifdef stream_thermohaline
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+#endif
+#ifdef streamts
+  INTEGER, PARAMETER                        :: LOV=3
+#else
+  INTEGER, PARAMETER                        :: LOV=1
 #endif
 ENDMODULE mod_streamfunctions
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

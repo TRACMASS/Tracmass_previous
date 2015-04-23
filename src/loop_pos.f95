@@ -35,8 +35,8 @@ contains
        endif
        x1=dble(ia)
 #if defined timeanalyt
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(2,ia,ja,ka,y0,y1)
+       call pos_time(3,ia,ja,ka,z0,z1)
 #else
        call pos_orgn(2,ia,ja,ka,y0,y1,ds) 
        call pos_orgn(3,ia,ja,ka,z0,z1,ds)
@@ -85,8 +85,8 @@ contains
        endif
        x1=dble(iam)
 #if defined timeanalyt
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(2,ia,ja,ka,y0,y1)
+       call pos_time(3,ia,ja,ka,z0,z1)
 #else
        call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! meridional position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
@@ -135,8 +135,8 @@ contains
        endif
        y1=dble(ja)
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(1,ia,ja,ka,x0,x1)
+       call pos_time(3,ia,ja,ka,z0,z1)
 #else
        call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
@@ -187,8 +187,8 @@ contains
        endif
        y1=dble(ja-1)
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(1,ia,ja,ka,x0,x1)
+       call pos_time(3,ia,ja,ka,z0,z1)
 #else
        call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal position
        call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vertical position
@@ -244,8 +244,8 @@ contains
           z1=dble(KM)-0.5d0 !
        endif
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(1,ia,ja,ka,x0,x1)
+       call pos_time(2,ia,ja,ka,y0,y1)
 #else
        call pos_orgn(1,ia,ja,ka,x0,x1,ds)
        call pos_orgn(2,ia,ja,ka,y0,y1,ds)
@@ -281,8 +281,8 @@ contains
 #endif              
        z1=dble(ka-1)
 #if defined timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(1,ia,ja,ka,x0,x1)
+       call pos_time(2,ia,ja,ka,y0,y1)
 #else
        call pos_orgn(1,ia,ja,ka,x0,x1,ds)
        call pos_orgn(2,ia,ja,ka,y0,y1,ds)
@@ -329,9 +329,9 @@ contains
        ! shortest time is the time-steping 
        scrivi=.true.
 #ifdef timeanalyt
-       call pos_time(1,ia,ja,ka,x0,x1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(2,ia,ja,ka,y0,y1,ts,tt,dsmin,dxyz,ss0,ds)
-       call pos_time(3,ia,ja,ka,z0,z1,ts,tt,dsmin,dxyz,ss0,ds)
+       call pos_time(1,ia,ja,ka,x0,x1)
+       call pos_time(2,ia,ja,ka,y0,y1)
+       call pos_time(3,ia,ja,ka,z0,z1)
 #else           
        ! If there is no spatial solution, 
        ! which should correspond to a convergence zone

@@ -1,7 +1,13 @@
 
 PROJMAKE           := $(wildcard projects/$(PROJECT)/Makefile.prj)
+CASEMAKE           := $(wildcard projects/$(PROJECT)/$(CASE)Makefile.prj)
+
+ifneq ($(strip $(CASEMAKE)),)
+include projects/$(PROJECT)/$(CASE)Makefile.prj
+else
 ifneq ($(strip $(PROJMAKE)),)
-	include projects/$(PROJECT)/Makefile.prj
+include projects/$(PROJECT)/Makefile.prj
+endif
 endif
 
 PROJECT_FLAG      = -DPROJECT_NAME=\'$(PROJECT)\'

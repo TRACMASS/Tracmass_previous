@@ -1,0 +1,124 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
+&INIT_GRID_DESCRIPTION
+         gcmname = 'NEMO',
+       gcmsource = 'http://www.nemo-ocean.eu/',
+        gridname = 'ORCA12',
+      gridsource = 'http://www.nemo-ocean.eu/',
+        griddesc = '1/12 deg run for the global Ocean.',
+       indatadir = '/Users/doos/data/orca/orca12/',
+/
+&INIT_CASE_DESCRIPTION
+        casename = 'ORCA12',
+        casedesc = 'Global Ocean trajectories',
+/
+&INIT_GRID_SIZE
+             imt =   4320,
+             jmt =   3059,
+              km =     75,
+             nst =      2,
+         subgrid =      1,
+     subgridimin =   3500,
+     subgridimax =   4000,
+     subgridjmin =    800,
+     subgridjmax =   1200,
+     subgridfile = 'templ.asc',
+       subgridid =      1,
+/
+&INIT_BASE_TIME
+         basesec =      0,
+         basemin =      0,
+        basehour =      0,
+         baseday =      1,
+         basemon =      1,
+        baseyear =   1996,
+/
+&INIT_GRID_TIME
+   fieldsperfile =      1,
+            ngcm =    120,
+            iter =     10,
+          intmax =  15330,
+        minveljd =     -1,
+        maxveljd =     -1,
+/
+&INIT_START_DATE
+        startsec =      0,
+        startmin =      0,
+       starthour =      0,
+        startday =      5,
+        startmon =      1,
+       startyear =   1996,
+         startjd =     -1,
+          intmin =      1,
+/
+&INIT_RUN_TIME
+         intspin =      1,
+          intrun =   1000,
+/
+&INIT_WRITE_TRAJS
+      twritetype =      2,
+           kriva =      2,
+      outdatadir = '/Users/doos/data/orca/orca12/data_out/',
+     outdatafile = 'orca12_test',
+ intmininoutfile =      0,
+/
+&INIT_SEEDING
+             nff =      1,
+            isec =      1,
+            idir =     -1,
+            nqua =      1,
+       partquant =      1,
+        ntracmax = 20000000,
+    loneparticle =     -1,
+        seedtype =      1,
+            ist1 =    250,
+            ist2 =    250,
+            jst1 =    200,
+            jst2 =    400,
+            kst1 =     66,
+            kst2 =     66,
+            tst1 =     -1,
+            tst2 =     -1,
+         seeddir =    ' ',
+        seedfile =     '',
+     varseedfile =      0,
+        seedtime =      0,
+         seedall =      0,
+         seedpos =      1,
+       seedparts =      0,
+     seedpart_id =      0,
+/
+&INIT_KILLZONES
+            nend =      5,
+            ienw = [1.0, 450.0, 0.0, 0.0],
+            iene = [50.0, 500.0, 9000.0, 9000.0],
+            jens = [0.0, 0.0, 0.0, 350.0],
+            jenn = [9000.0, 9000.0, 50.0, 400.0],
+           timax = 3650000.0,
+/
+&INIT_TEMP_SALT
+           tmin0 =  -50.0,
+           tmax0 =  400.0,
+           smin0 = -500.0,
+           smax0 =  400.0,
+           rmin0 = -100.0,
+           rmax0 =  500.0,
+           tmine =  -50.0,
+           tmaxe =  400.0,
+           smine = -150.0,
+           smaxe =  500.0,
+           rmine = -100.0,
+           rmaxe =  500.0,
+/
+&INIT_DIFFUSION
+              ah =    0.0,
+              av =    0.0,
+/
+&INIT_SEDIMENT
+        partdiam =  0.001,
+            rhos = 2620.0,
+           cwamp =   20.0,
+           twave =    8.0,
+         critvel =    0.1,
+/

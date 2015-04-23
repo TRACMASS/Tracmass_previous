@@ -116,7 +116,7 @@ $INITRUNSEED
   kst1     =  10,		 
   kst2     =  10,
   varSeedFile = 0,
-  seedFile    = 'mask?' /
+  seedFile    = '' /
   !
   !
 $INITRUNTEMPSALT

@@ -35,15 +35,8 @@ SUBROUTINE init_seed()
    LOGICAL                                    :: fileexists
 
 !-------------------------------------------------------------------------------
-#if ! defined baltix && ! defined rco
-   seedPos = seedType
-   seedType = 1
-   seedTime = 0
-   seedAll = 0
-#endif
-
    print *, ' '
-   SELECT CASE (seedPos)
+   SELECT CASE (seedType)
      
    CASE (1)      ! Seed particles within a given interval
                  ! defined by ist1, ist2, jst1, jst2, kst1, kst2 
@@ -103,7 +96,7 @@ SUBROUTINE init_seed()
             nsdMax = nsdMax+1
          END DO findRecl
          
-         SELECT CASE (seedType)
+         SELECT CASE (seedPos)
             CASE(1)
                ALLOCATE (seed_ijk(nsdMax,3))
             CASE(2)
@@ -116,7 +109,7 @@ SUBROUTINE init_seed()
          
          REWIND (34)
          
-         SELECT CASE (seedType)
+         SELECT CASE (seedPos)
             CASE(1)
                DO jsd = 1,nsdMax
                   READ (unit=34, fmt=ijkform) seed_ijk(jsd,1), &
