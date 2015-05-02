@@ -1,10 +1,11 @@
 PROJECT	          = theoretical
 CASE              = theoretical
-RUNFILE 	      = runtrm
+RUNFILE 	  = runtrm
 
 #F95COMPILER        = "g95"
 F95COMPILER        = "gfortran"
-F95COMPILER        = "ifort"
+#F95COMPILER        = "ifort"
+#FF                 = "/sw/bin/gfortran-fsf-4.9" #Alt. compiler location
 
 NETCDFLIBS	       = "none"
 #NETCDFLIBS        = "automatic"
