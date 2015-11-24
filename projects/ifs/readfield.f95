@@ -25,7 +25,8 @@ SUBROUTINE readfields
   USE mod_vel
   USE mod_dens
   USE mod_stat
-  
+  USE mod_tempsalt
+
   IMPLICIT none
 
 !!------------------------------------------------------------------------------
@@ -46,6 +47,7 @@ SUBROUTINE readfields
  CHARACTER (LEN=200)                                ::  gridFile, fieldFile,   &
  &                                                      string, prefix
  
+CHARACTER(LEN=200)                         :: outDataDir, outDataFile
  LOGICAL around
 
 
@@ -180,12 +182,31 @@ END IF
 !! Set a environment variable WGRIB, e.g. export WGRIB=/home/user/bin/wgrib
 !!
 
-string = '$WGRIB '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
-&        TRIM(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
+!string = '$WGRIB '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
+!&        TRIM(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
+
+!string = '/Users/doos/Dropbox/bibliotek/wgrib '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//    &   
+!                    &        TRIM(outDataFile)//'.bin -d all -bin -nh -V > log.txt'
+                    
+string = '/Users/doos/Dropbox/bibliotek/wgrib '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//    &   
+                    &        'tempo.bin -d all -bin -nh -V > log.txt'
+
+!&
+!string = '$WGRIB '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
+!string = 'wgrib '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)//                 &
+!string = '/Volumes/hav1/Applications/wgrib/wgrib '//TRIM(fieldFile)//' -o '//TRIM(inDataDir)// &
+!print *,'a',string
+
 CALL SYSTEM(string)
 
-OPEN (14,FORM='UNFORMATTED',FILE=trim(inDataDir)//trim(outDataFile)//'.bin',   &
+
+!OPEN (14,FORM='UNFORMATTED',FILE=trim(inDataDir)//trim(outDataFile)//'.bin',   &
+!&     ACCESS='DIRECT',RECL=IMT*145*4,CONVERT='little_endian')
+
+!print *,'b',trim(inDataDir)//'tempo.bin'
+OPEN (14,FORM='UNFORMATTED',FILE=trim(inDataDir)//'tempo.bin',   &
 &     ACCESS='DIRECT',RECL=IMT*145*4,CONVERT='little_endian')
+
 
 !!
 !! Read for each model level

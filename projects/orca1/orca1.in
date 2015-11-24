@@ -3,14 +3,15 @@
 /
 &INIT_GRID_DESCRIPTION
          gcmname = 'NEMO',
-       gcmsource = 'http://www.locean-ipsl.upmc.fr/opa/',
+       gcmsource = 'http://www.nemo-ocean.eu/',
         gridname = 'ORCA1',
-      gridsource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+      gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = '1 deg run for the global Ocean.',
-       indatadir = '/Users/doos/data/ecearth/',
+!       indatadir = '/Users/doos/data/ecearth/orca1/',
+       indatadir = '/Users/doos/Dropbox/data/ecearth/orca1/',
 /
 &INIT_CASE_DESCRIPTION
-        casename =  'xxx',
+        casename = 'ORCA1',
         casedesc = 'Global Ocean trajectories',
 /
 &INIT_GRID_SIZE
@@ -19,12 +20,12 @@
               km =     42,
              nst =      2,
          subgrid =      0,
-     subgridimin =     99,
-     subgridimax =   1440,
-     subgridjmin =    330,
-     subgridjmax =   1021,
-     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
-       subgridid =      1,
+     subgridimin =    3001,
+     subgridimax =    4000,
+     subgridjmin =     501,
+     subgridjmax =    1500,
+     subgridfile = 'templ.asc',
+       subgridid =      0,
 /
 &INIT_BASE_TIME
          basesec =      0,
@@ -32,56 +33,103 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =   2000,
+        baseyear =      1,
 /
 &INIT_GRID_TIME
    fieldsperfile =     12,
             ngcm =    730,
-            iter =     12,
-          intmax =     12,
-        minveljd =     -1,
-        maxveljd =     -1,
+            iter =      1,
+          intmax =    24,
+        minvelJD =      1,
+        maxvelJD =    120,
 /
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =      0,
-        startday =      1,
+       starthour =     12,
+        startday =      5,
         startmon =      1,
        startyear =   1996,
+        jdoffset =      3,
+          noleap =  .true., 
          startjd =     -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
-         intspin =      1,
+         intspin =      12,
           intrun =  12000,
 /
 &INIT_WRITE_TRAJS
-      twritetype =      2,
-           kriva =      6,
-      outdatadir = '/Users/doos/data/ecearth/data_out/',
-     outdatafile = 'th_seasonal_south_iter12',
+      twritetype =      11,
+  ! kriva:          0 = no writing
+  !                 1 = write at time intervals of gcm datasets (each ints)
+  !                 2 = write at each time iteration
+  !                 3 = write all the time
+  !                 4 = write only start and end positions
+  !                 5 = write at chosen intervals
+  !                 6 = write each spatial grid-crossing 
+           kriva =      1,
+      outdatadir = '/Users/doos/data/ecearth/orca1/data_out/',
+!     outdatafile = 'orca1_test_it1200_k1',
+     outdatafile = 'orca1_amoc7_an_k1',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
+  ! ==============================================
+  ! NAMELIST INITIALIZATION SEED
+  ! ==============================================
+  ! nff:           1 = Follow trajectories forward in time
+  !                2 = Follow trajectories backward in time
+  !                3 = Follow trajectories both forward and backward in time.
+  !
+  ! isec:          1 = Seed particles meridional(y-z)
+  !                2 = Seed particles zonal(x-z)
+  !                3 = Seed particles horiz(x-y)
+  !                4 = Seed particles in the middle of T-box
+  !                5 = Seed particles from given exact positions read in ?????
+  !
+  ! idir:          1 = follow positive direction (eastward/northward)  
+  !               -1 = follow negative direction (westward/southward)
+  !                0 = both directions
+  !
+  !
+  ! number of trajectories can be set by
+  ! nqua:           1 = constant number of particles in all boxes
+  !                     (partQuant in # particles / gridcell)
+  !                 2 = Each particle reflects water transport at seeding. 
+  !                     (partQuant in m3s-1. per particle)
+  !                 3 = Each particle reflects water volume at seeding.
+  !                     (partQuant in m3 per particle)
+  !                 5 = particles set by seedfile (isec==nqua==5)
+  !
+  ! partQuant       : particles/gridcell or m3s-1/particle or m3/particle
+  !
+  ! === initial directions all in MODEL COORDINATES ===
+  ! Method for seeding particles.
+  ! seedType:       1 = Seed an area defined by ist, jst, and kst.
+  !                 2 = Use a list to define which cells to seed.
+  !                 3 = Use a 2-D mask file.
+  !
+  ! If seedType = 1, define area where particles are seeded (started).
+  ! -1 indicates max value in grid.
              nff =      1,
             isec =      2,
-            idir =     -1,
-            nqua =      2,
-       partquant =   1000,
-        ntracmax =  50000,
-    loneparticle =     -1,
+            idir =      1,
+            nqua =      1,
+       partquant =      1,
+        ntracmax = 20000000,
+    loneparticle =      0,
         seedtype =      1,
-            ist1 =    220,
-            ist2 =    315,
-            jst1 =    119,
-            jst2 =    119,
+            ist1 =    234, !3840, ! 840,
+            ist2 =    310, ! 3849, ! 849,
+            jst1 =   115, ! 97,115, 1150, ! 650,
+            jst2 =   115, ! 97,115, !1159, ! 659,
             kst1 =      1,
             kst2 =     42,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
-        seedfile =    ' ',
+        seedfile =     '',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
@@ -90,25 +138,26 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =      4,
-            ienw = [110.0, 220.0, 1.0],
-            iene = [120.0, 315.0, 1.0],
-            jens = [246.0, 119.0, 1.0],
-            jenn = [246.0, 147.0, 1.0],
-           timax = 366000.0,
+            nend =      2,
+            ienw =    1,    1,
+            iene =    360,  360,
+            jens =      1,  236,
+            jenn =    115,  290,
+            timax = 365000.0, ! days
+
 /
 &INIT_TEMP_SALT
-           tmin0 =    2.0,
-           tmax0 =    5.0,
-           smin0 =   34.7,
-           smax0 =   35.3,
-           rmin0 = -500.0,
+           tmin0 = -100.0,
+           tmax0 =  400.0,
+           smin0 = -100.0,
+           smax0 =  100.7,
+           rmin0 = -100.0,
            rmax0 =  500.0,
-           tmine = -500.0,
-           tmaxe =  500.0,
-           smine = -500.0,
+           tmine = -100.0,
+           tmaxe =  400.0,
+           smine = -100.8,
            smaxe =  500.0,
-           rmine = -500.0,
+           rmine = -100.0,
            rmaxe =  500.0,
 /
 &INIT_DIFFUSION
