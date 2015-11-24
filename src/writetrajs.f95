@@ -4,6 +4,7 @@ module mod_write
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
   USE mod_time 
+ ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
@@ -89,6 +90,28 @@ CONTAINS
     open(unit=88, file=trim(fullWritePref)//'_ini.csv', status='replace')
     open(unit=89, file=trim(fullWritePref)//'_err.csv', status='replace')
 #endif
+
+
+#ifdef streamxy
+    open(51,file=trim(fullWritePref)//'_psi_xy_yx.bin',form='unformatted')
+#endif
+#if defined streamv
+    open(52,file=trim(fullWritePref)//'_psi_yz_xz.bin',form='unformatted')
+#endif
+#if defined streamr 
+    open(53,file=trim(fullWritePref)//'_psi_xr_yr.bin',form='unformatted')
+#endif
+#ifdef stream_thermohaline
+    open(54,file=trim(fullWritePref)//'_psi_ts.bin',form='unformatted')
+#endif
+
+#ifdef rerun
+    open(67, file=trim(fullWritePref)//'_rerun.asc')
+#endif
+
+
+
+
   end subroutine open_outfiles
 
   subroutine close_outfiles
@@ -166,11 +189,19 @@ CONTAINS
        !       vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
        !            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
     !end if
+    
+subvol =  trj(5,ntrac)
+t0     =  trj(7,ntrac)
+#if defined tempsalt
+    call interp2(ib,jb,kb,temp,salt,dens)
+#endif
 
+    
 #if defined textwrite 
     select case (sel)
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+!       if(temp==0.) stop 4867
     case (11)
        if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
             (kriva == 2 .AND. scrivi                    ) .or. &
@@ -179,9 +210,10 @@ CONTAINS
             (kriva == 5 .AND.                                  &
           &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
             (kriva == 6 .AND. .not.scrivi                  ) ) then
-#if defined tempsalt
-           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-#endif
+!#if defined tempsalt
+!           !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!           call interp2(ib,jb,kb,temp,salt,dens)
+!#endif
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
@@ -205,7 +237,8 @@ CONTAINS
     case (16)
        if(kriva.ne.0 ) then
 #if defined tempsalt
-           call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+           !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+           call interp2(ib,jb,kb,temp,salt,dens)
 #endif
           write(56,566) ntrac,ints,x1,y1,z1, &
                tt/tday,t0/tday,subvol,temp,salt,dens
@@ -256,7 +289,7 @@ CONTAINS
             (kriva == 6 .and. .not.scrivi                  ) ) then
 #if defined tempsalt
           call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
-          call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
+ !         call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
           recPosRun = recPosRun+1
