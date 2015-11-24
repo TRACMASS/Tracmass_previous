@@ -6,7 +6,9 @@ module mod_pos
   USE mod_time, only: intrpb, intrpbg
   USE mod_streamfunctions
   USE mod_psi
-    
+  USE mod_tempsalt
+  USE mod_traj, only: ntrac
+
   IMPLICIT none
   
 contains
@@ -328,6 +330,23 @@ contains
        call pos_time(1,ia,ja,ka,x0,x1)
        call pos_time(2,ia,ja,ka,y0,y1)
        call pos_time(3,ia,ja,ka,z0,z1)
+       if(dble(int(x0))/=x0 .and. abs(int(x0)-int(x1))>=1.) then
+        print *,'pangx=',x0,x1,y0,y1,z0,z1
+!        print *,'ds',dse,dsw,dsn,dss,dsu,dsd,dsc,dsmin
+        x1=x0 
+     !   stop 3854
+       endif
+       if(dble(int(y0))/=y0 .and. abs(int(y0)-int(y1))>=1.) then
+        print *,'pangy=',y0,y1
+    !    stop 3854
+         y1=y0  
+       endif
+       if(dble(int(z0))/=z0 .and. abs(int(z0)-int(z1))>=1.) then
+        print *,'pangz=',ntrac,z0,z1
+         z1=z0
+        stop 3854
+       endif
+!       print *,'x0x1',x0,x1,y0,y1,z0,z1
 #else           
        ! If there is no spatial solution, i.e. a convergence zone
        if(dse==UNDEF .and. dsw==UNDEF .and. dsn==UNDEF .and. & 
