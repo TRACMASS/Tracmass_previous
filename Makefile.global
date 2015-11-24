@@ -34,9 +34,9 @@ ifeq ($(NETCDFLIBS),"macports")
 	LNK_FLAGS        = -lnetcdf -lnetcdff 
 endif
 ifeq ($(NETCDFLIBS),"fink")
-        LIB_DIR          = -L/sw/lib -L/sw/lib/netcdf-gfortran/lib
-        INC_DIR          = -I/sw/include -I/sw/lib/netcdf-gfortran/include
-        LNK_FLAGS        = -lnetcdf -lnetcdff
+        LIB_DIR          = -L/sw/lib # -L/sw/lib/netcdf-gfortran/lib
+        INC_DIR          = -I/sw/include  #-I/sw/lib/netcdf-gfortran/include
+        LNK_FLAGS        = -lnetcdf -lnetcdff -lsz -Wl,-dead_strip_dylibs
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
