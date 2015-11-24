@@ -56,25 +56,25 @@ SUBROUTINE loop
   
 #ifdef rerun
  I=0 ; j=0 ; k=0 ; l=0
- print *,'rerun with initial points from ', & 
-      trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
- open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
+ !print *,'rerun with initial points from ', & 
+!      trim(outDataDir)//trim(outDataFile)//'_rerun.asc'
+! open(67,file=trim(outDataDir)//trim(outDataFile)//'_rerun.asc')
 40 continue
- read(67,566,end=41,err=41) ntrac,niter,rlon,rlat,z1,tt,t0,subvol,temp,salt,dens
+ read(67,566,end=41,err=41) ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 !  print 566, ntrac,niter,x1,y1,z1,tt,t0,subvol,temp,salt,dens
 
-#if defined orca025
-  if(    rlat == dble(jenn(1))) then
-     nrj(8,ntrac)=0     ! Southern boundary
+#if defined orca025 || orca1 
+  if(    y1 == dble(jenn(1))) then
+     nrj(8,ntrac)=1     ! Southern boundary
      i=i+1
      nout=nout+1
-  elseif(rlon == dble(iene(3))) then
-     nrj(8,ntrac)=0    ! East
+  elseif(y1 == dble(jens(2))) then
+     nrj(8,ntrac)=2    ! Northern boundary
      j=j+1
      nout=nout+1
-  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
-     nrj(8,ntrac)=1    ! back to the warm pool
-     k=k+1
+!  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
+!     nrj(8,ntrac)=1    ! back to the warm pool
+!     k=k+1
   else
      nrj(8,ntrac)=0 
      l=l+1   
@@ -82,6 +82,8 @@ SUBROUTINE loop
   endif
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+
+
 #elif defined orca025L75
   if( tt-t0 >365.*1000. .and. temp > tmax0 ) then
      nrj(8,ntrac)=1     ! warm end points
@@ -99,8 +101,8 @@ SUBROUTINE loop
 
 #elif defined ifs
   nendLoop: do n=1,nend
-     if( dble(ienw(n)) <= rlon .and. rlon <= dble(iene(n)) .and. &
-         dble(jens(n)) <= rlat .and. rlat <= dble(jenn(n))  ) then  
+     if( dble(ienw(n)) <= x1 .and. x1 <= dble(iene(n)) .and. &
+         dble(jens(n)) <= y1 .and. y1 <= dble(jenn(n))  ) then  
         nrj(8,ntrac) = n
         dist(n) = dist(n) + 1
         cycle lbasLoop
@@ -108,7 +110,7 @@ SUBROUTINE loop
   enddo nendLoop
   
   if( nrj(8,ntrac) == 0 ) then
-     print 566,ntrac,niter,rlon,rlat,zz
+     print 566,ntrac,niter,x1,y1,zz
      stop 4957
   endif
   
@@ -163,7 +165,7 @@ SUBROUTINE loop
      !=======================================================
      !=== write stream functions and "particle tracer"    ===
      !=======================================================
-     if(mod(ints,120) == 0) then 
+     if(mod(ints,intpsi) == 0) then 
       call write_streamfunctions
       call writetracer
      endif
@@ -327,7 +329,7 @@ SUBROUTINE loop
               jb=JMT-1
               x0=x1 ; y0=y1 ; ia=ib ; ja=jb
            elseif(y1 > dble(JMT-1)) then
-             print *,'north of northfold for ntrac=',ntrac
+!             print *,'north of northfold for ntrac=',ntrac
              x1 = dble(IMT+2) - x1
              ib=idint(x1)+1
              jb=JMT-1
@@ -387,15 +389,15 @@ SUBROUTINE loop
            if (jb>jmt) jb = jmt - (jb - jmt)
 
            
-           !call errorCheck('boundError', errCode)
-           !if (errCode.ne.0) cycle ntracLoop
-           !=call errorCheck('landError', errCode)
-           !=if (errCode.ne.0) cycle ntracLoop
-           !=call errorCheck('bottomError', errCode)
-           !=if (errCode.ne.0) cycle ntracLoop
-           !=call errorCheck('airborneError', errCode)
-           !=call errorCheck('corrdepthError', errCode)
-           !=call errorCheck('cornerError', errCode)
+           call errorCheck('boundError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
+           call errorCheck('landError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
+           call errorCheck('bottomError', errCode)
+       !    if (errCode.ne.0) cycle ntracLoop
+           call errorCheck('airborneError', errCode)
+           call errorCheck('corrdepthError', errCode)
+           call errorCheck('cornerError', errCode)
            
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
@@ -405,7 +407,7 @@ SUBROUTINE loop
            ! === end trajectory if outside chosen domain === 
            nendloop: do k=1,nend
               if(ienw(k) <= x1 .and. x1 <= iene(k) .and. &
-                 jens(k) <= y1 .and. y1 <= iene(k) ) then
+                 jens(k) <= y1 .and. y1 <= jenn(k) ) then
                  nexit(k)=nexit(k)+1
                  exit niterLoop                                
               endif
@@ -496,7 +498,7 @@ return
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*),intent(in)        :: teststr    
        INTEGER                             :: verbose = 1
-       INTEGER                             :: strict  = 0
+       INTEGER                             :: strict  = 1
        INTEGER,intent(out)                 :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
        INTEGER, save                       :: dxntrac, dyntrac
@@ -680,20 +682,14 @@ return
        case ('bottomError')
           ! if trajectory under bottom of ocean, 
           ! then put in middle of deepest layer 
-          ! (this should however be impossible)
+          ! (this can happen when using time dependent vertical coordinates)
            if( z1.le.dble(KM-kmt(ib,jb)) ) then
               print *,'Particle below bottom',z1,dble(KM-kmt(ib,jb))
-              print *,'kmt=',kmt(ia,ja),kmt(ib,jb)
+              print *,'x1,y1',x1,y1
               print *,'ntrac=',ntrac,niter 
-              call print_ds
-              call print_pos
-              call cross_stat(1,ia,ja,ka,x0,dse,dsw) ! zonal
-              call cross_stat(2,ia,ja,ka,y0,dsn,dss) ! meridional
-              call cross_stat(3,ia,ja,ka,z0,dsu,dsd) ! vertical
-              print *,'time step sol:',dse,dsw,dsn,dss,dsu,dsd
               nerror=nerror+1
  !             nrj(6,ntrac)=1
- !             stop 3957
+              stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if

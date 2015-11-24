@@ -32,7 +32,7 @@ SUBROUTINE init_params
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
-   real*8                                     :: jd
+   real*8                                     ::  jd
 
 ! Setup namelists
    namelist /INIT_NAMELIST_VERSION/ gridVerNum
@@ -52,7 +52,7 @@ SUBROUTINE init_params
                                     startJD, jdoffset, intmin, noleap
    namelist /INIT_RUN_TIME/         intspin, intrun
    namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
-                                    outdircase, intminInOutFile, outdirdate
+                                    outdircase, intminInOutFile, intpsi, outdirdate
           
    namelist /INIT_SEEDING/          nff, isec, idir, nqua, partQuant,        &
                                     ntracmax, loneparticle, SeedType, ist1,  &
@@ -148,7 +148,7 @@ SUBROUTINE init_params
    READ (8,nml=INIT_SEDIMENT)   
 #endif
    CLOSE (8)
-
+      
    SELECT CASE (subGrid)
    CASE (0)          
       PRINT *,'Sub-grid    : Use the Full grid.'     
@@ -334,7 +334,7 @@ SUBROUTINE init_params
       ! --- sea-surface height, and trajectory data                   ---
       ALLOCATE ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
       ALLOCATE ( hs(imt+1,jmt+1,nst) )
-#ifdef explicit_w || full_wflux
+#if defined explicit_w || full_wflux
       ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km,NST) )
 #else
       ALLOCATE ( wflux(0:km,NST) )
