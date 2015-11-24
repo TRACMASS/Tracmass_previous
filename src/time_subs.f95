@@ -79,16 +79,17 @@ USE mod_precdef
 USE mod_param
 USE mod_vel
 USE mod_traj, only: ntrac
-USE mod_grid, only: dxyz,imt,jmt,km
+USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm
 USE mod_time, only: ts, tt, tseas, intrpr, intrpg
-USE mod_loopvars, only: dsmin
+USE mod_loopvars!, only: dsmin
 
 IMPLICIT NONE
 
 INTEGER :: iim,loop,iil,ii,ijk,ia,ja,ka
 REAL (DP)  :: uu,um,vv,vm,ss,alfa
-REAL (DP)  :: f0,f1,dzs,dzu1,dzu2,rijk,s0,ss0
-REAL (8)   :: r0,sp,sn
+REAL (DP)  :: f0,f1,dzs,dzu1,dzu2,rijk,s0!,ss0
+REAL (DP)   :: r0,sp,sn
+
 !_______________________________________________________________________________
 sp=UNDEF ; sn=UNDEF
 
@@ -99,7 +100,8 @@ if(ijk==3) return
 if(dxyz<EPS) stop 8701
 if(dsmin==1.0_dp) stop 8702
 s0=tt/dxyz
-ss0=float(int(ts))*tseas/dxyz
+ss0=dble(idint(ts))*tseas/dxyz
+
 
 loop=0 ; rijk=0.0_dp ; ss=UNDEF ; f0=0.0_dp ; f1=0.0_dp
 
@@ -178,13 +180,16 @@ elseif(ijk==3) then
 #endif
 
 #ifdef zgrid3Dt 
-  dzs= intrpg*dzt(ia,ja,ka,nsp)+intrpr*dzt(ia,ja,ka,nsm)
-  dzu1=dzt(ia,ja,ka,nsm)
-  dzu2=dzt(ia,ja,ka,nsp)
+
+  dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
+  dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
+!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
+  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
   if(abs(dzu1)<eps) stop 8705
   if(abs(dzu2)<eps) stop 8706
   f0=dzs/dzu1
   f1=dzs/dzu2
+! print *,tt,ts, intrpg, intrpr,dzu1,dzu2,dzs,f0,f1
   uu=uu*f0
   um=um*f0
   vv=vv*f1
@@ -193,14 +198,11 @@ elseif(ijk==3) then
   if(abs(f1)<=eps) stop 8708
   f0=1.0_dp/f0
   f1=1.0_dp/f1
-
 #elif defined zgrid3D && defined freesurface
  if (ka==km) then
   dzs= dz(km)+intrpg*hs(ia,ja,nsm)+intrpr*hs(ia,ja,nsp)
   dzu1=dz(km)+hs(ia,ja,nsm)
   dzu2=dz(km)+hs(ia,ja,nsp)
-  if(abs(dzu1)<eps) print *,dzu1,eps
-  if(abs(dzu1)<eps) print *,dz(km-1),dz(km),hs(ia,ja,nsm),hs(ia,ja,nsp)
   if(abs(dzu1)<eps) stop 8705
   if(abs(dzu2)<eps) stop 8706
   f0=dzs/dzu1
@@ -209,31 +211,35 @@ elseif(ijk==3) then
   um=um*f0
   vv=vv*f1
   vm=vm*f1
-  if(abs(f0)<=eps) stop 8707
-  if(abs(f1)<=eps) stop 8708
+  if(abs(f0)<eps) stop 8707
+  if(abs(f1)<eps) stop 8708
   f0=1.0_dp/f0
   f1=1.0_dp/f1
  endif 
 #endif /*zgrid3Dt*/
 
+
 endif
 
 
-alfa = -(vv-uu-vm+um)
+alfa = -(vv-vm-uu+um)
+!print *,'alfa=',alfa,vv,vm,uu,um
 ! ----- a > 0
-     if (alfa>EPS) then
-!     if (alfa>0.0_dp) then
+!     if (alfa>EPS) then
+     if (alfa>0.0_dp) then
       call apos (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
 ! ----- a < 0      
-     elseif (alfa<-EPS) then
-!     elseif (alfa<0.0_dp) then
+!     elseif (alfa<-EPS) then
+     elseif (alfa<0.0_dp) then
       call amin (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
+ !     print *,'amin',ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin
 ! ----- a = 0 
       else
-!      if (alfa/=0.0_dp) print *,'anil eps=',alfa
+      if (alfa/=0.0_dp) print *,'anil eps=',alfa
       call anil (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
      endif
 ! translate direction and positions for old to new tracmass
+!print *,'cross_time ',ijk,'u+',uu,vv,' u-',um,vm,'ss',ss,ss0,' alfa',alfa
       if (rijk==dble(ii)) then
        sp=ss-s0
        sn=UNDEF
@@ -246,6 +252,10 @@ alfa = -(vv-uu-vm+um)
       endif
       if(sp==0.0_dp) sp=UNDEF
       if(sn==0.0_dp) sn=UNDEF
+      
+!    if(sp/=undef .or. sn/=undef) print *,'cross_time',ss,s0,sp,sn
+!      if(ijk==3) stop 49678
+!stop 4856
 return
 end subroutine cross_time
 !_______________________________________________________________________
@@ -275,14 +285,17 @@ subroutine pos_time(ijk,ia,ja,ka,r0,r1)
   !             ijk-direction of particle 
   !               (fractions of a grid box side in the 
   !                corresponding direction)
+
   !
 
 USE mod_precdef
 USE mod_param
 USE mod_vel
-USE mod_grid, only: dxyz,imt
-USE mod_time, only: tt,ts,tseas,intrpr, intrpg
-USE mod_loopvars, only: ds, dsmin
+USE mod_traj, only: ntrac
+USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm
+!USE mod_grid
+USE mod_time!, only: tt,ts,tseas,intrpr, intrpg
+USE mod_loopvars!, only: ds, dsmin
 USE mod_precdef
 IMPLICIT NONE
 
@@ -291,10 +304,7 @@ INTEGER :: ijk,ia,ja,ka,iim,iil,ii
 REAL (DP)  :: uu,um,vv,vm,xi,xi0,const,ga,erf0,alfa,beta,daw0,rijk
 REAL (DP)  ::dawson1, dawson2,s15adf,s15aef,errfun
 REAL (DP)  :: f0,f1,dzs,dzu1,dzu2,s0,ss
-REAL (8)  :: r0,r1,ss0
-
-
-ss0 = dble(idint(ts))*tseas/dxyz
+REAL (DP)  :: r0,r1!,ss0
 
 
 #ifdef twodim  
@@ -305,6 +315,7 @@ endif
 #endif 
 
 s0=tt/dxyz-ds
+!ss0=dble(idint(ts))*tseas/dxyz
 ss=ts*tseas/dxyz
 f0=0.0_dp ; f1=0.0_dp
 
@@ -383,11 +394,13 @@ elseif(ijk==3) then
 #endif
 
 #ifdef zgrid3Dt 
-  dzs= intrpg*dzt(ia,ja,ka,nsp)+intrpr*dzt(ia,ja,ka,nsm)
-  dzu1=dzt(ia,ja,ka,nsm)
-  dzu2=dzt(ia,ja,ka,nsp)
-  if(abs(dzu1)<=eps) stop 4966
-  if(abs(dzu2)<=eps) stop 4967
+
+  dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
+  dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
+!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
+  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
+  if(abs(dzu1)<eps) stop 4966
+  if(abs(dzu2)<eps) stop 4967
   f0=dzs/dzu1
   f1=dzs/dzu2
   uu=uu*f0
@@ -402,17 +415,17 @@ elseif(ijk==3) then
  if (ka==km) then
   dzs= dz(km)+intrpg*hs(ia,ja,nsm)+intrpr*hs(ia,ja,nsp)
   dzu1=dz(km)+hs(ia,ja,nsm)
-  dzu2=dz(km)+hs(ia,ja,nsp  )
-  if(abs(dzu1)<=eps) stop 4966
-  if(abs(dzu2)<=eps) stop 4967
+  dzu2=dz(km)+hs(ia,ja,nsp)
+  if(abs(dzu1)<eps) stop 4966
+  if(abs(dzu2)<eps) stop 4967
   f0=dzs/dzu1
   f1=dzs/dzu2
   uu=uu*f0
   um=um*f0
   vv=vv*f1
   vm=vm*f1
-  if(abs(f0)<=eps) stop 4968
-  if(abs(f1)<=eps) stop 4969
+  if(abs(f0)<eps) stop 4968
+  if(abs(f1)<eps) stop 4969
   f0=1.0_dp/f0
   f1=1.0_dp/f1
  endif 
@@ -421,6 +434,8 @@ elseif(ijk==3) then
 
 endif
 
+
+!print *,ijk,'u+',uu,vv,' u-',um,vm
 !if(uu==vv .and. um==vm) then
 ! print *,'pos'
 ! print *,ijk,ia,ja,ka,r0,r1,ds,intrpr
@@ -431,37 +446,31 @@ endif
 !endif
 
 if(abs(dsmin)<=eps) stop 4981
-alfa = -(vv-uu-vm+um)/dsmin
+alfa = -(vv-vm-uu+um)/dsmin
 beta = um-uu
 
 if(alfa/=0.0_dp) then
  if(f0==0.0_dp) then
-  ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)
-  const = (um*vv-uu*vm)/(vv-uu-vm+um)
+  ga = -dble(iim) + (vm-um)/(vv-vm-uu+um)
+  const = (um*vv-uu*vm)/(vv-vm-uu+um)
  else
   ga = -dble(iim) + (f1*vm-f0*um)/(vv-uu-vm+um)
   const = (f0*um*(vv-vm)+f1*vm*(um-uu))/(vv-uu-vm+um)
  endif
 endif
 
-!print *,'f0',f0,ga,-dble(iim),(vm-um)/(vv-uu-vm+um)
-
-!if(abs(f0)<EPS) then
-! print *,'f0',f0,vv-uu-vm+um,vv,uu,vm,um
-!! stop 8841
-!endif
 
 if (alfa>0.0_dp) then
- const=2.*const/sqrt(2.*alfa)
- xi0=(beta+alfa*(s0-ss0))/sqrt(2.*alfa)
- xi =(beta+alfa*(ss-ss0))/sqrt(2.*alfa)
- daw0 = dawson2(xi0) !      daw0 = dawson2(xi0,ifail)
+ const=2.d0*const/dsqrt(2.d0*alfa)
+ xi0=(beta+alfa*(s0-ss0))/dsqrt(2.d0*alfa)
+ xi =(beta+alfa*(ss-ss0))/dsqrt(2.d0*alfa)
+ daw0 = dawson2(xi0) 
  r1 = dawson1 (const,daw0,r0+ga,xi0,xi) -ga
 !print *,'alfa>0',f0,r1,const,daw0,r0+ga,xi0,xi,ga,dawson1 (const,daw0,r0+ga,xi0,xi)
 elseif (alfa<0.0_dp) then
- const=const*sqrt(pi/(-2.*alfa))
- xi0=(beta+alfa*(s0-ss0))/sqrt(-2.*alfa)
- xi =(beta+alfa*(ss-ss0))/sqrt(-2.*alfa)
+ const=const*dsqrt(pi/(-2._dp*alfa))
+ xi0=(beta+alfa*(s0-ss0))/dsqrt(-2._dp*alfa)
+ xi =(beta+alfa*(ss-ss0))/dsqrt(-2._dp*alfa)
  if (xi0>xilim) then ! complementary error function
   erf0 = s15adf(xi0) !       erf0 = s15adf(xi0, ifai l)
  elseif(xi0<-xilim) then
@@ -479,28 +488,35 @@ elseif (alfa==0.0_dp) then
  beta =(f0*um-f1*vm)/dsmin
  xi = ss-s0
 ! if (alfa==0.0_dp) then
- if (abs(alfa)<EPS) then
+ if (dabs(alfa)<EPS) then
   r1 = r0 - xi*(-f0*um+0.5_dp*beta*(s0-ss0+ss-ss0))
 !  print *,'alfa,r1',alfa,r1
  else
   ga = (r0-dble(iim)) + (beta*(s0-ss0-1.0_dp/alfa)-f0*um)/alfa
-  r1 = r0 + ga*(exp(-alfa*xi) - 1.0_dp) -beta*xi/alfa
+  r1 = r0 + ga*(dexp(-alfa*xi) - 1.0_dp) -beta*xi/alfa
  endif 
 endif
 
-!print *,'alfa,beta',alfa,beta,const,dsmin,xi,xi0
+!print *,'alfa,beta',alfa,beta,r0-r1
 !print *,'subroutine pos_time',r0,r1
 if (r1-dble(ii) >0.0_dp .and. r1-dble(ii) <xxlim) r1=dble(ii )-xxlim
 if (dble(iim)-r1>0.0_dp .and. dble(iim)-r1<xxlim) r1=dble(iim)+xxlim
 
 ! print *,'ts=',ts,tt,dsmin,ds,dsmin-ds
 if(abs(r0-r1)>1.0_dp) then
-! print *,'warning time analytical solution outside the box',ntrac,r0,r1,r0-r1
+ print *,'warning time analytical solution outside the box',ntrac,ijk,r0,r1,r0-r1,ii,iim
+! stop 48956
  r1=r0
 endif
 
+! This needs to be included only if airborneError is commented out in loop
+!if(ijk==3) then
+! if(r1>dble(KM)) then
+!  r1=dble(KM)-0.5d0
+! endif
+!endif
 
-
+!print *,'time',ijk,r1,r0
 
 return
 end subroutine pos_time
@@ -521,36 +537,33 @@ INTEGER :: ii,iim,iconfig,i,loop
 REAL (DP)  :: uu,um,vv,vm,xi0,xin,ssii,ssiim,xerr,xf1,xi,xi00,xia,xib,xibf
 REAL (DP)  :: alfa,beta,ga,const,daw0,xf,xf2,xiaf,dawson1,dawson2
 REAL (DP)  :: rijk,ss,f0,f1,s0,ss0 
-!REAL (DP),SAVE  :: alfamax
-REAL (8)  :: r0,dsmin
+REAL (DP)  :: r0,dsmin
 
-print *,ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin
+!print *,'ii',ii
 
-alfa = -(vv-uu-vm+um)/dsmin
-!alfamax=max(abs(alfa),alfamax)
-!print *,alfa,alfamax
+alfa = -(vv-vm-uu+um)/dsmin                 ! same as alpha in paper
 if(alfa<EPS) stop 8771
-beta = um-uu
-xi0=(beta+alfa*(s0-ss0))/sqrt(2.*alfa)
+beta = um-uu                                ! not same as beta in paper
+xi0=(beta+alfa*(s0-ss0))/dsqrt(2._dp*alfa)  ! same as xi0 in paper where s=s0-ss0
 
 ! 1) ii or iim ---> land point 
 if (uu==0.0_dp .and. vv==0.0_dp) then
- xin =-log(ii-r0) 
+ xin =-dlog(dble(ii)-r0) 
  if (xi0<0.0_dp .and. xi0*xi0>=xin) then
   rijk = dble(iim)
-!  xin=-sqrt(xi0*xi0-xin)
-  xin=-sqrt(xi0*xi0-xin)
-  ss= 2.*(xin-xi0)/sqrt(2.*alfa) + s0
+  xin=-dsqrt(xi0*xi0-xin)
+  ss= 2._dp*(xin-xi0)/dsqrt(2._dp*alfa) + s0
   return
  else ! no solution
   return 
  endif
 elseif (um==0.0_dp .and. vm==0.0_dp ) then
- xin =-log(r0-iim)
+! xin =-log(r0-iim)
+ xin =-dlog(r0-dble(iim))
  if (xi0<0.0_dp .and. xi0*xi0>=xin) then
   rijk = dble(ii)
-  xin=-sqrt(xi0*xi0-xin)
-  ss= 2.*(xin-xi0)/sqrt(2.*alfa) + s0
+  xin=-dsqrt(xi0*xi0-xin)
+  ss= 2.*(xin-xi0)/dsqrt(2.*alfa) + s0
   return
  else ! no solution
   return
@@ -558,8 +571,8 @@ elseif (um==0.0_dp .and. vm==0.0_dp ) then
 endif
 
 if (f0==0.0_dp) then
- ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)
- const = (um*vv-uu*vm)/(vv-uu-vm+um)
+ ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)   ! gamma/alfa
+ const = (um*vv-uu*vm)/(vv-uu-vm+um)       ! (beta*gamma-alpha*delta)/alpha
  ssii=uu-vv
  if(ssii/=0.0_dp) ssii = uu/ssii
  ssiim=um-vm
@@ -583,17 +596,18 @@ else
  endif
 endif
 
-const = 2.*const/sqrt(2.*alfa)
+
+const = 2.*const/dsqrt(2.*alfa)
 daw0 = dawson2(xi0)    
 ! 'velocity' at xi0
-xf1 = const -(xi0+xi0)*(r0+ga)    
+xf1 = const -(xi0+xi0)*(r0+ga)  
 
 ! 2) ii direction (four velocity configurations at edge)
 if (ssii<=0.0_dp .or. ssii>=1.0_dp) then
  if (uu>0.0_dp .or. vv>0.0_dp) then
 ! 2a) configuration: +++
   iconfig = 1
-  xi00=(vm-vv)/sqrt(2.*alfa)
+  xi00=(vm-vv)/dsqrt(2.*alfa)
  else
 ! 2b) configuration: --- no solution, try rijk=iim
  ! print *,'2b configuration: --- no solution, try rijk=iim=',iim,ssii,uu,vv
@@ -604,12 +618,12 @@ else
  if (vv>0.0_dp) then
 ! 2c) configuration: -- 0 ++
   iconfig = 3   
-  xi00=(vm-vv)/sqrt(2.*alfa)
+  xi00=(vm-vv)/dsqrt(2.0_dp*alfa)
  else
 ! 2d) configuration: ++ 0 --
   if (s0-ss0>=ssii*dsmin) goto 3000
   iconfig = 4
-  xi00=(beta+alfa*ssii*dsmin)/sqrt(2.*alfa) 
+  xi00=(beta+alfa*ssii*dsmin)/dsqrt(2.0_dp*alfa) 
  endif 
 endif
 
@@ -620,19 +634,19 @@ rijk=dble(ii)
 xib =xi00
 xibf=xf
  if (xf1>0.0_dp) then
-  if (xf1*(xi00-xi0)>-(r0-rijk)) then
+  if ( xf1*(xi00-xi0) > -(r0-rijk) ) then
    xi00=xi0
    xf=r0-rijk
   endif
  else
   if (ssiim>0.0_dp .and. ssiim<1.0_dp .and.vm>0.0_dp) then
 !  check crossing at 3c) configuration: -- 0 ++
-   xf2=(beta+alfa*ssiim*dsmin)/sqrt(2.*alfa)
+   xf2=(beta+alfa*ssiim*dsmin)/dsqrt(2.0_dp*alfa)
    xf2=dawson1(const,daw0,r0+ga,xi0,xf2)-ga-dble(iim)
    if (xf2<0.0_dp) goto 3000
   endif                
   if (iconfig==4) then
-   xi00=(beta+alfa*ssiim*dsmin)/sqrt(2.*alfa)
+   xi00=(beta+alfa*ssiim*dsmin)/dsqrt(2.0_dp*alfa)
    xf=dawson1(const,daw0,r0+ga,xi0,xi00)-ga-dble(ii)
   endif
  endif     
@@ -650,18 +664,18 @@ xibf=xf
       else
 ! 3b) configuration: ---
        iconfig = 6
-       xi00=(vm-vv)/sqrt(2.*alfa)
+       xi00=(vm-vv)/dsqrt(2.0_dp*alfa)
       endif 
      else
       if (vm>0.0_dp) then
 ! 3c) configuration: -- 0 ++
        if (s0-ss0>=ssiim*dsmin) return
        iconfig = 7   
-       xi00=(beta+alfa*ssiim*dsmin)/sqrt(2.*alfa) 
+       xi00=(beta+alfa*ssiim*dsmin)/dsqrt(2.0_dp*alfa) 
       else
 ! 3d) configuration: ++ 0 --
        iconfig = 8
-       xi00=(vm-vv)/sqrt(2.*alfa) 
+       xi00=(vm-vv)/dsqrt(2.0_dp*alfa) 
       endif 
      endif
      xf=dawson1(const,daw0,r0+ga,xi0,xi00)-ga-dble(iim)
@@ -675,7 +689,7 @@ xibf=xf
        xf=r0-rijk
       endif
      elseif (iconfig==7) then
-      xi00=(beta+alfa*ssii*dsmin)/sqrt(2.*alfa)
+      xi00=(beta+alfa*ssii*dsmin)/dsqrt(2.0_dp*alfa)
       xf=dawson1(const,daw0,r0+ga,xi0,xi00)-ga-dble(iim)
      endif      
 
@@ -703,14 +717,14 @@ xibf=xf
      loop=loop+1
      if(loop==80) then
       print *, ' loop stop', xi0, xi00, xi, xf, ntrac, loop
-      if (abs(xf)>100*xxlim) loop=1000
+      if (dabs(xf)>100*xxlim) loop=1000
 !      print *, 'loopnr', abs(xf),xxlim,100*xxlim, loop
 !       if (xerr==UNDEF) loop=1000
       goto 200
      endif
      if(abs(xf1)<=eps) stop 4992
      xin = xi - xf/xf1
-     if ( abs(xf)>100.0_dp .or.(xf*xibf>0.0_dp .and.(xf1*xibf<0.0_dp .or.xin<xia)) ) then
+     if ( dabs(xf)>100.0_dp .or.(xf*xibf>0.0_dp .and.(xf1*xibf<0.0_dp .or.xin<xia)) ) then
       xib = xi
       xibf= xf
       xi = 0.5_dp*(xi+xia)
@@ -729,9 +743,9 @@ xibf=xf
      xf = xf2-ga-rijk
      xf1= const-(xi+xi)*xf2 
 !     if(loop==1000) print *, ' loop', xi, xf, xf1
-     if (abs(xf)>=xerr) then
+     if (dabs(xf)>=xerr) then
       goto 100
-     elseif ( abs(xf)>xxlim*abs(xf1*(xi-xi0)).and. abs(xf)<ssii ) then
+     elseif ( dabs(xf)>xxlim*dabs(xf1*(xi-xi0)) .and. dabs(xf)<ssii ) then
 ! as long as the error can be reduced and the accuracy in the computed
 ! time (ss) is not the same as the one for xi: continue the iterations
       xerr = UNDEF
@@ -743,11 +757,11 @@ xibf=xf
 
      endif
 200   continue
-     ss= 2.*(xi-xi0)/sqrt(2.*alfa) + s0
+     ss= 2.0_dp*(xi-xi0)/dsqrt(2.0_dp*alfa) + s0
 !     nstat(iconfig,1,1)=nstat(iconfig,1,1)+1       ! removed statistics
 !     nstat(iconfig,2,1)=nstat(iconfig,2,1)+loop
      if (xi/=xi0) then
-      xin=abs( xf/((xi-xi0)*xf1) )
+      xin=dabs( xf/((xi-xi0)*xf1) )
 !      accu(1)=accu(1)+1.0
 !      accu(2)=accu(2)+xin
 !      if (xin>xxlim.and.ntrac<=100) print *,ntrac,xin,xf1,ss-s0
@@ -757,7 +771,7 @@ xibf=xf
       print *, '+ time cross =', ss-s0, ss, s0,loop
       print *, 'alfa',alfa,uu,um,vv,vm
       print *, 'iconfig',iconfig,r0,rijk
-       print *, 'xi',xi-xi0,xi,xi0,2.*(xi-xi0)/sqrt(2.*alfa),s0
+       print *, 'xi',xi-xi0,xi,xi0,2.*(xi-xi0)/dsqrt(2.*alfa),s0
       print *,'ii',ii,iim,abs(xf),xxlim,abs(xf1*(xi-xi0)),ssii,xerr
       STOP 7235
      endif
@@ -775,41 +789,43 @@ USE mod_param
 USE mod_vel
 IMPLICIT NONE
 
-REAL (DP),  PARAMETER ::  xilim=3.0,xxlim=1.d-7
-INTEGER :: ii,iim,iconfig,i,loop
+REAL (DP),  PARAMETER ::  xilim=3.0_dp,xxlim=1.d-7
+INTEGER    :: ii,iim,iconfig,i,loop
 REAL (DP)  :: uu,um,vv,vm,xib,xia,xi00,xi0,xf1,xf,xf2,xin,xibf,xi,xerr,xiaf
 REAL (DP)  :: alfa,beta,ga,s15aef,s15adf,erf0,const,errfun
 REAL (DP)  :: rijk,ss,f0,f1,s0,ss0,ssii,ssiim   
-REAL (8)  :: r0,dsmin
+REAL (DP)  :: r0,dsmin
 
-if(abs(dsmin)<eps) stop 8801
-alfa = -(vv-uu-vm+um)/dsmin
+if(dabs(dsmin)<eps) stop 8801
+alfa = -(vv-vm-uu+um)/dsmin
 beta = um-uu
-xi0=(beta+alfa*(s0-ss0))/sqrt(-2.*alfa)
+xi0=(beta+alfa*(s0-ss0))/dsqrt(-2.0_dp*alfa)
 if(alfa>=EPS) then
- print *,alfa,vv,uu,vm,um,dsmin,xi0
+! print *,alfa,vv,uu,vm,um,dsmin,xi0
  stop 8802
 endif
+!print *,'alfabera=',alfa,beta,vv,uu,vm,um,dsmin,xi0,f0
 
 
 ! 1) ii or iim ---> land point 
      if (uu==0.0_dp .and. vv==0.0_dp) then
       rijk = dble(iim)
-      xin =-log(ii-r0) 
-      xin =-sqrt(xi0*xi0+xin)
-      ss= 2.*(xi0-xin)/sqrt(-2.*alfa) + s0
+      xin =-dlog(dble(ii)-r0) 
+      xin =-dsqrt(xi0*xi0+xin)
+      ss= 2.0_dp*(xi0-xin)/dsqrt(-2.0_dp*alfa) + s0
       return
      elseif (um==0.0_dp .and. vm==0.0_dp ) then
       rijk = dble(ii)
-      xin =-log(r0-iim)
-      xin =-sqrt(xi0*xi0+xin)
-      ss= 2.*(xi0-xin)/sqrt(-2.*alfa) + s0
+      xin =-dlog(r0-dble(iim))
+      xin =-dsqrt(xi0*xi0+xin)
+      ss= 2.0_dp*(xi0-xin)/dsqrt(-2.0_dp*alfa) + s0
       return
      endif 
 
      if (f0==0.0_dp) then
-      if(abs(vv-uu-vm+um)<EPS) stop 8803
+      if(dabs(vv-uu-vm+um)<EPS) stop 8803
       ga = -dble(iim) + (vm-um)/(vv-uu-vm+um)
+!      print *,'ga=',ga
       const = (um*vv-uu*vm)/(vv-uu-vm+um)
       ssii=uu-vv
       if(ssii/=0.0_dp) ssii = uu/ssii
@@ -819,12 +835,15 @@ endif
       if(vv-uu-vm+um==0.0_dp) stop 8806
       ga = -dble(iim) + (f1*vm-f0*um)/(vv-uu-vm+um)
       const = (f0*um*(vv-vm)+f1*vm*(um-uu))/(vv-uu-vm+um)
-      if(uu-vv+um*(f0-1.0_dp)+vm*(1.0_dp-f1)==0.0_dp) stop 8808
+      if(uu-vv+um*(f0-1.0_dp)+vm*(1.0_dp-f1)==0.0_dp) then
+       uu=uu*1.000001 ! this might be a dirty fix in order tro avoid division by zero
+     !  stop 8808
+      endif
       ssii = (uu+um*(f0-1.0_dp))/(uu-vv+um*(f0-1.0_dp)+vm*(1.0_dp-f1))
-      if(f0*um-f1*vm==0.0_dp) stop 8810
+      if(f0*um-f1*vm==0.d0) stop 8810
       ssiim= f0*um/(f0*um-f1*vm)
      endif
-     const = const*sqrt(pi/(-2.*alfa))
+     const = const*dsqrt(pi/(-2.0_dp*alfa))
      if (xi0>xilim) then
 ! complementary error function
       erf0 = s15adf(xi0)
@@ -835,14 +854,14 @@ endif
       erf0 = -s15aef(xi0)
      endif
 ! minus-velocity at xi0
-     xf1 = xi0*(r0+ga)-(const/sqrt(pi)) 
+     xf1 = xi0*(r0+ga)-(const/dsqrt(pi)) 
 
 ! 2) ii direction (four velocity configurations at edge)
      if (ssii<=0.0_dp .or. ssii>=1.0_dp) then
       if (uu>0.0_dp .or. vv>0.0_dp) then
 ! 2a) configuration: +++
        iconfig = 1
-       xi00=(vm-vv)/sqrt(-2.*alfa)
+       xi00=(vm-vv)/dsqrt(-2.0_dp*alfa)
       else
 ! 2b) configuration: --- no solution, try rijk=iim
        rijk=dble(iim)
@@ -852,12 +871,12 @@ endif
       if (vv>0.0_dp) then
 ! 2c) configuration: -- 0 ++
        iconfig = 3   
-       xi00=(vm-vv)/sqrt(-2.*alfa)
+       xi00=(vm-vv)/dsqrt(-2.0_dp*alfa)
       else
 ! 2d) configuration: ++ 0 --
        if (s0-ss0>=ssii*dsmin) goto 4000
        iconfig = 4
-       xi00=(beta+alfa*ssii*dsmin)/sqrt(-2.*alfa) 
+       xi00=(beta+alfa*ssii*dsmin)/dsqrt(-2.0_dp*alfa) 
       endif 
      endif
      xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(ii)
@@ -871,20 +890,21 @@ endif
        xf=r0-rijk
       endif
      else
-      if (ssiim>0.0_dp .and.ssiim<1.0_dp .and.vm>0.0_dp) then
+      if (ssiim>0.0_dp .and. ssiim<1.0_dp .and. vm>0.0_dp) then
 ! check crossing at 3c) configuration: -- 0 ++
-       xf2=(beta+alfa*ssiim*dsmin)/sqrt(-2.*alfa)
+       xf2=(beta+alfa*ssiim*dsmin)/dsqrt(-2.0_dp*alfa)
        xf2=errfun(const,erf0,r0+ga,xi0,xf2)-ga-dble(iim)
        if (xf2<0.0_dp) goto 4000
       endif
       if (iconfig==4) then
-       xi00=(beta+alfa*ssiim*dsmin)/sqrt(-2.*alfa)
+       xi00=(beta+alfa*ssiim*dsmin)/dsqrt(-2.0_dp*alfa)
        xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(ii)
       endif
      endif 
      goto 2000
 
 4000  continue
+!print *,'ssssss',ss, ssiim,um,vm
 ! 3) iim direction (four velocity configurations at edge)
      if (ssiim<=0.0_dp .or. ssiim>=1.0_dp) then
       if (um>0.0_dp .or. vm>0.0_dp) then
@@ -894,18 +914,19 @@ endif
       else
 ! 3b) configuration: ---
        iconfig = 6
-       xi00=(vm-vv)/sqrt(-2.*alfa)
+       xi00=(vm-vv)/dsqrt(-2.0_dp*alfa)
+!       print *,'xi00',xi00
       endif 
      else
       if (vm>0.0_dp) then
 ! 3c) configuration: -- 0 ++
        if (s0-ss0>=ssiim*dsmin) return
        iconfig = 7   
-       xi00=(beta+alfa*ssiim*dsmin)/sqrt(-2.*alfa) 
+       xi00=(beta+alfa*ssiim*dsmin)/dsqrt(-2.0_dp*alfa) 
       else
 ! 3d) configuration: ++ 0 --
        iconfig = 8
-       xi00=(vm-vv)/sqrt(-2.*alfa) 
+       xi00=(vm-vv)/dsqrt(-2.0_dp*alfa) 
       endif 
      endif
      xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(iim)
@@ -919,26 +940,26 @@ endif
        xf=r0-rijk
       endif
      elseif (iconfig==7) then   
-      xi00=(beta+alfa*ssii*dsmin)/sqrt(-2.*alfa)
+      xi00=(beta+alfa*ssii*dsmin)/dsqrt(-2.0_dp*alfa)
       xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(iim)
      endif
 
 2000  continue
 ! calculation of root
      if (loop==100) then
-      xi = 0.005 + xi0
+      xi = 0.005_dp + xi0
       do i=1,200
-       xi=xi-0.005
+       xi=xi-0.005_dp
        xf2= errfun (const,erf0,r0+ga,xi0,xi)
        xf = xf2-ga-rijk
-       xf1= xi*xf2-(const/sqrt(pi)) 
+       xf1= xi*xf2-(const/dsqrt(pi)) 
        print *, ' loop', xi, xf, xf1
       enddo
       loop = 1000
      else
 
      xi = xi00
-     xf1= xi*(xf+rijk+ga)-(const/sqrt(pi))
+     xf1= xi*(xf+rijk+ga)-(const/dsqrt(pi))
      xia = xi0
      xiaf= r0-rijk
      xerr = xxlim
@@ -947,20 +968,18 @@ endif
      loop=loop+1
      if(loop==80) then
 !      print *, ' loop stop', xi0, xi00, xi, xf
-      if (abs(xf)>100*xxlim) loop=1000
+      if (dabs(xf)>100*xxlim) loop=1000
 !       if (xerr==UNDEF) loop=1000
       goto 300
      endif
      xf1 = xf1+xf1
-!     if(xf1==0.0_dp) stop 59785
-!     if(abs(xf1)<EPS) stop 8827
 !     xin = xi - xf/xf1
      if(xf1==1.0_dp) then
       xin=xi 
      else
       xin=xi-xf/xf1
      endif
-     if ( abs(xf)>100.0_dp .or.(xf*xibf>0.0_dp .and. (xf1*xibf>0.0_dp .or.xin>xia)) )then
+     if ( dabs(xf)>100.0_dp .or.(xf*xibf>0.0_dp .and. (xf1*xibf>0.0_dp .or.xin>xia)) )then
       xib = xi
       xibf= xf
       xi = 0.5_dp*(xi+xia)
@@ -971,18 +990,17 @@ endif
      else
       xi = xin      
      endif
-!     stop 49567
      xf2= errfun (const,erf0,r0+ga,xi0,xi)
-     xf1= xi*xf2-(const/sqrt(pi))
+     xf1= xi*xf2-(const/dsqrt(pi))
      xf = xf2-ga-rijk
 !      print *, ' loop', xi, xf, xf1
-     if (abs(xf)>=xerr) then
+     if (dabs(xf)>=xerr) then
       goto 200
-     elseif ( abs(xf)>xxlim*abs(xf1*(xi-xi0)).and. abs(xf)<ssii ) then
+     elseif ( dabs(xf)>xxlim*dabs(xf1*(xi-xi0)).and. dabs(xf)<ssii ) then
 ! as long as the error can be reduced and the accuracy in the computed
 ! time (ss) is not the same as the one for xi: continue the iterations
       xerr = UNDEF
-      ssii = abs(xf)
+      ssii = dabs(xf)
       ssiim= xi
       goto 200
      endif
@@ -990,14 +1008,16 @@ endif
 
      endif
 300   continue
-     ss= 2.*(xi0-xi)/sqrt(-2.*alfa) + s0 
-     if (xi/=xi0) xin=abs( xf/((xi-xi0)*xf1) )
+     ss= 2.0_dp*(xi0-xi)/dsqrt(-2.0_dp*alfa) + s0 
+     if (xi/=xi0) xin=dabs( xf/((xi-xi0)*xf1) )
      if (loop==1000.or.ss-s0<0.0_dp) then
       if (ss-s0<0.0_dp) then
        print *, ' ss-s0 is negative '
        stop 48967
       endif
      endif
+     
+     
 
 return
 end subroutine amin
@@ -1017,7 +1037,7 @@ INTEGER :: ii,iim
 REAL (DP)  :: alfa,beta,ga,uu,um,vv,vm,ss,ssii,ssiim
 REAL (DP)  :: xerr,xf,xf1,xf2,xi,xi0,xi00,xia,xiaf,xib,xibf,xin
 REAL (DP)  :: rijk,s0,ss0,f0,f1
-REAL (8)  :: r0,dsmin
+REAL (DP)  :: r0,dsmin
 INTEGER :: loop,i,iconfig
 
 if (f0==0.0_dp) then
@@ -1054,7 +1074,7 @@ if (alfa==0.0_dp) then
    else
     rijk=dble(ii)
    endif
-   ss=-ga+sqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
+   ss=-ga+dsqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
   else
    if (beta>0.0_dp) then
     rijk=dble(ii)
@@ -1062,14 +1082,14 @@ if (alfa==0.0_dp) then
     rijk=dble(iim)
    endif         
    if ( (s0+ga)**2 >= 2.*(rijk-r0)/beta ) then
-    ss=-ga-sqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
+    ss=-ga-dsqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
    else
     if (beta>0.0_dp) then
      rijk=dble(iim)
     else
      rijk=dble(ii)
     endif
-    ss=-ga+sqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
+    ss=-ga+dsqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
    endif
   endif         
  endif
@@ -1292,15 +1312,12 @@ function dawson1 (const,daw0,r0,xi0,xi)
 USE mod_precdef
 
  IMPLICIT NONE
- REAL (DP)  :: dawson1,const,daw0,r0,xi0,xi,daw
+ REAL (DP)  :: dawson1,const,daw0,r0,xi0,xi,daw,dawson2
 
-REAL (dp) :: dawson2
-daw=dawson2(xi)
+ daw=dawson2(xi)
 
- dawson1=r0*exp(xi0**2-xi**2)+const*(daw-exp(xi0**2-xi**2)*daw0)
+ dawson1=r0*dexp(xi0**2-xi**2)+const*(daw-dexp(xi0**2-xi**2)*daw0)
  
-!  write(99,*) 'dawson1',dawson1,daw,exp(xi0**2-xi**2),xi0**2-xi**2
-
  return
 
 end function dawson1
@@ -1311,7 +1328,7 @@ function errfun (const,erf0,r0,xi0,xi)
 USE mod_param
 USE mod_precdef
  IMPLICIT NONE
- REAL (dp),   PARAMETER :: xilim=3.0
+ REAL (dp),   PARAMETER :: xilim=3.0_dp
  REAL (dp)   :: errfun,const,erf0,r0,xi0,xi,erf,s15aef,s15adf,hh0,hh
  INTEGER :: i
 
@@ -1323,7 +1340,6 @@ else
 ! if(xi/=0.0_dp) stop 3956
  erf  = -s15aef(xi) ! error function
 endif
-
 if (abs(xi)>25.) then 
  hh0=1.0_dp
  hh=1.0_dp
@@ -1331,19 +1347,20 @@ if (abs(xi)>25.) then
   hh0=-0.5_dp*hh0*dble(i+i-1)/(xi0*xi0)
   hh=hh+hh0
  enddo
- erf=exp(xi**2-xi0**2)*hh/xi0
+ erf=dexp(xi**2-xi0**2)*hh/xi0
  hh0=1.0_dp
  hh=1.0_dp
  do i=1,10
   hh0=-0.5_dp*hh0*dble(i+i-1)/(xi*xi)
   hh=hh+hh0
  enddo       
- erf = 1.0_dp/sqrt(pi)*((hh/xi)-erf) 
+ erf = 1.0_dp/dsqrt(pi)*((hh/xi)-erf) 
 else
- erf = exp(xi**2)*(erf-erf0)
+ erf = dexp(xi**2)*(erf-erf0)
 endif 
-errfun = r0*exp(xi**2-xi0**2) + const*erf 
+errfun = r0*dexp(xi**2-xi0**2) + const*erf 
 
+!print *,'errfun', errfun, const,erf0,r0,xi0,xi
 return
 
 end function errfun
@@ -1352,8 +1369,9 @@ end function errfun
 !______________________________________________________________________________
 !function dawson2(x)
 !
-!! Returns Dawson's integral for any real x.
+!! Returns Dawson's integral for any real x. 
 !
+!USE mod_precdef
 !USE mod_param
 !IMPLICIT NONE
 !INTEGER, PARAMETER ::  NMAX=6  ! Denna ska kollas och testas med högre värden
@@ -1374,30 +1392,30 @@ end function errfun
 !if(init==0) then
 ! init=1
 ! do i=1,NMAX
-!  c(i)=exp(-((2.*dble(i)-1.)*H)**2)
+!  c(i)=dexp(-((2.0_dp*dble(i)-1.)*H)**2)
 ! enddo 
 !endif
 !
-!if(abs(x)<0.2) then    !  Use series expansion.
+!if(abs(x)<0.2_dp) then    !  Use series expansion.
 ! x2=x**2
-! dawson2=x*(1.-A1*x2*(1.-A2*x2*(1.-A3*x2)))
+! dawson2=x*(1.0_dp-A1*x2*(1.-A2*x2*(1.-A3*x2)))
 !else                     !  Use sampling theorem representation.
-! xx=abs(x)
+! xx=dabs(x)
 ! n0=2*nint(0.5*xx/H)
 ! xp=xx-dble(n0)*H
-! e1=exp(2.*xp*H)
+! e1=dexp(2.0_dp*xp*H)
 ! e2=e1**2
 ! dd1=dble(n0+1)
 ! dd2=dd1-2.
 ! sum=0.
 ! if(abs(dd1)<eps .or. abs(dd2*e1)<eps) stop 3434
 ! do i=1,NMAX
-!  sum=sum+c(i)*(e1/dd1+1./(dd2*e1))
-!  dd1=dd1+2.
-!  dd2=dd2-2.
+!  sum=sum+c(i)*(e1/dd1+1.0_dp/(dd2*e1))
+!  dd1=dd1+2.0_dp
+!  dd2=dd2-2.0_dp
 !  e1=e2*e1
 ! enddo 
-! dawson2=pisqin*sign(exp(-xp**2),x)*sum 
+! dawson2=pisqin*dsign(dexp(-xp**2),x)*sum 
 !endif
 !
 !return
@@ -1405,6 +1423,7 @@ end function errfun
 
 
 FUNCTION dawson2(XX) RESULT(fn_val)
+!FUNCTION dawson2(XX) RESULT(fn_val)
 USE mod_precdef
 !USE mod_param
 ! Code converted using TO_F90 by Alan Miller
@@ -1654,6 +1673,7 @@ END IF
 RETURN
 !---------- Last line of DAW ----------
 END FUNCTION dawson2
+!END FUNCTION dawson3
 
 
 
@@ -1669,8 +1689,8 @@ USE mod_precdef
 !Returns the error function erf(x).
 
 IMPLICIT NONE
-!REAL (DP) ::  s15aef,x,gammp
-REAL (dp)  :: s15aef,x,gammp
+REAL (DP) ::  s15aef,x,gammp
+!REAL (dp)  :: s15aef,x,gammp
 
 if(x<0.0_dp)then
  s15aef=-gammp(0.5_dp,x**2)
@@ -1691,10 +1711,9 @@ USE mod_precdef
 ! Returns the incomplete gamma function P(a,x).
 
 IMPLICIT NONE
-!REAL (DP)  :: a,gammp,x,gammcf,gamser,gln
-REAL (dp)  :: a,gammp,x,gammcf,gamser,gln
+REAL (DP)  :: a,gammp,x,gammcf,gamser,gln
 
-if(x<0.0_dp .or.a<=0.0_dp) print *, 'bad arguments in gammp'
+if(x<0.0_dp .or. a<=0.0_dp) print *, 'bad arguments in gammp'
 
 if(x<a+1.0_dp) then ! Use the series representation.
  call gser(gamser,a,x,gln)
@@ -1732,22 +1751,22 @@ h=d
 
 do i=1,ITMAX  ! Iterate to convergence.
  an=-dble(i)*(dble(i)-a)
- b=b+2.
+ b=b+2.0_dp
  d=an*d+b
- if(abs(d)<FPMIN) d=FPMIN
+ if(dabs(d)<FPMIN) d=FPMIN
  c=b+an/c
- if(abs(c)<FPMIN) c=FPMIN
+ if(dabs(c)<FPMIN) c=FPMIN
  d=1.0_dp/d
  del=d*c
  h=h*del
- if(abs(del-1.0_dp)<EPS) goto 1
+ if(dabs(del-1.0_dp)<EPS) goto 1
 enddo
  
 print *, 'a too large, ITMAX too small in gcf',abs(del-1.0_dp),EPS,del
 print *,'cd=',an
 stop 8780
 
-1 gammcf=exp(-x+a*log(x)-gln)*h  ! Put factors in front.
+1 gammcf=dexp(-x+a*dlog(x)-gln)*h  ! Put factors in front.
 
 return
 end subroutine gcf
@@ -1765,14 +1784,14 @@ REAL (DP)  :: gammln,xx,ser,stp,tmp,x,y,cof(6)
 INTEGER j
 
 SAVE cof,stp
-DATA cof,stp/76.18009172947146,-86.50532032941677, &
-             24.01409824083091,-1.231739572450155,.1208650973866179d-2, &
-              -.5395239384953d-5,2.5066282746310005/
+DATA cof,stp/76.18009172947146d0,-86.50532032941677d0, &
+             24.01409824083091d0,-1.231739572450155d0,.1208650973866179d-2, &
+              -.5395239384953d-5,2.5066282746310005d0/
 
 x=xx
 y=x
-tmp=x+5.5
-tmp=(x+0.5_dp)*log(tmp)-tmp
+tmp=x+5.5_dp
+tmp=(x+0.5_dp)*dlog(tmp)-tmp
 ser=1.000000000190015
 
 do j=1,6
@@ -1781,7 +1800,7 @@ do j=1,6
 enddo 
 
 if(x<1.d-10) stop 8890
-gammln=tmp+log(stp*ser/x)
+gammln=tmp+dlog(stp*ser/x)
  
 return
 
@@ -1823,13 +1842,13 @@ do n=1,ITMAX
  ap=ap+1.0_dp
  del=del*x/ap
  sum=sum+del
- if(abs(del)<abs(sum)*EPS) goto 1
+ if(dabs(del)<dabs(sum)*EPS) goto 1
 enddo
  
 print *, 'a too large, ITMAX too small in gser'
 stop 8860
 
-1 gamser=sum*exp(-x+a*log(x)-gln)
+1 gamser=sum*dexp(-x+a*dlog(x)-gln)
 
 return
 end subroutine gser
@@ -1848,7 +1867,7 @@ REAL (DP)  :: s15adf,x,gammp,gammq
 if(x<0.0_dp) then 
  s15adf=1.0_dp+gammp(0.5_dp,x**2) 
 else 
- s15adf=   gammq(0.5_dp,x**2) 
+ s15adf=       gammq(0.5_dp,x**2) 
 endif 
 
 return 
