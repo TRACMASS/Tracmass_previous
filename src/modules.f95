@@ -99,6 +99,8 @@ MODULE mod_grid
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r, z_w
 #if defined zgrid3Dt 
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb,dzu,dzv
+  REAL, ALLOCATABLE, DIMENSION(:,:)         :: abyst,abysu,abysv
 #elif zgrid3D
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt, dzu, dzv
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
@@ -109,7 +111,7 @@ MODULE mod_grid
 #ifdef ifs
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa, bb
 #endif
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
@@ -152,7 +154,7 @@ CONTAINS
     if(kb == KM) dxyz = dxyz + intrpg * hs(ib,jb,nsp) + intrpr * hs(ib,jb,nsm)
 #endif /*freesurface*/
 #else
-    dxyz=dz(kb)
+    dxyz =dz(kb)
 #ifdef varbottombox
     if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
 #endif /*varbottombox*/
@@ -399,9 +401,8 @@ ENDMODULE mod_buoyancy
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_domain
-  INTEGER, DIMENSION(10)                    :: ienw ,iene
-  INTEGER, DIMENSION(10)                    :: jens ,jenn
-  REAL*4                                    :: timax
+  INTEGER, DIMENSION(10)                :: ienw ,iene, jens ,jenn
+  REAL*4                                :: timax
 ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -439,6 +440,7 @@ CONTAINS
     hs(:,:,nsm)      = hs(:,:,nsp)
     uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
     vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
+!    wflux(:,nsm) = wflux(:,nsp) 
 #if defined zgrid3Dt 
     dzt(:,:,:,nsm)   = dzt(:,:,:,nsp)
 #endif
@@ -453,7 +455,7 @@ CONTAINS
   end subroutine datasetswap
 
 #if defined full_wflux
-  subroutine calc_implicit_vertvel
+  subroutine calc_implicit_vertvel !This sub needs to be updated to include dzt stuff!!!!
 
     USE mod_grid, only: imt, jmt, km, nsm, nsp
     IMPLICIT none
@@ -519,6 +521,7 @@ MODULE mod_streamfunctions
 #ifdef stream_thermohaline
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
 #endif
+  INTEGER                        :: INTPSI ! to be read by the xxx.in files in future
 #ifdef streamts
   INTEGER, PARAMETER                        :: LOV=3
 #else
