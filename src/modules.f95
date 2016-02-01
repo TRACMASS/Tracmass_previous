@@ -111,7 +111,7 @@ MODULE mod_grid
 #ifdef ifs
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa, bb
 #endif
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
@@ -270,7 +270,8 @@ CONTAINS
     else
        loopints = ints
     end if
-    loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1
+    !loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1 !! LD: removed +1 so consistent with interpolation bounds
+    loopJD = (loopints + ttpart)*(dble(ngcm)/24)
     call  gdate (baseJD+loopJD-1+jdoffset ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
     loopFrac = (loopJD - dble(int(loopJD,8))) * 24
