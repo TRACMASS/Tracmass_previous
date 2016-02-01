@@ -4,13 +4,13 @@
 &INIT_GRID_DESCRIPTION
          gcmname = 'ROMS',
        gcmsource = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
-        gridname = 'VIP',
+        gridname = 'vip',
       gridsource = 'RutgersESMGroup',
         griddesc = '0.5 km 4 yr simulation of the Verde Island Passage, Philippines',
        indatadir =   '/Volumes/P4/workdir/liz/VIP_files/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'VIP',
+        casename = 'vip',
         casedesc = 'Looking at larval dispersal in lagrangian space',
 /
 &INIT_GRID_SIZE
