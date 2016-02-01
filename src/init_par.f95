@@ -83,7 +83,8 @@ SUBROUTINE init_params
    if (len(trim(projdir)) == 0) then
       CALL getenv('TRMDIR',ormdir)
       if (len(trim(ormdir)) .ne. 0) then
-         projdir = trim(ormdir)//'/'//'projects/'//trim(Project)//'/'
+         ! projdir = trim(ormdir)//'/'//'projects/'//trim(Project)//'/' !!!!! LD: removed last "/" in projdir; else too many "/"
+         projdir = trim(ormdir)//'/'//'projects/'//trim(Project)
       else
          projdir = 'projects/'//trim(Project)
       end if
@@ -120,6 +121,8 @@ SUBROUTINE init_params
    CLOSE (8)
 
    print *,'Run file    : ',trim(projdir)//'/'//trim(Case)//'.in'
+
+!! LD: Below section (up to subGrid) looks redundant with above (except using 'Case' instead of 'Project' to read in namelist)... is it unique?
    OPEN (8,file=trim(projdir)//'/'//trim(Case)//'.in',     &
         & status='OLD', delim='APOSTROPHE')
    READ (8,nml=INIT_NAMELIST_VERSION)
@@ -245,7 +248,9 @@ SUBROUTINE init_params
            ( dble((endHour)*3600 + endMin*60 + endSec) / 86400 ) -baseJD
    end if
    if (endJD < startJD) then
-      endJD =  baseJD + startJD + intrun*ngcm/24. -2
+!      endJD =  baseJD + startJD + intrun*ngcm/24. -2   !! LD: changed to -1 so enddate contains entire run 
+      endJD =  baseJD + startJD + intrun*ngcm/24. -1 
+
    end if
    call  gdate (endJD ,endYear , endMon ,endDay)
    endFrac = (endJD-int(endJD))*24

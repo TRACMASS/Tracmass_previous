@@ -72,7 +72,6 @@ SUBROUTINE readfields
 !  write(dstamp(38:39),'(i2.2)')  currMin
 
   dataprefix  = trim(inDataDir) // dstamp
-print *, dataprefix
   tpos        = intpart1+1
   uvel        = get3DfieldNC(trim(dataprefix) ,   'u')
   vvel        = get3DfieldNC(trim(dataprefix) ,   'v')
