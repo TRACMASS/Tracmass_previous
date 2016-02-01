@@ -243,7 +243,8 @@ CONTAINS
     USE mod_param, only: ngcm
     IMPLICIT NONE
     ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas 
-    currJDtot = (ints+ttpart)*(dble(ngcm)/24.)
+    !currJDtot = (ints+ttpart)*(dble(ngcm)/24.) !! LD: included startMin and startSec; irrelevant if both are 0; there may be a better way to do this...
+    currJDtot = (ints+ttpart)*(dble(ngcm)/24.) + startMin/(60*24.) + startSec/(60*60*24.)
     call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
                  currYear , currMon ,currDay)
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
@@ -270,8 +271,8 @@ CONTAINS
     else
        loopints = ints
     end if
-    !loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1 !! LD: removed +1 so consistent with interpolation bounds
-    loopJD = (loopints + ttpart)*(dble(ngcm)/24)
+    !loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1 !! LD: removed +1 so consistent with interpolation bounds; added startMin and startSec
+    loopJD = (loopints + ttpart)*(dble(ngcm)/24) + startMin/(60*24.) + startSec/(60*60*24.)
     call  gdate (baseJD+loopJD-1+jdoffset ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
     loopFrac = (loopJD - dble(int(loopJD,8))) * 24
