@@ -40,7 +40,6 @@ SUBROUTINE readfields
   REAL,       ALLOCATABLE, DIMENSION(:,:)    :: ssh,dzt0
   ! ===   ===   ===
 
-  
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt), dzt0(imt,jmt) )
      allocate ( sc_r(km), Cs_r(km) )
@@ -49,27 +48,38 @@ SUBROUTINE readfields
   alloCondDZ: if(.not. allocated (dzu)) then
      allocate ( dzu(imt,jmt,km), dzv(imt,jmt,km) )
   end if alloCondDZ
+  initFieldcond: if(ints.eq.intstart) then
+     uflux  = 0.
+     vflux  = 0.
+#ifdef tempsalt
+     tem    = 0.
+     sal    = 0.
+     rho    = 0.
+#endif
+  end if initFieldcond
+
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   sc_r = 0
   Cs_r = 0
   sc_w = 0
   Cs_w = 0
 
+  call updateclock
   call datasetswap
-  call updateClock
+
   ! === update the time counting ===
   intpart1    = mod(ints,24)
   intpart2    = floor((ints)/24.)
 
-  dstamp      = 'xxxx/VIP-LD.HCo10T_avg_xxxx-xx-xxT00:00:00.nc'
-!  dstamp      = 'xxxx/VIP-LD.HCo12T_avg_xxxx-xx-xxTxx:xx:00.nc'
+!  dstamp      = 'xxxx/VIP-LD.HCo10T_avg_xxxx-xx-xxT00:00:00.nc'
+  dstamp      = 'xxxx/VIP-LD.HCo12T_avg_xxxx-xx-xxTxx:xx:00.nc'
 
   write (dstamp(1:4),'(i4.4)')   currYear
   write (dstamp(24:27),'(i4i2)') currYear
   write(dstamp(29:30),'(i2.2)')  currMon
   write(dstamp(32:33),'(i2.2)')  currDay
-!  write(dstamp(35:36),'(i2.2)')  currHour
-!  write(dstamp(38:39),'(i2.2)')  currMin
+  write(dstamp(35:36),'(i2.2)')  currHour
+  write(dstamp(38:39),'(i2.2)')  currMin
 
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
