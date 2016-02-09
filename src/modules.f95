@@ -272,7 +272,7 @@ CONTAINS
        loopints = ints
     end if
     !loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1 !! LD: removed +1 so consistent with interpolation bounds; added startMin and startSec
-    loopJD = (loopints + ttpart)*(dble(ngcm)/24) + startMin/(60*24.) + startSec/(60*60*24.)
+    loopJD = (loopints + ttpart)*(dble(ngcm)/24) + startHour/(24.) + startMin/(60*24.) + startSec/(60*60*24.)
     call  gdate (baseJD+loopJD-1+jdoffset ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
     loopFrac = (loopJD - dble(int(loopJD,8))) * 24
