@@ -1,0 +1,126 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
+&INIT_GRID_DESCRIPTION
+         gcmname = 'ROMS',
+       gcmsource = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
+        gridname = 'vip',
+      gridsource = 'RutgersESMGroup',
+        griddesc = '0.5 km 4 yr simulation of the Verde Island Passage, Philippines',
+       indatadir = '/Volumes/P6/ROMS/VIP/VIP-LD.HCo12T/',  !'/Volumes/P4/workdir/liz/VIP_files/',
+/
+&INIT_CASE_DESCRIPTION
+        casename = 'vip',
+        casedesc = 'Looking at larval dispersal in lagrangian space',
+/
+&INIT_GRID_SIZE
+             imt =    601,
+             jmt =    341,
+              km =     50,
+             nst =      2,
+         subgrid =      0,
+     subgridimin =       ,
+     subgridimax =       ,
+     subgridjmin =       ,
+     subgridjmax =       ,
+     subgridfile =     '',
+       subgridid =       ,
+/
+&INIT_BASE_TIME
+         basesec =      0,
+         basemin =      0,
+        basehour =      0,
+         baseday =      1,
+         basemon =      1,
+        baseyear =   1990,
+/
+&INIT_GRID_TIME
+   fieldsperfile =      2,
+            ngcm =     24,
+            iter =     10,
+          intmax = 146000,
+        minveljd =     -1,
+        maxveljd =     -1,
+/
+&INIT_START_DATE
+        startsec =      0,
+        startmin =     30,
+       starthour =      0,
+        startday =      1,
+        startmon =      7,
+       startyear =   1996,
+         startjd =     -1,
+          intmin =     -1,
+        jdoffset =      0,
+/
+&INIT_RUN_TIME
+         intspin =      2,
+          intrun =     15,
+/
+&INIT_WRITE_TRAJS
+      twritetype =      1,
+           kriva =      1,
+      outdatadir = '/Volumes/P4/workdir/liz/VIP_tracmass/',
+     outdatafile = 'testVIP',
+ intmininoutfile =      0,
+          intpsi =    120,
+/
+&INIT_SEEDING
+             nff =       1,
+            isec =       4,
+            idir =       0,
+            nqua =       1,
+       partquant =      50,
+        ntracmax = 2000000,
+    loneparticle =       0,
+        seedtype =       2,
+            ist1 =     510,
+            ist2 =     520,
+            jst1 =     210,
+            jst2 =     220,
+            kst1 =      50,
+            kst2 =      50,
+            tst1 =        ,
+            tst2 =        ,
+         seeddir = '/Users/liz/TOOLS/tracmass/projects/vip/',
+        seedfile = 'test.seed',
+     varseedfile =      0,
+        seedtime =      0,
+         seedall =      0,
+         seedpos =      1,
+       seedparts =      0,
+     seedpart_id =      0,
+/
+&INIT_KILLZONES
+            nend =    4,
+            ienw  =   1,   1, 601,   1,
+            iene  =   1, 601, 601, 601,
+            jens  =   1, 341,   1,   1,
+            jenn  = 341, 341, 341,   1,
+            timax = 356000.0
+/
+&INIT_TEMP_SALT
+           tmin0 =  -50.0,
+           tmax0 =  400.0,
+           smin0 = -500.0,
+           smax0 =  400.0,
+           rmin0 = -100.0,
+           rmax0 =  500.0,
+           tmine =  -50.0,
+           tmaxe =  400.0,
+           smine = -150.0,
+           smaxe =  500.0,
+           rmine = -100.0,
+           rmaxe =  500.0,
+/
+&INIT_DIFFUSION
+              ah = 2000.0,
+              av =    0.0,
+/
+&INIT_SEDIMENT
+        partdiam =  0.001,
+            rhos = 2620.0,
+           cwamp =   20.0,
+           twave =    8.0,
+         critvel =    0.1,
+/
