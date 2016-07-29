@@ -342,50 +342,6 @@ contains
 #endif
     endif
     
-!    
-!! This is just a try and needs to be implemented and tested thoroughly
-!! It will neet do be implemented for all varbottombox
-!#ifdef baltix
-!! depth conversion for bottom box
-!#ifdef varbottombox
-!    if(  (ds==dse .or. ds==dsw .or. ds==dsn .or. ds==dss)  .and.  &
-!         (ka==KM+1-kmt(ia,ja) .or. kb==KM+1-kmt(ib,jb))             ) then
-!#ifdef zgrid3Dt 
-!        dza=dz(ka)
-!        dzb=dz(kb)
-!        if(ka==KM+1-kmt(ia,ja)) dza=dztb(ia,ja,1)
-!        if(kb==KM+1-kmt(ib,jb)) dzb=dztb(ib,jb,1)
-!#elif  zgrid3D
-!        dza=dzt(ia,ja,ka)
-!        dzb=dzt(ib,jb,kb)
-!#else
-! stop 4967
-!#endif /*zgrid3Dt*/
-!       if(dza.ne.dzb) then
-!		zz=dble(int(z1))+1.d0 - (1.d0-z1+dble(int(z1)))*dza/dzb 
-!	
-!		if( zz.le.dble(int(z1)) .or. zz.ge.dble(int(z1)+1) ) then
-!	 		print *, 'fel',zz,z1,dble(int(z1))
-!	 		print *,'z0,z1=',z0,z1
-!	 		print *,'nytt z1=',zz
-!	 		print *, 'dz',dza,dzb,dza/dzb
-!	 		print *, 'ds',ds,dse,dsw,dsn,dss
-!	 		print *, 'kmt',kmt(ia,ja),kmt(ib,jb),ka,kb
-!	 		print *, 'distance from top of a box in m',(1.-(z1-int(z1)))*dza
-!	 		print *, 'distance from top of b box in m',(1.-(zz-int(zz)))*dzb
-!	 		print *, 'ska vara mellan 0 och 1',(1.-z1+dble(int(z1)))*dza/dzb
-!	 		print *, 'ia,ib,ja,jb=',ia,ib,ja,jb
-!	 		print *, 'x0,x1,y0,y1=',x0,x1,y0,y1
-!	 		
-!		 	stop 4956
-!		endif
-!	
-!		z1=zz
-!	endif
-!	endif
-!#endif /*varbottombox*/
-!#endif /*baltix*/
- 
   end subroutine pos
   
 
