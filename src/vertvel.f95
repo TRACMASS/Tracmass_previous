@@ -33,7 +33,7 @@ subroutine vertvel(ia,iam,ja,ka)
      um = intrpg * uflux(iam,ja  ,k,nsp) + intrpr * uflux(iam,ja  ,k,nsm)
      vv = intrpg * vflux(ia ,ja  ,k,nsp) + intrpr * vflux(ia ,ja  ,k,nsm)
      vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
-#if defined zgrid3Dt
+#if defined zgrid3D
      do n=n1,n2
         ! time change of the mass the in grid box
         wflux(k,n) = wflux(k-1,n) - ff * &
@@ -42,14 +42,10 @@ subroutine vertvel(ia,iam,ja,ka)
                (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )
     enddo
 #else
-#if defined  full_wflux
-     wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
-#else 
     do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
     enddo
-#endif
 #endif
 !end ocean code
   end do kloop

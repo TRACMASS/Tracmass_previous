@@ -29,7 +29,9 @@ CONTAINS
           outDataDir = trim(projdir) // trim(Project) // '/'
        end if
     end if
-    if (outdircase .eqv. .true.) outDataDir = trim(outDataDir) // trim(Case) // '/'
+    if (outdircase .eqv. .true.) then
+       outDataDir = trim(outDataDir) // trim(Case) // '/'
+    end if
     if (outdirdate .eqv. .true.) then
        yearstr = 'XXXXXXXX-XXXX'
        write (yearstr(1:4),'(I4.4)') int(startYear)

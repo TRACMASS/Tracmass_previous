@@ -177,7 +177,7 @@ elseif(ijk==3) then
  endif
 #endif
 
-#ifdef zgrid3Dt 
+#ifdef zgrid3D 
   dzs= intrpg*dzt(ia,ja,ka,nsp)+intrpr*dzt(ia,ja,ka,nsm)
   dzu1=dzt(ia,ja,ka,nsm)
   dzu2=dzt(ia,ja,ka,nsp)
@@ -193,28 +193,7 @@ elseif(ijk==3) then
   if(abs(f1)<=eps) stop 8708
   f0=1.0_dp/f0
   f1=1.0_dp/f1
-
-#elif defined zgrid3D && defined freesurface
- if (ka==km) then
-  dzs= dz(km)+intrpg*hs(ia,ja,nsm)+intrpr*hs(ia,ja,nsp)
-  dzu1=dz(km)+hs(ia,ja,nsm)
-  dzu2=dz(km)+hs(ia,ja,nsp)
-  if(abs(dzu1)<eps) print *,dzu1,eps
-  if(abs(dzu1)<eps) print *,dz(km-1),dz(km),hs(ia,ja,nsm),hs(ia,ja,nsp)
-  if(abs(dzu1)<eps) stop 8705
-  if(abs(dzu2)<eps) stop 8706
-  f0=dzs/dzu1
-  f1=dzs/dzu2
-  uu=uu*f0
-  um=um*f0
-  vv=vv*f1
-  vm=vm*f1
-  if(abs(f0)<=eps) stop 8707
-  if(abs(f1)<=eps) stop 8708
-  f0=1.0_dp/f0
-  f1=1.0_dp/f1
- endif 
-#endif /*zgrid3Dt*/
+#endif /*zgrid3D*/
 
 endif
 
@@ -382,7 +361,7 @@ elseif(ijk==3) then
  endif
 #endif
 
-#ifdef zgrid3Dt 
+#ifdef zgrid3D 
   dzs= intrpg*dzt(ia,ja,ka,nsp)+intrpr*dzt(ia,ja,ka,nsm)
   dzu1=dzt(ia,ja,ka,nsm)
   dzu2=dzt(ia,ja,ka,nsp)
@@ -398,25 +377,7 @@ elseif(ijk==3) then
   if(abs(f1)<=eps) stop 4969
   f0=1.0_dp/f0
   f1=1.0_dp/f1
-#elif defined zgrid3D && defined freesurface
- if (ka==km) then
-  dzs= dz(km)+intrpg*hs(ia,ja,nsm)+intrpr*hs(ia,ja,nsp)
-  dzu1=dz(km)+hs(ia,ja,nsm)
-  dzu2=dz(km)+hs(ia,ja,nsp  )
-  if(abs(dzu1)<=eps) stop 4966
-  if(abs(dzu2)<=eps) stop 4967
-  f0=dzs/dzu1
-  f1=dzs/dzu2
-  uu=uu*f0
-  um=um*f0
-  vv=vv*f1
-  vm=vm*f1
-  if(abs(f0)<=eps) stop 4968
-  if(abs(f1)<=eps) stop 4969
-  f0=1.0_dp/f0
-  f1=1.0_dp/f1
- endif 
-#endif /*zgrid3Dt*/
+#endif /*zgrid3d*/
 
 
 endif

@@ -60,6 +60,13 @@ CONTAINS
     print *,'Prefix for output files    : ' ,trim(outDataFile)
     print *, thinline !--------------------------------------------------- 
     print *,"Selected compile options:"
+
+#if defined zgrid3Dt
+    print *,' - zgrid3Dt has been renamed to zgrid3D. Please update your'
+    print *,'   project Makefile.prj accordingly.'
+    stop
+#endif
+    
 #ifdef timeanalyt 
     print *,' - Analytical time scheme used to solve diff. Eqs.'
 #elif defined timestep
@@ -195,12 +202,20 @@ CONTAINS
     wallsec = walltime - wallmin*60
 
     call updateClock
-    print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
-         wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin 
-799 format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
-         i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
-         i2.2, ':', i2.2)
-!799 format(i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10, ' dt=',i2.2,':',i2.2)
+    if (loneparticle>0) then
+       print 798 ,ints-intstart ,trj(1,loneparticle) ,trj(2,loneparticle), &
+            trj(3,loneparticle), nrj(6,loneparticle), wallmin, wallsec, loopYear, &
+            loopMon, loopDay, loopHour, loopMin 
+    else
+       print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
+            wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin
+    end if
+798    format(i7, '|', F8.2,  '|', F8.2,  '|', F8.2,  '|', i10, ' | ',  &
+            i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
+            i2.2, ':', i2.2)    
+799    format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
+            i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
+            i2.2, ':', i2.2)
 #endif
   end subroutine print_cycle_loop
 

@@ -34,7 +34,7 @@ SUBROUTINE init_seed()
 #endif
    LOGICAL                                    :: fileexists
 
-!-------------------------------------------------------------------------------
+   !-------------------------------------------------------------------------
    print *, ' '
    SELECT CASE (seedType)
      
@@ -282,5 +282,4 @@ SUBROUTINE init_seed()
       PRINT*,' Each seed position is used once                   '
    
    END SELECT
-   
 END SUBROUTINE init_seed

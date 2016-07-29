@@ -14,7 +14,7 @@ MODULE mod_seed
 !!
 !!------------------------------------------------------------------------------
 
-   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant
+   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart
    USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
    USE mod_vel,   only    : uflux, vflux, wflux, ff
    USE mod_traj,  only    : ntractot, ntrac, x1, y1, z1, trj, nrj
@@ -26,6 +26,7 @@ MODULE mod_seed
    INTEGER                                    :: nff,  isec,  idir
    INTEGER                                    :: nqua, num, nsdMax
    INTEGER                                    :: nsdTim
+   INTEGER                                    :: seedtstep=1   
    INTEGER                                    :: seedPos, seedTime
    INTEGER                                    :: seedType
    INTEGER                                    :: seedAll, varSeedFile
@@ -56,9 +57,9 @@ CONTAINS
      REAL*8                                   :: tt, ts
      REAL*8                                   :: vol, subvol
 
-      ! --------------------------------------------
-      ! --- Check if ntime is in vector seed_tim ---
-      ! --------------------------------------------
+     ! --------------------------------------------
+     ! --- Check if ntime is in vector seed_tim ---
+     ! --------------------------------------------     
       IF (seedTime == 2) THEN
          findTime: DO jsd=1,nsdTim
             IF (seed_tim(jsd) == ntime) THEN
@@ -71,6 +72,10 @@ CONTAINS
             END IF
          END DO findTime
       END IF
+      
+      !What is this line for???
+      !if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
+      
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---
       !----------------------------------------
@@ -80,6 +85,7 @@ CONTAINS
          ikst  = seed_ijk (jsd,3)
          isec  = seed_set (jsd,1)
          idir  = seed_set (jsd,2)
+         
          if (iist <   1) cycle startLoop
          if (ijst <   1) cycle startLoop
          if (iist > imt) cycle startLoop
@@ -142,7 +148,7 @@ CONTAINS
                ENDIF
                IF (vol == 0.d0) cycle startLoop
          
-         END SELECT
+            END SELECT
          ! If the particle is forced to move in positive/negative direction
          IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0) .OR. (vol == 0.) ) THEN
             CYCLE startLoop
@@ -153,13 +159,11 @@ CONTAINS
       
          ! Calculate volume/mass of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
-!#if defined zgrid3Dt
+#if defined zgrid3D
             vol = dzt(ib,jb,kb,1)
-!#elif  zgrid3D
-!            vol = dzt(ib,jb,kb)
-!#elif  zgrid1D
-!            vol = dz(kb)
-!#endif /*zgrid*/
+#else
+            vol = dz(kb)
+#endif /*zgrid*/
 !#ifdef varbottombox
 !            IF (kb == KM+1-kmt(ib,jb)) THEN
 !               vol = dztb (ib,jb,1)
@@ -187,7 +191,7 @@ CONTAINS
             case (5)
                num = partQuant
                subtimesteps = numseedsubints
-         END SELECT
+            END SELECT
          IF (num == 0 .AND. nqua /= 4) THEN
             num=1
          END IF
@@ -246,8 +250,8 @@ CONTAINS
                      END IF
 
                   CASE (4)   ! Spread evenly inside box                  
-                     x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt) - 0.5d0) / DBLE(ijt)
-                     y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt) - 0.5d0) / DBLE(ikt)
+                     x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
+                     y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
                      z1 = DBLE (kb-1) + 0.5d0
 
                   CASE (5)                  
@@ -283,9 +287,9 @@ CONTAINS
                   ! tt - time [s] rel to start
                   ts = DBLE (ints-1) + seedsubints(subtstep)
                   tt = ts * tseas
-                  ! ------------------------------------------------------------
+                  ! ---------------------------------------------------------
                   ! --- Put the new particle into the vectors trj and nrj ---
-                  ! ------------------------------------------------------------
+                  ! ---------------------------------------------------------
                   trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
                   nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
                   nrj(7,ntrac)=1

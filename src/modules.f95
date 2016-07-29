@@ -97,12 +97,8 @@ MODULE mod_grid
   ! === Vertical grids ===
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: zlev
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r, z_w
-#if defined zgrid3Dt 
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
-#elif zgrid3D
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt, dzu, dzv
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt, dzu, dzv
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
-#endif /*zgrid3Dt*/
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
@@ -144,13 +140,8 @@ CONTAINS
     REAL*8                                    :: intrpr, intrpg
 
     ! T-box volume in m3
-#ifdef zgrid3Dt 
+#ifdef zgrid3D
     dxyz = intrpg * dzt(ib,jb,kb,nsp) + intrpr * dzt(ib,jb,kb,nsm)
-#elif  zgrid3D
-    dxyz = dzt(ib, jb, kb)
-#ifdef freesurface
-    if(kb == KM) dxyz = dxyz + intrpg * hs(ib,jb,nsp) + intrpr * hs(ib,jb,nsm)
-#endif /*freesurface*/
 #else
     dxyz=dz(kb)
 #ifdef varbottombox
@@ -159,7 +150,7 @@ CONTAINS
 #ifdef freesurface
     if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
 #endif /*freesurface*/
-#endif /*zgrid3Dt*/
+#endif /*zgrid3D*/
     dxyz=dxyz*dxdy(ib,jb)
     if (dxyz<0) then
        print *,'=========================================================='
@@ -239,18 +230,23 @@ CONTAINS
 
   subroutine updateClock  
     USE mod_param, only: ngcm
+    USE mod_seed, only: nff
     IMPLICIT NONE
-    ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas 
+    ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas
+    print *, (ints+ttpart)*(dble(ngcm)/24.)
+    stop
     currJDtot = (ints+ttpart)*(dble(ngcm)/24.)
     call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
                  currYear , currMon ,currDay)
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
+    
     if ((mod(currYear, 4) == 0)  .and. (currJDyr>56) .and.     &
          (currJDyr<(56 - leapoffset + ngcm/24.)) .and. noleap) then
        leapoffset = leapoffset + 1
        call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
             currYear , currMon ,currDay)
     end if
+    
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
     currFrac = (currJDtot-dble(int(currJDtot,8)))*24
     currHour = int(currFrac,8)
@@ -268,7 +264,7 @@ CONTAINS
     else
        loopints = ints
     end if
-    loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1
+    loopJD = (loopints + ttpart)*(dble(ngcm)/24) !+ 1 TEST IF NEEDED
     call  gdate (baseJD+loopJD-1+jdoffset ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
     loopFrac = (loopJD - dble(int(loopJD,8))) * 24
@@ -439,7 +435,7 @@ CONTAINS
     hs(:,:,nsm)      = hs(:,:,nsp)
     uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
     vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
-#if defined zgrid3Dt 
+#if  zgrid3D
     dzt(:,:,:,nsm)   = dzt(:,:,:,nsp)
 #endif
 #if defined explicit_w || full_wflux
