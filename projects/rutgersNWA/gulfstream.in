@@ -2,15 +2,8 @@
       gridvernum =      6,
 /
 &INIT_GRID_DESCRIPTION
-         gcmname = 'ROMS',
-       gcmsource = 'http://www.atmos.ucla.edu/cesr/ROMS_page.html',
-        gridname = 'rutgersNWA',
-      gridsource = 'Rutgers',
-        griddesc = '7.5 km 50 yr simulation of the NW Atlantic',
-       indatadir = '/projData/rutgers/NWA/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'test',
         casedesc = 'Looking at chl growth in lagrangian space',
 /
 &INIT_GRID_SIZE
@@ -27,13 +20,8 @@
        subgridid =      1,
 /
 &INIT_BASE_TIME
-         basesec =      0,
-         basemin =      0,
-        basehour =      0,
-         baseday =      1,
-         basemon =      1,
-        baseyear =      1,
 /
+
 &INIT_GRID_TIME
    fieldsperfile =     31,
             ngcm =     24,
@@ -47,14 +35,14 @@
         startmin =      0,
        starthour =      0,
         startday =      1,
-        startmon =      2,
+        startmon =      1,
        startyear =   2000,
          startjd =     -1,
           intmin =  65800,
 /
 &INIT_RUN_TIME
-         intspin =      1,
-          intrun =    120,
+         intspin =   365,
+          intrun =   730,
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
@@ -65,18 +53,18 @@
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      4,
+            isec =      2,
             idir =      0,
-            nqua =      1,
-       partquant =      9,
+            nqua =      2,
+       partquant =   1000,
         ntracmax = 7000000,
     loneparticle =     -1,
         seedtype =      1,
             ist1 =    250,
-            ist2 =    255,
+            ist2 =    251,
             jst1 =    120,
             jst2 =    170,
-            kst1 =     40,
+            kst1 =     20,
             kst2 =     40,
             tst1 =     -1,
             tst2 =     -1,
@@ -98,27 +86,8 @@
            timax = 36500.2,
 /
 &INIT_TEMP_SALT
-           tmin0 =  -50.0,
-           tmax0 =  400.0,
-           smin0 = -500.0,
-           smax0 =  400.0,
-           rmin0 = -100.0,
-           rmax0 =  500.0,
-           tmine =  -50.0,
-           tmaxe =  400.0,
-           smine = -150.0,
-           smaxe =  500.0,
-           rmine = -100.0,
-           rmaxe =  500.0,
 /
 &INIT_DIFFUSION
-              ah = 2000.0,
-              av =    0.0,
 /
 &INIT_SEDIMENT
-        partdiam =  0.001,
-            rhos = 2620.0,
-           cwamp =   20.0,
-           twave =    8.0,
-         critvel =    0.1,
 /

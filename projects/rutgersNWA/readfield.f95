@@ -3,7 +3,8 @@ SUBROUTINE readfields
   USE netcdf
   USE mod_param
   USE mod_vel
-  
+
+  USE mod_seed,     only: nff
   USE mod_time
   USE mod_grid
   USE mod_name
@@ -45,17 +46,15 @@ SUBROUTINE readfields
      allocate ( sc_r(km), Cs_r(km) )
   end if alloCondUVW
   alloCondDZ: if(.not. allocated (dzu)) then
-     allocate ( dzu(imt,jmt,km), dzv(imt,jmt,km) )
+     allocate ( dzu(imt,jmt,km,2), dzv(imt,jmt,km,2) )
   end if alloCondDZ
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   sc_r = 0
   Cs_r = 0
 
-
   call datasetswap
   call updateClock
 
-  ! === update the time counting ===
   intpart1    = mod(ints,24)
   intpart2    = floor((ints)/24.)
   dstamp      = 'nwa_avg_XXXXX.nc'
@@ -82,22 +81,25 @@ SUBROUTINE readfields
 
   do k=1,km
      dzt0 = (sc_r(k)-Cs_r(k))*hc + Cs_r(k) * depth
-     dzt(:,:,k)= dzt0 + ssh*(1.0 + dzt0/depth)
+     dzt(:,:,k,2)= dzt0 + ssh*(1.0 + dzt0/depth)
   end do
 
-  dzt0 = dzt(:,:,km)
-  dzt(:,:,1:km-1)=dzt(:,:,2:km)-dzt(:,:,1:km-1)
-  dzt(:,:,km) = ssh-dzt0
+  dzt0 = dzt(:,:,km,2)
+  dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
+  dzt(:,:,km,2) = ssh-dzt0
 
-  dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:)*0.5 + dzt(2:imt,:,:)*0.5
-  dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:)*0.5 + dzt(:,2:jmt,:)*0.5
+  dzu(1:imt-1,:,:,2) = dzt(1:imt-1,:,:,2)*0.5 + dzt(2:imt,:,:,2)*0.5
+  dzv(:,1:jmt-1,:,2) = dzt(:,1:jmt-1,:,2)*0.5 + dzt(:,2:jmt,:,2)*0.5
 
   do k=1,km
-     uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k) * dyu
-     vflux(:,:,k,2)   = vvel(:,:,k) * dzv(:,:,k) * dxv
+     uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k,2) * dyu
+     vflux(:,:,k,2)   = vvel(:,:,k) * dzv(:,:,k,2) * dxv
   end do
 
-  if (intstep .le. 0) then
+  !print *, dzv(:,:,km,:)
+  !stop
+  
+  if (nff .eq. 2) then
      uflux = -uflux
      vflux = -vflux
   end if
