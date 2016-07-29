@@ -1,0 +1,70 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
+&INIT_GRID_DESCRIPTION
+/
+&INIT_CASE_DESCRIPTION
+/
+&INIT_GRID_SIZE
+             imt =   1440,
+             jmt =    720,
+              km =     50,
+             nst =      2,
+         subgrid =      1,
+     subgridkmin =      2,
+     subgridkmax =      2,
+/
+&INIT_BASE_TIME
+/
+&INIT_GRID_TIME
+/
+&INIT_START_DATE
+        startsec =      0,
+        startmin =      0,
+       starthour =      0,
+        startday =      1,
+        startmon =     10,
+       startyear =   2010,
+         startjd =     -1,
+          intmin =      1,
+/
+&INIT_RUN_TIME
+         intspin =      1,
+          intrun =  12166,
+/
+&INIT_WRITE_TRAJS
+/
+&INIT_SEEDING
+             nff =      1,
+            isec =      3,
+            idir =      0,
+            nqua =      1,
+       partquant =      6,
+        ntracmax = 7000000,
+    loneparticle =      0,
+        seedtype =      1,
+            ist1 =      1,		 
+            ist2 =     -1,			  
+            jst1 =      1,		 
+            jst2 =    700,		 
+            kst1 =      1,		 
+            kst2 =      1,
+         seedall =      0,
+         seedpos =      1,
+       seedparts =     10,
+     seedpart_id =      1,
+/
+&INIT_KILLZONES
+            nend =      0,
+            ienw =      0,
+            iene =      0,
+            jens =      0,
+            jenn =      0,
+           timax = 36500.0,
+/
+&INIT_TEMP_SALT
+/
+&INIT_DIFFUSION
+/
+&INIT_SEDIMENT
+/

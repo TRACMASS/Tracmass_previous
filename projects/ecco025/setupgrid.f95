@@ -1,3 +1,4 @@
+
 SUBROUTINE setupgrid
   
   USE netcdf
@@ -46,7 +47,7 @@ SUBROUTINE setupgrid
   map3d    = [2, 3, 4, 1]
   ncTpos = 1
   gridfile = trim(inDataDir) // 'UVEL.1440x720x50.20000802.nc'
-  
+
   start1D  = [subGridImin]
   count1d  = [imt]
   lon =  get1DfieldNC(trim(gridfile) , 'LONGITUDE_T')
@@ -83,12 +84,9 @@ SUBROUTINE setupgrid
      dz_inv(km) = dz_inv(km-1)
   end if
   dz = dz_inv(km:1:-1)
-  
   uvel = get3DfieldNC(trim(inDataDir)//'SALT.1440x720x50.20050812.nc', 'SALT')
   mask = 1
   where (uvel(:,:,1) < 0) mask = 0  
   kmt = km
   
-
-
 end SUBROUTINE setupgrid
