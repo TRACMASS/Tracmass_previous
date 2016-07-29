@@ -7,7 +7,7 @@
         gridname = 'HYCOM GLBa0.0',
       gridsource = 'http://www.hycom.org',
         griddesc = '1/12 deg run for the global Ocean.',
-       indatadir = '/projData/hycom/data/',
+       indatadir = '/projData/HYCOM/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'orcaGlobal',
@@ -15,14 +15,14 @@
 /
 &INIT_GRID_SIZE
              imt =   4500,
-             jmt =   3298,
-              km =     33,
+             jmt =   2001,
+              km =     40,
              nst =      2,
          subgrid =      1,
-     subgridimin =   1600,
-     subgridimax =   2400,
-     subgridjmin =    800,
-     subgridjmax =   1300,
+     subgridimin =      1,
+     subgridimax =   4500,
+     subgridjmin =      1,
+     subgridjmax =   2001,
      subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /

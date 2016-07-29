@@ -1,9 +1,9 @@
+
 SUBROUTINE setupgrid
   
   USE netcdf
   USE mod_param
   USE mod_vel
-  
   USE mod_time
   USE mod_grid
   USE mod_name
@@ -33,54 +33,59 @@ SUBROUTINE setupgrid
   !  dyu -
   ! -------------------------------------------------------------
 
-
-
-  ! === Init local variables for the subroutine ===
   INTEGER                                    :: i ,j ,k ,kk
 
+  REAL,          ALLOCATABLE, DIMENSION(:)   :: lat,lon,dz_inv
+  REAL,          ALLOCATABLE, DIMENSION(:,:) :: dytt,dxtt
+  CHARACTER (len=200)                        :: gridfile
 
-! === Template for setting up grids. Move the code from readfile.f95
+  allocate ( lon(imt), lat(jmt), dz_inv(km) )
+  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt) )
+  call coordinat
 
-! ===
+  map2d    = [3, 4, 1, 1]
+  map3d    = [2, 3, 4, 1]
+  ncTpos = 1
+  !gridfile = trim(inDataDir) // 'hycom_glb_910_2013121800_t000_uv3z.nc'
+  gridfile = trim(inDataDir) // 'hycom_glb_909_2013010100_t000_ts3z.nc'
+  start1D  = [subGridImin]
+  count1d  = [imt]
+  lon =  get1DfieldNC(trim(gridfile) , 'lon')
+  start1D  = [subGridJmin]
+  count1d  = [jmt]
+  lat =  get1DfieldNC(trim(gridfile) , 'lat')
+  start1D  = [subGridKmin]
+  count1d  = [km]
 
+  do i=1,imt-1
+     do j=1,jmt-1
+        dxtt(i,j) = l2d( lon(i), lon(i+1), lat(j), lat(j) )
+        dytt(i,j) = l2d( lon(i), lon(i), lat(j), lat(j+1) )
+     end do
+  end do
 
-!!$  CHARACTER (len=200)                        :: gridFileXY, gridFileZ
-!!$  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: kmask
-!!$
-!!$  alloCondGrid: if ( .not. allocated (kmask) ) then
-!!$     allocate ( kmask(IMT+2,JMT,KM) )
-!!$  end if alloCondGrid
-!!$  
-!!$  start1d  = [  1]
-!!$  count1d  = [ km]
-!!$  !Order is     t    k            i            j
-!!$  start2d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count2d  = [  1 ,  1 ,subGridImax ,subGridJmax]
-!!$  map2d    = [  4 ,  3 ,          1 ,          2]  
-!!$  start3d  = [  1 ,  1 ,subGridImin ,subGridJmin]
-!!$  count3d  = [  1 , km ,subGridImax ,subGridJmax]
-!!$  map3d    = [  4 ,  3 ,          2 ,          1]  
-!!$  
-!!$  gridFileXY = trim(inDataDir)//'grid_cell_xy.nc'
-!!$  gridFileZ  = trim(inDataDir)//'grid_cell_z.nc'
-!!$  
-!!$  dz   = get1DfieldNC(trim(gridFileZ)  ,'dz')  / 100.
-!!$  dxv  = get2DfieldNC(trim(gridFileXY) ,'DXU') / 100.
-!!$  dyu  = get2DfieldNC(trim(gridFileXY) ,'DYU') / 100.
-!!$  dxdy = dxv * dyu
-!!$
-!!$  dzt = 0
-!!$  kmask  = get3DfieldNC(trim(gridFileZ) ,'SALT')
-!!$  do j=1,jmt
-!!$     do i=1,imt
-!!$        do k=1,km
-!!$           kk=km+1-k
-!!$           if(kmask(i,j,k) .le. 1000.) then
-!!$              kmt(i,j)=k
-!!$              dzt(i,j,k) = dz(kk)
-!!$           end if
-!!$        enddo
-!!$     enddo
-!!$  enddo
+  do j=1,jmt-1
+     dxtt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j) )
+     dytt(imt,j) = l2d( lon(imt),lon(1)+360,lat(j),lat(j+1) )
+  end do
 
-end SUBROUTINE setupgrid
+  dxtt(:,jmt) = dxtt(:,jmt-1)
+  dytt(:,jmt) = dytt(:,jmt-1)
+
+  dxv(1:imt-1,:) = dxtt(1:imt-1,:)/2 + dxtt(2:imt,:)/2
+  dyu(:,1:jmt-1) = dytt(:,1:jmt-1)/2 + dytt(:,2:jmt)/2
+  dyu(:,jmt) = dyu(:,jmt-1)
+  dxv(imt,:) = dxtt(imt,:)/2 + dxtt(1,:)/2
+  dxdy = dyu * dxv                                                          
+
+  dz_inv = get1DfieldNC(trim(gridfile), 'depth')
+  if  (km > 1) then
+     dz_inv(1:km-1) = dz_inv(2:km)-dz_inv(1:km-1)
+     dz_inv(km) = dz_inv(km-1)
+  end if
+  dz = dz_inv(km:1:-1)
+  uvel = get3DfieldNC(trim(gridfile), 'salinity')
+  mask = 1
+  where (uvel(:,:,1) < 0) mask = 0  
+  kmt = km
+  end SUBROUTINE setupgrid
