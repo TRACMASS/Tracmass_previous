@@ -59,7 +59,7 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = '/Volumes/keronHD4/ormOut/',
+outdatadir = '/Volumes/keronHD4/ormOut/',
      outdatafile = 'jplNOWtest',
  intmininoutfile =      1,
 /
