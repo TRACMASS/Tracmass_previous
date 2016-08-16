@@ -14,7 +14,7 @@ MODULE mod_seed
 !!
 !!------------------------------------------------------------------------------
 
-   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart
+   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart,nff
    USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
    USE mod_vel,   only    : uflux, vflux, wflux, ff
    USE mod_traj,  only    : ntractot, ntrac, x1, y1, z1, trj, nrj
@@ -23,7 +23,7 @@ MODULE mod_seed
                             sal, tem, rho
    IMPLICIT NONE
   
-   INTEGER                                    :: nff,  isec,  idir
+   INTEGER                                    :: isec,  idir
    INTEGER                                    :: nqua, num, nsdMax
    INTEGER                                    :: nsdTim
    INTEGER                                    :: seedtstep=1   
@@ -73,8 +73,8 @@ CONTAINS
          END DO findTime
       END IF
       
-      !What is this line for???
-      !if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
+      !What is this line for??? Seed every eight days!!!
+      if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
       
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---

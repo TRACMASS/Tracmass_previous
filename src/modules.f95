@@ -176,6 +176,8 @@ MODULE mod_time
   INTEGER                                   :: ints      ,intstart ,intend
   INTEGER                                   :: intrun    ,intspin
   INTEGER                                   :: intmin    ,intmax
+  INTEGER                                   :: nff=1
+
   !type for datetimes
   type DATETIME
      REAL*8                                 :: JD=0 
@@ -230,11 +232,9 @@ CONTAINS
 
   subroutine updateClock  
     USE mod_param, only: ngcm
-    USE mod_seed, only: nff
     IMPLICIT NONE
     ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas
-    print *, (ints+ttpart)*(dble(ngcm)/24.)
-    stop
+
     currJDtot = (ints+ttpart)*(dble(ngcm)/24.)
     call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
                  currYear , currMon ,currDay)

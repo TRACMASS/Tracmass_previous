@@ -50,13 +50,13 @@ SUBROUTINE readfields
   write (dstamp(15:18),'(i4.4)') int(curryear)
   write (dstamp(19:20),'(i2.2)') int(currmon)
   write (dstamp(21:22),'(i2.2)') int(currday)
-  print *,currjdtot
-  if (loopjd > 440) write (dstamp(11:13),'(A3)') "910"
+  
+  if (currjdtot > 735096) write (dstamp(11:13),'(A3)') "910"
 
   filename = trim(inDataDir)//trim(dstamp)
-  uvel = get3DfieldNC(trim(filename) ,'water_u') * 0.001
+  uvel = get3DfieldNC(trim(filename) ,'water_u') * 0.001 * 2
   where (uvel<-10) uvel=0
-  vvel = get3DfieldNC(trim(filename) ,'water_v') * 0.001
+  vvel = get3DfieldNC(trim(filename) ,'water_v') * 0.001 * 2 
   where (vvel<-10) vvel=0
   if (nff .eq. -1) then
      uvel = -uvel

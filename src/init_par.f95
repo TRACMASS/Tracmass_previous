@@ -233,7 +233,7 @@ SUBROUTINE init_params
       startFrac = (startFrac - startHour) * 60
       startMin  = int(startFrac)
    end if
-
+   
    if (nff == 1) then
       intmin = jd2ints(startJD)
    else
