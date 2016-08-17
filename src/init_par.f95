@@ -76,9 +76,12 @@ SUBROUTINE init_params
    Case     = CASE_NAME
 
    IF ((IARGC() > 0) )  THEN
-      CALL getarg(1,Case)
+      CALL getarg(1,project)
    END IF
-
+   IF ((IARGC() > 1) )  THEN
+      CALL getarg(2, Case)
+   END IF
+   
    CALL getenv('TRMPROJDIR',projdir)
    if (len(trim(projdir)) == 0) then
       CALL getenv('TRMDIR',ormdir)
@@ -189,7 +192,7 @@ SUBROUTINE init_params
    start3d  = [1, subGridImin, subGridJmin, subGridKmin]
    count3d  = [1, imt,         jmt,         km         ]
    
-   if ((IARGC() > 1) )  then
+   if ((IARGC() > 2) )  then
       ARG_INT1 = 0.1
       CALL getarg(2,inparg)
       if ( ARG_INT1 == 0) then
@@ -201,7 +204,7 @@ SUBROUTINE init_params
       end if
    end if
       
-   IF ((IARGC() > 2) ) THEN
+   IF ((IARGC() > 3) ) THEN
       ARG_INT2 = 0.1
       CALL getarg(3,inparg)
       if ( ARG_INT2 == 0) then
