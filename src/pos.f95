@@ -77,9 +77,9 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
 #endif
   elseif(ijk.eq.3) then
      ii = ka
-#ifdef explicit_w || full_wflux
-     uu = intrpg * wflux(ia ,ja, ka  ,NST) + intrpr * wflux(ia, ja, ka  ,1)
-     um = intrpg * wflux(ia, ja, ka-1,NST) + intrpr * wflux(ia, ja, ka-1,1)
+#if defined explicit_w || full_wflux
+     uu = intrpg * wflux(ia ,ja, ka  , nsp) + intrpr * wflux(ia, ja, ka  , nsm)
+     um = intrpg * wflux(ia, ja, ka-1, nsp) + intrpr * wflux(ia, ja, ka-1, nsm)
 #else
      uu = intrpg * wflux(ka  ,nsp) + intrpr * wflux(ka  ,nsm)
      um = intrpg * wflux(ka-1,nsp) + intrpr * wflux(ka-1,nsm)

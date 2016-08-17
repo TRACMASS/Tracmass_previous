@@ -27,8 +27,9 @@ SUBROUTINE readfields
   CHARACTER (len=200)                          :: fieldFile
   ! = Variables for filename generation
   CHARACTER (len=200)                          :: dataprefix
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: zstoz
-  REAL*4 dd,hu,hv,uint,vint,zint
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: zstot,zstou,zstov
+  REAL*8, ALLOCATABLE, DIMENSION(:,:,:)        :: xxx
+  REAL*4 dd,hu,hv,uint,vint,zint,hh,h0
   
 #ifdef initxyt
   INTEGER, PARAMETER :: NTID=73
@@ -53,8 +54,9 @@ SUBROUTINE readfields
      allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(NTID,IJKMAX2,3) )
   endif alloCondGrid
 #endif
- alloCondUVW: if(.not. allocated (zstoz)) then
-    allocate ( zstoz(imt,jmt) )
+ alloCondUVW: if(.not. allocated (zstot)) then
+    allocate ( zstot(imt,jmt),zstou(imt,jmt),zstov(imt,jmt) )
+    allocate ( xxx(imt,jmt,km))
 #ifdef tempsalt
    allocate ( tmpzvec(km), salzvec(km), rhozvec(km), depthzvec(km), latvec(km))
 #endif
@@ -99,58 +101,148 @@ write(dataprefix(1:4),'(i4)')   currYear
 write(dataprefix(19:26),'(i4,i2.2,i2.2)') currYear,currMon,currDay
 fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)//'d05'
 
-hs(:,     :, 2) = get2DfieldNC(trim(fieldFile)//'T.nc', 'sossheig')
-hs(imt+1, :, 2) = hs(1,:,2)
+hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'sossheig')
+hs(imt+1, :, nsp) = hs(1,:,nsp)
 
-where (depth /= 0)
-   zstoz = hs(:imt,:jmt,2)/depth + 1
-elsewhere
-   zstoz = 0
-end where
 
-do k=1,km
-   dzt(:,:,k,2) = dztb(:,:,km+1-k) * zstoz
-end do
+
+ where (abyst /= 0)
+   zstot = hs(:imt,:jmt,nsp)/abyst + 1
+ elsewhere
+   zstot = 0.d0
+ end where
+ 
+  where (abysu /= 0)
+   zstou = 0.5*(hs(:imt,:jmt,nsp)+hs(2:imt+1,:jmt,nsp))/abysu + 1
+ elsewhere
+   zstou = 0.d0
+ end where
+ 
+ where (abysv /= 0)
+   zstov = 0.5*(hs(:imt,:jmt,nsp)+hs(:imt,2:jmt+1,nsp))/abysv + 1
+ elsewhere
+   zstov = 0.d0
+ end where
+
+!do j=1,JMT
+! print *,j,zstot(1,j),zstou(1,j),zstov(1,j)
+!enddo
+!stop 34965
+
+
+
+
+ do k=1,km
+   dzt(:,:,k,nsp) = dztb(:,:,km+1-k) * zstot
+ end do
+
+
+!   do i=1,IMT
+!    do j=1,JMT
+!    
+!     if(kmt(i,j)/=0) then
+!      h0= abyst(i,j)   ! total depth
+!      hh= h0 + hs(i,j,nsp)                      ! total thickness of water column on T-points
+!      do k=1,KM
+!       kk = KM+1-k
+!       if (kmt(i,j) >= k ) then ! for the levels above the bottom box
+!        dzt(i,j,kk,nsp) = dztb(i,j,k)    * hh / h0
+!       else
+!        dzt(i,j,kk,nsp) = 0.
+!       endif
+!      enddo
+!     endif
+!     
+!     if(kmu(i,j)/=0) then
+!      h0= abysu(i,j)   ! total depth
+!      hh= h0 + 0.5*(hs(i,j,nsp)+hs(i+1,j,nsp))  ! total thickness of water column
+!      do k=1,KM
+!       kk = KM+1-k
+!       if (kmu(i,j) >= k ) then ! for the levels above the bottom box
+!        dzt(i,j,kk,nsp) = dztb(i,j,k)    * hh / h0
+!       else
+!        dzt(i,j,kk,nsp) = 0.
+!       endif
+!      enddo
+!     endif
+!
+!     
+!    enddo
+!   enddo
+
+
+
+
+
 
 #if defined tempsalt 
- tem(:,:,:,2) = get3DfieldNC(trim(fieldFile)//'T.nc', 'votemper')
- tem(:,:,:,2) = tem(:,:,km:1:-1,2)
+ xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'votemper')
+ tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
  
- sal(:,:,:,2) = get3DfieldNC(trim(fieldFile)//'T.nc', 'vosaline')
- sal(:,:,:,2) = sal(:,:,km:1:-1,2)
+ xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'vosaline')
+ sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
  
  depthzvec = 0.
  do j=1,JMT
     latvec=-80+1./12.*float(j+subGridJmin-1)
     do i=1,IMT
-       tmpzvec = tem(i,j,:,2)
-       salzvec = sal(i,j,:,2)
+       tmpzvec = tem(i,j,:,nsp)
+       salzvec = sal(i,j,:,nsp)
        call statvd(tmpzvec, salzvec, rhozvec ,km ,depthzvec ,latvec)
-       rho(i,j,:,2)=rhozvec - 1000.
+       rho(i,j,:,nsp)=rhozvec - 1000.
     end do
  end do
 #endif     
 
  uvel = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozocrtx')
  vvel = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomecrty')
- do k=1,km
-    uflux(:,:,km+1-k,2) = uvel(:,:,k) * dyu * dztb(:,:,k) * zstoz
-    uflux(:,:,km+1-k,2) = uvel(:,:,k) * dxv * dztb(:,:,k) * zstoz
- end do
+! do k=1,km
+!!    uflux(:,:,km+1-k,nsp) = uvel(:,:,k) !* dyu * dzu(:,:,k) * zstou
+!    vflux(:,:,km+1-k,nsp) = vvel(1:imt,:,k) !* dxv * dzv(:,:,k) * zstov
+! end do
+ 
+ 
+ 
+ do i=1,IMT
+ do j=1,JMT
+ do k=1,KM
+    uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,k) * zstou(i,j)
+    vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,k) * zstov(i,j)
+ enddo
+ enddo
+ enddo
+
+
+ do i=1,IMT
+ do j=1,JMT
+ do k=1,KM
+  if(k>kmv(i,j) .and. vflux(i,j,km+1-k,nsp)/=0. ) then
+   print *,'vflux=',vflux(i,j,km+1-k,nsp),vvel(i,j,k),i,j,k,kmv(i,j),nsp
+   stop 4966
+  endif
+  if(k>kmu(i,j) .and. uflux(i,j,km+1-k,nsp)/=0. ) then
+   print *,'uflux=',uflux(i,j,km+1-k,nsp),uvel(i,j,k),i,j,k,kmu(i,j),nsp
+   stop 4967
+  endif
+ enddo
+ enddo
+ enddo
+
+
 
 #ifdef drifter
 ! average velocity/transport to simulate drifter trajectories
 kbot=65 ; ktop=66 ! number of surface layers to integrate over 
 uint=0. ; vint=0. ; zint=0.
 do k=kbot,ktop
-   uint = uint + uflux(:,:,k,2) ! integrated transport
-   vint = vint + vflux(:,:,k,2)
+   uint = uint + uflux(:,:,k,nsp) ! integrated transport
+   vint = vint + vflux(:,:,k,nsp)
    zint = zint + dz(k)          ! total depth of drougued drifter
 end do
 ! weighted transport for each layer
 do k=kbot,KM
-   uflux(:,:,k,2) = uint*dz(k)/zint 
-   vflux(:,:,k,2) = vint*dz(k)/zint
+   uflux(:,:,k,nsp) = uint*dz(k)/zint 
+   vflux(:,:,k,nsp) = vint*dz(k)/zint
 enddo
 #endif
 
@@ -170,7 +262,7 @@ enddo
 ! do i=1,IMT+1
 !  ii=i
 !  if(ii.eq.IMT+1) ii=1
-!  hs(i,j,2)=temp2d_simp(ii,j)
+!  hs(i,j,nsp)=temp2d_simp(ii,j)
 ! enddo
 !enddo
 
@@ -184,19 +276,19 @@ enddo
 !         do k=1,KM
 !            kk = KM+1-k
 !            if (kmt(i,j) == kk) then ! for the bottom box
-!               dzt(i,j,k,2) = dztb(i,j,1) * (zw(kmt(i,j)) + hs(i,j,2)) / zw(kmt(i,j))
-!               if(dzt(i,j,k,2).eq.0.) then
-!                print *,i,j,kmt(i,j),dztb(i,j,1),hs(i,j,2),zw(kmt(i,j))
+!               dzt(i,j,k,nsp) = dztb(i,j,1) * (zw(kmt(i,j)) + hs(i,j,nsp)) / zw(kmt(i,j))
+!               if(dzt(i,j,k,nsp).eq.0.) then
+!                print *,i,j,kmt(i,j),dztb(i,j,1),hs(i,j,nsp),zw(kmt(i,j))
 !                stop 4967
 !               endif
 !            elseif (kmt(i,j) /= 0) then ! for the levels above the bottom box
-!               dzt(i,j,k,2) = dz(k)       * (zw(kmt(i,j)) + hs(i,j,2)) / zw(kmt(i,j))
-!               if(dzt(i,j,k,2).eq.0.) then
-!                print *,i,j,kmt(i,j),dz(k),hs(i,j,2),zw(kmt(i,j))
+!               dzt(i,j,k,nsp) = dz(k)       * (zw(kmt(i,j)) + hs(i,j,nsp)) / zw(kmt(i,j))
+!               if(dzt(i,j,k,nsp).eq.0.) then
+!                print *,i,j,kmt(i,j),dz(k),hs(i,j,nsp),zw(kmt(i,j))
 !                stop 4968
 !               endif
 !            else
-!               dzt(i,j,k,2) = 0.
+!               dzt(i,j,k,nsp) = 0.
 !            endif
 !         enddo
 !      enddo
@@ -216,7 +308,7 @@ enddo
 !!$! do j=1,JMT
 !!$  do k=1,KM 
 !!$   kk=KM+1-k
-!!$   tem(:,:,kk,2)=temp3d_simp(:,:,k)
+!!$   tem(:,:,kk,nsp)=temp3d_simp(:,:,k)
 !!$  enddo
 !!$! enddo
 !!$!enddo
@@ -233,7 +325,7 @@ enddo
 !!$! do j=1,JMT
 !!$  do k=1,KM
 !!$   kk=KM+1-k
-!!$   sal(:,:,kk,2)=temp3d_simp(:,:,k)
+!!$   sal(:,:,kk,nsp)=temp3d_simp(:,:,k)
 !!$  enddo
 !!$! enddo
 !!$!enddo
@@ -244,13 +336,13 @@ enddo
 !!$ do i=1,IMT
 !!$  do k=1,kmt(i,j)
 !!$   kk=KM+1-k
-!!$   tempb(k)=tem(i,j,kk,2)
-!!$   saltb(k)=sal(i,j,kk,2)
+!!$   tempb(k)=tem(i,j,kk,nsp)
+!!$   saltb(k)=sal(i,j,kk,nsp)
 !!$  enddo
 !!$  call statvd(tempb, saltb, rhob ,KM ,depthb ,latb)
 !!$  do k=1,kmt(i,j)
 !!$   kk=KM+1-k
-!!$   rho(i,j,kk,2)=rhob(k)-1000.
+!!$   rho(i,j,kk,nsp)=rhob(k)-1000.
 !!$  enddo
 !!$ enddo
 !!$enddo
@@ -276,7 +368,7 @@ enddo
 !!$            k=KM+1-kk
 !!$            dd = dz(k)
 !!$            if (kk == kmu(i,j)) THEN
-!!$               dd = MIN (dztb(i,j,2),dztb(ip,j,2))
+!!$               dd = MIN (dztb(i,j,nsp),dztb(ip,j,nsp))
 !!$            endif
 !!$            if (kmu(i,j) <= 0) THEN
 !!$               dd = 0.

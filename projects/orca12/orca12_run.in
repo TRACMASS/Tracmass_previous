@@ -71,7 +71,7 @@
   kriva           = 2,
   inDataDir       = '/Users/doos/data/orca/orca12/'
   outDataDir      = '/Users/doos/data/orca/orca12/data_out/'
-  outDataFile     = 'orca12_test'
+  outDataFile     = 'orca12_anal'
   intminInOutFile = 0
   /
   !

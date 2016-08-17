@@ -50,6 +50,7 @@ dy=dx
 
 dxdy=dx*dy
 dz=10.
+dzt=10.
 
 mask=1
 

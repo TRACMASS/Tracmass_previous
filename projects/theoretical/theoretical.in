@@ -37,7 +37,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =      1,
-            iter =   1000,
+            iter =      1,
           intmax = 146000,
         minveljd =     -1,
         maxveljd =     -1,
@@ -54,13 +54,22 @@
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =    170,
+          intrun =  1000,
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
-           kriva =      1,
-      outdatadir =   './',
-     outdatafile =     '',
+  ! kriva:          0 = no writing
+  !                 1 = write at time intervals of gcm datasets (each ints)
+  !                 2 = write at each time iteration
+  !                 3 = write all the time
+  !                 4 = write only start and end positions
+  !                 5 = write at chosen intervals
+  !                 6 = write each spatial grid-crossing 
+             kriva =      6,
+      outdatadir =   '/Users/doos/data/tracmass/data_out/',
+     outdatafile =     'test',
+!     outdatafile =     'analyt_k1',
+    ! outdatafile =     'dt1_k1',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -69,13 +78,13 @@
             idir =      0,
             nqua =      1,
        partquant =      1,
-        ntracmax =   1000,
+        ntracmax =   2000000,
     loneparticle =     -1,
         seedtype =      1,
-            ist1 =     31,
-            ist2 =     31,
-            jst1 =     50,
-            jst2 =     50,
+            ist1 =     31,!31,
+            ist2 =     31, !31,
+            jst1 =     50, !50,
+            jst2 =     50, !50,
             kst1 =     5,
             kst2 =     5,
             tst1 =     -1,

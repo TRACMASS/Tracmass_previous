@@ -17,7 +17,7 @@ MODULE mod_seed
    USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart,nff
    USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
    USE mod_vel,   only    : uflux, vflux, wflux, ff
-   USE mod_traj,  only    : ntractot, ntrac, x1, y1, z1, trj, nrj
+   USE mod_traj!,  only    : ntractot, ntrac, ib, jb, kb, x1, y1, z1, trj, nrj
    USE mod_write, only    : writedata
    USE mod_tempsalt, only : rmax0, rmin0, tmax0, tmin0, smax0, smin0, &
                             sal, tem, rho
@@ -51,7 +51,7 @@ CONTAINS
 
      INTEGER                                  :: errCode
      INTEGER                                  :: subtimesteps = 1, subtstep
-     INTEGER                                  :: ib, jb, kb, ibm
+    ! INTEGER                                  :: ib, jb, kb, ibm
      INTEGER                                  :: i, j, k, l, m
      REAL                                     :: temp,salt,dens
      REAL*8                                   :: tt, ts
@@ -142,15 +142,15 @@ CONTAINS
                IF (KM+1-kmt(iist,ijst) > kb) THEN
                   CYCLE startLoop
                ELSE
-!                  vol = uflux (ib, jb, kb,nsm) + uflux (ibm, jb  , kb,nsm) + & 
-!                  &     vflux (ib, jb, kb,nsm) + vflux (ib , jb-1, kb,nsm)
-                  vol = 1.  ! This is a quick fix so the code continues ??????????
+                  vol = abs(uflux (ib, jb, kb,nsm)) + abs(uflux (ibm, jb  , kb,nsm)) + & 
+                  &     abs(vflux (ib, jb, kb,nsm)) + abs(vflux (ib , jb-1, kb,nsm))
+                  if(vol/=0.) vol = 1.  
                ENDIF
                IF (vol == 0.d0) cycle startLoop
          
             END SELECT
          ! If the particle is forced to move in positive/negative direction
-         IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0) .OR. (vol == 0.) ) THEN
+         IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0 ) .OR. (vol == 0.) ) THEN
             CYCLE startLoop
          ENDIF
       

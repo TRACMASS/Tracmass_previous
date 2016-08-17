@@ -24,22 +24,22 @@ subroutine vertvel(ia,iam,ja,ka)
 #if defined twodim || explicit_w
   return
 #else
-  
+   
   n1=min(nsm,nsp)
   n2=max(nsm,nsp)
-  
   kloop: do k=1,ka
-     uu = intrpg * uflux(ia ,ja  ,k,nsp) + intrpr * uflux(ia ,ja  ,k,nsm)
-     um = intrpg * uflux(iam,ja  ,k,nsp) + intrpr * uflux(iam,ja  ,k,nsm)
-     vv = intrpg * vflux(ia ,ja  ,k,nsp) + intrpr * vflux(ia ,ja  ,k,nsm)
-     vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
 #if defined zgrid3D
      do n=n1,n2
         ! time change of the mass the in grid box
         wflux(k,n) = wflux(k-1,n) - ff * &
-             ( uflux(ia,ja,k,n) - uflux(iam, ja,   k, n) +  & 
-               vflux(ia,ja,k,n) - vflux(ia,  ja-1, k, n) +  &
-               (dzt(ia,ja,k,nsp)-dzt(ia,ja,k,nsm))*dxdy(ia,ja)/tseas )
+             (  uflux(ia,ja,k,n) - uflux(iam, ja,   k, n)   & 
+              + vflux(ia,ja,k,n) - vflux(ia,  ja-1, k, n)   & 
+#if defined ifs
+              + (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )
+#else
+              - (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )
+#endif
+              ! ska det vara plus för ifs och minus för orca???
     enddo
 #else
     do n=n1,n2
@@ -51,19 +51,12 @@ subroutine vertvel(ia,iam,ja,ka)
   end do kloop
 
 
-#ifdef ifs
+! Make sure the vertical velocity is always zero at the bottom and below
+#if defined ifs
 wflux(0,:) = 0.d0
-wflux(km,:) = 0.d0
-#endif
-
-! Make sure the vertical velocity is always zero below and at the bottom
-#ifdef orca12
+#elif defined orca1 || orca12
 do k=0,KM-kmt(ia,ja)
-   do n=n1,n2
-      if(wflux(k,n)/=0.d0) then
-         wflux(k,n)=0.d0
-      endif
-   enddo
+  wflux(k,:)=0.d0
 enddo
 #endif
 

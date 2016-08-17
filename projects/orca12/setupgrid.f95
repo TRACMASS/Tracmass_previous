@@ -47,8 +47,9 @@ SUBROUTINE setupgrid
   REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t !,rhom
   CHARACTER (len=200)                         :: gridFile
 
-  allocate ( e1t(IMT,JMT) , e2t(IMT,JMT), depth(imt, jmt) )
-  allocate ( kmu(IMT,JMT), kmv(IMT,JMT) )
+  ALLOCATE ( e1t(IMT,JMT) , e2t(IMT,JMT), abyst(imt, jmt) , abysu(imt, jmt) , abysv(imt, jmt) )
+  ALLOCATE ( dztb(imt,jmt,km),dzu(imt,jmt,km),dzv(imt,jmt,km) )
+  ALLOCATE ( kmu(IMT,JMT), kmv(IMT,JMT) )
   map2D    = [3, 4,  1, 1 ]
   map3D    = [2, 3,  4, 1 ]
   ncTpos = 1
@@ -73,6 +74,9 @@ SUBROUTINE setupgrid
   end do
   
   kmt = get2DfieldNC(gridFile, 'mbathy')
+  
+!  print *,(kmt(i,JMT/3),i=800,810)
+  
   kmu=0 ; kmv=0
   do j=1,jmt
      jp=j+1
@@ -91,15 +95,44 @@ SUBROUTINE setupgrid
   enddo
 
   dztb = get3DfieldNC(gridFile, 'e3t')
+  dzu  = get3DfieldNC(gridFile, 'e3u')
+  dzv  = get3DfieldNC(gridFile, 'e3v')
+
   do k=1,km
      where (k > kmt)
         dztb(:,:,k) = 0
      end where
+     where (k > kmu)
+        dzu(:,:,k) = 0
+     end where
+     where (k > kmv)
+        dzv(:,:,k) = 0
+     end where
   enddo 
-  depth = sum(dztb, dim=3)
-    
-  dztb(:,:,2) = dztb(:,:,1) 
+  abyst = sum(dztb, dim=3)
+  abysu = sum(dzu , dim=3)
+  abysv = sum(dzv , dim=3)
 
+
+! do j=2500,2300,-1
+!  print "(400i1)",(kmu(i,j),i=3520,3680)
+! enddo
+! stop 3895
+
+
+!  print *,'depth'
+!  print *,(depth(i,JMT/3),i=800,810)
+!  print *,'dztb'
+!  print *,(dztb(i,JMT/3,kmt(i,JMT/3)),i=800,810)
+!  Print *,'kolla en punkt'
+!  print *,kmt(800,JMT/3)
+!  print *, dztb(800,JMT/3,:)
+!  print *, depth(800,JMT/3)
+
+    
+ ! dztb(:,:,2) = dztb(:,:,1) ! ????? what is this????
+
+ !print *,dztb(1,1000,1:5)
 
   
   

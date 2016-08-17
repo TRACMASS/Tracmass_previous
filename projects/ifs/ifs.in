@@ -7,7 +7,7 @@
         gridname =     '',
       gridsource =     '',
         griddesc =     '',
-       indatadir = '/nobackup/vagn2/x_joakj/data/ifs/',
+       indatadir = '/Users/doos/data/ifs/',
 /
 &INIT_CASE_DESCRIPTION
         casename =  'era',
@@ -37,7 +37,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =      6,
-            iter =      1,
+            iter =    1,
           intmax =   2920,
         minveljd =     -1,
         maxveljd =     -1,
@@ -46,38 +46,49 @@
         startsec =      0,
         startmin =      0,
        starthour =      0,
-        startday =      1,
-        startmon =      1,
-       startyear =   1995,
+        startday =     14,
+        startmon =      4,
+       startyear =   2010,
          startjd =     -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
-         intspin =      1,
+         intspin =     20,
           intrun =   2000,
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
-           kriva =      0,
-      outdatadir = '/nobackup/vagn2/x_joakj/data/ifs/',
-     outdatafile = 'era_test',
+  !
+  !==kriva:         0 = no writing
+  !==               1 = write at time intervals of gcm datasets
+  !==               2 = write each grid-crossing and timne change
+  !==               3 = write at each iteration (all the time)
+  !==               4 = write only start and end positions
+  !==               5 = write at chosen intervals
+  !==               6 = write each spatial grid-crossing 
+           kriva =      1,
+ !    outDataDir   = '/Users/doos/Dropbox/data/ifs/data_out/',
+     outDataDir   = '/Users/doos/data/ifs/data_out/',
+     outdatafile = 'eya_iter11_ver4_k1',
+!     outdatafile = 'eya_anal_ver3_k1',
  intmininoutfile =      0,
+ 
 /
 &INIT_SEEDING
-             nff =      1,
-            isec =      2,
-            idir =      1,
+             nff =     -1,
+            isec =      4,
+            idir =     -1,
             nqua =      1,
-       partquant =      1,
+       partquant =     16,
         ntracmax = 20000000,
     loneparticle =     -1,
         seedtype =      1,
-            ist1 =      1,
-            ist2 =     -1,
-            jst1 =     59,
-            jst2 =     59,
-            kst1 =      1,
-            kst2 =     -1,
+            ist1 =    273,
+            ist2 =    275,
+            jst1 =    123,
+            jst2 =    125,
+            kst1 =    39,
+            kst2 =    44,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =     '',
@@ -90,12 +101,12 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =      3,
-            ienw = [-1.0, -1.0],
-            iene = [500.0, 500.0],
-            jens = [1.0, 85.0],
-            jenn = [59.0, 145.0],
-           timax = 365000.0,
+            nend =      2,
+            ienw = 1, 1,
+            iene = 1, 1,
+            jens = 1, 1,
+            jenn = 1, 1,
+           timax = 11.0,
 /
 &INIT_TEMP_SALT
            tmin0 =  -50.0,

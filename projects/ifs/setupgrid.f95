@@ -9,6 +9,7 @@ SUBROUTINE setupgrid
   USE mod_name
   USE mod_vel
   USE mod_getfile
+  USE mod_tempsalt
 
   IMPLICIT NONE
   
@@ -37,7 +38,7 @@ SUBROUTINE setupgrid
 
 
   ! === Init local variables for the subroutine ===
-  INTEGER                                    :: ji,jj,jk
+  INTEGER                                    :: ji,jj,k
   REAL*8                                     :: rlatt
   
   ! -------------------------------------------------------------
@@ -118,11 +119,12 @@ SUBROUTINE setupgrid
   !!
   ALLOCATE ( aa(0:KM), bb(0:KM) )
   
-  OPEN (12,FILE=TRIM(inDataDir)//'topo/model_60lev.txt')
+!  OPEN (12,FILE=TRIM(inDataDir)//'topo/model_60lev.txt')
+  OPEN (12,FILE='/Users/doos/data/ifs/topo/model_60lev.txt')
 99 FORMAT(10x,f12.6,4x,f10.8)
   
-  DO jk=0,KM
-     READ (12,99) aa(jk),bb(jk)
+  DO k=0,KM
+     READ (12,99) aa(k),bb(k)
   END DO
   
   CLOSE (12)
@@ -130,9 +132,10 @@ SUBROUTINE setupgrid
   !!
   !! Setting necessary dummy argument
   !!
-  zw=9.e10  ! should not be used
-  DO jk=1,KM
-     dz(jk) = zw(jk)-zw(jk-1)
+!  zw=9.e10  ! should not be used
+  DO k=1,KM
+!     print *,k, aa(k),bb(k)
+!     dz(jk) = zw(jk)-zw(jk-1)
   END DO
 
 
