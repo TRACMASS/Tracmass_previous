@@ -1,7 +1,7 @@
 
 #========================================================================
-  INPUT_INT1        = intmin            # Variables set from command line
-  INPUT_INT2        = intrun            # Use 'dummy' if not used.   
+  INPUT_INT1        = dummy            # Variables set from command line
+  INPUT_INT2        = dummy            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
   fl01   = -Dmean           #
 #  fl02   = -Dtempsalt       # Include temp and salt

@@ -10,8 +10,8 @@
        indatadir = '/projData/HYCOM/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'orcaGlobal',
-        casedesc = 'Using Orca fields for fun and entertainment.',
+        casename = 'amazon',
+        casedesc = 'Follow the Amazon river plume.',
 /
 &INIT_GRID_SIZE
              imt =   4500,
@@ -23,6 +23,8 @@
      subgridimax =   4500,
      subgridjmin =      1,
      subgridjmax =   2001,
+     subgridkmin =      1,
+     subgridkmax =      2,
      subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
@@ -48,36 +50,42 @@
        starthour =      0,
         startday =      1,
         startmon =      1,
-       startyear =   2007,
+       startyear =   2013,
          startjd =     -1,
           intmin =     50,
 /
 &INIT_RUN_TIME
-         intspin =      1,
-          intrun =   1095,
+         intspin =    270,
+          intrun =    364,
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir = '/Users/bror/ormOut/',
-     outdatafile = 'hycom2Dim19',
+      outdatadir =     '',
+     outdatafile =     '',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
-             nff =      2,
+             nff =      1,
             isec =      3,
             idir =      0,
             nqua =      1,
-       partquant =      5,
+       partquant =      3,
         ntracmax = 7000000,
     loneparticle =     -1,
         seedtype =      1,
-            ist1 =    250,
-            ist2 =    600,
-            jst1 =    300,
-            jst2 =    400,
-            kst1 =     14,
-            kst2 =     19,
+            !!Amazon
+            ist1 =   3775,
+            ist2 =   3937,
+            jst1 =    988,
+            jst2 =   1087,
+            !!Orinoco
+            !ist1 =    3700,
+            !ist2 =    3762,
+            !jst1 =    1100,
+            !jst2 =    1150,
+            kst1 =       1,
+            kst2 =       1,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =     '',
