@@ -25,7 +25,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   USE mod_time, only: intrpr, intrpg
   IMPLICIT none
 
-  real*8                                     :: r0, r1, ds, uu, um, vv, vm, en
+  real(DP)                                   :: r0, r1, ds, uu, um, vv, vm, en
   integer                                    :: ijk, ia, ja, ka, ii, im
   
   

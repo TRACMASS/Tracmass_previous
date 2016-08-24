@@ -39,7 +39,7 @@ MODULE mod_seed
    INTEGER*8                                  :: itim
    INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seed_ijk, seed_set
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
-   REAL*8 , ALLOCATABLE, DIMENSION(:,:)       :: seed_xyz
+   REAL(DP) , ALLOCATABLE, DIMENSION(:,:)     :: seed_xyz
    CHARACTER(LEN=200)                         :: seedDir, seedFile, timeFile
    integer                                    :: numseedsubints
    REAL, DIMENSION(50)                        :: seedsubints = -1
@@ -54,8 +54,8 @@ CONTAINS
     ! INTEGER                                  :: ib, jb, kb, ibm
      INTEGER                                  :: i, j, k, l, m
      REAL                                     :: temp,salt,dens
-     REAL*8                                   :: tt, ts
-     REAL*8                                   :: vol, subvol
+     REAL(DP)                                 :: tt, ts
+     REAL(DP)                                 :: vol, subvol
 
      ! --------------------------------------------
      ! --- Check if ntime is in vector seed_tim ---

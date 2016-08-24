@@ -88,7 +88,7 @@ IMPLICIT NONE
 INTEGER :: iim,loop,iil,ii,ijk,ia,ja,ka
 REAL (DP)  :: uu,um,vv,vm,ss,alfa
 REAL (DP)  :: f0,f1,dzs,dzu1,dzu2,rijk,s0!,ss0
-REAL (DP)   :: r0,sp,sn
+REAL (DP)  :: r0,sp,sn
 
 !_______________________________________________________________________________
 sp=UNDEF ; sn=UNDEF
