@@ -7,8 +7,8 @@
         gridname = 'ORCA12',
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = '1/12 deg run for the global Ocean.',
-      ! indatadir = '/Users/doos/data/orca/orca12/',
-       indatadir = '/Volumes/Deacon/data/orca12/',
+       indatadir = '/Users/joakim/data/ORCA0083-N001/',
+     !topoDataDir = '/Users/joakim/data/ORCA0083-N001/domain/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'ORCA12',
@@ -20,10 +20,10 @@
               km =     75,
              nst =      2,
          subgrid =      1,
-     subgridimin =    3001,
-     subgridimax =    4000,
-     subgridjmin =     501,
-     subgridjmax =    1500,
+     subgridimin =    3333,
+     subgridimax =    3966,
+     subgridjmin =     776,
+     subgridjmax =    1195,
      subgridfile = 'templ.asc',
        subgridid =      0,
 /
@@ -34,11 +34,12 @@
          baseday =      1,
          basemon =      1,
         baseyear =      1,
+        jdoffset =      4,
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =    120,
-            iter =      12000,
+            iter =      1,
           intmax =  15330,
         minveljd =     -1,
         maxveljd =     -1,
@@ -49,15 +50,15 @@
        starthour =     12,
         startday =      5,
         startmon =      1,
-       startyear =   1996,
-        jdoffset =      3,
+       startyear =   2000,
+        !jdoffset =      3,
           noleap =  .true., 
-         startjd =     -1,
+         startjd =      -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =   1000,
+          intrun =   1,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -69,7 +70,7 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
            kriva =      4,
-      outdatadir = '/Users/doos/data/orca/orca12/data_out/',
+      outdatadir = '/Users/joakim/Downloads/orca12/',
   !    outdatadir = '/Volumes/Deacon/data/orca12/',
      outdatafile = 'orca12_iter12000_rekt_sub_k4',
 !     outdatafile = 'orca12_anal_rekt_sub_k4',
@@ -78,17 +79,17 @@
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      1,
-            idir =     -1,
+            isec =      4,
+            idir =      0,
             nqua =      1,
        partquant =      1,
         ntracmax = 20000000,
     loneparticle =      0, !2964,
         seedtype =      1,
-            ist1 =    840, !3840, ! 840,
-            ist2 =    849, ! 3849, ! 849,
-            jst1 =    650, !1150, ! 650,
-            jst2 =    659, !1159, ! 659,
+            ist1 =      1,
+            ist2 =    634,
+            jst1 =      1,
+            jst2 =    419,
             kst1 =      1,
             kst2 =     75,
             tst1 =     -1,
