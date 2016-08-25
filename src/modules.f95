@@ -384,7 +384,11 @@ CONTAINS
 #endif /*regulardt*/
     end if
     ! === time interpolation constant ===
+#if defined fixedtimestep 
+    intrpbg=0.d0 ! mimics Ariane's lack of linear interpolation of the velocity fields
+#else    
     intrpbg=dmod(ts,1.d0) 
+#endif
     intrpb =1.d0-intrpbg
   end subroutine calc_time
 
@@ -523,6 +527,9 @@ MODULE mod_streamfunctions
 #endif
 #ifdef stream_thermohaline
   REAL(SP), ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+#endif
+#ifdef tracer_convergence
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: converg
 #endif
   INTEGER                                    :: intpsi=120 
   ! to be read by the xxx.in files in future

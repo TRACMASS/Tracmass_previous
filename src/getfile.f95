@@ -91,7 +91,6 @@ MODULE mod_getfile
     ierr=NF90_GET_VAR(ncid ,varid , field, s,c)
     if(ierr.ne.0) call printReadError(3, fieldFile, varName)
     ierr=NF90_CLOSE(ncid)
-
     if ( all(map2d(1:2) == (/3,4/),DIM=1) .or. &
          all(map2d(2:3) == (/3,4/),DIM=1) ) then
        get2DfieldNC(1:imt,:) = field

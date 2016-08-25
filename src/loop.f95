@@ -243,7 +243,11 @@ SUBROUTINE loop
               cycle ntracLoop
            endif
            nrj(7,ntrac)=0
+#if defined fixedtimestep 
+           intrpg = 0.d0  ! mimics Ariane's lack of linear interpolation of the velocity fields
+#else
            intrpg = dmod(ts,1.d0) ! time interpolation constant between 0 and 1
+#endif
            intrpr = 1.d0-intrpg
            if(intrpg.lt.0.d0 .or.intrpg.gt.1.d0) then
               print *,'intrpg=',intrpg

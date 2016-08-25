@@ -54,7 +54,7 @@
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =  1000,
+          intrun =  100,
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
@@ -66,7 +66,7 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
              kriva =      6,
-      outdatadir =   '/Users/doos/data/tracmass/data_out/',
+      outdatadir =   '/Users/joakim/Downloads/',
      outdatafile =     'test',
 !     outdatafile =     'analyt_k1',
     ! outdatafile =     'dt1_k1',
