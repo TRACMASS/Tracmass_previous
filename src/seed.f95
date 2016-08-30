@@ -89,7 +89,6 @@ CONTAINS
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
-
 #if defined baltix || defined rco
          ! -------------------------------------------------
          ! --- Test if it is time to launch the particle ---
@@ -110,7 +109,6 @@ CONTAINS
          END IF
          jb  = ijst
          kb  = ikst
-         
          ! -----------------------------------------------------------
          ! --- Determine the volume/mass flux through the grid box ---
          ! -----------------------------------------------------------
@@ -173,7 +171,6 @@ CONTAINS
 !#endif /*freesurface*/
 
          END IF
-          
          ! Number of trajectories for box (iist,ijst,ikst)
          SELECT case (nqua)
             case (1)
@@ -194,7 +191,6 @@ CONTAINS
          ijt    = NINT (SQRT (FLOAT(num)) ) 
          ikt    = NINT (FLOAT (num) / FLOAT (ijt))
          subvol = vol / DBLE (ijt*ikt)
-
          IF (subvol == 0.d0) THEN
             print *, ' Transport of particle is zero!!!'
             print *, '    vol :', vol
@@ -203,7 +199,6 @@ CONTAINS
             print *, ' subvol : ',subvol
             STOP
          ENDIF
-         
          ! --------------------------------------------------
          ! --- Determine start position for each particle ---
          ! --------------------------------------------------
@@ -213,7 +208,6 @@ CONTAINS
                   ib = iist
                   jb = ijst
                   kb = ikst
-
                   SELECT CASE (isec)
                   CASE (1)   ! Meridional-vertical section
                      x1 = DBLE (ib) 
@@ -268,17 +262,14 @@ CONTAINS
                      CYCLE kkkLoop 
                   END IF
 #endif /*tempsalt*/
-
                   ! Update trajectory numbers
                   ntractot = ntractot+1
                   ntrac = ntractot
-
                   ! Only one particle for diagnistics purposes
                   if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
                      nrj(6,ntrac)=1
                      cycle kkkLoop
                   endif
-
                   ! ts - time, fractions of ints
                   ! tt - time [s] rel to start
                   ts = DBLE (ints-1) + seedsubints(subtstep)
@@ -289,10 +280,8 @@ CONTAINS
                   trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
                   nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
                   nrj(7,ntrac)=1
-
                   !Save initial particle position
                   call writedata(10) !ini
-
                END DO kkkLoop
             END DO ijjLoop
          end DO subtimestepLoop

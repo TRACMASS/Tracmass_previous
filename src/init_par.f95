@@ -247,10 +247,11 @@ SUBROUTINE init_params
       endJD  =  jdate(endYear ,endMon ,endDay) + 1 + &  
            ( dble((endHour)*3600 + endMin*60 + endSec) / 86400 ) -baseJD
    end if
+
    if (endJD < startJD) then
 !      endJD =  baseJD + startJD + intrun*ngcm/24. -2   !! LD: changed to -1 so enddate contains entire run 
       endJD =  baseJD + startJD + intrun*ngcm/24. -1 
-
+   print *, endJD
    end if
    call  gdate (endJD ,endYear , endMon ,endDay)
    endFrac = (endJD-int(endJD))*24

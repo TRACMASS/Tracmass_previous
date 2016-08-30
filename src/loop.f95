@@ -1,5 +1,4 @@
 SUBROUTINE loop
-!!---------------------------------------------------------------------------
 !!
 !!       SUBROUTINE loop:
 !!
@@ -53,7 +52,6 @@ SUBROUTINE loop
   !==========================================================
   !===   Read in end positions from a previous run        === 
   !==========================================================
-  
 #ifdef rerun
  I=0 ; j=0 ; k=0 ; l=0
  !print *,'rerun with initial points from ', & 
@@ -117,7 +115,6 @@ SUBROUTINE loop
 566 format(i8,i7,2f8.2,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #endif
- 
   goto 40
 41 continue
 #ifdef ifs
@@ -141,7 +138,6 @@ SUBROUTINE loop
   !==========================================================
   !=== read ocean/atmosphere GCM data files               ===
   !==========================================================
-  
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
   ints = intstart
@@ -150,18 +146,17 @@ SUBROUTINE loop
   call active_init
   ntrac = 0
   call fancyTimer('initialize dataset','stop')
-
   !==========================================================
   !=== Start main time loop                               ===
   !==========================================================
-  intsTimeLoop: do ints=intstart+1,intstart+intrun
+  print *, nff, intstart+1, intstart+intrun, intrun
+  intsTimeLoop: do ints=intstart+1,intstart+intrun, nff ! LIZ added nff for negative steps:wq
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
      degrade_counter = degrade_counter + 1
      if (degrade_counter > degrade_time) degrade_counter = 0
      call fancyTimer('reading next datafield','stop')
-     
      !=======================================================
      !=== write stream functions and "particle tracer"    ===
      !=======================================================
@@ -169,7 +164,6 @@ SUBROUTINE loop
       call write_streamfunctions
       call writetracer
      endif
-
     intspinCond: if(ints <= intstart+intspin) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)
@@ -177,7 +171,6 @@ SUBROUTINE loop
         t0 = tt
         dt = 0.d0
      end if intspinCond
-
 
      call active_ints(ints)
      !=== Check if the output file should be switched. ===

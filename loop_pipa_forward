@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Script to automate multiple tracmass runs
+# Based on script by Ashley Van Name
+
+# ===================USER INPUT=====================#
+
+infil=/Users/liz/TOOLS/tracmass/projects/pipa/forward_template.in
+tempfil=$infil.tmp
+outfil=/Users/liz/TOOLS/tracmass/projects/pipa/pipa.in
+yr=1993
+nmdays=(31 28 31 30 31 30 31 31 30 31 30 31)
+
+intrun=100
+nff=1
+isec=1
+partquant=10000
+ist1=166
+ist2=166
+jst1=48
+jst2=48
+
+
+while (($yr <= 2013)); do
+echo $yr
+      if (($yr == 1992)); then
+         mon=6;
+      else
+         mon=1;
+      fi              
+
+      ineq=$((yr%4))
+      if (($ineq == 0)); then
+         nmdays[1]=29
+      else
+         nmdays[1]=28
+      fi
+
+      while (($mon <= 12)); do
+            if (($yr == 2013 && $mon == 12)); then
+               nmdays[11]=24
+            else
+               nmdays[11]=31
+            fi
+
+            day=1
+            echo ${nmdays[$mon-1]}
+            while (($day <= ${nmdays[$mon-1]})); do   
+ 
+                 # Edit pipa.in file
+                  cp $infil $infil.tmp
+  
+#                  sed -i -n "s/<OUTDIR>/$outdatadir/g" $tempfil
+                  sed -i -n "s/<DAY>/$day/g"           $tempfil
+                  sed -i -n "s/<MONTH>/$mon/g"         $tempfil
+                  sed -i -n "s/<YEAR>/$yr/g"           $tempfil 
+                  sed -i -n "s/<RUN>/$intrun/g"        $tempfil
+                  sed -i -n "s/<NFF>/$nff/g"           $tempfil
+                  sed -i -n "s/<ISEC>/$isec/g"         $tempfil
+                  sed -i -n "s/<NPART>/$partquant/g"   $tempfil
+                  sed -i -n "s/<IST1>/$ist1/g"         $tempfil
+                  sed -i -n "s/<IST2>/$ist2/g"         $tempfil
+                  sed -i -n "s/<JST1>/$jst1/g"         $tempfil
+                  sed -i -n "s/<JST2>/$jst2/g"         $tempfil
+
+                  mv $tempfil $outfil
+
+                  # Run TRACMASS
+                  ./runtrm
+                  ((day+=1))
+            done 
+            ((mon+=1))
+      done
+      ((yr+=1))
+rm $infil.tmp*
+done
+
