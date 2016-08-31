@@ -2,12 +2,12 @@
 SUBROUTINE setupgrid
   
   USE netcdf
-  USE mod_param
-  USE mod_vel
-  USE mod_time
-  USE mod_grid
-  USE mod_name
-  USE mod_vel
+  USE mod_param, only:
+  USE mod_vel,   only:
+  USE mod_time,  only:
+  USE mod_grid,  only:
+  USE mod_name,  only: indatadir
+  USE mod_vel,   only: uvel
   USE mod_getfile
 
   IMPLICIT none
