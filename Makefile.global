@@ -28,6 +28,10 @@ ifeq ($(NETCDFLIBS),"automatic")
 	LIB_DIR = $(shell nc-config --flibs)
 	INC_DIR = -I$(shell nc-config --includedir)
 endif
+ifeq ($(NETCDFLIBS),"automatic-44")
+	INC_DIR = $(shell nf-config --cflags)
+	LIB_DIR = $(shell nf-config --flibs)
+endif 
 ifeq ($(NETCDFLIBS),"macports")
 	LIB_DIR          = -L/opt/local/lib
 	INC_DIR          = -I/opt/local/include/

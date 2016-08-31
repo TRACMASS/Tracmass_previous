@@ -87,7 +87,6 @@ CONTAINS
          ikst  = seed_ijk (jsd,3)
          isec  = seed_set (jsd,1)
          idir  = seed_set (jsd,2)
-         
          if (iist <   1) cycle startLoop
          if (ijst <   1) cycle startLoop
          if (iist > imt) cycle startLoop
