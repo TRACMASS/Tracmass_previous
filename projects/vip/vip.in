@@ -36,7 +36,7 @@
 /
 &INIT_GRID_TIME
    fieldsperfile =      2,
-            ngcm =     24,
+            ngcm =      1,
             iter =     10,
           intmax = 146000,
         minveljd =     -1,
@@ -54,7 +54,7 @@
         jdoffset =      0,
 /
 &INIT_RUN_TIME
-         intspin =      2,
+         intspin =      1,
           intrun =     15,
 /
 &INIT_WRITE_TRAJS
