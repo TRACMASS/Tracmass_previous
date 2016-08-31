@@ -5,29 +5,25 @@
 
 # ===================USER INPUT=====================#
 
-infil=/Users/liz/TOOLS/tracmass/projects/pipa/forward_template.in
+infil=/Users/liz/TOOLS/tracmass/projects/maphil/forward_template.in
 tempfil=$infil.tmp
-outfil=/Users/liz/TOOLS/tracmass/projects/pipa/pipa.in
-yr=1993
+outfil=/Users/liz/TOOLS/tracmass/projects/maphil/maphil.in
+yr=2010
 nmdays=(31 28 31 30 31 30 31 31 30 31 30 31)
 
-intrun=100
+intrun=9
 nff=1
-isec=1
-partquant=10000
-ist1=166
-ist2=166
-jst1=48
-jst2=48
+isec=4
+partquant=100
 
 
 while (($yr <= 2013)); do
 echo $yr
-      if (($yr == 1992)); then
-         mon=6;
-      else
-         mon=1;
-      fi              
+      #if (($yr == 2010)); then
+      #   mon=12;
+      #else
+      mon=1;
+      #fi              
 
       ineq=$((yr%4))
       if (($ineq == 0)); then
@@ -36,13 +32,7 @@ echo $yr
          nmdays[1]=28
       fi
 
-      while (($mon <= 12)); do
-            if (($yr == 2013 && $mon == 12)); then
-               nmdays[11]=24
-            else
-               nmdays[11]=31
-            fi
-
+      while (($mon <= 5)) || (($mon == 12)); do
             day=1
             echo ${nmdays[$mon-1]}
             while (($day <= ${nmdays[$mon-1]})); do   
@@ -58,18 +48,17 @@ echo $yr
                   sed -i -n "s/<NFF>/$nff/g"           $tempfil
                   sed -i -n "s/<ISEC>/$isec/g"         $tempfil
                   sed -i -n "s/<NPART>/$partquant/g"   $tempfil
-                  sed -i -n "s/<IST1>/$ist1/g"         $tempfil
-                  sed -i -n "s/<IST2>/$ist2/g"         $tempfil
-                  sed -i -n "s/<JST1>/$jst1/g"         $tempfil
-                  sed -i -n "s/<JST2>/$jst2/g"         $tempfil
 
                   mv $tempfil $outfil
 
                   # Run TRACMASS
-                  ./runtrm_pipa
+                  ./runtrm_maphil
                   ((day+=1))
-            done 
+            done
             ((mon+=1))
+            if (($mon == 6)); then
+               mon=12
+            fi
       done
       ((yr+=1))
 rm $infil.tmp*

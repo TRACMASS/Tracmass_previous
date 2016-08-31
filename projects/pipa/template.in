@@ -14,8 +14,8 @@
         casedesc = 'Tracking particles in the Central Pacific',
 /
 &INIT_GRID_SIZE
-             imt =     232,
-             jmt =     91,
+             imt =     95,
+             jmt =     51,
               km =     75,
              nst =      2,
          subgrid =      1,
@@ -46,38 +46,38 @@
         startsec =      0,
         startmin =      0,
        starthour =     12,
-        startday =     10,
-        startmon =     1,
-       startyear =     1993,
+        startday =     <DAY>,
+        startmon =     <MONTH>,
+       startyear =  <YEAR>,
          startjd =     -1,
           intmin =     -1,
         jdoffset =      0,
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =     100,
+          intrun =    150,
 /
 &INIT_WRITE_TRAJS
       twritetype =      1,
            kriva =      1,
-      outdatadir =  '/Volumes/P4/workdir/liz/PIPA_tracmass/forward/',
+      outdatadir = '/Volumes/P4/workdir/liz/pipa_tracmass/',
      outdatafile = 'test_pipa',
  intmininoutfile =      0,
           intpsi =    120,
 /
 &INIT_SEEDING
-             nff =   1,
-            isec =  1,
+             nff =       1,
+            isec =       3,
             idir =       0,
             nqua =       1,
-       partquant = 10000,
+       partquant =   10000,
         ntracmax = 2000000,
     loneparticle =       0,
         seedtype =       1,
-            ist1 =  166,
-            ist2 =  166,
-            jst1 =  48,
-            jst2 =  48,
+            ist1 =      67,
+            ist2 =      67,
+            jst1 =      28,
+            jst2 =      29,
             kst1 =      75,
             kst2 =      75,
             tst1 =        ,
@@ -93,10 +93,10 @@
 /
 &INIT_KILLZONES
             nend =    4,
-            ienw  =   1,   1,    1,    232,
-            iene  =   1,   232,  232,  232,
-            jens  =   1,   91,   91,   91,
-            jenn  =  91,   91,   1,    91,
+            ienw  =   1,   1,   1,  95,
+            iene  =   1,  95,  95,  95,
+            jens  =   1,  51,   1,   1,
+            jenn  =  51,  51,   1,  51,
             timax = 1000.0
 /
 &INIT_TEMP_SALT

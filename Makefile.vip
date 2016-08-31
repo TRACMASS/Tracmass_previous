@@ -1,5 +1,5 @@
-PROJECT	          = pipa
-CASE              = pipa
+PROJECT	          = vip
+CASE              = vip
 RUNFILE 	  = runtrm_$(PROJECT)
 
 #F95COMPILER        = "g95"

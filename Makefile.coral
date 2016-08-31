@@ -1,5 +1,5 @@
-PROJECT	          = pipa
-CASE              = pipa
+PROJECT	          = coral
+CASE              = coral
 RUNFILE 	  = runtrm_$(PROJECT)
 
 #F95COMPILER        = "g95"
