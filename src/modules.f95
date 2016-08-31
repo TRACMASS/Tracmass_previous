@@ -105,7 +105,7 @@ MODULE mod_grid
 #ifdef ifs
   REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa, bb
 #endif
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
