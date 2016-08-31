@@ -50,7 +50,7 @@ SUBROUTINE init_params
    namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
                                     startDay, startMon, startYear,           &
                                     startJD, intmin, noleap
-   namelist /INIT_RUN_TIME/         intspin, intrun
+   namelist /INIT_RUN_TIME/         intspin, intrun, seedintsdelta
    namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
                                     outdircase, intminInOutFile, intpsi, outdirdate
           
