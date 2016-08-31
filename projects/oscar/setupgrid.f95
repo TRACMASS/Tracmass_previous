@@ -39,8 +39,8 @@ SUBROUTINE setupgrid
   REAL,          ALLOCATABLE, DIMENSION(:,:) :: dytt,dxtt
   CHARACTER (len=200)                        :: gridfile
 
-  allocate ( lon(imt), lat(jmt) )
-  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt) )
+  allocate ( lon(imt), lat(jmt), depth(imt,jmt))
+  allocate ( dxtt(imt,jmt), dytt(imt,jmt))
   call coordinat
 
   gridfile = trim(inDataDir) // 'oscar_vel2009.nc'
@@ -49,16 +49,16 @@ SUBROUTINE setupgrid
   count1d  = [ imt]
   lon =  get1DfieldNC(trim(gridfile) , 'longitude')
   count1d  = [ jmt]
-  lat =  get1DfieldNC(trim(gridfile) , 'latitude')
-
+  lat = get1DfieldNC(trim(gridfile) , 'latitude')
+  lat = lat(imt:1:-1)
   
-  WHERE ( lon >360 )
-     lon = lon -360
-  end WHERE
-  WHERE ( lon >180 )
-     lon = lon-360
-  end WHERE
-  lon = cshift(lon,481,1)
+  !WHERE ( lon >360 )
+  !   lon = lon -360
+  !end WHERE
+  !WHERE ( lon >180 )
+  !   lon = lon-360
+  !end WHERE
+  !lon = cshift(lon,481,1)
 
   do i=1,imt-1
      do j=1,jmt-1
@@ -79,9 +79,24 @@ SUBROUTINE setupgrid
   dxdy = dyu * dxv                                                          
   
 
+  !WHERE ( lon >360 )
+  !WHERE ( lon >360 )
 
+  map2d    = [3, 4, 2, 1]   
+  ncTpos = 2
   kmt = 1
   mask = 1
   dz  = 10
-      
+  dzt = 10
+  uvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(gridfile), 'u')
+  where (uvel(:,:,1) .ne. uvel(:,:,1))
+     kmt = 0
+  end where
+  uvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(gridfile), 'v')
+  where (uvel(:,:,1) .ne. uvel(:,:,1))
+     kmt = 0
+  end where
+
+  mask = kmt
+
 end SUBROUTINE setupgrid

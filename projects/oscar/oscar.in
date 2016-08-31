@@ -7,7 +7,7 @@
         gridname = 'oscar',
       gridsource = 'http://podaac.jpl.nasa.gov/DATA_CATALOG/oscarinfo.html',
         griddesc = '1/3 deg geostrophic fields based on satellite SSH.',
-       indatadir = '/local/bjonsson/projData/oscar/thrdDeg/',
+       indatadir = '/projData/OSCAR/thrdDeg/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'global',

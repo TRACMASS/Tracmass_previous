@@ -25,7 +25,6 @@ SUBROUTINE readfields
   INTEGER,       ALLOCATABLE, DIMENSION(:,:)     :: ssh
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)     :: u0mask,u2mask
   INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:)     :: v0mask,v2mask
-  REAL,    SAVE, ALLOCATABLE, DIMENSION(:,:,:)   :: dzu,dzv
   
   REAL                                    :: x_scale     = 9.1556e-5
   REAL                                    :: x_offset    =-3.3845e-19
@@ -43,7 +42,7 @@ SUBROUTINE readfields
   character*16                               :: fileName
   
   if ( .NOT. ALLOCATED(dzu) ) then
-     allocate ( dzu(imt,jmt,km),dzv(imt,jmt,km) )
+     allocate ( dzu(imt,jmt,km,2),dzv(imt,jmt,km,2) )
   end if
 
 
@@ -68,8 +67,9 @@ SUBROUTINE readfields
   !Use  t=1  i=2  j=3  k=4
   map2d    = [3, 4, 2, 1]   
 
-  uvel(:,:,1) =  cshift(get2DfieldNC(trim(ncFile), 'u'),481,1)
-  vvel(:,:,1) =  cshift(get2DfieldNC(trim(ncFile), 'v'),481,1)
+  uvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(ncFile), 'u') !,481,1)
+  vvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(ncFile), 'v') !,481,1)
+  vvel = -vvel 
 
   where (uvel .ne. uvel)
      uvel = 0
@@ -78,8 +78,8 @@ SUBROUTINE readfields
      vvel = 0
   end where
 
-  uflux(:,:,1,2)  =uvel(:,:,1) * dyu(:,:) * dz(1)
-  vflux(:,:,1,2)  =vvel(:,:,1) * dxv(:,:) * dz(1)
+  uflux(:,:,1,2)  = uvel(:,:,1) * dyu(:,:) * dz(1) 
+  vflux(:,:,1,2)  = vvel(:,:,1) * dxv(:,:) * dz(1)
 
   uflux(1:imt-1,:,1,2) = (uflux(1:imt-1,:,1,2) + uflux(2:imt,:,1,2)) / 2
   uflux(imt    ,:,1,2) = (uflux(imt    ,:,1,2) + uflux(1    ,:,1,2)) / 2
