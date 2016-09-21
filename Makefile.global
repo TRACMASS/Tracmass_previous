@@ -44,8 +44,8 @@ ifeq ($(NETCDFLIBS),"fink")
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-#	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2 
-	FF_FLAGS         = -O3 -c -x f95-cpp-input #-gdwarf-2 
+#	FF_FLAGS         = -O0 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
+	FF_FLAGS         = -O3 -c -x f95-cpp-input  
         F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
 endif
