@@ -124,6 +124,7 @@ SUBROUTINE readfields
    write(dataprefix(1:4),'(i4)')   currYear
    write(dataprefix(19:26),'(i4,i2.2,i2.2)') currYear,currMon,currDay
    fieldFile = trim(inDataDir)//'means/'//trim(dataprefix)//'d05'
+   !fieldFile = trim(inDataDir)//'means/2000/ORCA0083-N01_20000105d05'
    
    ! Read SSH
    hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'sossheig')
@@ -193,12 +194,11 @@ SUBROUTINE readfields
    do k = 1, km
    do j = 1, jmt
    do i = 1, imt
-      uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,k,nsp) * zstou(i,j)
-      vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,k,nsp) * zstov(i,j)
+      uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,km+1-k,nsp) * zstou(i,j)
+      vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,km+1-k,nsp) * zstov(i,j)
    enddo
    enddo
    enddo
-   
    ! Check that volume fluxes are zero below sea floor
    do i=1,IMT
    do j=1,JMT
@@ -214,7 +214,8 @@ SUBROUTINE readfields
    enddo
    enddo
    enddo
-
+   
+   
 #ifdef drifter
    ! average velocity/transport to simulate drifter trajectories
    kbot=65 ; ktop=66 ! number of surface layers to integrate over 

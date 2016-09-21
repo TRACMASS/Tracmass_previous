@@ -19,13 +19,14 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   !    r1       : the new position (coordinate)
   !====================================================================
   
+  USE mod_precdef
   USE mod_grid, only: imt, jmt, nsm, nsp, nst
   USE mod_vel, only: uflux, vflux, wflux, ff
   USE mod_active_particles, only: upr
   USE mod_time, only: intrpr, intrpg
   IMPLICIT none
 
-  real*8                                     :: r0, r1, ds, uu, um, vv, vm, en
+  real(DP)                                   :: r0, r1, ds, uu, um, vv, vm, en
   integer                                    :: ijk, ia, ja, ka, ii, im
   
   

@@ -35,6 +35,7 @@ SUBROUTINE setupgrid
    INTEGER                                      :: i ,j ,k, n, kk, ii, &
    &                                               ip, jp, im, jm !! Loop indices
    REAL(DP), SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t        !! dx, dy [m]
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: tmp4D
    CHARACTER (len=200)                          :: gridFile 
    
    
@@ -130,10 +131,23 @@ SUBROUTINE setupgrid
    end do
    
    ! Reverse grid 
+   allocate( tmp4D(imt,jmt,km,2) )
+   
+   tmp4D(1:imt,1:jmt,1:km,:) = dzt(1:imt,1:jmt,1:km,:)
    do k=1,km
-      dzt(:,:,k,:) = dzt(:,:,km+1-k,:) 
-      dzu(:,:,k,:) = dzu(:,:,km+1-k,:) 
-      dzv(:,:,k,:) = dzv(:,:,km+1-k,:) 
+      dzt(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
    end do
+   
+   tmp4D(1:imt,1:jmt,1:km,:) = dzu(1:imt,1:jmt,1:km,:)
+   do k=1,km
+      dzu(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
+   end do
+   
+   tmp4D(1:imt,1:jmt,1:km,:) = dzv(1:imt,1:jmt,1:km,:)
+   do k=1,km
+      dzv(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
+   end do
+   
+   deallocate( tmp4d )
    
 end SUBROUTINE setupgrid
