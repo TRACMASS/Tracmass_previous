@@ -34,11 +34,11 @@ SUBROUTINE readfields
    ! = Variables for filename generation
    CHARACTER (len=200)                          :: dataprefix
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:)        :: ke
-   REAL(SP) dd,hu,hv,uint,vint,zint,hh,h0
+   REAL(P4) dd,hu,hv,uint,vint,zint,hh,h0
   
 #ifdef tempsalt
-   REAL(SP), ALLOCATABLE, DIMENSION(:)     :: rhozvec, depthzvec, latvec
-   REAL(SP), ALLOCATABLE, DIMENSION(:)     :: tmpzvec, salzvec
+   REAL(P4), ALLOCATABLE, DIMENSION(:)     :: rhozvec, depthzvec, latvec
+   REAL(P4), ALLOCATABLE, DIMENSION(:)     :: tmpzvec, salzvec
 #endif
 
    LOGICAL around
