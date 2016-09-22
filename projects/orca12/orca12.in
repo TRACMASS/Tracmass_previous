@@ -70,11 +70,9 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-           kriva =      1,
+           kriva =      6,
       outdatadir = '/Users/joakim/Downloads/orca12/',
-  !    outdatadir = '/Volumes/Deacon/data/orca12/',
-     outdatafile = 'orca12_iter12000_rekt_sub_k4',
-!     outdatafile = 'orca12_anal_rekt_sub_k4',
+     outdatafile = 'orca12_timedep_kriva6',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /

@@ -88,7 +88,7 @@ IMPLICIT NONE
 INTEGER :: iim,loop,iil,ii,ijk,ia,ja,ka
 REAL (DP)  :: uu,um,vv,vm,ss,alfa
 REAL (DP)  :: f0,f1,dzs,dzu1,dzu2,rijk,s0!,ss0
-REAL (DP)  :: r0,sp,sn
+REAL (DP)   :: r0,sp,sn
 
 !_______________________________________________________________________________
 sp=UNDEF ; sn=UNDEF
@@ -180,9 +180,11 @@ elseif(ijk==3) then
 #endif
 
 #ifdef zgrid3D 
-  dzs= intrpg*dzt(ia,ja,ka,nsp)+intrpr*dzt(ia,ja,ka,nsm)
-  dzu1=dzt(ia,ja,ka,nsm)
-  dzu2=dzt(ia,ja,ka,nsp)
+
+  dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
+  dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
+!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
+  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
   if(abs(dzu1)<eps) stop 8705
   if(abs(dzu2)<eps) stop 8706
   f0=dzs/dzu1
@@ -215,6 +217,7 @@ elseif(ijk==3) then
   f1=1.0_dp/f1
  endif 
 #endif /*zgrid3D*/
+
 
 endif
 
@@ -303,7 +306,6 @@ REAL (DP)  ::dawson1, dawson2,s15adf,s15aef,errfun
 REAL (DP)  :: f0,f1,dzs,dzu1,dzu2,s0,ss
 REAL (DP)  :: r0,r1!,ss0
 
-ss0 = dble(idint(ts))*tseas/dxyz
 
 #ifdef twodim  
 if(ijk==3) then
@@ -392,11 +394,13 @@ elseif(ijk==3) then
 #endif
 
 #ifdef zgrid3D 
-  dzs= intrpg*dzt(ia,ja,ka,nsp)+intrpr*dzt(ia,ja,ka,nsm)
-  dzu1=dzt(ia,ja,ka,nsm)
-  dzu2=dzt(ia,ja,ka,nsp)
-  if(abs(dzu1)<=eps) stop 4966
-  if(abs(dzu2)<=eps) stop 4967
+
+  dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
+  dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
+!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
+  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
+  if(abs(dzu1)<eps) stop 4966
+  if(abs(dzu2)<eps) stop 4967
   f0=dzs/dzu1
   f1=dzs/dzu2
   uu=uu*f0
@@ -424,10 +428,12 @@ elseif(ijk==3) then
   if(abs(f1)<eps) stop 4969
   f0=1.0_dp/f0
   f1=1.0_dp/f1
-#endif /*zgrid3d*/
+ endif 
+#endif /*zgrid3D*/
 
 
 endif
+
 
 !print *,ijk,'u+',uu,vv,' u-',um,vm
 !if(uu==vv .and. um==vm) then
@@ -509,9 +515,8 @@ endif
 !  r1=dble(KM)-0.5d0
 ! endif
 !endif
+
 !print *,'time',ijk,r1,r0
-
-
 
 return
 end subroutine pos_time
@@ -839,7 +844,7 @@ endif
       endif
       ssii = (uu+um*(f0-1.0_dp))/(uu-vv+um*(f0-1.0_dp)+vm*(1.0_dp-f1))
       if(f0*um-f1*vm==0.d0) then
-      print *,'8810',f0*um,f1*vm
+       print *,'8810',f0*um,f1*vm
        ssiim= f0*um/eps
 !      stop 8810
       else
@@ -1547,7 +1552,7 @@ REAL (dp), PARAMETER  :: zero = 0.0_dp, half = 0.5_dp, one = 1.0_dp,  &
 !----------------------------------------------------------------------
 !  Machine-dependent constants
 !----------------------------------------------------------------------
-REAL (dp), PARAMETER  :: EPS=1.d-10
+!REAL (dp), PARAMETER  :: EPS=1.d-10
 REAL (dp), PARAMETER  :: XSMALL = 1.05D-08, XLARGE = 9.49D+07,   &
                          XMAX = 2.24D+307
 !REAL (dp), PARAMETER  :: XSMALL = 3.73D-09, XLARGE = 2.68E+08,   &
@@ -1822,8 +1827,6 @@ USE mod_precdef
 USE mod_param
 IMPLICIT NONE
 
-!REAL (DP),  PARAMETER ::  EPS=3.d-7
-!REAL (DP),  PARAMETER ::  EPS=1.d-10
 INTEGER, PARAMETER ::  ITMAX=1000
 
 REAL (DP)  :: a,gamser,gln,x,ap,del,sum,gammln
