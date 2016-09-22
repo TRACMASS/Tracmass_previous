@@ -1,7 +1,7 @@
 
 
 MODULE mod_precdef		! Precision definitions
-   integer, parameter                       :: P4 = selected_real_kind(6, 37)
+   !integer, parameter                       :: P4 = selected_real_kind(6, 37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
 ENDMODULE mod_precdef
@@ -66,13 +66,13 @@ MODULE mod_tempsalt
   REAL(DP)                                  :: rmin, tmin, smin
   REAL(DP)                                  :: rmax, tmax, smax
   REAL(DP)                                  :: dr ,dtemp ,dsalt
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:,:) :: tem,sal,rho
-  REAL(P4)                                  :: tmin0 ,tmax0
-  REAL(P4)                                  :: smin0 ,smax0
-  REAL(P4)                                  :: rmin0 ,rmax0
-  REAL(P4)                                  :: tmine ,tmaxe
-  REAL(P4)                                  :: smine ,smaxe
-  REAL(P4)                                  :: rmine ,rmaxe
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: tem,sal,rho
+  REAL*4                                  :: tmin0 ,tmax0
+  REAL*4                                  :: smin0 ,smax0
+  REAL*4                                  :: rmin0 ,rmax0
+  REAL*4                                  :: tmine ,tmaxe
+  REAL*4                                  :: smine ,smaxe
+  REAL*4                                  :: rmine ,rmaxe
 end MODULE mod_tempsalt
 
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -90,9 +90,9 @@ MODULE mod_grid
   INTEGER                                   :: nperio=1
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:)   :: hs
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:)   :: botbox
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:)     :: dxv, dyu, ang
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: hs
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: botbox
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)     :: dxv, dyu, ang
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: dz
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: dxdy
   REAL(DP)                                  :: dxyz
@@ -103,6 +103,7 @@ MODULE mod_grid
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: zlev
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: z_r, z_w
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt, dzu, dzv
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt0, dzu0, dzv0
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
@@ -408,7 +409,7 @@ ENDMODULE mod_buoyancy
 MODULE mod_domain
   USE mod_precdef
   INTEGER, DIMENSION(10)                :: ienw ,iene, jens ,jenn
-  REAL(P4)                                :: timax
+  REAL*4                                :: timax
 ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -424,7 +425,7 @@ ENDMODULE mod_dens
 MODULE mod_vel
   USE mod_grid, only: nsm, nsp, dzt
   USE mod_precdef
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
 #if defined explicit_w || full_wflux
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
@@ -518,16 +519,16 @@ ENDMODULE mod_name
 MODULE mod_streamfunctions
   USE mod_precdef
 #ifdef streamxy
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
 #endif
 #ifdef streamv
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 #ifdef streamr
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
 #endif
 #ifdef stream_thermohaline
-  REAL(P4), ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
 #endif
 #ifdef tracer_convergence
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: converg

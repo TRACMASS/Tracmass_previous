@@ -46,19 +46,19 @@ SUBROUTINE readfields
    CHARACTER (len=200)                           :: dataprefix
    REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:)       :: xxx
-   REAL(P4)                                      :: dd,hu,hv,uint,vint,zint,hh,h0
+   REAL*4                                      :: dd,hu,hv,uint,vint,zint,hh,h0
   
 #ifdef initxyt
    INTEGER, PARAMETER                            :: NTID=73
    INTEGER, PARAMETER                            :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
 
    INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
-   REAL(P4), SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
+   REAL*4, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
 #endif
    
 #ifdef tempsalt
-   REAL(P4), ALLOCATABLE, DIMENSION(:)           :: rhozvec, depthzvec, latvec
-   REAL(P4), ALLOCATABLE, DIMENSION(:)           :: tmpzvec, salzvec
+   REAL*4, ALLOCATABLE, DIMENSION(:)           :: rhozvec, depthzvec, latvec
+   REAL*4, ALLOCATABLE, DIMENSION(:)           :: tmpzvec, salzvec
 #endif
 
    LOGICAL                                       :: around
@@ -133,7 +133,7 @@ SUBROUTINE readfields
    ! Depth at U, V, T points as 2D arrays
    allocate ( abyst(imt, jmt) , abysu(imt, jmt) , abysv(imt, jmt) )
    
-   abyst = sum(dzt(:,:,:,1), dim=3)
+   abyst = sum(dzt0(:,:,:), dim=3)
    abysu = sum(dzu(:,:,:,1), dim=3)
    abysv = sum(dzv(:,:,:,1), dim=3)
    
@@ -189,16 +189,26 @@ SUBROUTINE readfields
    ! This is only an approximation of what NEMO really does
    ! but is accurate within 1% 
    !
+   
+   do k = 1, km
+   do j = 1, jmt
+   do i = 1, imt
+      dzt(i,j,k,nsp) = dzt0(i,j,k) * zstot(i,j)
+   end do
+   end do
+   end do
+   
    uflux(:,:,:,nsp) = 0.
    vflux(:,:,:,nsp) = 0.
    do k = 1, km
    do j = 1, jmt
    do i = 1, imt
-      uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,km+1-k,nsp) * zstou(i,j)
-      vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,km+1-k,nsp) * zstov(i,j)
+      uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)
+      vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
    enddo
    enddo
    enddo
+   
    ! Check that volume fluxes are zero below sea floor
    do i=1,IMT
    do j=1,JMT
