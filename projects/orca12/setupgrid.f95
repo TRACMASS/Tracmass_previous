@@ -35,6 +35,7 @@ SUBROUTINE setupgrid
    INTEGER                                      :: i ,j ,k, n, kk, ii, &
    &                                               ip, jp, im, jm !! Loop indices
    REAL(DP), SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t        !! dx, dy [m]
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: tmp4D
    CHARACTER (len=200)                          :: gridFile 
    
    
@@ -49,7 +50,7 @@ SUBROUTINE setupgrid
    gridFile = trim(inDataDir)//'domain/mesh_hgr.nc'
    e1t  = get2DfieldNC(gridFile, 'e1t')
    e2t  = get2DfieldNC(gridFile, 'e2t')
-   dxdy(:,:) = e1t(:,:) * e2t(:,:)
+   dxdy(1:imt,1:jmt) = e1t(1:imt,1:jmt) * e2t(1:imt,1:jmt)
    deallocate ( e1t, e2t )
   
    !
@@ -102,38 +103,47 @@ SUBROUTINE setupgrid
    !
    ! SSH variability is accounted for in readfield each time step
    !
-   allocate ( dzu(imt,jmt,km,2),dzv(imt,jmt,km,2) )
+   allocate ( dzu(imt,jmt,km,2),dzv(imt,jmt,km,2), dzt0(imt,jmt,km) )
    
-   dzt(:,:,:,1) = get3DfieldNC(gridFile, 'e3t')
+   dzt0(:,:,:) = get3DfieldNC(gridFile, 'e3t')
    dzu(:,:,:,1) = get3DfieldNC(gridFile, 'e3u')
    dzv(:,:,:,1) = get3DfieldNC(gridFile, 'e3v')
-   
-   dzt(:,:,:,2) = dzt(:,:,:,1)
-   dzu(:,:,:,2) = dzu(:,:,:,1)
-   dzv(:,:,:,2) = dzv(:,:,:,1)
    
    !
    ! Ensure thickness is zero in invalid points
    !
    do n=1,2
       do k=1,km
-         where (k > kmt)
-            dzt(:,:,k,n) = 0
+         where (k > kmt(1:imt,1:jmt))
+            dzt0(:,:,k) = 0
          end where
-         where (k > kmu)
+         where (k > kmu(1:imt,1:jmt))
             dzu(:,:,k,n) = 0
          end where
-         where (k > kmv)
+         where (k > kmv(1:imt,1:jmt))
             dzv(:,:,k,n) = 0
          end where
       enddo 
    end do
    
    ! Reverse grid 
+   allocate( tmp4D(imt,jmt,km,2) )
+   
+   tmp4D(1:imt,1:jmt,1:km,1) = dzt0(1:imt,1:jmt,1:km)
    do k=1,km
-      dzt(:,:,k,:) = dzt(:,:,km+1-k,:) 
-      dzu(:,:,k,:) = dzu(:,:,km+1-k,:) 
-      dzv(:,:,k,:) = dzv(:,:,km+1-k,:) 
+      dzt0(:,:,k) = tmp4D(:,:,km+1-k,1) 
    end do
+   
+   tmp4D(1:imt,1:jmt,1:km,:) = dzu(1:imt,1:jmt,1:km,:)
+   do k=1,km
+      dzu(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
+   end do
+   
+   tmp4D(1:imt,1:jmt,1:km,:) = dzv(1:imt,1:jmt,1:km,:)
+   do k=1,km
+      dzv(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
+   end do
+   
+   deallocate( tmp4d )
    
 end SUBROUTINE setupgrid

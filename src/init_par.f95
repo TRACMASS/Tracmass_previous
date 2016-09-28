@@ -42,7 +42,7 @@ SUBROUTINE init_params
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &
                                     subGridKmin, subGridKmax, SubGridFile,   &
-                                    subGridID
+                                    subGridID, nperio
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
                                     baseMon, baseYear, jdoffset
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &

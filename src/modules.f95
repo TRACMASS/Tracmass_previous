@@ -1,7 +1,7 @@
 
 
 MODULE mod_precdef		! Precision definitions
-   integer, parameter                       :: SP = selected_real_kind(6, 37)
+   !integer, parameter                       :: P4 = selected_real_kind(6, 37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
 ENDMODULE mod_precdef
@@ -9,67 +9,70 @@ ENDMODULE mod_precdef
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_param
+  USE mod_precdef
   INTEGER                                   :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
   INTEGER                                   :: ncoor,kriva,iter,ngcm
-  REAL*8, PARAMETER                         :: UNDEF=1.d20 
-  REAL*8, PARAMETER                         :: EPS=1.d-7 ! the small epsilon
+  REAL(DP), PARAMETER                       :: UNDEF=1.d20 
+  REAL(DP), PARAMETER                       :: EPS=1.d-7 ! the small epsilon
 
-  REAL*8, PARAMETER                         :: grav = 9.81
-  REAL*8, PARAMETER                         :: PI = 3.14159265358979323846d0
-  REAL*8, PARAMETER                         :: radius = 6371229.d0 
-  REAL*8, PARAMETER                         :: radian = pi/180.d0  
-  REAL*8, PARAMETER                         :: deg=radius*radian   
-  REAL*8, PARAMETER                         :: tday=24.d0 * 3600.d0
+  REAL(DP), PARAMETER                       :: grav = 9.81
+  REAL(DP), PARAMETER                       :: PI = 3.14159265358979323846d0
+  REAL(DP), PARAMETER                       :: radius = 6371229.d0 
+  REAL(DP), PARAMETER                       :: radian = pi/180.d0  
+  REAL(DP), PARAMETER                       :: deg=radius*radian   
+  REAL(DP), PARAMETER                       :: tday=24.d0 * 3600.d0
   INTEGER                                   :: idmax(12,1000:3000)
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
-  REAL*8                                     :: ds, dsmin
-  REAL*8                                     :: dse, dsw, dsn, dss
-  REAL*8                                     :: dsu, dsd, dsc
-  LOGICAL                                    :: scrivi
-  INTEGER                                    :: niter
-  REAL*8                                     :: ss0
-  INTEGER                                    :: lbas
-  REAL*8                                     :: subvol
+  USE mod_precdef
+  REAL(DP)                                  :: ds, dsmin
+  REAL(DP)                                  :: dse, dsw, dsn, dss
+  REAL(DP)                                  :: dsu, dsd, dsc
+  LOGICAL                                   :: scrivi
+  INTEGER                                   :: niter
+  REAL(DP)                                  :: ss0
+  INTEGER                                   :: lbas
+  REAL(DP)                                  :: subvol
 ENDMODULE mod_loopvars
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 MODULE mod_traj
-
+  USE mod_precdef
   ! Variables connected to particle positions.
-  INTEGER, PARAMETER                         :: NNRJ=8, NTRJ=7
-  INTEGER                                    :: nend
-  INTEGER                                    :: ntrac, ntractot=0
+  INTEGER, PARAMETER                        :: NNRJ=8, NTRJ=7
+  INTEGER                                   :: nend
+  INTEGER                                   :: ntrac, ntractot=0
   ! === Particle arrays ===
-  REAL*8, ALLOCATABLE,  DIMENSION(:,:)       :: trj
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: nrj 
+  REAL(DP), ALLOCATABLE,  DIMENSION(:,:)    :: trj
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: nrj 
   ! === Particle counters ===
-  INTEGER                                    :: nout=0, nloop=0, nerror=0, nrh0=0
-  INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
+  INTEGER                                   :: nout=0, nloop=0, nerror=0, nrh0=0
+  INTEGER, ALLOCATABLE,DIMENSION(:)         :: nexit
   ! === Particle positions ===
-  INTEGER                                    :: ia, ja, ka, iam
-  INTEGER                                    :: ib, jb, kb, ibm
-  REAL*8                                     :: x0, y0, z0
-  REAL*8                                     :: x1, y1, z1
+  INTEGER                                   :: ia, ja, ka, iam
+  INTEGER                                   :: ib, jb, kb, ibm
+  REAL(DP)                                  :: x0, y0, z0
+  REAL(DP)                                  :: x1, y1, z1
 ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_tempsalt
-  REAL*8                                     :: rmin, tmin, smin
-  REAL*8                                     :: rmax, tmax, smax
-  REAL*8                                     :: dr ,dtemp ,dsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: tem,sal,rho
-  REAL*4                                     :: tmin0 ,tmax0
-  REAL*4                                     :: smin0 ,smax0
-  REAL*4                                     :: rmin0 ,rmax0
-  REAL*4                                     :: tmine ,tmaxe
-  REAL*4                                     :: smine ,smaxe
-  REAL*4                                     :: rmine ,rmaxe
+  USE mod_precdef
+  REAL(DP)                                  :: rmin, tmin, smin
+  REAL(DP)                                  :: rmax, tmax, smax
+  REAL(DP)                                  :: dr ,dtemp ,dsalt
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: tem,sal,rho
+  REAL*4                                  :: tmin0 ,tmax0
+  REAL*4                                  :: smin0 ,smax0
+  REAL*4                                  :: rmin0 ,rmax0
+  REAL*4                                  :: tmine ,tmaxe
+  REAL*4                                  :: smine ,smaxe
+  REAL*4                                  :: rmine ,rmaxe
 end MODULE mod_tempsalt
 
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -77,33 +80,36 @@ end MODULE mod_tempsalt
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
   USE mod_param, only: pi, undef, iter
+  USE mod_precdef
   IMPLICIT NONE
 
   INTEGER                                   :: imt, jmt, km
   INTEGER                                   :: nst=2
   INTEGER                                   :: nsm=1,  nsp=2
   INTEGER                                   :: wnsm=1, wnsp=2
-  REAL*8                                    :: dx,dy
-  REAL*8                                    :: dxdeg,dydeg,stlon1,stlat1
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: dz
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)       :: dxdy
-  REAL*8                                    :: dxyz
+  INTEGER                                   :: nperio=1
+  REAL(DP)                                  :: dx,dy
+  REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: hs
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: botbox
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)     :: dxv, dyu, ang
+  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: dz
+  REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: dxdy
+  REAL(DP)                                  :: dxyz
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: csu,cst,dyt,phi
+  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: csu,cst,dyt,phi
 
   ! === Vertical grids ===
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: zlev
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)   :: z_r, z_w
+  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: zlev
+  REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: z_r, z_w
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt, dzu, dzv
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt0, dzu0, dzv0
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
 #ifdef ifs
-  REAL*8, ALLOCATABLE, DIMENSION(:)         :: aa, bb
+  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: aa, bb
 #endif
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
   INTEGER                                   :: subGrid     ,subGridID
@@ -114,16 +120,16 @@ MODULE mod_grid
   INTEGER                                   :: degrade_space=0
 
 #ifdef ifs
-  REAL*8, PARAMETER                         :: R_d = 287.05d0
-  REAL*8, PARAMETER                         :: L_v = 2.5d0 * 1e+6   
-  REAL*8, PARAMETER                         :: c_d = 1004.d0
+  REAL(DP), PARAMETER                       :: R_d = 287.05d0
+  REAL(DP), PARAMETER                       :: L_v = 2.5d0 * 1e+6   
+  REAL(DP), PARAMETER                       :: c_d = 1004.d0
 #endif
 
 CONTAINS
   function l2d(lon1,lon2,lat1,lat2)
-    real                                   :: lon1,lon2,lat1,lat2,l2d
-    real                                   :: rlon1,rlon2,rlat1,rlat2
-    real                                   :: dlon,dlat,a,c
+    real                                    :: lon1,lon2,lat1,lat2,l2d
+    real                                    :: rlon1,rlon2,rlat1,rlat2
+    real                                    :: dlon,dlat,a,c
     dlon = (lon2 - lon1)/180*pi
     rlat1 = lat1 /180.*pi
     rlat2 = lat2 /180.*pi
@@ -137,7 +143,7 @@ CONTAINS
 
     use mod_traj, only: ib,jb,kb
     IMPLICIT NONE
-    REAL*8                                    :: intrpr, intrpg
+    REAL(DP)                                    :: intrpr, intrpg
 
     ! T-box volume in m3
 #ifdef zgrid3D
@@ -170,6 +176,7 @@ ENDMODULE mod_grid
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_time
+  USE mod_precdef
   ! Variables and routines for timekeeping
 
   !Timestep increasing with one for each new velocity field
@@ -180,7 +187,7 @@ MODULE mod_time
 
   !type for datetimes
   type DATETIME
-     REAL*8                                 :: JD=0 
+     REAL(DP)                               :: JD=0 
      REAL                                   :: frac=0, yd=0
      INTEGER                                :: Year, Mon, Day
      INTEGER                                :: Hour, Min, Sec
@@ -188,29 +195,29 @@ MODULE mod_time
   type(DATETIME), SAVE                      :: basetime, starttime
   type(DATETIME), SAVE                      :: currtime, looptime
   ! === Base for JD (When JD is 1)
-  REAL*8                                    :: baseJD=0
+  REAL(DP)                                  :: baseJD=0
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
-  REAL*8                                    :: jdoffset=0
+  REAL(DP)                                  :: jdoffset=0
   LOGICAL                                   :: noleap=.false.
   ! === Timerange for velocity fields
-  REAL*8                                    :: minvelJD=0,   maxvelJD=0
+  REAL(DP)                                  :: minvelJD=0,   maxvelJD=0
   INTEGER                                   :: minvelints, maxvelints
   ! === JD when the run starts
-  REAL*8                                    :: startJD=-999, ttpart, startFrac
+  REAL(DP)                                  :: startJD=-999, ttpart, startFrac
   INTEGER                                   :: startYear, startMon, startDay
   INTEGER                                   :: startHour, startMin, startSec
-  REAL*8                                    :: endJD=-999, endFrac
+  REAL(DP)                                  :: endJD=-999, endFrac
   INTEGER                                   :: endYear=0, endMon,   endDay
   INTEGER                                   :: endHour,   endMin,   endSec
   ! === Current JD
-  REAL*8                                    :: currJDtot ,currJDyr,currfrac
+  REAL(DP)                                  :: currJDtot ,currJDyr,currfrac
   INTEGER                                   :: currYear  ,currMon  ,currDay
   INTEGER                                   :: currHour, currMin, currSec
   INTEGER                                   :: leapoffset=0
   ! === Looping time
   INTEGER                                   :: loopints, loopintstart
-  REAL*8                                    :: loopJD, loopJDyr, loopFrac
+  REAL(DP)                                  :: loopJD, loopJDyr, loopFrac
   INTEGER                                   :: loopYear  ,loopMon  ,loopDay
   INTEGER                                   :: loopHour, loopMin, loopSec 
   ! Old stuff
@@ -221,13 +228,13 @@ MODULE mod_time
   ! Used to figure out when to change file.
   INTEGER                                   :: fieldsPerFile
   ! === Time-interpolation variables in loop ===
-  REAL*8                                    :: dt, t0
-  REAL*8                                    :: dtreg
-  REAL*8                                    :: tseas, tyear, dtmin,voltr
-  REAL*8                                    :: tstep, dstep, tss, partQuant
-  REAL*8                                    :: ts, tt
-  REAL*8                                    :: intrpr, intrpg
-  REAL*8                                    :: intrpb, intrpbg
+  REAL(DP)                                  :: dt, t0
+  REAL(DP)                                  :: dtreg
+  REAL(DP)                                  :: tseas, tyear, dtmin,voltr
+  REAL(DP)                                  :: tstep, dstep, tss, partQuant
+  REAL(DP)                                  :: ts, tt
+  REAL(DP)                                  :: intrpr, intrpg
+  REAL(DP)                                  :: intrpb, intrpbg
 CONTAINS
 
   subroutine updateClock  
@@ -277,7 +284,7 @@ CONTAINS
   subroutine gdate (rjd, year,month,day)
     !Computes the gregorian calendar date given a julian date (jd).
     !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
-    REAL*8                                   :: rjd
+    REAL(DP)                                   :: rjd
     INTEGER                                  :: jd
     INTEGER                                  :: year ,month ,day
     INTEGER                                  :: i ,j ,k ,l ,n
@@ -302,7 +309,7 @@ CONTAINS
 
   INTEGER function jd2ints(jd)
     USE mod_param, only: ngcm
-    REAL*8                                    :: jd
+    REAL(DP)                                    :: jd
     jd2ints = int(floor((jd)/(real(ngcm)/24.))) 
     return
   end function jd2ints
@@ -379,7 +386,11 @@ CONTAINS
 #endif /*regulardt*/
     end if
     ! === time interpolation constant ===
+#if defined fixedtimestep 
+    intrpbg=0.d0 ! mimics Ariane's lack of linear interpolation of the velocity fields
+#else    
     intrpbg=dmod(ts,1.d0) 
+#endif
     intrpb =1.d0-intrpbg
   end subroutine calc_time
 
@@ -389,12 +400,14 @@ ENDMODULE mod_time
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_buoyancy
+  USE mod_precdef
 ENDMODULE mod_buoyancy
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_domain
+  USE mod_precdef
   INTEGER, DIMENSION(10)                :: ienw ,iene, jens ,jenn
   REAL*4                                :: timax
 ENDMODULE mod_domain
@@ -403,7 +416,7 @@ ENDMODULE mod_domain
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
 MODULE mod_dens
-
+  USE mod_precdef
 ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
 
@@ -411,14 +424,15 @@ ENDMODULE mod_dens
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
   USE mod_grid, only: nsm, nsp, dzt
+  USE mod_precdef
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
 #if defined explicit_w || full_wflux
-  REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
+  REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)        :: wflux
+  REAL(DP), ALLOCATABLE, DIMENSION(:,:)        :: wflux
 #endif
   REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
-  REAL*8                                     :: ff
+  REAL(DP)                                     :: ff
   INTEGER                                    :: degrade_time=0
     integer, save                            :: degrade_counter = 0
 
@@ -503,17 +517,21 @@ ENDMODULE mod_name
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_streamfunctions
+  USE mod_precdef
 #ifdef streamxy
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
 #endif
 #ifdef streamv
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 #ifdef streamr
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
 #endif
 #ifdef stream_thermohaline
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+#endif
+#ifdef tracer_convergence
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: converg
 #endif
   INTEGER                                    :: intpsi=120 
   ! to be read by the xxx.in files in future

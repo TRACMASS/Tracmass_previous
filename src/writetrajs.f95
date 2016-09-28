@@ -30,9 +30,7 @@ CONTAINS
           outDataDir = trim(projdir) // trim(Project) // '/'
        end if
     end if
-    if (outdircase .eqv. .true.) then
-       outDataDir = trim(outDataDir) // trim(Case) // '/'
-    end if
+    if (outdircase .eqv. .true.) outDataDir = trim(outDataDir) // trim(Case) // '/'
     if (outdirdate .eqv. .true.) then
        yearstr = 'XXXXXXXX-XXXX'
        write (yearstr(1:4),'(I4.4)') int(startYear)
@@ -198,6 +196,7 @@ t0     =  trj(7,ntrac)
     call interp2(ib,jb,kb,temp,salt,dens)
 #endif
 
+!print *,x1,y1,z1
     
 #if defined textwrite 
     select case (sel)

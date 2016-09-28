@@ -18,7 +18,7 @@ SUBROUTINE loop
   USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
                           niter, lbas, scrivi, subvol
   USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, dzt, &
-                          mask, iter, nsm, nsp, hs, calc_dxyz
+                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio !joakim
   use mod_vel,      only: uflux, vflux, wflux
   USE mod_seed,     only: ff, nff, seedTime, seed
   USE mod_domain,   only: timax, jens, jenn, iene, ienw
@@ -242,18 +242,26 @@ SUBROUTINE loop
               nrj(7,ntrac) = 1
               cycle ntracLoop
            endif
+           
            nrj(7,ntrac)=0
+#if defined fixedtimestep 
+           intrpg = 0.d0  ! mimics Ariane's lack of linear interpolation of the velocity fields
+#else
            intrpg = dmod(ts,1.d0) ! time interpolation constant between 0 and 1
+#endif
            intrpr = 1.d0-intrpg
            if(intrpg.lt.0.d0 .or.intrpg.gt.1.d0) then
               print *,'intrpg=',intrpg
               exit intsTimeLoop
            endif
-
-           ! === Cyclic world ocean/atmosphere === 
-           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-              x1 = x1 - DBLE(IMT)
-           END IF
+           
+           if (nperio /= 0) then
+              ! === Cyclic world ocean/atmosphere === 
+              IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+                 x1 = x1 - DBLE(IMT)
+              END IF
+           end if
+           
            x0  = x1
            y0  = y1
            z0  = z1
@@ -262,7 +270,7 @@ SUBROUTINE loop
            if(iam == 0) iam = IMT
            ja  = jb
            ka  = kb
-
+           
            call calc_dxyz(intrpr, intrpg)
            call errorCheck('dxyzError'     ,errCode)
            call errorCheck('coordBoxError' ,errCode)
@@ -318,90 +326,98 @@ SUBROUTINE loop
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
-
-           ! === north fold cyclic for the ORCA grids ===
-#if defined orc || orca1 || orca12 
-            if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-              x1 = dble(IMT+2) - x1
-              ib=idint(x1)+1
-              jb=JMT-1
-              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           elseif(y1 > dble(JMT-1)) then
-!             print *,'north of northfold for ntrac=',ntrac
-             x1 = dble(IMT+2) - x1
-             ib=idint(x1)+1
-             jb=JMT-1
-             y1= dble(JMT-1) -y1 + dble(JMT-1)
-             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           endif
-#elif defined orca025 || orca025L75
-           if( y1 == dble(JMT-1) ) then
-              x1 = dble(IMT+3) - x1
-              y1 = dble(JMT-2)
-              ib=idint(x1)
-              jb=JMT-2
-              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           elseif(y1 > dble(JMT-1)) then
-              print *,ia,ib,x0,x1
-              print *,ja,jb,y0,y1
-              print *,ka,kb,z0,z1
-              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-              nerror=nerror+1
-              nrj(6,ntrac)=1
-              cycle ntracLoop
-           endif
            
-! === Cyclic Arctic in a global cylindrical projection ===
-            if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-              x1 = dble(IMT+2) - x1
-              ib=idint(x1)+1
-              jb=JMT-1
-              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           elseif(y1 > dble(JMT-1)) then
-             print *,'north of northfold for ntrac=',ntrac
-             x1 = dble(IMT+2) - x1
-             ib=idint(x1)+1
-             jb=JMT-1
-             y1= dble(JMT-1) -y1 + dble(JMT-1)
-             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           endif
+           if (nperio == 6) then
+              ! === north fold cyclic for the ORCA grids ===
+              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+                 x1 = dble(IMT+2) - x1
+                 ib=idint(x1)+1
+                 jb=JMT-1
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              elseif(y1 > dble(JMT-1)) then
+!                print *,'north of northfold for ntrac=',ntrac
+                x1 = dble(IMT+2) - x1
+                ib=idint(x1)+1
+                jb=JMT-1
+                y1= dble(JMT-1) -y1 + dble(JMT-1)
+                x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              endif
 
-
+           else if (nperio == 4) then
+              ! === another north fold implementation 
+              if( y1 == dble(JMT-1) ) then
+                 x1 = dble(IMT+3) - x1
+                 y1 = dble(JMT-2)
+                 ib=idint(x1)
+                 jb=JMT-2
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              elseif(y1 > dble(JMT-1)) then
+                 print *,ia,ib,x0,x1
+                 print *,ja,jb,y0,y1
+                 print *,ka,kb,z0,z1
+                 print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+                 nerror=nerror+1
+                 nrj(6,ntrac)=1
+                 cycle ntracLoop
+              endif
+              
+              ! === Cyclic Arctic in a global cylindrical projection ===
+              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+                 x1 = dble(IMT+2) - x1
+                 ib=idint(x1)+1
+                 jb=JMT-1
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              elseif(y1 > dble(JMT-1)) then
+                 print *,'north of northfold for ntrac=',ntrac
+                 x1 = dble(IMT+2) - x1
+                 ib=idint(x1)+1
+                 jb=JMT-1
+                 y1= dble(JMT-1) -y1 + dble(JMT-1)
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              endif
+           end if
            
-#endif
-           ! === Cyclic world ocean/atmosphere === 
-           if(x1 <  0.d0    ) x1=x1+dble(IMT)       
-           if(x1 > dble(IMT)) x1=x1-dble(IMT)   
-           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-            x1 = x1 - DBLE(IMT)
-           endif    
-           if(ib > IMT      ) ib=ib-IMT 
-
+           if (nperio /= 0) then
+              ! === East-west cyclic 
+              if(x1 <  0.d0    ) then
+                 print*,'<0',ntrac,x1
+                 x1=x1+dble(IMT)       
+                 print*,ntrac,x1
+              end if
+              if(x1 > dble(IMT)) then
+                 print*,'>imt',ntrac,x1
+                 x1=x1-dble(IMT)   
+                 print*,ntrac,x1
+              end if
+              IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+                 x1 = x1 - DBLE(IMT)
+              endif
+              if(ib > IMT      ) ib=ib-IMT 
+           end if
            
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
            if(x1 /= dble(idint(x1))) ib=idint(x1)+1 
            if(y1 /= dble(idint(y1))) jb=idint(y1)+1
            if(z1 /= dble(idint(z1))) kb=idint(z1)+1 
-
+           
            if (ja>jmt) ja = jmt - (ja - jmt)
            if (jb>jmt) jb = jmt - (jb - jmt)
-           
+
            call errorCheck('boundError', errCode)
-           if (errCode.ne.0) cycle ntracLoop           
-           call errorCheck('landError', errCode)
-           if (errCode.ne.0) cycle ntracLoop           
-           call errorCheck('bottomError', errCode)
            if (errCode.ne.0) cycle ntracLoop
+           call errorCheck('landError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
+           call errorCheck('bottomError', errCode)
+       !    if (errCode.ne.0) cycle ntracLoop
            call errorCheck('airborneError', errCode)
            if (errCode.ne.0) cycle ntracLoop
+           
            call errorCheck('corrdepthError', errCode)
 !           if (errCode.ne.0) cycle ntracLoop
            call errorCheck('cornerError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            
-
-
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
 #if defined diffusion     
@@ -429,7 +445,7 @@ SUBROUTINE loop
 
 
 
-        
+
            
            
 #if defined tempsalt
@@ -500,8 +516,8 @@ return
      
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*),intent(in)        :: teststr    
-       INTEGER                             :: verbose = 0
-       INTEGER                             :: strict  = 0
+       INTEGER                             :: verbose = 1
+       INTEGER                             :: strict  = 1
        INTEGER,intent(out)                 :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
        INTEGER, save                       :: dxntrac, dyntrac
@@ -620,13 +636,12 @@ return
           endif
 
        case ('landError')
-          if(kmt(ia,ja) == 0) then
+          if(kmt(ib,jb) == 0) then
              if (verbose == 1) then
                 print *, thickline !========================================
                 print *,'Warning: Trajectory on land'
                 print *, thinline !-----------------------------------------
                 call print_pos
-                call print_mask
                 call print_ds
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
                 print *,'hs=',hs(ia,ja,nsm),hs(ia,ja,nsp),hs(ib,jb,nsm),hs(ib,jb,nsp)
@@ -687,7 +702,7 @@ return
           ! if trajectory under bottom of ocean, 
           ! then put in middle of deepest layer 
           ! (this can happen when using time dependent vertical coordinates)
-           if( z1.le.dble(KM-kmt(ia,ja)) ) then
+           if( z1.le.dble(KM-kmt(ib,jb)) ) then
               print *,'Particle below bottom',z1,dble(KM-kmt(ib,jb))
               print *,'x1,y1',x1,y1
               print *,'ntrac=',ntrac,niter 
@@ -700,17 +715,11 @@ return
         case ('airborneError')
            ! if trajectory above sea level,
            ! then put back in the middle of shallowest layer (evaporation)
-           if (dble(km) > z1) then
-              print *, thickline !========================================
-              print *,'Warning: Trajectory airborne'
-              print *, thinline !-----------------------------------------
-              call print_pos
+           if( z1.ge.dble(KM) ) then
               z1=dble(KM)-0.5d0
               kb=KM
               errCode = -50
            endif
-
-           
         case ('corrdepthError')
            ! sets the right level for the corresponding trajectory depth
            if(z1.ne.dble(idint(z1))) then
@@ -840,19 +849,6 @@ return
     print '(A,F7.2,A,F7.2)','      z1 : ', z1, '      z0 : ', z0
   end subroutine print_pos
 
-
-  subroutine print_mask
-    print '(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)', &
-         'kmt(a,a) : ',    kmt(ia,ja),    '   kmt(a,b) : ', kmt(ia,jb), &
-         '   kmt(b,a) : ', kmt(ib,ja),    '   kmt(b,b) : ', kmt(ib,jb)
-    print '(A,I4,A,I4,A,I4,A,I4,A,I4,A,I4)', &
-         'msk(a,a) : ',    mask(ia,ja),    '   msk(a,b) : ', mask(ia,jb), &
-         '   msk(b,a) : ', mask(ib,ja),    '   msk(b,b) : ', mask(ib,jb)
-    
-  end subroutine print_mask
-
-
-  
   subroutine fancyTimer(timerText ,testStr)
     IMPLICIT NONE
 

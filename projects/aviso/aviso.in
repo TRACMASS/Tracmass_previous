@@ -2,31 +2,29 @@
       gridvernum =      6,
 /
 &INIT_GRID_DESCRIPTION
-         gcmname = 'NEMO',
-       gcmsource = 'http://www.nemo-ocean.eu/',
-        gridname = 'ORCA12',
-      gridsource = 'http://www.nemo-ocean.eu/',
-        griddesc = '1/12 deg run for the global Ocean.',
-       indatadir = '/Users/joakim/data/ORCA0083-N001/',
-     !topoDataDir = '/Users/joakim/data/ORCA0083-N001/domain/',
+         gcmname = 'AVISO',
+       gcmsource = 'http://www.aviso.altimetry.fr/',
+        gridname = 'AVISO',
+      gridsource = 'http://www.aviso.altimetry.fr/',
+        griddesc = 'Satellite altimetry',
+       indatadir = '/Users/joakim/data/aviso/global/delayed-time/grids/madt/all-sat-merged/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'ORCA12',
+        casename = 'AVISO',
         casedesc = 'Global Ocean trajectories',
 /
 &INIT_GRID_SIZE
-             imt =   4320,
-             jmt =   3059,
-              km =     75,
+             imt =   1440,
+             jmt =    720,
+              km =      1,
              nst =      2,
-         subgrid =      1,
-     subgridimin =    3333,
-     subgridimax =    3966,
-     subgridjmin =     776,
-     subgridjmax =    1195,
+         subgrid =      0,
+     subgridimin =    3001,
+     subgridimax =    4000,
+     subgridjmin =     501,
+     subgridjmax =    1500,
      subgridfile = 'templ.asc',
        subgridid =      0,
-       nperio    =      0, 
 /
 &INIT_BASE_TIME
          basesec =      0,
@@ -35,13 +33,13 @@
          baseday =      1,
          basemon =      1,
         baseyear =      1,
-        jdoffset =      4,
+        jdoffset =      3,
 /
 &INIT_GRID_TIME
-   fieldsperfile =      1,
-            ngcm =    120,
+   fieldsperfile =    366,
+            ngcm =     24,
             iter =      1,
-          intmax =  15330,
+          intmax =     10,
         minveljd =     -1,
         maxveljd =     -1,
 /
@@ -49,17 +47,16 @@
         startsec =      0,
         startmin =      0,
        starthour =     12,
-        startday =      5,
+        startday =      1,
         startmon =      1,
-       startyear =   2000,
-        !jdoffset =      3,
-          noleap =  .true., 
-         startjd =      -1,
+       startyear =   2008,
+          noleap =  .false., 
+         startjd =     -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =    10,
+          intrun =     360,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -70,27 +67,27 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-           kriva =      6,
-      outdatadir = '/Users/joakim/Downloads/orca12/',
-     outdatafile = 'orca12_timedep_kriva6',
+           kriva =      1,
+      outdatadir = '/Users/joakim/Downloads/aviso_traj/',
+     outdatafile = 'aviso_test',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      2,
-            idir =     -1,
+            isec =      4,
+            idir =      0,
             nqua =      1,
-       partquant =      1,
+       partquant =      111,
         ntracmax = 20000000,
-    loneparticle =      0, !2964,
+    loneparticle =      0, 
         seedtype =      1,
-            ist1 =    500,
-            ist2 =    633,
-            jst1 =    418,
-            jst2 =    418,
+            ist1 =    1120,
+            ist2 =    1140,
+            jst1 =    498, 
+            jst2 =    498, 
             kst1 =      1,
-            kst2 =     75,
+            kst2 =      1,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
@@ -104,10 +101,10 @@
 /
 &INIT_KILLZONES
             nend =      5,
-            ienw =   -1,  633,   -1,   -1,
-            iene =    1, 1000, 1000, 1000,
-            jens =    1,    1,    1,  418,
-            jenn =  700,  700,    1,  418,
+            ienw =  1,  1,   1,  1,
+            iene = -1, -1,  -1, -1,
+            jens =  1,  1,   1,  1,
+            jenn = -1, -1,  -1, -1,
 !            timax = 70.0,
            timax = 3650000.0,
 /

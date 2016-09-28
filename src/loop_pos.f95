@@ -1,4 +1,5 @@
 module mod_pos
+  USE mod_precdef
   USE mod_param
   USE mod_grid
   USE mod_vel
@@ -21,9 +22,9 @@ contains
     INTEGER                                    :: ia, iam, ja, ka,k
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens
-    REAL*8                                     :: dza,dzb, zz
-    REAL*8, INTENT(IN)                         :: x0, y0, z0
-    REAL*8, INTENT(OUT)                        :: x1, y1, z1
+    REAL(DP)                                   :: dza,dzb, zz
+    REAL(DP), INTENT(IN)                       :: x0, y0, z0
+    REAL(DP), INTENT(OUT)                      :: x1, y1, z1
       
     ! === calculate the new positions ===
     ! === of the trajectory           ===

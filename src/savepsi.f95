@@ -26,17 +26,31 @@ INTEGER             :: mta,msa,m
 
 
 #ifdef stream_thermohaline
-		  do m=mta,mtb-1
-           psi_ts(m,msb,1,lbas) = psi_ts(m,msb,1,lbas) + flux
+!		  do m=mta,mtb-1
+!           psi_ts(m,msb,1,lbas) = psi_ts(m,msb,1,lbas) + flux
+!          enddo
+!		  do m=mtb,mta-1
+!           psi_ts(m,msb,1,lbas) = psi_ts(m,msb,1,lbas) - flux
+!          enddo
+!		  do m=msa,msb-1
+!           psi_ts(mtb,m,2,lbas) = psi_ts(mtb,m,2,lbas) + flux
+!          enddo
+!		  do m=msb,msa-1
+!           psi_ts(mtb,m,2,lbas) = psi_ts(mtb,m,2,lbas) - flux
+!          enddo
+          
+          
+         do m=mta,mtb-1
+           psi_ts(m,msa,1,lbas) = psi_ts(m,msa,1,lbas) + flux
           enddo
-		  do m=mtb,mta-1
-           psi_ts(m,msb,1,lbas) = psi_ts(m,msb,1,lbas) - flux
+		  do m=mtb+1,mta
+           psi_ts(m,msa,1,lbas) = psi_ts(m,msa,1,lbas) - flux
           enddo
 		  do m=msa,msb-1
-           psi_ts(mtb,m,2,lbas) = psi_ts(mtb,m,2,lbas) + flux
+           psi_ts(mta,m,2,lbas) = psi_ts(mta,m,2,lbas) + flux
           enddo
-		  do m=msb,msa-1
-           psi_ts(mtb,m,2,lbas) = psi_ts(mtb,m,2,lbas) - flux
+		  do m=msb+1,msa
+           psi_ts(mta,m,2,lbas) = psi_ts(mta,m,2,lbas) - flux
           enddo
 #endif
 
@@ -86,6 +100,18 @@ select case(xy)
 
 
 end select
+
+!==== trajecory convergence of heat and maybe other tracers
+#ifdef tracer_convergence
+select case(xy)
+     case(1)
+   	  converg(ia,ja,ka,lbas,1) = converg(ia,ja,ka,lbas,1) + flux
+     case(2)
+   	  converg(ia,ja,ka,lbas,2) = converg(ia,ja,ka,lbas,2) + flux
+     case(3)
+   	  converg(ia,ja,ka,lbas,3) = converg(ia,ja,ka,lbas,3) + flux
+end select
+#endif
 
 end subroutine
 
