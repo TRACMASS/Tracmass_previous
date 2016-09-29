@@ -67,9 +67,9 @@ SUBROUTINE readfields
   !Use  t=1  i=2  j=3  k=4
   map2d    = [3, 4, 2, 1]   
 
-  uvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(ncFile), 'u') !,481,1)
-  vvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(ncFile), 'v') !,481,1)
-  vvel = -vvel 
+  uvel(:,:,1) =  get2DfieldNC(trim(ncFile), 'u') !,481,1)
+  vvel(:,:,1) =  get2DfieldNC(trim(ncFile), 'v') !,481,1)
+  !vvel = -vvel 
 
   where (uvel .ne. uvel)
      uvel = 0
@@ -78,8 +78,8 @@ SUBROUTINE readfields
      vvel = 0
   end where
 
-  uflux(:,:,1,2)  = uvel(:,:,1) * dyu(:,:) * dz(1) 
-  vflux(:,:,1,2)  = vvel(:,:,1) * dxv(:,:) * dz(1)
+  uflux(:,:,1,2)   = uvel(1:imt,:,1) * dyu(1:imt,:) * dz(1) 
+  vflux(:,1:jmt,1,2)  = vvel(1:imt,1:jmt,1) * dxv(1:imt,1:jmt) * dz(1)
 
   uflux(1:imt-1,:,1,2) = (uflux(1:imt-1,:,1,2) + uflux(2:imt,:,1,2)) / 2
   uflux(imt    ,:,1,2) = (uflux(imt    ,:,1,2) + uflux(1    ,:,1,2)) / 2

@@ -50,7 +50,7 @@ SUBROUTINE setupgrid
   lon =  get1DfieldNC(trim(gridfile) , 'longitude')
   count1d  = [ jmt]
   lat = get1DfieldNC(trim(gridfile) , 'latitude')
-  lat = lat(imt:1:-1)
+  !lat = lat(jmt:1:-1)
   
   !WHERE ( lon >360 )
   !   lon = lon -360
@@ -74,9 +74,9 @@ SUBROUTINE setupgrid
 
 
   dxv(1:imt-1,:) = dxtt(1:imt-1,:)/2 + dxtt(2:imt,:)/2
-  dyu(:,1:jmt-1) = dytt(:,1:jmt-1)/2 + dytt(:,2:jmt)/2
+  dyu(1:imt,1:jmt-1) = dytt(:,1:jmt-1)/2 + dytt(:,2:jmt)/2
   dxv(imt,:) = dxtt(imt,:)/2 + dxtt(1,:)/2
-  dxdy = dyu * dxv                                                          
+  dxdy = dyu(1:imt,:) * dxv(1:imt,:)                                                          
   
 
   !WHERE ( lon >360 )
@@ -88,12 +88,12 @@ SUBROUTINE setupgrid
   mask = 1
   dz  = 10
   dzt = 10
-  uvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(gridfile), 'u')
-  where (uvel(:,:,1) .ne. uvel(:,:,1))
+  uvel(:,:,1) =  get2DfieldNC(trim(gridfile), 'u')
+  where (uvel(1:imt,:,1) .ne. uvel(1:imt,:,1))
      kmt = 0
   end where
-  uvel(:,jmt:1:-1,1) =  get2DfieldNC(trim(gridfile), 'v')
-  where (uvel(:,:,1) .ne. uvel(:,:,1))
+  uvel(:,:,1) =  get2DfieldNC(trim(gridfile), 'v')
+  where (uvel(1:imt,:,1) .ne. uvel(1:imt,:,1))
      kmt = 0
   end where
 
