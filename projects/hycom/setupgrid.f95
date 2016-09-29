@@ -40,7 +40,9 @@ SUBROUTINE setupgrid
   CHARACTER (len=200)                        :: gridfile
 
   allocate ( lon(imt), lat(jmt), dz_inv(km) )
-  allocate ( dxtt(imt,jmt), dytt(imt,jmt), depth(imt,jmt) )
+  print *,imt
+  allocate ( dxtt(imt+2,jmt), dytt(imt+2,jmt), depth(imt,jmt) )
+
   call coordinat
 
   map2d    = [3, 4, 1, 1]
@@ -76,8 +78,8 @@ SUBROUTINE setupgrid
   dyu(:,1:jmt-1) = dytt(:,1:jmt-1)/2 + dytt(:,2:jmt)/2
   dyu(:,jmt) = dyu(:,jmt-1)
   dxv(imt,:) = dxtt(imt,:)/2 + dxtt(1,:)/2
-  dxdy = dyu * dxv                                                          
-
+  dxdy = dyu(1:imt,:) * dxv(1:imt,:)
+  
   dz_inv = get1DfieldNC(trim(gridfile), 'depth')
   if  (km > 1) then
      dz_inv(1:km-1) = dz_inv(2:km)-dz_inv(1:km-1)
