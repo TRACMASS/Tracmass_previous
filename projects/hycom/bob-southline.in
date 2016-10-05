@@ -10,7 +10,7 @@
        indatadir = '/projData/HYCOM/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'amazon',
+        casename = '',
         casedesc = 'Follow the Amazon river plume.',
 /
 &INIT_GRID_SIZE
@@ -57,7 +57,7 @@
 &INIT_RUN_TIME
          intspin =    335,
           intrun =    364,
-   seedintsdelta =     29,
+!   seedintsdelta =      1,
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
@@ -68,17 +68,17 @@
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      3,
+            isec =      2,
             idir =      0,
-            nqua =      1,
-       partquant =      3,
+            nqua =      2,
+       partquant =   1000,
         ntracmax = 7000000,
     loneparticle =     -1,
         seedtype =      1,
             ist1 =    965,
             ist2 =   1250,
             jst1 =   1100,
-            jst2 =   1400,
+            jst2 =   1101,
             kst1 =       1,
             kst2 =       1,
             tst1 =     -1,

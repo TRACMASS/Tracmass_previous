@@ -54,9 +54,9 @@ SUBROUTINE readfields
   if (currjdtot > 735096) write (dstamp(11:13),'(A3)') "910"
 
   filename = trim(inDataDir)//trim(dstamp)
-  uvel = get3DfieldNC(trim(filename) ,'water_u') * 0.001 * 2
+  uvel = get3DfieldNC(trim(filename) ,'water_u') * 0.001
   where (uvel<-10) uvel=0
-  vvel = get3DfieldNC(trim(filename) ,'water_v') * 0.001 * 2 
+  vvel = get3DfieldNC(trim(filename) ,'water_v') * 0.001
   where (vvel<-10) vvel=0
   if (nff .eq. -1) then
      uvel = -uvel

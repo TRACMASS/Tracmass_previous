@@ -40,7 +40,6 @@ SUBROUTINE setupgrid
   CHARACTER (len=200)                        :: gridfile
 
   allocate ( lon(imt), lat(jmt), dz_inv(km) )
-  print *,imt
   allocate ( dxtt(imt+2,jmt), dytt(imt+2,jmt), depth(imt,jmt) )
 
   call coordinat
