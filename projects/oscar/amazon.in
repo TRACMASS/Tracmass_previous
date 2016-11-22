@@ -1,0 +1,102 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
+&INIT_GRID_DESCRIPTION
+         gcmname = 'AVISO',
+       gcmsource = 'http://www.aviso.oceanobs.com/',
+        gridname = 'oscar',
+      gridsource = 'http://podaac.jpl.nasa.gov/DATA_CATALOG/oscarinfo.html',
+        griddesc = '1/3 deg geostrophic fields based on satellite SSH.',
+       indatadir = '/projData/OSCAR/thrdDeg/',
+/
+&INIT_CASE_DESCRIPTION
+        casename = 'amazon',
+        casedesc = 'Follow particles form a box outside the Amazon',
+/
+&INIT_GRID_SIZE
+/
+&INIT_BASE_TIME
+/
+&INIT_GRID_TIME
+/
+&INIT_START_DATE
+        startsec =      0,
+        startmin =      0,
+       starthour =      0,
+        startday =      1,
+        startmon =      1,
+       startyear =   2013,
+         startjd =     -1,
+          intmin =  58800,
+/
+&INIT_RUN_TIME
+         intspin =     1,
+          intrun =     72,
+   seedintsdelta =      1,
+/
+&INIT_WRITE_TRAJS
+      twritetype =      2,
+           kriva =      1,
+      outdatadir =     '',
+     outdatafile = 'oscar',
+ intmininoutfile =      1,
+/
+&INIT_SEEDING
+             nff =      1,
+            isec =      3,
+            idir =      0,
+            nqua =      1,
+       partquant =      8,
+        ntracmax = 7000000,
+    loneparticle =     -1,
+        seedtype =      1,
+            ist1 =    846,
+            ist2 =    885,
+            jst1 =    220,
+            jst2 =    244,
+            kst1 =      1,
+            kst2 =      1,
+            tst1 =     -1,
+            tst2 =     -1,
+         seeddir = '/projData/gomoosOrm/seedfiles',
+        seedfile = 'seed',
+     varseedfile =      1,
+        seedtime =      0,
+         seedall =      0,
+         seedpos =      1,
+       seedparts =      0,
+     seedpart_id =      0,
+/
+&INIT_KILLZONES
+            nend =      6,
+            ienw = 1,1,1,163,
+            iene = 2,163,80,164,
+            jens = 1,79,1,1,
+            jenn = 163,80,2,80,
+           timax = 36500.0,
+/
+&INIT_TEMP_SALT
+           tmin0 =  -50.0,
+           tmax0 =  400.0,
+           smin0 = -500.0,
+           smax0 =  400.0,
+           rmin0 = -100.0,
+           rmax0 =  500.0,
+           tmine =  -50.0,
+           tmaxe =  400.0,
+           smine = -150.0,
+           smaxe =  500.0,
+           rmine = -100.0,
+           rmaxe =  500.0,
+/
+&INIT_DIFFUSION
+              ah = 2000.0,
+              av =    0.0,
+/
+&INIT_SEDIMENT
+        partdiam =  0.001,
+            rhos = 2620.0,
+           cwamp =   20.0,
+           twave =    8.0,
+         critvel =    0.1,
+/
