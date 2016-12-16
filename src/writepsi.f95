@@ -27,6 +27,7 @@ write(52) stxz
 rewind(53)
 write(53) stxr
 write(53) styr
+write(53) stzr
 #endif
 
 #ifdef stream_thermohaline

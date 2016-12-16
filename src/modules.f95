@@ -525,7 +525,7 @@ MODULE mod_streamfunctions
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 #ifdef streamr
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr, stzr
 #endif
 #ifdef stream_thermohaline
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts

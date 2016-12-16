@@ -383,9 +383,10 @@ SUBROUTINE init_params
       styz=0.
 #endif
 #ifdef streamr
-      ALLOCATE ( stxr(imt,mr,nend,lov), styr(jmt,mr,nend,lov) )
+      ALLOCATE ( stxr(imt,mr,nend,lov), styr(jmt,mr,nend,lov), stzr(km,mr,nend,lov) )
       stxr=0.
-      styr=0
+      styr=0.
+      stzr=0.
 #endif
 #ifdef stream_thermohaline
       ALLOCATE ( psi_ts(MR,MR,2,nend) )
