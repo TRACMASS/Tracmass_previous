@@ -95,8 +95,17 @@ select case(xy)
           styr(ja,msb,lbas,3) = styr(ja,msb,lbas,3) + flux 
 #endif
 
-!     ! === Vertical component ===
-!     case(3)
+     ! === Vertical component ===
+       case(3)
+          ! === Depth dens/temp/salt stream function ===          
+#ifdef streamr
+          stzr(ka,mrb,lbas,1) = stzr(ka,mrb,lbas,1) + flux
+#endif
+
+#ifdef streamts
+          stzr(ka,mtb,lbas,2) = stzr(ka,mtb,lbas,2) + flux
+          stzr(ka,msb,lbas,3) = stzr(ka,msb,lbas,3) + flux 
+#endif
 
 
 end select
