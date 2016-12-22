@@ -37,7 +37,7 @@ SUBROUTINE setupgrid
   ! === Init local variables for the subroutine ===
   INTEGER                                     :: i ,j ,k, ip, jp, im, jm
   INTEGER                                     :: kk, ii
-  REAL(P4)                                    :: dlon, dlat
+  REAL(DP	)                                    :: dlon, dlat
   CHARACTER (len=200)                         :: gridFile
   
   allocate ( kmu(imt,jmt), kmv(imt,jmt) )
