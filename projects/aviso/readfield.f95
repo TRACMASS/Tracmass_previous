@@ -85,16 +85,20 @@ SUBROUTINE readfields
    where (uvel(1:imt,1:jmt,1) <= -2147483647)
       uvel(1:imt,1:jmt,1) = 0.
       vvel(1:imt,1:jmt,1) = 0.
-      kmt(1:imt,1:jmt)    = 0
-      kmu(1:imt,1:jmt)    = 0
-      kmv(1:imt,1:jmt)    = 0
+      !! Do not set km = 0 for missing values
+      !! Some of these are ice covered grid cells 
+      !! Thus a particle can be in a grid cell that gets 
+      !! ice covered and thus ends up on what TRACMASS thinks is "land"
+      !! Letting velocities be zero is enough to ensure that particles
+      !! can not enter such cells
+      !kmt(1:imt,1:jmt)    = 0
+      !kmu(1:imt,1:jmt)    = 0
+      !kmv(1:imt,1:jmt)    = 0
    end where
       
    !! Multiply by scale factor
    uvel(1:imt,1:jmt,1) = uvel(1:imt,1:jmt,1) * 0.0001  ![m/s]
    vvel(1:imt,1:jmt,1) = vvel(1:imt,1:jmt,1) * 0.0001  ![m/s]
-   
-   print*,fieldFile
    
    ke(:,:,:) = uvel(1:imt,1:jmt,:) * uvel(1:imt,1:jmt,:) + &
              & vvel(1:imt,1:jmt,:) * vvel(1:imt,1:jmt,:)
@@ -123,19 +127,19 @@ SUBROUTINE readfields
          if (i == 1) im=imt
          if (kmt(i,j) == 1 .and. kmt(ip,j) == 0) then !western boundary
             uflux(i,j,1,:) = 0.
-            kmu(i,j) = 0
+            !kmu(i,j) = 0
          end if
          if (kmt(i,j) == 1 .and. kmt(im,j) == 0) then !eastern boundary
             uflux(im,j,1,:) = 0.
-            kmu(im,j) = 0
+            !kmu(im,j) = 0
          end if
          if (kmt(i,j) == 1 .and. kmt(i,j-1) == 0) then !southern boundary
             vflux(i,j-1,1,:) = 0.
-            kmv(i,j-1) = 0
+            !kmv(i,j-1) = 0
          end if
          if (kmt(i,j) == 1 .and. kmt(i,j+1) == 0) then !northern boundary
             vflux(i,j,1,:) = 0.
-            kmv(i,j) = 0
+            !kmv(i,j) = 0
          end if
       end do
    end do
@@ -157,6 +161,7 @@ SUBROUTINE readfields
    !! Zero meridional flux at j=0 and j=jmt
    vflux(:,0  ,:,:) = 0.
    vflux(:,jmt,:,:) = 0.
+   
    
    do i=1,IMT
    do j=1,JMT

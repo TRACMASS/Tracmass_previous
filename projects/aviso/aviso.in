@@ -33,7 +33,7 @@
          baseday =      1,
          basemon =      1,
         baseyear =      1,
-        jdoffset =      3,
+        jdoffset =      0,
 /
 &INIT_GRID_TIME
    fieldsperfile =    366,
@@ -55,8 +55,8 @@
           intmin =      1,
 /
 &INIT_RUN_TIME
-         intspin =      1,
-          intrun =     360,
+         intspin =    366,
+          intrun =   1825,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -69,7 +69,7 @@
   !                 6 = write each spatial grid-crossing 
            kriva =      1,
       outdatadir = '/Users/joakim/Downloads/aviso_traj/',
-     outdatafile = 'aviso_test',
+     outdatafile = 'aviso_east_2008',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /
@@ -82,8 +82,8 @@
         ntracmax = 20000000,
     loneparticle =      0, 
         seedtype =      1,
-            ist1 =   1272,
-            ist2 =   1440,
+            ist1 =      1,!1272,
+            ist2 =     47,!1440,
             jst1 =    617, 
             jst2 =    617, 
             kst1 =      1,

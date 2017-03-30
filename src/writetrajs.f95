@@ -71,16 +71,26 @@ CONTAINS
 #endif
 
 #if defined binwrite
-    open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
     open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
 #endif
 
 #if defined csvwrite
@@ -151,7 +161,7 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosIn=0  ,recPosOut=0
     INTEGER*8, SAVE                      :: recPosRun=0 ,recPosErr=0
     INTEGER*8, SAVE                      :: recPosKll=0
-    REAL                                 :: x14 ,y14 ,z14
+    REAL                                 :: x14 ,y14 ,z14, tt14, t014
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
@@ -268,6 +278,8 @@ t0     =  trj(7,ntrac)
     x14=real(x1,kind=4)
     y14=real(y1,kind=4)
     z14=real(z1,kind=4)
+    tt14=real(tt/tday,kind=4)!Joakim edit
+    t014=real(t0/tday,kind=4)!Joakim edit
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -279,7 +291,7 @@ t0     =  trj(7,ntrac)
     select case (sel)       
     case (10) !in
        recPosIn = recPosIn + 1
-       write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14
+       write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
        return
     case (11)
        if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
@@ -294,23 +306,23 @@ t0     =  trj(7,ntrac)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
           recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
+          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
        end if
     case (13)
        recPosKll = recPosKll + 1
-       write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14   
+       write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (15)
        recPosRun = recPosRun + 1
-       write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14   
+       write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (17) !out
        recPosOut = recPosOut + 1
-       write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14   
+       write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (19) !end
        recPosOut = recPosOut + 1
-       write(unit=75 ,rec=recPosOut) ntrac,twrite,x14,y14,z14
+       write(unit=75 ,rec=recPosOut) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (40) !error
        recPosErr=recPosErr + 1    
-       write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14   
+       write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (99) !switch
        if ((recPosRun > 50000000).and.(intminInOutFile.eq.2)) then
           call close_outfiles

@@ -322,11 +322,11 @@ SUBROUTINE loop
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call calc_time
-
+           
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
-           
+
            if (nperio == 6) then
               ! === north fold cyclic for the ORCA grids ===
               if( y1 == dble(JMT-1) ) then ! North fold for ntrac
