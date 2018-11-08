@@ -1,5 +1,4 @@
 !#ifndef timeanalyt 
-
 subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
   
   ! subroutine to compute time (sp,sn) when trajectory 
@@ -22,14 +21,16 @@ subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
   !
   !    sp,sn   : crossing time to reach the grid box wall 
   !              (in units of s/m3)
-  
+
+USE mod_precdef   
 USE mod_grid, only: undef, imt, jmt, nsm, nsp
 USE mod_vel, only: uflux, vflux, wflux, ff
 USE mod_active_particles, only: upr
 USE mod_time, only: dtreg, intrpr, intrpg
 IMPLICIT none
 
-real*8                                       :: r0, ba, sp, sn, uu, um, vv, vm
+real(DP)                                     :: r0, ba, sp, sn, uu, um, vv, vm
+real(DP)                                     :: frac1,frac2
 integer                                      :: ijk, ia, ja, ka, ii, im
 
 if(ijk.eq.1) then
@@ -38,32 +39,54 @@ if(ijk.eq.1) then
  if(im.eq.0) im=IMT
  uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
  um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
+ frac1 = min( abs(upr(1,1)), abs(0.99*uu/upr(1,1)) )
+ frac2 = min( abs(upr(2,1)), abs(0.99*um/upr(2,1)) )
+ !print*,'cross x',uu,um,upr(1,1),upr(2,1)
 #ifdef turb   
  if(r0.ne.dble(ii)) then
-  uu=uu+upr(1,2)  
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   uu=uu+upr(1,2)!*frac1
+  !end if
  else
-  uu=uu+upr(1,1)  ! add u' from previous iterative time step if on box wall
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   uu=uu+upr(1,1)!*frac1  ! add u' from previous iterative time step if on box wall
+  !end if
  endif
  if(r0.ne.dble(im)) then
-  um=um+upr(2,2)
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   um=um+upr(2,2)!*frac2
+  !end if
  else
-  um=um+upr(2,1)  ! add u' from previous iterative time step if on box wall
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   um=um+upr(2,1)!*frac2  ! add u' from previous iterative time step if on box wall
+  !end if
  endif
 #endif
 elseif(ijk.eq.2) then
  ii=ja
  uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
  um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
+ frac1 = min( abs(upr(3,1)), abs(0.99*uu/upr(3,1)) )
+ frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )
+ !print*,'cross y',uu,um,upr(3,1),upr(4,1)
 #ifdef turb    
  if(r0.ne.dble(ja  )) then
-  uu=uu+upr(3,2)  
- else
-  uu=uu+upr(3,1)  ! add u' from previous iterative time step if on box wall
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   uu=uu+upr(3,2)!*frac1
+  !end if
+ else 
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   uu=uu+upr(3,1)!*frac1  ! add u' from previous iterative time step if on box wall
+  !end if
  endif
  if(r0.ne.dble(ja-1)) then
-  um=um+upr(4,2)
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   um=um+upr(4,2)!*frac2
+  !end if
  else
-  um=um+upr(4,1)  ! add u' from previous iterative time step if on box wall
+  !if (uu /= 0.d0 .and. um /= 0.d0) then
+   um=um+upr(4,1)!*frac2  ! add u' from previous iterative time step if on box wall
+  !end if
  endif
 #endif
 elseif(ijk.eq.3) then
@@ -91,6 +114,8 @@ elseif(ijk.eq.3) then
 #endif
 #endif
 endif
+
+!print*,'cross',uu,um,r0
 
 ! east, north or upward crossing
 if(uu.gt.0.d0 .and. r0.ne.dble(ii)) then

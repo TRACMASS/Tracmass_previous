@@ -21,6 +21,8 @@ MODULE mod_seed
    USE mod_write, only    : writedata
    USE mod_tempsalt, only : rmax0, rmin0, tmax0, tmin0, smax0, smin0, &
                             sal, tem, rho
+   USE mod_deformation
+   
    IMPLICIT NONE
   
    INTEGER                                    :: isec,  idir
@@ -72,8 +74,7 @@ CONTAINS
             END IF
          END DO findTime
       END IF
-      
-      !What is this line for??? Seed every eight days!!!
+
       if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
       
       ! ---------------------------------------
@@ -278,7 +279,7 @@ CONTAINS
 
                   ! Only one particle for diagnistics purposes
                   if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
-                     nrj(6,ntrac)=1
+                     trajectories(ntrac)%active = .false.
                      cycle kkkLoop
                   endif
 
@@ -289,9 +290,27 @@ CONTAINS
                   ! ---------------------------------------------------------
                   ! --- Put the new particle into the vectors trj and nrj ---
                   ! ---------------------------------------------------------
-                  trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
-                  nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
-                  nrj(7,ntrac)=1
+                  !trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
+                  !nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
+                  !nrj(7,ntrac)=1
+                  
+                  trajectories(ntrac)%x1 = x1
+                  trajectories(ntrac)%y1 = y1
+                  trajectories(ntrac)%z1 = z1
+                  trajectories(ntrac)%tt = tt
+                  trajectories(ntrac)%subvol = subvol
+                  trajectories(ntrac)%t0 = tt
+                  trajectories(ntrac)%ib = ib
+                  trajectories(ntrac)%jb = jb
+                  trajectories(ntrac)%kb = kb
+                  trajectories(ntrac)%niter = 0
+                  trajectories(ntrac)%nts = IDINT(ts)
+                  trajectories(ntrac)%icycle = 1
+                  
+                  trajectories(ntrac)%lapu1 = lapu(ib,jb,kb,1)
+                  trajectories(ntrac)%lapu2 = lapu(ib,jb,kb,2)
+                  trajectories(ntrac)%lapv1 = lapv(ib,jb,kb,1)
+                  trajectories(ntrac)%lapv2 = lapv(ib,jb,kb,2)
 
                   !Save initial particle position
                   call writedata(10) !ini

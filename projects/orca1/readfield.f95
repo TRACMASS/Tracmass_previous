@@ -27,11 +27,10 @@ SUBROUTINE readfields
   CHARACTER (len=200)                          :: fieldFile
   ! = Variables for filename generation
   CHARACTER (len=200)                          :: dataprefix
-!  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: zstot,zstou,zstov
   REAL*8, ALLOCATABLE, DIMENSION(:,:,:)        :: xxx
   REAL*4 dd,hu,hv,uint,vint,zint,hh,h0
 
-  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: zstot,zstou,zstov
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: zstot,zstou,zstov,abyst,abysu,abysv
 #ifdef initxyt
   INTEGER, PARAMETER :: NTID=73
   INTEGER, PARAMETER :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
@@ -50,12 +49,19 @@ SUBROUTINE readfields
  
   start1D  = [ 1]
   count1D  = [KM]
-  start2D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count2D  = [         imt,        jmt ,  1 , 1 ]
-  map2D    = [          1 ,          2 ,  3 , 4 ]  
-  start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count3D  = [         imt,        jmt , KM , 1 ]
-  map3D    = [          1 ,          2 ,  3 , 4 ] 
+  !start2D  = [subGridImin ,subGridJmin ,  1 , 1 ]
+  !count2D  = [         imt,        jmt ,  1 , 1 ]
+  !map2D    = [          1 ,          2 ,  3 , 4 ]  
+  !start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
+  !count3D  = [         imt,        jmt , KM , 1 ]
+  !map3D    = [          1 ,          2 ,  3 , 4 ] 
+
+  start2D  = [1, 1, subGridImin, subGridJmin]
+  count2D  = [1, 1, imt        , jmt        ]
+  map2D    = [3, 4, 1          , 2          ]
+  start3D  = [1, subGridImin, subGridJmin, 1]
+  count3D  = [1, imt, jmt, km]
+  map3D    = [2, 3, 4, 1]
 
 
 !---------------------------------------------------------------
@@ -66,7 +72,7 @@ SUBROUTINE readfields
   endif alloCondGrid
 #endif
  alloCondUVW: if(.not. allocated (xxx)) then
-!    allocate ( zstot(imt,jmt),zstou(imt,jmt),zstov(imt,jmt) )
+    allocate ( zstot(imt,jmt),zstou(imt,jmt),zstov(imt,jmt) )
 !    allocate ( ubol(imt,jmt,km),vbol(imt,jmt,km))
     allocate ( xxx(imt,jmt,km))
 #ifdef tempsalt
@@ -114,26 +120,83 @@ SUBROUTINE readfields
  if(CurrYear2==2006) CurrYear2=1996
 ! if(CurrYear2==1998) CurrYear2=1996
 
-dataprefix='ORCA1-SHC1_MM_19960101_19961231_grid_'
-write(dataprefix(15:18),'(i4)') CurrYear2
-write(dataprefix(24:27),'(i4)') CurrYear2
-fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)!
-!print *, fieldFile
+dataprefix='/YYYY/ORCA1-N406_YYYYMMDDd05'
+write(dataprefix( 2:5),'(i4)') currYear
+write(dataprefix(18:21),'(i4)') currYear
+write(dataprefix(22:23),'(i2.2)') currMon
+write(dataprefix(24:25),'(i2.2)') currDay
+fieldFile = trim(inDataDir)//'/means/'//trim(dataprefix)!
+
+!! Find time level to read
+!! If fieldsPerFile is 1, then nread is always 1
+!! If fieldsPerFile is 12, then nread will increase up to 12 and then be reset to 1 
 nread= nread+1
-if(nread==13) nread=1
-start2D  = [subGridImin ,subGridJmin ,  nread , 1 ]
-start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
+if(nread > fieldsPerFile) nread=1
+
+!            time, k,  i,            j
+start2D  = [nread, 1, subGridImin ,subGridJmin ]
+!           time,  i              j          k
+start3D  = [nread, subGridImin ,subGridJmin, 1 ]
   
 hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'sossheig')
 hs(imt+1, :, nsp) = hs(1,:,nsp)
 
- do k=1,km
-   dzt(1:imt,1:jmt,k,nsp) = dztb(1:imt,1:jmt,km+1-k) 
- end do
-   dzt(:,:,KM,nsp) = dzt(:,:,KM,nsp) + hs(1:imt,1:jmt,nsp)
+! Depth at U, V, T points as 2D arrays                                                                                                                                        
+allocate ( abyst(imt, jmt) , abysu(imt, jmt) , abysv(imt, jmt) )
 
+abyst = sum(dzt0(:,:,:), dim=3)
+abysu = sum(dzu(:,:,:,1), dim=3)
+abysv = sum(dzv(:,:,:,1), dim=3)
+
+! Calculate SSH/depth                                                                                                                                                         
+where (abyst /= 0)
+   zstot = hs(:imt,:jmt,nsp)/abyst + 1
+elsewhere
+   zstot = 0.d0
+end where
+
+where (abysu /= 0)
+   zstou = 0.5*(hs(1:imt,1:jmt,nsp)+hs(2:imt+1,1:jmt,nsp))/abysu + 1
+elsewhere
+   zstou = 0.d0
+end where
+
+! I think hs(jmt+1) is always zero here. 
+! Do we need a north fold to fill it in?
+where (abysv /= 0)
+   zstov = 0.5*(hs(1:imt,1:jmt,nsp)+hs(1:imt,2:jmt+1,nsp))/abysv + 1
+elsewhere
+   zstov = 0.d0
+end where
+
+!! what does this do?
+! do k=1,km
+!   dzt(1:imt,1:jmt,k,nsp) = dztb(1:imt,1:jmt,km+1-k) 
+! end do
+
+if (freeSurfaceForm == 1) then 
+   ! Add SSH to upper layer dz
+   dzt(:,:,KM,nsp) = dzt(:,:,KM,nsp) + hs(1:imt,1:jmt,nsp)
+else if (freeSurfaceForm == 2) then   
+   !                                                                                                       
+   ! Calculate zonal and meridional volume flux                                                                             
+   !                                                                                                                                
+   ! Weight by (1 + ssh / depth)                 
+   ! This is only an approximation of what NEMO really does      
+   ! but is accurate within 1% 
+   !                                                                                                                                                                
+   do k = 1, km
+   do j = 1, jmt
+   do i = 1, imt
+      dzt(i,j,k,nsp) = dzt0(i,j,k) * zstot(i,j)
+   end do
+   end do
+   end do
+end if
 
 #if defined tempsalt 
+ !! read temperature and salinity
+ !! flip vertical coordinate so k=KM is surface 
  xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'votemper')
  tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
  
@@ -151,7 +214,9 @@ hs(imt+1, :, nsp) = hs(1,:,nsp)
     end do
  end do
 #endif     
-
+ 
+ !! read u, v and also add GM velocities
+ !! do not flip vertical coordinate yet
  uvel = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozocrtx')
  xxx  = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozoeivu')
  uvel = uvel + xxx
@@ -160,19 +225,31 @@ hs(imt+1, :, nsp) = hs(1,:,nsp)
  xxx  = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomeeivv')
  vvel = vvel + xxx
 
- do i=1,IMT
-  do j=1,JMT
+!! calculate uflux, vflux with time-independent dzt
+!! dzu, dzv have been flipped in setupgrid
+do k=1,km
+ do j=1,jmt
+  do i=1,imt
    jp=j+1
    if(jp.eq.jmt+1) jp=jmt
-   do k=2,KM
-    uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,k) 
-    vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,k) 
-   enddo
-    uflux(i,j,km    ,nsp) = uvel(i,j,1) * dyu(i,j) * ( dzu(i,j,1)+ 0.5*( hs(i,j,nsp)+hs(i+1,j,nsp) ) )
-    vflux(i,j,km    ,nsp) = vvel(i,j,1) * dxv(i,j) * ( dzv(i,j,1)+ 0.5*( hs(i,j,nsp)+hs(i,jp ,nsp) ) )
+   uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,km+1-1,nsp) 
+   vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,km+1-1,nsp) 
   enddo
  enddo
+enddo
 
+!! add contribution from SSH for time-varying dz cases
+if (freeSurfaceForm == 1) then
+   !! add SSH to top layer
+   uflux(:,:,km,nsp) = uflux(:,:,km,nsp) + uvel(:,:,1) * dyu(1:imt,1:jmt) * 0.5*( hs(i,j,nsp)+hs(i+1,j,nsp) ) 
+   vflux(:,:,km,nsp) = vflux(:,:,km,nsp) + vvel(:,:,1) * dxv(1:imt,1:jmt) * 0.5*( hs(i,j,nsp)+hs(i,jp ,nsp) ) 
+else if (freeSurfaceForm == 2) then
+   !! add SSH/H to each layer (a fairly accurate approx of what NEMO does with key_vvl)
+   do k=1,km
+      uflux(1:imt,1:jmt,k,nsp) = uflux(1:imt,1:jmt,k,nsp) * zstou(1:imt,1:jmt)
+      vflux(1:imt,1:jmt,k,nsp) = vflux(1:imt,1:jmt,k,nsp) * zstov(1:imt,1:jmt)
+   end do
+end if
 
  do i=1,IMT
  do j=1,JMT-1

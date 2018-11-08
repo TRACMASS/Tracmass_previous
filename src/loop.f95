@@ -32,7 +32,9 @@ SUBROUTINE loop
   USE mod_streamfunctions, only: intpsi
   USE mod_tracer
   USE mod_sed
-
+  
+  USE mod_deformation
+  
   IMPLICIT none
 
   ! === Loop variables ===
@@ -65,18 +67,18 @@ SUBROUTINE loop
 
 #if defined orca025 || orca1 
   if(    y1 == dble(jenn(1))) then
-     nrj(8,ntrac)=1     ! Southern boundary
+     trajectories(ntrac)%lbas = 1 ! Southern boundary
      i=i+1
      nout=nout+1
   elseif(y1 == dble(jens(2))) then
-     nrj(8,ntrac)=2    ! Northern boundary
+     trajectories(ntrac)%lbas = 2 ! Northern boundary
      j=j+1
      nout=nout+1
 !  elseif(temp > tmaxe .and. salt < smine .and. tt-t0>365.) then
 !     nrj(8,ntrac)=1    ! back to the warm pool
 !     k=k+1
   else
-     nrj(8,ntrac)=0 
+     trajectories(ntrac)%lbas = 0
      l=l+1   
      nout=nout+1
   endif
@@ -86,13 +88,13 @@ SUBROUTINE loop
 
 #elif defined orca025L75
   if( tt-t0 >365.*1000. .and. temp > tmax0 ) then
-     nrj(8,ntrac)=1     ! warm end points
+     trajectories(ntrac)%lbas = 1 ! warm end points
      i=i+1
   elseif( tt-t0 >365.*1000. .and. temp <= tmax0 ) then
-     nrj(8,ntrac)=2    ! cold end points
+     trajectories(ntrac)%lbas = 2 ! cold end points
      j=j+1
   else                 ! too short
-     nrj(8,ntrac)=0 
+     trajectories(ntrac)%lbas = 0
      k=k+1
      nout=nout+1
   endif
@@ -103,13 +105,13 @@ SUBROUTINE loop
   nendLoop: do n=1,nend
      if( dble(ienw(n)) <= x1 .and. x1 <= dble(iene(n)) .and. &
          dble(jens(n)) <= y1 .and. y1 <= dble(jenn(n))  ) then  
-        nrj(8,ntrac) = n
+        trajectories(ntrac)%lbas = n
         dist(n) = dist(n) + 1
         cycle lbasLoop
      endif
   enddo nendLoop
   
-  if( nrj(8,ntrac) == 0 ) then
+  if( trajectories(ntrac)%lbas == 0 ) then
      print 566,ntrac,niter,x1,y1,zz
      stop 4957
   endif
@@ -132,7 +134,7 @@ SUBROUTINE loop
   100.*float(k)/float(i+j+k+l),100.*float(l)/float(i+j+k+l)
 #endif
   do ntrac=1,ntracmax ! eliminate the unwanted trajectories
-   if(nrj(8,ntrac) == 0) nrj(6,ntrac)=1 
+   if (trajectories(ntrac)%lbas == 0) trajectories(ntrac)%active=.false.
   enddo
   
 #else
@@ -192,30 +194,64 @@ SUBROUTINE loop
      ntracLoop: do ntrac=1,ntractot
         !print *,ntrac, ntractot
         ! === Test if the trajectory is dead   ===
-        if(nrj(6,ntrac) == 1) cycle ntracLoop
+        if (trajectories(ntrac)%active .eqv. .false.) cycle ntracLoop
         
         ! === Read in the position, etc at the === 
         ! === beginning of new time step       ===
-        x1     =  trj(1,ntrac)
-        y1     =  trj(2,ntrac)
-        z1     =  trj(3,ntrac)
-        tt     =  trj(4,ntrac)
-        subvol =  trj(5,ntrac)
-        t0     =  trj(7,ntrac)
+        x1     = trajectories(ntrac)%x1
+        y1     = trajectories(ntrac)%y1
+        z1     = trajectories(ntrac)%z1
+        tt     = trajectories(ntrac)%tt
+        subvol = trajectories(ntrac)%subvol
+        t0     = trajectories(ntrac)%t0
         
-        ib     =  nrj(1,ntrac)
-        jb     =  nrj(2,ntrac)
-        kb     =  nrj(3,ntrac)
-        niter  =  nrj(4,ntrac)
-        ts     =  dble(nrj(5,ntrac))
-        tss    =  0.d0
+        ib     = trajectories(ntrac)%ib
+        jb     = trajectories(ntrac)%jb
+        kb     = trajectories(ntrac)%kb
+        niter  = trajectories(ntrac)%niter
+        ts     = DBLE(trajectories(ntrac)%nts)
+        tss    = 0.d0
+        
+        !! at start of a new time step, calc laplacian u and v
+        !! and remember the old value
+        !! The next four lines are laplacian of volume fluxes
+        !trajectories(ntrac)%lapu1   = trajectories(ntrac)%lapu2
+        !trajectories(ntrac)%lapv1   = trajectories(ntrac)%lapv2
+        !trajectories(ntrac)%lapu2   = lapu(ib,jb,kb,1) 
+        !trajectories(ntrac)%lapv2   = lapv(ib,jb,kb,1) 
+        !! Here we translate laplacian of volume flux to velocity
+        lapu1  = trajectories(ntrac)%lapu1 / (dyu(ib,jb) * dzt(ib,jb,kb,1))   
+        lapu2  = trajectories(ntrac)%lapu2 / (dyu(ib,jb) * dzt(ib,jb,kb,1))
+        lapv1  = trajectories(ntrac)%lapv1 / (dxv(ib,jb) * dzt(ib,jb,kb,1))      
+        lapv2  = trajectories(ntrac)%lapv2 / (dxv(ib,jb) * dzt(ib,jb,kb,1))
+        !dlapu = trajectories(ntrac)%dlapu
+        !dlapv = trajectories(ntrac)%dlapv
+        !dhdiv  = hdiv2 - hdiv1
+        !dvort  = vort2 - vort1
+        !trajectories(ntrac)%dlapu = dlapu
+        !trajectories(ntrac)%dlapv = dlapv
+        ! put new step statistics as current
+        !trajectories(ntrac)%lapu1 = lapu2
+        !trajectories(ntrac)%lapv1 = lapv2
+        !trajectories(ntrac)%hdiv1 = hdiv2
+        !trajectories(ntrac)%vort1 = vort2
         
 #ifdef rerun
-        lbas=nrj(8,ntrac)
+        lbas = trajectories(ntrac)%lbas
         if(lbas.lt.1 .or.lbas.gt.nend) then
            print *,'lbas=',lbas,'ntrac=',ntrac
-           print *,'trj(:,ntrac)=',trj(:,ntrac)
-           print *,'nrj(:,ntrac)=',nrj(:,ntrac)
+           print *,'x1=',trajectories(ntrac)%x1
+           print *,'y1=',trajectories(ntrac)%y1
+           print *,'z1=',trajectories(ntrac)%z1
+           print *,'tt=',trajectories(ntrac)%tt
+           print *,'t0=',trajectories(ntrac)%t0
+           print *,'subvol=',trajectories(ntrac)%subvol
+           print *,'ib=',trajectories(ntrac)%ib
+           print *,'jb=',trajectories(ntrac)%jb
+           print *,'kb=',trajectories(ntrac)%kb
+           print *,'nts=',trajectories(ntrac)%nts
+           print *,'icycle=',trajectories(ntrac)%icycle
+           print *,'active=',trajectories(ntrac)%active
            exit intsTimeLoop
         endif
 #endif /*rerun*/
@@ -227,23 +263,30 @@ SUBROUTINE loop
            niter=niter+1 ! iterative step of trajectory
            ! === change velocity fields &  === 
            ! === store trajectory position ===
-           if( niter.ne.1 .and. tss == dble(iter) &
-                .and. nrj(7,ntrac).ne.1 ) then
-              trj(1,ntrac) = x1
-              trj(2,ntrac) = y1
-              trj(3,ntrac) = z1
-              trj(4,ntrac) = tt
-              trj(5,ntrac) = subvol
-              nrj(1,ntrac) = ib
-              nrj(2,ntrac) = jb
-              nrj(3,ntrac) = kb
-              nrj(4,ntrac) = niter
-              nrj(5,ntrac) = idint(ts)
-              nrj(7,ntrac) = 1
+           if( niter /= 1 .and. tss == dble(iter) &
+                .and. trajectories(ntrac)%icycle /= 1 ) then
+              
+              trajectories(ntrac)%x1     = x1
+              trajectories(ntrac)%y1     = y1
+              trajectories(ntrac)%z1     = z1
+              trajectories(ntrac)%tt     = tt
+              trajectories(ntrac)%subvol = subvol
+              trajectories(ntrac)%ib     = ib
+              trajectories(ntrac)%jb     = jb
+              trajectories(ntrac)%kb     = kb
+              trajectories(ntrac)%niter  = niter
+              trajectories(ntrac)%nts    = idint(ts)
+              trajectories(ntrac)%icycle = 1
+              
+              !trajectories(ntrac)%lapu2   = lapu(ib,jb,kb,2)
+              !trajectories(ntrac)%lapv2   = lapv(ib,jb,kb,2)
+              !trajectories(ntrac)%hdiv2   = hdiv(ib,jb,kb,2)
+              !trajectories(ntrac)%vort2   = vort(ib,jb,kb,2)
+              
               cycle ntracLoop
            endif
            
-           nrj(7,ntrac)=0
+           trajectories(ntrac)%icycle = 0
 #if defined fixedtimestep 
            intrpg = 0.d0  ! mimics Ariane's lack of linear interpolation of the velocity fields
 #else
@@ -304,6 +347,7 @@ SUBROUTINE loop
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
            call active_niter 
+           
            !call turbuflux(ia,ja,ka,dt)
            ! === calculate the vertical velocity ===
            call vertvel(ia,iam,ja,ka)
@@ -323,9 +367,13 @@ SUBROUTINE loop
            if (errCode.ne.0) cycle ntracLoop
            call calc_time
            
+           if (ntrac == 365) print*,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+           if (ntrac == 365) print*,'hej1',x0,y0,z0,ia,ja,ka
+           
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
+           if (ntrac == 365) print*,'hej2',x1,y1,z1,ib,jb,kb
 
            if (nperio == 6) then
               ! === north fold cyclic for the ORCA grids ===
@@ -357,7 +405,7 @@ SUBROUTINE loop
                  print *,ka,kb,z0,z1
                  print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
                  nerror=nerror+1
-                 nrj(6,ntrac)=1
+                 trajectories(ntrac)%active = .false.
                  cycle ntracLoop
               endif
               
@@ -403,7 +451,11 @@ SUBROUTINE loop
            
            if (ja>jmt) ja = jmt - (ja - jmt)
            if (jb>jmt) jb = jmt - (jb - jmt)
-
+           
+           call active_niter_2 !!joakim edit
+           
+           if (ntrac == 365) print*,'hej3',x1,y1,z1,ib,jb,kb
+           
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('landError', errCode)
@@ -436,7 +488,7 @@ SUBROUTINE loop
                .or. ia<1 .or. ib<1 .or. ja<1 .or. jb<1) then
              print *,'Warning: Trajectory leaving model area'
              call writedata(17)
-             nrj(6,ntrac)=1
+             trajectories(ntrac)%active = .false.
              exit niterLoop                                
           end if
 
@@ -469,7 +521,7 @@ SUBROUTINE loop
 
         nout=nout+1
         call writedata(17)
-        nrj(6,ntrac)=1
+        trajectories(ntrac)%active = .false.
      end do ntracLoop
  
      call print_cycle_loop()
@@ -531,14 +583,14 @@ return
        
        select case (trim(teststr))
        case ('infLoopError')
-          if(niter-nrj(4,ntrac) > 30000) then ! break infinite loops
+          if(niter-trajectories(ntrac)%niter > 30000) then ! break infinite loops
              if (verbose == 2) then
                 print *, thickline !========================================
                 print *,'Warning: Particle in infinite loop '
                 print *, thinline !-----------------------------------------
                 print '(A,I7.7,A,I6.6,A,I7.7)', ' ntrac : ', ntrac,     & 
                                           ' niter : ', niter,     &
-                                          '    nrj : ', nrj(ntrac,4)
+                                          '    trajectories(ntrac)%niter : ', trajectories(ntrac)%niter
                 call print_grd
                 call print_pos
 
@@ -554,23 +606,24 @@ return
                 print *, thinline !-----------------------------------------
              end if
 !             z1=dble(kb)-0.5d0
-             trj(1,ntrac)=x1 !dble(ib)-0.5d0  !x1
-             trj(2,ntrac)=y1 !dble(jb)-0.5d0 ! y1
-             trj(3,ntrac)=z1 !dble(kb)-0.5d0 ! z1
-             trj(4,ntrac)=tt
-             trj(5,ntrac)=subvol
-             nrj(1,ntrac)=ib
-             nrj(2,ntrac)=jb
-             nrj(3,ntrac)=kb
-             nrj(4,ntrac)=niter
-             nrj(5,ntrac)=idint(ts)
-             nrj(6,ntrac)=1  ! 0=continue trajectory, 1=end trajectory
-             nrj(7,ntrac)=1
+             trajectories(ntrac)%x1     = x1 !dble(ib)-0.5d0  !x1
+             trajectories(ntrac)%y1     = y1 !dble(jb)-0.5d0 ! y1
+             trajectories(ntrac)%z1     = z1 !dble(kb)-0.5d0 ! z1
+             trajectories(ntrac)%tt     = tt
+             trajectories(ntrac)%subvol = subvol
+             trajectories(ntrac)%ib     = ib
+             trajectories(ntrac)%jb     = jb
+             trajectories(ntrac)%kb     = kb
+             trajectories(ntrac)%niter  = niter
+             trajectories(ntrac)%nts    = idint(ts)
+             trajectories(ntrac)%active = .false.  ! 0=continue trajectory, 1=end trajectory
+             trajectories(ntrac)%icycle = 1
+             
              nloop=nloop+1             
              errCode = -48
           end if
        case ('ntracGTntracmax')
-          if(ntrac.gt.ntracmax) then
+          if(ntrac > ntracmax) then
              print *, thickline !========================================
              print *,'ERROR: to many trajectories,'
              print *, thinline !-----------------------------------------
@@ -606,7 +659,7 @@ return
              errCode = -39
              if (strict==1) stop 40961
              call writedata(40)
-             nrj(6,ntrac)=1
+             trajectories(ntrac)%active = .false.
           endif          
 
        case ('boundError')
@@ -632,7 +685,7 @@ return
              errCode = -50
              if (strict==1) stop
              call writedata(40)
-             nrj(6,ntrac)=1
+             trajectories(ntrac)%active = .false.
           endif
 
        case ('landError')
@@ -645,6 +698,9 @@ return
                 call print_ds
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
                 print *,'hs=',hs(ia,ja,nsm),hs(ia,ja,nsp),hs(ib,jb,nsm),hs(ib,jb,nsp)
+                print *,'uflux=',uflux(ia,ja,ka,nsm),uflux(ia,ja,ka,nsp),uflux(ib,jb,kb,nsm),uflux(ib,jb,kb,nsp)
+                print *,'vflux=',vflux(ia,ja,ka,nsm),vflux(ia,ja,ka,nsp),vflux(ib,jb,kb,nsm),vflux(ib,jb,kb,nsp)
+                print *,'kmt=',kmt(ia-1,ja),kmt(ia,ja),kmt(ia+1,ja),kmt(ia,ja-1),kmt(ia,ja+1)
                 print *,'tt=',tt,ts,tt/tday,t0/tday
                 print *,'ntrac=',ntrac
                 print *,'niter=',niter
@@ -659,8 +715,8 @@ return
              landError = landError +1
              errCode = -40             
              call writedata(40)
-             nrj(6,ntrac)=1
-             if (strict==1) stop 
+             trajectories(ntrac)%active = .false.
+             !if (strict==1) stop  !!joakim edit
           endif
           case ('coordboxError')
           ! ===  Check that coordinates belongs to   ===
@@ -707,8 +763,8 @@ return
               print *,'x1,y1',x1,y1
               print *,'ntrac=',ntrac,niter 
               nerror=nerror+1
- !             nrj(6,ntrac)=1
-              stop 3957
+ !             trajectories(ntrac)%iend = 1
+              !stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if
@@ -776,7 +832,7 @@ return
                  print *, thickline !========================================
               end if
               nerror=nerror+1
-              nrj(6,ntrac)=1
+              trajectories(ntrac)%active = .false.
               errCode = -56
            end if
         case ('longjump')

@@ -47,8 +47,8 @@ SUBROUTINE setupgrid
   real, allocatable, dimension(:) :: depth
   logical :: lwrite_nc, lread_nc
 
-lwrite_nc = .true.
-lread_nc  = .true.
+lwrite_nc = .false.
+lread_nc  = .false.
 
 allocate( lon(imt,jmt), lat(imt,jmt) )
 allocate( depth(km) )

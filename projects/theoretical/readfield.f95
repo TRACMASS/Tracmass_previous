@@ -14,6 +14,7 @@ subroutine readfields
   INTEGER :: i,j,k,n,ii,kk,im,jj,jm,l
   REAL*8, SAVE ::omtime,cox,coy,om,co,uwe,dl
   REAL*8, SAVE ::ug,u0,gamma,gammag,fcor
+  REAL*8 :: djj
   
   call datasetswap
   call updateClock
@@ -83,9 +84,15 @@ do k=1,KM
 
 ! Nicoletta Fabboni velocities, which have analytical solutions
 ! -------------------------------------------------------------
-         uflux(i,j,k,2) = dyu(i,j) * dzt(i,j,k,2) * ( ug*dexp(-gammag*omtime) + &
-                                             (u0-ug) * dexp(-gamma*omtime) * cos(fcor*omtime+pi/2.d0) )
-         vflux(i,j,k,2) = dxv(i,j) * dzt(i,j,k,2) * ( -(u0-ug) * dexp(-gamma*omtime) * sin(fcor*omtime+pi/2.d0) )
+!         uflux(i,j,k,2) = dyu(i,j) * dzt(i,j,k,2) * ( ug*dexp(-gammag*omtime) + &
+!                                             (u0-ug) * dexp(-gamma*omtime) * cos(fcor*omtime+pi/2.d0) )
+!         vflux(i,j,k,2) = dxv(i,j) * dzt(i,j,k,2) * ( -(u0-ug) * dexp(-gamma*omtime) * sin(fcor*omtime+pi/2.d0) )
+
+! Gaussian jet
+! ------------------
+          djj = ( (dble(j)-dble(jmt)/2.)/(dble(jmt)/5) )**2
+          uflux(i,j,k,2) = dyu(i,j) * dzt(i,j,k,2) * ug * dexp( -djj ) * (cos(fcor*omtime+pi/2.d0)+1.0)
+          vflux(i,j,k,2) = 0.d0
 
 if(j==1 .or. j==JMT) vflux(i,j,k,2)=0.
 

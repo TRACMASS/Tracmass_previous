@@ -66,23 +66,23 @@
 ! dtmin iterative time steping in seconds
 ! dsmin=dtmin/(dx*dy*dz) Units in (s/m**3)
 !
-! NNTRJ and NTRJ number of informations to be stored for each 
-! trajectory between the dataset time steps (ints)
-! nrj(ntrac,1)=ib  zonal index
-! nrj(ntrac,2)=jb  meridional index
-! nrj(ntrac,3)=kb  vertical index
-! nrj(ntrac,4)=n   trajectory iterative step
-! nrj(ntrac,5)=ts  model dataset time step of trajectory
-! nrj(ntrac,6)=0 if trajectory  active & =1 if trajectory terminated & =2 if sedimented
-! nrj(ntrac,7)=1 if trajectory active in data set time step else =0
-! nrj(ntrac,8)=1,2,...,NEND index of end section for rerun in order to calculate
+! Information to be stored in array trajectories 
+! where each trajectory contains
+! trajectories(ntrac)%ib  zonal index
+! trajectories(ntrac)%jb  meridional index
+! trajectories(ntrac)%kb  vertical index
+! trajectories(ntrac)%niter   trajectory iterative step between GCM fields
+! trajectories(ntrac)%ts  model dataset time step of trajectory
+! trajectories(ntrac)%iend =0 if trajectory  active & =1 if trajectory terminated & =2 if sedimented
+! trajectories(ntrac)%icycle =1 if trajectory active in data set time step else =0
+! trajectories(ntrac)%lbas  =1,2,...,NEND index of end section for rerun in order to calculate
 !                       Lagrangian stream functions
-! trj(ntrac,1)=x1 zonal      model index coordinate of trajectory
-! trj(ntrac,2)=y1 meridional model index coordinate of trajectory
-! trj(ntrac,3)=z1 vertical   model index coordinate of trajectory
-! trj(ntrac,4)=tt time of trajectory in seconds
-! trj(ntrac,5)=subvol volume transport of trajctory in m3/s
-! trj(ntrac,7)=t0 initial time in seconds of trajectory
+! trajectories(ntrac)%x1 zonal      model index coordinate of trajectory
+! trajectories(ntrac)%y1 meridional model index coordinate of trajectory
+! trajectories(ntrac)%z1 vertical   model index coordinate of trajectory
+! trajectories(ntrac)%tt time of trajectory in seconds
+! trajectories(ntrac)%subvol volume transport of trajctory in m3/s
+! trajectories(ntrac)%t0 initial time in seconds of trajectory
 !
 !__________________________ Array dimensions defined in modules.f95_______________________
 ! IMT= zonal model array dimension

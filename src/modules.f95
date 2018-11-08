@@ -1,11 +1,9 @@
 
 
 MODULE mod_precdef		! Precision definitions
-   !integer, parameter                       :: P4 = selected_real_kind(6, 37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
 ENDMODULE mod_precdef
-
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_param
@@ -26,6 +24,28 @@ MODULE mod_param
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+MODULE mod_trajdef ! Define derived type "trajectory"
+   USE mod_precdef
+   TYPE trajectory
+      INTEGER                               :: ia,ja,ka,ib,jb,kb  !! grid indices
+      INTEGER                               :: nts                !! time step
+      INTEGER                               :: niter              !! trajectory iterations
+      INTEGER                               :: icycle             !! 0=keep advecting particle
+                                                                  !! 1=stop and update model fields
+      INTEGER                               :: lbas               !! flag 
+      REAL(DP)                              :: x0,y0,z0,x1,y1,z1  !! positions
+      REAL(DP)                              :: tt,t0              !! time 
+      REAL(DP)                              :: subvol             !! volume (or mass for atm.)
+      REAL(DP)                              :: lapu1,lapv1        !! Laplacian of u,v at previous step
+      REAL(DP)                              :: lapu2,lapv2        !! Laplacian of u,v at next step
+      REAL(DP)                              :: dlapu,dlapv        !! d/dt Laplacian of u,v 
+      REAL(DP)                              :: vort1,hdiv1        !! Vorticity, div of u,v at previous step
+      REAL(DP)                              :: vort2,hdiv2        !! Vort, div of u,v at next step
+      LOGICAL                               :: active             !! particle active or not
+      LOGICAL                               :: sedimented         !! particle sedimented or not
+   END TYPE trajectory
+END MODULE
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
   USE mod_precdef
@@ -42,13 +62,13 @@ ENDMODULE mod_loopvars
 
 MODULE mod_traj
   USE mod_precdef
+  USE mod_trajdef
   ! Variables connected to particle positions.
   INTEGER, PARAMETER                        :: NNRJ=8, NTRJ=7
   INTEGER                                   :: nend
   INTEGER                                   :: ntrac, ntractot=0
-  ! === Particle arrays ===
-  REAL(DP), ALLOCATABLE,  DIMENSION(:,:)    :: trj
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: nrj 
+  ! === Particle arrays === 
+  TYPE(trajectory), ALLOCATABLE, DIMENSION(:) :: trajectories
   ! === Particle counters ===
   INTEGER                                   :: nout=0, nloop=0, nerror=0, nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)         :: nexit
@@ -57,6 +77,7 @@ MODULE mod_traj
   INTEGER                                   :: ib, jb, kb, ibm
   REAL(DP)                                  :: x0, y0, z0
   REAL(DP)                                  :: x1, y1, z1
+  REAL(DP)                                  :: lapu1, lapu2, lapv1, lapv2, dlapu, dlapv, vort1, vort2, hdiv1, hdiv2, dvort, dhdiv
 ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -118,6 +139,7 @@ MODULE mod_grid
   INTEGER                                   :: subGridKmin=1 ,subGridKmax=0
   CHARACTER(LEN=200)                        :: SubGridFile 
   INTEGER                                   :: degrade_space=0
+  INTEGER                                   :: freeSurfaceForm
 
 #ifdef ifs
   REAL(DP), PARAMETER                       :: R_d = 287.05d0
@@ -562,6 +584,13 @@ ENDMODULE mod_diffusion
 #endif
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+MODULE mod_deformation
+   USE mod_precdef
+   !! fields describing the flow deformation
+   !! e.g. vorticity, shearing etc. 
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: vort, hdiv
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: lapu, lapv
+END MODULE mod_deformation
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_sed

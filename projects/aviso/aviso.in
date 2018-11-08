@@ -7,7 +7,7 @@
         gridname = 'AVISO',
       gridsource = 'http://www.aviso.altimetry.fr/',
         griddesc = 'Satellite altimetry',
-       indatadir = '/Users/joakim/data/aviso/global/delayed-time/grids/madt/all-sat-merged/',
+       indatadir = '/Users/jkjellsson/data/aviso/global/delayed-time/grids/madt/all-sat-merged/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'AVISO',

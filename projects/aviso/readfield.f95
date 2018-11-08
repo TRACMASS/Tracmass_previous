@@ -27,6 +27,7 @@ SUBROUTINE readfields
   
    ! = Loop variables
    INTEGER                                      :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
+   INTEGER                                      :: createYear, createMon, createDay
    INTEGER                                      :: kbot,ktop
    INTEGER, SAVE                                :: ntempus=0,ntempusb=0,nread
    ! = Variables used for getfield procedures
@@ -55,14 +56,38 @@ SUBROUTINE readfields
    call datasetswap
    call updateClock
    
+   !! 
+   !! AVISO data from Ifremer is labelled by the date (YYYYMMDD) of the data
+   !! and also the date (YYYYMMDD) when the data was created. 
+   !! For data before 2013, the data of creation was 20140106. 
+   !! If you want to run trajectories after that, you need to change this date. 
+   !! 
+   
+   if (currYear <= 2012) then
+      createYear = 2014
+      createMon  = 1
+      createDay  = 6
+   
+   else if (currYear == 2013) then
+      createYear = 2014
+      createMon  = 7
+      createDay  = 4
+   
+   else 
+      print*,' Running AVISO trajectories with such recent data is not yet implemented '
+      print*,' You should stick to data before 2014 '
+      print*,' In fact, stick to living life before 2007. Det var battre forr... '
+   
+   end if
+   
    dataprefix = 'YYYY/dt_global_allsat_madt_uv_YYYYMMDD_YYYYMMDD.nc'
    write(dataprefix(1:4),'(i4.4)')   currYear
    write(dataprefix(31:34),'(i4.4)') currYear
    write(dataprefix(35:36),'(i2.2)') currMon
    write(dataprefix(37:38),'(i2.2)') currDay
-   write(dataprefix(40:43),'(i4.4)')   2014
-   write(dataprefix(44:45),'(i2.2)')   1
-   write(dataprefix(46:47),'(i2.2)')   6
+   write(dataprefix(40:43),'(i4.4)') createYear
+   write(dataprefix(44:45),'(i2.2)') createMon
+   write(dataprefix(46:47),'(i2.2)') createDay
    
    fieldFile = trim(inDataDir)//'uv/'//trim(dataprefix)
    do k=1,km
@@ -74,6 +99,8 @@ SUBROUTINE readfields
    kmt(:,:) = 1
    kmu(:,:) = 1
    kmv(:,:) = 1
+   
+   print*,fieldFile
       
    map2d = [3, 4, 1, 2]
    !! Read u, v 

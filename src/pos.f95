@@ -24,9 +24,11 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   USE mod_vel, only: uflux, vflux, wflux, ff
   USE mod_active_particles, only: upr
   USE mod_time, only: intrpr, intrpg
+  USE mod_traj, only: ntrac !!joakim edit
   IMPLICIT none
 
   real(DP)                                   :: r0, r1, ds, uu, um, vv, vm, en
+  real(DP)                                   :: frac1,frac2
   integer                                    :: ijk, ia, ja, ka, ii, im
   
   
@@ -43,36 +45,59 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      if(im.eq.0) im=IMT
      uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
      um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
+     !frac1 = min( abs(upr(1,1)), abs(0.99*uu/upr(1,1)) )
+     !frac2 = min( abs(upr(2,1)), abs(0.99*um/upr(2,1)) )
 #ifdef turb    
+     !print*,'zonal, fracs',(upr(1,1)+uu)/uu,(um+upr(2,1))/um
      if(r0.ne.dble(ii)) then
-        uu=uu+upr(1,2)  
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           uu=uu+upr(1,2)!*frac1
+        !end if
      else
-        uu=uu+upr(1,1)
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           uu=uu+upr(1,1)!*frac1
+        !end if
         ! add u' from previous iterative time step if on box wall
      endif
      if(r0.ne.dble(im)) then
-        um=um+upr(2,2)
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           um=um+upr(2,2)!*frac2
+        !end if
      else
-        um=um+upr(2,1)  
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           um=um+upr(2,1)!*frac2
+        !end if
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
+  if (ntrac==365) print*,'hej1.5',uu,um,upr(1,1:2),upr(2,1:2)
 
   elseif(ijk.eq.2) then
      ii=ja
      uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
      um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
+     !frac1 = min( abs(upr(3,1)), abs(0.99*uu/upr(3,1)) )
+     !frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )
 #ifdef turb    
+     !print*,'merid fracs',(uu+upr(3,1))/uu,(um+upr(4,1))/um
      if(r0.ne.dble(ja  )) then
-        uu=uu+upr(3,2)  
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           uu=uu+upr(3,2)!*frac1 
+        !end if
      else
-        uu=uu+upr(3,1)  
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           uu=uu+upr(3,1)!*frac1
+        !end if
         ! add u' from previous iterative time step if on box wall
      endif
      if(r0.ne.dble(ja-1)) then
-        um=um+upr(4,2)
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           um=um+upr(4,2)!*frac2
+        !end if
      else
-        um=um+upr(4,1)  
+        !if (uu /= 0.d0 .and. um /= 0.d0) then
+           um=um+upr(4,1)!*frac2
+        !end if
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
@@ -85,6 +110,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      uu = intrpg * wflux(ka  ,nsp) + intrpr * wflux(ka  ,nsm)
      um = intrpg * wflux(ka-1,nsp) + intrpr * wflux(ka-1,nsm)
 #endif
+     !print*,'vert',uu,um
 #ifdef turb    
      if(r0.ne.dble(ka  )) then
         uu=uu+upr(5,2)  
@@ -100,7 +126,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      endif
 #endif
   endif
-
+  !print*,'pos',uu,um
   !
   ! note: consider in future to improve the code below for accuracy 
   ! in case of um-uu = small; also see subroutine cross

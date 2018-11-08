@@ -44,8 +44,8 @@ ifeq ($(NETCDFLIBS),"fink")
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-	FF_FLAGS         = -O0 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
-#	FF_FLAGS         = -O3 -c -x f95-cpp-input  
+	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
+#	FF_FLAGS         = -O3 -c -x f95-cpp-input 
         F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
 endif
@@ -69,14 +69,14 @@ endif
 
 CC                = gcc -O  $(INC_DIR)
 
-ACTVEL = empty.o
+ACTVEL = zanna_turb_3.o
 
 VPATH = src:projects/$(PROJECT):src/active_particles
 
 all: runfile
 
-objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
-	            seed.o init_seed.o sw_stat.o $(ACTVEL) getfile.o \
+objects := $(addprefix $(OBJDIR)/,modules.o $(ACTVEL) laplacian.o savepsi.o loop_pos.o writetrajs.o \
+	            seed.o init_seed.o sw_stat.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
                     interp.o interp2.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o \

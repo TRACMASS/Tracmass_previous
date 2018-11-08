@@ -66,7 +66,7 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
              kriva =      6,
-      outdatadir =   '/Users/joakim/Downloads/',
+      outdatadir =   '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/',
      outdatafile =     'test',
 !     outdatafile =     'analyt_k1',
     ! outdatafile =     'dt1_k1',
@@ -81,8 +81,8 @@
         ntracmax =   2000000,
     loneparticle =     -1,
         seedtype =      1,
-            ist1 =     31,!31,
-            ist2 =     31, !31,
+            ist1 =     1,!31,
+            ist2 =     1, !31,
             jst1 =     50, !50,
             jst2 =     50, !50,
             kst1 =     5,

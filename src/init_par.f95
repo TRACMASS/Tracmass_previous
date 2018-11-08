@@ -16,6 +16,7 @@ SUBROUTINE init_params
    USE mod_tracer
    USE mod_getfile
    USE mod_write
+   USE mod_deformation
    
 #if defined diffusion || turb 
    USE mod_diffusion
@@ -42,7 +43,7 @@ SUBROUTINE init_params
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &
                                     subGridKmin, subGridKmax, SubGridFile,   &
-                                    subGridID, nperio
+                                    subGridID, nperio, freeSurfaceForm
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
                                     baseMon, baseYear, jdoffset
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
@@ -345,11 +346,32 @@ SUBROUTINE init_params
       wflux = 0.d0
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       
+      !! allocate deformation arrays
+      ALLOCATE ( vort(1:imt,1:jmt,1:km,2), hdiv(1:imt,1:jmt,1:km,1:2), &
+               & lapu(1:imt,1:jmt,1:km,2), lapv(1:imt,1:jmt,1:km,1:2)  )
+      vort(:,:,:,:) = 0.
+      hdiv(:,:,:,:) = 0.
+      lapu(:,:,:,:) = 0.
+      lapv(:,:,:,:) = 0.
+      
       ! === Init mod_traj ===
-      ALLOCATE ( trj(NTRJ,ntracmax), nrj(NNRJ,ntracmax) )
+      ALLOCATE ( trajectories(ntracmax) )
+      trajectories(:)%x1 = 0.
+      trajectories(:)%y1 = 0.
+      trajectories(:)%z1 = 0.
+      trajectories(:)%tt = 0.
+      trajectories(:)%t0 = 0.
+      trajectories(:)%subvol = 0.
+      trajectories(:)%ib = 0.
+      trajectories(:)%jb = 0.
+      trajectories(:)%kb = 0.
+      trajectories(:)%nts = 0.
+      trajectories(:)%niter = 0.
+      trajectories(:)%icycle = 0.
+      trajectories(:)%active = .true.
+      trajectories(:)%sedimented = .false.
+      
       ALLOCATE ( nexit(NEND) ) 
-      nrj = 0
-      trj = 0.d0
       nexit = 0
       ntractot = 0
       numseedsubints = max(count(seedsubints /= -1), 1)

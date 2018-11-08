@@ -1,272 +1,150 @@
 SUBROUTINE setupgrid
   
-  USE netcdf
-  USE mod_param
-  USE mod_vel
+   USE mod_precdef
+   USE netcdf
+   USE mod_param
+   USE mod_vel
+   
+   USE mod_time
+   USE mod_grid
+   USE mod_name
+   USE mod_vel
+   USE mod_getfile
+   
+   IMPLICIT none
+   ! =============================================================
+   !    ===  Set up the grid for ORCA025 configuration ===
+   ! =============================================================
+   ! Subroutine for defining the grid of the ORCA025 config. 
+   ! Run once before the loop starts.
+   ! -------------------------------------------------------------
+   ! The following arrays will be populated:
+   !
+   !  dxdy - Horizontal area of cells (T points)
+   !  dz   - Thickness of standard level (T point) 
+   !  dzt  - Time-invariant thickness of level (T point)
+   !  dzu  - Time-invariant thickness of level (U point)
+   !  dzv  - Time-invariant thickness of level (V point)
+   !  kmt  - Number of levels from surface to seafloor (T point)
+   !  kmu  - Number of levels from surface to seafloor (U point)
+   !  kmv  - Number of levels from surface to seafloor (V point)
+   !
+   ! -------------------------------------------------------------
+    
+   ! === Init local variables for the subroutine ===
+   INTEGER                                      :: i ,j ,k, n, kk, ii, &
+   &                                               ip, jp, im, jm !! Loop indices
+   REAL(DP), SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t        !! dx, dy [m]
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: tmp4D
+   CHARACTER (len=200)                          :: gridFile 
+   
+   
+   map2D    = [3, 4,  1, 1 ]
+   map3D    = [2, 3,  4, 1 ]
+   ncTpos   = 1
+   
+   !
+   ! --- Read dx, dy at T points --- 
+   !
+   allocate ( e1t(imt,jmt) , e2t(imt,jmt) )
+   gridFile = trim(inDataDir)//'domain/mesh_hgr.nc'
+   e1t  = get2DfieldNC(gridFile, 'e1t')
+   e2t  = get2DfieldNC(gridFile, 'e2t')
+   dxdy(1:imt,1:jmt) = e1t(1:imt,1:jmt) * e2t(1:imt,1:jmt)
+   deallocate ( e1t, e2t )
   
-  USE mod_time
-  USE mod_grid
-  USE mod_name
-  USE mod_vel
-  USE mod_getfile
+   !
+   ! --- Read dy at U points and dx at V points --- 
+   !
+   dyu  = get2DfieldNC(gridFile, 'e2u')
+   dxv  = get2DfieldNC(gridFile, 'e1v')
+   dx   = dxv(imt/2, jmt/2)
+   dy   = dyu(imt/2, jmt/2)
+   
+   !
+   ! Read dz at T points without considering 
+   ! bottom partial cells and variable volume  
+   !
+   gridFile = trim(inDataDir)//'domain/mesh_zgr.nc'
+   dz = get1DfieldNC(gridFile, 'e3t_0')
+   dz(1:km) = dz(km:1:-1)
+   !do k=1,km
+   !   kk=km+1-k
+   !   dz(kk)=zlev(k)
+   !   zlev(k)=zlev(k)+zlev(k-1)
+   !end do
+   
+   !
+   ! Read number of valid levels at U, V, T points
+   ! as 2D array
+   !
+   kmt = get2DfieldNC(gridFile, 'mbathy')
+   allocate ( kmu(imt,jmt), kmv(imt,jmt) )
+   
+   kmu=0 ; kmv=0
+   do j=1,jmt
+      jp=j+1
+      if(jp == jmt+1) jp=jmt
+      do i=1,imt
+         ip=i+1
+         if(ip == imt+1) ip=1
+         kmu(i,j)=min(kmt(i,j), kmt(ip,j),KM)
+         kmv(i,j)=min(kmt(i,j), kmt(i,jp),KM)
+      enddo
+   enddo
 
-  IMPLICIT none
-  ! =============================================================
-  !    ===  Set up the grid ===
-  ! =============================================================
-  ! Subroutine for defining the grid of the GCM. Run once
-  ! before the loop starts.
-  ! -------------------------------------------------------------
-  ! The following arrays has to be populated:
-  !
-  !  dxdy - Area of horizontal cell-walls.
-  !  dz   - Height of k-cells in 1 dim. |\
-  !  dzt  - Height of k-cells i 3 dim.  |- Only one is needed
-  !  kmt  - Number of k-cells from surface to seafloor.
-  !
-  ! The following might be needed to calculate
-  ! dxdy, uflux, and vflux
-  !
-  !  dzu - Height of each u-gridcell.
-  !  dzv - Height of each v-gridcell.
-  !  dxu -
-  !  dyu -
-  ! -------------------------------------------------------------
-
-
-
-  ! === Init local variables for the subroutine ===
-  INTEGER                                     :: i ,j ,k, ip, jp, im, jm
-  INTEGER                                     :: kk, ii
-  REAL*8                                      :: dp,dd
-  REAL*8,  ALLOCATABLE, DIMENSION(:,:)        :: temp2d_doub
-  REAL*8,  ALLOCATABLE, DIMENSION(:,:,:)      :: temp3d_doub
+   do i=4, imt
+      ii = imt + 4 - i
+      kmv(i,jmt) = kmv(ii,jmt-3)
+   enddo
   
-  REAL*4,  SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t !,rhom
-  CHARACTER (len=200)                         :: gridFile
-!  REAL*4									  :: long(IMT,JMT),lat(IMT,JMT)
-
-  ! === Start and count mask for reading netCDF files ===
-  start1D  = [ 1]
-  count1D  = [KM]
-  start2D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count2D  = [         imt,        jmt ,  1 , 1 ]
-  map2D    = [          1 ,          2 ,  3 , 4 ]  
-  start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count3D  = [         imt,        jmt , KM , 1 ]
-  map3D    = [          1 ,          2 ,  3 , 4 ] 
-  
-  call coordinat
-
-
-  ! === Open mesh file ===
-  gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
-  ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-  if(ierr.ne.0) stop 3751
-
-  ! === Read dx and dy for T points ===
-  ! === Compute area of grid box    ===
-  allocate( temp2d_doub(IMT,JMT) )
-  allocate ( e1t(IMT,JMT) , e2t(IMT,JMT) )
-  
-  ierr=NF90_INQ_VARID(ncid,'e1t',varid) 
-  if(ierr.ne.0) stop 3763
-  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-  if(ierr.ne.0) stop 3799
-  do i=1,IMT
-    e1t(i,:)=temp2d_doub(i,:)
-  enddo
-
-  ierr=NF90_INQ_VARID(ncid,'e2t',varid) 
-  if(ierr.ne.0) stop 3765
-  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-  if(ierr.ne.0) stop 3799
-  do i=1,IMT
-    e2t(i,:)=temp2d_doub(i,:)
-    dxdy(i,:) = e1t(i,:) * e2t(i,:)
-  enddo
-
-  ! === Read dy for u points ===
-  ierr=NF90_INQ_VARID(ncid,'e2u',varid) 
-  if(ierr.ne.0) stop 3764
-  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-  if(ierr.ne.0) stop 3799
-  do i=1,IMT
-    dyu(i,:)=temp2d_doub(i,:)
-  enddo
-
-  ! === Read dx for v points ===
-  ierr=NF90_INQ_VARID(ncid,'e1v',varid) ! dx for v points
-  if(ierr.ne.0) stop 3766
-  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-  if(ierr.ne.0) stop 3799
-  do i=1,IMT
-    dxv(i,:)=temp2d_doub(i,:)
-  enddo
-  
-  ! extras for analysis to be commented out
-! === Read dy for u points ===
-!  ierr=NF90_INQ_VARID(ncid,'glamu',varid) 
-!  if(ierr.ne.0) stop 3764
-!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-!  if(ierr.ne.0) stop 3799
-!  do i=1,IMT
-!  do  j=1,JMT
-!    long(i,j)=temp2d_doub(i,j)
-!    if(long(i,j).lt.0.) long(i,j)=long(i,j)+360.
-!  enddo
-!  enddo
-!  ierr=NF90_INQ_VARID(ncid,'gphiv',varid) 
-!  if(ierr.ne.0) stop 3764
-!  ierr=NF90_GET_VAR(ncid,varid,temp2d_doub,start2d,count2d)
-!  if(ierr.ne.0) stop 3799
-!  do i=1,IMT
-!  do  j=1,JMT
-!    lat(i,j)=temp2d_doub(i,j)
-!  enddo
-!  enddo
-!  do j=JMT,1,-1
-!  print *,j,lat(IMT/2,j)
-!  enddo
-!  stop 3486
-  
-  
-  
-  deallocate( temp2d_doub, e1t, e2t )
-  
-#ifdef orca025
-  ! === In orca025 the vertical mesh is ===
-  ! === in a separate file              ===
-  ierr=NF90_CLOSE(ncid)
-  gridFile = trim(inDataDir)//'topo/mesh_zgr.nc'
-  ierr=NF90_OPEN(trim(gridFile),NF90_NOWRITE,ncid)
-#endif
-
-
-  ! === Read and compute depth coordinates ===
-  zw(0) = 0.d0
-  ierr=NF90_INQ_VARID(ncid ,'e3t_0',varid)
-  if(ierr.ne.0) stop 3777
-  ierr=NF90_GET_VAR(ncid ,varid ,zw(1:KM) ,start1d ,count1d)
-  if(ierr.ne.0) stop 3778
-  do k=1,km
-    kk=km+1-k
-    dz(kk)=zw(k)
-    zw(k)=zw(k)+zw(k-1)
-!    print *,k,kk,dz(kk),zw(k)
-  end do
-!stop 936
-  ! === Read kmt - number of vertical T points ===
-  ierr=NF90_INQ_VARID(ncid,'mbathy',varid)
-  if(ierr.ne.0) stop 3767
-  ierr=NF90_GET_VAR(ncid,varid,kmt,start2d,count2d)
-  
-  ! === Read and compute the depth of the bottom T point ===
-  allocate (  botbox(IMT,JMT,3) )
-  allocate( temp3d_doub(IMT,JMT,KM) )
-  
-  botbox=0.
-  ierr=NF90_INQ_VARID(ncid,'e3t',varid) 
-  if(ierr.ne.0) stop 3763
-  ierr=NF90_GET_VAR(ncid,varid,temp3d_doub,start3d,count3d)
-  do i=1,IMT
-    do j=1,JMT
-      if(kmt(i,j).ne.0) then
-        botbox(i,j,3)=temp3d_doub(i,j,kmt(i,j))
-        if(botbox(i,j,3).eq.0.) then
-          print *,i,j,kmt(i,j),botbox(i,j,3),temp3d_doub(i,j,kmt(i,j))
-          botbox(i,j,3)=dz(km+1-kmt(i,j))
-        endif
-      endif
-    enddo
-  enddo
-
-  ! === Read and compute the depth of the bottom u and v point ===
-  allocate ( kmu(IMT,JMT)    ,kmv(IMT,JMT) )
-  kmu=0 ; kmv=0
-
-  do j=1,JMT
-    jp=j+1
-    if(jp.eq.jmt+1) jp=jmt
-    do i=1,imt
-      ip=i+1
-      if(ip.eq.IMT+1) ip=1
-      ! Number of depth levels for u and v
-      kmu(i,j)=min(kmt(i,j),kmt(ip,j),KM)
-      kmv(i,j)=min(kmt(i,j),kmt(i,jp),KM)
-      ! Depth of bottom box for u
-      if(kmu(i,j).ne.0) then
-        if(kmu(i,j) .eq. kmt(i,j) .and. kmu(i,j) .eq. kmt(ip,j)) then
-          botbox(i,j,1)=min(dztb(i,j,1),dztb(ip,j,1))
-        elseif(kmu(i,j) .eq. kmt(i,j)) then
-          botbox(i,j,1)=dztb(i,j,1)
-        elseif(kmu(i,j) .eq. kmt(ip,j)) then
-          botbox(i,j,1)=dztb(ip,j,1)
-        else
-          print*,kmu(i,j),kmt(i,j),kmt(ip,j)
-        endif
-      else
-        botbox(i,j,1) = 0.d0
-      endif
-      ! Depth of bottom box for v
-      if(kmv(i,j).ne.0) then
-        if(kmv(i,j) == kmt(i,j) .and. kmv(i,j) == kmt(i,jp)) then
-          botbox(i,j,2) = min(dztb(i,j,1),dztb(i,jp,1))
-        elseif(kmv(i,j) == kmt(i,j)) then
-          botbox(i,j,2) = dztb(i,j,1)
-        elseif(kmv(i,j) == kmt(i,jp)) then
-          botbox(i,j,2) = dztb(i,jp,1)
-        else
-          print*,kmv(i,j),kmt(i,j),kmt(i,jp)
-        endif
-      else
-        botbox(i,j,2) = 0.d0
-      endif
-    enddo
-  enddo
-
-  !  north fold 
-  do i=4,IMT
-    ii=IMT+4-i
-    kmv(i,JMT)=kmv(ii,JMT-3)
-    botbox(i,JMT,2)=botbox(ii,JMT-3,2)
-  enddo
-
-  ierr=NF90_CLOSE(ncid)
-
-
-  ! Bottom box 
-  do j=1,JMT
-    do i=1,IMT
-      if(kmt(i,j).ne.0) then
-        dztb(i,j,1)=botbox(i+subGridImin-1,j+subGridJmin-1,3)
-        if(botbox(i+subGridImin-1,j+subGridJmin-1,3).eq.0.) then
-          print *,i,j,kmt(i,j),botbox(i+subGridImin-1,j+subGridJmin-1,3)
-          stop 4957
-        endif
-      else
-        dztb(i,j,1)=0.
-      endif
-    enddo
-  enddo
-
-! Initialise time
-!  currSec = startSec 
-!  currMin = startMin 
-!  currHour = startHour 
-!  currDay = startDay 
-!  currMon = startMon 
-!  currYear = startYear 
-  
-  
-!open(21,file='/Users/doos/data/orca/orca025/topo/longlat',form='unformatted')
-!write(21) long
-!write(21) lat
-!write(21) kmt
-!write(21) kmu
-!write(21) kmv
-!close(21)
-!stop 3956
-
-
+   !
+   ! Read layer thickness at U, V, T points 
+   ! without considering variable volume.
+   !
+   ! SSH variability is accounted for in readfield each time step
+   !
+   allocate ( dzu(imt,jmt,km,2),dzv(imt,jmt,km,2), dzt0(imt,jmt,km) )
+   
+   dzt0(:,:,:) = get3DfieldNC(gridFile, 'e3t')
+   dzu(:,:,:,1) = get3DfieldNC(gridFile, 'e3u')
+   dzv(:,:,:,1) = get3DfieldNC(gridFile, 'e3v')
+   
+   !
+   ! Ensure thickness is zero in invalid points
+   !
+   do n=1,2
+      do k=1,km
+         where (k > kmt(1:imt,1:jmt))
+            dzt0(:,:,k) = 0
+         end where
+         where (k > kmu(1:imt,1:jmt))
+            dzu(:,:,k,n) = 0
+         end where
+         where (k > kmv(1:imt,1:jmt))
+            dzv(:,:,k,n) = 0
+         end where
+      enddo 
+   end do
+   
+   ! Reverse grid 
+   allocate( tmp4D(imt,jmt,km,2) )
+   
+   tmp4D(1:imt,1:jmt,1:km,1) = dzt0(1:imt,1:jmt,1:km)
+   do k=1,km
+      dzt0(:,:,k) = tmp4D(:,:,km+1-k,1) 
+   end do
+   
+   tmp4D(1:imt,1:jmt,1:km,:) = dzu(1:imt,1:jmt,1:km,:)
+   do k=1,km
+      dzu(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
+   end do
+   
+   tmp4D(1:imt,1:jmt,1:km,:) = dzv(1:imt,1:jmt,1:km,:)
+   do k=1,km
+      dzv(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
+   end do
+   
+   deallocate( tmp4d )
+   
 end SUBROUTINE setupgrid

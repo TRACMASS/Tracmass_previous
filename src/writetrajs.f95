@@ -4,6 +4,7 @@ module mod_write
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
   USE mod_time 
+  USE mod_active_particles, only: upr !!Joakim edit
  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
@@ -83,8 +84,10 @@ CONTAINS
     !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
     open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &
          access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    !open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
+    !     access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
     open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
-         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+         access='direct' ,form='unformatted' ,recl=72 ,status='replace') !!Joakim edit
     open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
          access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
     open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &
@@ -161,7 +164,10 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosIn=0  ,recPosOut=0
     INTEGER*8, SAVE                      :: recPosRun=0 ,recPosErr=0
     INTEGER*8, SAVE                      :: recPosKll=0
-    REAL                                 :: x14 ,y14 ,z14, tt14, t014
+    INTEGER*4                            :: ntrac4
+    REAL*4                               :: x14 ,y14 ,z14, tt14, t014
+    REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
+                                            dvort4, dhdiv4, upr4, vpr4
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
@@ -200,8 +206,6 @@ CONTAINS
        !            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
     !end if
     
-subvol =  trj(5,ntrac)
-t0     =  trj(7,ntrac)
 #if defined tempsalt
     call interp2(ib,jb,kb,temp,salt,dens)
 #endif
@@ -214,7 +218,14 @@ t0     =  trj(7,ntrac)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 !       if(temp==0.) stop 4867
     case (11)
-       if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
+       !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
+       !     (kriva == 2 .AND. scrivi                    ) .or. &
+       !     (kriva == 3                                 ) .or. &
+       !     (kriva == 4 .AND. niter == 1                ) .or. &
+       !     (kriva == 5 .AND.                                  &
+       !   &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
+       !     (kriva == 6 .AND. .not.scrivi                  ) ) then
+       if(  (kriva == 1 .AND. trajectories(ntrac)%niter == niter-1   ) .or. &
             (kriva == 2 .AND. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .AND. niter == 1                ) .or. &
@@ -261,8 +272,11 @@ t0     =  trj(7,ntrac)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
        do n=1,ntracmax
-        if(nrj(1,n).ne.0) then
-         write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
+        !if(nrj(1,n).ne.0) then
+        if(trajectories(n)%ib /= 0) then
+         !write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
+         write(34,566) n,trajectories(n)%niter,trajectories(n)%x1,trajectories(n)%y1,trajectories(n)%z1, &
+                     & trajectories(n)%tt/tday,trajectories(n)%t0/tday
       endif
        enddo
        close(34)
@@ -275,11 +289,24 @@ t0     =  trj(7,ntrac)
 #endif 
    
 #if defined binwrite 
+    ntrac4=int(ntrac,kind=4)
     x14=real(x1,kind=4)
     y14=real(y1,kind=4)
     z14=real(z1,kind=4)
     tt14=real(tt/tday,kind=4)!Joakim edit
     t014=real(t0/tday,kind=4)!Joakim edit
+    lapu14 = real(lapu1,kind=4)!Joakim edit
+    lapu24 = real(lapu2,kind=4)!Joakim edit
+    lapv14 = real(lapv1,kind=4)!Joakim edit
+    lapv24 = real(lapv2,kind=4)!Joakim edit
+    vort24 = real(vort2,kind=4)!Joakim edit
+    hdiv24 = real(hdiv2,kind=4)!Joakim edit
+    dlapu4 = real(dlapu,kind=4)!Joakim edit
+    dlapv4 = real(dlapv,kind=4)!Joakim edit
+    dvort4 = real(dvort,kind=4)!Joakim edit
+    dhdiv4 = real(dhdiv,kind=4)!Joakim edit
+    upr4   = real(upr(1,1),kind=4)!Joakim edit
+    vpr4   = real(upr(3,1),kind=4)!Joakim edit
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -294,7 +321,8 @@ t0     =  trj(7,ntrac)
        write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       !if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       if(  (kriva == 1 .and. trajectories(ntrac)%niter  ==  niter-1 ) .or. &
             (kriva == 2 .and. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .and. niter == 1                ) .or. &
@@ -306,14 +334,16 @@ t0     =  trj(7,ntrac)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
           recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
+          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014,&
+                                        lapu14,lapu24,lapv14,lapv24,upr4,vpr4,vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
        end if
     case (13)
        recPosKll = recPosKll + 1
        write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (15)
        recPosRun = recPosRun + 1
-       write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
+       write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14,tt14,t014,&
+                                     lapu14,lapu24,lapv14,lapv24, upr4, vpr4, vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
     case (17) !out
        recPosOut = recPosOut + 1
        write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
@@ -353,7 +383,8 @@ t0     =  trj(7,ntrac)
        write(88,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       !if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       if(  (kriva == 1 .and. trajectories(ntrac)%niter  ==  niter-1 ) .or. &
             (kriva == 2 .and. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .and. niter == 1                ) .or. &

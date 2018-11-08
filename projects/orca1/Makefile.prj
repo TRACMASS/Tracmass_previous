@@ -3,13 +3,13 @@
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-#   fl01   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
-  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
-#   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+   fl01   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
+#  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
+   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
    fl03   = -Dtempsalt       # Include temp and salt
    fl04   = -Dtextwrite      # Write results to textfile
-#  fl05   = -Dbinwrite       # Write results to binaryfile
+   fl05   = -Dbinwrite       # Write results to binaryfile
 #  fl06   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
   fl07  = -Dstreamxy       # Calculates the barotropic stream function.
@@ -29,8 +29,7 @@
 #   fl17  = -Dvarbottombox   # Variable bottom box to match actual depth
 #   fl18  = -Dfreesurface    # Variable bottom box to match actual depth
 #   fl19  = -Dzvec1D         # Cell depths defined as vector (for z-coord?)
-#  fl20  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
-  fl21  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+    fl20  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
 #------------------------------------------------------------------------
 #  fl22  = -Dselect         # Select only one trajectory (for debugging)
 #  fl23  = -Dtracer         # Stores a simulated tracer

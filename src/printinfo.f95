@@ -1,6 +1,7 @@
 
 module mod_print
-
+  
+  USE mod_trajdef
   USE mod_param
   USE mod_name
   USE mod_time
@@ -203,8 +204,8 @@ CONTAINS
 
     call updateClock
     if (loneparticle>0) then
-       print 798 ,ints-intstart ,trj(1,loneparticle) ,trj(2,loneparticle), &
-            trj(3,loneparticle), nrj(6,loneparticle), wallmin, wallsec, loopYear, &
+       print 798 ,ints-intstart ,trajectories(loneparticle)%x1 ,trajectories(loneparticle)%y1, &
+            trajectories(loneparticle)%z1, trajectories(loneparticle)%active, wallmin, wallsec, loopYear, &
             loopMon, loopDay, loopHour, loopMin 
     else
        print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &

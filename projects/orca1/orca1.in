@@ -8,7 +8,7 @@
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = '1 deg run for the global Ocean.',
 !       indatadir = '/Users/doos/data/ecearth/orca1/',
-       indatadir = '/Users/doos/Dropbox/data/ecearth/orca1/',
+       indatadir = '/Users/joakim/data/ORCA1-N406/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'ORCA1',
@@ -17,7 +17,7 @@
 &INIT_GRID_SIZE
              imt =    360,
              jmt =    292,
-              km =     42,
+              km =     75,
              nst =      2,
          subgrid =      0,
      subgridimin =    3001,
@@ -26,6 +26,9 @@
      subgridjmax =    1500,
      subgridfile = 'templ.asc',
        subgridid =      0,
+ freeSurfaceForm =      2, ! 0=ignore ssh, 
+                           ! 1=add ssh to top layer dz (NEMO without key_vvel)
+                           ! 2=add ssh/H to dz in each layer (NEMO key_vvel option)
 /
 &INIT_BASE_TIME
          basesec =      0,
@@ -34,12 +37,13 @@
          baseday =      1,
          basemon =      1,
         baseyear =      1,
+        jdoffset =      4,
 /
 &INIT_GRID_TIME
-   fieldsperfile =     12,
-            ngcm =    730,
-            iter =      1,
-          intmax =    24,
+   fieldsperfile =      1,
+            ngcm =    120,
+            iter =     12,
+          intmax =     24,
         minvelJD =      1,
         maxvelJD =    120,
 /
@@ -49,15 +53,14 @@
        starthour =     12,
         startday =      5,
         startmon =      1,
-       startyear =   1996,
-        jdoffset =      3,
+       startyear =   2000,
           noleap =  .true., 
          startjd =     -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
-         intspin =      12,
-          intrun =  12000,
+         intspin =      1,
+          intrun =      2,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -69,9 +72,9 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
            kriva =      1,
-      outdatadir = '/Users/doos/data/ecearth/orca1/data_out/',
+      outdatadir = '/Users/joakim/Downloads/tracmass_out/orca1/',
 !     outdatafile = 'orca1_test_it1200_k1',
-     outdatafile = 'orca1_amoc7_an_k1',
+     outdatafile = 'orca1_test',
  intmininoutfile =      0,
 /
 &INIT_SEEDING
@@ -122,10 +125,10 @@
         seedtype =      1,
             ist1 =    234, !3840, ! 840,
             ist2 =    310, ! 3849, ! 849,
-            jst1 =   115, ! 97,115, 1150, ! 650,
-            jst2 =   115, ! 97,115, !1159, ! 659,
-            kst1 =      1,
-            kst2 =     42,
+            jst1 =    115, ! 97,115, 1150, ! 650,
+            jst2 =    115, ! 97,115, !1159, ! 659,
+            kst1 =     75,
+            kst2 =     75,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
@@ -152,13 +155,13 @@
            smin0 = -100.0,
            smax0 =  100.7,
            rmin0 = -100.0,
-           rmax0 =  500.0,
+           rmax0 = 7000.0,
            tmine = -100.0,
            tmaxe =  400.0,
            smine = -100.8,
            smaxe =  500.0,
            rmine = -100.0,
-           rmaxe =  500.0,
+           rmaxe = 7000.0,
 /
 &INIT_DIFFUSION
               ah =    0.0,

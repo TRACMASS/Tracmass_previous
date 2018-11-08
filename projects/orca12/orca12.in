@@ -7,7 +7,7 @@
         gridname = 'ORCA12',
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = '1/12 deg run for the global Ocean.',
-       indatadir = '/Users/joakim/data/ORCA0083-N001/',
+       indatadir = '/group_workspaces/jasmin2/nemo/vol1/ORCA0083-N001/',
      !topoDataDir = '/Users/joakim/data/ORCA0083-N001/domain/',
 /
 &INIT_CASE_DESCRIPTION
@@ -20,10 +20,10 @@
               km =     75,
              nst =      2,
          subgrid =      1,
-     subgridimin =    3333,
-     subgridimax =    3966,
-     subgridjmin =     776,
-     subgridjmax =    1195,
+     subgridimin =    300, !1287,!1806,!3100, !3333,
+     subgridimax =   2802, !2487,!2424,!3600, !3966,
+     subgridjmin =      1, !348,!348,! 500, !776,
+     subgridjmax =   1128, !969,!759,!1000, !1195,
      subgridfile = 'templ.asc',
        subgridid =      0,
        nperio    =      0, 
@@ -40,7 +40,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =    120,
-            iter =      1,
+            iter =    120,
           intmax =  15330,
         minveljd =     -1,
         maxveljd =     -1,
@@ -59,7 +59,7 @@
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =    10,
+          intrun =    147,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -70,9 +70,9 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-           kriva =      6,
-      outdatadir = '/Users/joakim/Downloads/orca12/',
-     outdatafile = 'orca12_timedep_kriva6',
+           kriva =      1,
+      outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/orca12/',
+     outdatafile = 'orca12_south_pacific_2_lev64',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /
@@ -84,7 +84,7 @@
        partquant =      1,
         ntracmax = 20000000,
     loneparticle =      0, !2964,
-        seedtype =      1,
+        seedtype =      2,
             ist1 =    500,
             ist2 =    633,
             jst1 =    418,
@@ -93,8 +93,8 @@
             kst2 =     75,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =    ' ',
-        seedfile =     '',
+         seeddir =     '/group_workspaces/jasmin2/aopp/joakim/tracmass_in/',
+        seedfile =     'start_south_pacific_2_lev64_orca0083_close.txt',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
@@ -104,12 +104,12 @@
 /
 &INIT_KILLZONES
             nend =      5,
-            ienw =   -1,  633,   -1,   -1,
-            iene =    1, 1000, 1000, 1000,
-            jens =    1,    1,    1,  418,
-            jenn =  700,  700,    1,  418,
+            ienw =   -1, 2501,   -1,   -1, ! -1, 1199,  -1,  -1, !-1, 617,  -1,  -1, ! -1, 499,  -1,  -1, ! -1,  633,   -1,   -1,
+            iene =    1, 2550, 5000, 5000, !  1, 9000,9000,9000, ! 1,1000,1000,1000, !  1,1000,1000,1000, !  1, 1000, 1000, 1000,
+            jens =    1,    1,    1, 1127, !  1,    1,   1, 620, ! 1,   1,   1, 410, !  1,   1,   1, 499, !  1,    1,    1,  418,
+            jenn = 2000, 2000,    1, 1130, !900,  900,   1, 620, !700, 700,   1, 410, !500, 500,   1, 499, !700,  700,    1,  418,
 !            timax = 70.0,
-           timax = 3650000.0,
+           timax = 365.0,
 /
 &INIT_TEMP_SALT
            tmin0 =  -50.0,
