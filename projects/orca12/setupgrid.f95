@@ -43,6 +43,7 @@ SUBROUTINE setupgrid
    map3D    = [2, 3,  4, 1 ]
    ncTpos   = 1
    
+      
    !
    ! --- Read dx, dy at T points --- 
    !
@@ -66,7 +67,7 @@ SUBROUTINE setupgrid
    ! bottom partial cells and variable volume  
    !
    gridFile = trim(inDataDir)//'domain/mesh_zgr.nc'
-   dz = get1DfieldNC(gridFile, 'e3t_0')
+   dz = get1DfieldNC(gridFile, 'e3t_1d')
    do k=1,km
       kk=km+1-k
       dz(kk)=zlev(k)
@@ -105,9 +106,9 @@ SUBROUTINE setupgrid
    !
    allocate ( dzu(imt,jmt,km,2),dzv(imt,jmt,km,2), dzt0(imt,jmt,km) )
    
-   dzt0(:,:,:) = get3DfieldNC(gridFile, 'e3t')
-   dzu(:,:,:,1) = get3DfieldNC(gridFile, 'e3u')
-   dzv(:,:,:,1) = get3DfieldNC(gridFile, 'e3v')
+   dzt0(:,:,:) = get3DfieldNC(gridFile, 'e3t_0')
+   dzu(:,:,:,1) = get3DfieldNC(gridFile, 'e3u_0')
+   dzv(:,:,:,1) = get3DfieldNC(gridFile, 'e3v_0')
    
    !
    ! Ensure thickness is zero in invalid points

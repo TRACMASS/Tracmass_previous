@@ -43,12 +43,13 @@ SUBROUTINE readfields
    INTEGER                                       :: kbot,ktop
    INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread
    ! = Variables used for getfield procedures
-   CHARACTER (len=200)                           :: fieldFile
+   CHARACTER (len=200)                           :: fieldFile, medfieldFile
    ! = Variables for filename generation
    CHARACTER (len=200)                           :: dataprefix
    REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:)       :: xxx
    REAL*4                                      :: dd,hu,hv,uint,vint,zint,hh,h0
+   REAL*4, ALLOCATABLE, DIMENSION(:,:,:),SAVE    :: u_m, v_m
   
 #ifdef initxyt
    INTEGER, PARAMETER                            :: NTID=73
@@ -66,6 +67,20 @@ SUBROUTINE readfields
    LOGICAL                                       :: around
  
 !---------------------------------------------------------------
+
+#ifdef nomean
+if (ints == intstart) then
+   !! Read mean  
+   if(.not. allocated (u_m)) then
+   allocate ( u_m(imt,jmt,km), v_m(imt,jmt,km) )
+   print*,' Read mean fields '
+   u_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00U.nc',&
+                            & 'vozocrtx')
+   v_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00V.nc',&
+                            & 'vomecrty')
+   end if
+end if
+#endif
 
 #ifdef initxyt
    ! 
@@ -126,14 +141,15 @@ SUBROUTINE readfields
    !
    ! Find the files for the current step
    ! 
-   dataprefix='xxxx/ORCA0083-N01_xxxxxxxx'
+   dataprefix='xxxx/ORCA0083-N06_xxxxxxxx'
    write(dataprefix(1:4),'(i4)')   currYear
    write(dataprefix(19:26),'(i4,i2.2,i2.2)') currYear,currMon,currDay
    fieldFile = trim(inDataDir)//'means/'//trim(dataprefix)//'d05'
+   medfieldFile = trim(inDataDir)//'medusa/'//trim(dataprefix)//'d05'
    !fieldFile = trim(inDataDir)//'means/2000/ORCA0083-N01_20000105d05'
    
    ! Read SSH
-   hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'sossheig')
+   hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'ssh')
    hs(imt+1, :, nsp) = hs(1,:,nsp)
    
    ! Depth at U, V, T points as 2D arrays
@@ -164,11 +180,11 @@ SUBROUTINE readfields
  
    ! Read temperature 
 #if defined tempsalt 
-   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'votemper')
+   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'potemp')
    tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
    
    ! Read salinity
-   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'vosaline')
+   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'salin')
    sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
    
    ! Calculate potential density
@@ -185,9 +201,15 @@ SUBROUTINE readfields
 #endif     
    
    ! Read u, v
-   uvel = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozocrtx')
-   vvel = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomecrty')
- 
+   uvel = get3DfieldNC(trim(fieldFile)//'U.nc', 'uo')
+   vvel = get3DfieldNC(trim(fieldFile)//'V.nc', 'vo')
+   
+   ! Put oxygen in salinity field
+   xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'D.nc', 'TPP3')
+   sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   
+   xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'P.nc', 'DIN')
+   rho(:,:,:,nsp) = xxx(:,:,km:1:-1)
    !
    ! Calculate zonal and meridional volume flux
    !
@@ -203,11 +225,25 @@ SUBROUTINE readfields
    end do
    end do
    end do
-   
+
+#ifdef nomean   
    !! flip u,v upside down
    !! use uflux, vflux as temporary arrays
-   uflux(1:imt,1:jmt,1:km,nsp) = uvel(1:imt,1:jmt,1:km)
-   vflux(1:imt,1:jmt,1:km,nsp) = vvel(1:imt,1:jmt,1:km)
+   where (uvel == 0)
+      u_m = 0
+   end where
+   where (vvel == 0)
+      v_m = 0
+   end where
+   
+   uflux(1:imt,1:jmt,1:km,nsp) = uvel(1:imt,1:jmt,1:km) - u_m(1:imt,1:jmt,1:km)
+   vflux(1:imt,1:jmt,1:km,nsp) = vvel(1:imt,1:jmt,1:km) - v_m(1:imt,1:jmt,1:km)
+
+#else
+   uflux(1:imt,1:jmt,1:km,nsp) = uvel(1:imt,1:jmt,1:km) 
+   vflux(1:imt,1:jmt,1:km,nsp) = vvel(1:imt,1:jmt,1:km) 
+#endif
+      
    uvel(:,:,:) = 0.
    vvel(:,:,:) = 0.
    do k = 1, km

@@ -42,6 +42,7 @@
 #   fl27  = -Dorca025          # orca1 or orca025 or orca025l75h6
 #------------------------------------------------------------------------
 #   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
+#    fl30   = -Dnomean
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \

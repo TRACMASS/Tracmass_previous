@@ -44,8 +44,8 @@ ifeq ($(NETCDFLIBS),"fink")
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
-#	FF_FLAGS         = -O3 -c -x f95-cpp-input 
+#	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
+	FF_FLAGS         = -O3 -c -x f95-cpp-input 
         F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
 endif
@@ -69,7 +69,7 @@ endif
 
 CC                = gcc -O  $(INC_DIR)
 
-ACTVEL = zanna_turb_3.o
+ACTVEL = zanna_turb_4.o
 
 VPATH = src:projects/$(PROJECT):src/active_particles
 

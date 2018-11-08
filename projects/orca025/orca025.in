@@ -58,14 +58,15 @@
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =      73,
+          intrun =     74,
 /
 &INIT_WRITE_TRAJS
       twritetype =     11,
            kriva =      1,
       outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/orca025/',
-     !outdatafile = 'orca025_test_3',
-     outdatafile = 'orca025_param_test_impl18_kappa-0.1',
+     outdatafile = 'orca025_param_test_zturb4_kappa-0.2_lev75_diffusivity_sfclock',
+     !outdatafile = 'orca025_param_test_zturb4_kappa-0.2_addlap',
+     !outdatafile = 'orca025_south_pacific_2_lev75_diffusivity'
 /
 &INIT_SEEDING
              nff =      1,
@@ -73,19 +74,19 @@
             idir =      0,
             nqua =      1,
        partquant =      1,
-        ntracmax = 100000,
+        ntracmax = 400000,
     loneparticle =     -1,
-        seedtype =      2,
-            ist1 =    417,
-            ist2 =    417,
-            jst1 =    188,
-            jst2 =    188,
-            kst1 =     42,
-            kst2 =     42,
+        seedtype =      2, !2, !! seedType=1 use ist,jst. seedType=2 use seedfile
+            ist1 =      2,
+            ist2 =    832,
+            jst1 =      2,
+            jst2 =    373,
+            kst1 =     64,
+            kst2 =     64,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    '/group_workspaces/jasmin2/aopp/joakim/tracmass_in/',
-        seedfile =    'start_south_pacific_2_lev64_orca025_close.txt',
+        seedfile =    'start_south_pacific_2_diffusivity_lev75_orca025_close.txt', !'start_south_pacific_2_lev64_orca025_close.txt',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
@@ -97,8 +98,8 @@
             nend =      5,
             ienw =  -1,  833,   -1,   -1, ! -1,399,  -1,  -1, !-1,  166,   -1,   -1,
             iene =   1,  900, 1500, 1500, !  1,1000,1000,1000, ! 1, 1000, 1000, 1000,
-            jens =   1,    1,    1,  375, !  1,   1,   1, 206, ! 1,    1,    1,  165,
-            jenn = 700,  700,    1,  375, !700, 700,   1, 206, !700,  700,    1,  165,
+            jens =   1,    1,    1,  374, !  1,   1,   1, 206, ! 1,    1,    1,  165,
+            jenn = 700,  700,    1,  374, !700, 700,   1, 206, !700,  700,    1,  165,
 !            timax = 70.0,
            timax = 365.0,
 /

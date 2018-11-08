@@ -8,6 +8,7 @@ subroutine readfields
   USE mod_vel
   !  USE mod_dens
   USE mod_stat
+  USE mod_tempsalt
   
   IMPLICIT none
     
