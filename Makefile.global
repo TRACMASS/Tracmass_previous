@@ -28,31 +28,30 @@ ifeq ($(NETCDFLIBS),"automatic")
 	LIB_DIR = $(shell nc-config --flibs)
 	INC_DIR = -I$(shell nc-config --includedir)
 endif
+ifeq ($(NETCDFLIBS),"automatic-44")
+	INC_DIR = $(shell nf-config --cflags)
+	LIB_DIR = $(shell nf-config --flibs)
+endif 
 ifeq ($(NETCDFLIBS),"macports")
-	LIB_DIR          = 
-	INC_DIR          = -I$(NETCDF_DIR)/include
-	LNK_FLAGS        = -L$(NETCDF_DIR)/lib -lnetcdf  -lnetcdff
+	LIB_DIR          = -L/opt/local/lib
+	INC_DIR          = -I/opt/local/include/
+	LNK_FLAGS        = -lnetcdf -lnetcdff 
 endif
-
-
-
-ifeq ($(NETCDFLIBS),"tetralith")
-	LIB_DIR          = 
-	INC_DIR          = -I$(NETCDF_DIR)/include
-	LNK_FLAGS        = -L$(NETCDF_DIR)/lib -lnetcdf -lnetcdff
-endif
-
-
-
 ifeq ($(NETCDFLIBS),"fink")
         LIB_DIR          = -L/sw/lib # -L/sw/lib/netcdf-gfortran/lib
         INC_DIR          = -I/sw/include  #-I/sw/lib/netcdf-gfortran/include
-        LNK_FLAGS        = -lnetcdf -lnetcdff -lsz -Wl,-dead_strip_dylibs
+        LNK_FLAGS        = -lnetcdf -lnetcdff #-lsz -Wl,-dead_strip_dylibs
+endif
+ifeq ($(NETCDFLIBS),"tetralith")
+	LIB_DIR		=
+	INC_DIR 	= -I$(NETCDF_DIR)/include
+	LNK_FLAGS	= -L$(NETCDF_DIR)/lib -lnetcdf -lnetcdff
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-#	FF_FLAGS         = -c -x f95-cpp-input -fconvert=big-endian -gdwarf-2 
-	FF_FLAGS         = -O3 -c -x f95-cpp-input #-gdwarf-2 
+#	FF_FLAGS         = -O0 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
+#	FF_FLAGS         = -O3 -c -x f95-cpp-input  
+	FF_FLAGS         = -O3 -c -x f95-cpp-input  -g #-fcheck=all -Wall #-gdwarf-2 
         F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
 endif
@@ -62,10 +61,9 @@ ifeq ($(F95COMPILER),"g95")
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 endif
 
-ifeq ($(F95COMPILER),ifort)
-        FF_FLAGS         = -O3 -cpp -convert big_endian
-        #F90_FLAGS       = -free -assume nounderscore
-        F90_FLAGS        = -free
+ifeq ($(F95COMPILER),"ifort")
+        FF_FLAGS         = -O3 -c -cpp -convert big_endian
+        F90_FLAGS        = -free #-assume nounderscore
 	ARG_FLAGS       += -Tf
         FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 endif
@@ -92,10 +90,10 @@ objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
 		    setupgrid.o readfield.o diffusion.o)
 
 runfile : $(objects)
-	$(FF) $(FF_FLAGS) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
+	$(FF) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
 
 $(OBJDIR)/%.o : %.f95
-	$(FF) -c $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
+	$(FF) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
 
 
 
