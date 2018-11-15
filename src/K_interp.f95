@@ -73,26 +73,24 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        if(kn==KM  .and. az<0.) az=0.d0
 
       
-!      if(ay <0.d0 .or. ay>1.d0) then
-!       print *,ay
-!       print *,jp,jm,jb,y1
-!       print *,ip,im,ib,x1
-!       print *,kp,kn,kb,z1
-!       stop 39058
-!      endif
-!
-!      if(ax <0.d0 .or. ax>1.d0) then
-!       print *,'ax=',ax
-!       print *,ip,im,ib,x1
-!       ax=0.5
-!!       stop 39059
-!      endif
-!      
-!      if(az <0.d0 .or. az>1.d0) then
-!       print *,az
-!       print *,kp,kn,kb,z1
-!       stop 39060
-!      endif
+      if(ay <0.d0 .or. ay>1.d0) then
+       print *,ay
+       print *,jp,jm,jb,y1
+       stop 39058
+      endif
+
+      if(ax <0.d0 .or. ax>1.d0) then
+       print *,'ax=',ax
+       print *,ip,im,ib,x1
+       ax=0.5
+!       stop 39059
+      endif
+      
+      if(az <0.d0 .or. az>1.d0) then
+       print *,az
+       print *,kp,kn,kb,z1
+       stop 39060
+      endif
 
 
 
@@ -152,74 +150,76 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
       sppp=sal(ip,jp,kp,ns)
       rppp=rho(ip,jp,kp,ns)
       if(tppp==0. .and. sppp==0.) then
-        tppp=tem(ib,jb,kb,ns)
-       sppp=sal(ib,jb,kb,ns)
-       rppp=rho(ib,jb,kb,ns)
+       tppp=tem(ip,jp,kn,ns)
+       sppp=sal(ip,jp,kn,ns)
+       rppp=rho(ip,jp,kn,ns)
       endif
       
       tppm=tem(ip,jp,kn,ns)
       sppm=sal(ip,jp,kn,ns)
       rppm=rho(ip,jp,kn,ns)
       if(tppm==0. .and. sppm==0.) then
-
-        tppm=tem(ib,jb,kb,ns)
-       sppm=sal(ib,jb,kb,ns)
-       rppm=rho(ib,jb,kb,ns)
+       tppm=tem(ip,jp,kn,ns)
+       sppm=sal(ip,jp,kn,ns)
+       rppm=rho(ip,jp,kn,ns)
       endif
       
       tpmp=tem(ip,jm,kp,ns)
       spmp=sal(ip,jm,kp,ns)
       rpmp=rho(ip,jm,kp,ns)
       if(tpmp==0. .and. spmp==0.) then
-         tpmp=tem(ib,jb,kb,ns)
-       spmp=sal(ib,jb,kb,ns)
-       rpmp=rho(ib,jb,kb,ns)
+       tpmp=tem(ip,jp,kn,ns)
+       spmp=sal(ip,jp,kn,ns)
+       rpmp=rho(ip,jp,kn,ns)
       endif
       
       tpmm=tem(ip,jm,kn,ns)
       spmm=sal(ip,jm,kn,ns)
       rpmm=rho(ip,jm,kn,ns)
-      if(tpmm==0. .and. spmm==0.) then 
-         tpmm=tem(ib,jb,kb,ns)
-       spmm=sal(ib,jb,kb,ns)
-       rpmm=rho(ib,jb,kb,ns)
+      if(tpmm==0. .and. spmm==0.) then
+       tpmm=tem(ip,jp,kn,ns)
+       spmm=sal(ip,jp,kn,ns)
+       rpmm=rho(ip,jp,kn,ns)
       endif
       
       tmpp=tem(im,jp,kp,ns)
       smpp=sal(im,jp,kp,ns)
       rmpp=rho(im,jp,kp,ns)
       if(tmpp==0. .and. smpp==0.) then
-       tmpp=tem(ib,jb,kb,ns)
-       smpp=sal(ib,jb,kb,ns)
-       rmpp=rho(ib,jb,kb,ns)
+       tmpp=tem(ip,jp,kn,ns)
+       smpp=sal(ip,jp,kn,ns)
+       rmpp=rho(ip,jp,kn,ns)
       endif
       
       tmpm=tem(im,jp,kn,ns)
       smpm=sal(im,jp,kn,ns)
       rmpm=rho(im,jp,kn,ns)
       if(tmpm==0. .and. smpm==0.) then
-       tmpm=tem(ib,jb,kb,ns)
-       smpm=sal(ib,jb,kb,ns)
-       rmpm=rho(ib,jb,kb,ns)
+       tmpm=tem(ip,jp,kn,ns)
+       smpm=sal(ip,jp,kn,ns)
+       rmpm=rho(ip,jp,kn,ns)
       endif
       
       tmmp=tem(im,jm,kp,ns)
       smmp=sal(im,jm,kp,ns)
       rmmp=rho(im,jm,kp,ns)
       if(tmmp==0. .and. smmp==0.) then
-       tmmp=tem(ib,jb,kb,ns)
-       smmp=sal(ib,jb,kb,ns)
-       rmmp=rho(ib,jb,kb,ns)
+       tmmp=tem(ip,jp,kn,ns)
+       smmp=sal(ip,jp,kn,ns)
+       rmmp=rho(ip,jp,kn,ns)
       endif
       
       tmmm=tem(im,jm,kn,ns)
       smmm=sal(im,jm,kn,ns)
       rmmm=rho(im,jm,kn,ns)
       if(tmmm==0. .and. smmm ==0.) then
-       tmmm=tem(ib,jb,kb,ns)
-       smmm=sal(ib,jb,kb,ns)
-       rmmm=rho(ib,jb,kb,ns)
+       tmmm=tem(ip,jp,kn,ns)
+       smmm=sal(ip,jp,kn,ns)
+       rmmm=rho(ip,jp,kn,ns)
       endif
+      
+      
+
 
       temp=tppp*(1.-ax)*(1.-ay)*(1.-az) &
          + tmpp*    ax *(1.-ay)*(1.-az) &

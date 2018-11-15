@@ -7,7 +7,7 @@
         gridname = 'rutgersNWA',
       gridsource = 'Rutgers',
         griddesc = '7.5 km 50 yr simulation of the NW Atlantic',
-       indatadir = '/projData/rutgers/NWA/',
+       indatadir = '/Volumes/rutgersNWA/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'test',
@@ -59,23 +59,23 @@
 &INIT_WRITE_TRAJS
       twritetype =      2,
            kriva =      1,
-      outdatadir =     '',
-     outdatafile =     '',
+      outdatadir = '/Volumes/rutgersNWA/ormOut/',
+     outdatafile = 'rutgersNWAtest',
  intmininoutfile =      1,
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      4,
+            isec =      3,
             idir =      0,
             nqua =      1,
        partquant =      9,
         ntracmax = 7000000,
     loneparticle =     -1,
-        seedtype =      1,
+        seedtype =      2,
             ist1 =    250,
-            ist2 =    255,
-            jst1 =    120,
-            jst2 =    170,
+            ist2 =    715,
+            jst1 =    150,
+            jst2 =    350,
             kst1 =     40,
             kst2 =     40,
             tst1 =     -1,
@@ -90,12 +90,12 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =  6,
-            ienw =  1, 720,   1,  1,
-            iene =  2, 721, 721,721,
-            jens =  1,   1,   1,360,
-            jenn =361, 361,   2,361,
-           timax = 36500.2,
+            nend =      6,
+            ienw = 1,1,1,255,
+            iene = 2,257,385,257,
+            jens = 1,380,1,1,
+            jenn = 257,385,2,385,
+           timax = 36500.0,
 /
 &INIT_TEMP_SALT
            tmin0 =  -50.0,

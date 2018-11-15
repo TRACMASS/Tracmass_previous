@@ -179,7 +179,7 @@ elseif(ijk==3) then
  endif
 #endif
 
-#ifdef zgrid3D 
+#ifdef zgrid3Dt 
 
   dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
   dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
@@ -216,7 +216,7 @@ elseif(ijk==3) then
   f0=1.0_dp/f0
   f1=1.0_dp/f1
  endif 
-#endif /*zgrid3D*/
+#endif /*zgrid3Dt*/
 
 
 endif
@@ -393,7 +393,7 @@ elseif(ijk==3) then
  endif
 #endif
 
-#ifdef zgrid3D 
+#ifdef zgrid3Dt 
 
   dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
   dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
@@ -429,7 +429,7 @@ elseif(ijk==3) then
   f0=1.0_dp/f0
   f1=1.0_dp/f1
  endif 
-#endif /*zgrid3D*/
+#endif /*zgrid3Dt*/
 
 
 endif
@@ -592,10 +592,8 @@ else
  if(abs(ssiim)>EPS) then
   ssiim= f0*um/ssiim
  else
-  ssiim= EPS ! This to correct when by accident f0*um = f1*vm
-  print *,'f0*um = f1*vm',ssiim,f0,um,f1,vm
-  ssiim= f0*um/ssiim
-!  stop 8779
+  print *,ssiim,f0,um,f1,vm
+  stop 8779
  endif
 endif
 
@@ -843,13 +841,8 @@ endif
      !  stop 8808
       endif
       ssii = (uu+um*(f0-1.0_dp))/(uu-vv+um*(f0-1.0_dp)+vm*(1.0_dp-f1))
-      if(f0*um-f1*vm==0.d0) then
-       print *,'8810',f0*um,f1*vm
-       ssiim= f0*um/eps
-!      stop 8810
-      else
-       ssiim= f0*um/(f0*um-f1*vm)
-      endif
+      if(f0*um-f1*vm==0.d0) stop 8810
+      ssiim= f0*um/(f0*um-f1*vm)
      endif
      const = const*dsqrt(pi/(-2.0_dp*alfa))
      if (xi0>xilim) then

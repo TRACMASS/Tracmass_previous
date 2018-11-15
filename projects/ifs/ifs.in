@@ -37,7 +37,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =      6,
-            iter =    1,
+            iter =      12000,
           intmax =   2920,
         minveljd =     -1,
         maxveljd =     -1,
@@ -69,15 +69,15 @@
            kriva =      1,
  !    outDataDir   = '/Users/doos/Dropbox/data/ifs/data_out/',
      outDataDir   = '/Users/doos/data/ifs/data_out/',
-     outdatafile = 'eya_iter11_ver4_k1',
-!     outdatafile = 'eya_anal_ver3_k1',
+     outdatafile = 'eya_iter12000_ver5_k1',
+!     outdatafile = 'eya_anal_ver5_k1',
  intmininoutfile =      0,
- 
+ intpsi =      10,
 /
 &INIT_SEEDING
-             nff =     -1,
+             nff =      1,
             isec =      4,
-            idir =     -1,
+            idir =      0,
             nqua =      1,
        partquant =     16,
         ntracmax = 20000000,
@@ -106,7 +106,7 @@
             iene = 1, 1,
             jens = 1, 1,
             jenn = 1, 1,
-           timax = 11.0,
+           timax = 41.0,
 /
 &INIT_TEMP_SALT
            tmin0 =  -50.0,

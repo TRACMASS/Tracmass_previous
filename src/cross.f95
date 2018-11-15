@@ -26,11 +26,14 @@ subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
 USE mod_grid, only: undef, imt, jmt, nsm, nsp
 USE mod_vel, only: uflux, vflux, wflux, ff
 USE mod_active_particles, only: upr
-USE mod_time, only: dtreg, intrpr, intrpg
+USE mod_time, only:  intrpr, intrpg
 IMPLICIT none
 
 real*8                                       :: r0, ba, sp, sn, uu, um, vv, vm
 integer                                      :: ijk, ia, ja, ka, ii, im
+!  real*8                                     :: intrpr=0.5d0, intrpg=0.5d0
+  
+!  intrpr=0.5d0; intrpg=0.5d0
 
 if(ijk.eq.1) then
  ii=ia

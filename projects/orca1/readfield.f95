@@ -48,14 +48,14 @@ SUBROUTINE readfields
 
  LOGICAL around
  
-  start1D  = [ 1]
-  count1D  = [KM]
-  start2D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count2D  = [         imt,        jmt ,  1 , 1 ]
-  map2D    = [          1 ,          2 ,  3 , 4 ]  
-  start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
-  count3D  = [         imt,        jmt , KM , 1 ]
-  map3D    = [          1 ,          2 ,  3 , 4 ] 
+!  start1D  = [ 1]
+!  count1D  = [KM]
+!  start2D  = [subGridImin ,subGridJmin ,  1 , 1 ]
+!  count2D  = [         imt,        jmt ,  1 , 1 ]
+!  map2D    = [          1 ,          2 ,  3 , 4 ]  
+!  start3D  = [subGridImin ,subGridJmin ,  1 , 1 ]
+!  count3D  = [         imt,        jmt , KM , 1 ]
+!  map3D    = [          1 ,          2 ,  3 , 4 ] 
 
 
 !---------------------------------------------------------------
@@ -80,65 +80,83 @@ SUBROUTINE readfields
 ! === Initialising fields ===
  initFieldcond: if(ints.eq.intstart) then
  nread=0
-
-#ifdef initxyt
-    ! Time for individual start positions
-    if(IJKMAX2.eq.7392) open(84,file=trim(inDataDir)//'topo/masktime_32_025', &
-         form='unformatted')
-    read(84) trajinit
-    close(84)
-    j=0
-    do k=1,NTID
-       do i=1,IJKMAX2
-          if(trajinit(k,i,3).ne.0.) then
-             j=j+1
-#if orca025l75h6
-             trajinit(k,i,3)=float(kst2)-0.5
-             !   print *,j,trajinit(k,i,:)
-#endif
-          endif
-       enddo
-       ! print *,k,j
-    enddo
-    ijkst=0
-    ! print *,'ijkmax=',j,IJKMAX2,ijkmax
-    if(j.ne.IJKMAX2) then
-       stop 4396
-    endif
-#endif
+ncTpos = 0
 
  CurrYear2=currYear-1
  endif initFieldcond
  
  if(currMon==1) CurrYear2 = CurrYear2+1
- if(CurrYear2==2006) CurrYear2=1996
+! if(CurrYear2==2006) CurrYear2=1996
+if(CurrYear2==2006) CurrYear2=1850
 ! if(CurrYear2==1998) CurrYear2=1996
 
-dataprefix='ORCA1-SHC1_MM_19960101_19961231_grid_'
+!dataprefix='ORCA1-SHC1_MM_19960101_19961231_grid_'
+dataprefix='ORCA1-SHC1_MM_18500101_18501231_grid_'
 write(dataprefix(15:18),'(i4)') CurrYear2
 write(dataprefix(24:27),'(i4)') CurrYear2
-fieldFile = trim(inDataDir)//'fields/'//trim(dataprefix)!
+fieldFile = TRIM(inDataDir)//TRIM(dataprefix)!
 !print *, fieldFile
 nread= nread+1
 if(nread==13) nread=1
-start2D  = [subGridImin ,subGridJmin ,  nread , 1 ]
-start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
+ncTpos = ncTpos+1
+if(ncTpos==13) ncTpos=1
+!start2D  = [subGridImin ,subGridJmin ,  nread , 1 ]
+!start3D  = [subGridImin ,subGridJmin ,  1 , nread ]
+
+
+
   
-hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'sossheig')
+!PRINT *, map2d
+!PRINT *, start2d
+!PRINT *, count2d
+hs(1:imt,1:jmt, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc4', 'sossheig')
 hs(imt+1, :, nsp) = hs(1,:,nsp)
+mlh(1:imt,1:jmt, nsp) =  get2DfieldNC(trim(fieldFile)//'T.nc4', 'somxl010') !Saramlh
+mlh(imt+1,:,nsp) = mlh(1,:,nsp) !Saramlh
+EP(1:imt,1:jmt,nsp) = get2DfieldNC(TRIM(fieldFile)//'T.nc4','sowaflep') !SaraEP
+EP(imt+1,:,nsp) = EP(1,:,nsp) !SaraEP
+
+!open(21,file='/Users/doos/Dropbox/data/ecearth/data_out/hs.bin',form='unformatted')
+!write(21) hs
+!close(21)
+
 
  do k=1,km
-   dzt(1:imt,1:jmt,k,nsp) = dztb(1:imt,1:jmt,km+1-k) 
+   dzt(1:imt,1:jmt,k ,nsp) = dztb(1:imt,1:jmt,km+1-k) ! 3D field of time-independent dz
  end do
-   dzt(:,:,KM,nsp) = dzt(:,:,KM,nsp) + hs(1:imt,1:jmt,nsp)
-
-
-#if defined tempsalt 
- xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'votemper')
- tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   dzt(1:imt,1:jmt,KM,nsp) =  dzt(1:imt,1:jmt,KM,nsp) + hs(1:imt,1:jmt,nsp) ! add ssh to dz in surface layer
+  
+do i=1,IMT   
+ do j=1,JMT   
+  do k=1,km
+!   dzt(i,j,k ,nsp) = dztb(i,j,km+1-k) ! 3D field of time-independent dz
+  enddo
+ !  dzt(i,j,KM,nsp) = dzt(i,j,KM,nsp) + hs(i,j,nsp) ! add ssh to dz in surface layer
+   !if(kmt(i,j)/=0 .and. hs(i,j,nsp)==0.) print *,i,j,kmt(i,j),hs(i,j,:)
+ enddo
+enddo
  
- xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'vosaline')
+! stop 4967
+ 
+start3D = [nread,1,1,1]
+!PRINT *, start3D
+#if defined tempsalt 
+ xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc4', 'votemper')
+ tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
+
+ xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc4', 'vosaline')
  sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
+
+ 
+ do i=1,IMT   
+ do j=1,JMT   
+   !if(kmt(i,j)/=0 .and. hs(i,j,nsp)==0.) then
+   ! print *,i,j,kmt(i,j),hs(i,j,nsp),tem(i,j,km,nsp)
+   ! stop 5968
+   !endif
+ enddo
+enddo
+ 
  
  depthzvec = 0.
  do j=1,JMT
@@ -152,12 +170,17 @@ hs(imt+1, :, nsp) = hs(1,:,nsp)
  end do
 #endif     
 
- uvel = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozocrtx')
- xxx  = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozoeivu')
+start3D = [nread,1,1,1]
+!PRINT *, map3d
+!PRINT *, start3d
+ uvel = get3DfieldNC(trim(fieldFile)//'U.nc4', 'vozocrtx')
+ xxx  = get3DfieldNC(trim(fieldFile)//'U.nc4', 'vozoeivu')
  uvel = uvel + xxx
+
+!PRINT *, uvel(272,147,2)
  
- vvel = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomecrty')
- xxx  = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomeeivv')
+ vvel = get3DfieldNC(trim(fieldFile)//'V.nc4', 'vomecrty')
+ xxx  = get3DfieldNC(trim(fieldFile)//'V.nc4', 'vomeeivv')
  vvel = vvel + xxx
 
  do i=1,IMT
@@ -165,34 +188,31 @@ hs(imt+1, :, nsp) = hs(1,:,nsp)
    jp=j+1
    if(jp.eq.jmt+1) jp=jmt
    do k=2,KM
-    uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,k) 
-    vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,k) 
+    uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) *   dzu(i,j,k) 
+    vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) *   dzv(i,j,k) 
    enddo
-    uflux(i,j,km    ,nsp) = uvel(i,j,1) * dyu(i,j) * ( dzu(i,j,1)+ 0.5*( hs(i,j,nsp)+hs(i+1,j,nsp) ) )
-    vflux(i,j,km    ,nsp) = vvel(i,j,1) * dxv(i,j) * ( dzv(i,j,1)+ 0.5*( hs(i,j,nsp)+hs(i,jp ,nsp) ) )
+    uflux(i,j,km    ,nsp) = uvel(i,j,1) * dyu(i,j) * ( dzu(i,j,1)+ 0.5*(hs(i,j,nsp)+hs(i+1,j,nsp)) )
+    vflux(i,j,km    ,nsp) = vvel(i,j,1) * dxv(i,j) * ( dzv(i,j,1)+ 0.5*(hs(i,j,nsp)+hs(i,jp ,nsp)) )
   enddo
  enddo
 
 
- do i=1,IMT
- do j=1,JMT-1
- do k=1,KM
+! check that velocity is zero on land
+! do i=1,IMT
+! do j=1,JMT-1
+! do k=1,KM
 !  if(k>kmv(i,j) .and. vflux(i,j,km+1-k,nsp)/=0. ) then
-  if(k>kmv(i,j) .and. vvel(i,j,k)/=0. ) then
-   print *,'vflux=',vflux(i,j,km+1-k,nsp),vvel(i,j,k),i,j,k,kmv(i,j),nsp
-   stop 4966
-  endif
-  
-  
-    if(k>kmv(i,j) .and. vvel(i,j,k)/=0. ) then
-   print *,'vflux=',vflux(i,j,km+1-k,nsp),vvel(i,j,k),i,j,k,kmv(i,j),nsp
-   stop 4966
-  endif
-
-
- enddo
- enddo
- enddo
+!!  if(k>kmv(i,j) .and. vvel(i,j,k)/=0. ) then
+!   print *,'vflux=',vflux(i,j,km+1-k,nsp),vvel(i,j,k),i,j,k,kmv(i,j),nsp
+!   stop 4966
+!  endif
+!  if(k>kmv(i,j) .and. vvel(i,j,k)/=0. ) then
+!   print *,'vflux=',vflux(i,j,km+1-k,nsp),vvel(i,j,k),i,j,k,kmv(i,j),nsp
+!   stop 4967
+!  endif
+! enddo
+! enddo
+! enddo
 
 
 

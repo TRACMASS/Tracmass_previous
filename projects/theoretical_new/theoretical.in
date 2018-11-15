@@ -25,7 +25,7 @@
      subgridjmax =   1000,
      subgridfile =     '',
        subgridid =      1,
-      ! nperio    =      1, 
+       nperio    =      1, 
 /
 &INIT_BASE_TIME
          basesec =      0,
@@ -67,8 +67,8 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
              kriva =      6,
-      outdatadir =   '/proj/bolinc/users/x_sarbe/project/TRACMASS/',
-     outdatafile =     'test_theoretical',
+      outdatadir =   '/proj/bolinc/users/x_sarbe/TRACMASS/projects/theoretical/',
+     outdatafile =     'test_k6',
 !     outdatafile =     'analyt_k1',
     ! outdatafile =     'dt1_k1',
  intmininoutfile =      0,
@@ -115,7 +115,7 @@
             isec =      4,
             idir =      0,
             nqua =      1,
-       partquant =      2,
+       partquant =      1,
         ntracmax =   2000000,
     loneparticle =     -1,
         seedtype =      1,

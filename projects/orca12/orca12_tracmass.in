@@ -7,8 +7,8 @@
         gridname = 'ORCA12',
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = '1/12 deg run for the global Ocean.',
-!       indatadir = '/Users/doos/data/orca/orca12/',
-       indatadir = '/proj/bolinc/users/x_krido/',
+       indatadir = '/Users/doos/data/orca/orca12/',
+!       indatadir = '/Volumes/Hadley/data/orca12/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'ORCA12',
@@ -20,10 +20,10 @@
               km =     75,
              nst =      2,
          subgrid =      1,
-     subgridimin =    2250,
-     subgridimax =    3970,
-     subgridjmin =    1570,
-     subgridjmax =    2400,
+     subgridimin =    3001,
+     subgridimax =    4000,
+     subgridjmin =     501, !501,
+     subgridjmax =    1500,
      subgridfile = 'templ.asc',
        subgridid =      0,
 /
@@ -38,7 +38,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =    120, ! don't touch!
-            iter =      12,
+            iter =      1,
           intmax =  15330,
         minveljd =     -1,
         maxveljd =     -1,
@@ -57,7 +57,7 @@
 /
 &INIT_RUN_TIME
          intspin =      1, !71
-          intrun =   7300,
+          intrun =   1000,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -69,24 +69,29 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
            kriva =      6,
-      outdatadir = '/proj/bolinc/users/x_sarbe/project/tracmass/data_out/',
-     outdatafile = 'orca12_100y',
+      outdatadir = '/Users/doos/data/orca/orca12/data_out/',
+  !    outdatadir = '/Volumes/Deacon/data/orca12/',
+  !   outdatafile = 'orca12_iter12000_rekt_sub_k4',
+  !   outdatafile = 'orca12_iter0_1996_winter_sub_k6',
+     outdatafile = 'orca12_anal_1996_winter_syd2_k6',
+!     outdatafile = 'orca12_analb_rekt_sub_k6',
+!     outdatafile = 'orca12_anal_rekt_sub_k4',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      2,
-            idir =      1,
+            isec =      1,
+            idir =     -1,
             nqua =      1,
-       partquant =      1, !10, !1,
+       partquant =      1,
         ntracmax = 20000000,
     loneparticle =      0, !2964,
         seedtype =      1,
-            ist1 =     390, 
-            ist2 =     1218, 
-            jst1 =     3, 
-            jst2 =     3, 
+            ist1 =    600, !840, 
+            ist2 =    649, !849, 
+            jst1 =    450, !650, 
+            jst2 =    459, !659, 
             kst1 =      1,
             kst2 =     75,
             tst1 =     -1,
@@ -101,12 +106,13 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =  2,
-            ienw =  1,    1,  
-            iene =  1720, 1720, 
-            jens =  1,    805,  
-            jenn =  3,    807,
-            timax = 36500000.0,
+            nend =      5,
+            ienw =    1,    1,    1,  900,
+            iene = 1000, 1000,  550, 1000,
+            jens =  680,    1,    1,    1,
+            jenn =  700,   50, 1000, 1000,
+!            timax = 70.0,
+           timax = 3650000.0,
 /
 &INIT_TEMP_SALT
            tmin0 =  -50.0,
