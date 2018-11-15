@@ -11,7 +11,6 @@
    fl04   = -Dtextwrite      # Write results to textfile
 #  fl05   = -Dbinwrite       # Write results to binaryfile
 #  fl06   = -Dmysqlwrite     # Write results to mysql
-#  fl07   = -Dncdfwrite      # Write results to netcdf files. 
 #------------------------------------------------------------------------
   fl08  = -Dstreamxy       # Calculates the barotropic stream function.
   fl09  = -Dstreamr        #    vertical stream function, z=density

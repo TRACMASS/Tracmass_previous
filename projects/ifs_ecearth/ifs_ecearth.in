@@ -40,7 +40,7 @@
    fieldsperfile =    124,
             ngcm =      6, !don't touch!
             iter =      6,
-          intmax =   2920,
+          intmax =   120,!2920,
         minveljd =     -1,
         maxveljd =     -1,
 /
@@ -55,7 +55,7 @@
           intmin =      1,
 /
 &INIT_RUN_TIME
-         intspin =     60,!120, !50,
+         intspin =     1,!120, !50,
           intrun =   1440, !2000,
 /
 &INIT_WRITE_TRAJS
@@ -114,18 +114,18 @@
   ! -1 indicates max value in grid.
   !
              nff =      1,
-            isec =      1,
-            idir =      1,
+            isec =      3,
+            idir =      0,
             nqua =      1,
        partquant =      1,
         ntracmax =     1000000,
     loneparticle =      -1, !0, !3455, 
         seedtype =      1, !3, !1=ist1 etc. 3=seedfile
             ist1 =      100, !382,
-            ist2 =      100, !457, 
-            jst1 =      10, !140, !140,
-            jst2 =      150, !173, !173, 
-            kst1 =     50, !60,
+            ist2 =      130, !457, 
+            jst1 =      60, !140, !140,
+            jst2 =      75, !173, !173, 
+            kst1 =     62, !60,
             kst2 =     62, !60,
             tst1 =     -1,
             tst2 =     -1,
@@ -139,12 +139,12 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =      2,
+            nend =      3,
             ienw = 0,
             iene = 0, 
-            jens = 0, 
-            jenn = 0, 
-           timax = 1000.0,
+            jens = 50, 
+            jenn = 75, 
+           timax = 30.0,
 /
 &INIT_TEMP_SALT
            tmin0 = -400.0,

@@ -54,7 +54,7 @@ SUBROUTINE setupgrid
 
   ! LATITUDE
   ! -------------------------------------------------------------
-   OPEN(13,FILE=TRIM(topoDataDir)//'/latitude160.txt') ! Update path [AITOR]
+   OPEN(13,FILE=TRIM(topoDataDir)//'latitude160.txt') ! Update path [AITOR]
   DO j = JMT,1,-1
     READ(13,"(39x,f9.5)") phi(j)
   END DO
