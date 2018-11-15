@@ -60,13 +60,20 @@ CONTAINS
     print *,'Prefix for output files    : ' ,trim(outDataFile)
     print *, thinline !--------------------------------------------------- 
     print *,"Selected compile options:"
+
+#if defined zgrid3Dt
+    print *,' - zgrid3Dt has been renamed to zgrid3D. Please update your'
+    print *,'   project Makefile.prj accordingly.'
+    stop
+#endif
+    
 #ifdef timeanalyt 
     print *,' - Analytical time scheme used to solve diff. Eqs.'
 #elif defined timestep
     print *,' - Stationary scheme used to solve  diff. Eqs.'
 #endif
 #if defined tempsalt
-#if defined ifs
+#if defined atmospheric
     print *,' - Temperature and humidity fields included'
 #else
     print *,' - Temperature and salinity fields included'
@@ -108,7 +115,7 @@ CONTAINS
     
 #if defined streamr
 #if defined streamts
-#if defined ifs
+#if defined atmospheric
     print *,' - Lagrangian density, temperature and humidity stream function stored'
 #else
     print *,' - Lagrangian density, temperature and salinity stream function stored'
@@ -181,7 +188,7 @@ CONTAINS
 599 format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
          ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
          ' nsusp=',i8,' nexit=',9i8)
-#elif defined ifs || rco || tes || orc || baltix || orca025  || orca025L75 || AusCOM
+#elif defined atmospheric || ifs || rco || tes || orc || baltix || orca025  || orca025L75 || AusCOM
     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
 799 format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
          ' nerror=',i4,' in ocean/atm=',i8)

@@ -3,8 +3,7 @@ module mod_write
 
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
-  USE mod_time   
-  USE netcdf
+  USE mod_time 
  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
@@ -19,12 +18,6 @@ module mod_write
   LOGICAL                                    :: outdirdate = .true.
   LOGICAL                                    :: outdircase = .true.
   CHARACTER (LEN=30)                         :: yearstr
-  INTEGER                                    :: ncid, status, grpid_c, grpid_v, ntracs_dimid, steps_dimid 
-  INTEGER				     :: lon_varid, lat_varid, ntracs_varid, steps_varid, temp_varid, sal_varid
-  INTEGER, PARAMETER                         :: NDIMS = 2, NRECS = 2, len_steps  = 20000
-  INTEGER          			     :: start(NDIMS)
-  INTEGER, DIMENSION(len_steps)              :: steps
-
   
 CONTAINS
 
@@ -124,35 +117,6 @@ CONTAINS
     open(67, file=trim(fullWritePref)//'_rerun.asc')
 #endif
 
-#ifdef ncdfwrite
-
-	CALL check( NF90_CREATE(trim(fullWritePref)//'.nc4', NF90_HDF5,ncid) )
-
-	CALL check( NF90_DEF_DIM(ncid, 'steps',  NF90_UNLIMITED, steps_dimid) )
- 	CALL check( NF90_DEF_DIM(ncid, 'ntracs', NF90_UNLIMITED, ntracs_dimid) )
-
-	CALL check( NF90_DEF_VAR(ncid, 'ntracs', NF90_REAL, ntracs_dimid, ntracs_varid) )
-	CALL check( NF90_PUT_ATT(ncid, ntracs_varid, 'Units', 'Number of trajectories') )
-	CALL check( NF90_DEF_VAR(ncid, 'steps', NF90_REAL, steps_dimid, steps_varid) )
-	CALL check( NF90_PUT_ATT(ncid, steps_varid, 'Units', 'Length of trajectory') )
-
-	CALL check( NF90_DEF_VAR(ncid, 'model_lon', NF90_REAL, (/ntracs_dimid, steps_dimid/), lon_varid) )
-        CALL check( NF90_PUT_ATT(ncid, lon_varid, 'Units', 'Model longitude') )
-	CALL check( NF90_DEF_VAR(ncid, 'model_lat', NF90_REAL, (/ntracs_dimid, steps_dimid/), lat_varid) )
-        CALL check( NF90_PUT_ATT(ncid, lat_varid, 'Units', 'Model latitude') )
-	
-#ifdef tempsalt
-        	CALL check( NF90_DEF_VAR(ncid, 'temperature', NF90_REAL, (/ntracs_dimid, steps_dimid/), temp_varid) )
-        	CALL check( NF90_PUT_ATT(ncid, temp_varid, 'Units', 'Degrees Celcius') )
-		CALL check( NF90_DEF_VAR(ncid, 'salinity', NF90_REAL, (/ntracs_dimid, steps_dimid/), sal_varid) )
-        	CALL check( NF90_PUT_ATT(ncid, sal_varid, 'Units', 'g/kg') )
-#endif
-
-        !CALL check( NF90_DEF_VAR_DEFLATE(ncid, lon_varid, 1, 1, 4) )
-        !CALL check( NF90_DEF_VAR_DEFLATE(ncid, lat_varid, 1, 1, 4) )
-	!CALL check( NF90_ENDDEF(ncid) )
-	
-#endif
 
 
 
@@ -204,16 +168,10 @@ CONTAINS
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
     REAL                                       :: temp2, salt2, dens2
-#if defined for || sim 
-566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
-         ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined rco || baltix 
-566 format(i8,i7,f7.2,f7.2,f7.1,2f12.4 &
-         ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined tes 
+#if defined  tes 
 566 format(i8,i7,f8.3,f8.3,f7.3,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined ifs 
+#elif defined atmospheric 
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.2 &
          ,f15.0,f8.2,f8.2,f8.2,f6.0,8e8.1 )
 #elif defined orc
@@ -382,7 +340,7 @@ t0     =  trj(7,ntrac)
        call updateclock
        twrite = currJDtot
     else
-       twrite = real(ints,kind=8)s
+       twrite = real(ints,kind=8)
     end if
     select case (sel)       
     case (10)
@@ -390,7 +348,7 @@ t0     =  trj(7,ntrac)
        return
     case (11)
        if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
-            (kriva == 2 .and. scrivi                    ) .or. &s
+            (kriva == 2 .and. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .and. niter == 1                ) .or. &
             (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
@@ -412,63 +370,6 @@ t0     =  trj(7,ntrac)
        
     end select
 #endif   
-
-
-#if defined ncdfwrite
-	
-    select case (sel)
-    case (10)
-    case (11)
-
-      	 if(  	(kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
-            	(kriva == 2 .AND. scrivi                    ) .or. &
-            	(kriva == 3                                 ) .or. &
-            	(kriva == 4 .AND. niter == 1                ) .or. &
-            	(kriva == 5 .AND.                                  &
-          	&  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
-            	(kriva == 6 .AND. .not.scrivi                  ) ) then
-
-#ifdef tempsalt
-		CALL interp2(ib,jb,kb,temp,salt,dens)
-		!CALL interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-#endif		
-		if (ntrac .GT. len_steps) then
-			Print*, 'Increase size of steps in writetrajs.f95'
-			Stop
-		endif
-
-		steps(ntrac) = steps(ntrac) + 1
-		recPosRun = recPosRun+1
-		start = (/1,1/)
-		start(1) = steps(ntrac)
-		start(2) = ntrac
-		CALL check( NF90_PUT_VAR( ncid,lon_varid ,x1,   start = start) )
-		CALL check( NF90_PUT_VAR( ncid,lat_varid ,y1,   start = start) )
-
-#if defined tempsalt
-                CALL check( NF90_PUT_VAR( ncid,temp_varid,temp, start = start) )
-		CALL check( NF90_PUT_VAR( ncid,sal_varid ,salt, start = start) )
-#endif	
-  
-		
-	end if	
-    end select
-
-
-
-#endif
-
   end subroutine writedata
-
-  subroutine check(status)
-  	integer, intent ( in) :: status
-    
-  	if(status /= nf90_noerr) then 
-      		print *, trim(nf90_strerror(status))
-      		stop 2
-    	end if
-
-  end subroutine check  
-
 
 end module mod_write

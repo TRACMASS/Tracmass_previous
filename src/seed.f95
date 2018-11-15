@@ -14,7 +14,7 @@ MODULE mod_seed
 !!
 !!------------------------------------------------------------------------------
 
-   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant
+   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart,nff
    USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
    USE mod_vel,   only    : uflux, vflux, wflux, ff
    USE mod_traj!,  only    : ntractot, ntrac, ib, jb, kb, x1, y1, z1, trj, nrj
@@ -23,9 +23,10 @@ MODULE mod_seed
                             sal, tem, rho
    IMPLICIT NONE
   
-   INTEGER                                    :: nff,  isec,  idir
+   INTEGER                                    :: isec,  idir
    INTEGER                                    :: nqua, num, nsdMax
    INTEGER                                    :: nsdTim
+   INTEGER                                    :: seedtstep=1   
    INTEGER                                    :: seedPos, seedTime
    INTEGER                                    :: seedType
    INTEGER                                    :: seedAll, varSeedFile
@@ -38,7 +39,7 @@ MODULE mod_seed
    INTEGER*8                                  :: itim
    INTEGER, ALLOCATABLE, DIMENSION(:,:)       :: seed_ijk, seed_set
    INTEGER, ALLOCATABLE, DIMENSION(:)         :: seed_tim
-   REAL*8 , ALLOCATABLE, DIMENSION(:,:)       :: seed_xyz
+   REAL(DP) , ALLOCATABLE, DIMENSION(:,:)     :: seed_xyz
    CHARACTER(LEN=200)                         :: seedDir, seedFile, timeFile
    integer                                    :: numseedsubints
    REAL, DIMENSION(50)                        :: seedsubints = -1
@@ -53,12 +54,14 @@ CONTAINS
     ! INTEGER                                  :: ib, jb, kb, ibm
      INTEGER                                  :: i, j, k, l, m
      REAL                                     :: temp,salt,dens
-     REAL*8                                   :: tt, ts
-     REAL*8                                   :: vol, subvol
+     REAL(DP)                                 :: tt, ts
+     REAL(DP)                                 :: vol, subvol
+     
 
-      ! --------------------------------------------
-      ! --- Check if ntime is in vector seed_tim ---
-      ! --------------------------------------------
+
+     ! --------------------------------------------
+     ! --- Check if ntime is in vector seed_tim ---
+     ! --------------------------------------------     
       IF (seedTime == 2) THEN
          findTime: DO jsd=1,nsdTim
             IF (seed_tim(jsd) == ntime) THEN
@@ -123,7 +126,7 @@ CONTAINS
                vol = vflux (iist,ijst,ikst,nsm)
          
             CASE (3)  ! Through upper zonal-meridional surface
-               CALL vertvel (1.d0,ib,ibm,jb,kb)
+               CALL vertvel (ib,ibm,jb,kb)
 #if defined explicit_w || full_wflux
                vol = wflux(ib,jb,kb,nsm)
 #elif twodim
@@ -153,13 +156,11 @@ CONTAINS
       
          ! Calculate volume/mass of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
-!#if defined zgrid3Dt
+#if defined zgrid3D
             vol = dzt(ib,jb,kb,1)
-!#elif  zgrid3D
-!            vol = dzt(ib,jb,kb)
-!#elif  zgrid1D
-!            vol = dz(kb)
-!#endif /*zgrid*/
+#else
+            vol = dz(kb)
+#endif /*zgrid*/
 !#ifdef varbottombox
 !            IF (kb == KM+1-kmt(ib,jb)) THEN
 !               vol = dztb (ib,jb,1)
