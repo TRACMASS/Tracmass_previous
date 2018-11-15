@@ -37,19 +37,19 @@ SUBROUTINE init_params
 ! Setup namelists
    namelist /INIT_NAMELIST_VERSION/ gridVerNum
    namelist /INIT_GRID_DESCRIPTION/ GCMname, GCMsource, gridName, gridSource,&
-                                    griddesc, inDataDir!, topoDataDir !!joakim
+                                    griddesc, inDataDir
    namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &
                                     subGridKmin, subGridKmax, SubGridFile,   &
-                                    subGridID, nperio
+                                    subGridID
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
-                                    baseMon, baseYear, jdoffset
+                                    baseMon, baseYear
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
                                     minvelJD, maxvelJD
    namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
                                     startDay, startMon, startYear,           &
-                                    startJD, intmin, noleap
+                                    startJD, jdoffset, intmin, noleap
    namelist /INIT_RUN_TIME/         intspin, intrun
    namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
                                     outdircase, intminInOutFile, intpsi, outdirdate
@@ -76,12 +76,9 @@ SUBROUTINE init_params
    Case     = CASE_NAME
 
    IF ((IARGC() > 0) )  THEN
-      CALL getarg(1,project)
+      CALL getarg(1,Case)
    END IF
-   IF ((IARGC() > 1) )  THEN
-      CALL getarg(2, Case)
-   END IF
-   
+
    CALL getenv('TRMPROJDIR',projdir)
    if (len(trim(projdir)) == 0) then
       CALL getenv('TRMDIR',ormdir)
@@ -192,7 +189,7 @@ SUBROUTINE init_params
    start3d  = [1, subGridImin, subGridJmin, subGridKmin]
    count3d  = [1, imt,         jmt,         km         ]
    
-   if ((IARGC() > 2) )  then
+   if ((IARGC() > 1) )  then
       ARG_INT1 = 0.1
       CALL getarg(2,inparg)
       if ( ARG_INT1 == 0) then
@@ -204,7 +201,7 @@ SUBROUTINE init_params
       end if
    end if
       
-   IF ((IARGC() > 3) ) THEN
+   IF ((IARGC() > 2) ) THEN
       ARG_INT2 = 0.1
       CALL getarg(3,inparg)
       if ( ARG_INT2 == 0) then
@@ -236,7 +233,7 @@ SUBROUTINE init_params
       startFrac = (startFrac - startHour) * 60
       startMin  = int(startFrac)
    end if
-   
+
    if (nff == 1) then
       intmin = jd2ints(startJD)
    else
@@ -320,10 +317,13 @@ SUBROUTINE init_params
       dxv = 0
       dyu = 0
 
-#if  zgrid3D
+#ifdef zgrid3Dt
       ALLOCATE ( dzt(imt,jmt,km,nst) )
       dzt = 0
-#endif /*zgrid3D*/
+#elif  zgrid3D
+      ALLOCATE ( dzt(imt,jmt,km) )
+      dzt = 0
+#endif /*zgrid3Dt*/
 #ifdef varbottombox
       ALLOCATE ( dztb(imt,jmt,nst) )
 #endif /*varbottombox*/
@@ -334,12 +334,18 @@ SUBROUTINE init_params
       ! --- sea-surface height, and trajectory data                   ---
       ALLOCATE ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
       ALLOCATE ( hs(imt+1,jmt+1,nst) )
+      ALLOCATE ( mlh(imt+1,jmt+1,nst) ) !Saramlh
+      ALLOCATE ( dep(km)) !Saramlh
+      ALLOCATE ( EP(imt+1,jmt+1,nst) )  !SaraEP
 #if defined explicit_w || full_wflux
       ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km,NST) )
 #else
       ALLOCATE ( wflux(0:km,NST) )
 #endif
       hs    = 0.
+      mlh   = 0. !Saramlh
+      dep   = 0. !Saramlh
+      EP    = 0. !SaraEP
       uflux = 0.
       vflux = 0.
       wflux = 0.d0
@@ -391,6 +397,18 @@ SUBROUTINE init_params
 #ifdef stream_thermohaline
       ALLOCATE ( psi_ts(MR,MR,2,nend) )
       psi_ts=0.
+#endif
+      
+      ! --- Allocate trace convergence ----
+#ifdef tracer_convergence
+      ALLOCATE( uct(imt,jmt,km,nend), vct(imt,jmt,km,nend), wct(imt,jmt,km,nend) )
+      ALLOCATE( ucs(imt,jmt,km,nend), vcs(imt,jmt,km,nend), wcs(imt,jmt,km,nend) )
+      uct = 0.
+      vct = 0.
+      wct = 0.
+      ucs = 0.
+      vcs = 0.
+      wcs = 0.
 #endif
 
       ! --- Allocate tracer data ---

@@ -7,8 +7,8 @@
         gridname = 'ORCA1',
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = '1 deg run for the global Ocean.',
-!       indatadir = '/Users/doos/data/ecearth/orca1/',
-       indatadir = '/Users/doos/Dropbox/data/ecearth/orca1/',
+       ! indatadir = '/proj/bolinc/users/x_sarbe/project/TRACMASS/1996_2005/',
+        indatadir = '/proj/bolinc/users/x_sarbe/project/TRACMASS/1850_2005/',  
 /
 &INIT_CASE_DESCRIPTION
         casename = 'ORCA1',
@@ -38,8 +38,8 @@
 &INIT_GRID_TIME
    fieldsperfile =     12,
             ngcm =    730,
-            iter =      1,
-          intmax =    24,
+            iter =      10,
+          intmax =    120,
         minvelJD =      1,
         maxvelJD =    120,
 /
@@ -49,7 +49,8 @@
        starthour =     12,
         startday =      5,
         startmon =      1,
-       startyear =   1996,
+        startyear =   1852,
+       !startyear =   1996,
         jdoffset =      3,
           noleap =  .true., 
          startjd =     -1,
@@ -68,11 +69,12 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-           kriva =      1,
-      outdatadir = '/Users/doos/data/ecearth/orca1/data_out/',
-!     outdatafile = 'orca1_test_it1200_k1',
-     outdatafile = 'orca1_amoc7_an_k1',
- intmininoutfile =      0,
+     
+     kriva =      6,
+     outdatadir = '/proj/bolinc/users/x_sarbe/project/TRACMASS/data_out/',
+     outdatafile = 'orca1_drake',
+     intmininoutfile =      0,
+     intpsi =      12,
 /
 &INIT_SEEDING
   ! ==============================================
@@ -113,23 +115,24 @@
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
              nff =      1,
-            isec =      2,
+            isec =      1,
             idir =      1,
             nqua =      1,
        partquant =      1,
         ntracmax = 20000000,
     loneparticle =      0,
         seedtype =      1,
-            ist1 =    234, !3840, ! 840,
-            ist2 =    310, ! 3849, ! 849,
-            jst1 =   115, ! 97,115, 1150, ! 650,
-            jst2 =   115, ! 97,115, !1159, ! 659,
-            kst1 =      1,
-            kst2 =     42,
+            ist1 =      220, !2,   !2,    !314, !234,    !234, !220, !207, !234, !226, !234, !226, !3840, ! 840,
+            ist2 =      220, !320, !359,  !314, !310,  !310, !280, !276, !310, !292, !310, !292, ! 3849, ! 849,
+            jst1 =      35,  !215, !1,    !16, !65, !64,   !115, !168, !187, !115, !236, !115, !236, ! 97,115, 1150, ! 650,
+            jst2 =      90,  !292, !200,  !100, !65, !64,   !115, !168, !187, !115, !236, !115, !236, ! 97,115, !1159, ! 659,
+            kst1 =      1, !35, !30,
+            kst2 =      42,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
         seedfile =     '',
+ 
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
@@ -138,25 +141,33 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =      2,
-            ienw =    1,    1,
-            iene =    360,  360,
-            jens =      1,  236,
-            jenn =    115,  290,
-            timax = 365000.0, ! days
+            nend =     2,
+            !ienw =    1,    1,
+            !iene =    360,  360,
+            !jens =    1,    236,
+            !jenn =    115,  290,
+            !ienw =    1,    234,
+            !iene =    360,  310,
+            !jens =    243,  115, !1,    216, !  1,  236,
+            !jenn =    290,  120, !168,  290, !115,  290,
+            ienw = 219,
+            iene = 219,
+            jens = 35,
+            jenn = 90,
+            timax =  180000 !Motsvarar 500 år !36000.0, ! days
 
 /
 &INIT_TEMP_SALT
-           tmin0 = -100.0,
-           tmax0 =  400.0,
-           smin0 = -100.0,
-           smax0 =  100.7,
+           tmin0 =  -500, !2.0,
+           tmax0 =  500,  !5.0,
+           smin0 =  -500, !33.5,
+           smax0 =  500,  !34.0,
            rmin0 = -100.0,
            rmax0 =  500.0,
            tmine = -100.0,
-           tmaxe =  400.0,
+           tmaxe =  21.0,
            smine = -100.8,
-           smaxe =  500.0,
+           smaxe =  500,
            rmine = -100.0,
            rmaxe =  500.0,
 /

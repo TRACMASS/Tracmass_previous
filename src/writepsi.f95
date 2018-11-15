@@ -39,6 +39,24 @@ write(54) psi_ts
 print *,'stream function written'
 #endif
 
+#ifdef tracer_convergence
+rewind(55)
+write(55) uct
+write(55) vct
+write(55) wct
+#endif
+
+#ifdef tracer_convergence
+rewind(50)
+write(50) ucs
+write(50) vcs
+write(50) wcs
+#endif
+
+#if defined tracer_convergence
+PRINT *, 'Tracer convergence written'
+#endif
+
 
 return
 end subroutine write_streamfunctions

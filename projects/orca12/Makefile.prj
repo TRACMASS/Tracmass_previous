@@ -3,45 +3,46 @@
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-#   fl01   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
-  fl01   = -Dtimeanalyt    #  Analytical time scheme used to solve the
-#   fl02   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+#   fl01   = -Dfixedtimestep  # Mimics Ariane's lack of time interpolation of the velocity fields
+#   fl02   = -Dtimestep       # Time steps with analytical stationary scheme differential Eqs.
+  fl03   = -Dtimeanalyt    #  Analytical time scheme used to solve the
+#   fl04   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-   fl03   = -Dtempsalt       # Include temp and salt
-   fl04   = -Dtextwrite      # Write results to textfile
-   fl05   = -Dbinwrite       # Write results to binaryfile
-#  fl06   = -Dmysqlwrite     # Write results to mysql
+   fl05   = -Dtempsalt       # Include temp and salt
+   fl06   = -Dtextwrite      # Write results to textfile
+#  fl07   = -Dbinwrite       # Write results to binaryfile
+#  fl08   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
-  fl07  = -Dstreamxy       # Calculates the barotropic stream function.
-#  fl08  = -Dstreamr        #    vertical stream function, z=density
-#  fl09  = -Dstreamts       #    vertical stream function, z=???
-#  fl10  = -Dstreamv        #    vertical stream function, z=depth
-#  fl11  = -Drerun          # Stores the Lagrangian stream functions as a
+#  fl09  = -Dstreamxy       # Calculates the barotropic stream function.
+#  fl10  = -Dstreamr        #    vertical stream function, z=density
+#  fl11  = -Dstreamts       #    vertical stream function, z=???
+#  fl12  = -Dstreamv        #    vertical stream function, z=depth
+#  fl13  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
-#   fl12  = -Dinitxyt       # Start trajectories at given positions and times
+#   fl14  = -Dinitxyt       # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-#   fl13  = -Dtwodim         # Turn off vertical velocities.
-#  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
-#  fl15  = -Dexplicit_w     # Use a given vertical velocity.
+#   fl15  = -Dtwodim         # Turn off vertical velocities.
+#  fl16  = -Dfull_wflux     # Use a full 3D wflux field.
+#  fl17  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-#   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
-#   fl17  = -Dfreesurface    # Variable bottom box to match actual depth
-#   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
-  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
-#  fl18  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+#   fl18  = -Dvarbottombox   # Variable bottom box to match actual depth
+#   fl19  = -Dfreesurface    # Variable bottom box to match actual depth
+#   fl20  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
+#  fl21  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
+  fl22  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
 #------------------------------------------------------------------------
-#  fl20  = -Dselect         # Select only one trajectory (for debugging)
-#  fl21  = -Dtracer         # Stores a simulated tracer
-#  fl22  = -Dsediment       # Sediment code developed for RCO
+#  fl23  = -Dselect         # Select only one trajectory (for debugging)
+#  fl24  = -Dtracer         # Stores a simulated tracer
+#  fl25  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
-#  fl23  = -Dturb           # Adds subgrid turbulent velocities 
-#  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
-#  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+#  fl26  = -Dturb           # Adds subgrid turbulent velocities 
+#  fl27  = -Ddiffusion      # Adds a diffusion on trajectory
+#  fl28  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #------------------------------------------------------------------------
-#   fl27  = -Dorca025          # orca1 or orca025 or orca025l75h6
+#   fl29  = -Dorca025          # orca1 or orca025 or orca025l75h6
 #------------------------------------------------------------------------
-#   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
+#   fl30   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \

@@ -22,10 +22,7 @@ REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
 REAL    :: temp,salt,dens
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
-
-! Determining nearest centers of boxes 
-! ax/ay/az = 0 if trajectory is at east/north/top 
-
+! determining nearest centers of boxes 
       if(x1.le.dble(ib)-dble(.5)) then
        ip=ib
        im=ib-1
@@ -35,7 +32,6 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        im=ib
        if(ip.gt.imt) ip=1
       endif
-      
       if(y1.le.dble(jb)-dble(.5)) then
        jp=jb
        jm=jb-1
@@ -45,7 +41,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        jm=jb
        if(jp.gt.jmt) jp=jmt
       endif
-      
+
       if(z1.le.dble(kb)-dble(.5)) then
        kp=kb
        kn=kb-1
@@ -55,11 +51,8 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        if(kp.gt.km) kp=km
        kn=kb
       endif
-           
-      ax=dble(ip)-0.5d0-x1
-      ay=dble(jp)-0.5d0-y1
-      az=dble(kp)-0.5d0-z1
-      
+
+      ax=dble(ip)-x1
       if(ax.gt.100.d0) then
 !       print *,ax,ip,im,x1,ib
        ax=ax-dble(imt)
@@ -68,33 +61,8 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        ax=ax+dble(imt)
 !       stop 49679
       endif
-
-       if(jm==JMT .and. ay<0.) ay=0.d0
-       if(kn==KM  .and. az<0.) az=0.d0
-
-      
-!      if(ay <0.d0 .or. ay>1.d0) then
-!       print *,ay
-!       print *,jp,jm,jb,y1
-!       print *,ip,im,ib,x1
-!       print *,kp,kn,kb,z1
-!       stop 39058
-!      endif
-!
-!      if(ax <0.d0 .or. ax>1.d0) then
-!       print *,'ax=',ax
-!       print *,ip,im,ib,x1
-!       ax=0.5
-!!       stop 39059
-!      endif
-!      
-!      if(az <0.d0 .or. az>1.d0) then
-!       print *,az
-!       print *,kp,kn,kb,z1
-!       stop 39060
-!      endif
-
-
+      ay=(dble(jp)-y1)
+      az=(dble(kp)-z1)
 
 ! temperature, salinity, density calculation 
 !      tppp=tem(ip,jp,kp,ns)
@@ -152,101 +120,102 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
       sppp=sal(ip,jp,kp,ns)
       rppp=rho(ip,jp,kp,ns)
       if(tppp==0. .and. sppp==0.) then
-        tppp=tem(ib,jb,kb,ns)
-       sppp=sal(ib,jb,kb,ns)
-       rppp=rho(ib,jb,kb,ns)
+       tppp=tem(ip,jp,kn,ns)
+       sppp=sal(ip,jp,kn,ns)
+       rppp=rho(ip,jp,kn,ns)
       endif
       
       tppm=tem(ip,jp,kn,ns)
       sppm=sal(ip,jp,kn,ns)
       rppm=rho(ip,jp,kn,ns)
       if(tppm==0. .and. sppm==0.) then
-
-        tppm=tem(ib,jb,kb,ns)
-       sppm=sal(ib,jb,kb,ns)
-       rppm=rho(ib,jb,kb,ns)
+       tppm=tem(ip,jp,kn,ns)
+       sppm=sal(ip,jp,kn,ns)
+       rppm=rho(ip,jp,kn,ns)
       endif
       
       tpmp=tem(ip,jm,kp,ns)
       spmp=sal(ip,jm,kp,ns)
       rpmp=rho(ip,jm,kp,ns)
       if(tpmp==0. .and. spmp==0.) then
-         tpmp=tem(ib,jb,kb,ns)
-       spmp=sal(ib,jb,kb,ns)
-       rpmp=rho(ib,jb,kb,ns)
+       tpmp=tem(ip,jp,kn,ns)
+       spmp=sal(ip,jp,kn,ns)
+       rpmp=rho(ip,jp,kn,ns)
       endif
       
       tpmm=tem(ip,jm,kn,ns)
       spmm=sal(ip,jm,kn,ns)
       rpmm=rho(ip,jm,kn,ns)
-      if(tpmm==0. .and. spmm==0.) then 
-         tpmm=tem(ib,jb,kb,ns)
-       spmm=sal(ib,jb,kb,ns)
-       rpmm=rho(ib,jb,kb,ns)
+      if(tpmm==0. .and. spmm==0.) then
+       tpmm=tem(ip,jp,kn,ns)
+       spmm=sal(ip,jp,kn,ns)
+       rpmm=rho(ip,jp,kn,ns)
       endif
       
       tmpp=tem(im,jp,kp,ns)
       smpp=sal(im,jp,kp,ns)
       rmpp=rho(im,jp,kp,ns)
       if(tmpp==0. .and. smpp==0.) then
-       tmpp=tem(ib,jb,kb,ns)
-       smpp=sal(ib,jb,kb,ns)
-       rmpp=rho(ib,jb,kb,ns)
+       tmpp=tem(ip,jp,kn,ns)
+       smpp=sal(ip,jp,kn,ns)
+       rmpp=rho(ip,jp,kn,ns)
       endif
       
       tmpm=tem(im,jp,kn,ns)
       smpm=sal(im,jp,kn,ns)
       rmpm=rho(im,jp,kn,ns)
       if(tmpm==0. .and. smpm==0.) then
-       tmpm=tem(ib,jb,kb,ns)
-       smpm=sal(ib,jb,kb,ns)
-       rmpm=rho(ib,jb,kb,ns)
+       tmpm=tem(ip,jp,kn,ns)
+       smpm=sal(ip,jp,kn,ns)
+       rmpm=rho(ip,jp,kn,ns)
       endif
       
       tmmp=tem(im,jm,kp,ns)
       smmp=sal(im,jm,kp,ns)
       rmmp=rho(im,jm,kp,ns)
       if(tmmp==0. .and. smmp==0.) then
-       tmmp=tem(ib,jb,kb,ns)
-       smmp=sal(ib,jb,kb,ns)
-       rmmp=rho(ib,jb,kb,ns)
+       tmmp=tem(ip,jp,kn,ns)
+       smmp=sal(ip,jp,kn,ns)
+       rmmp=rho(ip,jp,kn,ns)
       endif
       
       tmmm=tem(im,jm,kn,ns)
       smmm=sal(im,jm,kn,ns)
       rmmm=rho(im,jm,kn,ns)
       if(tmmm==0. .and. smmm ==0.) then
-       tmmm=tem(ib,jb,kb,ns)
-       smmm=sal(ib,jb,kb,ns)
-       rmmm=rho(ib,jb,kb,ns)
+       tmmm=tem(ip,jp,kn,ns)
+       smmm=sal(ip,jp,kn,ns)
+       rmmm=rho(ip,jp,kn,ns)
       endif
 
+
+
       temp=tppp*(1.-ax)*(1.-ay)*(1.-az) &
-         + tmpp*    ax *(1.-ay)*(1.-az) &
-         + tpmp*(1.-ax)*    ay *(1.-az) &
-         + tmmp*    ax *    ay *(1.-az) &
-         + tppm*(1.-ax)*(1.-ay)*    az  &
-         + tmpm*    ax *(1.-ay)*    az  &
-         + tpmm*(1.-ax)*    ay *    az  &
-         + tmmm*    ax *    ay *    az  
+        + tmpp*    ax *(1.-ay)*(1.-az) &
+        + tpmp*(1.-ax)*    ay *(1.-az) &
+        + tmmp*    ax *    ay *(1.-az) &
+        + tppm*(1.-ax)*(1.-ay)*    az  &
+        + tmpm*    ax *(1.-ay)*    az  &
+        + tpmm*(1.-ax)*    ay *    az  &
+        + tmmm*    ax *    ay *    az  
  
       salt=sppp*(1.-ax)*(1.-ay)*(1.-az) & 
-         + smpp*    ax *(1.-ay)*(1.-az) &
-         + spmp*(1.-ax)*    ay *(1.-az) &  
-         + smmp*    ax *    ay *(1.-az) &
-         + sppm*(1.-ax)*(1.-ay)*    az  &
-         + smpm*    ax *(1.-ay)*    az  &
-         + spmm*(1.-ax)*    ay *    az  &
-         + smmm*    ax *    ay *    az  
+        + smpp*    ax *(1.-ay)*(1.-az) &
+        + spmp*(1.-ax)*    ay *(1.-az) &  
+        + smmp*    ax *    ay *(1.-az) &
+        + sppm*(1.-ax)*(1.-ay)*    az  &
+        + smpm*    ax *(1.-ay)*    az  &
+        + spmm*(1.-ax)*    ay *    az  &
+        + smmm*    ax *    ay *    az  
  
       dens=rppp*(1.-ax)*(1.-ay)*(1.-az) &
-         + rmpp*    ax *(1.-ay)*(1.-az) &
-         + rpmp*(1.-ax)*    ay *(1.-az) &
-         + rmmp*    ax *    ay *(1.-az) &
-         + rppm*(1.-ax)*(1.-ay)*    az  &
-         + rmpm*    ax *(1.-ay)*    az  &
-         + rpmm*(1.-ax)*    ay *    az  &
-         + rmmm*    ax *    ay *    az
+        + rmpp*    ax *(1.-ay)*(1.-az) &
+        + rpmp*(1.-ax)*    ay *(1.-az) &
+        + rmmp*    ax *    ay *(1.-az) &
+        + rppm*(1.-ax)*(1.-ay)*    az  &
+        + rmpm*    ax *(1.-ay)*    az  &
+        + rpmm*(1.-ax)*    ay *    az  &
+        + rmmm*    ax *    ay *    az
 
 return
 end subroutine interp

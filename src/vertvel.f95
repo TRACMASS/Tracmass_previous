@@ -28,7 +28,7 @@ subroutine vertvel(ia,iam,ja,ka)
   n1=min(nsm,nsp)
   n2=max(nsm,nsp)
   kloop: do k=1,ka
-#if defined zgrid3D
+#if defined zgrid3Dt
      do n=n1,n2
         ! time change of the mass the in grid box
         wflux(k,n) = wflux(k-1,n) - ff * &
@@ -37,7 +37,7 @@ subroutine vertvel(ia,iam,ja,ka)
 #if defined ifs
               + (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )
 #else
-              - (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )
+              - (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )  ! kolla denna!!!!
 #endif
               ! ska det vara plus för ifs och minus för orca???
     enddo
@@ -48,7 +48,7 @@ subroutine vertvel(ia,iam,ja,ka)
      vv = intrpg * vflux(ia ,ja  ,k,nsp) + intrpr * vflux(ia ,ja  ,k,nsm)
      vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
      wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
-#else
+#else 
     do n=n1,n2
      wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )

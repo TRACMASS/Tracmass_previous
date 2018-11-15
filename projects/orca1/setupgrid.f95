@@ -58,10 +58,13 @@ SUBROUTINE setupgrid
 !  gridFile = trim(inDataDir)//'topo/mesh_hgr.nc'
   if(KM==42) then
  !  gridFile = trim(inDataDir)//'topo/mesh_mask_ecearth_42l.nc'
-   gridFile = '/Users/doos/data/ecearth/topo/mesh_mask_ORCA1_ecearth2_42l.nc'
+ !  gridFile = '/Users/doos/data/ecearth/topo/mesh_mask_ORCA1_ecearth2_42l.nc'
+     gridFile = '/proj/bolinc/users/x_sarbe/project/TRACMASS/1996_2005/TOPO/mesh_mask_ORCA1_ecearth2_42l.nc'
+!   gridFile = '/Users/doos/data/ecearth/topo/mesh_mask_ecearth_42l.nc'
   elseif(KM==64) then
   ! gridFile = trim(inDataDir)//'topo/mesh_mask_orca1l64.nc'
   endif
+
   e1t  = get2DfieldNC(gridFile, 'e1t')
   e2t  = get2DfieldNC(gridFile, 'e2t')
   dxdy = e1t * e2t
@@ -115,8 +118,13 @@ SUBROUTINE setupgrid
         dzv(:,:,k) = 0
     end where
   enddo 
+
+
+  dep = get1DfieldNC(gridFile, 'nav_lev')
+
   
-  
+
+! check that dzu and dzv is correct  
 !  do j=1,jmt-1
 !     jp=j+1
 !     if(jp.eq.jmt+1) jp=jmt
@@ -124,12 +132,12 @@ SUBROUTINE setupgrid
 !        ip=i+1
 !        if(ip.eq.IMT+1) ip=1
 !        do k=1,KM
-!         dzu(i,j,k)=min(dztb(i,j,k), dztb(ip,j,k))
-!         dzv(i,j,k)=min(dztb(i,j,k), dztb(i,jp,k))
+!         if(dzu(i,j,k)/=min(dztb(i,j,k), dztb(ip,j,k))) print *,dzu(i,j,k),min(dztb(i,j,k),dztb(ip,j,k))
+!         if(dzv(i,j,k)/=min(dztb(i,j,k), dztb(i,jp,k))) print *,dzv(i,j,k),min(dztb(i,j,k),dztb(i,jp,k))
 !        enddo
 !     enddo
 !  enddo
-
+!stop 4978
 
 ! do j=2500,2300,-1
 !  print "(400i1)",(kmu(i,j),i=3520,3680)
