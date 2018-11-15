@@ -20,29 +20,26 @@
 #  fl13  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
-#   fl14  = -Dinitxyt       # Start trajectories at given positions and times
+#   fl12  = -Dinitxyt       # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-#   fl15  = -Dtwodim         # Turn off vertical velocities.
-#  fl16  = -Dfull_wflux     # Use a full 3D wflux field.
-#  fl17  = -Dexplicit_w     # Use a given vertical velocity.
+#   fl13  = -Dtwodim         # Turn off vertical velocities.
+#  fl14  = -Dfull_wflux     # Use a full 3D wflux field.
+#  fl15  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-#   fl18  = -Dvarbottombox   # Variable bottom box to match actual depth
-#   fl19  = -Dfreesurface    # Variable bottom box to match actual depth
-#   fl20  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
-#  fl21  = -Dzgrid3D        # Cell depths defined as 3D grid (for sigma)
-  fl22  = -Dzgrid3Dt       # Cell depths 3D and time interp. (for atm)
+#   fl16  = -Dvarbottombox   # Variable bottom box to match actual depth
+#   fl17  = -Dfreesurface    # Variable bottom box to match actual depth
+#   fl18  = -Dzgrid1D        # Cell depths defined as vector (for z-coord?)
+  fl18  = -Dzgrid3D        # Cell depths defined as 3D grid 
 #------------------------------------------------------------------------
-#  fl23  = -Dselect         # Select only one trajectory (for debugging)
-#  fl24  = -Dtracer         # Stores a simulated tracer
-#  fl25  = -Dsediment       # Sediment code developed for RCO
+#  fl20  = -Dselect         # Select only one trajectory (for debugging)
+#  fl21  = -Dtracer         # Stores a simulated tracer
+#  fl22  = -Dsediment       # Sediment code developed for RCO
 #------------------------------------------------------------------------
-#  fl26  = -Dturb           # Adds subgrid turbulent velocities 
-#  fl27  = -Ddiffusion      # Adds a diffusion on trajectory
-#  fl28  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
+#  fl23  = -Dturb           # Adds subgrid turbulent velocities 
+#  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
+#  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #------------------------------------------------------------------------
-#   fl29  = -Dorca025          # orca1 or orca025 or orca025l75h6
-#------------------------------------------------------------------------
-#   fl30   = -Ddrifter       # surface drifter depth average of uflux/vflux
+#   fl28   = -Ddrifter       # surface drifter depth average of uflux/vflux
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \

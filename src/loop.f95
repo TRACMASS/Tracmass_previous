@@ -18,7 +18,7 @@ SUBROUTINE loop
   USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
                           niter, lbas, scrivi, subvol
   USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, dzt, &
-                          mask, iter, nsm, nsp, hs, calc_dxyz
+                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio, subGridJmin 
   use mod_vel,      only: uflux, vflux, wflux
   USE mod_seed,     only: ff, nff, seedTime, seed
   USE mod_domain,   only: timax, jens, jenn, iene, ienw
@@ -29,7 +29,7 @@ SUBROUTINE loop
   USE mod_tempsalt
   ! === Selectable moules ===
   USE mod_active_particles
-  USE mod_streamfunctions
+  USE mod_streamfunctions, only: intpsi
   USE mod_tracer
   USE mod_sed
 
@@ -99,7 +99,7 @@ SUBROUTINE loop
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 
-#elif defined ifs
+#elif defined atmospheric
   nendLoop: do n=1,nend
      if( dble(ienw(n)) <= x1 .and. x1 <= dble(iene(n)) .and. &
          dble(jens(n)) <= y1 .and. y1 <= dble(jenn(n))  ) then  
@@ -120,7 +120,7 @@ SUBROUTINE loop
  
   goto 40
 41 continue
-#ifdef ifs
+#ifdef atmospheric
   print *,'Lagrangian decomposition distribution in %: '
   do n=1,nend
      PRINT*,100.*float(dist(n))/float(sum(dist))
@@ -154,7 +154,7 @@ SUBROUTINE loop
   !==========================================================
   !=== Start main time loop                               ===
   !==========================================================
-  intsTimeLoop: do ints=intstart+1,intstart+intrun
+  intsTimeLoop: do ints=intstart+nff, intstart+intrun, nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
@@ -174,7 +174,7 @@ SUBROUTINE loop
       call writetracer
      endif
 
-    intspinCond: if(ints <= intstart+intspin) then
+     intspinCond: if(ints*nff <= (intstart+intspin)*nff) then
         call fancyTimer('seeding','start')
         call seed (tt,ts)
         call fancyTimer('seeding','stop')
@@ -247,18 +247,23 @@ SUBROUTINE loop
               cycle ntracLoop
            endif
            nrj(7,ntrac)=0
+#if defined fixedtimestep 
+           intrpg = 0.d0  ! mimics Ariane's lack of linear interpolation of the velocity fields
+#else
            intrpg = dmod(ts,1.d0) ! time interpolation constant between 0 and 1
-!           intrpg = 0.5d0 ! uncomment in order to mimic Ariane
+#endif
            intrpr = 1.d0-intrpg
            if(intrpg.lt.0.d0 .or.intrpg.gt.1.d0) then
               print *,'intrpg=',intrpg
               exit intsTimeLoop
            endif
-
-           ! === Cyclic world ocean/atmosphere === 
-           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-              x1 = x1 - DBLE(IMT)
-           END IF
+           
+           if (nperio /= 0) then
+              ! === Cyclic world ocean/atmosphere === 
+              IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+                 x1 = x1 - DBLE(IMT)
+              END IF
+           end if
            
            x0  = x1
            y0  = y1
@@ -325,65 +330,75 @@ SUBROUTINE loop
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
+           if (nperio == 6) then
+              ! === north fold cyclic for the ORCA grids ===
+              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+                 x1 = dble(IMT+2) - x1
+                 ib=idint(x1)+1
+                 jb=JMT-1
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+                 print *,'north of northfold for ntrac=',ntrac,x1
+              elseif(y1 > dble(JMT-1)) then
+                print *,'y1 > dble(JMT-1) north of northfold for ntrac=',ntrac
+                x1 = dble(IMT+2) - x1
+                ib=idint(x1)+1
+                jb=JMT-1
+                y1= dble(JMT-1) -y1 
+                x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              endif
 
-           ! === north fold cyclic for the ORCA grids ===
-#if defined orc || orca1 || orca12 
-            if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-              x1 = dble(IMT+2) - x1
-              ib=idint(x1)+1
-              jb=JMT-1
-              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           elseif(y1 > dble(JMT-1)) then
-!             print *,'north of northfold for ntrac=',ntrac
-             x1 = dble(IMT+2) - x1
-             ib=idint(x1)+1
-             jb=JMT-1
-             y1= dble(JMT-1) -y1 + dble(JMT-1)
-             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           endif
-#elif defined orca025 || orca025L75
-           if( y1 == dble(JMT-1) ) then
-              x1 = dble(IMT+3) - x1
-              y1 = dble(JMT-2)
-              ib=idint(x1)
-              jb=JMT-2
-              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           elseif(y1 > dble(JMT-1)) then
-              print *,ia,ib,x0,x1
-              print *,ja,jb,y0,y1
-              print *,ka,kb,z0,z1
-              print *,ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-              nerror=nerror+1
-              nrj(6,ntrac)=1
-              cycle ntracLoop
-           endif
+           elseif (nperio == 4) then
+              ! === another north fold implementation 
+              if( y1 == dble(JMT-1) ) then
+                 x1 = dble(IMT+3) - x1
+                 y1 = dble(JMT-2)
+                 ib=idint(x1)
+                 jb=JMT-2
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+                 print *,'north of northfold for ntrac=',ntrac,x1
+              elseif(y1 > dble(JMT-1)) then
+                print *,'y1 > dble(JMT-1) north of northfold for ntrac=',ntrac
+                x1 = dble(IMT+3) - x1
+                ib=idint(x1)
+                jb=JMT-2
+                y1= dble(JMT-1) -y1 
+                x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              endif
+              
+!!               === Cyclic Arctic in a global cylindrical projection ===
+!              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+!                 x1 = dble(IMT+2) - x1
+!                 ib=idint(x1)+1
+!                 jb=JMT-1
+!                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+!              elseif(y1 > dble(JMT-1)) then
+!                 print *,'north of northfold for ntrac=',ntrac
+!                 x1 = dble(IMT+2) - x1
+!                 ib=idint(x1)+1
+!                 jb=JMT-1
+!                 y1= dble(JMT-1) -y1 + dble(JMT-1)
+!                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+!              endif
+           end if
            
-! === Cyclic Arctic in a global cylindrical projection ===
-            if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-              x1 = dble(IMT+2) - x1
-              ib=idint(x1)+1
-              jb=JMT-1
-              x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           elseif(y1 > dble(JMT-1)) then
-             print *,'north of northfold for ntrac=',ntrac
-             x1 = dble(IMT+2) - x1
-             ib=idint(x1)+1
-             jb=JMT-1
-             y1= dble(JMT-1) -y1 + dble(JMT-1)
-             x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-           endif
-
-
+           if (nperio /= 0) then
+              ! === East-west cyclic 
+              if(x1 <  0.d0    ) then
+                 print*,'<0',ntrac,x1
+                 x1=x1+dble(IMT)       
+                 print*,ntrac,x1
+              endif
+              if(x1 > dble(IMT)) then
+                 print*,'>imt',ntrac,x1
+                 x1=x1-dble(IMT)   
+                 print*,ntrac,x1
+              end if
+              IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
+                 x1 = x1 - DBLE(IMT)
+              endif
+              if(ib > IMT      ) ib=ib-IMT 
+           end if
            
-#endif
-           ! === Cyclic world ocean/atmosphere === 
-           if(x1 <  0.d0    ) x1=x1+dble(IMT)       
-           if(x1 > dble(IMT)) x1=x1-dble(IMT)   
-           IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
-            x1 = x1 - DBLE(IMT)
-           endif    
-           if(ib > IMT      ) ib=ib-IMT 
-            
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
            if(x1 /= dble(idint(x1))) ib=idint(x1)+1 
@@ -400,9 +415,14 @@ SUBROUTINE loop
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('bottomError', errCode)
        !    if (errCode.ne.0) cycle ntracLoop
+#ifndef hydro 
            call errorCheck('airborneError', errCode)
+#endif
+           if (errCode.ne.0) cycle ntracLoop
+           
            call errorCheck('corrdepthError', errCode)
            call errorCheck('cornerError', errCode)
+           if (errCode.ne.0) cycle ntracLoop
            
            ! === diffusion, which adds a random position ===
            ! === position to the new trajectory          ===
@@ -410,6 +430,13 @@ SUBROUTINE loop
            call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
            ! === end trajectory if outside chosen domain === 
+           
+           if( z1>= dble(KM) ) then ! precipated for atm or evaporated if ocean
+            nexit(1)=nexit(1)+1
+            kb=KM
+            exit niterLoop                                
+           endif
+           
            nendloop: do k=1,nend
               if(ienw(k) <= x1 .and. x1 <= iene(k) .and. &
                  jens(k) <= y1 .and. y1 <= jenn(k) ) then
@@ -599,7 +626,7 @@ return
        case ('boundError')
           if(ia<1 .or. ia>imt .or. ib<1 .or. ib>imt .or.    &
              ja<1 .or. ja>jmt .or. jb<1 .or. jb>jmt .or.    &
-             y0<1 .or. y0>jmt .or. y1<1 .or. y1>jmt         &
+             y0<0 .or. y0>jmt .or. y1<0 .or. y1>jmt         &
              ) then
              if (verbose == 1) then
                 print *, thickline !========================================
@@ -695,7 +722,7 @@ return
               print *,'ntrac=',ntrac,niter 
               nerror=nerror+1
  !             nrj(6,ntrac)=1
-              stop 3957
+!              stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if
@@ -818,7 +845,7 @@ return
          '          dxyz :  ',dxyz
     print '(A,I4,A,F7.2,A,F7.2)',    &
          '    kmt: ', kmt(ib,ja), &
-#if defined zgrid3Dt || defined zgrid3D
+#if defined zgrid3D
          '    dz(k) : ', dz(kb), '   dzt :  ', dzt(ib,jb,kb,1)
 
 #else

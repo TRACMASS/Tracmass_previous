@@ -28,18 +28,13 @@ subroutine vertvel(ia,iam,ja,ka)
   n1=min(nsm,nsp)
   n2=max(nsm,nsp)
   kloop: do k=1,ka
-#if defined zgrid3Dt
+#if defined zgrid3D
      do n=n1,n2
         ! time change of the mass the in grid box
         wflux(k,n) = wflux(k-1,n) - ff * &
              (  uflux(ia,ja,k,n) - uflux(iam, ja,   k, n)   & 
               + vflux(ia,ja,k,n) - vflux(ia,  ja-1, k, n)   & 
-#if defined ifs
-              + (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )
-#else
-              - (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )  ! kolla denna!!!!
-#endif
-              ! ska det vara plus för ifs och minus för orca???
+              - (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas ) 
     enddo
 #else
 #if defined  full_wflux
@@ -57,10 +52,11 @@ subroutine vertvel(ia,iam,ja,ka)
 #endif
 !end ocean code
   end do kloop
+  
 
 
-! Make sure the vertical velocity is always zero at the bottom and below
-#if defined ifs
+! Make sure the vertical velocity is always zero at the ocean bottom and below as well as at the TOA
+#if defined atmospheric 
 wflux(0,:) = 0.d0
 #elif defined orca1 || orca12
 do k=0,KM-kmt(ia,ja)

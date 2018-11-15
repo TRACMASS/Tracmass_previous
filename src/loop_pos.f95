@@ -1,4 +1,5 @@
 module mod_pos
+  USE mod_precdef
   USE mod_param
   USE mod_grid
   USE mod_vel
@@ -21,10 +22,10 @@ contains
     INTEGER                                    :: ia, iam, ja, ka,k
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens
-    REAL*8                                     :: dza,dzb, zz
-    REAL*8, INTENT(IN)                         :: x0, y0, z0
-    REAL*8, INTENT(OUT)                        :: x1, y1, z1
-    
+    REAL(DP)                                   :: dza,dzb, zz
+    REAL(DP), INTENT(IN)                       :: x0, y0, z0
+    REAL(DP), INTENT(OUT)                      :: x1, y1, z1
+      
     ! === calculate the new positions ===
     ! === of the trajectory           ===
     scrivi=.false.
@@ -170,6 +171,7 @@ contains
        msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
+       call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
@@ -184,7 +186,7 @@ contains
        uu=(intrpbg*vflux(ia,ja-1,ka,nsp)+intrpb*vflux(ia,ja-1,ka,nsm))*ff
        if(uu.lt.0.d0) then
           jb=ja-1
-#ifndef ifs 
+#ifndef atmospheric 
         if(jb==0) stop 34578
 #endif
        endif
@@ -221,8 +223,7 @@ contains
        msb=int((salt-smin)/dsalt)+1
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
-       call interp2(ia,ja,ka,temp,salt,dens,nsm)
-!        call interp(ia,ja,ka,x1,y1,z1,temp,salt,dens,nsm)
+       call interp2(ia,ja,ka,temp,salt,dens)
        mta=(temp-tmin)/dtemp+1
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
@@ -244,9 +245,14 @@ contains
           kb=ka+1
        endif
        z1=dble(ka)
-       if(kb==KM+1) then    ! prevent "evaporation" and put particle from 
-          kb=KM             ! the surface to the middle of the surface layer
-          z1=dble(KM)-0.5d0 !
+   
+       if(kb==KM+1) then    ! prevent particles to cross the sea surface 
+          kb=KM             
+#if defined hydro 
+          z1=dble(KM)       ! put them exactly at the surface for hydro
+#else
+          z1=dble(KM)-0.5d0 ! ! put them in the midle of the surface layer 
+#endif
        endif
 #if defined timeanalyt
        call pos_time(1,ia,ja,ka,x0,x1)
@@ -407,50 +413,6 @@ contains
 #endif
     endif
     
-!    
-!! This is just a try and needs to be implemented and tested thoroughly
-!! It will neet do be implemented for all varbottombox
-!#ifdef baltix
-!! depth conversion for bottom box
-!#ifdef varbottombox
-!    if(  (ds==dse .or. ds==dsw .or. ds==dsn .or. ds==dss)  .and.  &
-!         (ka==KM+1-kmt(ia,ja) .or. kb==KM+1-kmt(ib,jb))             ) then
-!#ifdef zgrid3Dt 
-!        dza=dz(ka)
-!        dzb=dz(kb)
-!        if(ka==KM+1-kmt(ia,ja)) dza=dztb(ia,ja,1)
-!        if(kb==KM+1-kmt(ib,jb)) dzb=dztb(ib,jb,1)
-!#elif  zgrid3D
-!        dza=dzt(ia,ja,ka)
-!        dzb=dzt(ib,jb,kb)
-!#else
-! stop 4967
-!#endif /*zgrid3Dt*/
-!       if(dza.ne.dzb) then
-!		zz=dble(int(z1))+1.d0 - (1.d0-z1+dble(int(z1)))*dza/dzb 
-!	
-!		if( zz.le.dble(int(z1)) .or. zz.ge.dble(int(z1)+1) ) then
-!	 		print *, 'fel',zz,z1,dble(int(z1))
-!	 		print *,'z0,z1=',z0,z1
-!	 		print *,'nytt z1=',zz
-!	 		print *, 'dz',dza,dzb,dza/dzb
-!	 		print *, 'ds',ds,dse,dsw,dsn,dss
-!	 		print *, 'kmt',kmt(ia,ja),kmt(ib,jb),ka,kb
-!	 		print *, 'distance from top of a box in m',(1.-(z1-int(z1)))*dza
-!	 		print *, 'distance from top of b box in m',(1.-(zz-int(zz)))*dzb
-!	 		print *, 'ska vara mellan 0 och 1',(1.-z1+dble(int(z1)))*dza/dzb
-!	 		print *, 'ia,ib,ja,jb=',ia,ib,ja,jb
-!	 		print *, 'x0,x1,y0,y1=',x0,x1,y0,y1
-!	 		
-!		 	stop 4956
-!		endif
-!	
-!		z1=zz
-!	endif
-!	endif
-!#endif /*varbottombox*/
-!#endif /*baltix*/
- 
   end subroutine pos
   
 

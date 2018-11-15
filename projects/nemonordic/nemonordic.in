@@ -6,26 +6,27 @@
        gcmsource = 'http://www.nemo-ocean.eu/',
         gridname = 'ORCA12',
       gridsource = 'http://www.nemo-ocean.eu/',
-        griddesc = '1/12 deg run for the global Ocean.',
-!       indatadir = '/Users/doos/data/orca/orca12/',
-       indatadir = '/proj/bolinc/users/x_krido/',
+        griddesc = 'Nemo-Nordic',
+       indatadir = '/Users/doos/data/nemonordic/',
+     !topoDataDir = '/Users/joakim/data/ORCA0083-N001/domain/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'ORCA12',
-        casedesc = 'Global Ocean trajectories',
+        casename = 'Nemo-Nordic',
+        casedesc = 'Gulf of Finland trajectories',
 /
 &INIT_GRID_SIZE
-             imt =   4320,
-             jmt =   3059,
-              km =     75,
+             imt =   187,
+             jmt =   110,
+              km =     56,
              nst =      2,
-         subgrid =      1,
-     subgridimin =    2250,
-     subgridimax =    3970,
-     subgridjmin =    1570,
-     subgridjmax =    2400,
+         subgrid =      0,
+     subgridimin =      0,
+     subgridimax =      0,
+     subgridjmin =      0,
+     subgridjmax =      0,
      subgridfile = 'templ.asc',
        subgridid =      0,
+       nperio    =      0, 
 /
 &INIT_BASE_TIME
          basesec =      0,
@@ -33,34 +34,34 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =   1996,
-        jdoffset =      0,
+        baseyear =   2000,
 /
 &INIT_GRID_TIME
-   fieldsperfile =      1,
-            ngcm =    120, ! don't touch!
+   fieldsperfile =   8735,
+            ngcm =      1,
             iter =      12,
-          intmax =  15330,
+          intmax =   8735,
         minveljd =     -1,
         maxveljd =     -1,
 /
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =     12,
-        startday =      5, ! 2, 5,
-        startmon =      1, !10, 1,
-       startyear =   1996,
+       starthour =      0,
+        startday =     30,
+        startmon =      5,
+       startyear =   2013,
+        !jdoffset =      3,
           noleap =  .false., 
          startjd =      -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
-         intspin =      1, !71
-          intrun =   7300,
+         intspin =      1,
+          intrun =  10000,
 /
 &INIT_WRITE_TRAJS
-      twritetype =      11,
+      twritetype =      2,
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets (each ints)
   !                 2 = write at each time iteration
@@ -68,32 +69,34 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-           kriva =      6,
-      outdatadir = '/proj/bolinc/users/x_sarbe/project/tracmass/data_out/',
-     outdatafile = 'orca12_100y',
+           kriva =      3,
+      outdatadir = '/Users/doos/data/nemonordic/data_out/',
+     outdatafile = 'nemonordic_kriva4',
+ outdircase =      .false. ,
  intmininoutfile =      0,
-          intpsi =    10, ! write stream functions and tracer
+          intpsi =    10000, ! write stream functions and tracer
+ outdirdate =      .false. ,
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      2,
-            idir =      1,
+            isec =      4,
+            idir =      0,
             nqua =      1,
-       partquant =      1, !10, !1,
+       partquant =      1,
         ntracmax = 20000000,
-    loneparticle =      0, !2964,
+    loneparticle =     -1, !2964,
         seedtype =      1,
-            ist1 =     390, 
-            ist2 =     1218, 
-            jst1 =     3, 
-            jst2 =     3, 
-            kst1 =      1,
-            kst2 =     75,
+            ist1 =    101,
+            ist2 =    103,
+            jst1 =     53,
+            jst2 =     59,
+            kst1 =     56,
+            kst2 =     56,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
         seedfile =     '',
-     varseedfile =      0,
+     varseedfile =      1,
         seedtime =      0,
          seedall =      0,
          seedpos =      1,
@@ -101,12 +104,12 @@
      seedpart_id =      0,
 /
 &INIT_KILLZONES
-            nend =  2,
-            ienw =  1,    1,  
-            iene =  1720, 1720, 
-            jens =  1,    805,  
-            jenn =  3,    807,
-            timax = 36500000.0,
+            nend =      3,
+            ienw = 0, 0,
+            iene = 2, 188,
+            jens = 1, 0,
+            jenn = 110, 2,
+           timax = 365.0,
 /
 &INIT_TEMP_SALT
            tmin0 =  -50.0,

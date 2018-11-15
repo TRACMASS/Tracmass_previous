@@ -34,7 +34,7 @@
      stop 4957
   endif
 
-#elif defined ifs
+#elif defined atmospheric
   if(rlat.eq.float(jenn(1))) then
      nrj(8,ntrac)=1    ! Southern boundary
   elseif(rlat.eq.float(jens(2))) then

@@ -14,20 +14,20 @@
         casedesc = 'Rectangular ocean',
 /
 &INIT_GRID_SIZE
-             imt =    100,
-             jmt =    100,
-              km =     10,
-             nst =      2,
-         subgrid =      0,
+             imt =    100, ! Grid cells in the zonal direction
+             jmt =    100, ! Grid cells in the meridional direction
+              km =     10, ! Grid cells in the vertical direction
+             nst =      2, ! two time levels stores in central memory (don't change!)
+         subgrid =      0, ! 0=entire grid ; 1=sub grid to be specified below
      subgridimin =    500,
      subgridimax =   1000,
      subgridjmin =    400,
      subgridjmax =   1000,
      subgridfile =     '',
        subgridid =      1,
-      ! nperio    =      1, 
+       nperio    =      1, ! Boundary conditions: 0 = not cyclic ; 4 = orca grids
 /
-&INIT_BASE_TIME
+&INIT_BASE_TIME            ! The time will be counted from this date
          basesec =      0,
          basemin =      0,
         basehour =      0,
@@ -36,14 +36,14 @@
         baseyear =   1988,
 /
 &INIT_GRID_TIME
-   fieldsperfile =      1,
-            ngcm =      1,
-            iter =      1,
-          intmax = 146000,
+   fieldsperfile =      1, ! The number of snapshots per (netcdf) file
+            ngcm =      1, ! The number of hours between two data sets (∆tg)
+            iter =      1, ! Number of intermediate time steps between two gcm time steps
+          intmax = 146000, ! Maximum number of gcm time steps
         minveljd =     -1,
         maxveljd =     -1,
 /
-&INIT_START_DATE
+&INIT_START_DATE            ! The starting date of the GCM data to be read
         startsec =      0,
         startmin =      0,
        starthour =      1,
@@ -51,14 +51,14 @@
         startmon =      1,
        startyear =   1988,
          startjd =     -1,
-          intmin =      1,
+          intmin =      1, 
 /
 &INIT_RUN_TIME
-         intspin =      1,
-          intrun =  100,
+         intspin =      2, ! Number of gcm time steps when new trjectories are started
+          intrun =  100,   ! Terminate run adter intrun gcm time steps
 /
 &INIT_WRITE_TRAJS
-      twritetype =      2,
+      twritetype =      2, ! =0,1,2 defines how time is computed in subroutine open_outfiles
   ! kriva:          0 = no writing
   !                 1 = write at time intervals of gcm datasets (each ints)
   !                 2 = write at each time iteration
@@ -67,13 +67,11 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
              kriva =      6,
-      outdatadir =   '/proj/bolinc/users/x_sarbe/project/TRACMASS/',
-     outdatafile =     'test_theoretical',
-!     outdatafile =     'analyt_k1',
-    ! outdatafile =     'dt1_k1',
+      outdatadir =     '' !'/proj/bolinc/vagn/vagn2/x_aital/tracmass_out',
+     outdatafile =     'Theoretical_test_1',
  intmininoutfile =      0,
- intpsi =     100,
- outdirdate =      .false. ,
+ intpsi =     100,           ! int frequency of written stream functions
+ outdirdate =      .false. , ! if true a directory will be created where the trajectories are stored
 /
 &INIT_SEEDING
   ! ==============================================
@@ -105,7 +103,7 @@
   !
   ! === initial directions all in MODEL COORDINATES ===
   ! Method for seeding particles.
-  ! seedType:       1 = Seed an area defined by ist, jst, and kst.
+  ! seedType:       1 = Seed an area defined by ist, jst, and kst. if =-1 then all grid points
   !                 2 = Use a list to define which cells to seed.
   !                 3 = Use a 2-D mask file.
   !
@@ -115,9 +113,9 @@
             isec =      4,
             idir =      0,
             nqua =      1,
-       partquant =      2,
-        ntracmax =   2000000,
-    loneparticle =     -1,
+       partquant =      1,
+        ntracmax =   2000000,  ! maximum number of trajectories; increase if necessary!
+    loneparticle =     -1,  ! if /= -1 then only this (ntrac) trajectory will be computed
         seedtype =      1,
             ist1 =     31,!31,
             ist2 =     31, !31,
@@ -136,22 +134,22 @@
        seedparts =      0,
      seedpart_id =      0,
 /
-&INIT_KILLZONES
-            nend =      2,
-            ienw =      1,
-            iene =      1,
-            jens =      1,
-            jenn =      1,
-           timax =   20.0,
+&INIT_KILLZONES              ! defines a horizontal area where trjectories are terminated
+            nend =      2,   ! number of killing zones plus one
+            ienw =      1,   ! western  border of killing zone
+            iene =      1,   ! eastern  border of killing zone
+            jens =      1,   ! southern border of killing zone
+            jenn =      1,   ! northern border of killing zone
+           timax =   20.0,   ! terminates trajectories after certain number of days
 /
-&INIT_TEMP_SALT
-           tmin0 =  -50.0,
-           tmax0 =  400.0,
-           smin0 = -500.0,
-           smax0 =  400.0,
-           rmin0 = -100.0,
-           rmax0 =  500.0,
-           tmine =  -50.0,
+&INIT_TEMP_SALT              
+           tmin0 =  -50.0,   ! defines minimum temperature required for trajectories to start
+           tmax0 =  400.0,   !         maximum
+           smin0 = -500.0,   !         minimum salinity/humidity
+           smax0 =  400.0,   !         maximum salinity/humidity
+           rmin0 = -100.0,   !         minimum density/atm pressure
+           rmax0 =  500.0,   !         maximum density/atm pressure
+           tmine =  -50.0,   ! defines minimum temperature required for trajectories to CONTINUE
            tmaxe =  400.0,
            smine = -150.0,
            smaxe =  500.0,
@@ -159,11 +157,11 @@
            rmaxe =  500.0,
 /
 &INIT_DIFFUSION
-              ah = 2000.0,
-              av =    0.0,
+              ah = 2000.0,  ! sub-grid parametersiation horizontal diffusion
+              av =    0.0,  !                           vertical
 /
-&INIT_SEDIMENT
-        partdiam =  0.001,
+&INIT_SEDIMENT              ! coefficients for adding a sedimentation velocity and resuspension
+        partdiam =  0.001,  
             rhos = 2620.0,
            cwamp =   20.0,
            twave =    8.0,

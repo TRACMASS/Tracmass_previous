@@ -3,33 +3,32 @@
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
 #------------------------------------------------------------------------
-#   fl01   = -Dfixedtimestep  # Mimics Ariane's lack of time interpolation of the velocity fields
-   fl02   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
-#  fl02   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
-   fl03   = -Dregulardt      # Regular time steps to be used with -Dtimestep
+   fl01   = -Datmospheric    # This should always be activated for ifs
+#   fl02   = -Dfixedtimestep  # Mimics Ariane's lack of time interpolation of the velocity fields
+   fl03   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
+#  fl03   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
+   fl04   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-# Save trajectories  
- fl04   = -Dtempsalt       # Include temp and salt
- fl05   = -Dtextwrite      # Write results to textfile
-#  fl06   = -Dbinwrite       # Write results to binaryfile
-#  fl07   = -Dmysqlwrite     # Write results to mysql
+   fl05   = -Dtempsalt       # Include temp and salt
+   fl06   = -Dtextwrite      # Write results to textfile
+#  fl07   = -Dbinwrite       # Write results to binaryfile
+#  fl08   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
-#   fl08  = -Dstreamxy       # Calculates the barotropic stream function.
-#   fl09  = -Dstreamr        # lat-tracer (rho)/ depth-tracer (rho) vertical stream function, z=density
-   #fl10  = -Dstreamts        # --idem-- (tem/sal)  vertical stream function, z=density
-#   fl11  = -Dstream_thermohaline  #    thermohaline stream function
-  fl12  = -Dstreamv        # Meridional/Zonal streamfunciton vertical stream function, z=depth
-#  fl13  = -Drerun          # Stores the Lagrangian stream functions as a
+#   fl09  = -Dstreamxy       # Calculates the barotropic stream function.
+#   fl10  = -Dstreamr        #    vertical stream function, z=density
+#   fl11  = -Dstreamts        #    vertical stream function, z=density
+#   fl12  = -Dstream_thermohaline  #    thermohaline stream function
+   fl13  = -Dstreamv        #    vertical stream function, z=depth
+#  fl14  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    
-                            #
-#fl14  = -Dinitxyt        # Start trajectories at given positions and times
+#   fl15  = -Dinitxyt        # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-#  fl15  = -Dtwodim         # Turn off vertical velocities.
-#  fl16  = -Dfull_wflux     # Use a full 3D wflux field.
-#  fl17  = -Dexplicit_w     # Use a given vertical velocity.
+#  fl16  = -Dtwodim         # Turn off vertical velocities.
+#  fl17  = -Dfull_wflux     # Use a full 3D wflux field.
+#  fl18  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
-fl21  = -Dzgrid3D         # Cell depths defined as 3D grid 
+   fl21  = -Dzgrid3D         # Cell depths defined as 3D grid 
 #------------------------------------------------------------------------
 #  fl23  = -Dselect         # Select only one trajectory (for debugging)
 #  fl24  = -Dtracer         # Stores a simulated tracer
@@ -42,8 +41,7 @@ fl21  = -Dzgrid3D         # Cell depths defined as 3D grid
    fl30  = -Denergy
 #------------------------------------------------------------------------
 #   fl31  = -Dhydro          # Tracks water mass in the amtopsphere instead of air
-#========================================================================
-#fl32 = -Difs
+#========================================================================fl32 = -Difs
 
 ORM_FLAGS= -D$(PROJECT) \
 $(fl01)$(fl02)$(fl03)$(fl04)$(fl05)$(fl06)$(fl07)$(fl08)$(fl09)$(fl10)\
