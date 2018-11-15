@@ -42,14 +42,14 @@ SUBROUTINE init_params
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &
                                     subGridKmin, subGridKmax, SubGridFile,   &
-                                    subGridID
+                                    subGridID, nperio
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
-                                    baseMon, baseYear
+                                    baseMon, baseYear, jdoffset
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
                                     minvelJD, maxvelJD
    namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
                                     startDay, startMon, startYear,           &
-                                    startJD, jdoffset, intmin, noleap
+                                    startJD, intmin, noleap
    namelist /INIT_RUN_TIME/         intspin, intrun
    namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
                                     outdircase, intminInOutFile, intpsi, outdirdate
@@ -317,13 +317,10 @@ SUBROUTINE init_params
       dxv = 0
       dyu = 0
 
-#ifdef zgrid3Dt
+#if  zgrid3D
       ALLOCATE ( dzt(imt,jmt,km,nst) )
       dzt = 0
-#elif  zgrid3D
-      ALLOCATE ( dzt(imt,jmt,km) )
-      dzt = 0
-#endif /*zgrid3Dt*/
+#endif /*zgrid3D*/
 #ifdef varbottombox
       ALLOCATE ( dztb(imt,jmt,nst) )
 #endif /*varbottombox*/

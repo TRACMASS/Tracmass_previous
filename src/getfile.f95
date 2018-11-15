@@ -76,8 +76,7 @@ MODULE mod_getfile
        stop
     end if
 
-    !start2d(1) = ncTpos
-    start2d(2) = ncTpos ! SARA
+    start2d(1) = ncTpos
     !start2d(map2d(3)) = ncTpos       
     s = start2d(map2d)
     c = count2d(map2d)
@@ -92,7 +91,6 @@ MODULE mod_getfile
     ierr=NF90_GET_VAR(ncid ,varid , field, s,c)
     if(ierr.ne.0) call printReadError(3, fieldFile, varName)
     ierr=NF90_CLOSE(ncid)
-
     if ( all(map2d(1:2) == (/3,4/),DIM=1) .or. &
          all(map2d(2:3) == (/3,4/),DIM=1) ) then
        get2DfieldNC(1:imt,:) = field
@@ -120,7 +118,6 @@ MODULE mod_getfile
        stop
     end if
     start3d(1) = ncTpos
-    !start3d = [nread,1,1,1]
     s = start3d(map3d)
     c = count3d(map3d)
     d = c + s - 1
