@@ -120,7 +120,7 @@ MODULE mod_grid
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt, dzu, dzv
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt0, dzu0, dzv0
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
-#endif /*zgrid3Dt*/
+
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
