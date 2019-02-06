@@ -40,19 +40,18 @@ endif
 ifeq ($(NETCDFLIBS),"fink")
         LIB_DIR          = -L/sw/lib # -L/sw/lib/netcdf-gfortran/lib
         INC_DIR          = -I/sw/include  #-I/sw/lib/netcdf-gfortran/include
-        LNK_FLAGS        = -lnetcdf -lnetcdff #-lsz -Wl,-dead_strip_dylibs
-endif
-ifeq ($(NETCDFLIBS),"tetralith")
-	LIB_DIR		=
-	INC_DIR 	= -I$(NETCDF_DIR)/include
-	LNK_FLAGS	= -L$(NETCDF_DIR)/lib -lnetcdf -lnetcdff
+        LNK_FLAGS        = -lnetcdf -lnetcdff -lsz 
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-#	FF_FLAGS         = -O0 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
-#	FF_FLAGS         = -O3 -c -x f95-cpp-input  
-	FF_FLAGS         = -O3 -c -x f95-cpp-input  -g #-fcheck=all -Wall #-gdwarf-2 
-        F90_FLAGS        = -fno-underscoring 
+	FF_FLAGS         = -O3 -c -x f95-cpp-input 
+  	ifeq ($(OPT),"debug")
+		FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
+	endif
+	ifeq ($(OPT),"opt")
+		FF_FLAGS         = -O3 -c -x f95-cpp-input 
+	endif
+    F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
 endif
 ifeq ($(F95COMPILER),"g95")
@@ -63,7 +62,7 @@ endif
 
 ifeq ($(F95COMPILER),"ifort")
         FF_FLAGS         = -O3 -c -cpp -convert big_endian
-        F90_FLAGS        = -free #-assume nounderscore
+        F90_FLAGS        = -free -assume nounderscore
 	ARG_FLAGS       += -Tf
         FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 endif
@@ -75,14 +74,14 @@ endif
 
 CC                = gcc -O  $(INC_DIR)
 
-ACTVEL = empty.o
+ACTVEL = zanna_turb_4.o
 
 VPATH = src:projects/$(PROJECT):src/active_particles
 
 all: runfile
 
-objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
-	            seed.o init_seed.o sw_stat.o $(ACTVEL) getfile.o \
+objects := $(addprefix $(OBJDIR)/,modules.o $(ACTVEL) laplacian.o savepsi.o loop_pos.o writetrajs.o \
+	            seed.o init_seed.o sw_stat.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
                     interp.o interp2.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o \

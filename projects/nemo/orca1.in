@@ -1,0 +1,175 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
+&INIT_GRID_DESCRIPTION
+         gcmname = 'NEMO-ORCA1',
+       gcmsource = 'http://www.nemo-ocean.eu/',
+        gridname = 'ORCA1.L75',
+      gridsource = 'http://www.nemo-ocean.eu/',
+        griddesc = 'Global 1 deg run',
+       indatadir = '',
+     topoDataDir = '/sfs/fs1/work-geomar/smomw352/ORCA1-N406/domain/',
+     RunID       = 'ORCA1-N406', 
+     physDataDir = '/sfs/fs1/work-geomar/smomw352/ORCA1-N406/means/',
+     physPrefixForm = 'YYYY/RUNID_YYYYMMDDGRIDX'
+     bioDataDir = '', 
+     bioPrefixForm = '', 
+     tGridName = 'd05T', 
+     uGridName = 'd05U',
+     vGridName = 'd05V',
+     fileSuffix = '.nc',
+     ssh_name = 'sossheig', 
+     ueul_name = 'vozocrtx', 
+     veul_name = 'vomecrty',
+     usgs_name = 'vozoeivu',
+     vsgs_name = 'vomeeivv',
+     temp_name = 'votemper',
+     salt_name = 'vosaline',
+     oneStepPerFile = .true.,
+     readMean = .false., 
+     readTS = .true., 
+     vvl = .true., 
+     readBio = .false., 
+     readSSH = .true., 
+     sgsUV = .true.,
+/
+&INIT_CASE_DESCRIPTION
+        casename = 'ORCA1',
+        casedesc = 'Test',
+/
+&INIT_GRID_SIZE
+             imt =   362,
+             jmt =   292,
+              km =     75,
+             nst =      2,
+         subgrid =      0,
+     subgridimin =    3529,
+     subgridimax =    3725,
+     subgridjmin =    2279,
+     subgridjmax =    2634,
+     subgridfile = 'templ.asc',
+       subgridid =      0,
+       nperio    =      0, 
+       coordFile = 'mesh_hgr.nc'
+     hgridFile = 'mesh_hgr.nc'
+     zgridFile = 'mesh_zgr.nc'
+     bathyFile = 'bathy_level.nc'
+   dx_name = 'e1t'
+   dy_name = 'e2t'
+   dxv_name = 'e1v'
+   dyu_name = 'e2u'
+   dz_1D_name = 'e3t_0'
+   dzt_3D_name = 'e3t'
+   dzu_3D_name = 'e3u'
+   dzv_3D_name = 'e3v'
+   kBathy_name = 'Bathy_level'
+   gridIsUpsideDown = .true.
+   read3Ddz = .true. 
+/
+&INIT_BASE_TIME
+         basesec =      0,
+         basemin =      0,
+        basehour =      0,
+         baseday =      1,
+         basemon =      1,
+        baseyear =      1,
+        jdoffset =      4,
+/
+&INIT_GRID_TIME
+   fieldsperfile =      1,
+            ngcm =    120,
+            iter =      1,
+          intmax =  15330,
+        minveljd =      1,
+        maxveljd =    120,
+/
+&INIT_START_DATE
+        startsec =      0,
+        startmin =      0,
+       starthour =     12,
+        startday =      5,
+        startmon =      1,
+       startyear =   1980,
+          noleap =  .true., 
+         startjd =     -1,
+          intmin =      1,
+/
+&INIT_RUN_TIME
+         intspin =      1,
+          intrun =   73,
+/
+&INIT_WRITE_TRAJS
+      twritetype =      11,
+  ! kriva:          0 = no writing
+  !                 1 = write at time intervals of gcm datasets (each ints)
+  !                 2 = write at each time iteration
+  !                 3 = write all the time
+  !                 4 = write only start and end positions
+  !                 5 = write at chosen intervals
+  !                 6 = write each spatial grid-crossing 
+           kriva =      1,
+      outdatadir = '/sfs/fs1/work-geomar/smomw352/',
+     outdatafile = 'orca1_test',
+ intmininoutfile =      0,
+          intpsi =    10, ! write stream functions and tracer
+/
+&INIT_SEEDING
+             nff =      1,
+            isec =      4,
+            idir =      0,
+            nqua =      1,
+       partquant =      1,
+        ntracmax = 20000000,
+    loneparticle =      0, !2964,
+        seedtype =      1,
+            ist1 =   235,
+            ist2 =   237,
+            jst1 =   198,
+            jst2 =   198,
+            kst1 =     70,
+            kst2 =     75,
+            tst1 =     -1,
+            tst2 =     -1,
+         seeddir =    ' ',
+        seedfile =     '',
+     varseedfile =      0,
+        seedtime =      0,
+         seedall =      0,
+         seedpos =      1,
+       seedparts =      0,
+     seedpart_id =      0,
+/
+&INIT_KILLZONES
+            nend =      5,
+            ienw =   -1, 2402,   -1,   -1,
+            iene =    2, 3000, 3000, 3000,
+            jens =    1,    1,    1, 1481,
+            jenn = 2000, 2000,    2, 2000,
+!            timax = 70.0,
+           timax = 3650000.0,
+/
+&INIT_TEMP_SALT
+           tmin0 =  -50.0,
+           tmax0 =  400.0,
+           smin0 = -500.0,
+           smax0 =  400.0,
+           rmin0 = -100.0,
+           rmax0 =  500.0,
+           tmine =  -50.0,
+           tmaxe =  400.0,
+           smine = -150.0,
+           smaxe =  500.0,
+           rmine = -100.0,
+           rmaxe =  500.0,
+/
+&INIT_DIFFUSION
+              ah =    0.0,
+              av =    0.0,
+/
+&INIT_SEDIMENT
+        partdiam =  0.001,
+            rhos = 2620.0,
+           cwamp =   20.0,
+           twave =    8.0,
+         critvel =    0.1,
+/
