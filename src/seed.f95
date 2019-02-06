@@ -21,6 +21,8 @@ MODULE mod_seed
    USE mod_write, only    : writedata
    USE mod_tempsalt, only : rmax0, rmin0, tmax0, tmin0, smax0, smin0, &
                             sal, tem, rho
+   USE mod_deformation
+   
    IMPLICIT NONE
   
    INTEGER                                    :: isec,  idir
@@ -56,8 +58,6 @@ CONTAINS
      REAL                                     :: temp,salt,dens
      REAL(DP)                                 :: tt, ts
      REAL(DP)                                 :: vol, subvol
-     
-
 
      ! --------------------------------------------
      ! --- Check if ntime is in vector seed_tim ---
@@ -74,6 +74,9 @@ CONTAINS
             END IF
          END DO findTime
       END IF
+
+      if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
+      
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---
       !----------------------------------------
@@ -92,7 +95,7 @@ CONTAINS
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
-
+         
 #if defined baltix || defined rco
          ! -------------------------------------------------
          ! --- Test if it is time to launch the particle ---
@@ -124,9 +127,9 @@ CONTAINS
          
             CASE (2)  ! Through northern zonal-vertical surface
                vol = vflux (iist,ijst,ikst,nsm)
-         
+               
             CASE (3)  ! Through upper zonal-meridional surface
-               CALL vertvel (ib,ibm,jb,kb)
+               CALL vertvel (1.d0,ib,ibm,jb,kb)
 #if defined explicit_w || full_wflux
                vol = wflux(ib,jb,kb,nsm)
 #elif twodim
@@ -145,7 +148,7 @@ CONTAINS
                ENDIF
                IF (vol == 0.d0) cycle startLoop
          
-         END SELECT
+            END SELECT
          ! If the particle is forced to move in positive/negative direction
          IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0 ) .OR. (vol == 0.) ) THEN
             CYCLE startLoop
@@ -188,7 +191,7 @@ CONTAINS
             case (5)
                num = partQuant
                subtimesteps = numseedsubints
-         END SELECT
+            END SELECT
          IF (num == 0 .AND. nqua /= 4) THEN
             num=1
          END IF
@@ -247,8 +250,8 @@ CONTAINS
                      END IF
 
                   CASE (4)   ! Spread evenly inside box                  
-                     x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt) - 0.5d0) / DBLE(ijt)
-                     y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt) - 0.5d0) / DBLE(ikt)
+                     x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
+                     y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
                      z1 = DBLE (kb-1) + 0.5d0
 
                   CASE (5)                  
@@ -262,9 +265,8 @@ CONTAINS
                   ! ------------------------------------------------------ 
 
 #ifdef tempsalt 
-                  !CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-                  CALL interp2(ib,jb,kb,temp,salt,dens)
-                   IF (temp < tmin0 .OR. temp > tmax0 .OR. &
+                  CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+                  IF (temp < tmin0 .OR. temp > tmax0 .OR. &
                        &   salt < smin0 .OR. salt > smax0 .OR. &
                        &   dens < rmin0 .OR. dens > rmax0      ) THEN
                      CYCLE kkkLoop 
@@ -277,7 +279,7 @@ CONTAINS
 
                   ! Only one particle for diagnistics purposes
                   if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
-                     nrj(6,ntrac)=1
+                     trajectories(ntrac)%active = .false.
                      cycle kkkLoop
                   endif
 
@@ -285,12 +287,30 @@ CONTAINS
                   ! tt - time [s] rel to start
                   ts = DBLE (ints-1) + seedsubints(subtstep)
                   tt = ts * tseas
-                  ! ------------------------------------------------------------
+                  ! ---------------------------------------------------------
                   ! --- Put the new particle into the vectors trj and nrj ---
-                  ! ------------------------------------------------------------
-                  trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
-                  nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
-                  nrj(7,ntrac)=1
+                  ! ---------------------------------------------------------
+                  !trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
+                  !nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
+                  !nrj(7,ntrac)=1
+                  
+                  trajectories(ntrac)%x1 = x1
+                  trajectories(ntrac)%y1 = y1
+                  trajectories(ntrac)%z1 = z1
+                  trajectories(ntrac)%tt = tt
+                  trajectories(ntrac)%subvol = subvol
+                  trajectories(ntrac)%t0 = tt
+                  trajectories(ntrac)%ib = ib
+                  trajectories(ntrac)%jb = jb
+                  trajectories(ntrac)%kb = kb
+                  trajectories(ntrac)%niter = 0
+                  trajectories(ntrac)%nts = IDINT(ts)
+                  trajectories(ntrac)%icycle = 1
+                  
+                  trajectories(ntrac)%lapu1 = lapu(ib,jb,kb,1)
+                  trajectories(ntrac)%lapu2 = lapu(ib,jb,kb,2)
+                  trajectories(ntrac)%lapv1 = lapv(ib,jb,kb,1)
+                  trajectories(ntrac)%lapv2 = lapv(ib,jb,kb,2)
 
                   !Save initial particle position
                   call writedata(10) !ini

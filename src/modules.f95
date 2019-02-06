@@ -1,12 +1,9 @@
 
 
 MODULE mod_precdef		! Precision definitions
-   !integer, parameter                       :: P4 = selected_real_kind(6, 37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
-!   integer, parameter                       :: DP = selected_real_kind(33, 4931)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
 ENDMODULE mod_precdef
-
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_param
@@ -15,7 +12,7 @@ MODULE mod_param
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
   INTEGER                                   :: ncoor,kriva,iter,ngcm
   REAL(DP), PARAMETER                       :: UNDEF=1.d20 
-  REAL(DP), PARAMETER                       :: EPS=1.d-10 !7 ! the small epsilon
+  REAL(DP), PARAMETER                       :: EPS=1.d-7 ! the small epsilon
 
   REAL(DP), PARAMETER                       :: grav = 9.81
   REAL(DP), PARAMETER                       :: PI = 3.14159265358979323846d0
@@ -27,6 +24,28 @@ MODULE mod_param
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+MODULE mod_trajdef ! Define derived type "trajectory"
+   USE mod_precdef
+   TYPE trajectory
+      INTEGER                               :: ia,ja,ka,ib,jb,kb  !! grid indices
+      INTEGER                               :: nts                !! time step
+      INTEGER                               :: niter              !! trajectory iterations
+      INTEGER                               :: icycle             !! 0=keep advecting particle
+                                                                  !! 1=stop and update model fields
+      INTEGER                               :: lbas               !! flag 
+      REAL(DP)                              :: x0,y0,z0,x1,y1,z1  !! positions
+      REAL(DP)                              :: tt,t0              !! time 
+      REAL(DP)                              :: subvol             !! volume (or mass for atm.)
+      REAL(DP)                              :: lapu1,lapv1        !! Laplacian of u,v at previous step
+      REAL(DP)                              :: lapu2,lapv2        !! Laplacian of u,v at next step
+      REAL(DP)                              :: dlapu,dlapv        !! d/dt Laplacian of u,v 
+      REAL(DP)                              :: vort1,hdiv1        !! Vorticity, div of u,v at previous step
+      REAL(DP)                              :: vort2,hdiv2        !! Vort, div of u,v at next step
+      LOGICAL                               :: active             !! particle active or not
+      LOGICAL                               :: sedimented         !! particle sedimented or not
+   END TYPE trajectory
+END MODULE
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
   USE mod_precdef
@@ -35,40 +54,30 @@ MODULE mod_loopvars
   REAL(DP)                                  :: dsu, dsd, dsc
   LOGICAL                                   :: scrivi
   INTEGER                                   :: niter
-  REAL(QP)                                  :: ss0
+  REAL(DP)                                  :: ss0
   INTEGER                                   :: lbas
   REAL(DP)                                  :: subvol
 ENDMODULE mod_loopvars
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
-
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-MODULE mod_timeanalyt
-  USE mod_precdef
-  INTEGER                                   :: looop,ii,iim
-  REAL(DP), PARAMETER                       :: XXLIM=1.d-6
-  REAL(DP)                                  :: r0
-  REAL(QP)                                  :: rijk,s0,ss,fn0i0,fn0im,fnmi0,fnmim,f0,f1
-ENDMODULE mod_timeanalyt
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-
 MODULE mod_traj
   USE mod_precdef
+  USE mod_trajdef
   ! Variables connected to particle positions.
-  INTEGER, PARAMETER                         :: NNRJ=8, NTRJ=7
-  INTEGER                                    :: nend
-  INTEGER                                    :: ntrac, ntractot=0
-  ! === Particle arrays ===
-  REAL(DP), ALLOCATABLE,  DIMENSION(:,:)    :: trj
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: nrj 
+  INTEGER, PARAMETER                        :: NNRJ=8, NTRJ=7
+  INTEGER                                   :: nend
+  INTEGER                                   :: ntrac, ntractot=0
+  ! === Particle arrays === 
+  TYPE(trajectory), ALLOCATABLE, DIMENSION(:) :: trajectories
   ! === Particle counters ===
-  INTEGER                                    :: nout=0, nloop=0, nerror=0, nrh0=0
-  INTEGER, ALLOCATABLE,DIMENSION(:)          :: nexit
+  INTEGER                                   :: nout=0, nloop=0, nerror=0, nrh0=0
+  INTEGER, ALLOCATABLE,DIMENSION(:)         :: nexit
   ! === Particle positions ===
   INTEGER                                   :: ia, ja, ka, iam
   INTEGER                                   :: ib, jb, kb, ibm
   REAL(DP)                                  :: x0, y0, z0
   REAL(DP)                                  :: x1, y1, z1
+  REAL(DP)                                  :: lapu1, lapu2, lapv1, lapv2, dlapu, dlapv, vort1, vort2, hdiv1, hdiv2, dvort, dhdiv
 ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -102,30 +111,41 @@ MODULE mod_grid
   INTEGER                                   :: nperio=1
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: mlh !Saramlh
-  REAL*4, ALLOCATABLE, DIMENSION(:)         :: dep !Saramlh
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: EP  !SaraEP
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: hs
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: botbox
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)     :: dxv, dyu, ang
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: dz
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: dxdy
   REAL(DP)                                  :: dxyz
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: csu,cst,dyt,phi
-
+  
+  CHARACTER(LEN=200)                        :: coordFile, hgridFile, zgridFile, bathyFile
+  CHARACTER(LEN=50)                         :: dx_name, dy_name, dxv_name, dyu_name, &
+                                               dz_1D_name, dzt_3D_name, dzu_3D_name, dzv_3D_name, &
+                                               kBathy_name
+  LOGICAL                                   :: gridIsUpsideDown, read3Ddz, oneStepPerFile, &
+                                               readMean, readTS, vvl, readBio, readSSH, sgsUV
+  
+  ! Info about input data 
+  CHARACTER(LEN=50)                         :: RunID, tGridName, uGridName, vGridName, &
+                                               fileSuffix, ssh_name, ueul_name, veul_name, &
+                                               usgs_name, vsgs_name, temp_name, salt_name
+  CHARACTER(LEN=200)                        :: physDataDir, physPrefixForm,  &
+                                               bioDataDir, bioPrefixForm 
+  CHARACTER(LEN=50), DIMENSION(20)          :: physTracerNames, bioTracerNames
+  
   ! === Vertical grids ===
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: zlev
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: z_r, z_w
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt, dzu, dzv
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt0, dzu0, dzv0
   REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
-
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
-#ifdef atmospheric
-  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: aa, bb, dydegv
+#ifdef ifs
+  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: aa, bb
 #endif
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv
   INTEGER                                   :: subGrid     ,subGridID
@@ -134,8 +154,9 @@ MODULE mod_grid
   INTEGER                                   :: subGridKmin=1 ,subGridKmax=0
   CHARACTER(LEN=200)                        :: SubGridFile 
   INTEGER                                   :: degrade_space=0
+  INTEGER                                   :: freeSurfaceForm
 
-#ifdef atmospheric
+#ifdef ifs
   REAL(DP), PARAMETER                       :: R_d = 287.05d0
   REAL(DP), PARAMETER                       :: L_v = 2.5d0 * 1e+6   
   REAL(DP), PARAMETER                       :: c_d = 1004.d0
@@ -143,9 +164,9 @@ MODULE mod_grid
 
 CONTAINS
   function l2d(lon1,lon2,lat1,lat2)
-    real                                   :: lon1,lon2,lat1,lat2,l2d
-    real                                   :: rlon1,rlon2,rlat1,rlat2
-    real                                   :: dlon,dlat,a,c
+    real                                    :: lon1,lon2,lat1,lat2,l2d
+    real                                    :: rlon1,rlon2,rlat1,rlat2
+    real                                    :: dlon,dlat,a,c
     dlon = (lon2 - lon1)/180*pi
     rlat1 = lat1 /180.*pi
     rlat2 = lat2 /180.*pi
@@ -179,7 +200,6 @@ CONTAINS
        print *,'ERROR: Negative box volume                                '
        print *,'----------------------------------------------------------'
        print *,'dxdy = ', dxdy(ib,jb)
-       print *,'dzt = ', intrpg,dzt(ib,jb,kb,nsp),intrpr,dzt(ib,jb,kb,nsm)
        print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
        print *,'----------------------------------------------------------'
        print *,'The run is terminated'
@@ -216,7 +236,7 @@ MODULE mod_time
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
   REAL(DP)                                  :: jdoffset=0
-  LOGICAL                                   :: noleap=.true.
+  LOGICAL                                   :: noleap=.false.
   ! === Timerange for velocity fields
   REAL(DP)                                  :: minvelJD=0,   maxvelJD=0
   INTEGER                                   :: minvelints, maxvelints
@@ -257,17 +277,20 @@ CONTAINS
   subroutine updateClock  
     USE mod_param, only: ngcm
     IMPLICIT NONE
-    ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas 
+    ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas
+
     currJDtot = (ints+ttpart)*(dble(ngcm)/24.)
     call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
                  currYear , currMon ,currDay)
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
+    
     if ((mod(currYear, 4) == 0)  .and. (currJDyr>56) .and.     &
          (currJDyr<(56 - leapoffset + ngcm/24.)) .and. noleap) then
        leapoffset = leapoffset + 1
        call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
             currYear , currMon ,currDay)
     end if
+    
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
     currFrac = (currJDtot-dble(int(currJDtot,8)))*24
     currHour = int(currFrac,8)
@@ -285,7 +308,7 @@ CONTAINS
     else
        loopints = ints
     end if
-    loopJD = (loopints + ttpart)*(dble(ngcm)/24) + 1
+    loopJD = (loopints + ttpart)*(dble(ngcm)/24) !+ 1 TEST IF NEEDED
     call  gdate (baseJD+loopJD-1+jdoffset ,loopYear, loopMon, loopDay)
     loopJDyr = baseJD+loopJD - jdate(loopYear ,1 ,1)
     loopFrac = (loopJD - dble(int(loopJD,8))) * 24
@@ -403,8 +426,7 @@ CONTAINS
 #if defined fixedtimestep 
     intrpbg=0.d0 ! mimics Ariane's lack of linear interpolation of the velocity fields
 #else    
-!    intrpbg=dmod(ts,1.d0) 
-    intrpbg=mod(ts,1.d0) 
+    intrpbg=dmod(ts,1.d0) 
 #endif
     intrpb =1.d0-intrpbg
   end subroutine calc_time
@@ -455,14 +477,12 @@ CONTAINS
  
   subroutine datasetswap
 
-    USE  mod_grid, ONLY      : nsm,nsp,hs,mlh,EP !Saramlh !SaraEP
+    USE  mod_grid, only      : nsm,nsp,hs
     USE  mod_tempsalt, only  : tem,sal,rho
 
     IMPLICIT NONE
 
     hs(:,:,nsm)      = hs(:,:,nsp)
-    mlh(:,:,nsm)     = mlh(:,:,nsp) !Saramlh
-    EP(:,:,nsm)      = EP(:,:,nsp)  !SaraEP
     uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
     vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
 !    wflux(:,nsm) = wflux(:,nsp) 
@@ -542,14 +562,13 @@ MODULE mod_streamfunctions
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 #ifdef streamr
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr,stzr
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr, stzr
 #endif
 #ifdef stream_thermohaline
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
 #endif
 #ifdef tracer_convergence
- ! REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:)      :: converg
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: uct, vct, wct, ucs, vcs, wcs
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: converg
 #endif
   INTEGER                                    :: intpsi=120 
   ! to be read by the xxx.in files in future
@@ -580,6 +599,13 @@ ENDMODULE mod_diffusion
 #endif
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+MODULE mod_deformation
+   USE mod_precdef
+   !! fields describing the flow deformation
+   !! e.g. vorticity, shearing etc. 
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: vort, hdiv
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: lapu, lapv
+END MODULE mod_deformation
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_sed

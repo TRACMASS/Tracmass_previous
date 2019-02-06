@@ -16,6 +16,7 @@ SUBROUTINE init_params
    USE mod_tracer
    USE mod_getfile
    USE mod_write
+   USE mod_deformation
    
 #if defined diffusion || turb 
    USE mod_diffusion
@@ -37,12 +38,27 @@ SUBROUTINE init_params
 ! Setup namelists
    namelist /INIT_NAMELIST_VERSION/ gridVerNum
    namelist /INIT_GRID_DESCRIPTION/ GCMname, GCMsource, gridName, gridSource,&
-                                    griddesc, inDataDir, topoDataDir
+                                    griddesc, inDataDir, topoDataDir, RunID, & 
+                                    physDataDir, physPrefixForm,             &
+                                    bioDataDir, bioPrefixForm,               &
+                                    tGridName, uGridName, vGridName,         &
+                                    fileSuffix,                              & 
+                                    ssh_name, ueul_name, veul_name,          &
+                                    usgs_name, vsgs_name,                    &
+                                    temp_name, salt_name,                    &
+                                    physTracerNames, bioTracerNames,         & 
+                                    oneStepPerFile,                          & 
+                                    readMean, readTS, vvl, readBio, readSSH, sgsUV
    namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &
                                     subGridKmin, subGridKmax, SubGridFile,   &
-                                    subGridID, nperio
+                                    subGridID, nperio, freeSurfaceForm,      &
+                                    coordFile, hgridFile, zgridFile, bathyFile, &
+                                    dx_name, dy_name, dxv_name, dyu_name,    &
+                                    dz_1D_name, dzt_3D_name, dzu_3D_name,    &
+                                    kBathy_name,                             &
+                                    dzv_3D_name, gridIsUpsideDown, read3Ddz
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
                                     baseMon, baseYear, jdoffset
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
@@ -76,9 +92,12 @@ SUBROUTINE init_params
    Case     = CASE_NAME
 
    IF ((IARGC() > 0) )  THEN
-      CALL getarg(1,Case)
+      CALL getarg(1,project)
    END IF
-
+   IF ((IARGC() > 1) )  THEN
+      CALL getarg(2, Case)
+   END IF
+   
    CALL getenv('TRMPROJDIR',projdir)
    if (len(trim(projdir)) == 0) then
       CALL getenv('TRMDIR',ormdir)
@@ -88,7 +107,7 @@ SUBROUTINE init_params
          projdir = 'projects/'//trim(Project)
       end if
    end if
-
+   
    OPEN (8,file=trim(projdir)//'/'//trim(Project)//'.in',    &
         & status='OLD', delim='APOSTROPHE')
    ! -- Check if the namefiles has correct version number. 
@@ -189,7 +208,7 @@ SUBROUTINE init_params
    start3d  = [1, subGridImin, subGridJmin, subGridKmin]
    count3d  = [1, imt,         jmt,         km         ]
    
-   if ((IARGC() > 1) )  then
+   if ((IARGC() > 2) )  then
       ARG_INT1 = 0.1
       CALL getarg(2,inparg)
       if ( ARG_INT1 == 0) then
@@ -201,7 +220,7 @@ SUBROUTINE init_params
       end if
    end if
       
-   IF ((IARGC() > 2) ) THEN
+   IF ((IARGC() > 3) ) THEN
       ARG_INT2 = 0.1
       CALL getarg(3,inparg)
       if ( ARG_INT2 == 0) then
@@ -233,7 +252,7 @@ SUBROUTINE init_params
       startFrac = (startFrac - startHour) * 60
       startMin  = int(startFrac)
    end if
-
+   
    if (nff == 1) then
       intmin = jd2ints(startJD)
    else
@@ -331,28 +350,43 @@ SUBROUTINE init_params
       ! --- sea-surface height, and trajectory data                   ---
       ALLOCATE ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
       ALLOCATE ( hs(imt+1,jmt+1,nst) )
-      ALLOCATE ( mlh(imt+1,jmt+1,nst) ) !Saramlh
-      ALLOCATE ( dep(km)) !Saramlh
-      ALLOCATE ( EP(imt+1,jmt+1,nst) )  !SaraEP
 #if defined explicit_w || full_wflux
       ALLOCATE ( wflux(imt+2 ,jmt+2 ,0:km,NST) )
 #else
       ALLOCATE ( wflux(0:km,NST) )
 #endif
       hs    = 0.
-      mlh   = 0. !Saramlh
-      dep   = 0. !Saramlh
-      EP    = 0. !SaraEP
       uflux = 0.
       vflux = 0.
       wflux = 0.d0
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       
+      !! allocate deformation arrays
+      ALLOCATE ( vort(1:imt,1:jmt,1:km,2), hdiv(1:imt,1:jmt,1:km,1:2), &
+               & lapu(1:imt,1:jmt,1:km,2), lapv(1:imt,1:jmt,1:km,1:2)  )
+      vort(:,:,:,:) = 0.
+      hdiv(:,:,:,:) = 0.
+      lapu(:,:,:,:) = 0.
+      lapv(:,:,:,:) = 0.
+      
       ! === Init mod_traj ===
-      ALLOCATE ( trj(NTRJ,ntracmax), nrj(NNRJ,ntracmax) )
+      ALLOCATE ( trajectories(ntracmax) )
+      trajectories(:)%x1 = 0.
+      trajectories(:)%y1 = 0.
+      trajectories(:)%z1 = 0.
+      trajectories(:)%tt = 0.
+      trajectories(:)%t0 = 0.
+      trajectories(:)%subvol = 0.
+      trajectories(:)%ib = 0.
+      trajectories(:)%jb = 0.
+      trajectories(:)%kb = 0.
+      trajectories(:)%nts = 0.
+      trajectories(:)%niter = 0.
+      trajectories(:)%icycle = 0.
+      trajectories(:)%active = .true.
+      trajectories(:)%sedimented = .false.
+      
       ALLOCATE ( nexit(NEND) ) 
-      nrj = 0
-      trj = 0.d0
       nexit = 0
       ntractot = 0
       numseedsubints = max(count(seedsubints /= -1), 1)
@@ -394,18 +428,6 @@ SUBROUTINE init_params
 #ifdef stream_thermohaline
       ALLOCATE ( psi_ts(MR,MR,2,nend) )
       psi_ts=0.
-#endif
-      
-      ! --- Allocate trace convergence ----
-#ifdef tracer_convergence
-      ALLOCATE( uct(imt,jmt,km,nend), vct(imt,jmt,km,nend), wct(imt,jmt,km,nend) )
-      ALLOCATE( ucs(imt,jmt,km,nend), vcs(imt,jmt,km,nend), wcs(imt,jmt,km,nend) )
-      uct = 0.
-      vct = 0.
-      wct = 0.
-      ucs = 0.
-      vcs = 0.
-      wcs = 0.
 #endif
 
       ! --- Allocate tracer data ---

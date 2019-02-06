@@ -25,6 +25,7 @@ subroutine interp2(i,j,k,temp,salt,dens)
   temp=intrpbg*tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm)
   salt=intrpbg*sal(i,j,k,nsp)+intrpb*sal(i,j,k,nsm)
   dens=intrpbg*rho(i,j,k,nsp)+intrpb*rho(i,j,k,nsm)
+
   return
 end subroutine interp2
 #endif

@@ -4,10 +4,10 @@ module mod_write
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
   USE mod_time 
+  USE mod_active_particles, only: upr !!Joakim edit
  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
-
   INTEGER                                    :: intminInOutFile
   CHARACTER(LEN=200)                         :: outDataDir, outDataFile
   CHARACTER (LEN=200)                        ::  projdir="", ormdir=""
@@ -48,8 +48,6 @@ CONTAINS
   
   subroutine open_outfiles
 
-
-
     IMPLICIT NONE
     CHARACTER(LEN=200)                         :: fullWritePref
     CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
@@ -74,16 +72,28 @@ CONTAINS
 #endif
 
 #if defined binwrite
-    open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    !open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &  
+    !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+    open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    !open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
+    !     access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
+         access='direct' ,form='unformatted' ,recl=72 ,status='replace') !!Joakim edit
     open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
-    open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &  
-         access='direct' ,form='unformatted' ,recl=24 ,status='replace')
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    open(unit=79 ,file=trim(fullWritePref)//'_err.bin', &
+         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
 #endif
 
 #if defined csvwrite
@@ -102,15 +112,10 @@ CONTAINS
     open(52,file=trim(fullWritePref)//'_psi_yz_xz.bin',form='unformatted')
 #endif
 #if defined streamr 
-    open(53,file=trim(fullWritePref)//'_psi_xr_yr_zr.bin',form='unformatted')
+    open(53,file=trim(fullWritePref)//'_psi_xr_yr.bin',form='unformatted')
 #endif
 #ifdef stream_thermohaline
     open(54,file=trim(fullWritePref)//'_psi_ts.bin',form='unformatted')
-#endif
-
-#ifdef tracer_convergence
-    OPEN(55,file=TRIM(fullWritePref)//'_convergt.bin',form='unformatted')
-    OPEN(50,file=TRIM(fullWritePref)//'_convergs.bin',form='unformatted')
 #endif
 
 #ifdef rerun
@@ -143,8 +148,6 @@ CONTAINS
     close(78)
     close(79)
 #endif
-
-
   end subroutine close_outfiles
 
   subroutine writedata(sel)
@@ -154,7 +157,6 @@ CONTAINS
     USE mod_loopvars
     USE mod_name
 
-
     IMPLICIT NONE
 
     REAL                                 :: vort
@@ -162,30 +164,38 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosIn=0  ,recPosOut=0
     INTEGER*8, SAVE                      :: recPosRun=0 ,recPosErr=0
     INTEGER*8, SAVE                      :: recPosKll=0
-    INTEGER*8                            :: ntrac_number
-    REAL                                 :: x14 ,y14 ,z14
+    INTEGER*4                            :: ntrac4
+    REAL*4                               :: x14 ,y14 ,z14, tt14, t014
+    REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
+                                            dvort4, dhdiv4, upr4, vpr4
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
     REAL                                       :: temp2, salt2, dens2
-#if defined  tes 
+#if defined for || sim 
+566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
+         ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
+#elif defined rco || baltix 
+566 format(i8,i7,f7.2,f7.2,f7.1,2f12.4 &
+         ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
+#elif defined tes 
 566 format(i8,i7,f8.3,f8.3,f7.3,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined atmospheric 
-566 format(i8,i7,f9.3,f9.3,f7.2,f12.2,f12.2 &
-         ,f15.0,f8.2,f8.2,f10.2,f6.0,8e8.1 )
+#elif defined ifs 
+566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.2 &
+         ,f15.0,f8.2,f8.2,f8.2,f6.0,8e8.1 )
 #elif defined orc
     !566 format(i8,i7,2f8.2,f6.2,2f10.2 &
     !         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
-566 format(i8,i7,2f9.3,f6.2,2f12.2 &
-         ,f12.0,f6.1,f6.2,f6.2,f6.2,8e8.1 ) !Sara !SaraEP
+566 format(i8,i7,2f9.3,f6.2,2f10.2 &
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
-566 format(i8,i7,2f9.3,f6.2,2f12.2 &
-         ,f12.0,f6.1,f6.2,f6.2,e15.4,f9.2,8e8.1 )!Saratid !SaraEP !Saramlh
+566 format(i8,i7,2f9.3,f6.2,2f10.2 &
+         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
     !566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
     !         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
-
+    
     xf   = floor(x1)
     yf   = floor(y1)
     zf   = floor(z1)
@@ -196,40 +206,41 @@ CONTAINS
        !            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
     !end if
     
-subvol =  trj(5,ntrac)
-t0     =  trj(7,ntrac)
-! Ska räcka att ha här för att interpolering ska göras för alla fall i textwrite
 #if defined tempsalt
     call interp2(ib,jb,kb,temp,salt,dens)
-!    PRINT *,'t1', temp 
-    !CALL interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,nsm)!Sara
-!    PRINT *,'t2', temp
-
 #endif
 
+!print *,x1,y1,z1
     
 #if defined textwrite 
     select case (sel)
     case (10)
-       ! Writing the _ini.asc
-       WRITE(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens,&
-          EP(INT(x1),INT(y1),nsm)*dxdy(INT(x1),INT(y1)), mlh(INT(x1),INT(y1),nsm) !SaraEP !Saramlh
-
+       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+!       if(temp==0.) stop 4867
     case (11)
-       if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
+       !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
+       !     (kriva == 2 .AND. scrivi                    ) .or. &
+       !     (kriva == 3                                 ) .or. &
+       !     (kriva == 4 .AND. niter == 1                ) .or. &
+       !     (kriva == 5 .AND.                                  &
+       !   &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
+       !     (kriva == 6 .AND. .not.scrivi                  ) ) then
+       if(  (kriva == 1 .AND. trajectories(ntrac)%niter == niter-1   ) .or. &
             (kriva == 2 .AND. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .AND. niter == 1                ) .or. &
             (kriva == 5 .AND.                                  &
           &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
             (kriva == 6 .AND. .not.scrivi                  ) ) then
-
+!#if defined tempsalt
+!           !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+!           call interp2(ib,jb,kb,temp,salt,dens)
+!#endif
 #if defined biol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
 #if defined tempsalt
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,&
-             salt,dens,EP(INT(x1),INT(y1),nsm)*dxdy(INT(x1),INT(y1)), mlh(INT(x1),INT(y1),nsm) !SaraEP !Saramlh
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 #else
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
 #endif        
@@ -247,34 +258,55 @@ t0     =  trj(7,ntrac)
             tt/tday,t0/tday,subvol,temp,salt,dens
     case (16)
        if(kriva.ne.0 ) then
-
+#if defined tempsalt
+           !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+           call interp2(ib,jb,kb,temp,salt,dens)
+#endif
           write(56,566) ntrac,ints,x1,y1,z1, &
                tt/tday,t0/tday,subvol,temp,salt,dens
        end if
     case (17)
        write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens,EP(INT(x1),INT(y1),nsm)*dxdy(INT(x1),INT(y1)), mlh(INT(x1),INT(y1),nsm) !SaraEP !Saramlh
+            ,temp,salt,dens  
     case (19)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
        do n=1,ntracmax
-        if(nrj(1,n).ne.0) then
-         write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
+        !if(nrj(1,n).ne.0) then
+        if(trajectories(n)%ib /= 0) then
+         !write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
+         write(34,566) n,trajectories(n)%niter,trajectories(n)%x1,trajectories(n)%y1,trajectories(n)%z1, &
+                     & trajectories(n)%tt/tday,trajectories(n)%t0/tday
       endif
        enddo
        close(34)
     case (40)
        write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens,EP(INT(x1),INT(y1),nsm)*dxdy(INT(x1),INT(y1)), mlh(INT(x1),INT(y1),nsm) !SaraEP  !Saramlh
+            ,temp,salt,dens  
     case (99) !switch
        
     end select
 #endif 
    
 #if defined binwrite 
+    ntrac4=int(ntrac,kind=4)
     x14=real(x1,kind=4)
     y14=real(y1,kind=4)
     z14=real(z1,kind=4)
+    tt14=real(tt/tday,kind=4)!Joakim edit
+    t014=real(t0/tday,kind=4)!Joakim edit
+    lapu14 = real(lapu1,kind=4)!Joakim edit
+    lapu24 = real(lapu2,kind=4)!Joakim edit
+    lapv14 = real(lapv1,kind=4)!Joakim edit
+    lapv24 = real(lapv2,kind=4)!Joakim edit
+    vort24 = real(vort2,kind=4)!Joakim edit
+    hdiv24 = real(hdiv2,kind=4)!Joakim edit
+    dlapu4 = real(dlapu,kind=4)!Joakim edit
+    dlapv4 = real(dlapv,kind=4)!Joakim edit
+    dvort4 = real(dvort,kind=4)!Joakim edit
+    dhdiv4 = real(dhdiv,kind=4)!Joakim edit
+    upr4   = real(upr(1,1),kind=4)!Joakim edit
+    vpr4   = real(upr(3,1),kind=4)!Joakim edit
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -286,37 +318,41 @@ t0     =  trj(7,ntrac)
     select case (sel)       
     case (10) !in
        recPosIn = recPosIn + 1
-       write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14
+       write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       !if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       if(  (kriva == 1 .and. trajectories(ntrac)%niter  ==  niter-1 ) .or. &
             (kriva == 2 .and. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .and. niter == 1                ) .or. &
             (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva == 6 .and. .not.scrivi                  ) ) then
 #if defined tempsalt
-          CALL interp2(ib,jb,kb,temp,salt,dens)
-          !call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
+          call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
+ !         call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
+          !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
           recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14
+          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014,&
+                                        lapu14,lapu24,lapv14,lapv24,upr4,vpr4,vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
        end if
     case (13)
        recPosKll = recPosKll + 1
-       write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14   
+       write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (15)
        recPosRun = recPosRun + 1
-       write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14   
+       write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14,tt14,t014,&
+                                     lapu14,lapu24,lapv14,lapv24, upr4, vpr4, vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
     case (17) !out
        recPosOut = recPosOut + 1
-       write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14   
+       write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (19) !end
        recPosOut = recPosOut + 1
-       write(unit=75 ,rec=recPosOut) ntrac,twrite,x14,y14,z14
+       write(unit=75 ,rec=recPosOut) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (40) !error
        recPosErr=recPosErr + 1    
-       write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14   
+       write(unit=79 ,rec=recPosErr) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (99) !switch
        if ((recPosRun > 50000000).and.(intminInOutFile.eq.2)) then
           call close_outfiles
@@ -347,7 +383,8 @@ t0     =  trj(7,ntrac)
        write(88,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       !if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       if(  (kriva == 1 .and. trajectories(ntrac)%niter  ==  niter-1 ) .or. &
             (kriva == 2 .and. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .and. niter == 1                ) .or. &

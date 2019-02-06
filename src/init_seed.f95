@@ -21,20 +21,20 @@ SUBROUTINE init_seed()
    IMPLICIT NONE
 
    INTEGER                                    :: ji, jj, jk, filestat
-   INTEGER                                    :: numsd, landsd=0
+   INTEGER                                    :: numsd, landsd
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:)     :: seedMask
    CHARACTER(LEN=50)                          :: fileStamp
    CHARACTER(LEN=200)                         :: fullSeedFile
    CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6,i12)"
    CHARACTER(LEN=*), PARAMETER                :: timform = "(42x      ,i12)"
-#if ! defined baltix && ! defined rco
-   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(6i6)"
-#else
-   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(3i10,  2i6,i12)"
-#endif
+!#if ! defined baltix && ! defined rco
+!   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(6i6)"
+!#else
+   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(3i10, i6, i12)"
+!#endif
    LOGICAL                                    :: fileexists
 
-!-------------------------------------------------------------------------------
+   !-------------------------------------------------------------------------
    print *, ' '
    SELECT CASE (seedType)
      
@@ -52,7 +52,7 @@ SUBROUTINE init_seed()
             IF (mask(ji,jj) .ne. 0) THEN 
                DO jk=kst1,kst2
                   numsd = numsd+1
-                  seed_ijk (numsd,1:3) = [ ji, jj, jk ]
+                  seed_ijk (numsd,1:3) = [ ji, jj, jk ]               
                   seed_set (numsd,1:2) = [ isec, idir ]
                END DO
             ELSE
@@ -189,8 +189,6 @@ SUBROUTINE init_seed()
          END DO
          print *,'Particles are seeded according to the listfile'
          print *,'   '//trim(fullSeedFile)
-      ELSE
-       stop 3857
       END IF chFile2d
        
    END SELECT
@@ -284,5 +282,4 @@ SUBROUTINE init_seed()
       PRINT*,' Each seed position is used once                   '
    
    END SELECT
-   
 END SUBROUTINE init_seed

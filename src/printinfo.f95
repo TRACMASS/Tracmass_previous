@@ -1,6 +1,7 @@
 
 module mod_print
-
+  
+  USE mod_trajdef
   USE mod_param
   USE mod_name
   USE mod_time
@@ -73,7 +74,7 @@ CONTAINS
     print *,' - Stationary scheme used to solve  diff. Eqs.'
 #endif
 #if defined tempsalt
-#if defined atmospheric
+#if defined ifs
     print *,' - Temperature and humidity fields included'
 #else
     print *,' - Temperature and salinity fields included'
@@ -115,7 +116,7 @@ CONTAINS
     
 #if defined streamr
 #if defined streamts
-#if defined atmospheric
+#if defined ifs
     print *,' - Lagrangian density, temperature and humidity stream function stored'
 #else
     print *,' - Lagrangian density, temperature and salinity stream function stored'
@@ -188,7 +189,7 @@ CONTAINS
 599 format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
          ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
          ' nsusp=',i8,' nexit=',9i8)
-#elif defined atmospheric || ifs || rco || tes || orc || baltix || orca025  || orca025L75 || AusCOM
+#elif defined ifs || rco || tes || orc || baltix || orca025  || orca025L75 || AusCOM
     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
 799 format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
          ' nerror=',i4,' in ocean/atm=',i8)
@@ -202,12 +203,20 @@ CONTAINS
     wallsec = walltime - wallmin*60
 
     call updateClock
-    print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
-         wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin 
-799 format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
-         i3.3, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
-         i2.2, ':', i2.2)
-!799 format(i7,' run=',i10,' out=',i10,' err=',i10,' tot=',i10, ' dt=',i2.2,':',i2.2)
+    if (loneparticle>0) then
+       print 798 ,ints-intstart ,trajectories(loneparticle)%x1 ,trajectories(loneparticle)%y1, &
+            trajectories(loneparticle)%z1, trajectories(loneparticle)%active, wallmin, wallsec, loopYear, &
+            loopMon, loopDay, loopHour, loopMin 
+    else
+       print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
+            wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin
+    end if
+798    format(i7, '|', F8.2,  '|', F8.2,  '|', F8.2,  '|', i10, ' | ',  &
+            i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
+            i2.2, ':', i2.2)    
+799    format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
+            i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
+            i2.2, ':', i2.2)
 #endif
   end subroutine print_cycle_loop
 
