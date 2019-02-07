@@ -52,7 +52,7 @@ ifeq ($(F95COMPILER),"gfortran")
 		FF_FLAGS         = -O3 -c -x f95-cpp-input 
 	endif
     F90_FLAGS        = -fno-underscoring 
-	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -pg -J$(OBJDIR)
+	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR)
 endif
 ifeq ($(F95COMPILER),"g95")
 	FF_FLAGS         = -c -cpp -fendian=big

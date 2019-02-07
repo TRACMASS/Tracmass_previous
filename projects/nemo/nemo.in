@@ -8,9 +8,9 @@
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = 'Global 1 deg run',
        indatadir = '',
-     topoDataDir = '/Users/jkjellsson/ORCA1-N406/',
+     topoDataDir = '/Users/doos/data/ORCA1-N406/',
      RunID       = 'ORCA1-N406', 
-     physDataDir = '/Users/jkjellsson/ORCA1-N406/',
+     physDataDir = '/Users/doos/data/ORCA1-N406/',
      physPrefixForm = 'RUNID_YYYYGRIDX'
      bioDataDir = '', 
      bioPrefixForm = '', 
@@ -26,11 +26,11 @@
      temp_name = 'votemper',
      salt_name = 'vosaline',
      oneStepPerFile = .false.,
-     readMean = .false., 
-     readTS = .true., 
-     vvl = .true., 
-     readBio = .false., 
-     readSSH = .true., 
+     readMean       = .false., 
+     readTS         = .true., 
+     vvl            = .true., 
+     readBio        = .false., 
+     readSSH        = .true., 
      sgsUV = .true.,
 /
 &INIT_CASE_DESCRIPTION
@@ -77,8 +77,8 @@
 /
 &INIT_GRID_TIME
    fieldsperfile =     12,
-            ngcm =    120,
-            iter =      1,
+            ngcm =    730,
+            iter =     10,
           intmax =  15330,
         minveljd =      1,
         maxveljd =    120,
@@ -108,7 +108,7 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
            kriva =      1,
-      outdatadir = '/Users/jkjellsson/Downloads/tracmass_out/',
+      outdatadir = '/Users/doos/data/orca1/data_out/',
      outdatafile = 'orca1_test',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer

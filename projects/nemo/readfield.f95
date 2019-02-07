@@ -152,11 +152,11 @@ SUBROUTINE readfields
       end if
       
       if (.not. oneStepPerFile) then
-         allocate( file_timestamp(1), fileDay(1,2), fileMon(1,2) )
-         fileDay(1,1) = 1
-         fileDay(1,2) = 31
-         fileMon(1,1) = 1
-         fileMon(1,2) = 12
+         allocate( file_timestamp(fieldsperfile), fileDay(fieldsperfile,2), fileMon(fieldsperfile,2) )
+         fileDay(:,1) = 1
+         fileDay(:,2) = 31
+         fileMon(:,1) = 1
+         fileMon(:,2) = 12
       end if
       
       if (RunID == '2_INALT60.L120-KRS0020_4h') then
@@ -164,18 +164,20 @@ SUBROUTINE readfields
          ! INALT60 data with 4h frequency
          ! Here we set start/stop dates for each file in each year
          !
+         fieldsperfile = 16
          deallocate( file_timestamp, fileDay, fileMon )
          allocate( file_timestamp(16), fileDay(16,2), fileMon(16,2) )
          fileDay(1:16,1) = (/  1,  6, 31, 25, 22, 16, 11,  5, 30, 25, 19, 13,  8,  2, 27, 22 /)
          fileDay(1:16,2) = (/  5, 30, 24, 21, 15, 10,  4, 29, 24, 18, 12,  7,  1, 26, 21, 31 /)
          fileMon(1:16,1) = (/  1,  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12 /)
          fileMon(1:16,2) = (/  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12, 12 /)
+         
       end if
       
       if (.not. oneStepPerFile) then   
          ! Now write year to timestamp string
          tmpstr = "YYYYMMDD_YYYYMMDD"
-         do ii=1,16
+         do ii=1,fieldsperfile
             write(tmpstr(5:8)  ,'(i2.2,i2.2)') fileMon(ii,1),fileDay(ii,1)
             write(tmpstr(14:17),'(i2.2,i2.2)') fileMon(ii,2),fileDay(ii,2)
             file_timestamp(ii) = trim(tmpstr)
@@ -316,10 +318,17 @@ SUBROUTINE readfields
       end if 
       
       timestamp = trim(file_timestamp(itime))
+   
+   else
+      fieldStep = fieldStep + 1
+      if (fieldStep > fieldsperfile) then
+         fieldStep = 1
+      end if
       
    end if
    
    ncTpos = fieldStep
+   print *,'nctpos=',nctpos
    
    !
    ! Set the file names that we need to read
