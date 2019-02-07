@@ -23,6 +23,10 @@ CONTAINS
   subroutine active_niter
     return
   end subroutine active_niter
+  
+  subroutine active_niter_2
+    return
+  end subroutine active_niter_2
 
 END MODULE mod_active_particles
 

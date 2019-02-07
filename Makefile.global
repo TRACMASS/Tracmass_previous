@@ -74,7 +74,7 @@ endif
 
 CC                = gcc -O  $(INC_DIR)
 
-ACTVEL = zanna_turb_4.o
+ACTVEL = empty.o #zanna_turb_4.o
 
 VPATH = src:projects/$(PROJECT):src/active_particles
 
