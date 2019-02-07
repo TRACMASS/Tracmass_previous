@@ -24,7 +24,7 @@
      usgs_name = 'vozoeivu',
      vsgs_name = 'vomeeivv',
      temp_name = 'votemper',
-     salt_name = 'vosaline',
+     salt_name      = 'vosaline',
      oneStepPerFile = .false.,
      readMean       = .false., 
      readTS         = .true., 
