@@ -1,9 +1,0 @@
-name=../../skb/run/si.fw.l2
-rm $name
-
-g95 -o $name main.f95 -O3 -cpp -Dmean -Dtempsalt -Dstreamxy -Dstreamr -Dstreamv -Dtracer -Dtime -Dsimp -Dsediment
-
-#$name
-
-time $name > $name.run &
-#tail -f $name.run
