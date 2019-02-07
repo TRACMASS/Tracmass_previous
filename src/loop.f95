@@ -18,7 +18,7 @@ SUBROUTINE loop
   USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
                           niter, lbas, scrivi, subvol
   USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, dzt, &
-                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio !joakim
+                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio, useTrmClock
   use mod_vel,      only: uflux, vflux, wflux
   USE mod_seed,     only: ff, nff, seedTime, seed
   USE mod_domain,   only: timax, jens, jenn, iene, ienw
@@ -147,7 +147,9 @@ SUBROUTINE loop
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
   ints = intstart
+  if (useTrmClock) then
   call updateclock  
+  end if
   call readfields   ! initial dataset
   call active_init
   ntrac = 0
