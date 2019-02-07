@@ -32,6 +32,7 @@
      readBio        = .false., 
      readSSH        = .true., 
      sgsUV = .true.,
+     useTrmClock = .false.,
 /
 &INIT_CASE_DESCRIPTION
         casename = 'ORCA1',
@@ -77,7 +78,7 @@
 /
 &INIT_GRID_TIME
    fieldsperfile =     12,
-            ngcm =    730,
+            ngcm =      1,
             iter =     10,
           intmax =  15330,
         minveljd =      1,
@@ -86,8 +87,8 @@
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =     12,
-        startday =      5,
+       starthour =      0,
+        startday =      1,
         startmon =      1,
        startyear =   2000,
           noleap =  .true., 

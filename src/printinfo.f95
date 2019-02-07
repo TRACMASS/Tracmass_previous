@@ -201,8 +201,10 @@ CONTAINS
     !call dtime(wallarray, walltime)
     wallmin = int(walltime/60)
     wallsec = walltime - wallmin*60
-
-    call updateClock
+    
+    if (useTrmClock) then
+       call updateClock
+    end if
     if (loneparticle>0) then
        print 798 ,ints-intstart ,trajectories(loneparticle)%x1 ,trajectories(loneparticle)%y1, &
             trajectories(loneparticle)%z1, trajectories(loneparticle)%active, wallmin, wallsec, loopYear, &

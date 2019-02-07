@@ -82,7 +82,7 @@ SUBROUTINE readfields
    INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
    INTEGER                                       :: kbot,ktop, idiag, jdiag
    INTEGER                                       :: ichar
-   INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep, log_level=2
+   INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep, log_level=2, currStep
    INTEGER, DIMENSION(12), SAVE                  :: daysInMonth
    
    ! Variables to set the filenames
@@ -92,6 +92,7 @@ SUBROUTINE readfields
    CHARACTER (len=200)                           :: dataprefix, timestamp
    INTEGER, ALLOCATABLE, DIMENSION(:,:),SAVE     :: fileMon, fileDay
    CHARACTER (len=200), ALLOCATABLE, DIMENSION(:),SAVE :: file_timestamp
+   CHARACTER (len=10), SAVE                      :: ngcm_unit = "month"
    
    ! Variables to calculate thickness of layers with vvl
    REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
@@ -106,7 +107,7 @@ SUBROUTINE readfields
    REAL*4, ALLOCATABLE, DIMENSION(:)           :: tmpzvec, salzvec
    
    ! Control what to read (should be namelist variables)
-   LOGICAL                                       :: around, useTrmClock = .false.
+   LOGICAL                                       :: around !, useTrmClock = .false.
    
    INTEGER, PARAMETER                            :: NTID=73
    INTEGER, PARAMETER                            :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
@@ -130,6 +131,8 @@ SUBROUTINE readfields
       print*,' One step per file:            ',oneStepPerFile
       print*,' Name for gridT:               ',trim(tGridName)
       print*,' File suffix:                  ',trim(fileSuffix)
+      
+      print*,' Start year,mon,day, hour      ',startYear,startMon,startDay,startHour
       
       if (.not. useTrmClock) then
          currHour = startHour
@@ -244,20 +247,31 @@ SUBROUTINE readfields
    if (useTrmClock) then
       call updateClock 
    else
+      if (ints /= intstart) then
       daysInMonth = (/ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
+      if (ngcm_unit == "minute") then
+         currStep = ngcm 
+      else if (ngcm_unit == "hour") then
+         currStep = ngcm * 60
+      else if (ngcm_unit == "day") then
+         currStep = ngcm * 24 * 60
+      else if (ngcm_unit == "month") then
+         currStep = daysInMonth(currMon) * 24 * 60 
+      end if
       ! Update the clock manually
-      currHour = currHour + ngcm
-      if (currHour >= 24) then
+      currHour = currHour + currStep/60
+      do while (currHour >= 24) 
          currDay = currDay + 1
          currHour = currHour - 24
-      end if
-      if (currDay > daysInMonth(currMon)) then
-         currMon = currMon + 1
-         currDay = currDay - daysInMonth(currMon)
-      end if
-      if (currMon > 12) then
-         currYear = currYear + 1
-         currMon = currMon - 12
+         if (currDay > daysInMonth(currMon)) then
+            currDay = currDay - daysInMonth(currMon)
+            currMon = currMon + 1
+         end if
+         if (currMon > 12) then
+            currMon = currMon - 12
+            currYear = currYear + 1
+         end if
+      end do
       end if
    end if
    
@@ -294,6 +308,7 @@ SUBROUTINE readfields
    ! If only one step per file, this is always 1. 
    !
    
+   print*,' ---------------------------- '
    ncTpos = fieldStep
    
    if (oneStepPerFile) then
@@ -613,6 +628,7 @@ SUBROUTINE readfields
       ijkst=0 
    endif
 #endif
+   print*,'end currYear,currMon,currDay,currHour',currYear,currMon,currDay,currHour
 
    return
    

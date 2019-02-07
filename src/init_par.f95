@@ -48,7 +48,7 @@ SUBROUTINE init_params
                                     temp_name, salt_name,                    &
                                     physTracerNames, bioTracerNames,         & 
                                     oneStepPerFile,                          & 
-                                    readMean, readTS, vvl, readBio, readSSH, sgsUV
+                                    readMean, readTS, vvl, readBio, readSSH, sgsUV, useTrmClock
    namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &

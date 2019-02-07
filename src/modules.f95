@@ -136,7 +136,8 @@ MODULE mod_grid
                                                dz_1D_name, dzt_3D_name, dzu_3D_name, dzv_3D_name, &
                                                kBathy_name
   LOGICAL                                   :: gridIsUpsideDown, read3Ddz, oneStepPerFile, &
-                                               readMean, readTS, vvl, readBio, readSSH, sgsUV
+                                               readMean, readTS, vvl, readBio, readSSH, sgsUV, &
+                                               useTrmClock
   
   ! Info about input data 
   CHARACTER(LEN=50)                         :: RunID, tGridName, uGridName, vGridName, &
