@@ -2,22 +2,22 @@
       gridvernum =      6,
 /
 &INIT_GRID_DESCRIPTION
-         gcmname = 'EraInterim',
+         gcmname = 'ifs',
        gcmsource =     '',
         gridname =     '',
       gridsource =     '',
         griddesc =     '',
-       indatadir = '/Users/doos/Dropbox/data_cylinder/ifs/',
-!       indatadir = '/Users/doos/data/ifs/',
+       indatadir = '/proj/bolinc/vagn/vagn2/x_aital/project/EC_EARTH/IFS/',
+     topodatadir = '/proj/bolinc/vagn/vagn2/x_aital/TRACMASS/projects/ifs/mesh/'
 /
 &INIT_CASE_DESCRIPTION
-        casename =  'era',
+        casename =  'ifs',
         casedesc =     '',
 /
 &INIT_GRID_SIZE
-             imt =    480,
-             jmt =    240,
-              km =     60,
+             imt =    320,
+             jmt =    159,
+              km =     62,
              nst =      2,
          subgrid =      0,
      subgridimin =    500,
@@ -34,13 +34,13 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =   1979,
+        baseyear =   1996,
 /
 &INIT_GRID_TIME
-   fieldsperfile =      1,
+   fieldsperfile =    124,
             ngcm =      6, !don't touch!
             iter =      6,
-          intmax =   1460,
+          intmax =   2920,
         minveljd =     -1,
         maxveljd =     -1,
 /
@@ -48,15 +48,15 @@
         startsec =      0,
         startmin =      0,
        starthour =      0,
-        startday =     01,
-        startmon =     01,
-       startyear =   2016,
+        startday =      1,
+        startmon =      1,
+       startyear =   1996,
          startjd =     -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
-         intspin =     4,!120, !50,
-          intrun =     2000, !120, !2000,
+         intspin =     60,!120, !50,
+          intrun =   1440, !2000,
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
@@ -69,11 +69,8 @@
   !==               5 = write at chosen intervals
   !==               6 = write each spatial grid-crossing 
            kriva =      6,
-     outDataDir   = '/Users/doos/data/ifs/data_out/',
-!     outDataDir   = '/Users/doos/Dropbox/data_cylinder/ifs/data_out/',
-!     outdatafile = 'hydro_10jan2016_iter_atl_k6',
-!     outdatafile = 'hydro_2jan2016_iter_atlpac_k6',
-     outdatafile = 'hydro_warmpool_back_k6',
+ outdatadir = '/proj/bolinc/vagn/vagn2/x_aital/TRACMASS/'
+ outdatafile = 'ifs',
  outdircase =      .false. ,
  intmininoutfile =      0,
  intpsi =     100,
@@ -117,23 +114,23 @@
   ! -1 indicates max value in grid.
   !
              nff =      1,
-            isec =      3,
-            idir =     -1,
+            isec =      1,
+            idir =      1,
             nqua =      1,
        partquant =      1,
-        ntracmax = 8000000,
-    loneparticle =      0, !0, !3455, 
-        seedtype =      1, !1=ist1 etc. 3=seedfile
-            ist1 =     170, ! 1, !382,
-            ist2 =     260, !480, !457, 
-            jst1 =      90, !1, !140, !140,
-            jst2 =    134,  !240, !173, !173, 
-            kst1 =     60, !60,
-            kst2 =     60, !60,
+        ntracmax =     1000000,
+    loneparticle =      -1, !0, !3455, 
+        seedtype =      1, !3, !1=ist1 etc. 3=seedfile
+            ist1 =      100, !382,
+            ist2 =      100, !457, 
+            jst1 =      10, !140, !140,
+            jst2 =      150, !173, !173, 
+            kst1 =     50, !60,
+            kst2 =     62, !60,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =     '/Users/doos/Dropbox/data_cylinder/ifs/topo/',
-        seedfile =      'globalseed.bin', !'atlanticseed.bin', !'globalseed.bin', 
+         seeddir =      '',
+        seedfile =      '', 
      varseedfile =      0, !1= read seedfile , 0= use ist1,ist2,jst1,...
         seedtime =      0,
          seedall =      0,
@@ -147,21 +144,21 @@
             iene = 0, 
             jens = 0, 
             jenn = 0, 
-           timax = 365.0,
+           timax = 1000.0,
 /
 &INIT_TEMP_SALT
-           tmin0 =  -50.0,
+           tmin0 = -400.0,
            tmax0 =  400.0,
            smin0 = -500.0,
            smax0 =  400.0,
-           rmin0 = -100.0,
-           rmax0 = 1100.0,
-           tmine =  -50.0,
+           rmin0 = -100000.0,
+           rmax0 = 110000.0,
+           tmine =  -400.0,
            tmaxe =  400.0,
            smine = -150.0,
            smaxe =  500.0,
-           rmine = -100.0,
-           rmaxe = 1100.0,
+           rmine = -1000000.0,
+           rmaxe = 11000000.0,
 /
 &INIT_DIFFUSION
               ah = 2000.0,

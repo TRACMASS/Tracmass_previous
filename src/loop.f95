@@ -366,14 +366,10 @@ SUBROUTINE loop
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call calc_time
-           
-           if (ntrac == 365) print*,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-           if (ntrac == 365) print*,'hej1',x0,y0,z0,ia,ja,ka
-           
+                      
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
-           if (ntrac == 365) print*,'hej2',x1,y1,z1,ib,jb,kb
 
            if (nperio == 6) then
               ! === north fold cyclic for the ORCA grids ===
@@ -456,9 +452,7 @@ SUBROUTINE loop
 
            
            call active_niter_2 !!joakim edit
-           
-           if (ntrac == 365) print*,'hej3',x1,y1,z1,ib,jb,kb
-           
+                      
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('landError', errCode)
