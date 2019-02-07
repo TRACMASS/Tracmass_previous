@@ -115,8 +115,6 @@ elseif(ijk.eq.3) then
 #endif
 endif
 
-!print*,'cross',uu,um,r0
-
 ! east, north or upward crossing
 if(uu.gt.0.d0 .and. r0.ne.dble(ii)) then
  if(um.ne.uu) then

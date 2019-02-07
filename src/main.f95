@@ -21,7 +21,7 @@ PROGRAM TRACMASS
   modrundirCond: if(nff == 1) then ! forward 
      intstart =  intmin          
      intend   =  intmax
-  elseif(nff == 2) then ! backward
+  elseif(nff == -1) then ! backward
      intstart =  intmin+intrun
      minvelints = minvelints + intrun
      intend   =  intmin

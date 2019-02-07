@@ -114,8 +114,8 @@ dsalt=(smax-smin)/dble(MR-1)
 do j=1,JMT
  rlatu=stlat1+dy*(j-1)+dy
  rlatt=rlatu-0.5d0*dy
- csu(j)=dcos(rlatu*radian)
- cst(j)=dcos(rlatt*radian)
+ csu(j)=cos(rlatu*radian)
+ cst(j)=cos(rlatt*radian)
 #if defined for || sim 
  csu(j)=1.d0
  cst(j)=1.d0

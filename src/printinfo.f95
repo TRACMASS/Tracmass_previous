@@ -74,7 +74,7 @@ CONTAINS
     print *,' - Stationary scheme used to solve  diff. Eqs.'
 #endif
 #if defined tempsalt
-#if defined ifs
+#if defined atmospheric
     print *,' - Temperature and humidity fields included'
 #else
     print *,' - Temperature and salinity fields included'
@@ -116,7 +116,7 @@ CONTAINS
     
 #if defined streamr
 #if defined streamts
-#if defined ifs
+#if defined atmospheric
     print *,' - Lagrangian density, temperature and humidity stream function stored'
 #else
     print *,' - Lagrangian density, temperature and salinity stream function stored'

@@ -172,16 +172,10 @@ CONTAINS
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
     REAL                                       :: temp2, salt2, dens2
-#if defined for || sim 
-566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
-         ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined rco || baltix 
-566 format(i8,i7,f7.2,f7.2,f7.1,2f12.4 &
-         ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined tes 
+#if defined  tes 
 566 format(i8,i7,f8.3,f8.3,f7.3,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
-#elif defined ifs 
+#elif defined atmospheric 
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.2 &
          ,f15.0,f8.2,f8.2,f8.2,f6.0,8e8.1 )
 #elif defined orc

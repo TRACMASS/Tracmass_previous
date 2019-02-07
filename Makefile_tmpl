@@ -1,6 +1,6 @@
 PROJECT	          = theoretical
 CASE              = theoretical
-RUNFILE 	  = runtrm
+RUNFILE 	  = runtracmass
 
 #F95COMPILER        = "g95"
 F95COMPILER        = "gfortran"

@@ -419,7 +419,7 @@ SUBROUTINE init_params
       stxz=0.
       styz=0.
 #endif
-#ifdef streamr
+#if defined streamr || streamts
       ALLOCATE ( stxr(imt,mr,nend,lov), styr(jmt,mr,nend,lov), stzr(km,mr,nend,lov) )
       stxr=0.
       styr=0.
