@@ -74,8 +74,9 @@ CONTAINS
             END IF
          END DO findTime
       END IF
-
-      if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
+      
+      !What is this line for??? Seed every eight days!!! Undrar Doos med!!! 
+   !   if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
       
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---
@@ -129,13 +130,13 @@ CONTAINS
                vol = vflux (iist,ijst,ikst,nsm)
                
             CASE (3)  ! Through upper zonal-meridional surface
-               CALL vertvel (1.d0,ib,ibm,jb,kb)
+               CALL vertvel (ib,ibm,jb,kb)
 #if defined explicit_w || full_wflux
-               vol = wflux(ib,jb,kb,nsm)
+               vol = wflux(ib,jb,kb,nsm)*ff
 #elif twodim
                vol = 1.
 #else 
-               vol=wflux(kb,nsm)
+               vol=wflux(kb,nsm)*ff
 #endif
          
             CASE (4 ,5)   ! Total volume/mass of a grid box
@@ -230,7 +231,7 @@ CONTAINS
                      END IF
 
                   CASE (2)   ! Zonal-vertical section
-                     x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
+                     x1 = DBLE (ib-1)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb)
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                      IF (idir == 1) THEN
@@ -240,7 +241,7 @@ CONTAINS
                      END IF
 
                   CASE (3)   ! Horizontal section                  
-                     x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
+                     x1 = DBLE (ib-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                      z1 = DBLE (kb)
                      IF (idir == 1) THEN
@@ -250,7 +251,7 @@ CONTAINS
                      END IF
 
                   CASE (4)   ! Spread evenly inside box                  
-                     x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
+                     x1 = DBLE (ib-1)  + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
                      y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
                      z1 = DBLE (kb-1) + 0.5d0
 
@@ -260,12 +261,20 @@ CONTAINS
                      z1 = seed_xyz (jsd,3)
 
                   END SELECT
+                  
+                  
+                     if(x1>IMT .or. x1<0 .or. y1>JMT .or. y1<0 .or. z1>KM .or. z1<0 ) then
+                     print *,ib,ib-1,jb,kb,x1,y1,z1
+                     stop 4867
+                     endif
+
                   ! ------------------------------------------------------
                   ! --- Check properties of water mass at initial time ---
                   ! ------------------------------------------------------ 
 
 #ifdef tempsalt 
-                  CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+                  call interp2(ib,jb,kb,temp,salt,dens)
+               !   CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
                   IF (temp < tmin0 .OR. temp > tmax0 .OR. &
                        &   salt < smin0 .OR. salt > smax0 .OR. &
                        &   dens < rmin0 .OR. dens > rmax0      ) THEN

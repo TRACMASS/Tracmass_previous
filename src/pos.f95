@@ -70,7 +70,6 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
-  if (ntrac==365) print*,'hej1.5',uu,um,upr(1,1:2),upr(2,1:2)
 
   elseif(ijk.eq.2) then
      ii=ja
@@ -110,7 +109,6 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      uu = intrpg * wflux(ka  ,nsp) + intrpr * wflux(ka  ,nsm)
      um = intrpg * wflux(ka-1,nsp) + intrpr * wflux(ka-1,nsm)
 #endif
-     !print*,'vert',uu,um
 #ifdef turb    
      if(r0.ne.dble(ka  )) then
         uu=uu+upr(5,2)  
@@ -126,7 +124,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      endif
 #endif
   endif
-  !print*,'pos',uu,um
+
   !
   ! note: consider in future to improve the code below for accuracy 
   ! in case of um-uu = small; also see subroutine cross

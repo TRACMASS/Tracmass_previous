@@ -18,7 +18,8 @@ SUBROUTINE loop
   USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
                           niter, lbas, scrivi, subvol
   USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, dzt, &
-                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio, useTrmClock
+                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio, subGridJmin, useTrmClock
+
   use mod_vel,      only: uflux, vflux, wflux
   USE mod_seed,     only: ff, nff, seedTime, seed
   USE mod_domain,   only: timax, jens, jenn, iene, ienw
@@ -101,7 +102,7 @@ SUBROUTINE loop
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 
-#elif defined ifs
+#elif defined atmospheric
   nendLoop: do n=1,nend
      if( dble(ienw(n)) <= x1 .and. x1 <= dble(iene(n)) .and. &
          dble(jens(n)) <= y1 .and. y1 <= dble(jenn(n))  ) then  
@@ -122,7 +123,7 @@ SUBROUTINE loop
  
   goto 40
 41 continue
-#ifdef ifs
+#ifdef atmospheric
   print *,'Lagrangian decomposition distribution in %: '
   do n=1,nend
      PRINT*,100.*float(dist(n))/float(sum(dist))
@@ -194,7 +195,7 @@ SUBROUTINE loop
      call fancyTimer('advection','start')
      
      ntracLoop: do ntrac=1,ntractot
-        !print *,ntrac, ntractot
+
         ! === Test if the trajectory is dead   ===
         if (trajectories(ntrac)%active .eqv. .false.) cycle ntracLoop
         
@@ -328,7 +329,7 @@ SUBROUTINE loop
               tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
            end if
 #endif /*tracer*/
-           call writedata(11)
+           call writedata(11) ! should perhaps be at the end Doos
            
            !==============================================! 
            ! calculate the 3 crossing times over the box  ! 
@@ -368,14 +369,10 @@ SUBROUTINE loop
            call errorCheck('dsCrossError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call calc_time
-           
-           if (ntrac == 365) print*,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
-           if (ntrac == 365) print*,'hej1',x0,y0,z0,ia,ja,ka
-           
+                      
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
-           if (ntrac == 365) print*,'hej2',x1,y1,z1,ib,jb,kb
 
            if (nperio == 6) then
               ! === north fold cyclic for the ORCA grids ===
@@ -385,11 +382,11 @@ SUBROUTINE loop
                  jb=JMT-1
                  x0=x1 ; y0=y1 ; ia=ib ; ja=jb
               elseif(y1 > dble(JMT-1)) then
-!                print *,'north of northfold for ntrac=',ntrac
+                print *,'y1 > dble(JMT-1) north of northfold for ntrac=',ntrac
                 x1 = dble(IMT+2) - x1
                 ib=idint(x1)+1
                 jb=JMT-1
-                y1= dble(JMT-1) -y1 + dble(JMT-1)
+                y1= dble(JMT-1) -y1 
                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
               endif
 
@@ -411,20 +408,20 @@ SUBROUTINE loop
                  cycle ntracLoop
               endif
               
-              ! === Cyclic Arctic in a global cylindrical projection ===
-              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-                 x1 = dble(IMT+2) - x1
-                 ib=idint(x1)+1
-                 jb=JMT-1
-                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-              elseif(y1 > dble(JMT-1)) then
-                 print *,'north of northfold for ntrac=',ntrac
-                 x1 = dble(IMT+2) - x1
-                 ib=idint(x1)+1
-                 jb=JMT-1
-                 y1= dble(JMT-1) -y1 + dble(JMT-1)
-                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-              endif
+!!               === Cyclic Arctic in a global cylindrical projection ===
+!              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+!                 x1 = dble(IMT+2) - x1
+!                 ib=idint(x1)+1
+!                 jb=JMT-1
+!                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+!              elseif(y1 > dble(JMT-1)) then
+!                 print *,'north of northfold for ntrac=',ntrac
+!                 x1 = dble(IMT+2) - x1
+!                 ib=idint(x1)+1
+!                 jb=JMT-1
+!                 y1= dble(JMT-1) -y1 + dble(JMT-1)
+!                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+!              endif
            end if
            
            if (nperio /= 0) then
@@ -454,17 +451,20 @@ SUBROUTINE loop
            if (ja>jmt) ja = jmt - (ja - jmt)
            if (jb>jmt) jb = jmt - (jb - jmt)
            
+!          call writedata(11)   ! should perhaps be here instead of above Doos
+
+           
            call active_niter_2 !!joakim edit
-           
-           if (ntrac == 365) print*,'hej3',x1,y1,z1,ib,jb,kb
-           
+                      
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('bottomError', errCode)
        !    if (errCode.ne.0) cycle ntracLoop
+#ifndef hydro 
            call errorCheck('airborneError', errCode)
+#endif
            if (errCode.ne.0) cycle ntracLoop
            
            call errorCheck('corrdepthError', errCode)
@@ -478,6 +478,13 @@ SUBROUTINE loop
            call diffuse(x1,y1,z1,ib,jb,kb,dt)
 #endif
            ! === end trajectory if outside chosen domain === 
+           
+           if( z1>= dble(KM) ) then ! precipated for atm or evaporated if ocean
+            nexit(1)=nexit(1)+1
+            kb=KM
+            exit niterLoop                                
+           endif
+           
            nendloop: do k=1,nend
               if(ienw(k) <= x1 .and. x1 <= iene(k) .and. &
                  jens(k) <= y1 .and. y1 <= jenn(k) ) then
@@ -494,16 +501,10 @@ SUBROUTINE loop
              exit niterLoop                                
           end if
 
-
-
-
-
-
-
-           
            
 #if defined tempsalt
-           call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+           call interp2(ib,jb,kb,temp,salt,dens)
+!           call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
            ! if (temp < tmine .or. temp > tmaxe .or. &
            ! &   salt < smine .or. salt > smaxe .or. &
            ! &   dens < rmine .or. dens > rmaxe      ) then
@@ -667,7 +668,7 @@ return
        case ('boundError')
           if(ia<1 .or. ia>imt .or. ib<1 .or. ib>imt .or.    &
              ja<1 .or. ja>jmt .or. jb<1 .or. jb>jmt .or.    &
-             y0<1 .or. y0>jmt .or. y1<1 .or. y1>jmt         &
+             y0<0 .or. y0>jmt .or. y1<0 .or. y1>jmt         &
              ) then
              if (verbose == 1) then
                 print *, thickline !========================================
@@ -718,7 +719,7 @@ return
              errCode = -40             
              call writedata(40)
              trajectories(ntrac)%active = .false.
-             !if (strict==1) stop  !!joakim edit
+             if (strict==1) stop 
           endif
           case ('coordboxError')
           ! ===  Check that coordinates belongs to   ===
@@ -820,13 +821,13 @@ return
                  print *, thickline !========================================
                  print *,'Warning: not find any path for unknown reason '
                  print *, " "
-                 write (*,'(A, E9.3, A, E9.3)'), ' uflux= ', &
+                 write (*,'(A, E9.3, A, E9.3)') ' uflux= ', &
                       uflux(ia,ja,ka,nsm),'  vflux= ', vflux(ia,ja,ka,nsm)
                  call print_ds
                  print *,'---------------------------------------------------'
                  print *,"   ntrac = ",ntrac
                  call print_pos
-                 write (*,'(A7, I10, A7, I10, A7, I10)'), & 
+                 write (*,'(A7, I10, A7, I10, A7, I10)') & 
                       ' k_inv= ', KM+1-kmt(ia,ja), ' kmt= ', kmt(ia,ja), &
                       'lnd= ', mask(ia,ja)
                  print *, thinline !-----------------------------------------

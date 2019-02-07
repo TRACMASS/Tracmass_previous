@@ -12,7 +12,7 @@ MODULE mod_param
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
   INTEGER                                   :: ncoor,kriva,iter,ngcm
   REAL(DP), PARAMETER                       :: UNDEF=1.d20 
-  REAL(DP), PARAMETER                       :: EPS=1.d-7 ! the small epsilon
+  REAL(DP), PARAMETER                       :: EPS=1.d-10 !7 ! the small epsilon
 
   REAL(DP), PARAMETER                       :: grav = 9.81
   REAL(DP), PARAMETER                       :: PI = 3.14159265358979323846d0
@@ -54,10 +54,21 @@ MODULE mod_loopvars
   REAL(DP)                                  :: dsu, dsd, dsc
   LOGICAL                                   :: scrivi
   INTEGER                                   :: niter
-  REAL(DP)                                  :: ss0
+  REAL(QP)                                  :: ss0
   INTEGER                                   :: lbas
   REAL(DP)                                  :: subvol
 ENDMODULE mod_loopvars
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_timeanalyt
+  USE mod_precdef
+  INTEGER                                   :: looop,ii,iim
+  REAL(DP), PARAMETER                       :: XXLIM=1.d-6
+  REAL(DP)                                  :: r0
+  REAL(QP)                                  :: rijk,s0,ss,fn0i0,fn0im,fnmi0,fnmim,f0,f1
+ENDMODULE mod_timeanalyt
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 MODULE mod_traj
@@ -111,9 +122,9 @@ MODULE mod_grid
   INTEGER                                   :: nperio=1
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: hs
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: botbox
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)     :: dxv, dyu, ang
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: dz
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: dxdy
   REAL(DP)                                  :: dxyz
@@ -145,8 +156,8 @@ MODULE mod_grid
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
-#ifdef ifs
-  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: aa, bb
+#ifdef atmospheric
+  REAL(DP), ALLOCATABLE, DIMENSION(:)       :: aa, bb, dydegv
 #endif
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv
   INTEGER                                   :: subGrid     ,subGridID
@@ -157,7 +168,7 @@ MODULE mod_grid
   INTEGER                                   :: degrade_space=0
   INTEGER                                   :: freeSurfaceForm
 
-#ifdef ifs
+#ifdef atmospheric
   REAL(DP), PARAMETER                       :: R_d = 287.05d0
   REAL(DP), PARAMETER                       :: L_v = 2.5d0 * 1e+6   
   REAL(DP), PARAMETER                       :: c_d = 1004.d0
@@ -201,6 +212,7 @@ CONTAINS
        print *,'ERROR: Negative box volume                                '
        print *,'----------------------------------------------------------'
        print *,'dxdy = ', dxdy(ib,jb)
+       print *,'dzt = ', intrpg,dzt(ib,jb,kb,nsp),intrpr,dzt(ib,jb,kb,nsm)
        print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
        print *,'----------------------------------------------------------'
        print *,'The run is terminated'
@@ -237,7 +249,7 @@ MODULE mod_time
   INTEGER                                   :: baseYear  ,baseMon  ,baseDay
   INTEGER                                   :: baseHour  ,baseMin  ,baseSec
   REAL(DP)                                  :: jdoffset=0
-  LOGICAL                                   :: noleap=.false.
+  LOGICAL                                   :: noleap=.true.
   ! === Timerange for velocity fields
   REAL(DP)                                  :: minvelJD=0,   maxvelJD=0
   INTEGER                                   :: minvelints, maxvelints
@@ -427,7 +439,8 @@ CONTAINS
 #if defined fixedtimestep 
     intrpbg=0.d0 ! mimics Ariane's lack of linear interpolation of the velocity fields
 #else    
-    intrpbg=dmod(ts,1.d0) 
+!    intrpbg=dmod(ts,1.d0) 
+    intrpbg=mod(ts,1.d0) 
 #endif
     intrpb =1.d0-intrpbg
   end subroutine calc_time

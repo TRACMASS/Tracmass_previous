@@ -39,8 +39,11 @@ SUBROUTINE setupgrid
 
   ! === Init local variables for the subroutine ===
   INTEGER                                    :: i,j,k
-  REAL*8                                     :: rlatt
+  REAL*8, DIMENSION(JMT)                     :: rlatv
+  REAL*8, DIMENSION(0:JMT)                   :: rlatu
+  !REAL*8, DIMENSION(JMT)                     :: dydegv  
   
+  !REAL*8, DIMENSION(0:KM),SAVE               :: aa,bb
   ! -------------------------------------------------------------
   
   !!
@@ -49,45 +52,45 @@ SUBROUTINE setupgrid
   kmt = KM
   mask = 1  
 
-  
-  !!
-  !! Grid box sizes
-  !!
-  dx = 360./float(IMT)   
-  dy = 180./float(JMT)  ! Horizontal resolution in degrees [deg]
-!  print *,'dy=',dy
-  stlon1=0. 
-  stlat1=-90000.
-  dxdeg = dx*deg        
-  dydeg = dy*deg        ! Horizontal resolution in radians [rad]
-  
-  !! Cosine at each v-point (C-grid) 
-  DO j=0,JMT
-     phi(j) = -90. + dy * FLOAT(j)    ! Latitude for each v-point (C-grid)
-     csu(j) = DCOS (phi(j) * radian) 
-!     print *,jj,phi(jj),csu(jj)
+  ! LATITUDE
+  ! -------------------------------------------------------------
+   OPEN(13,FILE=TRIM(topoDataDir)//'/latitude160.txt') ! Update path [AITOR]
+  DO j = JMT,1,-1
+    READ(13,"(39x,f9.5)") phi(j)
   END DO
-  
+  CLOSE(13)
+  phi(0)   = -90.
+  phi(JMT) = 90.
+
+  ! Dy/Dx length
+  ! -------------------------------------------------------------
+  ALLOCATE(dydegv(JMT))
+  dydegv(1:JMT)  = 0.5*(phi(1:JMT)-phi(0:JMT-1))
+  dydegv = dydegv*deg
+
+  dx = 360./float(IMT)
+  dxdeg = dx*deg
+
+  ! Cosines definition
+  ! -------------------------------------------------------------
+
+  !! Cosine at each v-point (C-grid)
+  rlatu = phi
+  csu(:) = cos(rlatu(:)*radian)
+
   !! Cosine at each u-point (C-grid)
-  DO j=1,JMT
-     rlatt = 0.5 * ( phi(j) + phi(j-1) )   ! Latitude at each u-point (C-grid)
-     cst(j) = DCOS ( rlatt * radian )
-  END DO
-  
+  rlatv(:) = 0.5*(phi(1:JMT)+phi(0:JMT-1))
+  cst(:) = cos(rlatv(:)*radian)
+
   !! Total horizontal area of grid box
   DO i=1,IMT
-     DO j=1,JMT
-        dxdy(i,j) = dx * deg * cst(j) * dy * deg
-     END DO
+    DO j=1,JMT
+        dxdy(i,j) = dx*deg*cst(j)*dydegv(j)
+    END DO
   END DO
   
   ! -------------------------------------------------------------
-  
-  !!
-  !! Some atmosphere constants
-  !!
-  
-  
+
   !!
   !! Min/max for pressure, temperature, specific humidity
   !!
@@ -112,37 +115,23 @@ SUBROUTINE setupgrid
   dr    = (rmax-rmin)/dble(MR-1) ![hPa]
   dtemp = (tmax-tmin)/dble(MR-1) ![K]
   dsalt = (smax-smin)/dble(MR-1) ![g/kg]
-  
 
-  
   !!
   !! Read A(k) and B(k) to determine hybrid coordinate levels.
   !! p(k) = A(k) + B(k) * p_surface
   !!
-  ALLOCATE ( aa(0:KM), bb(0:KM) )
   
-!  OPEN (12,FILE=TRIM(inDataDir)//'topo/model_60lev.txt')
-!  OPEN (12,FILE='/Users/doos/data/ifs/topo/model_60lev.txt')
-  OPEN (12,FILE='/Users/doos/Dropbox/data_cylinder/ifs/topo/model_60lev.txt')
-99 FORMAT(10x,f12.6,4x,f10.8)
+  ALLOCATE(aa(0:KM),bb(0:KM))
+  
+  OPEN (12,FILE=TRIM(topoDataDir)//'model_62lev.txt')
+
+  99 FORMAT(10x,f12.6,4x,f10.8)
   
   DO k=0,KM
      READ (12,99) aa(k),bb(k)
   END DO
   
   CLOSE (12)
-  
-  !!
-  !! Setting necessary dummy argument
-  !!
-!  zw=9.e10  ! should not be used
-  DO k=1,KM
-!     print *,k, aa(k),bb(k)
-!     dz(jk) = zw(jk)-zw(jk-1)
-  END DO
-  
-
-
 
   ! -------------------------------------------------------------
   

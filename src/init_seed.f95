@@ -21,7 +21,7 @@ SUBROUTINE init_seed()
    IMPLICIT NONE
 
    INTEGER                                    :: ji, jj, jk, filestat
-   INTEGER                                    :: numsd, landsd
+   INTEGER                                    :: numsd, landsd=0
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:)     :: seedMask
    CHARACTER(LEN=50)                          :: fileStamp
    CHARACTER(LEN=200)                         :: fullSeedFile
@@ -146,9 +146,7 @@ SUBROUTINE init_seed()
    
       ALLOCATE ( seedMask(IMT, JMT, 1) )
       IF (varSeedFile == 1) then
-         fullSeedFile=trim(seedFile) !// trim(inparg1)
-         print *,'Variable file name not working!'
-         stop
+         fullSeedFile=trim(seedDir) // trim(seedFile)        
       ELSE
          fullSeedFile=trim(seedFile)
       END IF
@@ -189,6 +187,8 @@ SUBROUTINE init_seed()
          END DO
          print *,'Particles are seeded according to the listfile'
          print *,'   '//trim(fullSeedFile)
+      ELSE
+       stop 3857
       END IF chFile2d
        
    END SELECT

@@ -187,7 +187,7 @@ contains
        if(uu.lt.0.d0) then
        !if (uu+upr(3,1) < 0.d0) then
           jb=ja-1
-#ifndef ifs 
+#ifndef atmospheric 
         if(jb==0) stop 34578
 #endif
        endif
@@ -245,9 +245,14 @@ contains
           kb=ka+1
        endif
        z1=dble(ka)
-       if(kb==KM+1) then    ! prevent "evaporation" and put particle from 
-          kb=KM             ! the surface to the middle of the surface layer
-          z1=dble(KM)-0.5d0 !
+   
+       if(kb==KM+1) then    ! prevent particles to cross the sea surface 
+          kb=KM             
+#if defined hydro 
+          z1=dble(KM)       ! put them exactly at the surface for hydro
+#else
+          z1=dble(KM)-0.5d0 ! ! put them in the midle of the surface layer 
+#endif
        endif
 #if defined timeanalyt
        call pos_time(1,ia,ja,ka,x0,x1)
@@ -367,13 +372,10 @@ contains
        if(dse==UNDEF .and. dsw==UNDEF .and. dsn==UNDEF .and. & 
           dss==UNDEF .and. dsu==UNDEF .and. dsd==UNDEF ) then       
           ib=ia ; jb=ja ; kb=ka
-       else
-          !print*,'hej3',ia,ja,ka,x0,y0,z0
+       endif
           call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
           call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
           call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
-          !print*,'hej4',ib,jb,kb,x1,y1,z1
-       endif
 #endif
     endif
     
