@@ -82,7 +82,7 @@ SUBROUTINE readfields
    INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
    INTEGER                                       :: kbot,ktop, idiag, jdiag
    INTEGER                                       :: ichar
-   INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep
+   INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep, log_level=2
    INTEGER, DIMENSION(12), SAVE                  :: daysInMonth
    
    ! Variables to set the filenames
@@ -186,7 +186,7 @@ SUBROUTINE readfields
          !  
          ! Find the files for the current step  
          ! 
-         fieldStep = 0
+         fieldStep = 1
          itime = 1
          do while (currMon*100 + currDay - (fileMon(itime,2)*100 + fileDay(itime,2)) > 0)
             itime = itime + 1
@@ -194,8 +194,10 @@ SUBROUTINE readfields
       end if
       
       if (.not. oneStepPerFile) then
-         print*,' First file timestamp:         ',file_timestamp(1)
-         print*,' Start with file number:       ',itime
+         if (log_level > 0) then
+            print*,' First file timestamp:         ',file_timestamp(1)
+            print*,' Start with file number:       ',itime
+         end if
       end if
       
    end if
@@ -274,7 +276,6 @@ SUBROUTINE readfields
                j=j+1
 #if orca025l75h6
                trajinit(k,i,3)=float(kst2)-0.5
-               !   print *,j,trajinit(k,i,:)
 #endif
             endif
          enddo
@@ -293,8 +294,12 @@ SUBROUTINE readfields
    ! If only one step per file, this is always 1. 
    !
    
+   ncTpos = fieldStep
+   
    if (oneStepPerFile) then
-      print*,' Only one step per file '
+      if (log_level > 0) then
+         print*,' Only one step per file '
+      end if
       itime = 1
       fieldStep = 1
       
@@ -327,8 +332,8 @@ SUBROUTINE readfields
       
    end if
    
-   ncTpos = fieldStep
-   print *,'nctpos=',nctpos
+   print*,' next step to read ',fieldStep
+   
    
    !
    ! Set the file names that we need to read
@@ -380,7 +385,17 @@ SUBROUTINE readfields
    vFile = trim(physDataDir)//trim(physPrefix(:ichar-1))//trim(vGridName)//trim(physPrefix(ichar+5:))//trim(fileSuffix)
    
    if (ints == intstart) then
-      print*,' First T file:                 ',trim(tFile)
+      if (log_level > 0) then
+         print*,' First T file:                 ',trim(tFile)
+         print*,' First U file:                 ',trim(uFile)
+         print*,' First V file:                 ',trim(vFile)
+      end if
+   else 
+      if (log_level > 1) then
+         print*,' Current T file:               ',trim(tFile)
+         print*,' Current U file:               ',trim(uFile)
+         print*,' Current V file:               ',trim(vFile)
+      end if
    end if
     
    ! Read SSH

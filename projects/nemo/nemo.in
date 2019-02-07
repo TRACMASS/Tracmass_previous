@@ -8,9 +8,9 @@
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = 'Global 1 deg run',
        indatadir = '',
-     topoDataDir = '/Users/doos/data/ORCA1-N406/',
+     topoDataDir = '/Users/jkjellsson/data/ORCA1-N406/',
      RunID       = 'ORCA1-N406', 
-     physDataDir = '/Users/doos/data/ORCA1-N406/',
+     physDataDir = '/Users/jkjellsson/data/ORCA1-N406/',
      physPrefixForm = 'RUNID_YYYYGRIDX'
      bioDataDir = '', 
      bioPrefixForm = '', 
@@ -108,7 +108,7 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
            kriva =      1,
-      outdatadir = '/Users/doos/data/orca1/data_out/',
+      outdatadir = '/Users/jkjellsson/Downloads/',
      outdatafile = 'orca1_test',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
