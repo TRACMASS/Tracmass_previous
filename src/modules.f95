@@ -10,7 +10,7 @@ MODULE mod_param
   USE mod_precdef
   INTEGER                                   :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
-  INTEGER                                   :: ncoor,kriva,iter,ngcm
+  INTEGER                                   :: ncoor,kriva,iter,ngcm,ngcm_unit
   REAL(DP), PARAMETER                       :: UNDEF=1.d20 
   REAL(DP), PARAMETER                       :: EPS=1.d-10 !7 ! the small epsilon
 
@@ -120,6 +120,7 @@ MODULE mod_grid
   INTEGER                                   :: nsm=1,  nsp=2
   INTEGER                                   :: wnsm=1, wnsp=2
   INTEGER                                   :: nperio=1
+  INTEGER                                   :: log_level = 0
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
@@ -266,6 +267,9 @@ MODULE mod_time
   INTEGER                                   :: currHour, currMin, currSec
   INTEGER                                   :: leapoffset=0
   ! === Looping time
+  INTEGER                                   :: loopIndex = 0
+  INTEGER                                   :: loopStartYear, loopEndYear
+  LOGICAL                                   :: loopYears = .false. 
   INTEGER                                   :: loopints, loopintstart
   REAL(DP)                                  :: loopJD, loopJDyr, loopFrac
   INTEGER                                   :: loopYear  ,loopMon  ,loopDay
