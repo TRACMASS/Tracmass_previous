@@ -58,6 +58,7 @@ SUBROUTINE readfields
    ! ==========================================================================
    
    USE mod_precdef
+   USE mod_calendar
    USE mod_param
    USE mod_vel
    
@@ -82,8 +83,7 @@ SUBROUTINE readfields
    INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
    INTEGER                                       :: kbot,ktop, idiag, jdiag
    INTEGER                                       :: ichar
-   INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep, log_level=2, currStep
-   INTEGER, DIMENSION(12), SAVE                  :: daysInMonth
+   INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep 
    
    ! Variables to set the filenames
    CHARACTER (len=200)                           :: fieldFile, medfieldFile, umFile, vmFile, physPrefix
@@ -92,7 +92,6 @@ SUBROUTINE readfields
    CHARACTER (len=200)                           :: dataprefix, timestamp
    INTEGER, ALLOCATABLE, DIMENSION(:,:),SAVE     :: fileMon, fileDay
    CHARACTER (len=200), ALLOCATABLE, DIMENSION(:),SAVE :: file_timestamp
-   CHARACTER (len=10), SAVE                      :: ngcm_unit = "month"
    
    ! Variables to calculate thickness of layers with vvl
    REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
@@ -135,10 +134,11 @@ SUBROUTINE readfields
       print*,' Start year,mon,day, hour      ',startYear,startMon,startDay,startHour
       
       if (.not. useTrmClock) then
-         currHour = startHour
-         currDay = startDay
-         currMon = startMon
-         currYear = startYear
+         call init_calendar
+         !currHour = startHour
+         !currDay = startDay
+         !currMon = startMon
+         !currYear = startYear
       end if
       
       if (readMean) then
@@ -247,32 +247,35 @@ SUBROUTINE readfields
    if (useTrmClock) then
       call updateClock 
    else
-      if (ints /= intstart) then
-      daysInMonth = (/ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
-      if (ngcm_unit == "minute") then
-         currStep = ngcm 
-      else if (ngcm_unit == "hour") then
-         currStep = ngcm * 60
-      else if (ngcm_unit == "day") then
-         currStep = ngcm * 24 * 60
-      else if (ngcm_unit == "month") then
-         currStep = daysInMonth(currMon) * 24 * 60 
+      if (ints /= intstart) then 
+         call update_calendar
       end if
-      ! Update the clock manually
-      currHour = currHour + currStep/60
-      do while (currHour >= 24) 
-         currDay = currDay + 1
-         currHour = currHour - 24
-         if (currDay > daysInMonth(currMon)) then
-            currDay = currDay - daysInMonth(currMon)
-            currMon = currMon + 1
-         end if
-         if (currMon > 12) then
-            currMon = currMon - 12
-            currYear = currYear + 1
-         end if
-      end do
-      end if
+      !if (ints /= intstart) then
+      !daysInMonth = (/ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
+      !if (ngcm_unit == "minute") then
+      !   currStep = ngcm 
+      !else if (ngcm_unit == "hour") then
+      !   currStep = ngcm * 60
+      !else if (ngcm_unit == "day") then
+      !   currStep = ngcm * 24 * 60
+      !else if (ngcm_unit == "month") then
+      !   currStep = daysInMonth(currMon) * 24 * 60 
+      !end if
+      !! Update the clock manually
+      !currHour = currHour + currStep/60
+      !do while (currHour >= 24) 
+      !   currDay = currDay + 1
+      !   currHour = currHour - 24
+      !   if (currDay > daysInMonth(currMon)) then
+      !      currDay = currDay - daysInMonth(currMon)
+      !      currMon = currMon + 1
+      !   end if
+      !   if (currMon > 12) then
+      !      currMon = currMon - 12
+      !      currYear = currYear + 1
+      !   end if
+      !end do
+      !end if
    end if
    
    ! === Initialising fields ===

@@ -61,12 +61,13 @@ SUBROUTINE init_params
                                     dzv_3D_name, gridIsUpsideDown, read3Ddz
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
                                     baseMon, baseYear, jdoffset
-   namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
+   namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, ngcm_unit, iter, intmax,       &
                                     minvelJD, maxvelJD
    namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
                                     startDay, startMon, startYear,           &
                                     startJD, intmin, noleap
-   namelist /INIT_RUN_TIME/         intspin, intrun
+   namelist /INIT_RUN_TIME/         loopYears, loopStartYear, loopEndYear,   & 
+                                    intspin, intrun, log_level
    namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
                                     outdircase, intminInOutFile, intpsi, outdirdate
           

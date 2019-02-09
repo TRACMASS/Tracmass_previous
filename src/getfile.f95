@@ -127,8 +127,12 @@ MODULE mod_getfile
     if(ierr.ne.0) call printReadError(1, fieldFile, varName)
     ierr=NF90_INQ_VARID(ncid ,varName ,varid)
     if(ierr.ne.0) call printReadError(2, fieldFile, varName)
-
-    print*,'s, c ', s, c
+    
+    if (log_level >= 2) then
+       print*,' Start: ',s
+       print*,' Count: ',c
+    end if
+    
     ierr=NF90_GET_VAR(ncid ,varid ,field, s, c)
     if(ierr.ne.0) call printReadError(3, fieldFile, varName)
 
