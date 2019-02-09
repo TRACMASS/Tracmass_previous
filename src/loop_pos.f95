@@ -366,16 +366,22 @@ contains
          z1=z0
         stop 3854
        endif
-!       print *,'x0x1',x0,x1,y0,y1,z0,z1
 #else           
        ! If there is no spatial solution, i.e. a convergence zone
        if(dse==UNDEF .and. dsw==UNDEF .and. dsn==UNDEF .and. & 
           dss==UNDEF .and. dsu==UNDEF .and. dsd==UNDEF ) then       
           ib=ia ; jb=ja ; kb=ka
        endif
-          call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
-          call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
-          call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
+       call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
+       call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
+       call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
+       if (nperio /= 0) then !  East-west cyclic
+        if(x1 <  0.d0    ) then
+         x1=x1+dble(IMT)       
+        elseif(x1 > dble(IMT)) then
+         x1=x1-dble(IMT)   
+        end if
+       end if
 #endif
     endif
     

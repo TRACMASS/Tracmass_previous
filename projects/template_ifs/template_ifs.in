@@ -3,16 +3,20 @@
 /
 &INIT_GRID_DESCRIPTION
          gcmname = 'EraInterim',
-       gcmsource =     '',
-        gridname =     '',
-      gridsource =     '',
-        griddesc =     '',
-       indatadir = '/Users/doos/Dropbox/data_cylinder/ifs/',
-!       indatadir = '/Users/doos/data/ifs/',
+       gcmsource = 'https://www.ecmwf.int/',
+        gridname = '',
+      gridsource = 'https://www.ecmwf.int/',
+        griddesc = '',
+       indatadir = '',
+     topoDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/topo/',
+     RunID       = 'era', 
+     physDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/eranc/',
+      fileSuffix = '.nc',
+     useTrmClock = .false., ! ????????
 /
 &INIT_CASE_DESCRIPTION
-        casename =  'era',
-        casedesc =     '',
+        casename = 'era',
+        casedesc = 'test',
 /
 &INIT_GRID_SIZE
              imt =    480,
@@ -24,7 +28,7 @@
      subgridimax =   1000,
      subgridjmin =    400,
      subgridjmax =   1000,
-     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
+     subgridfile = 'templ.asc',
        subgridid =      1,
        nperio    =      1, 
 /
@@ -38,7 +42,7 @@
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
-            ngcm =      6, !don't touch!
+            ngcm =      6, ! number of hours between data sets, which depend on your model output files
             iter =      6,
           intmax =   1460,
         minveljd =     -1,
@@ -49,8 +53,8 @@
         startmin =      0,
        starthour =      0,
         startday =     01,
-        startmon =     01,
-       startyear =   2016,
+        startmon =     02,
+       startyear =   2017,
          startjd =     -1,
           intmin =      1,
 /
@@ -68,11 +72,8 @@
   !==               4 = write only start and end positions
   !==               5 = write at chosen intervals
   !==               6 = write each spatial grid-crossing 
-           kriva =      6,
+           kriva =      0,
      outDataDir   = '/Users/doos/data/ifs/data_out/',
-!     outDataDir   = '/Users/doos/Dropbox/data_cylinder/ifs/data_out/',
-!     outdatafile = 'hydro_10jan2016_iter_atl_k6',
-!     outdatafile = 'hydro_2jan2016_iter_atlpac_k6',
      outdatafile = 'hydro_warmpool_back_k6',
  outdircase =      .false. ,
  intmininoutfile =      0,
@@ -83,9 +84,7 @@
   ! ==============================================
   ! NAMELIST INITIALIZATION SEED
   ! ==============================================
-  ! nff:          1 = Follow trajectories forward in time
-  !              -1 = Follow trajectories backward in time
-  !
+
   ! isec:         1 = Seed particles meridional(y-z)
   !               2 = Seed particles zonal(x-z)
   !               3 = Seed particles horiz(x-y)
@@ -116,20 +115,20 @@
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
   !
-             nff =      1,
+             nff =     -1, ! 1 = Follow trajectories forward in time ; -1 = Follow backward in time
             isec =      3,
             idir =     -1,
             nqua =      1,
        partquant =      1,
         ntracmax = 8000000,
-    loneparticle =      0, !0, !3455, 
+    loneparticle =    0, !0, !3455, 
         seedtype =      1, !1=ist1 etc. 3=seedfile
-            ist1 =     170, ! 1, !382,
-            ist2 =     260, !480, !457, 
-            jst1 =      90, !1, !140, !140,
-            jst2 =    134,  !240, !173, !173, 
-            kst1 =     60, !60,
-            kst2 =     60, !60,
+            ist1 =     1, ! 170, ! 1, !382,
+            ist2 =     480, ! 260, !480, !457, 
+            jst1 =     90, ! 1, !140, ! Note that TRACMASS reverses latitude order so j=1 is southpole
+            jst2 =     90, ! 134,  !240, !173, !173, 
+            kst1 =     1, ! 60,
+            kst2 =     60, ! 60,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =     '/Users/doos/Dropbox/data_cylinder/ifs/topo/',

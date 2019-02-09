@@ -65,7 +65,6 @@ endif
 
 !! Update the time counter
 
-!ihour = ihour + int(ff) * ngcm  
 ihour = ihour + nff * ngcm  
 
 if (ihour >= 24) then   !Forward scheme
@@ -120,25 +119,19 @@ if (ints == intstart) then
    Lv = 2.5d+6     ! Latent heat for condensation of water vapor [J/kg]
    cp = 1004.d0    ! Specific heat for dry air
    celsius0=273.15
-
-!   qmin=1.e-6 ! A minimum of water mass is required to compute water mass trajectories
-!   qmin=1.e-7 ! A minimum of water mass is required to compute water mass trajectories
-   qmin=1.e-10 ! A minimum of water mass is required to compute water mass trajectories
+   qmin=1.e-7     ! A minimum of water mass is required to compute water mass trajectories
 
    iyear = startYear
    imon  = startMon
    iday  = startDay
    ihour = startHour
 
- !  ncTpos=4*(iday-1)+ (ihour)/6 
 
 endif
 
 ntime = 1000000 * iyear + 10000 * imon + 100 * iday + ihour
 
-
-!ncTpos = ncTpos+nff
-   ncTpos=4*(iday-1)+ (ihour)/6 +1
+ncTpos=4*(iday-1)+ (ihour)/6 +1
 
 !print *, ints,ncTpos,ntime
 
@@ -160,7 +153,7 @@ ntime = 1000000 * iyear + 10000 * imon + 100 * iday + ihour
 !! Construct string to read input files
 !!
 
-prefix = '0000/era000000'
+prefix = '0000/'//trim(RunID)//'000000'
 WRITE (prefix(1:4),'(i4)') iyear
 WRITE (prefix(9:12),'(i4)') iyear
 if (imon < 10) then
@@ -168,9 +161,9 @@ if (imon < 10) then
 else
  WRITE (prefix(13:14),'(i2)') imon
 endif
-fieldFile = TRIM(inDataDir)//'eranc/'//TRIM(prefix)//'.nc'
+fieldFile = TRIM(physDataDir)//TRIM(prefix)//trim(fileSuffix)
 
-print *, ntime,trim(fieldFile)
+!print *, ntime,trim(fieldFile)
 
 start1D  = [ 1]
 count1D  = [NY]
@@ -182,65 +175,13 @@ count3D  = [ imt, NY, KM,      1 ]
 map3D    = [  1 , 2 ,  3,      4 ] 
 
 
-!kladd
-!fieldFile = TRIM(inDataDir)//'eranc/topo/topo.nc'
-!ierr = NF90_OPEN (trim(fieldFile),NF90_NOWRITE,ncid)
-!if (ierr /= 0) then
-! PRINT*,NF90_STRERROR (ierr)
-! STOP
-!endif
-!ierr=NF90_INQ_VARID(ncid,'sst',varid)
-!ierr=NF90_GET_VAR(ncid,varid, ishort,start2d,count2d)
-!! asking if there are the scale_factor and add_offset attributes
-! ierr = nf90_get_att(ncid, varid,"scale_factor", scale_factor)
-! if (ierr == -43) scale_factor =1.0
-! ierr = nf90_get_att(ncid, varid,"add_offset", add_offset)
-! if (ierr == -43) add_offset = 0.0
-! pxy=float(ishort)* scale_factor+ add_offset
-! print *, pxy
-!do i=1,IMT
-! do j=1,NY
-!  if(pxy(i,j)==215.701538) then
-!   ishort(i,j)=0
-!   print *,i,j,pxy(i,j)
-!  else
-!   ishort(i,j)=1
-!  endif
-! enddo
-!enddo
-!!print *,ishort
-!open(78,file=TRIM(inDataDir)//'eranc/topo/topo.bin',form='unformatted')
-!write(78) ishort
-!close(78)
-!stop 3856
 
-
-
-
-
-!print *, ncTpos
-!if(ncTpos*nff==1 .or. (nff==-1 .and. ncTpos==4*idmax(imon,iyear))) then
 ierr=NF90_CLOSE(ncid)
 ierr = NF90_OPEN (trim(fieldFile),NF90_NOWRITE,ncid)
 if (ierr /= 0) then
  PRINT*,NF90_STRERROR (ierr)
  STOP
-endif
-!endif
-
-!!    Read latitude
-!   ierr=NF90_INQ_VARID(ncid,'latitude',varid)
-!   print *,ncid,varid
-!   if (ierr /= 0) then
-!      PRINT*,NF90_STRERROR (ierr)
-!      STOP
-!   endif
-!   ierr=NF90_GET_VAR(ncid,varid,rlat,start1d,count1d)
-!   if (ierr /= 0) then
-!      PRINT*,NF90_STRERROR (ierr)
-!      STOP
-!   endif
-!   
+endif   
 
 !__________________________ Read surface pressure
    ierr=NF90_INQ_VARID(ncid,'lnsp',varid)
@@ -284,8 +225,6 @@ endif
  if (ierr == -43) add_offset = 0.0
    
  qxyz=float(ishortxyz)* scale_factor+ add_offset
-
-!print *, qxyz(1,JMT/2,:)
 
 
 #if defined hydro
@@ -367,7 +306,6 @@ enddo
    
  uxyz=float(ishortxyz)* scale_factor+ add_offset
 
-!print *, 'u=',uxyz(1,JMT,KM), ishortxyz(1,1,KM)
 
 !!_________ Read v
    ierr=NF90_INQ_VARID(ncid,'v',varid)
@@ -463,44 +401,11 @@ DO k=1,KM
    END DO
 END DO
 
-!print *,vflux(:,1,KM,2)
 
-!stop 4967
-
-   ! Impose zero velocitites at the poles
-!vflux(:  ,1,:,:)=0.
+! Impose zero velocitites at the poles
 vflux(:  ,0,:,:)=0.
-!vflux(:  ,1,:,:)=0.
 vflux(:,JMT,:,:)=0.
 
-
-! vertvel test
-!
-!vertsummam=0. ; vertsummap=0.
-!k=ints-54060
-!do i=1,IMT
-! do j=1,JMT
-!  im=i-1
-!  if (im == 0) im=IMT
-!  CALL vertvel (i,im,j,KM)
-!  if(wflux(KM,1)<0.) then
-!   vertsummam= vertsummam+wflux(KM,1)
-!  else
-!   vertsummap= vertsummap+wflux(KM,1)
-!  endif
-!  if(k/=0) emp(i,j)=emp(i,j)+wflux(KM,1)
-! enddo
-!enddo
-!
-!print *, k,vertsummam*1.e-9, vertsummap*1.e-9,(vertsummam+vertsummap)*1.e-9
-!
-!if(k==1460) then
-! emp=emp/1460.
-! open(78,file=TRIM(inDataDir)//'data_out/emp_2016.bin',form='unformatted')
-! write(78) emp
-! close(78)
-! stop 496784
-!endif
 
 
 !!
@@ -577,8 +482,6 @@ rho(:,:,:,2) = 0.5/cp * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![C]
 
 #endif
 
-
-!print *,'slutlaest'
 
 RETURN
 

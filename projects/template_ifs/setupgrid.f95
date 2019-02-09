@@ -123,7 +123,7 @@ SUBROUTINE setupgrid
   
 !  OPEN (12,FILE=TRIM(inDataDir)//'topo/model_60lev.txt')
 !  OPEN (12,FILE='/Users/doos/data/ifs/topo/model_60lev.txt')
-  OPEN (12,FILE='/Users/doos/Dropbox/data_cylinder/ifs/topo/model_60lev.txt')
+  OPEN (12,FILE=trim(topoDataDir)//'model_60lev.txt')
 99 FORMAT(10x,f12.6,4x,f10.8)
   
   DO k=0,KM
