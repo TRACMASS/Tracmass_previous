@@ -121,9 +121,7 @@ SUBROUTINE setupgrid
   !!
   ALLOCATE ( aa(0:KM), bb(0:KM) )
   
-!  OPEN (12,FILE=TRIM(inDataDir)//'topo/model_60lev.txt')
-!  OPEN (12,FILE='/Users/doos/data/ifs/topo/model_60lev.txt')
-  OPEN (12,FILE=trim(topoDataDir)//'model_60lev.txt')
+  OPEN ( 12,FILE=trim(topoDataDir)//trim(zgridFile) )
 99 FORMAT(10x,f12.6,4x,f10.8)
   
   DO k=0,KM

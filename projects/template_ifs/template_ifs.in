@@ -1,66 +1,95 @@
 &INIT_NAMELIST_VERSION
-      gridvernum =      6,
+      gridvernum    =      6,                             	! grid version number, used to distinguish grids in setupgrid 
 /
 &INIT_GRID_DESCRIPTION
-         gcmname = 'EraInterim',
-       gcmsource = 'https://www.ecmwf.int/',
-        gridname = '',
-      gridsource = 'https://www.ecmwf.int/',
-        griddesc = '',
-       indatadir = '',
-     topoDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/topo/',
-     RunID       = 'era', 
-     physDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/eranc/',
-      fileSuffix = '.nc',
-     useTrmClock = .false., ! ????????
+     gcmname        = 'EraInterim',                         ! name of GCM            
+     gcmsource      = 'https://www.ecmwf.int/',				! website for GCM
+     gridname 		= '',									! name of grid
+     gridsource     = 'https://www.ecmwf.int/',          	! website for grid
+     griddesc       = '',                    				! short description of grid
+     ! Describe filenames
+     topoDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/topo/',  ! directory of grid data
+     RunID       = 'era',									! name of GCM simulation
+     physDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
+     fileSuffix  = '.nc',                                	! suffix of files, e.g. ".nc"
+     ! Logicals to control what to read etc.
+     useTrmClock = .false.,                               	! use sophisticated clock (otherwise simple clock)
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'era',
-        casedesc = 'test',
+     casename       = 'era',                               	! short name of the TRACMASS run
+     casedesc       = 'Test',                               ! short description of the TRACMASS run
 /
 &INIT_GRID_SIZE
-             imt =    480,
-             jmt =    240,
-              km =     60,
-             nst =      2,
-         subgrid =      0,
-     subgridimin =    500,
-     subgridimax =   1000,
-     subgridjmin =    400,
-     subgridjmax =   1000,
-     subgridfile = 'templ.asc',
-       subgridid =      1,
-       nperio    =      1, 
+     ! Size of global grid
+     imt            = 480,                                  ! number of global i points
+     jmt            = 240,                                  ! number of global j points
+     km             = 60,                                   ! number of global k points
+     nst            = 2,                                    ! number of time levels to use (should be = 2)
+     ! Only read subregion of the global data
+     subgrid        = 0,                                    ! only read part of the grid if > 0
+     subgridimin    = 10,                                   ! i start point of region
+     subgridimax    = 100,                                  ! i end point of region
+     subgridjmin    = 10,                                   ! j start point of region
+     subgridjmax    = 100,                                  ! j end point of region
+     subgridfile    = 'templ.asc',                          ! or read region indices from file
+     subgridid      = 0,                                    ! number for this region
+     nperio         = 1,                                    ! control periodic boundary conditions
+                                                            ! > 0 periodic in x
+                                                            ! = 4 North fold for ORCA2, 025, 0083
+                                                            ! = 6 North fold for ORCA1
+     zgridFile      = 'model_60lev.txt'                     ! file with dz etc.
 /
 &INIT_BASE_TIME
-         basesec =      0,
-         basemin =      0,
-        basehour =      0,
-         baseday =      1,
-         basemon =      1,
-        baseyear =   1979,
+     basesec        = 0,                                    ! base time and date for trmClock
+     basemin        = 0,
+     basehour       = 0,
+     baseday        = 1,
+     basemon        = 1,
+     baseyear       = 1900,
+     jdoffset       = 4,                                    ! trmClock offset in juliandays
 /
 &INIT_GRID_TIME
-   fieldsperfile =      1,
-            ngcm =      6, ! number of hours between data sets, which depend on your model output files
-            iter =      6,
-          intmax =   1460,
-        minveljd =     -1,
-        maxveljd =     -1,
+     fieldsperfile  = 1,
+     ngcm           = 6,                                    ! time between two time levels
+                                                            ! if ncgcm_unit = 5, then ngcm = 3 means 3 months
+     ngcm_unit      = 3,                                    ! units of ngcm 
+                                                            ! 1 = seconds
+                                                            ! 2 = minutes
+                    										! 3 = hours
+							     							! 4 = days
+							     							! 5 = months
+							     							! 6 = years
+     
+     iter           = 6,                                    ! number of time steps between two GCM time levels
+     intmax         = 1460,                                 ! max iterations before trajectory is 
+                                                            ! stopped with infiniteError
+     minveljd 		= -1,									!
+     maxveljd 		= -1,									!
 /
 &INIT_START_DATE
-        startsec =      0,
-        startmin =      0,
-       starthour =      0,
-        startday =     01,
-        startmon =     02,
-       startyear =   2017,
-         startjd =     -1,
-          intmin =      1,
+     startsec       = 0,                                    ! start time
+     startmin       = 0,
+     starthour      = 0,
+     startday       = 1,                                    ! start date
+     startmon       = 1,
+     startyear      = 2016,
+     noleap         = .false.,                              ! dont use leap years? 
+     startjd        = -1,                                   ! first julianday for trmClock
+     intmin         = 1,                                    !
 /
 &INIT_RUN_TIME
-         intspin =     4,!120, !50,
-          intrun =     2000, !120, !2000,
+     ! Loop run 
+     loopYears      = .true.,				     			! make a time loop to run 
+     		      					     					! e.g. 1000 years using only 100 years of data
+     loopStartYear  = 2016,				     				! year to start loop from
+     loopEndYear    = 2017,				     				! last year of loop
+     
+     intspin        = 1,                                    ! number of time steps for seeding
+     intrun         = 999999,                               ! number of time steps for run (always=2)
+     log_level      = 2,				     				! level of verbosity 
+     		      					     					! = 0 minimal output to stdout
+							    							! = 1 low verbosity
+							     							! = 2 medium verbosity
 /
 &INIT_WRITE_TRAJS
       twritetype =      2,
@@ -115,7 +144,7 @@
   ! If seedType = 1, define area where particles are seeded (started).
   ! -1 indicates max value in grid.
   !
-             nff =     -1, ! 1 = Follow trajectories forward in time ; -1 = Follow backward in time
+             nff =      1, ! 1 = Follow trajectories forward in time ; -1 = Follow backward in time
             isec =      3,
             idir =     -1,
             nqua =      1,

@@ -96,7 +96,7 @@
 							     ! 5 = months
 							     ! 6 = years
      
-     iter           = 10,                                    ! number of subcycles between time levels
+     iter           = 10,                                    ! number of time steps between two GCM time levels
      intmax         = 15330,                                 ! max iterations before trajectory is 
                                                              ! stopped with infiniteError
      minveljd       = 1,                                     !

@@ -18,7 +18,7 @@ SUBROUTINE readfields
 !!------------------------------------------------------------------------------
 
   USE mod_param
-  
+  USE mod_calendar
   USE mod_time
   USE mod_grid
   USE mod_name
@@ -29,7 +29,6 @@ SUBROUTINE readfields
   USE mod_tempsalt
 
   IMPLICIT none
-
 
 
 !!------------------------------------------------------------------------------
@@ -62,13 +61,12 @@ endif
 
 !!------------------------------------------------------------------------------
 
+!if(ints/=intstart) call update_calendar
+
 
 !! Update the time counter
-
 ihour = ihour + nff * ngcm  
-
 if (ihour >= 24) then   !Forward scheme
-
  ihour = 0
  iday  = iday + 1
  if (iday > idmax(imon,iyear)) then
@@ -80,9 +78,7 @@ if (ihour >= 24) then   !Forward scheme
    iyear = iyear + 1
   endif
  endif
-
 elseif (ihour < 0) then  !Backward scheme
-   
   ihour = 18
   iday  = iday - 1
   if (iday == 0) then
@@ -94,7 +90,6 @@ elseif (ihour < 0) then  !Backward scheme
    iday=idmax(imon,iyear)
    ncTpos=4*iday
   endif
-
 endif
 
 
@@ -130,12 +125,8 @@ if (ints == intstart) then
 endif
 
 ntime = 1000000 * iyear + 10000 * imon + 100 * iday + ihour
-
 ncTpos=4*(iday-1)+ (ihour)/6 +1
-
-!print *, ints,ncTpos,ntime
-
-
+!ncTpos=4*(currDay-1)+ (currHour)/6 +1
 
 !! Swap data sets
    uflux(:,:,:,1) = uflux(:,:,:,2)
@@ -146,7 +137,6 @@ ncTpos=4*(iday-1)+ (ihour)/6 +1
    sal(:,:,:,1)   = sal(:,:,:,2)
    rho(:,:,:,1)   = rho(:,:,:,2)
 #endif
-
 
 
 !!
@@ -163,8 +153,6 @@ else
 endif
 fieldFile = TRIM(physDataDir)//TRIM(prefix)//trim(fileSuffix)
 
-!print *, ntime,trim(fieldFile)
-
 start1D  = [ 1]
 count1D  = [NY]
 start2D  = [  1,  1,   1, ncTpos ]
@@ -173,8 +161,6 @@ map2D    = [ 1 , 2 ,   3 ,     4 ]
 start3D  = [   1,  1,  1, ncTpos ]
 count3D  = [ imt, NY, KM,      1 ]
 map3D    = [  1 , 2 ,  3,      4 ] 
-
-
 
 ierr=NF90_CLOSE(ncid)
 ierr = NF90_OPEN (trim(fieldFile),NF90_NOWRITE,ncid)
