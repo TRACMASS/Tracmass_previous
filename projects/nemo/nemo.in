@@ -8,9 +8,9 @@
      gridsource     = 'http://www.nemo-ocean.eu/',           ! website for grid
      griddesc       = 'Global 1 deg run',                    ! short description of grid
      ! Describe filenames
-     topoDataDir    = '/Users/jkjellsson/data/ORCA1-N406/',  ! directory of grid data
+     topoDataDir    = '/Users/jkjellsson/Downloads/ORCA1-N406/',  ! directory of grid data
      RunID          = 'ORCA1-N406',                          ! name of GCM simulation
-     physDataDir    = '/Users/jkjellsson/data/ORCA1-N406/',  ! directory of physical data (u,v,T,S,MLD,etc)
+     physDataDir    = '/Users/jkjellsson/Downloads/ORCA1-N406/',  ! directory of physical data (u,v,T,S,MLD,etc)
      physPrefixForm = 'RUNID_YYYYGRIDX'                      ! format of filenames for physical data
      bioDataDir     = '',                                    ! directory of biogeochemistry data 
      bioPrefixForm  = '',                                    ! format of filenames for BGC data
@@ -86,7 +86,7 @@
 /
 &INIT_GRID_TIME
      fieldsperfile  = 12,
-     ngcm           = 1,                                     ! time between two time levels
+     ngcm_step      = 1,                                     ! time between two time levels
                                                              ! if ncgcm_unit = 5, then ngcm = 3 means 3 months
      ngcm_unit      = 5,                                     ! units of ngcm 
                                                              ! 1 = seconds
@@ -118,11 +118,11 @@
      loopYears      = .true.,				     ! make a time loop to run 
      		      					     ! e.g. 1000 years using only 100 years of data
      loopStartYear  = 2000,				     ! year to start loop from
-     loopEndYear    = 2000,				     ! last year of loop
+     loopEndYear    = 2001,				     ! last year of loop
      
-     intspin        = 1,                                     ! number of time steps for seeding
-     intrun         = 36,                                    ! number of time steps for run
-     log_level      = 2,				     ! level of verbosity 
+     intspin        = 12,                                    ! number of time steps for seeding
+     intrun         = 120,                                   ! number of time steps for run
+     log_level      = 0,				     ! level of verbosity 
      		      					     ! = 0 minimal output to stdout
 							     ! = 1 low verbosity
 							     ! = 2 medium verbosity
@@ -162,10 +162,10 @@
      		      					     ! = 2 seed using file with start positions
 							     
 							     ! when seedtype = 1
-     ist1           = 235,				     ! seed in box in range i = [ist1,ist2]
-     ist2           = 237,				     ! 	       	      	    j = [jst1,jst2]
-     jst1           = 198,				     ! 			    k = [kst1,kst2]
-     jst2           = 198,				     
+     ist1           = 208,				     ! seed in box in range i = [ist1,ist2]
+     ist2           = 216,				     ! 	       	      	    j = [jst1,jst2]
+     jst1           = 195,				     ! 			    k = [kst1,kst2]
+     jst2           = 195,				     
      kst1           = 70,
      kst2           = 75,
      tst1           = -1,				     ! seed only between tst1 and tst2

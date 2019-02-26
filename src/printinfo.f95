@@ -210,8 +210,13 @@ CONTAINS
             trajectories(loneparticle)%z1, trajectories(loneparticle)%active, wallmin, wallsec, loopYear, &
             loopMon, loopDay, loopHour, loopMin 
     else
-       print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
-            wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin
+       if (useTrmClock) then
+          print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
+               wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin
+       else
+          print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
+               wallmin, wallsec, currYear, currMon, currDay, currHour, currMin
+       end if
     end if
 798    format(i7, '|', F8.2,  '|', F8.2,  '|', F8.2,  '|', i10, ' | ',  &
             i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &

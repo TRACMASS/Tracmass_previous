@@ -10,7 +10,7 @@
 #------------------------------------------------------------------------
    fl05   = -Dtempsalt       # Include temp and salt
    fl06   = -Dtextwrite      # Write results to textfile
-#  fl07   = -Dbinwrite       # Write results to binaryfile
+  fl07   = -Dbinwrite       # Write results to binaryfile
 #  fl08   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
    fl09  = -Dstreamxy       # Calculates the barotropic stream function.

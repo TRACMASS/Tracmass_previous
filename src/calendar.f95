@@ -50,8 +50,34 @@ MODULE mod_calendar
         currMon = startMon
         currYear = startYear
         
+        iyear = currYear - startYear + 1
+        ! Find current step (secs)
+        IF (ngcm_unit == 1) THEN ! sec 
+           currStep = ngcm_step
+        ELSE IF (ngcm_unit == 2) THEN ! min
+           currStep = ngcm_step * 60
+        ELSE IF (ngcm_unit == 3) THEN ! hour 
+           currStep = ngcm_step * 60 * 60
+        ELSE IF (ngcm_unit == 4) THEN ! days 
+           currStep = ngcm_step * 24 * 60 * 60
+        ELSE IF (ngcm_unit == 5) THEN ! months 
+           currStep = daysInMonth(iyear,currMon) * 24 * 60 * 60
+        ELSE IF (ngcm_unit == 6) THEN ! years 
+           currStep = SUM(daysInMonth(iyear,:)) * 24 * 60 * 60
+        ELSE
+           PRINT*," The ngcm_unit ",ngcm_unit," is not recognised "
+           PRINT*," Valid units are 1 (second), 2 (minute), 3 (hour) "
+           PRINT*," 4 (day), 5 (month), 6 (year) "
+           PRINT*," You can also code new units in calendar.f95"
+           PRINT*," For now, I stop "
+           STOP
+        END IF
+
+        ! ngcm 
+        ngcm = currStep / (60*60) ! hours 
+        
      RETURN              
-     END SUBROUTINE init_calendar
+     END SUBROUTINE init_calendar         
      
      SUBROUTINE update_calendar
      ! ---------------------------------------------------
@@ -73,17 +99,17 @@ MODULE mod_calendar
      iyear = currYear - startYear + 1 
      
      ! Find number of minutes to add
-     IF (ngcm_unit == 1) THEN
-        currStep = ngcm
-     ELSE IF (ngcm_unit == 2) THEN
-        currStep = ngcm * 60
-     ELSE IF (ngcm_unit == 3) THEN
-        currStep = ngcm * 60 * 60
-     ELSE IF (ngcm_unit == 4) THEN
-        currStep = ngcm * 24 * 60 * 60
-     ELSE IF (ngcm_unit == 5) THEN
+     IF (ngcm_unit == 1) THEN ! sec
+        currStep = ngcm_step
+     ELSE IF (ngcm_unit == 2) THEN ! min
+        currStep = ngcm_step * 60
+     ELSE IF (ngcm_unit == 3) THEN ! hour
+        currStep = ngcm_step * 60 * 60
+     ELSE IF (ngcm_unit == 4) THEN ! days
+        currStep = ngcm_step * 24 * 60 * 60
+     ELSE IF (ngcm_unit == 5) THEN ! months
         currStep = daysInMonth(iyear,currMon) * 24 * 60 * 60
-     ELSE IF (ngcm_unit == 6) THEN
+     ELSE IF (ngcm_unit == 6) THEN ! years
         currStep = SUM(daysInMonth(iyear,:)) * 24 * 60 * 60
      ELSE
         PRINT*," The ngcm_unit ",ngcm_unit," is not recognised "
@@ -93,6 +119,9 @@ MODULE mod_calendar
         PRINT*," For now, I stop "
         STOP
      END IF
+     
+     ! ngcm
+     ngcm = currStep / (60*60) ! hours 
      
      ! Now update the time and date
      currSec  = currSec + currStep * nff

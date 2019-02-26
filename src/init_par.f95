@@ -17,6 +17,7 @@ SUBROUTINE init_params
    USE mod_getfile
    USE mod_write
    USE mod_deformation
+   USE mod_calendar
    
 #if defined diffusion || turb 
    USE mod_diffusion
@@ -61,7 +62,7 @@ SUBROUTINE init_params
                                     dzv_3D_name, gridIsUpsideDown, read3Ddz
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
                                     baseMon, baseYear, jdoffset
-   namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, ngcm_unit, iter, intmax,       &
+   namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm_step, ngcm_unit, iter, intmax,       &
                                     minvelJD, maxvelJD
    namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
                                     startDay, startMon, startYear,           &
@@ -237,9 +238,13 @@ SUBROUTINE init_params
       iter=1
 #endif
 
-      
+   ! Initialise calendar
+   if (.not. useTrmClock) then
+      call init_calendar
+   end if
+         
    timax    =  24.*3600.*timax ! convert time lengths from days to seconds
-   dstep    =  1.d0/dble(iter)
+   dstep    =  1.d0/dble(iter)   
    dtmin    =  dstep * tseas
    baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)  + &  
            ( dble((baseHour)*3600 + baseMin*60 + baseSec) / 86400 )
@@ -287,7 +292,7 @@ SUBROUTINE init_params
    end if
 
    tseas= dble(ngcm)*3600.d0
-
+   
    ! --- ist -1 to imt ---
    IF ( ist1 == -1) THEN 
       ist1 = IMT

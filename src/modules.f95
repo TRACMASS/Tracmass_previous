@@ -10,7 +10,7 @@ MODULE mod_param
   USE mod_precdef
   INTEGER                                   :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
-  INTEGER                                   :: ncoor,kriva,iter,ngcm,ngcm_unit
+  INTEGER                                   :: ncoor,kriva,iter,ngcm,ngcm_step,ngcm_unit
   REAL(DP), PARAMETER                       :: UNDEF=1.d20 
   REAL(DP), PARAMETER                       :: EPS=1.d-10 !7 ! the small epsilon
 
