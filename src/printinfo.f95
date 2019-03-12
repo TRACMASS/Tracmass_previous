@@ -146,7 +146,7 @@ CONTAINS
   write(6,FMT='(A,I4,A,I2.2,A,I2.2,A,I2.2,A,I2.2)')          &
          ' End date in model-time       : ' , endYear, '-',  & 
          endMon, '-', endDay,' ' ,endHour, ':', endMin
-    write(6,FMT='(A,I5)') ' Length of run in timesteps   : ' ,intrun
+    write(6,FMT='(A,I6)') ' Length of run in timesteps   : ' ,intrun
     write(6,FMT='(A,I5)') ' Number of seeding timesteps  : ' ,intspin
     write(6,FMT='(A,I5)') ' Steps between two GCM fields : ' ,iter
 

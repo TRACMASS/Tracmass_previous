@@ -142,7 +142,7 @@
      outdatadir     = '/Users/jkjellsson/Downloads/',        ! directory for output
      outdatafile    = 'orca1_test',			     ! fileprefix for output
      intmininoutfile= 0,				     !
-     intpsi         = 10, 				     ! frequency of writepsi
+     intpsi         = 10, 									! frequency of writing the stream functions
 /
 &INIT_SEEDING
      nff            = 1,                                     ! = 1 run forward trajectories
@@ -164,7 +164,7 @@
 							     ! when seedtype = 1
      ist1           = 235,				     ! seed in box in range i = [ist1,ist2]
      ist2           = 237,				     ! 	       	      	    j = [jst1,jst2]
-     jst1           = 198,				     ! 			    k = [kst1,kst2]
+     jst1           = 198,				     ! 			    		k = [kst1,kst2]
      jst2           = 198,				     
      kst1           = 70,
      kst2           = 75,

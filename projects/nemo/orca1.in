@@ -91,13 +91,13 @@
      ngcm_unit      = 5,                                     ! units of ngcm 
                                                              ! 1 = seconds
                                                              ! 2 = minutes
-                    					     ! 3 = hours
-							     ! 4 = days
+                    					     				 ! 3 = hours
+							       							! 4 = days
 							     ! 5 = months
 							     ! 6 = years
      
      iter           = 10,                                    ! number of subcycles between time levels
-     intmax         = 15330,                                 ! max iterations before trajectory is 
+     intmax         = 15330,                                 ! max gcm timesteps before trajectory is 
                                                              ! stopped with infiniteError
      minveljd       = 1,                                     !
      maxveljd       = 120,                                   !
@@ -120,7 +120,7 @@
      loopStartYear  = 2000,				     ! year to start loop from
      loopEndYear    = 2000,				     ! last year of loop
      
-     intspin        = 1,                                     ! number of time steps for seeding
+     intspin        = 12,                                     ! number of time steps for seeding
      intrun         = 36,                                    ! number of time steps for run
      log_level      = 2,				     ! level of verbosity 
      		      					     ! = 0 minimal output to stdout
@@ -132,9 +132,9 @@
                                                              ! = 1 write float time variable
   							     ! = 2 write julianday
 							     ! > 2 write time step
-     kriva          = 1,                                     ! 0 = no writing
-             	      					     ! 1 = write at time intervals of gcm datasets (each ints)
-        						     ! 2 = write at each time iteration
+     kriva          = 1,         ! 0 = no writing
+             	      		     ! 1 = write at time intervals of gcm datasets (each ints)
+        						 ! 2 = write at each time iteration
 							     ! 3 = write all the time
   							     ! 4 = write only start and end positions
   							     ! 5 = write at chosen intervals
@@ -145,7 +145,7 @@
      intpsi         = 10, 				     ! frequency of writepsi
 /
 &INIT_SEEDING
-     nff            = 1,                                     ! = 1 run forward trajectories
+     nff            = 1,                   ! = 1 run forward trajectories
      		      					     ! = -1 run backwards
      isec           = 2,				     ! = 1 start on zonal cell wall 
      		      					     ! = 2 start on meridional cell wall

@@ -251,7 +251,7 @@ CONTAINS
                      END IF
 
                   CASE (4)   ! Spread evenly inside box                  
-                     x1 = DBLE (ib-1)  + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
+                     x1 = DBLE (ib-1) + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
                      y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
                      z1 = DBLE (kb-1) + 0.5d0
 

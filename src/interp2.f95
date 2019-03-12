@@ -18,9 +18,12 @@ subroutine interp2(i,j,k,temp,salt,dens)
   real temp,salt,dens
   
   integer i,j,k
+  
 
   intrpbg=dmod(ts,1.d0) 
   intrpb =1.d0-intrpbg
+
+!  print *,i,j,k,nsm,nsp, intrpb, intrpbg
 
   temp=intrpbg*tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm)
   salt=intrpbg*sal(i,j,k,nsp)+intrpb*sal(i,j,k,nsm)

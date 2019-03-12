@@ -67,7 +67,7 @@ MODULE mod_timeanalyt
   INTEGER                                   :: looop,ii,iim
   REAL(DP), PARAMETER                       :: XXLIM=1.d-6
   REAL(DP)                                  :: r0
-  REAL(QP)                                  :: rijk,s0,ss,fn0i0,fn0im,fnmi0,fnmim,f0,f1
+  REAL(QP)                                  :: rijk,s0,ss,fn0i0,fn0im,fnmi0,fnmim,f0,f1,ssms0,s0mss0
 ENDMODULE mod_timeanalyt
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
