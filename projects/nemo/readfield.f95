@@ -119,6 +119,7 @@ SUBROUTINE readfields
    
    if (ints == intstart) then
       
+      if (log_level >= 1) then
       print*,' Run ID:                       ',trim(RunID)
       print*,' Prefix for phys files:        ',trim(physPrefixForm)
       print*,' Dir for phys files:           ',trim(physDataDir)
@@ -132,6 +133,7 @@ SUBROUTINE readfields
       print*,' File suffix:                  ',trim(fileSuffix)
       
       print*,' Start year,mon,day, hour      ',startYear,startMon,startDay,startHour
+      end if
       
       if (.not. useTrmClock) then
          call init_calendar
@@ -311,7 +313,6 @@ SUBROUTINE readfields
    ! If only one step per file, this is always 1. 
    !
    
-   print*,' ---------------------------- '
    ncTpos = fieldStep
    
    if (oneStepPerFile) then
@@ -328,7 +329,9 @@ SUBROUTINE readfields
       ! Special case for INALT60
       !
       fieldStep = fieldStep + 1   
-      print*,' Reading file time stamp, fieldStep ',itime,fieldStep
+      if (log_level >= 2) then
+         print*,' Reading file time stamp, fieldStep ',itime,fieldStep
+      end if
       if ( (fieldStep > 150 .and. ( fileMon(itime,1)*100+fileDay(itime,1) > 101 .and. &
                                   & fileMon(itime,1)*100+fileDay(itime,1) < 1222 ) ) .or. & 
          & (fieldStep > 30  .and. ( fileMon(itime,1)*100+fileDay(itime,1) == 101)  ) .or. &
@@ -348,10 +351,7 @@ SUBROUTINE readfields
          fieldStep = 1
       end if
       
-   end if
-   
-   print*,' next step to read ',fieldStep
-   
+   end if   
    
    !
    ! Set the file names that we need to read
@@ -394,8 +394,6 @@ SUBROUTINE readfields
       physPrefix = trim(physPrefix(:ichar-1))//trim(timestamp)//trim(physPrefix(ichar+8:))
       ichar = INDEX(physPrefix,'TSTSTSTS')
    end do
-   
-   print*,'currYear, Mon, Day ', currYear, currMon, currDay
    
    ichar = INDEX(physPrefix,'GRIDX')
    tFile = trim(physDataDir)//trim(physPrefix(:ichar-1))//trim(tGridName)//trim(physPrefix(ichar+5:))//trim(fileSuffix)
@@ -476,19 +474,18 @@ SUBROUTINE readfields
    ! Read u, v
    !
    xxx(:,:,:) = get3DfieldNC(trim(uFile), trim(ueul_name)) 
-   uvel(1:imt,1:jmt,km:1:-1) = xxx(:,:,1:km)
+   uvel(1:imt,1:jmt,1:km) = xxx(:,:,1:km)
    xxx(:,:,:) = get3DfieldNC(trim(vFile), trim(veul_name))
-   vvel(1:imt,1:jmt,km:1:-1) = xxx(:,:,1:km)
+   vvel(1:imt,1:jmt,1:km) = xxx(:,:,1:km)
    
    if (sgsUV) then
       !
       ! Read subgrid scale velocities (e.g. EIV from NEMO)
       !
-      print*,' Reading SGS u,v '
       xxx(:,:,:) = get3DfieldNC(trim(uFile), trim(usgs_name))
-      uvel(1:imt,1:jmt,km:1:-1) = xxx(:,:,1:km)
+      uvel(1:imt,1:jmt,1:km) = uvel(1:imt,1:jmt,1:km) + xxx(:,:,1:km)
       xxx(:,:,:) = get3DfieldNC(trim(vFile), trim(vsgs_name))   
-      vvel(1:imt,1:jmt,km:1:-1) = xxx(:,:,1:km)
+      vvel(1:imt,1:jmt,1:km) = vvel(1:imt,1:jmt,1:km) + xxx(:,:,1:km)
    end if
    
    if (readBio) then
@@ -549,9 +546,9 @@ SUBROUTINE readfields
    !print*,'kmu ',kmu(idiag,jdiag)
    do k = 1, km
    do j = 1, jmt
-   do i = 1, imt
-      uflux(i,j,km+1-k,nsp) = uvel(i,j,km+1-k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)  
-      vflux(i,j,km+1-k,nsp) = vvel(i,j,km+1-k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
+   do i = 1, imt      
+      uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)  
+      vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
    enddo
    enddo
    enddo
@@ -631,7 +628,6 @@ SUBROUTINE readfields
       ijkst=0 
    endif
 #endif
-   print*,'end currYear,currMon,currDay,currHour',currYear,currMon,currDay,currHour
 
    return
    
