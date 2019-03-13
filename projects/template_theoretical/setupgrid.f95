@@ -55,10 +55,10 @@ kmt=KM ! flat bottom
 !dxdeg=dx*deg
 !dydeg=dy*deg
 
-! Nicoletta Fabboni velocities, which have analytical solutions
 dxv = 250. 
 dyu = 250.
-dxdy(1:IMT,1:JMT) = dxv(1:IMT,1:JMT) * dyu(1:IMT,1:JMT)
+!dxdy(1:IMT,1:JMT) = dxv(1:IMT,1:JMT) * dyu(1:IMT,1:JMT)
+dxdy = 250. * 250.
 dz  = 10.
 dzt = 10.
 

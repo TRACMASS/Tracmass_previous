@@ -2,165 +2,189 @@
       gridvernum =      6,
 /
 &INIT_GRID_DESCRIPTION
-         gcmname = 'Academic test run',
-       gcmsource =     '',
-        gridname =     '',
-      gridsource =     '',
-        griddesc =     '',
-       indatadir =   './',
+	gcmname        = 'Academic test run',				! name of GCM            
+	gcmsource      = '',								! website for GCM
+	gridname 	   = '',								! name of grid
+	gridsource     = '',								! website for grid
+	griddesc       = '',								! short description of grid
+	! Describe filenames
+	topoDataDir = '',  									! directory of grid data
+	RunID       = '',									! name of GCM simulation
+	physDataDir = '',   								! directory of physical data (u,v,T,S,MLD,etc)
+	fileSuffix  = '',									! suffix of files, e.g. ".nc"
+	! Logicals to control what to read etc.
+	useTrmClock = .false.,								! use sophisticated clock (otherwise simple clock)
 /
 &INIT_CASE_DESCRIPTION
         casename = 'Academic',
         casedesc = 'Rectangular ocean',
 /
 &INIT_GRID_SIZE
-             imt =    100, ! Grid cells in the zonal direction
-             jmt =    100, ! Grid cells in the meridional direction
-              km =     10, ! Grid cells in the vertical direction
-             nst =      2, ! two time levels stores in central memory (don't change!)
-         subgrid =      0, ! 0=entire grid ; 1=sub grid to be specified below
-     subgridimin =    500,
-     subgridimax =   1000,
-     subgridjmin =    400,
-     subgridjmax =   1000,
-     subgridfile =     '',
-       subgridid =      1,
-       nperio    =      1, ! Boundary conditions: 0 = not cyclic ; 4 = orca grids
+	! Size of global grid
+	imt            = 100,								! number of global i points
+	jmt            = 100,								! number of global j points
+	km             = 10,								! number of global k points
+	nst            = 2,									! number of time levels to use (should be = 2)
+	! Only read subregion of the global data
+	subgrid        = 0,									! only read part of the grid if > 0
+	subgridimin    = 10,								! i start point of region
+	subgridimax    = 100,								! i end point of region
+	subgridjmin    = 10,								! j start point of region
+	subgridjmax    = 100,								! j end point of region
+	subgridfile    = 'templ.asc',						! or read region indices from file
+	subgridid      = 0,									! number for this region
+	nperio         = 1,									! control periodic boundary conditions
+    													! > 0 periodic in x
+														! = 4 North fold for ORCA2, 025, 0083
+														! = 6 North fold for ORCA1
 /
 &INIT_BASE_TIME            ! The time will be counted from this date
-         basesec =      0,
-         basemin =      0,
-        basehour =      0,
-         baseday =      1,
-         basemon =      1,
-        baseyear =   1988,
+	basesec        = 0,									! base time and date for trmClock
+	basemin        = 0,
+	basehour       = 0,
+	baseday        = 1,
+	basemon        = 1,
+	baseyear       = 1900,
+	jdoffset       = 0,									! trmClock offset in juliandays
 /
 &INIT_GRID_TIME
-   fieldsperfile =      1, ! The number of snapshots per (netcdf) file
-            ngcm =      1, ! The number of hours between two data sets (∆tg)
-            iter =      1, ! Number of intermediate time steps between two gcm time steps
-          intmax = 146000, ! Maximum number of gcm time steps
-        minveljd =     -1,
-        maxveljd =     -1,
+     fieldsperfile  = 1,
+     ngcm_step      = 1,                                     ! time between two time levels
+                                                             ! if ncgcm_unit = 5, then ngcm = 3 means 3 months
+     ngcm_unit      = 3,                                     ! units of ngcm 
+                                                             ! 1 = seconds
+                                                             ! 2 = minutes
+                    					     				 ! 3 = hours
+							     							 ! 4 = days
+							     							 ! 5 = months
+							     						     ! 6 = years
+     
+     iter           = 1,                                    ! number of time steps between two GCM time levels
+     intmax         = 15330,                                 ! max iterations before trajectory is 
+                                                             ! stopped with infiniteError
+     minveljd       = -1,                                     !
+     maxveljd       = -1,                                   !
 /
 &INIT_START_DATE            ! The starting date of the GCM data to be read
-        startsec =      0,
-        startmin =      0,
-       starthour =      1,
-        startday =      1,
-        startmon =      1,
-       startyear =   1988,
-         startjd =     -1,
-          intmin =      1, 
+	startsec       = 0,									! start time
+	startmin       = 0,
+	starthour      = 0,
+	startday       = 1,									! start date
+	startmon       = 1,
+	startyear      = 2018,
+	noleap         = .false.,							! dont use leap years? 
+	startjd        = -1,								! first julianday for trmClock
+	intmin         = 1,									!
 /
 &INIT_RUN_TIME
-         intspin =      2, ! Number of gcm time steps when new trjectories are started
-          intrun =  100,   ! Terminate run adter intrun gcm time steps
+     ! Loop run 
+	loopYears      = .true.,							! make a time loop to run 
+														! e.g. 1000 years using only 100 years of data
+	loopStartYear  = 2018,								! year to start loop from
+	loopEndYear    = 2018,								! last year of loop
+     
+	intspin        = 1,									! number of time steps for seeding
+	intrun         = 1000,							    ! number of time steps for run (always=2)
+	log_level      = 2,									! level of verbosity 
+														! = 0 minimal output to stdout
+														! = 1 low verbosity
+														! = 2 medium verbosity
 /
 &INIT_WRITE_TRAJS
-      twritetype =      2, ! =0,1,2 defines how time is computed in subroutine open_outfiles
-  ! kriva:          0 = no writing
-  !                 1 = write at time intervals of gcm datasets (each ints)
-  !                 2 = write at each time iteration
-  !                 3 = write all the time
-  !                 4 = write only start and end positions
-  !                 5 = write at chosen intervals
-  !                 6 = write each spatial grid-crossing 
-             kriva =      6,
-      outdatadir =     '' !'/proj/bolinc/vagn/vagn2/x_aital/tracmass_out',
-     outdatafile =     'Theoretical_test_1',
- intmininoutfile =      0,
- intpsi =     100,           ! int frequency of written stream functions
- outdirdate =      .false. , ! if true a directory will be created where the trajectories are stored
+	twritetype     =  1,								! how to write time 
+														! = 1 write float time variable
+														! = 2 write julianday
+														! > 2 write time step
+															
+	kriva          = 3,									! 0 = no writing
+														! 1 = write at time intervals of gcm datasets (each ints)
+														! 2 = write at each time iteration
+														! 3 = write all the time
+														! 4 = write only start and end positions
+														! 5 = write at chosen intervals
+														! 6 = write each spatial grid-crossing
+	outDataDir     = '/Users/doos/data/tracmass/template_theoretical/',	! directory for output
+	outdatafile    = 'theoretical_test_1',						! fileprefix for output
+	outdircase     = .false. ,							! creates a new directory to store the data from the run      
+	intminInOutFile  =  0,								! 0 = ????
+														! 1 = ????
+														! 2 = 
+														! 3 = 
+	intpsi		   = 100,								! frequency of writing the stream functions
+	outdirdate     = .false. ,							! if true a directory will be created where the trajectories are stored
 /
 &INIT_SEEDING
-  ! ==============================================
-  ! NAMELIST INITIALIZATION SEED
-  ! ==============================================
-  ! nff:          1 = Follow trajectories forward in time
-  !              -1 = Follow trajectories backward in time
-  !
-  ! isec:         1 = Seed particles meridional(y-z)
-  !               2 = Seed particles zonal(x-z)
-  !               3 = Seed particles horiz(x-y)
-  !               4 = Seed particles in the middle of T-box
-  !
-  ! idir:         1 = follow positive direction (eastward/northward)  
-  !              -1 = follow negative direction (westward/southward)
-  !               0 = both directions
-  !
-  !
-  ! number of trajectories can be set by
-  ! nqua:         1 = constant number of particles in all boxes
-  !                   (partQuant in # particles / gridcell)
-  !               2 = Each particle reflects water transport at seeding. 
-  !                   (partQuant in m3s-1. per particle)
-  !               3 = Each particle reflects water volume at seeding.
-  !                   (partQuant in m3 per particle)
-  !               5 = particles set by seedfile (isec==nqua==5)
-  !
-  ! partQuant       : particles/gridcell or m3s-1/particle or m3/particle
-  !
-  ! === initial directions all in MODEL COORDINATES ===
-  ! Method for seeding particles.
-  ! seedType:       1 = Seed an area defined by ist, jst, and kst. if =-1 then all grid points
-  !                 2 = Use a list to define which cells to seed.
-  !                 3 = Use a 2-D mask file.
-  !
-  ! If seedType = 1, define area where particles are seeded (started).
-  ! -1 indicates max value in grid.
-             nff =      1,
-            isec =      4,
-            idir =      0,
-            nqua =      1,
-       partquant =      1,
-        ntracmax =   2000000,  ! maximum number of trajectories; increase if necessary!
-    loneparticle =     -1,  ! if /= -1 then only this (ntrac) trajectory will be computed
-        seedtype =      1,
-            ist1 =     31,!31,
-            ist2 =     31, !31,
-            jst1 =     50, !50,
-            jst2 =     50, !50,
-            kst1 =     5,
-            kst2 =     5,
-            tst1 =     -1,
-            tst2 =     -1,
-         seeddir =     '',
-        seedfile =     '',
-     varseedfile =      0,
-        seedtime =      0,
-         seedall =      0,
-         seedpos =      1,
-       seedparts =      0,
-     seedpart_id =      0,
+	nff			   = 1,								    ! = 1 run forward trajectories
+														! = -1 run backwards
+	isec           = 4,									! = 1 start on zonal cell wall 
+														! = 2 start on meridional cell wall
+														! = 3 start on vertical wall
+														! = 4 start in center of cell
+	idir           = 0,									! = 1 start only when flux > 0 (eastward/northward) 
+														! = -1      only when flux < 0 (westward/southward)
+														! = 0 start at flux < 0 or > 0 (both directions) not working ???
+	nqua           = 1,									! number of trajectories can be set by     
+														! = 1 constant number of particles in all seeding cells
+														!     set by partQuant (particles / gridcell)
+														! = 2 Each particle reflects mass transport at seeding. 
+														!     set by partQuant (m3/s or kg/s per particle)
+														! = 3 Each particle reflects air/water mass/volume at seeding.
+														!     set by partQuant in m3 or kg per particle
+														! = 5  particles set by seedfile (Set: isec==5)
+	partQuant      = 1,									! particles/gridcell or m3s-1/particle or m3/particle
+	ntracmax       = 8000,							    ! max number of trajectories (set as big as possible)
+	loneparticle   = 0,									! follow only this trajectory for debugging. If = 0 then all trajectories
+	seedtype       = 1,									! = 1 seed by using ist,jst,kst (below)
+														! = 2 seed by using list file with start positions
+														! = 3 seed by using a 2-D mask file.
+							     
+	! Use the parameters below when seedtype = 1
+	ist1           = 31,				     			! seed in box in range i = [ist1,ist2]
+	ist2           = 31,				     			! 	       	      	   j = [jst1,jst2]
+	jst1           = 50,	    		     			! 			           k = [kst1,kst2]
+	jst2           = 50,			     
+	kst1           = 5,    
+	kst2           = 5,    
+	tst1           = -1,								! seed only between tst1 and tst2
+	tst2           = -1,								! given as 19800105 for 1980-01-05
+     
+	! Use the parameters below when seedtype = 2
+	seeddir        = '',								! directory for seed files
+	seedfile       = '',								! name of seed file
+	varseedfile    = 0,									! = 1 read seedfile , = 0 use ist1,ist2,jst1,...
+	seedtime       = 0,									! seed only for specific times
+	seedall        = 0,									! seed all particles or only one
+	seedpos        = 1,									! 
+	seedparts      = 0,									!
+	seedpart_id	   = 0,									!
 /
-&INIT_KILLZONES              ! defines a horizontal area where trjectories are terminated
-            nend =      2,   ! number of killing zones plus one
-            ienw =      1,   ! western  border of killing zone
-            iene =      1,   ! eastern  border of killing zone
-            jens =      1,   ! southern border of killing zone
-            jenn =      1,   ! northern border of killing zone
-           timax =   20.0,   ! terminates trajectories after certain number of days
+&INIT_KILLZONES              ! defines a horizontal area where trajectories are terminated
+	nend 		   = 2,									! number of ways to kill a trajectory (in this case time + one region)
+	ienw 		   = 0,									! west indices of killzones
+	iene           = 0, 								! east indices of killzones
+	jens           = 0, 								! south indices of killzones
+	jenn           = 0,  								! north indices of killzones
+	timax          = 20.0, 							    ! time limit for traj [days]
 /
 &INIT_TEMP_SALT              
-           tmin0 =  -50.0,   ! defines minimum temperature required for trajectories to start
-           tmax0 =  400.0,   !         maximum
-           smin0 = -500.0,   !         minimum salinity/humidity
-           smax0 =  400.0,   !         maximum salinity/humidity
-           rmin0 = -100.0,   !         minimum density/atm pressure
-           rmax0 =  500.0,   !         maximum density/atm pressure
-           tmine =  -50.0,   ! defines minimum temperature required for trajectories to CONTINUE
-           tmaxe =  400.0,
-           smine = -150.0,
-           smaxe =  500.0,
-           rmine = -100.0,
-           rmaxe =  500.0,
+	tmin0 		   =  -50.0,							! start only if T >= tmin0
+	tmax0   	   =  400.0,							! ---- " ----   T <= tmax0   
+	smin0          = -500.0,							! ---- " ----   S >= smin0
+	smax0          =  400.0,							!               S <= smax0
+	rmin0          = -100.0,							! 		   rho >= rmin0
+	rmax0          = 1100.0,							!  	   rho <= rmax0
+	tmine          =  -50.0,							! kill traj  if T <  tmine
+	tmaxe          =  400.0,							! ---- " -----  T >  tmaxe
+	smine          = -150.0,							!               S <  smine
+	smaxe          =  500.0,
+	rmine          = -100.0,
+	rmaxe          = 1100.0,
 /
 &INIT_DIFFUSION
-              ah = 2000.0,  ! sub-grid parametersiation horizontal diffusion
-              av =    0.0,  !                           vertical
+              ah = 2000.0,  							! sub-grid parametersiation horizontal diffusion
+              av =    0.0,  !                           							vertical
 /
-&INIT_SEDIMENT              ! coefficients for adding a sedimentation velocity and resuspension
+&INIT_SEDIMENT              							! coefficients for adding a sedimentation velocity and resuspension
         partdiam =  0.001,  
             rhos = 2620.0,
            cwamp =   20.0,

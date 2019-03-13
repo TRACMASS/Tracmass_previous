@@ -40,6 +40,7 @@ subroutine readfields
   gammag = 1./(28.9*24.*3600.)
   omtime = dble(ints-intstart) * dble(ngcm*3600)
 
+
 !C-grid & store in matrixes
 
 do k=1,KM
@@ -84,7 +85,7 @@ do k=1,KM
 ! Nicoletta Fabboni velocities, which have analytical solutions
 ! -------------------------------------------------------------
          uflux(i,j,k,2) = dyu(i,j) * dzt(i,j,k,2) * ( ug*dexp(-gammag*omtime) + &
-                                             (u0-ug) * dexp(-gamma*omtime) * cos(fcor*omtime+pi/2.d0) )
+                                               (u0-ug) * dexp(-gamma*omtime) * cos(fcor*omtime+pi/2.d0) )
          vflux(i,j,k,2) = dxv(i,j) * dzt(i,j,k,2) * ( -(u0-ug) * dexp(-gamma*omtime) * sin(fcor*omtime+pi/2.d0) )
 
 if(j==1 .or. j==JMT) vflux(i,j,k,2)=0.

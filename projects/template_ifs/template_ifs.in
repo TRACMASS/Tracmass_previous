@@ -59,7 +59,7 @@
 /
 &INIT_GRID_TIME
 	fieldsperfile  = 1,
-	ngcm           = 6,									! time between two time levels
+	ngcm_step      = 6,									! time between two time levels
 														! if ncgcm_unit = 5, then ngcm = 3 means 3 months
 	ngcm_unit      = 3,									! units of ngcm 
 														! 1 = seconds
@@ -199,10 +199,10 @@
 	rmaxe          = 1100.0,
 /
 &INIT_DIFFUSION
-	ah             = 2000.0,
-	av             =    0.0,
+	ah             = 2000.0,							! sub-grid parametersiation horizontal diffusion
+	av             =    0.0,							!                           vertical
 /
-&INIT_SEDIMENT
+&INIT_SEDIMENT											! coefficients for adding a sedimentation velocity and resuspension
 	partdiam       =  0.001,
 	rhos           = 2620.0,
 	cwamp          =   20.0,
