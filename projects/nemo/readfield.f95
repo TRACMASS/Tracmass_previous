@@ -80,7 +80,7 @@ SUBROUTINE readfields
    
    ! -----------------------------------------------------------------------------
    
-   INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
+   INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l, jt
    INTEGER                                       :: kbot,ktop, idiag, jdiag
    INTEGER                                       :: ichar
    INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep 
@@ -447,6 +447,19 @@ SUBROUTINE readfields
          zstov = 0.d0
       end where
    end if
+   
+   ! 
+   ! Read tracers
+   ! 
+   DO jt=1,n2Dtracers
+      print*,'read 2D tracer: ',tracers2D(jt)%name
+      tracers2D(jt)%data(:,:,nsp) = get2DfieldNC(trim(tFile), tracers2D(jt)%name)
+   END DO
+   DO jt=1,n3Dtracers
+      print*,'read 3D tracer: ',tracers3D(jt)%name
+      xxx(:,:,:) = get3DfieldNC(trim(tFile), tracers3D(jt)%name)
+      tracers3D(jt)%data(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   END DO
    
    ! Read temperature 
    if (readTS) then

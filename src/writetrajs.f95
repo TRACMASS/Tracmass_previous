@@ -5,6 +5,7 @@ module mod_write
   USE mod_name, only: casename, case, Project
   USE mod_time 
   USE mod_active_particles, only: upr !!Joakim edit
+  USE mod_tempsalt, only: n2Dtracers, n3Dtracers, tracers2D, tracers3D
  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
@@ -78,6 +79,9 @@ CONTAINS
        binRecL = 24
     else if (binwritetype == 1) then
        binRecL = 36
+    else if (binwritetype == 2) then
+       binRecL = 36 + 4*n2Dtracers + 4*n3Dtracers
+       print*,'binRecL is ',binRecL
     else
        binRecL = 72
     end if
@@ -178,6 +182,8 @@ CONTAINS
     REAL*4                               :: x14 ,y14 ,z14, tt14, t014
     REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
                                             dvort4, dhdiv4, upr4, vpr4
+
+    REAL*4, DIMENSION(n3Dtracers)        :: trc3D4 
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
@@ -311,6 +317,8 @@ CONTAINS
     dhdiv4 = real(dhdiv,kind=4)!Joakim edit
     upr4   = real(upr(1,1),kind=4)!Joakim edit
     vpr4   = real(upr(3,1),kind=4)!Joakim edit
+    call interp_gen3D(ib,jb,kb,n3Dtracers,trc3D4,2)     
+    !trc3D4(1:n3Dtracers) = trc3D(1:n3Dtracers)
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -326,6 +334,8 @@ CONTAINS
           write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14
        else if (binwritetype == 1) then
           write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
+       else if (binwritetype == 2) then
+          write(unit=78, rec=recPosIn) ntrac,twrite, x14,y14,z14,tt14,t014, trc3D4(1:n3Dtracers)          
        else
           write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014, &
                                        lapu14,lapu24,lapv14,lapv24,upr4,vpr4,vort24,hdiv24,dvort4,dhdiv4

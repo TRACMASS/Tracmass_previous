@@ -31,7 +31,7 @@ SUBROUTINE init_params
 !!----------------------------------------------------------------------------
    
    INTEGER                                    ::  argint1 ,argint2
-   INTEGER                                    ::  dummy ,factor ,i ,dtstep
+   INTEGER                                    ::  dummy ,factor ,i ,dtstep, jt
    INTEGER                                    ::  gridVerNum ,runVerNum
    CHARACTER (LEN=30)                         ::  inparg, argname
    real*8                                     ::  jd
@@ -81,6 +81,8 @@ SUBROUTINE init_params
    namelist /INIT_KILLZONES/        nend, ienw, iene, jens, jenn, timax
    namelist /INIT_TEMP_SALT/        tmin0, tmax0, smin0, smax0, rmin0, rmax0,&
                                     tmine, tmaxe, smine, smaxe, rmine, rmaxe
+   
+   namelist /INIT_TRACERS/          n2Dtracers, names2Dtracers, n3Dtracers, names3Dtracers 
 #if defined diffusion || turb 
    namelist /INIT_DIFFUSION/        ah, av
 #endif
@@ -132,6 +134,7 @@ SUBROUTINE init_params
    READ (8,nml=INIT_SEEDING)
    READ (8,nml=INIT_KILLZONES)
    READ (8,nml=INIT_TEMP_SALT)
+   READ (8,nml=INIT_TRACERS)
 #if defined diffusion || turb 
    READ (8,nml=INIT_DIFFUSION)
 #endif
@@ -162,6 +165,7 @@ SUBROUTINE init_params
    READ (8,nml=INIT_SEEDING)
    READ (8,nml=INIT_KILLZONES)
    READ (8,nml=INIT_TEMP_SALT)
+   READ (8,nml=INIT_TRACERS)
 #if defined diffusion || turb 
    READ (8,nml=INIT_DIFFUSION)
 #endif
@@ -413,7 +417,19 @@ SUBROUTINE init_params
       sal = 0.
       rho = 0.
 #endif
-
+      
+      ALLOCATE ( tracers2D(n2Dtracers), tracers3D(n3Dtracers) )
+      DO jt=1,n2Dtracers
+         ALLOCATE( tracers2D(jt)%data(imt,jmt,2) ) 
+         tracers2D(jt)%name = names2Dtracers(jt)
+         print*,'tracer 2D name: ',tracers2D(jt)%name
+      END DO
+      DO jt=1,n3Dtracers
+          ALLOCATE( tracers3D(jt)%data(imt,jmt,km,2) )
+          tracers3D(jt)%name = names3Dtracers(jt)
+          print*,'tracer 3D name: ',tracers3D(jt)%name
+      END DO            
+      
       ! --- Allocate Lagrangian stream functions ---
 #ifdef streamxy
       ALLOCATE ( stxyy(imt,jmt,nend), stxyx(imt,jmt,nend) )
