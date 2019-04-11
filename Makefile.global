@@ -44,15 +44,15 @@ ifeq ($(NETCDFLIBS),"fink")
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-	FF_FLAGS         = -O3 -c -x f95-cpp-input 
+	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check 
   	ifeq ($(OPT),"debug")
-		FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
+		FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check -fcheck=all -Wextra -Wall -pedantic
 	endif
 	ifeq ($(OPT),"opt")
 		FF_FLAGS         = -O3 -c -x f95-cpp-input 
 	endif
-    F90_FLAGS        = -fno-underscoring 
-	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR)
+        F90_FLAGS        = -fno-underscoring 
+	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR) 
 endif
 ifeq ($(F95COMPILER),"g95")
 	FF_FLAGS         = -c -cpp -fendian=big

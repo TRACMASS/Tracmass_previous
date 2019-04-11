@@ -182,7 +182,7 @@ CONTAINS
     REAL*4                               :: x14 ,y14 ,z14, tt14, t014
     REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
                                             dvort4, dhdiv4, upr4, vpr4
-
+    REAL(DP), DIMENSION(n3Dtracers)      :: trc3D
     REAL*4, DIMENSION(n3Dtracers)        :: trc3D4 
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
@@ -218,6 +218,14 @@ CONTAINS
     
 #if defined tempsalt
     call interp2(ib,jb,kb,temp,salt,dens)
+#endif
+
+#ifdef newtracers
+    call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')
+#else
+    !trc3D(1) = temp
+    !trc3D(2) = salt
+    !trc3D(3) = dens
 #endif
 
 !print *,x1,y1,z1
@@ -272,6 +280,9 @@ CONTAINS
            !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
            call interp2(ib,jb,kb,temp,salt,dens)
 #endif
+#ifdef newtracers
+           call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')
+#endif           
           write(56,566) ntrac,ints,x1,y1,z1, &
                tt/tday,t0/tday,subvol,temp,salt,dens
        end if
@@ -317,8 +328,17 @@ CONTAINS
     dhdiv4 = real(dhdiv,kind=4)!Joakim edit
     upr4   = real(upr(1,1),kind=4)!Joakim edit
     vpr4   = real(upr(3,1),kind=4)!Joakim edit
-    call interp_gen3D(ib,jb,kb,n3Dtracers,trc3D4,2)     
-    !trc3D4(1:n3Dtracers) = trc3D(1:n3Dtracers)
+    
+#ifdef newtracers
+    !
+    ! Experimental new tracer interpolation scheme
+    !
+    call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')     
+    trc3D4 = real(trc3D,kind=4)
+#else
+    trc3D4(:) = 0.
+#endif
+    
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -353,6 +373,9 @@ CONTAINS
           call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
  !         call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
+#endif
+#ifdef newtracers
+          call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,tracers3D,2,method='linear')
 #endif
           recPosRun = recPosRun+1
           if (binwritetype == 0) then

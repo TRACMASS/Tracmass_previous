@@ -129,6 +129,11 @@ end MODULE mod_tempsalt
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_log
+  USE mod_precdef
+  INTEGER                                   :: log_level = 0
+END MODULE
+
 MODULE mod_grid
   USE mod_param, only: pi, undef, iter
   USE mod_precdef
@@ -139,7 +144,6 @@ MODULE mod_grid
   INTEGER                                   :: nsm=1,  nsp=2
   INTEGER                                   :: wnsm=1, wnsp=2
   INTEGER                                   :: nperio=1
-  INTEGER                                   :: log_level = 0
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs

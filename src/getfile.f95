@@ -1,6 +1,7 @@
 
 MODULE mod_getfile
   USE mod_grid
+  USE mod_log
 #ifndef no_netcdf
   USE netcdf
 #endif

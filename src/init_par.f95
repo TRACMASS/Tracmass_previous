@@ -422,12 +422,12 @@ SUBROUTINE init_params
       DO jt=1,n2Dtracers
          ALLOCATE( tracers2D(jt)%data(imt,jmt,2) ) 
          tracers2D(jt)%name = names2Dtracers(jt)
-         print*,'tracer 2D name: ',tracers2D(jt)%name
+         print*,'allocate tracer 2D name: ',tracers2D(jt)%name
       END DO
       DO jt=1,n3Dtracers
           ALLOCATE( tracers3D(jt)%data(imt,jmt,km,2) )
           tracers3D(jt)%name = names3Dtracers(jt)
-          print*,'tracer 3D name: ',tracers3D(jt)%name
+          print*,'allocate tracer 3D name: ',tracers3D(jt)%name
       END DO            
       
       ! --- Allocate Lagrangian stream functions ---
