@@ -117,12 +117,12 @@
      ! Loop run 
      loopYears      = .true.,				     ! make a time loop to run 
      		      					     ! e.g. 1000 years using only 100 years of data
-     loopStartYear  = 2000,				     ! year to start loop from
-     loopEndYear    = 2001,				     ! last year of loop
+     loopStartYear  = 2001,				     ! year to start loop from
+     loopEndYear    = 2000,				     ! last year of loop
      
      intspin        = 12,                                    ! number of time steps for seeding
      intrun         = 120,                                   ! number of time steps for run
-     log_level      = 0,				     ! level of verbosity 
+     log_level      = 5,				     ! level of verbosity 
      		      					     ! = 0 minimal output to stdout
 							     ! = 1 low verbosity
 							     ! = 2 medium verbosity
@@ -145,7 +145,7 @@
      intpsi         = 10, 									! frequency of writing the stream functions
 /
 &INIT_SEEDING
-     nff            = 1,                                     ! = 1 run forward trajectories
+     nff            =-1,                                     ! = 1 run forward trajectories
      		      					     ! = -1 run backwards
      isec           = 2,				     ! = 1 start on zonal cell wall 
      		      					     ! = 2 start on meridional cell wall
@@ -213,6 +213,12 @@
      smaxe          =  500.0,				     ! 		     S >  smaxe
      rmine          = -100.0,				     ! 		   rho <  rmine
      rmaxe          =  500.0,				     !		   rho >  rmaxe
+/
+&INIT_TRACERS
+     n2Dtracers           = 1                                ! number of 2D tracers to read
+     names2Dtracers(1)    = 'sossheig'                       ! names of 2D tracers
+     n3Dtracers           = 2                                ! number of 3D tracers to read
+     names3Dtracers(1:2)  = 'votemper','vosaline'            ! names of 3D tracers
 /
 &INIT_DIFFUSION
      ! Add diffusion (random walk) to trajectories

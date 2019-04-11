@@ -13,7 +13,8 @@ MODULE mod_seed
 !!
 !!
 !!------------------------------------------------------------------------------
-
+   
+   USE mod_log, only      : log_level
    USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart,nff
    USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
    USE mod_vel,   only    : uflux, vflux, wflux, ff
@@ -59,9 +60,15 @@ CONTAINS
      REAL(DP)                                 :: tt, ts
      REAL(DP)                                 :: vol, subvol
 
+     
+     if(log_level >= 5) THEN
+        print*,' entering seed '
+     end if
+     
      ! --------------------------------------------
      ! --- Check if ntime is in vector seed_tim ---
      ! --------------------------------------------     
+     
       IF (seedTime == 2) THEN
          findTime: DO jsd=1,nsdTim
             IF (seed_tim(jsd) == ntime) THEN
@@ -122,7 +129,6 @@ CONTAINS
          ! --- Determine the volume/mass flux through the grid box ---
          ! -----------------------------------------------------------
          SELECT CASE (isec)
-         
             CASE (1)  ! Through eastern meridional-vertical surface
                vol = uflux (iist,ijst,ikst,nsm)
          
@@ -271,9 +277,18 @@ CONTAINS
                   ! ------------------------------------------------------
                   ! --- Check properties of water mass at initial time ---
                   ! ------------------------------------------------------ 
+#ifdef newtracers
+                  !
+                  ! Experimental new tracer interpolation
+                  !
+                  call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,tracers3D,method='nearest')
+#else
+                  ! Retro style
+                  call interp2(ib,jb,kb,temp,salt,dens)
+#endif
 
 #ifdef tempsalt 
-                  call interp2(ib,jb,kb,temp,salt,dens)
+                  !call interp2(ib,jb,kb,temp,salt,dens)
                !   CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
                   IF (temp < tmin0 .OR. temp > tmax0 .OR. &
                        &   salt < smin0 .OR. salt > smax0 .OR. &
@@ -321,12 +336,19 @@ CONTAINS
                   trajectories(ntrac)%lapv1 = lapv(ib,jb,kb,1)
                   trajectories(ntrac)%lapv2 = lapv(ib,jb,kb,2)
 
-                  !Save initial particle position
+                  !Save initial particle position                  
+                  if(log_level >= 3) THEN
+                     print*,' write initial trajectory position '
+                  end if
                   call writedata(10) !ini
 
                END DO kkkLoop
             END DO ijjLoop
          end DO subtimestepLoop
       END DO startLoop
+      
+      if(log_level >= 5) THEN
+         print*,' leaving seed' 
+      end if
    END SUBROUTINE seed
 END MODULE mod_seed

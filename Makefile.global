@@ -44,15 +44,15 @@ ifeq ($(NETCDFLIBS),"fink")
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-	FF_FLAGS         = -O3 -c -x f95-cpp-input 
+	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check 
   	ifeq ($(OPT),"debug")
-		FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check
+		FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check -fcheck=all -Wextra -Wall -pedantic
 	endif
 	ifeq ($(OPT),"opt")
 		FF_FLAGS         = -O3 -c -x f95-cpp-input 
 	endif
-    F90_FLAGS        = -fno-underscoring 
-	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR)
+        F90_FLAGS        = -fno-underscoring 
+	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR) 
 endif
 ifeq ($(F95COMPILER),"g95")
 	FF_FLAGS         = -c -cpp -fendian=big
@@ -84,7 +84,7 @@ objects := $(addprefix $(OBJDIR)/,modules.o $(ACTVEL) calendar.o \
 	   	    laplacian.o savepsi.o loop_pos.o writetrajs.o \
 	            seed.o init_seed.o sw_stat.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
-                    interp.o interp2.o pos.o \
+                    interp.o interp2.o interp_general.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o printinfo.o loop.o main.o \
 		    setupgrid.o readfield.o diffusion.o)

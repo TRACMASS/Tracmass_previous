@@ -7,6 +7,7 @@ subroutine interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,ns)
 !
 !     This subroutine should be improved in order to include time interpolation   
 
+USE mod_log
 USE mod_grid
 USE mod_vel
 USE mod_dens
@@ -22,6 +23,11 @@ REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
 REAL    :: temp,salt,dens
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
+
+if (log_level >= 10) then
+   print*,' entering interp '
+end if
+
 ! determining nearest centers of boxes 
       if(x1.le.dble(ib)-dble(.5)) then
        ip=ib
@@ -216,6 +222,10 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
         + rmpm*    ax *(1.-ay)*    az  &
         + rpmm*(1.-ax)*    ay *    az  &
         + rmmm*    ax *    ay *    az
+
+if (log_level >= 10) then
+   print*,' leaving interp '
+end if
 
 return
 end subroutine interp

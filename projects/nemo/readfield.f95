@@ -61,6 +61,7 @@ SUBROUTINE readfields
    USE mod_calendar
    USE mod_param
    USE mod_vel
+   USE mod_log
    
    USE mod_time
    USE mod_grid
@@ -80,7 +81,7 @@ SUBROUTINE readfields
    
    ! -----------------------------------------------------------------------------
    
-   INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
+   INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l, jt
    INTEGER                                       :: kbot,ktop, idiag, jdiag
    INTEGER                                       :: ichar
    INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep 
@@ -117,6 +118,10 @@ SUBROUTINE readfields
    
    ! -----------------------------------------------------------------------------
    
+   if(log_level >= 5) THEN
+      print*,' entering readfield '
+   end if
+   
    if (ints == intstart) then
       
       if (log_level >= 1) then
@@ -136,11 +141,7 @@ SUBROUTINE readfields
       end if
       
       if (.not. useTrmClock) then
-         call init_calendar
-         !currHour = startHour
-         !currDay = startDay
-         !currMon = startMon
-         !currYear = startYear
+         call init_calendar         
       end if
       
       if (readMean) then
@@ -246,38 +247,15 @@ SUBROUTINE readfields
    lapu(:,:,:,1) = lapu(:,:,:,2)
    lapv(:,:,:,1) = lapv(:,:,:,2)
    
+   !
+   ! If we are using the trm clock or the simple calendar
+   !
    if (useTrmClock) then
       call updateClock 
    else
-      if (ints /= intstart) then 
+      if (ints /= intstart) then          
          call update_calendar
-      end if
-      !if (ints /= intstart) then
-      !daysInMonth = (/ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
-      !if (ngcm_unit == "minute") then
-      !   currStep = ngcm 
-      !else if (ngcm_unit == "hour") then
-      !   currStep = ngcm * 60
-      !else if (ngcm_unit == "day") then
-      !   currStep = ngcm * 24 * 60
-      !else if (ngcm_unit == "month") then
-      !   currStep = daysInMonth(currMon) * 24 * 60 
-      !end if
-      !! Update the clock manually
-      !currHour = currHour + currStep/60
-      !do while (currHour >= 24) 
-      !   currDay = currDay + 1
-      !   currHour = currHour - 24
-      !   if (currDay > daysInMonth(currMon)) then
-      !      currDay = currDay - daysInMonth(currMon)
-      !      currMon = currMon + 1
-      !   end if
-      !   if (currMon > 12) then
-      !      currMon = currMon - 12
-      !      currYear = currYear + 1
-      !   end if
-      !end do
-      !end if
+      end if      
    end if
    
    ! === Initialising fields ===
@@ -346,12 +324,25 @@ SUBROUTINE readfields
       timestamp = trim(file_timestamp(itime))
    
    else
-      fieldStep = fieldStep + 1
+      
+      ! If more than one step per file, add one step (or remove one for backward trajectories)
+      fieldStep = fieldStep + 1 * nff
+      
+      ! If we exceed fieldsperfile, go back to first step
       if (fieldStep > fieldsperfile) then
          fieldStep = 1
+      
+      ! If we are at step < 1, then we go to last step
+      else if (fieldStep < 1) then
+         fieldStep = fieldsperfile
+      
       end if
       
    end if   
+   
+   if( log_level >= 1 ) THEN
+      print*,' reading fieldStep (ncTpos) = ',fieldStep
+   end if
    
    !
    ! Set the file names that we need to read
@@ -447,6 +438,23 @@ SUBROUTINE readfields
          zstov = 0.d0
       end where
    end if
+   
+   ! 
+   ! Read tracers
+   ! 
+   DO jt=1,n2Dtracers
+      if (log_level >= 2) then
+         print*,'read 2D tracer: ',tracers2D(jt)%name
+      end if
+      tracers2D(jt)%data(:,:,nsp) = get2DfieldNC(trim(tFile), tracers2D(jt)%name)
+   END DO
+   DO jt=1,n3Dtracers
+      if (log_level >= 2) then
+         print*,'read 3D tracer: ',tracers3D(jt)%name
+      end if
+      xxx(:,:,:) = get3DfieldNC(trim(tFile), tracers3D(jt)%name)
+      tracers3D(jt)%data(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   END DO
    
    ! Read temperature 
    if (readTS) then
@@ -629,6 +637,9 @@ SUBROUTINE readfields
    endif
 #endif
 
+   if(log_level >= 5) THEN
+      print*,' leaving readfield '
+   end if
    return
    
 end subroutine readfields

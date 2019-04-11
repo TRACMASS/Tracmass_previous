@@ -6,6 +6,7 @@ subroutine interp2(i,j,k,temp,salt,dens)
   ! === can be called as either ia,ja,ka or ib,jb,kb
   ! === used to calculate the thermohaline stram function with -Dstream_thermohaline  
   
+  USE mod_log
   USE mod_grid
   USE mod_param
   USE mod_loopvars
@@ -19,7 +20,10 @@ subroutine interp2(i,j,k,temp,salt,dens)
   
   integer i,j,k
   
-
+  if (log_level >= 10) then
+     print*,' entering interp2 '
+  end if
+  
   intrpbg=dmod(ts,1.d0) 
   intrpb =1.d0-intrpbg
 
@@ -28,7 +32,11 @@ subroutine interp2(i,j,k,temp,salt,dens)
   temp=intrpbg*tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm)
   salt=intrpbg*sal(i,j,k,nsp)+intrpb*sal(i,j,k,nsm)
   dens=intrpbg*rho(i,j,k,nsp)+intrpb*rho(i,j,k,nsm)
-
+  
+  if (log_level >= 10) then
+     print*,' leaving interp2 '
+  end if
+  
   return
 end subroutine interp2
 #endif

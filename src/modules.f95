@@ -1,6 +1,7 @@
 
 
 MODULE mod_precdef		! Precision definitions
+   integer, parameter                       :: PP = selected_real_kind(6 ,  37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
 ENDMODULE mod_precdef
@@ -105,11 +106,34 @@ MODULE mod_tempsalt
   REAL*4                                  :: tmine ,tmaxe
   REAL*4                                  :: smine ,smaxe
   REAL*4                                  :: rmine ,rmaxe
+  
+  INTEGER                                 :: n2Dtracers, n3Dtracers
+  CHARACTER(LEN=30), DIMENSION(100)       :: names2Dtracers, names3Dtracers
+  
+  TYPE tracer2D
+     REAL(PP), ALLOCATABLE, DIMENSION(:,:,:) :: data
+     CHARACTER(LEN=30)                       :: name
+     REAL(PP)                                :: missval
+  END TYPE tracer2D
+  
+  TYPE tracer3D
+     REAL(PP), ALLOCATABLE, DIMENSION(:,:,:,:) :: data
+     CHARACTER(LEN=30)                         :: name
+     REAL(PP)                                  :: missval
+  END TYPE tracer3D
+   
+  TYPE(tracer2D), ALLOCATABLE, DIMENSION(:)  :: tracers2D
+  TYPE(tracer3D), ALLOCATABLE, DIMENSION(:)  :: tracers3D
 end MODULE mod_tempsalt
 
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+MODULE mod_log
+  USE mod_precdef
+  INTEGER                                   :: log_level = 0
+END MODULE
+
 MODULE mod_grid
   USE mod_param, only: pi, undef, iter
   USE mod_precdef
@@ -120,7 +144,6 @@ MODULE mod_grid
   INTEGER                                   :: nsm=1,  nsp=2
   INTEGER                                   :: wnsm=1, wnsp=2
   INTEGER                                   :: nperio=1
-  INTEGER                                   :: log_level = 0
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
