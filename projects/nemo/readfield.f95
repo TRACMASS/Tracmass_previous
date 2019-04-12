@@ -350,12 +350,7 @@ SUBROUTINE readfields
    !
    
    physPrefix = physPrefixForm
-   ichar = INDEX(physPrefix,'RUNID')
-   do while (ichar /= 0)
-      physPrefix = trim(physPrefix(:ichar-1))//trim(RunID)//trim(physPrefix(ichar+5:))
-      ichar = INDEX(physPrefix,'RUNID')
-   end do
-   
+      
    ichar = INDEX(physPrefix,'YYYY')
    do while (ichar /= 0)
       write(physPrefix(ichar:ichar+3),'(i4)') currYear
@@ -384,6 +379,12 @@ SUBROUTINE readfields
    do while (ichar /= 0)
       physPrefix = trim(physPrefix(:ichar-1))//trim(timestamp)//trim(physPrefix(ichar+8:))
       ichar = INDEX(physPrefix,'TSTSTSTS')
+   end do
+   
+   ichar = INDEX(physPrefix,'RUNID')
+   do while (ichar /= 0)
+      physPrefix = trim(physPrefix(:ichar-1))//trim(RunID)//trim(physPrefix(ichar+5:))
+      ichar = INDEX(physPrefix,'RUNID')
    end do
    
    ichar = INDEX(physPrefix,'GRIDX')
