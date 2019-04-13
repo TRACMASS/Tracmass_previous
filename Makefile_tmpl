@@ -7,8 +7,9 @@ F95COMPILER        = "gfortran"
 #F95COMPILER        = "ifort"
 #FF                 = "/sw/bin/gfortran-fsf-4.9" #Alt. compiler location
 
-NETCDFLIBS	       = "none"
-#NETCDFLIBS        = "automatic"
+NETCDFLIBS	   = "none"
+#NETCDFLIBS        = "automatic"  # set using nc-config
+#NETCDFLIBS        = "automatic-44"  # set using nf-config
 #NETCDFLIBS        = "macports"
 #NETCDFLIBS        = "fink"
 #NETCDFLIBS        = "source"

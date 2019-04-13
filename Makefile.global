@@ -56,13 +56,12 @@ ifeq ($(F95COMPILER),"g95")
 endif
 
 ifeq ($(F95COMPILER),"ifort")
-        FF_FLAGS         = -O3 -c -cpp -convert big_endian
-        F90_FLAGS        = -free -assume nounderscore
-	ARG_FLAGS       += -Tf
+        FF_FLAGS         = -O3 -cpp -convert big_endian
+        F90_FLAGS        = -free 
+        ARG_FLAGS       += -Tf
         FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
+	TT_FLAGS         = -c 
 endif
-
-
 
 
 
@@ -88,7 +87,7 @@ runfile : $(objects)
 	$(FF) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
 
 $(OBJDIR)/%.o : %.f95
-	$(FF) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
+	$(FF) $(TT_FLAGS) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
 
 
 
