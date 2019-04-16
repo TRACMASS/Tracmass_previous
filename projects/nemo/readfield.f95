@@ -158,6 +158,16 @@ SUBROUTINE readfields
       end if
       
       if (.not. oneStepPerFile) then
+         ! 
+         ! Here we set which time steps are in which files with which timestamp. 
+         ! By default, we assume below that if oneStepPerFile is false, then all time steps
+         ! are in a file with the timestamp YYYY0101_YYYY1231, where YYYY is currYear. 
+         ! This is common for NEMO runs with 5-day or monthly data. 
+         ! 
+         ! Another example could be if we have one file per month with daily data
+         ! Then the data will be in a file with timestamp YYYYMM01_YYYYMM31 where YYYY is currYear 
+         ! and MM is currMon, and the last 31 must be changed to 28, 29 or 30 for some months. 
+         !
          allocate( file_timestamp(fieldsperfile), fileDay(fieldsperfile,2), fileMon(fieldsperfile,2) )
          fileDay(:,1) = 1
          fileDay(:,2) = 31
@@ -181,7 +191,11 @@ SUBROUTINE readfields
       end if
       
       if (.not. oneStepPerFile) then   
-         ! Now write year to timestamp string
+         ! 
+         ! Write months and days to timestamps 
+         ! We will write currYear here later. 
+         ! Should we not write currYear here as well? 
+         ! 
          tmpstr = "YYYYMMDD_YYYYMMDD"
          do ii=1,fieldsperfile
             write(tmpstr(5:8)  ,'(i2.2,i2.2)') fileMon(ii,1),fileDay(ii,1)
@@ -191,6 +205,8 @@ SUBROUTINE readfields
          
          !  
          ! Find the files for the current step  
+         ! While the current month and day are ahead of the month and day of the file,
+         ! then update itime
          ! 
          fieldStep = 1
          itime = 1
@@ -222,6 +238,7 @@ SUBROUTINE readfields
    !
    if (.not. allocated(xxx)) then
       allocate ( xxx(imt,jmt,km))
+      xxx(:,:,:) = 0.
    end if
    
    !
@@ -229,6 +246,10 @@ SUBROUTINE readfields
    !
    if(vvl .and. .not. allocated (zstot)) then
       allocate ( zstot(imt,jmt),zstou(imt,jmt),zstov(imt,jmt) )
+      ! Initialise to 1, which is the case if ssh = 0.
+      zstot(:,:) = 1.
+      zstou(:,:) = 1. 
+      zstov(:,:) = 1.
    end if   
    
    !
@@ -290,7 +311,7 @@ SUBROUTINE readfields
    ! i.e. set itime and fieldStep
    ! If only one step per file, this is always 1. 
    !
-   
+      
    ncTpos = fieldStep
    
    if (oneStepPerFile) then
@@ -341,7 +362,7 @@ SUBROUTINE readfields
    end if   
    
    if( log_level >= 1 ) THEN
-      print*,' reading fieldStep (ncTpos) = ',fieldStep
+      print*,' reading fieldStep (ncTpos) = ',fieldStep, ncTpos
    end if
    
    !
@@ -408,18 +429,30 @@ SUBROUTINE readfields
     
    ! Read SSH
    if (readSSH .or. vvl) then
-      hs(:,     :, nsp) = get2DfieldNC(trim(tFile), ssh_name)
-      hs(imt+1, :, nsp) = hs(1,:,nsp)
+      hs(:,:,nsp)       = 0. !Initialise to zero      
+      hs(1:imt, 1:jmt, nsp) = get2DfieldNC(trim(tFile), ssh_name)      
+      hs(imt+1, 1:jmt, nsp) = hs(1, 1:jmt, nsp)
    end if
    
+   !
    ! Depth at U, V, T points as 2D arrays
+   ! 
+   ! Hmmm, I dont think this is correct...
+   ! Sum of dz at T points does not account for the last half-level down to the sea floor...
+   ! We should take sum of dz at W points, or read in ocean depth directly. 
+   !
    allocate ( abyst(imt, jmt) , abysu(imt, jmt) , abysv(imt, jmt) )
+   abyst(:,:) = 0. 
+   abysu(:,:) = 0.
+   abysv(:,:) = 0.
    
    abyst = sum(dzt0(:,:,:), dim=3)
    abysu = sum(dzu(:,:,:,1), dim=3)
    abysv = sum(dzv(:,:,:,1), dim=3)
    
    if (vvl) then
+      if (log_level >= 2) print*,' Calculating ocean depth and the weigths for vvl '
+      
       ! Calculate SSH/depth
       where (abyst /= 0)
          zstot = hs(:imt,:jmt,nsp)/abyst + 1
@@ -434,7 +467,8 @@ SUBROUTINE readfields
       end where
    
       where (abysv /= 0)
-         zstov = 0.5*(hs(:imt,:jmt,nsp)+hs(:imt,2:jmt+1,nsp))/abysv + 1
+         ! This interpolation should probably take north-fold into account? 
+         zstov(1:imt,1:jmt) = 0.5*(hs(:imt,:jmt,nsp)+hs(:imt,2:jmt+1,nsp))/abysv(1:imt,1:jmt) + 1
       elsewhere
          zstov = 0.d0
       end where
@@ -569,8 +603,18 @@ SUBROUTINE readfields
    do i=1,IMT
    do j=1,JMT
    do k=1,KM
-   if(k > kmv(i,j) .and. vflux(i,j,km+1-k,nsp) /= 0.) then
-      print *,'vflux=',vflux(i,j,km+1-k,nsp),vvel(i,j,k),i,j,k,kmv(i,j),nsp
+   if(k > kmv(i,j) .and. vflux(i,j,km+1-k,nsp) /= 0.) then      
+      print *,' Warning: vflux is non-zero below sea floor '
+      print *,'          Something might be wrong '
+      print *,'          i,j,k = ',i,j,k
+      print *,'          vflux(i,j,:,nsp) = ',vflux(i,j,:,nsp)
+      print *,'          vvel(i,j,:) = ',vvel(i,j,:)
+      print *,'          dxv(i,j) = ',dxv(i,j)
+      print *,'          dzv(i,j,:,1) = ',dzv(i,j,:,1)
+      print *,'          zstov(i,j) = ',zstov(i,j)
+      print *,'          kmv(i,j) = ',kmv(i,j)
+      print *,'          vfile = ',vfile
+      print *,'          ncTpos = ',ncTpos
       stop 4966
    endif
    if(k > kmu(i,j) .and. uflux(i,j,km+1-k,nsp) /= 0.) then

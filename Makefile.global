@@ -56,7 +56,7 @@ ifeq ($(F95COMPILER),"g95")
 endif
 
 ifeq ($(F95COMPILER),"ifort")
-        FF_FLAGS         = -O3 -cpp -convert big_endian
+        FF_FLAGS         = -O3 -cpp -convert big_endian -xcore-avx512
         F90_FLAGS        = -free 
         ARG_FLAGS       += -Tf
         FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)

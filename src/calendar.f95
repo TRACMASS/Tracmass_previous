@@ -193,7 +193,7 @@ MODULE mod_calendar
      END DO          
      
      IF (loopYears) THEN
-        IF (currYear > loopEndYear) THEN
+        IF (currYear > loopEndYear .and. nff > 0) THEN
            IF (log_level >= 3) THEN
               PRINT*,' currYear > loopEndYear. Going back to loopStartYear '
            END IF
@@ -226,7 +226,7 @@ MODULE mod_calendar
      END DO
      
      IF (loopYears) THEN
-        IF (currYear < loopEndYear) THEN
+        IF (currYear < loopEndYear .and. nff < 0) THEN
            IF (log_level >= 3) THEN
               PRINT*,' currYear < loopEndYear. Going back to loopStartYear '
            END IF
