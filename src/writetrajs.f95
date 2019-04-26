@@ -6,7 +6,7 @@ module mod_write
   USE mod_time 
   USE mod_active_particles, only: upr !!Joakim edit
   USE mod_tempsalt, only: n2Dtracers, n3Dtracers, tracers2D, tracers3D
- ! USE mod_traj, only: ib,jb,kb
+  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
@@ -179,6 +179,8 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosRun=0 ,recPosErr=0
     INTEGER*8, SAVE                      :: recPosKll=0
     INTEGER*4                            :: ntrac4
+    INTEGER                              :: ziter
+    REAL(DP)                             :: zx1,zy1,zz1,ztt,zt0,zvol
     REAL*4                               :: x14 ,y14 ,z14, tt14, t014
     REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
                                             dvort4, dhdiv4, upr4, vpr4
@@ -228,12 +230,22 @@ CONTAINS
     !trc3D(3) = dens
 #endif
 
-!print *,x1,y1,z1
-    
+! 
+! Get data for this trajectory
+! 
+ziter = trajectories(ntrac)%niter    
+zx1   = trajectories(ntrac)%x1
+zy1   = trajectories(ntrac)%y1
+zz1   = trajectories(ntrac)%z1
+ztt   = trajectories(ntrac)%tt
+zt0   = trajectories(ntrac)%t0
+zvol  = trajectories(ntrac)%subvol
+
 #if defined textwrite 
     select case (sel)
     case (10)
-       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+       !write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+       write(58,566) ntrac,ziter,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 !       if(temp==0.) stop 4867
     case (11)
        !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
@@ -258,9 +270,11 @@ CONTAINS
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
 #if defined tempsalt
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+          !write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+          write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 #else
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
+          !write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
+          write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol
 #endif        
 #endif        
        endif
@@ -302,8 +316,8 @@ CONTAINS
        enddo
        close(34)
     case (40)
-       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens  
+       !write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
+       write(59,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
     case (99) !switch
        
     end select
