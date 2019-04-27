@@ -185,9 +185,10 @@ SUBROUTINE loop
 
      intspinCond: if(ints*nff <= (intstart+intspin)*nff) then
         call fancyTimer('seeding','start')
+        t0 = tt
         call seed (tt,ts)
         call fancyTimer('seeding','stop')
-        t0 = tt
+        !t0 = tt
         dt = 0.d0
      end if intspinCond
 

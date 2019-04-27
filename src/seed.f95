@@ -19,6 +19,7 @@ MODULE mod_seed
    USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
    USE mod_vel,   only    : uflux, vflux, wflux, ff
    USE mod_traj!,  only    : ntractot, ntrac, ib, jb, kb, x1, y1, z1, trj, nrj
+   USE mod_loopvars, only : subvol
    USE mod_write, only    : writedata
    USE mod_tempsalt, only : rmax0, rmin0, tmax0, tmin0, smax0, smin0, &
                             sal, tem, rho
@@ -58,7 +59,7 @@ CONTAINS
      INTEGER                                  :: i, j, k, l, m
      REAL                                     :: temp,salt,dens
      REAL(DP)                                 :: tt, ts
-     REAL(DP)                                 :: vol, subvol
+     REAL(DP)                                 :: vol
 
      
      if(log_level >= 5) THEN

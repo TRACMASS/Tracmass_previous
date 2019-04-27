@@ -230,22 +230,11 @@ CONTAINS
     !trc3D(3) = dens
 #endif
 
-! 
-! Get data for this trajectory
-! 
-ziter = trajectories(ntrac)%niter    
-zx1   = trajectories(ntrac)%x1
-zy1   = trajectories(ntrac)%y1
-zz1   = trajectories(ntrac)%z1
-ztt   = trajectories(ntrac)%tt
-zt0   = trajectories(ntrac)%t0
-zvol  = trajectories(ntrac)%subvol
-
 #if defined textwrite 
     select case (sel)
     case (10)
-       !write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-       write(58,566) ntrac,ziter,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
+       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+       !write(58,566) ntrac,ziter,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 !       if(temp==0.) stop 4867
     case (11)
        !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
@@ -270,11 +259,11 @@ zvol  = trajectories(ntrac)%subvol
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
 #if defined tempsalt
-          !write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-          write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+          !write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 #else
-          !write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
-          write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
+          !write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol
 #endif        
 #endif        
        endif
@@ -316,8 +305,8 @@ zvol  = trajectories(ntrac)%subvol
        enddo
        close(34)
     case (40)
-       !write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
-       write(59,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
+       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
+       !write(59,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
     case (99) !switch
        
     end select
