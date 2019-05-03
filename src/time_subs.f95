@@ -81,7 +81,7 @@ USE mod_vel
 USE mod_traj, only: ntrac
 USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm, dxdy
 USE mod_time, only: ts, tt, tseas, intrpr, intrpg
-USE mod_loopvars!, only: dsmin
+USE mod_loopvars
 USE mod_timeanalyt
 
 IMPLICIT NONE
@@ -104,8 +104,14 @@ s0=tt/dxyz
 ss0=dble(idint(ts))*tseas/dxyz
 if(s0<ss0) s0=ss0
 
+!ss=ss-ss0   !tinit
 !s0=s0-ss0   !tinit
 !ss0=0.      !tinit
+!if(s0<ss0) s0=ss0
+!if(ss<0 .or. s0<0.) then
+!print *,ss,s0
+!!stop 961
+!endif
 
 
 s0mss0=s0-ss0
@@ -130,7 +136,9 @@ s0mss0=s0-ss0
 !if(ss<0.) stop 495779
 
 
-looop=0 ; rijk=0. ; ss=UNDEF ; f0=0.0 ; f1=0.0
+looop=0 ; rijk=0. ; ss=UNDEF ; f0=1.0 ; f1=1.0
+
+f0=0. ; f1=9999.0
 
 if(ijk==1) then
  ii=ia
@@ -141,22 +149,6 @@ if(ijk==1) then
  fn0im=uflux(iil,ja,ka,nsm)
  fnmi0=uflux(ii ,ja,ka,nsp)
  fnmim=uflux(iil,ja,ka,nsp)
-!#ifdef turb   
-! if(r0/=dble(ja)) then
-!  fn0i0=fn0i0+upr(7,2)  
-!  fnmi0=fnmi0+upr(1,2)  
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0i0=fn0i0+upr(7,1) 
-!  fnmi0=fnmi0+upr(1,1)  
-! endif
-! if(r0=/dble(ja-1)) then
-!  fn0im=fn0im+upr(8,2)
-!  fnmim=fnmim+upr(2,2)
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0im=fn0im+upr(8,1)  
-!  fnmim=fnmim+upr(2,1)  
-! endif
-!#endif
 elseif(ijk==2) then
  ii=ja
  iim=ja-1
@@ -165,22 +157,6 @@ elseif(ijk==2) then
  fn0im=vflux(ia,iil,ka,nsm)
  fnmi0=vflux(ia,ii ,ka,nsp)
  fnmim=vflux(ia,iil,ka,nsp)
-!#ifdef turb   
-! if(r0/=dble(ii)) then
-!  fnmi0=fnmi0+upr(3,2)  
-!  fn0i0=fn0i0+upr(9,2)  
-! else  ! add u' from previous iterative time step if on box wall
-!  fnmi0=fnmi0+upr(3,1)  
-!  fn0i0=fn0i0+upr(9,1) 
-! endif
-! if(r0/=dble(iim)) then
-!  fn0im=fn0im+upr( 4,2)
-!  fnmim=fnmim+upr(10,2)
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0im=fn0im+upr( 4,1)  
-!  fnmim=fnmim+upr(10,1)  
-! endif
-!#endif
 elseif(ijk==3) then
  ii=ka
  iim=ka-1
@@ -189,100 +165,46 @@ elseif(ijk==3) then
  fn0im=wflux(iil,nsm)
  fnmi0=wflux(ii ,nsp)
  fnmim=wflux(iil,nsp)
-!#ifdef turb   
-! if(r0/=dble(ii)) then
-!  fnmi0=fnmi0+upr( 5,2)  
-!  fn0i0=fn0i0+upr(11,2)  
-! else  ! add u' from previous iterative time step if on box wall
-!  fnmi0=fnmi0+upr( 5,1)  
-!  fn0i0=fn0i0+upr(11,1) 
-! endif
-! if(r0/=dble(iim)) then
-!  fn0im=fn0im+upr( 6,2)
-!  fnmim=fnmim+upr(12,2)
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0im=fn0im+upr( 6,1)  
-!  fnmim=fnmim+upr(12,1)  
-! endif
-!#endif
 
-!#ifdef zgrid3D 
-
-  dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
-  dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
-!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
-  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
-!  if(abs(dzu1)<eps) stop 8705
-  if(dzu1==0.) stop 8705
-!  if(abs(dzu2)<eps) stop 8706
-  if(dzu2==0.) stop 8706
-  f0=dzs/dzu1
-  f1=dzs/dzu2
-! print *,tt,ts, intrpg, intrpr,dzu1,dzu2,dzs,f0,f1
-  fn0i0=fn0i0*f0
-  fn0im=fn0im*f0
-  fnmi0=fnmi0*f1
-  fnmim=fnmim*f1
-  if(abs(f0)<=eps) stop 8707
-  if(abs(f1)<=eps) stop 8708
-  f0=1.0/f0
-  f1=1.0/f1
-!#elif defined zgrid3D && defined freesurface
-! if (ka==km) then
-!  dzs= dz(km)+intrpg*hs(ia,ja,nsm)+intrpr*hs(ia,ja,nsp)
-!  dzu1=dz(km)+hs(ia,ja,nsm)
-!  dzu2=dz(km)+hs(ia,ja,nsp)
-!  if(abs(dzu1)<eps) stop 8705
-!  if(abs(dzu2)<eps) stop 8706
-!  f0=dzs/dzu1
-!  f1=dzs/dzu2
-!  fn0i0=fn0i0*f0
-!  fn0im=fn0im*f0
-!  fnmi0=fnmi0*f1
-!  fnmim=fnmim*f1
-!  if(abs(f0)<eps) stop 8707
-!  if(abs(f1)<eps) stop 8708
-!  f0=1.0/f0
-!  f1=1.0/f1
-! endif 
-!#endif /*zgrid3D*/
-
-
+ dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
+ dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
+ dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
+ if(dzu1==0.) stop 8705
+ if(dzu2==0.) stop 8706
+ f0=dzs/dzu1
+ f1=dzs/dzu2
+ fn0i0=fn0i0*f0
+ fn0im=fn0im*f0
+ fnmi0=fnmi0*f1
+ fnmim=fnmim*f1
+ if(abs(f0)<=eps) stop 8707
+ if(abs(f1)<=eps) stop 8708
+ f0=1.0/f0
+ f1=1.0/f1
 endif
 
-
 alfa = -(fnmi0-fnmim-fn0i0+fn0im)
-!print *,'alfa=',alfa,fnmi0,fnmim,fn0i0,fn0im
-! ----- a > 0
-!     if (alfa>EPS) then
-     if (alfa>0.) then
-      call apos !(r0,rijk,s0,ss,ss0,fn0i0,fn0im,fnmi0,fnmim,f0,f1)
-! ----- a < 0      
-!     elseif (alfa<-EPS) then
-     elseif (alfa<0.) then
-      call amin !(r0,rijk,s0,ss,ss0,fn0i0,fn0im,fnmi0,fnmim,f0,f1)
-! ----- a = 0 
-      else
-      if (alfa/=0.) print *,'anil eps=',alfa
-      call anil !(r0,rijk,s0,ss,ss0,fn0i0,fn0im,fnmi0,fnmim,f0,f1)
-     endif
-! translate direction and positions for old to new tracmass
-!print *,'cross_time ',ijk,'u+',fn0i0,fnmi0,' u-',fn0im,fnmim,'ss',ss,ss0,' alfa',alfa
-      if (rijk==dble(ii)) then
-       sp=ss-s0
-       sn=UNDEF
-      elseif(rijk==dble(iim)) then
-       sn=ss-s0
-       sp=UNDEF
-      else
-       sp=UNDEF
-       sn=UNDEF
-      endif
-      if(sp==0.0) sp=UNDEF
-      if(sn==0.0) sn=UNDEF
-      
-!      ss=ss+dble(idint(ts))*tseas/dxyz
+if (alfa>0.) then
+ call apos 
+elseif (alfa<0.) then
+ call amin 
+else
+ call anil 
+endif
 
+if (rijk==dble(ii)) then
+ sp=ss-s0
+ sn=UNDEF
+elseif(rijk==dble(iim)) then
+ sn=ss-s0
+ sp=UNDEF
+else
+ sp=UNDEF
+ sn=UNDEF
+endif
+if(sp==0.0) sp=UNDEF
+if(sn==0.0) sn=UNDEF
+      
 return
 end subroutine cross_time
 !_______________________________________________________________________
@@ -321,14 +243,13 @@ USE mod_param
 USE mod_vel
 USE mod_traj, only: ntrac
 USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm
-!USE mod_grid
-USE mod_time!, only: tt,ts,tseas,intrpr, intrpg
-USE mod_loopvars!, only: ds, dsmin
+USE mod_time
+USE mod_loopvars
 USE mod_precdef
 USE mod_timeanalyt
 IMPLICIT NONE
 
-REAL (DP),  PARAMETER ::  xilim=3.0!,xxlim=1.d-9
+REAL (DP),  PARAMETER ::  xilim=3.0
 INTEGER :: ijk,ia,ja,ka,iil
 REAL (DP)  :: rr0,r1
 REAL (DP)  :: xi,xi0,const,ga,erf0,daw0
@@ -348,15 +269,19 @@ s0=tt/dxyz-ds
 if(s0<ss0) s0=ss0
 ss=ts*tseas/dxyz
 
-!ss=ss-ss0 !tinit
-!s0=s0-ss0    !tinit
-!ss0=0.    !tinit
+!ss=ss-ss0  !tinit
+!s0=s0-ss0  !tinit
+!ss0=0.     !tinit
+!if(s0<ss0) s0=ss0
+!if(ss<0 .or. s0<0.) stop 345
 
 ssms0 =ss-s0
 ssmss0=ss-ss0
 s0mss0=s0-ss0
 
+!print *, ssms0, ssmss0, s0mss0
 
+!stop 8888
 
 !ss0=dble(idint(ts))*tseas/dxyz !!tinit
 !s0=s0-ss0  !tinit
@@ -380,7 +305,7 @@ s0mss0=s0-ss0
 !stop 54978
 
 
-f0=0. ; f1=0.
+f0=1. ; f1=1.
 
 if(ijk==1) then
  ii=ia
@@ -391,22 +316,6 @@ if(ijk==1) then
  fn0im=uflux(iil,ja,ka,nsm)
  fnmi0=uflux(ii ,ja,ka,nsp)
  fnmim=uflux(iil,ja,ka,nsp)
-!#ifdef turb   
-! if(r0/=dble(ja)) then
-!  fn0i0=fn0i0+upr(7,2)  
-!  fnmi0=fnmi0+upr(1,2)  
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0i0=fn0i0+upr(7,1) 
-!  fnmi0=fnmi0+upr(1,1)  
-! endif
-! if(r0/=dble(ja-1)) then
-!  fn0im=fn0im+upr(8,2)
-!  fnmim=fnmim+upr(2,2)
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0im=fn0im+upr(8,1)  
-!  fnmim=fnmim+upr(2,1)  
-! endif
-!#endif
 elseif(ijk==2) then
  ii=ja
  iim=ja-1
@@ -415,22 +324,6 @@ elseif(ijk==2) then
  fn0im=vflux(ia,iil,ka,nsm)
  fnmi0=vflux(ia,ii ,ka,nsp)
  fnmim=vflux(ia,iil,ka,nsp)
-!#ifdef turb   
-! if(r0/=dble(ii)) then
-!  fnmi0=fnmi0+upr(3,2)  
-!  fn0i0=fn0i0+upr(9,2)  
-! else  ! add u' from previous iterative time step if on box wall
-!  fnmi0=fnmi0+upr(3,1)  
-!  fn0i0=fn0i0+upr(9,1) 
-! endif
-! if(r0/=dble(iim)) then
-!  fn0im=fn0im+upr( 4,2)
-!  fnmim=fnmim+upr(10,2)
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0im=fn0im+upr( 4,1)  
-!  fnmim=fnmim+upr(10,1)  
-! endif
-!#endif
 elseif(ijk==3) then
  ii=ka
  iim=ka-1
@@ -439,28 +332,9 @@ elseif(ijk==3) then
  fn0im=wflux(iil,nsm)
  fnmi0=wflux(ii ,nsp)
  fnmim=wflux(iil,nsp)
-!#ifdef turb   
-! if(r0/=dble(ii)) then
-!  fnmi0=fnmi0+upr( 5,2)  
-!  fn0i0=fn0i0+upr(11,2)  
-! else  ! add u' from previous iterative time step if on box wall
-!  fnmi0=fnmi0+upr( 5,1)  
-!  fn0i0=fn0i0+upr(11,1) 
-! endif
-! if(r0/=dble(iim)) then
-!  fn0im=fn0im+upr( 6,2)
-!  fnmim=fnmim+upr(12,2)
-! else  ! add u' from previous iterative time step if on box wall
-!  fn0im=fn0im+upr( 6,1)  
-!  fnmim=fnmim+upr(12,1)  
-! endif
-!#endif
-
-!#ifdef zgrid3D 
 
   dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
   dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
-!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
   dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
   if(abs(dzu1)<eps) stop 4966
   if(abs(dzu2)<eps) stop 4967
@@ -474,10 +348,6 @@ elseif(ijk==3) then
   if(abs(f1)<=eps) stop 4969
   f0=1.0/f0
   f1=1.0/f1
-!  dzs= dz(km)+intrpg*hs(ia,ja,nsm)+intrpr*hs(ia,ja,nsp)
-
-
-
 endif
 
 
@@ -534,9 +404,7 @@ elseif (alfa==0.0) then
  beta =(f0*fn0im-f1*fnmim)/dsmin
  xi = ssms0
  if (alfa==0.0) then
-! if (abs(alfa)<EPS) then
   r1 = r0 - xi*(-f0*fn0im+0.5*beta*(s0mss0+ssmss0))
-!  print *,'alfa,r1',alfa,r1
  else
   ga = (r0-iim) + (beta*(s0mss0-1.0/alfa)-f0*fn0im)/alfa
   r1 = r0 + ga*(exp(-alfa*xi) - 1.0) -beta*xi/alfa
@@ -578,7 +446,7 @@ return
 end subroutine pos_time
 !_______________________________________________________________________
 
-subroutine apos !(r0,rijk,s0,ss,ss0,fn0i0,fn0im,fnmi0,fnmim,f0,f1)
+subroutine apos 
 ! computation of time (ss) at crossing for a>0 
 
 USE mod_precdef
@@ -590,20 +458,16 @@ USE mod_loopvars , only: dsmin,ss0
 USE mod_timeanalyt
 IMPLICIT NONE
 
-!REAL (DP),  PARAMETER ::  xxlim=1.d-7
 INTEGER :: iconfig,i,loop
 REAL (QP)  :: ssii,ssiim
 REAL (QP)  :: alfa,beta
 REAL (DP)  :: xi0,xin,xerr,xf1,xi,xi00,xia,xib,xibf
 REAL (DP)  :: ga,const,daw0,xf,xf2,xiaf,dawson1,dawson2
 
-!s0mss0=s0-ss0
 
-alfa = -(fnmi0-fnmim-fn0i0+fn0im)/dsmin                 ! same as alpha in paper
-!if(alfa<EPS) stop 8771
-if(alfa==0.) stop 8771
-beta = fn0im-fn0i0                                ! not same as beta in paper
-xi0=(beta+alfa*(s0mss0))/sqrt(2.*alfa)  ! same as xi0 in paper where s=s0mss0
+alfa= -(fnmi0-fnmim-fn0i0+fn0im)/dsmin             	! same as alpha in paper
+beta= fn0im-fn0i0                                	! not same as beta in paper
+xi0= (beta+alfa*(s0mss0))/sqrt(2.*alfa)  			! same as xi0 in paper where s=s0mss0
 
 ! 1) ii or iim ---> land point 
 if (fn0i0==0.0 .and. fnmi0==0.0) then
@@ -630,8 +494,8 @@ elseif (fn0im==0.0 .and. fnmim==0.0 ) then
 endif
 
 if (f0==0.0) then
- ga = -dble(iim) + (fnmim-fn0im)/(fnmi0-fn0i0-fnmim+fn0im)   ! gamma/alfa
- const = (fn0im*fnmi0-fn0i0*fnmim)/(fnmi0-fn0i0-fnmim+fn0im)       ! (beta*gamma-alpha*delta)/alpha
+ ga = -dble(iim) + (fnmim-fn0im)/(fnmi0-fn0i0-fnmim+fn0im)   		! gamma/alfa
+ const = (fn0im*fnmi0-fn0i0*fnmim)/(fnmi0-fn0i0-fnmim+fn0im)       	! (beta*gamma-alpha*delta)/alpha
  ssii=fn0i0-fnmi0
  if(ssii/=0.0) ssii = fn0i0/ssii
  ssiim=fn0im-fnmim
@@ -650,7 +514,7 @@ else
  if(abs(ssiim)>EPS) then
   ssiim= f0*fn0im/ssiim
  else
-  ssiim= EPS ! This to correct when by accident f0*fn0im = f1*fnmim
+  ssiim= EPS ! This is to correct when by accident f0*fn0im = f1*fnmim
   print *,'f0*fn0im = f1*fnmim',ssiim,f0,fn0im,f1,fnmim
   ssiim= f0*fn0im/ssiim
 !  stop 8779
@@ -845,7 +709,7 @@ return
 end subroutine apos
 !_______________________________________________________________________
 
-subroutine amin !(r0,rijk,s0,ss,ss0,fn0i0,fn0im,fnmi0,fnmim,f0,f1)
+subroutine amin 
 
 ! computation of time (ss) at crossing for a<0 
 
@@ -1103,7 +967,7 @@ return
 end subroutine amin
 !_______________________________________________________________________
 
-subroutine anil !(r0,rijk,s0,ss,ss0,fn0i0,fn0im,fnmi0,fnmim,f0,f1)
+subroutine anil 
 
 ! computation of time (ss) at crossing for alfa=0 
 

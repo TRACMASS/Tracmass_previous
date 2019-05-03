@@ -69,7 +69,7 @@
 														! 5 = months
 														! 6 = years
      
-	iter           = 60,									! number of time steps between two GCM fields
+	iter           = 6000,								! number of time steps between two GCM fields
 	intmax         = 1460,								! max iterations before trajectory is 
 														! stopped with infiniteError
 	minveljd 		= -1,								!
@@ -114,7 +114,8 @@
 														! 5 = write at chosen intervals
 														! 6 = write each spatial grid-crossing
 	outDataDir     = '/Users/doos/data/ifs/data_out/',	! directory for output
-	outdatafile    = 'ifs_test_anal6',						! fileprefix for output
+!	outdatafile    = 'ifs_test_iter6000',		    	! fileprefix for output
+	outdatafile    = 'ifs_test_anal7',					! fileprefix for output
 	outdircase     = .false. ,							! creates a new directory to store the data from the run      
 	intminInOutFile  =  0,								! 0 = ????
 														! 1 = ????

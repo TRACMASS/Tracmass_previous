@@ -65,7 +65,7 @@ ENDMODULE mod_loopvars
 MODULE mod_timeanalyt
   USE mod_precdef
   INTEGER                                   :: looop,ii,iim
-  REAL(DP), PARAMETER                       :: XXLIM=1.d-6
+  REAL(DP), PARAMETER                       :: xxlim=1.d-6
   REAL(DP)                                  :: r0
   REAL(QP)                                  :: rijk,s0,ss,fn0i0,fn0im,fnmi0,fnmim,f0,f1,ssms0,s0mss0
 ENDMODULE mod_timeanalyt
@@ -196,17 +196,10 @@ CONTAINS
     REAL(DP)                                    :: intrpr, intrpg
 
     ! T-box volume in m3
-#ifdef zgrid3D
     dxyz = intrpg * dzt(ib,jb,kb,nsp) + intrpr * dzt(ib,jb,kb,nsm)
-#else
-    dxyz =dz(kb)
-#ifdef varbottombox
-    if(kb == KM+1-kmt(ib,jb) ) dxyz=dztb(ib,jb,1)
-#endif /*varbottombox*/
-#ifdef freesurface
-    if(kb == KM) dxyz=dxyz+intrpg*hs(ib,jb,nsp)+intrpr*hs(ib,jb,nsm)
-#endif /*freesurface*/
-#endif /*zgrid3D*/
+!#ifdef timeanalyt
+!    dxyz = dzt(ib,jb,kb,nsp) 
+!#endif /*timeanalyt*/
     dxyz=dxyz*dxdy(ib,jb)
     if (dxyz<0) then
        print *,'=========================================================='
