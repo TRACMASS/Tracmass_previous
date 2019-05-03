@@ -61,6 +61,7 @@ SUBROUTINE readfields
    USE mod_calendar
    USE mod_param
    USE mod_vel
+   USE mod_log
    
    USE mod_time
    USE mod_grid
@@ -80,7 +81,7 @@ SUBROUTINE readfields
    
    ! -----------------------------------------------------------------------------
    
-   INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
+   INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l, jt
    INTEGER                                       :: kbot,ktop, idiag, jdiag
    INTEGER                                       :: ichar
    INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread,itime, fieldStep 
@@ -117,6 +118,10 @@ SUBROUTINE readfields
    
    ! -----------------------------------------------------------------------------
    
+   if(log_level >= 5) THEN
+      print*,' entering readfield '
+   end if
+   
    if (ints == intstart) then
       
       if (log_level >= 1) then
@@ -136,11 +141,7 @@ SUBROUTINE readfields
       end if
       
       if (.not. useTrmClock) then
-         call init_calendar
-         !currHour = startHour
-         !currDay = startDay
-         !currMon = startMon
-         !currYear = startYear
+         call init_calendar         
       end if
       
       if (readMean) then
@@ -157,6 +158,16 @@ SUBROUTINE readfields
       end if
       
       if (.not. oneStepPerFile) then
+         ! 
+         ! Here we set which time steps are in which files with which timestamp. 
+         ! By default, we assume below that if oneStepPerFile is false, then all time steps
+         ! are in a file with the timestamp YYYY0101_YYYY1231, where YYYY is currYear. 
+         ! This is common for NEMO runs with 5-day or monthly data. 
+         ! 
+         ! Another example could be if we have one file per month with daily data
+         ! Then the data will be in a file with timestamp YYYYMM01_YYYYMM31 where YYYY is currYear 
+         ! and MM is currMon, and the last 31 must be changed to 28, 29 or 30 for some months. 
+         !
          allocate( file_timestamp(fieldsperfile), fileDay(fieldsperfile,2), fileMon(fieldsperfile,2) )
          fileDay(:,1) = 1
          fileDay(:,2) = 31
@@ -180,7 +191,11 @@ SUBROUTINE readfields
       end if
       
       if (.not. oneStepPerFile) then   
-         ! Now write year to timestamp string
+         ! 
+         ! Write months and days to timestamps 
+         ! We will write currYear here later. 
+         ! Should we not write currYear here as well? 
+         ! 
          tmpstr = "YYYYMMDD_YYYYMMDD"
          do ii=1,fieldsperfile
             write(tmpstr(5:8)  ,'(i2.2,i2.2)') fileMon(ii,1),fileDay(ii,1)
@@ -190,6 +205,8 @@ SUBROUTINE readfields
          
          !  
          ! Find the files for the current step  
+         ! While the current month and day are ahead of the month and day of the file,
+         ! then update itime
          ! 
          fieldStep = 1
          itime = 1
@@ -221,6 +238,7 @@ SUBROUTINE readfields
    !
    if (.not. allocated(xxx)) then
       allocate ( xxx(imt,jmt,km))
+      xxx(:,:,:) = 0.
    end if
    
    !
@@ -228,6 +246,10 @@ SUBROUTINE readfields
    !
    if(vvl .and. .not. allocated (zstot)) then
       allocate ( zstot(imt,jmt),zstou(imt,jmt),zstov(imt,jmt) )
+      ! Initialise to 1, which is the case if ssh = 0.
+      zstot(:,:) = 1.
+      zstou(:,:) = 1. 
+      zstov(:,:) = 1.
    end if   
    
    !
@@ -246,38 +268,15 @@ SUBROUTINE readfields
    lapu(:,:,:,1) = lapu(:,:,:,2)
    lapv(:,:,:,1) = lapv(:,:,:,2)
    
+   !
+   ! If we are using the trm clock or the simple calendar
+   !
    if (useTrmClock) then
       call updateClock 
    else
-      if (ints /= intstart) then 
+      if (ints /= intstart) then          
          call update_calendar
-      end if
-      !if (ints /= intstart) then
-      !daysInMonth = (/ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /)
-      !if (ngcm_unit == "minute") then
-      !   currStep = ngcm 
-      !else if (ngcm_unit == "hour") then
-      !   currStep = ngcm * 60
-      !else if (ngcm_unit == "day") then
-      !   currStep = ngcm * 24 * 60
-      !else if (ngcm_unit == "month") then
-      !   currStep = daysInMonth(currMon) * 24 * 60 
-      !end if
-      !! Update the clock manually
-      !currHour = currHour + currStep/60
-      !do while (currHour >= 24) 
-      !   currDay = currDay + 1
-      !   currHour = currHour - 24
-      !   if (currDay > daysInMonth(currMon)) then
-      !      currDay = currDay - daysInMonth(currMon)
-      !      currMon = currMon + 1
-      !   end if
-      !   if (currMon > 12) then
-      !      currMon = currMon - 12
-      !      currYear = currYear + 1
-      !   end if
-      !end do
-      !end if
+      end if      
    end if
    
    ! === Initialising fields ===
@@ -312,7 +311,7 @@ SUBROUTINE readfields
    ! i.e. set itime and fieldStep
    ! If only one step per file, this is always 1. 
    !
-   
+      
    ncTpos = fieldStep
    
    if (oneStepPerFile) then
@@ -346,12 +345,25 @@ SUBROUTINE readfields
       timestamp = trim(file_timestamp(itime))
    
    else
-      fieldStep = fieldStep + 1
+      
+      ! If more than one step per file, add one step (or remove one for backward trajectories)
+      fieldStep = fieldStep + 1 * nff
+      
+      ! If we exceed fieldsperfile, go back to first step
       if (fieldStep > fieldsperfile) then
          fieldStep = 1
+      
+      ! If we are at step < 1, then we go to last step
+      else if (fieldStep < 1) then
+         fieldStep = fieldsperfile
+      
       end if
       
    end if   
+   
+   if( log_level >= 1 ) THEN
+      print*,' reading fieldStep (ncTpos) = ',fieldStep, ncTpos
+   end if
    
    !
    ! Set the file names that we need to read
@@ -359,12 +371,7 @@ SUBROUTINE readfields
    !
    
    physPrefix = physPrefixForm
-   ichar = INDEX(physPrefix,'RUNID')
-   do while (ichar /= 0)
-      physPrefix = trim(physPrefix(:ichar-1))//trim(RunID)//trim(physPrefix(ichar+5:))
-      ichar = INDEX(physPrefix,'RUNID')
-   end do
-   
+      
    ichar = INDEX(physPrefix,'YYYY')
    do while (ichar /= 0)
       write(physPrefix(ichar:ichar+3),'(i4)') currYear
@@ -395,6 +402,12 @@ SUBROUTINE readfields
       ichar = INDEX(physPrefix,'TSTSTSTS')
    end do
    
+   ichar = INDEX(physPrefix,'RUNID')
+   do while (ichar /= 0)
+      physPrefix = trim(physPrefix(:ichar-1))//trim(RunID)//trim(physPrefix(ichar+5:))
+      ichar = INDEX(physPrefix,'RUNID')
+   end do
+   
    ichar = INDEX(physPrefix,'GRIDX')
    tFile = trim(physDataDir)//trim(physPrefix(:ichar-1))//trim(tGridName)//trim(physPrefix(ichar+5:))//trim(fileSuffix)
    uFile = trim(physDataDir)//trim(physPrefix(:ichar-1))//trim(uGridName)//trim(physPrefix(ichar+5:))//trim(fileSuffix)
@@ -416,18 +429,30 @@ SUBROUTINE readfields
     
    ! Read SSH
    if (readSSH .or. vvl) then
-      hs(:,     :, nsp) = get2DfieldNC(trim(tFile), ssh_name)
-      hs(imt+1, :, nsp) = hs(1,:,nsp)
+      hs(:,:,nsp)       = 0. !Initialise to zero      
+      hs(1:imt, 1:jmt, nsp) = get2DfieldNC(trim(tFile), ssh_name)      
+      hs(imt+1, 1:jmt, nsp) = hs(1, 1:jmt, nsp)
    end if
    
+   !
    ! Depth at U, V, T points as 2D arrays
+   ! 
+   ! Hmmm, I dont think this is correct...
+   ! Sum of dz at T points does not account for the last half-level down to the sea floor...
+   ! We should take sum of dz at W points, or read in ocean depth directly. 
+   !
    allocate ( abyst(imt, jmt) , abysu(imt, jmt) , abysv(imt, jmt) )
+   abyst(:,:) = 0. 
+   abysu(:,:) = 0.
+   abysv(:,:) = 0.
    
    abyst = sum(dzt0(:,:,:), dim=3)
    abysu = sum(dzu(:,:,:,1), dim=3)
    abysv = sum(dzv(:,:,:,1), dim=3)
    
    if (vvl) then
+      if (log_level >= 2) print*,' Calculating ocean depth and the weigths for vvl '
+      
       ! Calculate SSH/depth
       where (abyst /= 0)
          zstot = hs(:imt,:jmt,nsp)/abyst + 1
@@ -442,11 +467,29 @@ SUBROUTINE readfields
       end where
    
       where (abysv /= 0)
-         zstov = 0.5*(hs(:imt,:jmt,nsp)+hs(:imt,2:jmt+1,nsp))/abysv + 1
+         ! This interpolation should probably take north-fold into account? 
+         zstov(1:imt,1:jmt) = 0.5*(hs(:imt,:jmt,nsp)+hs(:imt,2:jmt+1,nsp))/abysv(1:imt,1:jmt) + 1
       elsewhere
          zstov = 0.d0
       end where
    end if
+   
+   ! 
+   ! Read tracers
+   ! 
+   DO jt=1,n2Dtracers
+      if (log_level >= 2) then
+         print*,'read 2D tracer: ',tracers2D(jt)%name
+      end if
+      tracers2D(jt)%data(:,:,nsp) = get2DfieldNC(trim(tFile), tracers2D(jt)%name)
+   END DO
+   DO jt=1,n3Dtracers
+      if (log_level >= 2) then
+         print*,'read 3D tracer: ',tracers3D(jt)%name
+      end if
+      xxx(:,:,:) = get3DfieldNC(trim(tFile), tracers3D(jt)%name)
+      tracers3D(jt)%data(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   END DO
    
    ! Read temperature 
    if (readTS) then
@@ -560,8 +603,18 @@ SUBROUTINE readfields
    do i=1,IMT
    do j=1,JMT
    do k=1,KM
-   if(k > kmv(i,j) .and. vflux(i,j,km+1-k,nsp) /= 0.) then
-      print *,'vflux=',vflux(i,j,km+1-k,nsp),vvel(i,j,k),i,j,k,kmv(i,j),nsp
+   if(k > kmv(i,j) .and. vflux(i,j,km+1-k,nsp) /= 0.) then      
+      print *,' Warning: vflux is non-zero below sea floor '
+      print *,'          Something might be wrong '
+      print *,'          i,j,k = ',i,j,k
+      print *,'          vflux(i,j,:,nsp) = ',vflux(i,j,:,nsp)
+      print *,'          vvel(i,j,:) = ',vvel(i,j,:)
+      print *,'          dxv(i,j) = ',dxv(i,j)
+      print *,'          dzv(i,j,:,1) = ',dzv(i,j,:,1)
+      print *,'          zstov(i,j) = ',zstov(i,j)
+      print *,'          kmv(i,j) = ',kmv(i,j)
+      print *,'          vfile = ',vfile
+      print *,'          ncTpos = ',ncTpos
       stop 4966
    endif
    if(k > kmu(i,j) .and. uflux(i,j,km+1-k,nsp) /= 0.) then
@@ -629,6 +682,9 @@ SUBROUTINE readfields
    endif
 #endif
 
+   if(log_level >= 5) THEN
+      print*,' leaving readfield '
+   end if
    return
    
 end subroutine readfields

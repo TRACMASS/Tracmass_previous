@@ -3,6 +3,7 @@ MODULE mod_calendar
    USE mod_precdef
    USE mod_time
    USE mod_param
+   USE mod_log
    
    INTEGER, DIMENSION(10000,12)       :: daysInMonth   
    
@@ -25,6 +26,10 @@ MODULE mod_calendar
      ! -------------------------------------------------- 
      
         INTEGER              :: jyear,iyear                
+        
+        IF (log_level >= 5) THEN
+           PRINT*,' entering init_calendar '
+        END IF
         
         IF (.not. noleap) THEN
            DO jyear=1,10000
@@ -51,6 +56,18 @@ MODULE mod_calendar
         currYear = startYear
         
         iyear = currYear - startYear + 1
+        IF (nff < 0) THEN
+           imon = currMon - 1
+           IF (imon <= 0) THEN
+              imon = 12
+              iyear = 1
+           END IF
+        END IF
+        
+        IF (log_level >=3) THEN
+           print*,'before setting first time step. curryear, mon,day, iyear, imon ',currYear,currMon,currDay,iyear,imon
+        END IF
+        
         ! Find current step (secs)
         IF (ngcm_unit == 1) THEN ! sec 
            currStep = ngcm_step
@@ -61,7 +78,7 @@ MODULE mod_calendar
         ELSE IF (ngcm_unit == 4) THEN ! days 
            currStep = ngcm_step * 24 * 60 * 60
         ELSE IF (ngcm_unit == 5) THEN ! months 
-           currStep = daysInMonth(iyear,currMon) * 24 * 60 * 60
+           currStep = daysInMonth(iyear,imon) * 24 * 60 * 60
         ELSE IF (ngcm_unit == 6) THEN ! years 
            currStep = SUM(daysInMonth(iyear,:)) * 24 * 60 * 60
         ELSE
@@ -75,6 +92,11 @@ MODULE mod_calendar
 
         ! ngcm 
         ngcm = currStep / (60*60) ! hours 
+        
+        IF (log_level >=5 ) THEN
+           PRINT*,' Done initialising calendar. ngcm = ',ngcm
+           PRINT*,' leaving init_calendar '
+        END IF
         
      RETURN              
      END SUBROUTINE init_calendar         
@@ -94,9 +116,25 @@ MODULE mod_calendar
      !
      ! ---------------------------------------------------
      
-     INTEGER                 :: iyear
+     INTEGER                 :: iyear, imon
+     
+     IF(log_level >= 5) THEN
+        PRINT*,' entering update_calendar '
+     END IF
      
      iyear = currYear - startYear + 1 
+     imon  = currMon - 1
+     IF (nff < 0) THEN
+           imon = currMon - 1
+           IF (imon <= 0) THEN
+              imon = 12
+              iyear = 1
+           END IF
+     END IF
+     
+     IF (log_level >= 3) THEN
+        print*,'b4 update calendar',currYear,currMon,currDay,iyear,imon
+     END IF  
      
      ! Find number of minutes to add
      IF (ngcm_unit == 1) THEN ! sec
@@ -107,8 +145,8 @@ MODULE mod_calendar
         currStep = ngcm_step * 60 * 60
      ELSE IF (ngcm_unit == 4) THEN ! days
         currStep = ngcm_step * 24 * 60 * 60
-     ELSE IF (ngcm_unit == 5) THEN ! months
-        currStep = daysInMonth(iyear,currMon) * 24 * 60 * 60
+     ELSE IF (ngcm_unit == 5) THEN ! months        
+           currStep = daysInMonth(iyear,imon) * 24 * 60 * 60          
      ELSE IF (ngcm_unit == 6) THEN ! years
         currStep = SUM(daysInMonth(iyear,:)) * 24 * 60 * 60
      ELSE
@@ -126,6 +164,10 @@ MODULE mod_calendar
      ! Now update the time and date
      currSec  = currSec + currStep * nff
      
+     IF (log_level >= 3) THEN
+        PRINT*,' set up currStep, ngcm ',currStep,ngcm
+     END IF
+     
      ! If currSec > 60 we update the minutes, 
      ! and hours etc until we have currSec < 60 again
      DO WHILE (currSec >= 60)
@@ -140,17 +182,21 @@ MODULE mod_calendar
               IF (currDay > daysInMonth(iyear,currMon)) THEN
                  currDay = currDay - daysInMonth(iyear,currMon)
                  currMon = currMon + 1
-              END IF
-              IF (currMon > 12) THEN
-                 currMon = currMon - 12
-                 currYear = currYear + 1
+                 !END IF
+                 IF (currMon > 12) THEN
+                    currMon = currMon - 12
+                    currYear = currYear + 1
+                 END IF
               END IF
            END IF
         END IF
      END DO          
      
      IF (loopYears) THEN
-        IF (currYear > loopEndYear) THEN
+        IF (currYear > loopEndYear .and. nff > 0) THEN
+           IF (log_level >= 3) THEN
+              PRINT*,' currYear > loopEndYear. Going back to loopStartYear '
+           END IF
            currYear = loopStartYear
            loopIndex = loopIndex + 1
         END IF
@@ -169,16 +215,33 @@ MODULE mod_calendar
               currDay  = currDay - 1
               IF (currDay < 0) THEN
                  currMon = currMon - 1
-                 currDay = currDay + daysInMonth(iyear,currMon)
-              END IF
-              IF (currMon < 0) THEN
-                 currMon = currMon + 12
-                 currYear = currYear - 1
+                 IF (currMon <= 0) THEN
+                    currMon = currMon + 12
+                    currYear = currYear - 1
+                 END IF
+                 currDay = currDay + daysInMonth(currYear,currMon)                 
               END IF
            END IF
         END IF
      END DO
      
+     IF (loopYears) THEN
+        IF (currYear < loopEndYear .and. nff < 0) THEN
+           IF (log_level >= 3) THEN
+              PRINT*,' currYear < loopEndYear. Going back to loopStartYear '
+           END IF
+           currYear = loopStartYear
+           loopIndex = loopIndex + 1
+        END IF
+     END IF
+     
+     IF (log_level >= 3) THEN
+        print*,'af update calendar',currYear,currMon,currDay,iyear
+     END IF
+     
+     IF (log_level >= 5) THEN
+        PRINT*,' leaving update_calendar '
+     END IF  
      RETURN     
      END SUBROUTINE update_calendar
      

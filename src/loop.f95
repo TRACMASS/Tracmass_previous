@@ -14,6 +14,7 @@ SUBROUTINE loop
 !!
 !!
 !!---------------------------------------------------------------------------          
+  USE mod_log,      only: log_level
   USE mod_param,    only: ntracmax, undef, tday 
   USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
                           niter, lbas, scrivi, subvol
@@ -48,6 +49,10 @@ SUBROUTINE loop
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
   
+  if(log_level >= 5) THEN
+      print*,' entering loop '
+  end if
+   
   call print_start_loop
   
   dstep = 1.d0 / dble(iter)
@@ -148,9 +153,11 @@ SUBROUTINE loop
   call fancyTimer('initialize dataset','start')
   ff=dble(nff)
   ints = intstart
+  
   if (useTrmClock) then
-  call updateclock  
+     call updateclock  
   end if
+  
   call readfields   ! initial dataset
   call active_init
   ntrac = 0
@@ -170,6 +177,7 @@ SUBROUTINE loop
      !=======================================================
      !=== write stream functions and "particle tracer"    ===
      !=======================================================
+
      if(mod(ints,intpsi) == 0) then 
       call write_streamfunctions
       call writetracer
@@ -177,9 +185,10 @@ SUBROUTINE loop
 
      intspinCond: if(ints*nff <= (intstart+intspin)*nff) then
         call fancyTimer('seeding','start')
+        t0 = tt
         call seed (tt,ts)
         call fancyTimer('seeding','stop')
-        t0 = tt
+        !t0 = tt
         dt = 0.d0
      end if intspinCond
 

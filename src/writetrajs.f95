@@ -5,7 +5,8 @@ module mod_write
   USE mod_name, only: casename, case, Project
   USE mod_time 
   USE mod_active_particles, only: upr !!Joakim edit
- ! USE mod_traj, only: ib,jb,kb
+  USE mod_tempsalt, only: n2Dtracers, n3Dtracers, tracers2D, tracers3D
+  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
@@ -78,6 +79,9 @@ CONTAINS
        binRecL = 24
     else if (binwritetype == 1) then
        binRecL = 36
+    else if (binwritetype == 2) then
+       binRecL = 36 + 4*n2Dtracers + 4*n3Dtracers
+       print*,'binRecL is ',binRecL
     else
        binRecL = 72
     end if
@@ -175,9 +179,13 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosRun=0 ,recPosErr=0
     INTEGER*8, SAVE                      :: recPosKll=0
     INTEGER*4                            :: ntrac4
+    INTEGER                              :: ziter
+    REAL(DP)                             :: zx1,zy1,zz1,ztt,zt0,zvol
     REAL*4                               :: x14 ,y14 ,z14, tt14, t014
     REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
                                             dvort4, dhdiv4, upr4, vpr4
+    REAL(DP), DIMENSION(n3Dtracers)      :: trc3D
+    REAL*4, DIMENSION(n3Dtracers)        :: trc3D4 
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
@@ -191,10 +199,10 @@ CONTAINS
 #elif defined orc
     !566 format(i8,i7,2f8.2,f6.2,2f10.2 &
     !         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
-566 format(i8,i7,2f9.3,f6.2,2f10.2 &
+566 format(i8,i7,2f9.3,f9.2,2f14.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
-566 format(i8,i7,2f9.3,f6.2,2f10.2 &
+566 format(i8,i7,2f9.3,f9.2,2f14.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
     !566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
     !         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -214,12 +222,19 @@ CONTAINS
     call interp2(ib,jb,kb,temp,salt,dens)
 #endif
 
-!print *,x1,y1,z1
-    
+#ifdef newtracers
+    call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')
+#else
+    !trc3D(1) = temp
+    !trc3D(2) = salt
+    !trc3D(3) = dens
+#endif
+
 #if defined textwrite 
     select case (sel)
     case (10)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+       !write(58,566) ntrac,ziter,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 !       if(temp==0.) stop 4867
     case (11)
        !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
@@ -245,8 +260,10 @@ CONTAINS
 #else
 #if defined tempsalt
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+          !write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 #else
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
+          !write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol
 #endif        
 #endif        
        endif
@@ -266,6 +283,9 @@ CONTAINS
            !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
            call interp2(ib,jb,kb,temp,salt,dens)
 #endif
+#ifdef newtracers
+           call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')
+#endif           
           write(56,566) ntrac,ints,x1,y1,z1, &
                tt/tday,t0/tday,subvol,temp,salt,dens
        end if
@@ -285,8 +305,8 @@ CONTAINS
        enddo
        close(34)
     case (40)
-       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens  
+       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
+       !write(59,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
     case (99) !switch
        
     end select
@@ -311,6 +331,17 @@ CONTAINS
     dhdiv4 = real(dhdiv,kind=4)!Joakim edit
     upr4   = real(upr(1,1),kind=4)!Joakim edit
     vpr4   = real(upr(3,1),kind=4)!Joakim edit
+    
+#ifdef newtracers
+    !
+    ! Experimental new tracer interpolation scheme
+    !
+    call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')     
+    trc3D4 = real(trc3D,kind=4)
+#else
+    trc3D4(:) = 0.
+#endif
+    
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -326,6 +357,8 @@ CONTAINS
           write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14
        else if (binwritetype == 1) then
           write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
+       else if (binwritetype == 2) then
+          write(unit=78, rec=recPosIn) ntrac,twrite, x14,y14,z14,tt14,t014, trc3D4(1:n3Dtracers)          
        else
           write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014, &
                                        lapu14,lapu24,lapv14,lapv24,upr4,vpr4,vort24,hdiv24,dvort4,dhdiv4
@@ -343,6 +376,9 @@ CONTAINS
           call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
  !         call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
+#endif
+#ifdef newtracers
+          call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,tracers3D,2,method='linear')
 #endif
           recPosRun = recPosRun+1
           if (binwritetype == 0) then
