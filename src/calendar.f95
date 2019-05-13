@@ -55,8 +55,14 @@ MODULE mod_calendar
         currMon = startMon
         currYear = startYear
         
-        iyear = currYear - startYear + 1
-        IF (nff < 0) THEN
+        iyear = currYear - startYear + 1        
+        ! For forward trajectories, we need the current month to calculate step length
+        ! but for backward trajectories, we need the previous month
+        ! E.g. if we start 1 Feb, currStep is 28 days for fwd trajs 
+        ! but currStep is 31 days for backwd trajs (duration of Jan)
+        IF (nff > 0) THEN
+           imon = currMon
+        ELSE IF (nff < 0) THEN
            imon = currMon - 1
            IF (imon <= 0) THEN
               imon = 12
@@ -123,8 +129,10 @@ MODULE mod_calendar
      END IF
      
      iyear = currYear - startYear + 1 
-     imon  = currMon - 1
-     IF (nff < 0) THEN
+     ! see comment for init_calendar for explanation of the following lines
+     IF (nff > 0) THEN
+        imon = currMon
+     ELSE IF (nff < 0) THEN
            imon = currMon - 1
            IF (imon <= 0) THEN
               imon = 12

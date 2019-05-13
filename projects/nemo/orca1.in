@@ -154,8 +154,15 @@
      idir           = 0,				     ! = 1 start only when flux > 0
      		      					     ! = -1      only when flux < 0 
 							     ! = 0 start at flux < 0 or > 0
-     nqua           = 1,
-     partquant      = 1,
+	nqua           = 1,									! number of trajectories can be set by     
+														! = 1 constant number of particles in all seeding cells
+														!     set by partQuant (particles / gridcell)
+														! = 2 Each particle reflects mass transport at seeding. 
+														!     set by partQuant (m3/s or kg/s per particle)
+														! = 3 Each particle reflects air/water mass/volume at seeding.
+														!     set by partQuant in m3 or kg per particle
+														! = 5  particles set by seedfile (Set: isec==5)
+     partquant      = 1,                      ! particles/gridcell or m3s-1/particle or m3/particle
      ntracmax       = 20000000,			             ! max number of trajectories
      loneparticle   = 0, 				     ! start only one trajectory for debugging
      seedtype       = 1,				     ! = 1 seed using ist,jst,kst (below)

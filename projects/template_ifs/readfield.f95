@@ -36,7 +36,7 @@ SUBROUTINE readfields
  INTEGER                                   ::  i, j, k, n, ii, kk, m, jj, jm, im 
  INTEGER, PARAMETER                        ::  NY=241 ! size of raw data: JMT+1
 
- REAL(DP), SAVE                            ::  punit, eunit,  pp, tv, pc, pm, pref, Rd, cp, Lv
+ REAL(DP), SAVE                            ::  punit, eunit,  pps, tv, pc, pm, pref, Rd, cp, Lv
  REAL*4, SAVE                              ::  celsius0, qmin
  REAL*4, ALLOCATABLE, DIMENSION(:,:)       ::  pxy,  th, zh, uh, vh, qh, ph, dpgh
  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     ::  td, tw, zg, qxyz,txyz,zxyz,uxyz,vxyz
@@ -349,9 +349,9 @@ DO k=1,KM
          tem  (i,j,k,2) = 0.25*(th(i,jj)+th(im,jj)+th(i,jm)+th(im,jm)) ![K]
          sal  (i,j,k,2) = 0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm)) ![g/kg]
          
-         pp = 0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm)) ![Pa]
-         dzt  (i,j,k,2) = ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pp )*punit / grav
-         rho  (i,j,k,2) = 0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pp )*punit ![Pa]
+         pps = 0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm)) ![Pa]
+         dzt  (i,j,k,2) = ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*pps )*punit / grav
+         rho  (i,j,k,2) = 0.5*( aa(k)+aa(k-1) + (bb(k)+bb(k-1))*pps )*punit ![Pa]
 
 #if defined hydro
          dzt  (i,j,k,2) = dzt  (i,j,k,2) * sal  (i,j,k,2)*0.001 ! water mass instead of air mass
