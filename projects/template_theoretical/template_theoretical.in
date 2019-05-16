@@ -1,3 +1,7 @@
+! This is a template to run TRACMASS with velocities generated in readfields.f95 so you do not need to read any fields
+! 1.) Copy the entire folder template_ifs and rename it as you wish. 
+! 2.) Set PROJECT = to this new name in the Makfile in the directory highest up in this unix tree
+! 3.) Set "outDataDir" to where you want to store your data from the TRACMASS run
 &INIT_NAMELIST_VERSION
       gridvernum =      6,
 /
@@ -179,6 +183,12 @@
 	smaxe          =  500.0,
 	rmine          = -100.0,
 	rmaxe          = 1100.0,
+/
+&INIT_TRACERS
+     n2Dtracers           = 0                           ! number of 2D tracers to read
+     names2Dtracers(1)    = ''                          ! names of 2D tracers
+     n3Dtracers           = 0                           ! number of 3D tracers to read
+     names3Dtracers(1:2)  = '',''                       ! names of 3D tracers
 /
 &INIT_DIFFUSION
               ah = 2000.0,  							! sub-grid parametersiation horizontal diffusion

@@ -199,6 +199,12 @@
 	rmine          = -100.0,
 	rmaxe          = 1100.0,
 /
+&INIT_TRACERS
+     n2Dtracers           = 0                           ! number of 2D tracers to read
+     names2Dtracers(1)    = ''                          ! names of 2D tracers
+     n3Dtracers           = 0                           ! number of 3D tracers to read
+     names3Dtracers(1:2)  = '',''                       ! names of 3D tracers
+/
 &INIT_DIFFUSION
 	ah             = 2000.0,							! sub-grid parametersiation horizontal diffusion
 	av             =    0.0,							!                           vertical

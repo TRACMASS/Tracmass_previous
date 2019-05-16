@@ -39,7 +39,7 @@ CONTAINS
  subroutine print_header_main
     call lines
     print *, thickline!================================================= 
-    print *,'             TRACMASS lagrangian off-line particle tracking '
+    print *,'             TRACMASS Lagrangian off-line particle tracking '
     print *, thickline!================================================= 
   end subroutine print_header_main
 

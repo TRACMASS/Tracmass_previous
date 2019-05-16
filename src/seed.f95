@@ -167,11 +167,11 @@ CONTAINS
       
          ! Calculate volume/mass of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
-#if defined zgrid3D
+!#if defined zgrid3D
             vol = dzt(ib,jb,kb,1)
-#else
-            vol = dz(kb)
-#endif /*zgrid*/
+!#else
+!            vol = dz(kb)
+!#endif /*zgrid*/
 !#ifdef varbottombox
 !            IF (kb == KM+1-kmt(ib,jb)) THEN
 !               vol = dztb (ib,jb,1)
@@ -231,17 +231,17 @@ CONTAINS
                      x1 = DBLE (ib) 
                      y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
-                     IF (idir == 1) THEN
+                     IF (idir*nff == 1) THEN
                         ib = iist+1
                      ELSE IF (idir == -1) THEN
                         ib=iist 
                      END IF
 
                   CASE (2)   ! Zonal-vertical section
-                     x1 = DBLE (ib-1)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
+                     x1 = DBLE (ib-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb)
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
-                     IF (idir == 1) THEN
+                     IF (idir*nff == 1) THEN
                         jb = ijst+1
                      ELSE IF (idir == -1) THEN
                         jb = ijst
@@ -251,15 +251,17 @@ CONTAINS
                      x1 = DBLE (ib-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                      z1 = DBLE (kb)
-                     IF (idir == 1) THEN
+                     IF (idir*nff == 1) THEN
                         kb = ikst+1
                      ELSE IF (idir == -1) THEN
                         kb = ikst
                      END IF
 
                   CASE (4)   ! Spread evenly inside box                  
-                     x1 = DBLE (ib-1) + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
-                     y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
+!                     x1 = DBLE (ib-1) + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
+!                     y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
+                     x1 = DBLE (ib-1) + (DBLE(jjt)-0.5d0) / DBLE(ijt)
+                     y1 = DBLE (jb-1) + (DBLE(jkt)-0.5d0) / DBLE(ikt)
                      z1 = DBLE (kb-1) + 0.5d0
 
                   CASE (5)                  
@@ -284,8 +286,10 @@ CONTAINS
                   !
                   call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,tracers3D,method='nearest')
 #else
+#ifdef tempsalt 
                   ! Retro style
                   call interp2(ib,jb,kb,temp,salt,dens)
+#endif
 #endif
 
 #ifdef tempsalt 
