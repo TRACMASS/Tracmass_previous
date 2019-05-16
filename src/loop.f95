@@ -166,7 +166,7 @@ SUBROUTINE loop
   !==========================================================
   !=== Start main time loop                               ===
   !==========================================================
-  intsTimeLoop: do ints=intstart+nff, intstart+intrun, nff
+  intsTimeLoop: DO ints=intstart+nff, intstart+intrun, nff
      call fancyTimer('reading next datafield','start')
      tt = ints*tseas
      if (degrade_counter < 1) call readfields
@@ -183,7 +183,8 @@ SUBROUTINE loop
       call writetracer
      endif
 
-     intspinCond: if(ints*nff <= (intstart+intspin)*nff) then
+     intspinCond: IF((ints)*nff <= (intstart+intspin)*nff) THEN
+
         call fancyTimer('seeding','start')
         t0 = tt
         call seed (tt,ts)
@@ -271,7 +272,7 @@ SUBROUTINE loop
         call active_ntrac(ntrac)
           ! ===  start loop for each trajectory ===
         scrivi=.true.
-        niterLoop: do           
+        niterLoop: DO           
            niter=niter+1 ! iterative step of trajectory
            ! === change velocity fields &  === 
            ! === store trajectory position ===
@@ -385,7 +386,7 @@ SUBROUTINE loop
 
            if (nperio == 6) then
               ! === north fold cyclic for the ORCA grids ===
-              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
+              IF( y1 == DBLE(JMT-1) ) THEN ! North fold for ntrac
                  x1 = dble(IMT+2) - x1
                  ib=idint(x1)+1
                  jb=JMT-1
@@ -395,9 +396,10 @@ SUBROUTINE loop
                 x1 = dble(IMT+2) - x1
                 ib=idint(x1)+1
                 jb=JMT-1
-                y1= dble(JMT-1) -y1 
+                !y1= DBLE(JMT-1) 
                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-              endif
+                PRINT *, 'x1', x1, 'y1', y1, 'ib', ib, 'jb', jb
+             ENDIF
 
            else if (nperio == 4) then
               ! === another north fold implementation 
@@ -512,24 +514,24 @@ SUBROUTINE loop
 
            
 #if defined tempsalt
-           call interp2(ib,jb,kb,temp,salt,dens)
-!           call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-           ! if (temp < tmine .or. temp > tmaxe .or. &
-           ! &   salt < smine .or. salt > smaxe .or. &
-           ! &   dens < rmine .or. dens > rmaxe      ) then
-                if (temp > tmaxe .and. salt < smine .and.  &
-               &   (tt-t0)/tday > 365.      ) then
-                 nexit(NEND)=nexit(NEND)+1
-                 exit niterLoop                                
-               endif
+          CALL interp2(ib,jb,kb,temp,salt,dens)
+          !           call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+          IF (temp < tmine .OR. temp > tmaxe .OR. &
+             &   salt < smine .OR. salt > smaxe .OR. &
+             &   dens < rmine .OR. dens > rmaxe      ) THEN
+             !if (temp > tmaxe .and. salt < smine .and.  &
+             !&   (tt-t0)/tday > 365.      ) then
+             nexit(NEND)=nexit(NEND)+1
+             EXIT niterLoop                                
+          ENDIF
 #endif       
-           ! === stop trajectory if the choosen time or ===
-           ! === water mass properties are exceeded     ===
-           if(tt-t0.gt.timax) then
-              nexit(NEND)=nexit(NEND)+1
-              exit niterLoop
-           endif
-        end do niterLoop
+          ! === stop trajectory if the choosen time or ===
+          ! === water mass properties are exceeded     ===
+          IF(tt-t0.GT.timax) THEN
+             nexit(NEND)=nexit(NEND)+1
+             EXIT niterLoop
+          ENDIF
+       END DO niterLoop
 
         nout=nout+1
         call writedata(17)
