@@ -55,7 +55,7 @@
      subgridfile    = 'templ.asc',                           ! or read region indices from file
      subgridid      = 0,                                     ! number for this region
      
-     nperio         = 6,                                     ! control periodic boundary conditions
+     nperio         = 4,                                     ! control periodic boundary conditions
                                                              ! > 0 periodic in x
                                                              ! = 4 North fold for ORCA2, 025, 0083
                                                              ! = 6 North fold for ORCA1
@@ -117,8 +117,8 @@
      ! Loop run 
      loopYears      = .true.,				     ! make a time loop to run 
      		      					     ! e.g. 1000 years using only 100 years of data
-     loopStartYear  = 2001,				     ! year to start loop from
-     loopEndYear    = 2000,				     ! last year of loop
+     loopStartYear  = 2000,				     ! year to start loop from
+     loopEndYear    = 2001,				     ! last year of loop
      
      intspin        = 12,                                    ! number of time steps for seeding
      intrun         = 120,                                   ! number of time steps for run
@@ -140,12 +140,12 @@
   							     ! 5 = write at chosen intervals
   							     ! 6 = write each spatial grid-crossing
      outdatadir     = '/Users/jkjellsson/Downloads/',        ! directory for output
-     outdatafile    = 'orca1_test',			     ! fileprefix for output
+     outdatafile    = 'orca1_bicay',			     ! fileprefix for output
      intmininoutfile= 0,				     !
      intpsi         = 10, 									! frequency of writing the stream functions
 /
 &INIT_SEEDING
-     nff            =-1,                                     ! = 1 run forward trajectories
+     nff            = 1,                                     ! = 1 run forward trajectories
      		      					     ! = -1 run backwards
      isec           = 2,				     ! = 1 start on zonal cell wall 
      		      					     ! = 2 start on meridional cell wall
@@ -168,12 +168,12 @@
      seedtype       = 1,				     ! = 1 seed using ist,jst,kst (below)
      		      					     ! = 2 seed using file with start positions
 							     
-							     	     ! when seedtype = 1
-     ist1           = 235,				     ! seed in box in range i = [ist1,ist2]
-     ist2           = 237,				     ! 	       	      	    j = [jst1,jst2]
-     jst1           = 198,				     ! 			    		k = [kst1,kst2]
-     jst2           = 198,				     
-     kst1           = 70,
+							     ! when seedtype = 1
+     ist1           = 280,				     ! seed in box in range i = [ist1,ist2]
+     ist2           = 284,				     ! 	       	      	    j = [jst1,jst2]
+     jst1           = 213,				     ! 			    k = [kst1,kst2]
+     jst2           = 213,				     
+     kst1           = 1,
      kst2           = 75,
      tst1           = -1,				     ! seed only between tst1 and tst2
      tst2           = -1,				     ! given as 19800105 for 1980-01-05
