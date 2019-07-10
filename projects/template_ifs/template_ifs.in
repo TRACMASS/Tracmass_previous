@@ -17,9 +17,9 @@
 	gridsource     = 'https://www.ecmwf.int/',			! website for grid
 	griddesc       = '',								! short description of grid
 	! Describe filenames
-	topoDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/topo/',  ! directory of grid data
+	topoDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/topo/',  ! directory of grid data
 	RunID       = 'era',								! name of GCM simulation
-	physDataDir = '/Users/doos/Dropbox/data_cylinder/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
+	physDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
 	fileSuffix  = '.nc',								! suffix of files, e.g. ".nc"
 	! Logicals to control what to read etc.
 	useTrmClock = .false.,								! use sophisticated clock (otherwise simple clock)
@@ -69,7 +69,7 @@
 														! 5 = months
 														! 6 = years
      
-	iter           = 6000,								! number of time steps between two GCM fields
+	iter           = 6,			     					! number of time steps between two GCM fields
 	intmax         = 1460,								! max iterations before trajectory is 
 														! stopped with infiniteError
 	minveljd 		= -1,								!
@@ -94,7 +94,7 @@
 	loopEndYear    = 2018,								! last year of loop
      
 	intspin        = 1,									! number of time steps for seeding
-	intrun         = 999999,							! number of time steps for run (always=2)
+	intrun         = 368,		    					! number of time steps for run (always=2)
 	log_level      = 2,									! level of verbosity 
 														! = 0 minimal output to stdout
 														! = 1 low verbosity
@@ -106,7 +106,7 @@
 														! = 2 write julianday
 														! > 2 write time step
 															
-	kriva          = 1,									! 0 = no writing
+	kriva          = 6,									! 0 = no writing
 														! 1 = write at time intervals of gcm datasets (each ints)
 														! 2 = write at each time iteration
 														! 3 = write all the time
@@ -115,7 +115,7 @@
 														! 6 = write each spatial grid-crossing
 	outDataDir     = '/Users/doos/data/ifs/data_out/',	! directory for output
 !	outdatafile    = 'ifs_test_iter6000',		    	! fileprefix for output
-	outdatafile    = 'ifs_test_anal7',					! fileprefix for output
+	outdatafile    = 'ifs_test_iter1',					! fileprefix for output
 	outdircase     = .false. ,							! creates a new directory to store the data from the run      
 	intminInOutFile  =  0,								! 0 = ????
 														! 1 = ????
@@ -125,13 +125,13 @@
 	outdirdate     = .false. ,							! ?????
 /
 &INIT_SEEDING
-	nff			   = 1,								    ! = 1 run forward trajectories
+	nff			   = -1,								    ! = 1 run forward trajectories
 														! = -1 run backwards
 	isec           = 1,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
 														! = 3 start on vertical wall
 														! = 4 start in center of cell
-	idir           = 1,									! = 1 start only when flux > 0 (eastward/northward) 
+	idir           = -1,									! = 1 start only when flux > 0 (eastward/northward) 
 														! = -1      only when flux < 0 (westward/southward)
 														! = 0 start at flux < 0 or > 0 (both directions) not working ???
 	nqua           = 1,									! number of trajectories can be set by     
@@ -143,7 +143,7 @@
 														!     set by partQuant in m3 or kg per particle
 														! = 5  particles set by seedfile (Set: isec==5)
 	partQuant      = 2,									! particles/gridcell or m3s-1/particle or m3/particle
-	ntracmax       = 8000000,							! max number of trajectories (set as big as possible)
+	ntracmax       = 12345678,							! max number of trajectories (set as big as possible)
 	loneparticle   = 0,									! follow only this trajectory for debugging. If = 0 then all trajectories
 	seedtype       = 1,									! = 1 seed by using ist,jst,kst (below)
 														! = 2 seed by using list file with start positions

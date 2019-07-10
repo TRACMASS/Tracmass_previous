@@ -315,6 +315,9 @@ SUBROUTINE loop
               IF (ib == 1 .AND. x1 >= DBLE (IMT)) THEN
                  x1 = x1 - DBLE(IMT)
               END IF
+              IF (x1 < 0.d0 ) THEN
+                 x1 = x1 + DBLE(IMT)
+              END IF
            end if
            
            x0  = x1
@@ -382,7 +385,7 @@ SUBROUTINE loop
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
-
+           
            if (nperio == 6) then
               ! === north fold cyclic for the ORCA grids ===
               if( y1 == dble(JMT-1) ) then ! North fold for ntrac
@@ -436,7 +439,7 @@ SUBROUTINE loop
            if (nperio /= 0) then
               ! === East-west cyclic 
               if(x1 <  0.d0    ) then
-                 print*,'<0',ntrac,x1
+                 print*,'<0',ntrac,x1,ib
                  x1=x1+dble(IMT)       
                  print*,ntrac,x1
               end if
