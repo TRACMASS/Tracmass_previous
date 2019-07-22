@@ -40,7 +40,7 @@
 #  fl29  = -Dcoarse         # Adds a diffusion on trajectory
 #   fl30  = -Denergy
 #------------------------------------------------------------------------
-#   fl31  = -Dhydro          # Tracks water mass in the amtopsphere instead of air
+   fl31  = -Dhydro          # Tracks water mass in the amtopsphere instead of air
 #------------------------------------------------------------------------
    fl32  = -Dtempus          # Dataset time count
 #========================================================================

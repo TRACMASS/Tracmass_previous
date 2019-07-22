@@ -115,7 +115,7 @@
 														! 6 = write each spatial grid-crossing
 	outDataDir     = '/Users/doos/data/ifs/data_out/',	! directory for output
 !	outdatafile    = 'ifs_test_iter6000',		    	! fileprefix for output
-	outdatafile    = 'ifs_test_iter1',					! fileprefix for output
+	outdatafile    = 'ifs_test_iter2',					! fileprefix for output
 	outdircase     = .false. ,							! creates a new directory to store the data from the run      
 	intminInOutFile  =  0,								! 0 = ????
 														! 1 = ????
@@ -127,11 +127,11 @@
 &INIT_SEEDING
 	nff			   = -1,								    ! = 1 run forward trajectories
 														! = -1 run backwards
-	isec           = 1,									! = 1 start on zonal cell wall 
+	isec           = 3,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
 														! = 3 start on vertical wall
 														! = 4 start in center of cell
-	idir           = -1,									! = 1 start only when flux > 0 (eastward/northward) 
+	idir           = 1,									! = 1 start only when flux > 0 (eastward/northward) 
 														! = -1      only when flux < 0 (westward/southward)
 														! = 0 start at flux < 0 or > 0 (both directions) not working ???
 	nqua           = 1,									! number of trajectories can be set by     
@@ -142,7 +142,7 @@
 														! = 3 Each particle reflects air/water mass/volume at seeding.
 														!     set by partQuant in m3 or kg per particle
 														! = 5  particles set by seedfile (Set: isec==5)
-	partQuant      = 2,									! particles/gridcell or m3s-1/particle or m3/particle
+	partQuant      = 1,									! particles/gridcell or m3s-1/particle or m3/particle
 	ntracmax       = 12345678,							! max number of trajectories (set as big as possible)
 	loneparticle   = 0,									! follow only this trajectory for debugging. If = 0 then all trajectories
 	seedtype       = 1,									! = 1 seed by using ist,jst,kst (below)
@@ -150,10 +150,10 @@
 														! = 3 seed by using a 2-D mask file.
 							     
 	! Use the parameters below when seedtype = 1
-	ist1           = 420,				     			! seed in box in range i = [ist1,ist2]
-	ist2           = 420,				     			! 	       	      	   j = [jst1,jst2]
-	jst1           = 160,	    		     			! 			           k = [kst1,kst2]
-	jst2           = 160,			     
+	ist1           = 1,				     			! seed in box in range i = [ist1,ist2]
+	ist2           = 220,				     			! 	       	      	   j = [jst1,jst2]
+	jst1           = 1,	    		     			! 			           k = [kst1,kst2]
+	jst2           = 135,			     
 	kst1           = 60,    
 	kst2           = 60,    
 	tst1           = -1,								! seed only between tst1 and tst2

@@ -183,14 +183,14 @@ elseif(ijk==3) then
  f1=1.0/f1
 endif
 
-alfa = -(fnmi0-fnmim-fn0i0+fn0im)
-if (alfa>0.) then
- call apos 
-elseif (alfa<0.) then
- call amin 
-else
- call anil 
-endif
+ alfa = -(fnmi0-fnmim-fn0i0+fn0im)
+ if (alfa>0.) then
+  call apos
+ elseif (alfa<0.) then
+  call amin 
+ else
+  call anil 
+ endif
 
 if (rijk==dble(ii)) then
  sp=ss-s0

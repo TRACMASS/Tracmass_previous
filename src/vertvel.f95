@@ -4,7 +4,7 @@ subroutine vertvel(ia,iam,ja,ka)
   ! === Computes the vertical velocity by integrating ===
   ! === the continuity eq. from the bottom            ===
   ! === for the nsm and nsp velocity time steps       ===
-  USE mod_vel,              only: uflux, vflux, wflux, nsm, nsp, ff
+  USE mod_vel,              only: uflux, vflux, wflux, nsm, nsp!, ff
   USE mod_time,             only: intrpr, intrpg, tseas
   USE mod_active_particles, only: upr
   USE mod_grid
@@ -31,7 +31,8 @@ subroutine vertvel(ia,iam,ja,ka)
 #if defined zgrid3D
      do n=n1,n2
         ! time change of the mass the in grid box
-        wflux(k,n) = wflux(k-1,n) - ff * &
+!        wflux(k,n) = wflux(k-1,n) - ff * &
+        wflux(k,n) = wflux(k-1,n) -  &
              (  uflux(ia,ja,k,n) - uflux(iam, ja,   k, n)   & 
               + vflux(ia,ja,k,n) - vflux(ia,  ja-1, k, n)   & 
               - (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas ) 
@@ -42,10 +43,12 @@ subroutine vertvel(ia,iam,ja,ka)
      um = intrpg * uflux(iam,ja  ,k,nsp) + intrpr * uflux(iam,ja  ,k,nsm)
      vv = intrpg * vflux(ia ,ja  ,k,nsp) + intrpr * vflux(ia ,ja  ,k,nsm)
      vm = intrpg * vflux(ia ,ja-1,k,nsp) + intrpr * vflux(ia ,ja-1,k,nsm)
-     wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
+!     wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ff * ( uu - um + vv - vm )
+     wflux(ia,ja,k,nsm)=wflux(ia,ja,k-1,nsm) - ( uu - um + vv - vm )
 #else
     do n=n1,n2
-     wflux(k,n) = wflux(k-1,n) - ff * &
+     wflux(k,n) = wflux(k-1,n) - &
+!     wflux(k,n) = wflux(k-1,n) - ff * &
      ( uflux(ia,ja,k,n) - uflux(iam,ja,k,n) + vflux(ia,ja,k,n) - vflux(ia,ja-1,k,n) )
     enddo
 #endif
