@@ -122,10 +122,10 @@
 														! 2 = 
 														! 3 = 
 	intpsi		   = 100,								! frequency of writing the stream functions
-	outdirdate     = .false. ,							! ?????
+	outdirdate     = .false. ,							! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
-	nff			   = -1,								    ! = 1 run forward trajectories
+	nff			   = -1,								! = 1 run forward trajectories
 														! = -1 run backwards
 	isec           = 3,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
