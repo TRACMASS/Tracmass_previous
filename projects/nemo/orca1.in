@@ -42,7 +42,7 @@
 /
 &INIT_GRID_SIZE
      ! Size of global grid
-     imt            = 362,                                   ! number of global i points
+     imt            = 360,                                   ! number of global i points
      jmt            = 292,                                   ! number of global j points
      km             = 75,                                    ! number of global k points
      nst            = 2,                                     ! number of time levels to use (should be = 2)
