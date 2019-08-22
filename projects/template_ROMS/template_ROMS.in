@@ -1,11 +1,9 @@
 ! This is a template to run TRACMASS with ROMS.
-! 1.) Copy the entire folder template_ifs and rename it as you wish. 
+! 1.) Copy the entire folder projects/template_xxxxx and rename it as you wish. 
 ! 2.) Set PROJECT = to this new name in the Makfile in the directory highest up in this unix tree
-! 3.) Download test data to run with from https://www.dropbox.com/s/t6ha6iat0p0mof4/roms_avg.nc?dl=0
-! 4.) Place this file in a directory named "roms_avg.nc" and change "physDataDir" to the name of the directory 
-! 5.) Download the model bathymetry from https://www.dropbox.com/s/0v5u0roehhdztpw/roms_grd.nc?dl=0
-! 6.) Set "topoDataDir" to the directory where you store this model level file
-! 7.) Set "outDataDir" to where you want to store your data from the TRACMASS run
+! 3.) Download test data to run with from https://www.dropbox.com/sh/b6leim7tb99i3hm/AAA7M0mxuYTwJLKjqmLnoJuca?dl=0
+! 4.) Set "topoDataDir" to the directory where you store this model level file
+! 5.) Set "outDataDir" to where you want to store your data from the TRACMASS run
 
 &INIT_NAMELIST_VERSION
 	gridvernum    =      6,								! grid version number, used to distinguish grids in setupgrid 
@@ -160,7 +158,7 @@
 &INIT_SEEDING
 	nff			   = 1,									! = 1 run forward trajectories
      		      					     				! = -1 run backwards
-    isec           = 2,				     				! = 1 start on zonal cell wall 
+    isec           = 3,				     				! = 1 start on zonal cell wall 
      		      					     				! = 2 start on meridional cell wall
 							     						! = 3 start on vertical wall
 							     						! = 4 start in center of cell
@@ -182,8 +180,8 @@
 														! = 2 seed by using list file with start positions
 														! = 3 seed by using a 2-D mask file.
 	! Use the parameters below when seedtype = 1
-    ist1           = 150,				     			! seed in box in range i = [ist1,ist2]
-    ist2           = 250,				     			! 	       	      	    j = [jst1,jst2]
+    ist1           = 140,				     			! seed in box in range i = [ist1,ist2]
+    ist2           = 150,				     			! 	       	      	    j = [jst1,jst2]
     jst1           = 190,				     			! 			    		k = [kst1,kst2]
     jst2           = 200,				     
     kst1           = 40,

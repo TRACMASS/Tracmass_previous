@@ -387,9 +387,10 @@ SUBROUTINE loop
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
            
-           if (nperio == 6) then
+           if (nperio == 4) then
               ! === north fold cyclic for the ORCA grids ===
-              IF( y1 == DBLE(JMT-1) ) THEN ! North fold for ntrac
+              ! === Note that you must have IMT=360,1440 or 4320  ===
+              IF( y1 == DBLE(JMT-1) ) THEN 
                  x1 = dble(IMT+2) - x1
                  ib=idint(x1)+1
                  jb=JMT-1
@@ -399,13 +400,13 @@ SUBROUTINE loop
                 x1 = dble(IMT+2) - x1
                 ib=idint(x1)+1
                 jb=JMT-1
-                !y1= DBLE(JMT-1) 
+                y1= DBLE(JMT-1) 
                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
                 PRINT *, 'x1', x1, 'y1', y1, 'ib', ib, 'jb', jb
              ENDIF
 
-           else if (nperio == 4) then
-              ! === another north fold implementation 
+           else if (nperio == 6) then
+              ! === another north fold implementation for the ORCA grids ===
               if( y1 == dble(JMT-1) ) then
                  x1 = dble(IMT+3) - x1
                  y1 = dble(JMT-2)
@@ -422,20 +423,23 @@ SUBROUTINE loop
                  cycle ntracLoop
               endif
               
-!!               === Cyclic Arctic in a global cylindrical projection ===
-!              if( y1 == dble(JMT-1) ) then ! North fold for ntrac
-!                 x1 = dble(IMT+2) - x1
-!                 ib=idint(x1)+1
-!                 jb=JMT-1
-!                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-!              elseif(y1 > dble(JMT-1)) then
-!                 print *,'north of northfold for ntrac=',ntrac
-!                 x1 = dble(IMT+2) - x1
-!                 ib=idint(x1)+1
-!                 jb=JMT-1
-!                 y1= dble(JMT-1) -y1 + dble(JMT-1)
-!                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
-!              endif
+           else if (nperio == 9) then
+              ! === fold implementation for the ORCA grids ===
+              ! === Note that you must have IMT=360,1440 or 4320  ===
+              if( y1 == dble(JMT-1) ) then 
+                 x1 = dble(IMT+2) - x1
+                 ib=idint(x1)+1
+                 jb=JMT-1
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              elseif(y1 > dble(JMT-1)) then
+                 print *,'north of northfold for ntrac=',ntrac
+                 stop 45321
+                 x1 = dble(IMT+2) - x1
+                 ib=idint(x1)+1
+                 jb=JMT-1
+                 y1= dble(JMT-1) -y1 + dble(JMT-1)
+                 x0=x1 ; y0=y1 ; ia=ib ; ja=jb
+              endif
            end if
            
            if (nperio /= 0) then
@@ -780,8 +784,8 @@ return
               print *,'x1,y1',x1,y1
               print *,'ntrac=',ntrac,niter 
               nerror=nerror+1
- !             trajectories(ntrac)%iend = 1
-              !stop 3957
+!              trajectories(ntrac)%iend = 1
+              stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if

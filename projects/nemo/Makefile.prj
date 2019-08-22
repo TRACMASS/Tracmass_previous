@@ -28,6 +28,7 @@
 #  fl18  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
   fl21  = -Dzgrid3D         # Cell depths defined as 3D grid 
+  fl22  = -Dnewtracers      # Any number of GCM tracers (not only temp, salt, rho)
 #------------------------------------------------------------------------
 #  fl23  = -Dselect         # Select only one trajectory (for debugging)
 #  fl24  = -Dtracer         # Stores a simulated tracer
