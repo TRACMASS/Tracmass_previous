@@ -1,4 +1,4 @@
-# Makfile for orca12
+# Makfile for nemo_doos
 #========================================================================
   INPUT_INT1        = intmin            # Variables set from command line
   INPUT_INT2        = intrun            # Use 'dummy' if not used.   
@@ -40,6 +40,7 @@
 #   fl30  = -Denergy
 #------------------------------------------------------------------------
 #    fl31   = -Dnomean
+    fl32   = -Dorca12
 #========================================================================
 
 ORM_FLAGS= -D$(PROJECT) \
