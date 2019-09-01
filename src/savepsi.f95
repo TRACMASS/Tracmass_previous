@@ -1,5 +1,6 @@
 module mod_psi
 
+  USE mod_precdef 
   USE mod_loopvars
   USE mod_grid
   USE mod_streamfunctions
@@ -17,7 +18,7 @@ IMPLICIT NONE
 ! flux = subvol*ff
 
 INTEGER             :: ia,ja,ka   !where to write
-REAL*8              :: x1,y1,z1
+REAL(DP)              :: x1,y1,z1
 INTEGER             :: xy, dir !1 - zonal, 2 - meridional, 3 - vertical
 REAL                :: flux
 REAL                :: temp,salt,dens

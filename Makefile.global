@@ -44,7 +44,7 @@ ifeq ($(NETCDFLIBS),"fink")
 endif
 
 ifeq ($(F95COMPILER),"gfortran")
-	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check 
+	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check -ffpe-trap=denormal -static 
   	#FF_FLAGS         = -O3 -c -x f95-cpp-input 	
         F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR) 
@@ -74,11 +74,12 @@ VPATH = src:projects/$(PROJECT):src/active_particles
 
 all: runfile
 
-objects := $(addprefix $(OBJDIR)/,modules.o $(ACTVEL) calendar.o \
+objects := $(addprefix $(OBJDIR)/,modules.o interp_general.o $(ACTVEL) calendar.o \
 	   	    laplacian.o savepsi.o loop_pos.o writetrajs.o \
 	            seed.o init_seed.o sw_stat.o getfile.o \
+ 		    tracer_functions.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
-                    interp.o interp2.o interp_general.o pos.o \
+                    interp.o interp2.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o printinfo.o loop.o main.o \
 		    setupgrid.o readfield.o diffusion.o)

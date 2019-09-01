@@ -15,9 +15,9 @@
      gridsource     = 'http://www.nemo-ocean.eu/',           ! website for grid
      griddesc       = 'Global 1 deg run',                    ! short description of grid
      ! Describe filenames
-     topoDataDir    = '/Users/jkjellsson/Downloads/ORCA1-N406/',  ! directory of grid data
+     topoDataDir    = '/Users/joakim/data/tracmass_test_data/orca1/topo/',  ! directory of grid data
      RunID          = 'ORCA1-N406',                          ! name of GCM simulation
-     physDataDir    = '/Users/jkjellsson/Downloads/ORCA1-N406/',  ! directory of physical data (u,v,T,S,MLD,etc)
+     physDataDir    = '/Users/joakim/data/tracmass_test_data/orca1/fields/',  ! directory of physical data (u,v,T,S,MLD,etc)
      physPrefixForm = 'RUNID_YYYYGRIDX'                      ! format of filenames for physical data
      bioDataDir     = '',                                    ! directory of biogeochemistry data 
      bioPrefixForm  = '',                                    ! format of filenames for BGC data
@@ -127,9 +127,9 @@
      loopStartYear  = 2000,				     ! year to start loop from
      loopEndYear    = 2001,				     ! last year of loop
      
-     intspin        = 12,                                    ! number of time steps for seeding
-     intrun         = 120,                                   ! number of time steps for run
-     log_level      = 5,				     ! level of verbosity 
+     intspin        =  1,                                    ! number of time steps for seeding
+     intrun         = 240,                                   ! number of time steps for run
+     log_level      = 2,				     ! level of verbosity 
      		      					     ! = 0 minimal output to stdout
 							     ! = 1 low verbosity
 							     ! = 2 medium verbosity
@@ -146,12 +146,12 @@
   							     ! 4 = write only start and end positions
   							     ! 5 = write at chosen intervals
   							     ! 6 = write each spatial grid-crossing
-     outdatadir     = '/Users/jkjellsson/Downloads/',        ! directory for output
-     outdatafile    = 'orca1_bicay',			     ! fileprefix for output
-	 outdircase     = .false. ,							! creates a new directory to store the data from the run      
+     outdatadir     = '/Users/joakim/Downloads/tracmass_out/',        ! directory for output
+     outdatafile    = 'orca1_test_newtracers',		     ! fileprefix for output
+     outdircase     = .false. ,				     ! creates a new directory to store the data from the run      
      intmininoutfile= 0,				     !
-     intpsi         = 10, 									! frequency of writing the stream functions
-	 outdirdate     = .false. ,							! creates a new directory to store the data from the run
+     intpsi         = 10, 				     ! frequency of writing the stream functions
+     outdirdate     = .false. ,	                             ! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
      nff            = 1,                                     ! = 1 run forward trajectories
@@ -160,7 +160,7 @@
      		      					     ! = 2 start on meridional cell wall
 							     ! = 3 start on vertical wall
 							     ! = 4 start in center of cell
-     idir           = 0,				     ! = 1 start only when flux > 0
+     idir           = 1,				     ! = 1 start only when flux > 0
      		      					     ! = -1      only when flux < 0 
 							     ! = 0 start at flux < 0 or > 0 but this option is not working
 	nqua           = 1,									! number of trajectories can be set by     
@@ -178,10 +178,10 @@
      		      					     ! = 2 seed using file with start positions
 							     
 							     ! when seedtype = 1
-     ist1           = 280,				     ! seed in box in range i = [ist1,ist2]
+     ist1           = 206,				     ! seed in box in range i = [ist1,ist2]
      ist2           = 284,				     ! 	       	      	    j = [jst1,jst2]
-     jst1           = 213,				     ! 			    k = [kst1,kst2]
-     jst2           = 213,				     
+     jst1           = 192,				     ! 			    k = [kst1,kst2]
+     jst2           = 192,				     
      kst1           = 1,
      kst2           = 75,
      tst1           = -1,				     ! seed only between tst1 and tst2
@@ -209,10 +209,10 @@
      ! the other i = [500,1000], j = [450,470]
 
      nend           = 5,                                     ! number of ways to kill a traj
-     ienw           =   -1, 2402,   -1,   -1,		     ! west indices of killzones
-     iene           =    2, 3000, 3000, 3000,		     ! east indices of killzones
-     jens           =    1,    1,    1, 1481,		     ! south indices of killzones
-     jenn           = 2000, 2000,    2, 2000,		     ! north indices of killzones
+     ienw           =   -1,  360,   -1,   -1,		     ! west indices of killzones
+     iene           =    2,  362, 3000, 3000,		     ! east indices of killzones
+     jens           =    1,    1,    1,  232,		     ! south indices of killzones
+     jenn           = 2000, 2000,  192,  292,		     ! north indices of killzones
      timax          = 3650000.0,     			     ! time limit for traj [days]
 /
 &INIT_TEMP_SALT
@@ -233,8 +233,12 @@
 &INIT_TRACERS
      n2Dtracers           = 1                                ! number of 2D tracers to read
      names2Dtracers(1)    = 'sossheig'                       ! names of 2D tracers
-     n3Dtracers           = 2                                ! number of 3D tracers to read
-     names3Dtracers(1:2)  = 'votemper','vosaline'            ! names of 3D tracers
+     src2Dtracers(1)      = 'read' 
+     desc2Dtracers(1)     = 'ssh' 
+     n3Dtracers           = 3                                ! number of 3D tracers to read
+     names3Dtracers(1:3)  = 'votemper','vosaline','rho'      ! names of 3D tracers
+     src3Dtracers(1:3)    = 'read',    'read', 'calculate'   ! source of 3D tracers
+     desc3Dtracers(1:3)   = 'temperature','pr_salinity','sigma' 
 /
 &INIT_DIFFUSION
      ! Add diffusion (random walk) to trajectories

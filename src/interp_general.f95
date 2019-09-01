@@ -1,6 +1,141 @@
-#ifdef tempsalt
+module mod_interp
 
-subroutine interp_gen3D(ib,jb,kb,x1,y1,z1,n3D,trc3D,ns,method)
+contains
+
+subroutine interp_gen2D(ib,jb,x1,y1,ns,trc2D,method)
+
+!     computes temperature, salinity, density at position of trajectory
+!     by interpolating data from the center of eight nearest boxes  
+!
+!     This subroutine should be improved in order to include time interpolation   
+
+! These use statements were in interp
+USE mod_grid
+USE mod_vel
+USE mod_dens
+USE mod_vel
+USE mod_tempsalt
+
+! These use statements came from interp2
+USE mod_param
+USE mod_loopvars
+USE mod_time
+
+IMPLICIT none
+
+REAL(DP), INTENT(IN)  :: x1,y1
+CHARACTER(LEN=15) :: method_name
+CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: method
+REAL*8  :: ax,ay
+
+REAL(PP) :: tpp,tpm,tmp,tmm
+
+REAL(PP), DIMENSION(n2Dtracers),INTENT(OUT) :: trc2D
+
+INTEGER, INTENT(IN) :: ib,jb,ns
+INTEGER :: ip,im,jp,jm,id2D
+
+! 
+! Default is nearest (interp2) interpolation
+!
+method_name = 'linear'
+! If method is in routine call
+if (present(method)) method_name=method
+
+if (method_name == 'linear') then
+   
+   ! determining nearest centers of boxes 
+   !
+   ! This is from the old interp routine
+   ! which I think is linear interpolation in x,y,z,t
+   ! 
+   if(x1.le.dble(ib)-dble(.5)) then
+      ip=ib
+      im=ib-1
+      if(im.eq.0) im=imt
+   else
+      ip=ib+1
+      im=ib
+      if(ip.gt.imt) ip=1
+   endif
+   if(y1.le.dble(jb)-dble(.5)) then
+      jp=jb
+      jm=jb-1
+      if(jm.eq.0) jm=1
+   else
+      jp=jb+1
+      jm=jb
+      if(jp.gt.jmt) jp=jmt
+   endif
+
+   ax=dble(ip)-x1
+   if(ax.gt.100.d0) then
+      ax=ax-dble(imt)
+   elseif(ax.lt.-100.d0) then
+      ax=ax+dble(imt)
+   endif
+   ay=(dble(jp)-y1)
+
+   DO id2D=1,n2Dtracers
+      
+      tpp = tracers2D(id2D)%data(ip,jp,ns)      
+      if(tpp == tracers2D(id2D)%missval) then
+         tpp = tracers2D(id2D)%data(ip,jp,ns)
+      endif
+         
+      tpm = tracers2D(id2D)%data(ip,jm,ns)
+      if(tpm == tracers2D(id2D)%missval) then
+         tpm = tracers2D(id2D)%data(ip,jp,ns)
+      endif
+         
+      tmp = tracers2D(id2D)%data(im,jp,ns)      
+      if(tmp == tracers2D(id2D)%missval) then
+         tmp = tracers2D(id2D)%data(ip,jp,ns)       
+      endif
+         
+      tmm = tracers2D(id2D)%data(im,jm,ns)
+      if(tmm == tracers2D(id2D)%missval) then
+         tmm = tracers2D(id2D)%data(ip,jp,ns)
+      endif
+         
+      trc2D(id2D) = tpp * (1.-ax) * (1.-ay) &
+                  + tmp *     ax  * (1.-ay) &
+                  + tpm * (1.-ax) *     ay  &
+                  + tmm *     ax  *     ay 
+
+   END DO
+   
+
+else if (method_name == 'nearest') then
+
+      ! Taken from old interp2 routine             
+      !       
+      ! === NO interpolation of the temperature, salinity, and density=== 
+      ! === just their value at the centre of the T-box interpolated in time  ===  
+      ! === can be called as either ia,ja,ka or ib,jb,kb   
+      ! === used to calculate the thermohaline stram function with -Dstream_thermohaline          
+      
+      intrpbg = dmod(ts,1.d0)
+      intrpb  = 1.d0 - intrpbg
+      
+      DO id2D = 1,n2Dtracers
+         trc2D(id2D) = intrpbg * tracers2D(id2D)%data(ib,jb,nsp) + intrpb * tracers2D(id2D)%data(ib,jb,nsm)
+      END DO
+
+else
+      
+      print*,' Interpolation method '//trim(method)//' is not implemented in TRACMASS '
+      print*,' Did you set something wrong in the namelist? '
+      print*,' Feel free to implement the method if you are feeling brave '
+      stop
+
+end if
+   
+return
+end subroutine interp_gen2D
+
+
+subroutine interp_gen3D(ib,jb,kb,x1,y1,z1,ns,trc3D,method)
 
 !     computes temperature, salinity, density at position of trajectory
 !     by interpolating data from the center of eight nearest boxes  
@@ -23,7 +158,7 @@ IMPLICIT none
 
 REAL(DP), INTENT(IN)  :: x1,y1,z1
 CHARACTER(LEN=15) :: method_name
-CHARACTER(LEN=15), INTENT(IN), OPTIONAL :: method
+CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: method
 REAL*8  :: ax,ay,az
 
 REAL    :: tppp,tppm,tpmp,tpmm,tmpp,tmpm,tmmp,tmmm
@@ -31,9 +166,9 @@ REAL    :: sppp,sppm,spmp,spmm,smpp,smpm,smmp,smmm
 REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
 REAL    :: temp,salt,dens
 
-REAL(PP), DIMENSION(n3D),INTENT(OUT) :: trc3D
+REAL(PP), DIMENSION(n3Dtracers),INTENT(OUT) :: trc3D
 
-INTEGER, INTENT(IN) :: ib,jb,kb,ns,n3D
+INTEGER, INTENT(IN) :: ib,jb,kb,ns
 INTEGER :: ip,im,jp,jm,kp,kn,id3D
 
 ! 
@@ -144,7 +279,7 @@ if (method_name == 'linear') then
       
   
 
-      DO id3D=1,n3D
+      DO id3D=1,n3Dtracers
          tppp = tracers3D(id3D)%data(ip,jp,kp,ns)      
          if(tppp == tracers3D(id3D)%missval) then
           tppp = tracers3D(id3D)%data(ip,jp,kn,ns)
@@ -208,7 +343,7 @@ else if (method_name == 'nearest') then
       intrpbg=dmod(ts,1.d0)
       intrpb =1.d0-intrpbg
       
-      DO id3D=1,n3D
+      DO id3D=1,n3Dtracers
          trc3D(id3D) = intrpbg * tracers3D(id3D)%data(ib,jb,kb,nsp) + intrpb * tracers3D(id3D)%data(ib,jb,kb,nsm)
       END DO
 
@@ -224,5 +359,5 @@ end if
 return
 end subroutine interp_gen3D
 
-#endif
+end module mod_interp
 

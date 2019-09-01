@@ -82,7 +82,8 @@ SUBROUTINE init_params
    namelist /INIT_TEMP_SALT/        tmin0, tmax0, smin0, smax0, rmin0, rmax0,&
                                     tmine, tmaxe, smine, smaxe, rmine, rmaxe
    
-   namelist /INIT_TRACERS/          n2Dtracers, names2Dtracers, n3Dtracers, names3Dtracers 
+   namelist /INIT_TRACERS/          n2Dtracers, names2Dtracers, n3Dtracers, names3Dtracers, &
+                                    src2Dtracers, src3Dtracers, desc2Dtracers, desc3Dtracers
 #if defined diffusion || turb 
    namelist /INIT_DIFFUSION/        ah, av
 #endif
@@ -426,8 +427,14 @@ SUBROUTINE init_params
       END DO
       DO jt=1,n3Dtracers
           ALLOCATE( tracers3D(jt)%data(imt,jmt,km,2) )
-          tracers3D(jt)%name = names3Dtracers(jt)
-          print*,'allocate tracer 3D name: ',tracers3D(jt)%name
+          tracers3D(jt)%name   = names3Dtracers(jt)
+          tracers3D(jt)%desc   = desc3Dtracers(jt)
+          tracers3D(jt)%source = src3Dtracers(jt) 
+          print*,' --------------------- ' 
+          print*,' 3D Tracer name : ',tracers3D(jt)%name          
+          print*,'    description : ',tracers3D(jt)%desc
+          print*,'         source : ',tracers3D(jt)%source
+          print*,' --------------------- '
       END DO            
       
       ! --- Allocate Lagrangian stream functions ---
