@@ -7,6 +7,7 @@ module mod_pos
   USE mod_time
   USE mod_streamfunctions
   USE mod_psi
+  use mod_psi_new
     
   IMPLICIT none
   

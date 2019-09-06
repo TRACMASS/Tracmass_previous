@@ -3,6 +3,7 @@ module mod_tracer_functions
    use mod_precdef
    use mod_log
 
+   use mod_param, only    : mr
    use mod_time
    use mod_grid, only     : imt, jmt, km, subGridJmin, nsp   
    use mod_tempsalt, only : tracers3D, tracers2D, n3Dtracers, n2Dtracers
@@ -12,6 +13,71 @@ module mod_tracer_functions
 
 contains
    
+   subroutine set_tracer_defaults
+      !
+      ! Purpose
+      ! -------
+      ! Set default values for tracers
+      ! 
+      ! Called from init_par
+      ! ---------
+      ! 
+      !
+      implicit none
+      
+      integer  :: jt  
+      
+      do jt = 1, n3Dtracers          
+         
+         if (tracers3D(jt)%desc == 'temperature' ) then         
+            tracers3D(jt)%minimum = -3.
+            tracers3D(jt)%maximum = 33.
+         
+         elseif (tracers3D(jt)%desc == 'pr_salinity' ) then
+            tracers3D(jt)%minimum = 33.
+            tracers3D(jt)%maximum = 38.
+         
+         elseif (tracers3D(jt)%desc == 'sigma' ) then
+            tracers3D(jt)%minimum = 19.
+            tracers3D(jt)%maximum = 28.5
+         
+         elseif (tracers3D(jt)%desc == 'po_temperature' ) then
+            tracers3D(jt)%minimum = 25.
+            tracers3D(jt)%maximum = 40.
+         
+         end if
+         !if (log_level >= 2) then 
+            print*,' default tracer name, min, max ',tracers3D(jt)%desc,tracers3D(jt)%minimum,tracers3D(jt)%maximum 
+         !end if
+      end do 
+      return 
+      
+   end subroutine set_tracer_defaults
+   
+   subroutine set_tracer_parameters
+      !
+      ! Purpose
+      ! -------
+      ! Set parameters for tracers
+      ! e.g. bin size in tracer coordinates 
+      ! 
+      !
+      implicit none
+      
+      integer :: jt
+                  
+      ! Calculate bin size in tracer coordinates
+      do jt = 1, n3Dtracers
+         
+         tracers3D(jt)%step = (tracers3D(jt)%maximum - tracers3D(jt)%minimum) / float(mr-1)
+         if (log_level >= 2) then
+            print*,' tracer name, step ',tracers3D(jt)%desc,tracers3D(jt)%step
+         end if
+      end do   
+      return
+      
+   end subroutine set_tracer_parameters
+         
    subroutine calculate_3Dtracer(itracer)
       
       implicit none

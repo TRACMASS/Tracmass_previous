@@ -124,6 +124,8 @@ MODULE mod_tempsalt
      CHARACTER(LEN=30)                         :: name
      CHARACTER(LEN=20)                         :: source
      CHARACTER(LEN=20)                         :: desc
+     REAL(PP)                                  :: minimum, maximum
+     REAL(PP)                                  :: step  
      REAL(PP)                                  :: missval
   END TYPE tracer3D
    
