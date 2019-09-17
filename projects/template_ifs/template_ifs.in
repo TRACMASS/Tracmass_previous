@@ -17,8 +17,9 @@
 	gridsource     = 'https://www.ecmwf.int/',			! website for grid
 	griddesc       = '',								! short description of grid
 	! Describe filenames
-	topoDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/topo/',  ! directory of grid data
+	topoDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',  ! directory of grid data
 	RunID       = 'era',								! name of GCM simulation
+!	physDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',   ! directory of physical data (u,v,T,S,MLD,etc)
 	physDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
 	fileSuffix  = '.nc',								! suffix of files, e.g. ".nc"
 	! Logicals to control what to read etc.
@@ -70,7 +71,7 @@
 														! 6 = years
      
 	iter           = 6,			     					! number of time steps between two GCM fields
-	intmax         = 1460,								! max iterations before trajectory is 
+	intmax         = 10460,								! max iterations before trajectory is 
 														! stopped with infiniteError
 	minveljd 		= -1,								!
 	maxveljd 		= -1,								!
@@ -78,10 +79,10 @@
 &INIT_START_DATE
 	startsec       = 0,									! start time
 	startmin       = 0,
-	starthour      = 0,
+	starthour      = 6,
 	startday       = 1,									! start date
 	startmon       = 1,
-	startyear      = 2018,
+	startyear      = 2017,
 	noleap         = .false.,							! dont use leap years? 
 	startjd        = -1,								! first julianday for trmClock
 	intmin         = 1,									!
@@ -90,11 +91,11 @@
      ! Loop run 
 	loopYears      = .true.,							! make a time loop to run 
 														! e.g. 1000 years using only 100 years of data
-	loopStartYear  = 2018,								! year to start loop from
+	loopStartYear  = 2017,								! year to start loop from
 	loopEndYear    = 2018,								! last year of loop
      
 	intspin        = 1,									! number of time steps for seeding
-	intrun         = 368,		    					! number of time steps for run (always=2)
+	intrun         = 99999,		    					! number of time steps for run (always=2)
 	log_level      = 2,									! level of verbosity 
 														! = 0 minimal output to stdout
 														! = 1 low verbosity
@@ -115,7 +116,7 @@
 														! 6 = write each spatial grid-crossing
 	outDataDir     = '/Users/doos/data/ifs/data_out/',	! directory for output
 !	outdatafile    = 'ifs_test_iter6000',		    	! fileprefix for output
-	outdatafile    = 'ifs_test_iter2',					! fileprefix for output
+	outdatafile    = 'ifs_walker_air_anal_west',					! fileprefix for output
 	outdircase     = .false. ,							! creates a new directory to store the data from the run      
 	intminInOutFile  =  0,								! 0 = ????
 														! 1 = ????
@@ -125,13 +126,13 @@
 	outdirdate     = .false. ,							! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
-	nff			   = -1,								! = 1 run forward trajectories
+	nff			   = 1,								! = 1 run forward trajectories
 														! = -1 run backwards
-	isec           = 3,									! = 1 start on zonal cell wall 
+	isec           = 1,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
 														! = 3 start on vertical wall
 														! = 4 start in center of cell
-	idir           = 1,									! = 1 start only when flux > 0 (eastward/northward) 
+	idir           = -1,									! = 1 start only when flux > 0 (eastward/northward) 
 														! = -1      only when flux < 0 (westward/southward)
 														! = 0 start at flux < 0 or > 0 (both directions) not working ???
 	nqua           = 1,									! number of trajectories can be set by     
@@ -150,11 +151,11 @@
 														! = 3 seed by using a 2-D mask file.
 							     
 	! Use the parameters below when seedtype = 1
-	ist1           = 1,				     			! seed in box in range i = [ist1,ist2]
-	ist2           = 220,				     			! 	       	      	   j = [jst1,jst2]
-	jst1           = 1,	    		     			! 			           k = [kst1,kst2]
-	jst2           = 135,			     
-	kst1           = 60,    
+	ist1           = 241,				     			! seed in box in range i = [ist1,ist2]
+	ist2           = 241,				     			! 	       	      	   j = [jst1,jst2]
+	jst1           = 81,	    		     			! 			           k = [kst1,kst2]
+	jst2           = 161,			     
+	kst1           =  1,    
 	kst2           = 60,    
 	tst1           = -1,								! seed only between tst1 and tst2
 	tst2           = -1,								! given as 19800105 for 1980-01-05
@@ -171,10 +172,10 @@
 /
 &INIT_KILLZONES
 	nend 		   = 2,									! number of ways to kill a trajectory (in this case time + one region)
-	ienw 		   = 0,									! west indices of killzones
-	iene           = 0, 								! east indices of killzones
-	jens           = 0, 								! south indices of killzones
-	jenn           = 0,  								! north indices of killzones
+	ienw 		   = 241,									! west indices of killzones
+	iene           = 241, 								! east indices of killzones
+	jens           =  0, 								! south indices of killzones
+	jenn           = 999,  								! north indices of killzones
 	timax          = 365.0, 							! time limit for traj [days]
 		
 !	nend           =  5,                                ! Exasmples with 4 spatial killing zones  + one time
@@ -186,18 +187,18 @@
 /
 &INIT_TEMP_SALT
      ! Start or end trajectories in tracer intervals; T stands for Dry static energy and S for Latent heat
-	tmin0 		   =  -50.0,							! start only if T >= tmin0
-	tmax0   	   =  400.0,							! ---- " ----   T <= tmax0   
-	smin0          = -500.0,							! ---- " ----   S >= smin0
-	smax0          =  400.0,							!               S <= smax0
-	rmin0          = -100.0,							! 		   rho >= rmin0
-	rmax0          = 1100.0,							!  	   rho <= rmax0
-	tmine          =  -50.0,							! kill traj  if T <  tmine
-	tmaxe          =  400.0,							! ---- " -----  T >  tmaxe
-	smine          = -150.0,							!               S <  smine
-	smaxe          =  500.0,
-	rmine          = -100.0,
-	rmaxe          = 1100.0,
+	tmin0 		   = -9999.0,							! start only if T >= tmin0
+	tmax0   	   =  9999.0,							! ---- " ----   T <= tmax0   
+	smin0          = -9999.0,							! ---- " ----   S >= smin0
+	smax0          =  9999.0,							!               S <= smax0
+	rmin0          = -9999.0,							! 		   rho >= rmin0
+	rmax0          =  9999.0,							!  	   rho <= rmax0
+	tmine          = -9999.0,							! kill traj  if T <  tmine
+	tmaxe          =  9999.0,							! ---- " -----  T >  tmaxe
+	smine          = -9999.0,							!               S <  smine
+	smaxe          =  9999.0,
+	rmine          = -9999.0,
+	rmaxe          =  9999.0,
 /
 &INIT_TRACERS
      n2Dtracers           = 0                           ! number of 2D tracers to read

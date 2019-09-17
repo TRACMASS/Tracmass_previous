@@ -37,7 +37,7 @@ SUBROUTINE setupgrid
   ! === Init local variables for the subroutine ===
   INTEGER                                     :: i ,j ,k, ip, jp, im, jm
   INTEGER                                     :: kk, ii
-  REAL(P4)                                    :: dlon, dlat
+  REAL(PP)                                    :: dlon, dlat
   CHARACTER (len=200)                         :: gridFile
   
   allocate ( kmu(imt,jmt), kmv(imt,jmt) )
@@ -59,5 +59,23 @@ SUBROUTINE setupgrid
   dz(:) = 1. !assume 10m thick layer
   
   kmt(:,:) = 1.
+  
+  ! comment this out first time you run it through the entire time series
+   open(unit=111,file='/Users/doos/data/aviso/topo/kmt.bin',form='unformatted')
+   read(111) kmt
+   close(111) 
+  
+   kmu=0 ; kmv=0
+   do j=1,jmt
+      jp=j+1
+      if(jp == jmt+1) jp=jmt
+      do i=1,imt
+         ip=i+1
+         if(ip == imt+1) ip=1
+         kmu(i,j)=min(kmt(i,j), kmt(ip,j),KM)
+         kmv(i,j)=min(kmt(i,j), kmt(i,jp),KM)
+      enddo
+   enddo
+
   
 end SUBROUTINE setupgrid
