@@ -58,12 +58,18 @@ SUBROUTINE setupgrid
 
   dz(:) = 1. !assume 10m thick layer
   
-  kmt(:,:) = 1.
+  kmt(:,:) = 0.
   
   ! comment this out first time you run it through the entire time series
    open(unit=111,file='/Users/doos/data/aviso/topo/kmt.bin',form='unformatted')
    read(111) kmt
    close(111) 
+   
+   do j=JMT,1,-1
+    write (*,"(999i1)") (kmt(i,j),i=1,200)
+   enddo
+   
+   stop 5967
   
    kmu=0 ; kmv=0
    do j=1,jmt

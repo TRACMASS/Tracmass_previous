@@ -82,6 +82,16 @@ SUBROUTINE readfields
    uvel(1:imt,1:jmt,1) = get2DfieldNC(trim(fieldFile), ueul_name)
    vvel(1:imt,1:jmt,1) = get2DfieldNC(trim(fieldFile), veul_name)
    
+! Comment this out next time
+!   do j = 1, jmt
+!    do i = 1, imt
+!     if(uvel(i,j,1)> -214748364) then 
+!      kmt(i,j)=1.
+!     end if
+!    end do
+!   end do
+
+   
    !! Land points are indicated by FillValue = -2147483647
    !! Find abnormal velocities and set them to zero to indicate land instead
    where (uvel(1:imt,1:jmt,1) <= -2147483647)

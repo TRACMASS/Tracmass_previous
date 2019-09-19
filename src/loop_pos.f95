@@ -289,9 +289,13 @@ contains
        call vertvel(ia, iam, ja, ka)
      
 #if defined explicit_w || full_wflux
-       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
+       uu=wflux(ia,ja,ka-1,nsm)*ff
+!       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
+       if(uu.lt.0.d0) kb=ka-1
 #else
-       if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
+       uu=(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm))*ff
+!        if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
+        if(uu.lt.0.d0) kb=ka-1
 #endif              
        z1=dble(ka-1)
 #if defined timeanalyt

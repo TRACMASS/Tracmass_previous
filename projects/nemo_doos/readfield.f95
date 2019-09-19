@@ -413,23 +413,6 @@ SUBROUTINE readfields
    uFile = trim(physDataDir)//trim(physPrefix(:ichar-1))//trim(uGridName)//trim(physPrefix(ichar+5:))//trim(fileSuffix)
    vFile = trim(physDataDir)//trim(physPrefix(:ichar-1))//trim(vGridName)//trim(physPrefix(ichar+5:))//trim(fileSuffix)
    
-#if orca12
-
-   physPrefix = physPrefixForm
-   print *,trim(physPrefixForm)
-   dataprefix=''
-   WRITE(dataprefix(1:8),'(i4,i2.2,i2.2)') CurrYear,currMon,currDay
-
-   tFile = trim(physDataDir)//trim(physPrefixForm)//trim(dataprefix)//'d05'//trim(tGridName)//trim(fileSuffix)
-   uFile = trim(physDataDir)//trim(physPrefixForm)//trim(dataprefix)//'d05'//trim(uGridName)//trim(fileSuffix)
-   vFile = trim(physDataDir)//trim(physPrefixForm)//trim(dataprefix)//'d05'//trim(vGridName)//trim(fileSuffix)
-   print *,'tFile ',trim(tFile)
-   print *,'uFile ',trim(uFile)
-   print *,'vFile ',trim(vFile)
-
-#endif
-
-   
    if (ints == intstart) then
       if (log_level > 0) then
          print*,' First T file:                 ',trim(tFile)
@@ -571,10 +554,6 @@ SUBROUTINE readfields
       do j = 1, jmt
       do i = 1, imt
          dzt(i,j,k,nsp) = dzt0(i,j,k) * zstot(i,j)
-         if(dzt(i,j,k,nsp)<0.) then
-         print *,i,j,k,dzt(i,j,k,nsp),dzt0(i,j,k),zstot(i,j),hs(i,j,nsp),abyst(i,j)
-         stop 4967
-         endif
       end do
       end do
       end do

@@ -61,8 +61,9 @@ subroutine vertvel(ia,iam,ja,ka)
 ! Make sure the vertical velocity is always zero at the ocean bottom and below as well as at the TOA
 #if defined atmospheric 
 wflux(0,:) = 0.d0
-#elif defined orca1 || orca12  
-do k=0,KM-kmt(ia,ja)  ! Shouldn't this be the case for all models???
+#else
+!#elif defined orca1 || orca12  
+do k=0,KM-kmt(ia,ja)  ! Shouldn't this be the case for all ocean models???
   wflux(k,:)=0.d0
 enddo
 #endif
