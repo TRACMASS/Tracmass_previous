@@ -24,10 +24,10 @@ contains
     INTEGER                                    :: mrb,mtb,msb
     integer                                    :: mtrb(n3Dtracers), mtra(n3Dtracers)
     REAL                                       :: uu
-    INTEGER                                    :: ia, iam, ja, ka,k
+    INTEGER                                    :: ia, iam, ja, ka
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens
-    REAL(DP)                                   :: dza,dzb, zz
+    REAL(DP)                                   :: dza,dzb
     REAL(DP), INTENT(IN)                       :: x0, y0, z0
     REAL(DP), INTENT(OUT)                      :: x1, y1, z1
       
@@ -76,22 +76,20 @@ contains
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
-       mta=(temp-tmin)/dtemp+1
+       mta=int( (temp-tmin)/dtemp+1 )
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
-       msa=(salt-smin)/dsalt+1
+       msa=int( (salt-smin)/dsalt+1 )
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-#endif        
+#endif     
        call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+       ! Dont call bin_tracers again, just let mtra = mtrb
+       ! Thermohaline code does not work anyway for now. 
        mtra = mtrb
-       !print*,mtb,msb,mrb,mtrb(1:3)
-       !call savepsi(ia,ja,ka,mtrb, mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))
-       print*,tmin,dtemp,tracers3D(1)%minimum,tracers3D(1)%step
-       print*,int((temp-tmin)/dtemp)+1,temp,tmin,dtemp
+       !call savepsi(ia,ja,ka,mtrb, mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))       
        call savepsi_new(ia,ja,ka,mtra,mtrb,1,1,real(subvol*ff))
-       print*,mtb,msb,mrb,mtrb(1:3)        
-       stop
+       !stop
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
@@ -143,7 +141,6 @@ contains
 #endif 
        !call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
        call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
-       print*,mtb,msb,mrb,mtrb(1:3)
        mtra = mtrb
        call savepsi_new(iam,ja,ka,mtra,mtrb,1,-1,real(subvol*ff))
 
@@ -196,7 +193,6 @@ contains
 #endif 
        !call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
        call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
-       print*,mtb,msb,mrb,mtrb(1:3)
        mtra = mtrb
        call savepsi_new(ia,ja,ka,mtra,mtrb,2,1,real(subvol*ff))
 
@@ -252,7 +248,6 @@ contains
 #endif 
        !call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
        call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
-       print*,mtb,msb,mrb,mtrb(1:3)
        mtra = mtrb
        call savepsi_new(ia,ja-1,ka,mtra,mtrb,2,-1,real(subvol*ff))
        
@@ -307,7 +302,6 @@ contains
 #endif 
        !call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,real(subvol*ff))
        call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
-       print*,mtb,msb,mrb,mtrb(1:3)
        mtra = mtrb
        call savepsi_new(ia,ja,ka,mtra,mtrb,3,1,real(subvol*ff))
 
@@ -371,7 +365,6 @@ contains
 #endif 
        !call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
        call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
-       print*,mtb,msb,mrb,mtrb(1:3)
        mtra = mtrb
        call savepsi_new(ia,ja,ka-1,mtra,mtrb,3,-1,real(subvol*ff))
 
@@ -434,15 +427,38 @@ contains
      real(DP),                           intent(in)   ::  x1,y1,z1
      integer(PP)                                      ::  jt 
      real(PP)                                         ::  trc3D(n3Dtracers) 
+     real(PP)                                         ::  temp, salt, dens
+     integer(PP)                                      ::  mtb, msb, mrb
+          
+     ! Old method
+     call interp2(ib,jb,kb,temp,salt,dens)
+     mtb=int((temp-tmin)/dtemp)+1
+     if(mtb.lt.1 ) mtb=1
+     if(mtb.gt.MR) mtb=MR
+     msb=int((salt-smin)/dsalt)+1
+     if(msb.lt.1 ) msb=1
+     if(msb.gt.MR) msb=MR     
+     mrb=int((dens-rmin)/dr)+1
+     if(mrb.lt.1 ) mrb=1
+     if(mrb.gt.MR) mrb=MR
+     !print*,' Old: ',mtb,msb,mrb
      
-     call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='linear')
+     call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')
      
      do jt = 1, n3Dtracers 
-        print*,trc3D(jt),tracers3D(jt)%minimum, tracers3D(jt)%step 
         mtrb(jt) = int( (trc3D(jt)-tracers3D(jt)%minimum)/tracers3D(jt)%step ) + 1                
         mtrb(jt) = min(mtrb(jt),MR)
-        mtrb(jt) = max(mtrb(jt), 1)
+        mtrb(jt) = max(mtrb(jt), 1)                   
      end do
+     !print*,'New: ',mtrb(:)     
+     
+     ! Check that we get same results with new scheme as old
+     if (mtrb(1) /= mtb .or. mtrb(2) /= msb .or. mtrb(3) /= mrb) then 
+        print*,' New scheme does not match the old '
+        print*,' Old: ',mtb,msb,mrb 
+        print*,'New: ',mtrb(:) 
+        stop        
+     end if
      
      return
   
