@@ -1,5 +1,19 @@
 module mod_interp
-
+! 
+! mod_interp:
+! -----------
+!
+! Contains routines for interpolating 2D and 3D fields
+! The routines combine all previous interpolation methods
+! with the same function call. 
+! The old routines where
+!
+! * interp                 - now called by setting method=linear
+! * interp2                - now called by setting method=nearest
+! * K_interp               - removed (was identical to interp)
+! * cross_gridwall_interp  - now called by setting method=cross_gridwall
+! * sara_interp            - now called by setting method=cross_gridwall2
+!
 contains
 
 subroutine interp_gen2D(ib,jb,x1,y1,ns,trc2D,method)
@@ -26,14 +40,14 @@ IMPLICIT none
 REAL(DP), INTENT(IN)  :: x1,y1
 CHARACTER(LEN=15) :: method_name
 CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: method
-REAL*8  :: ax,ay
+REAL(DP)  :: ax,ay
 
 REAL(PP) :: tpp,tpm,tmp,tmm
 
 REAL(PP), DIMENSION(n2Dtracers),INTENT(OUT) :: trc2D
 
 INTEGER, INTENT(IN) :: ib,jb,ns
-INTEGER :: ip,im,jp,jm,id2D
+INTEGER :: ip,im,jp,jm,id2D, jt
 
 ! 
 ! Default is nearest (interp2) interpolation
@@ -122,6 +136,45 @@ else if (method_name == 'nearest') then
          trc2D(id2D) = intrpbg * tracers2D(id2D)%data(ib,jb,nsp) + intrpb * tracers2D(id2D)%data(ib,jb,nsm)
       END DO
 
+else if (method_name == 'cross_gridwall') then 
+      
+      ! Taken from old cross_gridwall_interp routine
+      
+      do jt = 1, n2Dtracers
+   
+         IF(x1 == int(x1)) THEN
+         
+            IF (x1 == ib) THEN ! Crossing the left grid wall
+               trc2D(jt) = 0.5 * (tracers2D(jt)%data(ib,jb,ns) + tracers2D(jt)%data(ib+1,jb,ns))
+            
+            ELSEIF (x1 < ib) THEN ! Crossing the right grid wall
+               trc2D(jt) = 0.5*(tracers2D(jt)%data(ib-1,jb,ns) + tracers2D(jt)%data(ib,jb,ns))
+            
+            ELSE
+               PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+               ! Should we stop here? 
+            ENDIF
+
+         ELSEIF (y1 == INT(y1)) THEN
+            
+            IF (y1 == jb) THEN ! Crossing the left grid wall
+               trc2D(jt) = 0.5 * (tracers2D(jt)%data(ib,jb,ns) + tracers2D(jt)%data(ib,jb+1,ns))
+            ELSEIF (y1 < jb) THEN ! Crossing the right grid wall
+               trc2D(jt) = 0.5 * (tracers2D(jt)%data(ib,jb-1,ns) + tracers2D(jt)%data(ib,jb,ns))
+            ELSE
+               PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+            ENDIF
+      
+         ELSE
+         
+            ! Do someting if we are not on a wall?
+            print*,' Warning: Using cross_gridwall interp method when not on a wall '
+         
+         ENDIF
+   
+   end do
+
+
 else
       
       print*,' Interpolation method '//trim(method)//' is not implemented in TRACMASS '
@@ -166,10 +219,12 @@ REAL    :: sppp,sppm,spmp,spmm,smpp,smpm,smmp,smmm
 REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
 REAL    :: temp,salt,dens
 
+REAL(PP) :: tb, tm
 REAL(PP), DIMENSION(n3Dtracers),INTENT(OUT) :: trc3D
 
+
 INTEGER, INTENT(IN) :: ib,jb,kb,ns
-INTEGER :: ip,im,jp,jm,kp,kn,id3D
+INTEGER :: ip,im,jp,jm,kp,kn,id3D,jt
 
 ! 
 ! Default is nearest (interp2) interpolation
@@ -347,6 +402,313 @@ else if (method_name == 'nearest') then
          trc3D(id3D) = intrpbg * tracers3D(id3D)%data(ib,jb,kb,nsp) + intrpb * tracers3D(id3D)%data(ib,jb,kb,nsm)
       END DO
 
+else if (method_name == 'cross_gridwall') then 
+      
+      ! Taken from old cross_gridwall_interp routine
+      
+      DO jt=1,n3Dtracers
+         
+         IF(x1 == int(x1)) THEN
+            
+            IF (x1 == ib) THEN ! Crossing the left grid wall
+               trc3D(jt) = 0.5 * (tracers3D(jt)%data(ib,jb,kb,ns) + tracers3D(jt)%data(ib+1,jb,kb,ns))
+            ELSEIF (x1 < ib) THEN ! Crossing the right grid wall
+               trc3D(jt) = 0.5*(tracers3D(jt)%data(ib-1,jb,kb,ns) + tracers3D(jt)%data(ib,jb,kb,ns))
+            ELSE
+               PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+               ! Should we stop here? 
+            ENDIF
+         
+         ELSEIF (y1 == INT(y1)) THEN
+            
+            IF (y1 == jb) THEN ! Crossing the left grid wall
+               trc3D(jt) = 0.5 * (tracers3D(jt)%data(ib,jb,kb,ns) + tracers3D(jt)%data(ib,jb+1,kb,ns))
+            ELSEIF (y1 < jb) THEN ! Crossing the right grid wall
+               trc3D(jt) = 0.5 * (tracers3D(jt)%data(ib,jb-1,kb,ns) + tracers3D(jt)%data(ib,jb,kb,ns))
+            ELSE
+               PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+            ENDIF
+      
+         ELSEIF (z1 == INT(z1)) THEN
+         
+            IF (z1 == kb) THEN ! Crossing the left grid wall
+               trc3D(jt) = 0.5 * (tracers3D(jt)%data(ib,jb,kb,ns) + tracers3D(jt)%data(ib,jb,kb+1,ns))
+            ELSEIF (z1 < kb) THEN ! Crossing the right grid wall
+               trc3D(jt) = 0.5 * (tracers3D(jt)%data(ib,jb,kb-1,ns) + tracers3D(jt)%data(ib,jb,kb,ns))
+            ELSE
+               PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+            ENDIF
+         
+         ELSE
+        
+            ! Do someting if we are not on a wall?
+            print*,' Warning: Using cross_gridwall interp method when not on a wall '
+      
+         ENDIF
+      
+      END DO
+
+
+else if (method == 'cross_gridwall2') then 
+      
+      DO jt = 1, n3Dtracers
+         
+         ! ----- CROSSING X -----
+         IF(x1 == INT(x1)) THEN
+            
+            IF (x1 == ib) THEN ! Crossing the right grid wall
+               ! The box the trajectory crosses. ib,jb,kb -> ib+1,jb,kb. 
+               ! None of these can be land, since the trajectory can cross.
+               tb = 0.5 * ( tracers3D(jt)%data(ib,jb,kb,ns) + tracers3D(jt)%data(ib+1,jb,kb,ns) )
+               
+               ! Determine position in z. 
+               IF ( z1 < (kb - 0.5) ) THEN ! closer to kb-1 than kb+1
+                  
+                  ! Check for land by checking first tracer with its missing_value
+                  ! Maybe not the best solution...
+                  IF ( tracers3D(jt)%data(ib,jb,kb-1,ns) == tracers3D(jt)%missval ) THEN ! Land in gridbox ib,jb,kb-1
+                     tm = tracers3D(jt)%data(ib+1,jb,kb-1,ns)
+                  ELSEIF ( tracers3D(jt)%data(ib+1,jb,kb-1,ns) == tracers3D(jt)%missval ) THEN ! Land in gridbox ib+1,jb,kb-1
+                     tm = tracers3D(jt)%data(ib,jb,kb-1,ns)
+                  ELSE ! No land or land in both boxes.
+                     tm = 0.5 * ( tracers3D(jt)%data(ib,jb,kb-1,ns) + tracers3D(jt)%data(ib+1,jb,kb-1,ns) )
+                  ENDIF
+                  
+                  ! --- Computes the total temperature of the trajektory ---
+                  ! ---    by giving weigt to tb,sb,rb and tm,sm,rm      ---
+                  
+                  IF (tm == tracers3D(jt)%missval) THEN ! If both gridboxes are land.s
+                     trc3D(jt) = tb
+                  ELSE ! No land
+                     az = kb - z1 - 0.5 ! Distance to trajectory from kb.(?)
+                     trc3D(jt) = (1. - az) * tb + az * tm
+                  ENDIF
+               
+               ELSE ! If the trajectory is closer to kb + 1
+                  
+                  IF (tracers3D(jt)%data(ib,jb,kb+1,ns) == tracers3D(jt)%missval) THEN ! Land in gridbox ib,jb,kb+1
+                     tm = tracers3D(jt)%data(ib+1,jb,kb+1,ns)
+                  ELSEIF (tracers3D(jt)%data(ib+1,jb,kb+1,ns) == tracers3D(jt)%missval) THEN ! Land in gridbox ib+1,jb,kb+1
+                     tm = tracers3D(jt)%data(ib,jb,kb+1,ns)
+                  ELSE ! No land or land in both boxes.
+                     tm = 0.5 * ( tracers3D(jt)%data(ib,jb,kb+1,ns) + tracers3D(jt)%data(ib+1,jb,kb+1,ns) )
+                  ENDIF
+                  
+                  ! --- Computes the total temperature of the trajectory ---
+                  ! ---    by giving weigt to tb,sb,rb and tm,sm,rm      ---
+	      
+                  IF (tm == tracers3D(jt)%missval) THEN ! Land in both gridboxes. 
+                     trc3D(jt) = tb
+                  ELSE ! No land or land in only one box.
+                     az = z1 - kb + 0.5
+                     trc3D(jt) = (1. - az) * tb + az * tm
+                  ENDIF
+               
+               ENDIF
+         
+            ! Crossing the left grid wall
+            ELSEIF (x1 < ib) THEN 
+               
+               ! The box the trajectory crosses, same for both z-cases
+               tb = 0.5 * ( tracers3D(jt)%data(ib,jb,kb,ns)   + tracers3D(jt)%data(ib-1,jb,kb,ns)   )
+                
+               IF ( z1 < kb - 0.5 ) THEN ! Determening position of trajectory in z.
+                  
+                  IF (tracers3D(jt)%data(ib,jb,kb-1,ns) == tracers3D(jt)%missval) THEN ! Land
+                     tm = tracers3D(jt)%data(ib-1,jb,kb-1,ns)
+                  ELSEIF (tracers3D(jt)%data(ib-1,jb,kb-1,ns) == tracers3D(jt)%missval) THEN ! Land
+                     tm = tracers3D(jt)%data(ib,jb,kb-1,ns)
+                  ELSE ! No land or both land. 
+                     tm = 0.5 * ( tracers3D(jt)%data(ib,jb,kb-1,ns) + tracers3D(jt)%data(ib-1,jb,kb-1,ns) )
+                  ENDIF
+                  
+                  IF (tm == tracers3D(jt)%missval) THEN ! if both land
+                     trc3D(jt) = tb
+                  ELSE ! If no land
+                     az = z1 - kb + 0.5
+                     trc3D(jt) = (1. - az) * tb + az * tm
+                  ENDIF
+            
+               ELSE
+                  
+                  IF (tracers3D(jt)%data(ib,jb,kb+1,ns) == tracers3D(jt)%missval) THEN ! Land
+                     tm = tracers3D(jt)%data(ib-1,jb,kb+1,ns)
+                  ELSEIF (tracers3D(jt)%data(ib-1,jb,kb+1,ns) == tracers3D(jt)%missval) THEN ! Land
+                     tm = tracers3D(jt)%data(ib,jb,kb+1,ns)
+                  ELSE ! No land or both land. 
+                     tm = 0.5 * ( tracers3D(jt)%data(ib,jb,kb+1,ns) + tracers3D(jt)%data(ib-1,jb,kb+1,ns) )
+                  ENDIF
+                  
+                  IF (tm == tracers3D(jt)%missval) THEN ! if both land
+                     trc3D(jt) = tb
+                  ELSE ! If no land
+                     az = z1 - kb + 0.5
+                     trc3D(jt) = (1. - az) * tb + az * tm
+                  ENDIF
+               
+               ENDIF
+               
+            ELSE
+            
+               PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+            
+            ENDIF
+      
+      ! ############# CROSSING Y #############
+      ELSEIF (y1 == INT(y1)) THEN
+         
+         IF (y1 == jb) THEN ! Crossing the right grid wall
+            ! The box the trajectory crosses, will be the same for both z-cases
+            !tb = 0.5 * ( tem(ib,jb,kb,ns)   + tem(ib,jb+1,kb,ns)   )
+            !sb = 0.5 * ( sal(ib,jb,kb,ns)   + sal(ib,jb+1,kb,ns)   )
+            !rb = 0.5 * ( rho(ib,jb,kb,ns)   + rho(ib,jb+1,kb,ns)   )
+            
+            ! Determine position in z. 
+            IF ( z1 < (kb - 0.5) ) THEN ! closer to kb-1 than kb+1
+               !IF (sal(ib,jb,kb-1,ns) == 0 .AND. tem(ib,jb,kb-1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb+1,kb-1,ns)
+               !   sm = sal(ib,jb+1,kb-1,ns)
+               !   rm = rho(ib,jb+1,kb-1,ns)
+               !ELSEIF (sal(ib,jb+1,kb-1,ns) == 0 .AND. tem(ib,jb+1,kb-1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb,kb-1,ns)
+               !   sm = sal(ib,jb,kb-1,ns)
+               !   rm = rho(ib,jb,kb-1,ns)
+               !ELSE ! No land or both land. 
+               !   tm = 0.5 * ( tem(ib,jb,kb-1,ns) + tem(ib,jb+1,kb-1,ns) )
+               !   sm = 0.5 * ( sal(ib,jb,kb-1,ns) + sal(ib,jb+1,kb-1,ns) )
+               !   rm = 0.5 * ( rho(ib,jb,kb-1,ns) + rho(ib,jb+1,kb-1,ns) )
+               !ENDIF
+               !
+               !IF (sm == 0 .AND. tm == 0) THEN ! If both are land.
+               !   temp = tb
+               !   salt = sb
+               !   dens = rb
+               !ELSE ! No land
+               !   az = kb - z1 - 0.5 ! Distance to trajectory.
+               !   temp = (1. - az) * tb + az * tm
+               !   salt = (1. - az) * sb + az * sm
+               !   dens = (1. - az) * rb + az * rm
+               !ENDIF
+            
+            ELSE ! If the trajectory is closer to kb + 1
+               !IF (sal(ib,jb,kb+1,ns) == 0 .AND. tem(ib,jb,kb+1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb+1,kb+1,ns)
+               !   sm = sal(ib,jb+1,kb+1,ns)
+               !   rm = rho(ib,jb+1,kb+1,ns)
+               !ELSEIF (sal(ib,jb+1,kb+1,ns) == 0 .AND. tem(ib,jb+1,kb+1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb,kb+1,ns)
+               !   sm = sal(ib,jb,kb+1,ns)
+               !   rm = rho(ib,jb,kb+1,ns)
+               !ELSE
+               !   tm = 0.5 * ( tem(ib,jb,kb+1,ns) + tem(ib,jb+1,kb+1,ns) )
+               !   sm = 0.5 * ( sal(ib,jb,kb+1,ns) + sal(ib,jb+1,kb+1,ns) )
+               !   rm = 0.5 * ( rho(ib,jb,kb+1,ns) + rho(ib,jb+1,kb+1,ns) ) 
+               !ENDIF
+               !
+               !IF (sm == 0 .AND. tm == 0) THEN
+               !   temp = tb
+               !   salt = sb
+               !   dens = rb
+               !ELSE
+               !   az = z1 - kb + 0.5
+               !   temp = (1. - az) * tb + az * tm
+               !   salt = (1. - az) * sb + az * sm
+               !   dens = (1. - az) * rb + az * rm
+               !ENDIF
+            ENDIF
+            
+         ! ----- CROSSING THE LEFT GRID WALL -----
+         ELSEIF (y1 < jb) THEN 
+         
+            ! The box the trajectory crosses, same for both z-cases
+            !tb = 0.5 * ( tem(ib,jb,kb,ns)   + tem(ib,jb-1,kb,ns)   )
+            !sb = 0.5 * ( sal(ib,jb,kb,ns)   + sal(ib,jb-1,kb,ns)   )
+            !rb = 0.5 * ( rho(ib,jb,kb,ns)   + rho(ib,jb-1,kb,ns)   )
+            
+            IF ( z1 < kb - 0.5 ) THEN
+               !IF (sal(ib,jb,kb-1,ns) == 0 .AND. tem(ib,jb,kb-1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb-1,kb-1,ns)
+               !   sm = sal(ib,jb-1,kb-1,ns)
+               !   rm = rho(ib,jb-1,kb-1,ns)
+               !ELSEIF (sal(ib,jb-1,kb-1,ns) == 0 .AND. tem(ib,jb-1,kb-1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb,kb-1,ns)
+               !   sm = sal(ib,jb,kb-1,ns)
+               !   rm = rho(ib,jb,kb-1,ns)
+               !ELSE ! No land or both land. 
+               !   tm = 0.5 * ( tem(ib,jb,kb-1,ns) + tem(ib,jb-1,kb-1,ns) )
+               !   sm = 0.5 * ( sal(ib,jb,kb-1,ns) + sal(ib,jb-1,kb-1,ns) )
+               !   rm = 0.5 * ( rho(ib,jb,kb-1,ns) + rho(ib,jb-1,kb-1,ns) )
+               !ENDIF
+            
+               !IF (sm == 0 .AND. tm == 0) THEN ! if both land
+               !   temp = tb
+               !   salt = sb
+               !   dens = rb
+               !ELSE ! If no land
+               !   az = z1 - kb + 0.5
+               !   temp = (1. - az) * tb + az * tm
+               !   salt = (1. - az) * sb + az * sm
+               !   dens = (1. - az) * rb + az * rm
+               !ENDIF
+            
+            ELSE
+               
+               !IF (sal(ib,jb,kb+1,ns) == 0 .AND. tem(ib,jb,kb+1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb-1,kb+1,ns)
+               !   sm = sal(ib,jb-1,kb+1,ns)
+               !   rm = rho(ib,jb-1,kb+1,ns)
+               !ELSEIF (sal(ib,jb-1,kb+1,ns) == 0 .AND. tem(ib,jb-1,kb+1,ns) == 0) THEN ! Land
+               !   tm = tem(ib,jb,kb+1,ns)
+               !   sm = sal(ib,jb,kb+1,ns)
+               !   rm = rho(ib,jb,kb+1,ns)
+               !ELSE ! No land or both land. 
+               !   tm = 0.5 * ( tem(ib,jb,kb+1,ns) + tem(ib,jb-1,kb+1,ns) )
+               !   sm = 0.5 * ( sal(ib,jb,kb+1,ns) + sal(ib,jb-1,kb+1,ns) )
+               !   rm = 0.5 * ( rho(ib,jb,kb+1,ns) + rho(ib,jb-1,kb+1,ns) )
+               !ENDIF
+
+               !IF (sm == 0 .AND. tm == 0) THEN ! if both land
+               !   temp = tb
+               !   salt = sb
+               !   dens = rb
+               !ELSE ! If no land
+               !   az = z1 - kb + 0.5
+               !   temp = (1. - az) * tb + az * tm
+               !   salt = (1. - az) * sb + az * sm
+               !   dens = (1. - az) * rb + az * rm
+               !ENDIF
+            
+            ENDIF
+         
+         ELSE
+            
+            PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+         
+         ENDIF
+         
+      ! ---- CROSSING Z -----
+      ELSEIF (z1 == INT(z1)) THEN
+         
+         IF (z1 == kb) THEN ! Crossing the left upper grid wall
+            
+            !temp = 0.5*(tem(ib,jb,kb,ns)+tem(ib,jb,kb+1,ns))
+            !salt = 0.5*(sal(ib,jb,kb,ns)+sal(ib,jb,kb+1,ns))
+            !dens = 0.5*(rho(ib,jb,kb,ns)+rho(ib,jb,kb+1,ns))
+         
+         ELSEIF (z1 < kb) THEN ! Crossing the lower grid wall
+            
+            !temp = 0.5*(tem(ib,jb,kb-1,ns)+tem(ib,jb,kb,ns))
+            !salt = 0.5*(sal(ib,jb,kb-1,ns)+sal(ib,jb,kb,ns))
+            !dens = 0.5*(rho(ib,jb,kb-1,ns)+rho(ib,jb,kb,ns))
+         
+         ELSE
+            PRINT *, 'Error: The trajectory is not in the expected gridbox!'
+         ENDIF
+      
+      ENDIF
+      
+      end do
+      
 else
       
       print*,' Interpolation method '//trim(method)//' is not implemented in TRACMASS '

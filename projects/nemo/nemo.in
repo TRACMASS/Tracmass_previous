@@ -147,7 +147,7 @@
   							     ! 5 = write at chosen intervals
   							     ! 6 = write each spatial grid-crossing
      outdatadir     = '/Users/joakim/Downloads/tracmass_out/',        ! directory for output
-     outdatafile    = 'orca1_test_newtracers2',		     ! fileprefix for output
+     outdatafile    = 'orca1_test_newtracers4',		     ! fileprefix for output
      outdircase     = .false. ,				     ! creates a new directory to store the data from the run      
      intmininoutfile= 0,				     !
      intpsi         = 10, 				     ! frequency of writing the stream functions
