@@ -7,9 +7,8 @@ module mod_write
   USE mod_time 
   USE mod_active_particles, only: upr !!Joakim edit
   USE mod_tempsalt, only: n2Dtracers, n3Dtracers, tracers2D, tracers3D
-#ifdef newinterp
   USE mod_interp, only: interp_gen2D,interp_gen3D
-#endif
+  
   ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
@@ -237,16 +236,13 @@ CONTAINS
     !         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
 
-#ifdef newinterp
    ! From now on we will use one format for writing
    ! (unless we have a very good reason to do otherwise)
    ! Here we write the format to a string, fmt566
    ! which allows us to use the variables n2Dtracers and n3Dtracers in the format    
    !write (fmt565, '( "(a8,1x,a7,1x,3a9,1x,2a14,1x,a15,1x," i4 "(a10),1x," i4 "(a10) )" )' )  n2Dtracers,n3Dtracers
    write (fmt566, '( "(i8,1x, i7,1x, 3f9.3,1x, 2f14.2,1x, f15.0,1x, ", i4, "(f10.2),1x," i4 "(f10.2))" )' ) n2Dtracers,n3Dtracers
-#else
-   write (fmt566, '( "(i8, i7, 3f9.3, 2f14.2, f15.0, ", i4, "(f8.2))" )' )  3
-#endif
+   !write (fmt566, '( "(i8, i7, 3f9.3, 2f14.2, f15.0, ", i4, "(f8.2))" )' )  3
     
     xf   = floor(x1)
     yf   = floor(y1)
@@ -259,25 +255,21 @@ CONTAINS
     !end if
     
 #if defined tempsalt
-#ifdef newinterp
     call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='nearest')
     call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')
     temp = trc3D(1)
     salt = trc3D(2)
     dens = trc3D(3)
-#else
-    call interp2(ib,jb,kb,temp,salt,dens)
-#endif
+
+    !call interp2(ib,jb,kb,temp,salt,dens)
 #endif
 
 #if defined textwrite 
     select case (sel)
     case (10)
-#ifdef newinterp
        write(58,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-       write(58,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-#endif
+       !write(58,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+
     case (11)
        !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
        !     (kriva == 2 .AND. scrivi                    ) .or. &
@@ -302,11 +294,8 @@ CONTAINS
 #else
 
 #if defined tempsalt
-#ifdef newinterp
           write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-          write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-#endif
+          !write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 #else
           write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
 #endif        
@@ -315,49 +304,36 @@ CONTAINS
        endif
     case (13)
        ! === write sed pos ===
-#ifdef newinterp
        write(57,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-       write(57,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens 
-#endif
+       !write(57,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens 
+       
     case (14)
        ! write run file
-#ifdef newinterp
        write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-       write(56,fmt566) ntrac,ints,x1,y1,z1,tt/60.,t0/3600.,subvol,temp,salt,dens
-#endif
+       !write(56,fmt566) ntrac,ints,x1,y1,z1,tt/60.,t0/3600.,subvol,temp,salt,dens
+
     case (15)
-#ifdef newinterp
       write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-      write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-#endif
+      !write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+      
     case (16)
        if(kriva.ne.0 ) then
 #ifdef tempsalt
-#ifdef newinterp
            call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='nearest')
            call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')
            temp = trc3D(1)
            salt = trc3D(2)
            dens = trc3D(3)
-#else
-           call interp2(ib,jb,kb,temp,salt,dens)
+           !call interp2(ib,jb,kb,temp,salt,dens)
 #endif
-#endif
-#ifdef newinterp           
            write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-           write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-#endif
+           !write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+
        end if
     case (17)
-#ifdef newinterp
        write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-       write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol, temp,salt,dens  
-#endif
+       !write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol, temp,salt,dens  
+       
     case (19)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
@@ -371,12 +347,10 @@ CONTAINS
        enddo
        close(34)
     case (40)
-#ifdef newinterp
        write(59,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
-#else
-       write(59,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
+       !write(59,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
        !write(59,fmt566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
-#endif
+       
     case (99) !switch
        
     end select
@@ -402,15 +376,12 @@ CONTAINS
     upr4   = real(upr(1,1),kind=4)!Joakim edit
     vpr4   = real(upr(3,1),kind=4)!Joakim edit
     
-#ifdef newinterp
     !
     ! Experimental new tracer interpolation scheme
     !
     call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='nearest')
     call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')     
-#else
-    trc3D4(:) = 0.
-#endif
+    !trc3D4(:) = 0.
     
     if (twritetype==1) then
        twrite = tt
@@ -443,17 +414,14 @@ CONTAINS
             (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva == 6 .and. .not.scrivi                  ) ) then
 #if defined tempsalt
-#ifdef newinterp 
           call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='linear')
           call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='linear')
           temp = trc3D(1)
           salt = trc3D(2)
           dens = trc3D(3)
-#else
-          call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
+          !call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
  !         call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
-#endif
 #endif 
 
           recPosRun = recPosRun+1

@@ -28,7 +28,6 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   IMPLICIT none
 
   real(DP)                                   :: r0, r1, ds, uu, um, vv, vm, en
-  real(DP)                                   :: frac1,frac2
   integer                                    :: ijk, ia, ja, ka, ii, im
   
   
@@ -45,28 +44,17 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      if(im.eq.0) im=IMT
      uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
      um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
-     !frac1 = min( abs(upr(1,1)), abs(0.99*uu/upr(1,1)) )
-     !frac2 = min( abs(upr(2,1)), abs(0.99*um/upr(2,1)) )
 #ifdef turb    
-     !print*,'zonal, fracs',(upr(1,1)+uu)/uu,(um+upr(2,1))/um
      if(r0.ne.dble(ii)) then
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           uu=uu+upr(1,2)!*frac1
-        !end if
-     else
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           uu=uu+upr(1,1)!*frac1
-        !end if
+        uu=uu+upr(1,2)
+     else        
+        uu=uu+upr(1,1)
         ! add u' from previous iterative time step if on box wall
      endif
-     if(r0.ne.dble(im)) then
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           um=um+upr(2,2)!*frac2
-        !end if
+     if(r0.ne.dble(im)) then        
+        um=um+upr(2,2)        
      else
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           um=um+upr(2,1)!*frac2
-        !end if
+        um=um+upr(2,1)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
@@ -75,28 +63,17 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      ii=ja
      uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
      um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
-     !frac1 = min( abs(upr(3,1)), abs(0.99*uu/upr(3,1)) )
-     !frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )
 #ifdef turb    
-     !print*,'merid fracs',(uu+upr(3,1))/uu,(um+upr(4,1))/um
      if(r0.ne.dble(ja  )) then
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           uu=uu+upr(3,2)!*frac1 
-        !end if
+        uu=uu+upr(3,2)   
      else
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           uu=uu+upr(3,1)!*frac1
-        !end if
+        uu=uu+upr(3,1)
         ! add u' from previous iterative time step if on box wall
      endif
      if(r0.ne.dble(ja-1)) then
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           um=um+upr(4,2)!*frac2
-        !end if
+        um=um+upr(4,2)        
      else
-        !if (uu /= 0.d0 .and. um /= 0.d0) then
-           um=um+upr(4,1)!*frac2
-        !end if
+        um=um+upr(4,1)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
