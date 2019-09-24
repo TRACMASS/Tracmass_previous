@@ -154,6 +154,8 @@ SUBROUTINE loop
   ff=dble(nff)
   ints = intstart
   
+  print*,'initialise'
+  
   if (useTrmClock) then
      call updateclock  
   end if

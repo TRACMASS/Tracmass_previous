@@ -1,6 +1,5 @@
 
-
-MODULE mod_precdef		! Precision definitions
+MODULE mod_precdef  ! Precision definitions
    integer, parameter                       :: PP = selected_real_kind(6 ,  37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
@@ -99,26 +98,34 @@ MODULE mod_tempsalt
   REAL(DP)                                  :: rmin, tmin, smin
   REAL(DP)                                  :: rmax, tmax, smax
   REAL(DP)                                  :: dr ,dtemp ,dsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: tem,sal,rho
-  REAL*4                                  :: tmin0 ,tmax0
-  REAL*4                                  :: smin0 ,smax0
-  REAL*4                                  :: rmin0 ,rmax0
-  REAL*4                                  :: tmine ,tmaxe
-  REAL*4                                  :: smine ,smaxe
-  REAL*4                                  :: rmine ,rmaxe
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:,:) :: tem,sal,rho
+  REAL(PP)                                  :: tmin0 ,tmax0
+  REAL(PP)                                  :: smin0 ,smax0
+  REAL(PP)                                  :: rmin0 ,rmax0
+  REAL(PP)                                  :: tmine ,tmaxe
+  REAL(PP)                                  :: smine ,smaxe
+  REAL(PP)                                  :: rmine ,rmaxe
   
   INTEGER                                 :: n2Dtracers, n3Dtracers
-  CHARACTER(LEN=30), DIMENSION(100)       :: names2Dtracers, names3Dtracers
+  CHARACTER(LEN=30), DIMENSION(100)       :: names2Dtracers, names3Dtracers, &
+                                           & src2Dtracers, src3Dtracers, & 
+                                           & desc2Dtracers, desc3Dtracers 
   
   TYPE tracer2D
      REAL(PP), ALLOCATABLE, DIMENSION(:,:,:) :: data
      CHARACTER(LEN=30)                       :: name
+     CHARACTER(LEN=20)                       :: source 
+     CHARACTER(LEN=20)                       :: desc
      REAL(PP)                                :: missval
   END TYPE tracer2D
   
   TYPE tracer3D
      REAL(PP), ALLOCATABLE, DIMENSION(:,:,:,:) :: data
      CHARACTER(LEN=30)                         :: name
+     CHARACTER(LEN=20)                         :: source
+     CHARACTER(LEN=20)                         :: desc
+     REAL(PP)                                  :: minimum, maximum
+     REAL(PP)                                  :: step  
      REAL(PP)                                  :: missval
   END TYPE tracer3D
    
@@ -146,9 +153,9 @@ MODULE mod_grid
   INTEGER                                   :: nperio=1
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang, depth
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:)     :: hs
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang, depth
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: dz
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: dxdy
   REAL(DP)                                  :: dxyz
@@ -294,7 +301,7 @@ MODULE mod_time
   INTEGER                                   :: iyear ,imon ,iday ,ihour
   INTEGER                                   :: yearmin ,yearmax
 
-  INTEGER*8                                 :: ntime
+  INTEGER(DP)                                 :: ntime
   ! Used to figure out when to change file.
   INTEGER                                   :: fieldsPerFile
   ! === Time-interpolation variables in loop ===
@@ -480,7 +487,7 @@ ENDMODULE mod_buoyancy
 MODULE mod_domain
   USE mod_precdef
   INTEGER, DIMENSION(10)                :: ienw ,iene, jens ,jenn
-  REAL*4                                :: timax
+  REAL(PP)                                :: timax
 ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -496,7 +503,7 @@ ENDMODULE mod_dens
 MODULE mod_vel
   USE mod_grid, only: nsm, nsp, dzt
   USE mod_precdef
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
 #if defined explicit_w || full_wflux
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
@@ -510,12 +517,15 @@ MODULE mod_vel
 CONTAINS
  
   subroutine datasetswap
-
+    
+    USE  mod_log, only       : log_level
     USE  mod_grid, only      : nsm,nsp,hs
-    USE  mod_tempsalt, only  : tem,sal,rho
-
+    USE  mod_tempsalt, only  : tem,sal,rho,n2Dtracers,n3Dtracers,tracers2D,tracers3D
+    
     IMPLICIT NONE
-
+    
+    integer(pp) :: jt
+    
     hs(:,:,nsm)      = hs(:,:,nsp)
     uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
     vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
@@ -531,6 +541,16 @@ CONTAINS
     sal(:,:,:,nsm)   = sal(:,:,:,nsp)
     rho(:,:,:,nsm)   = rho(:,:,:,nsp)
 #endif
+    
+    if (log_level >= 2) print*,' Swapping tracers2D and tracers3D '
+    do jt=1,n2Dtracers
+       tracers2D(jt)%data(:,:,nsm) = tracers2D(jt)%data(:,:,nsp)
+    end do
+    
+    do jt=1,n3Dtracers
+       tracers3D(jt)%data(:,:,:,nsm) = tracers3D(jt)%data(:,:,:,nsp)
+    end do
+    
   end subroutine datasetswap
 
 #if defined full_wflux
@@ -590,16 +610,16 @@ ENDMODULE mod_name
 MODULE mod_streamfunctions
   USE mod_precdef
 #ifdef streamxy
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:)        :: stxyy, stxyx
 #endif
 #ifdef streamv
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:)        :: stxz, styz
 #endif
 #ifdef streamr
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr, stzr
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:,:)      :: stxr,styr, stzr
 #endif
 #ifdef stream_thermohaline
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
+  REAL(PP), ALLOCATABLE, DIMENSION(:,:,:,:)      :: psi_ts
 #endif
 #ifdef tracer_convergence
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: converg

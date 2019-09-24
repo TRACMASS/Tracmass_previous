@@ -1,11 +1,14 @@
 
 module mod_write
-
+  
+  USE mod_precdef
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
   USE mod_time 
   USE mod_active_particles, only: upr !!Joakim edit
   USE mod_tempsalt, only: n2Dtracers, n3Dtracers, tracers2D, tracers3D
+  USE mod_interp, only: interp_gen2D,interp_gen3D
+  
   ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
@@ -52,8 +55,11 @@ CONTAINS
   subroutine open_outfiles
 
     IMPLICIT NONE
+    integer                                    :: jt
+    character(len=200)                         :: fmt565
     CHARACTER(LEN=200)                         :: fullWritePref
     CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
+    character(len=10)                          :: ctrc2D(n2Dtracers), ctrc3D(n3Dtracers)
     
     if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
        write (intminstamp, '(A,i8.8)') '_t', intstart
@@ -72,6 +78,29 @@ CONTAINS
     open(57, file=trim(fullWritePref)//'_out.asc')  
     open(58, file=trim(fullWritePref)//'_ini.asc')   
     open(59, file=trim(fullWritePref)//'_err.asc')
+    
+    ! Put headers for ntrac, niter etc and for tracer numbers
+    write (fmt565, '( "(a8,1x,a7,1x,3a9,1x,2a14,1x,a15,1x," i4 "(a10),1x," i4 "(a10) )" )' )  n2Dtracers,n3Dtracers    
+    ! Identifiers for tracers, e.g. trc2D0001, trc3D0001 etc 
+    do jt=1,n2Dtracers
+       write(ctrc2D(jt),'(a6,i0.4)') 'trc2D',jt
+    end do 
+    do jt=1,n3Dtracers
+       write(ctrc3D(jt),'(a6,i0.4)') 'trc3D',jt
+    end do
+    ! Suggest we use variable names for tracers instead
+    write(56,fmt565) 'ntrac','ints','x','y','z','tt','t0','subvol',&
+                    & (tracers2D(jt)%name, jt = 1, n2Dtracers),&
+                    & (tracers3D(jt)%name, jt = 1, n3Dtracers)
+    write(57,fmt565) 'ntrac','ints','x','y','z','tt','t0','subvol',&
+                    & (tracers2D(jt)%name, jt = 1, n2Dtracers),&
+                    & (tracers3D(jt)%name, jt = 1, n3Dtracers)
+    write(58,fmt565) 'ntrac','ints','x','y','z','tt','t0','subvol',&
+                    & (tracers2D(jt)%name, jt = 1, n2Dtracers),&
+                    & (tracers3D(jt)%name, jt = 1, n3Dtracers)
+    write(59,fmt565) 'ntrac','ints','x','y','z','tt','t0','subvol',&
+                    & (tracers2D(jt)%name, jt = 1, n2Dtracers),&
+                    & (tracers3D(jt)%name, jt = 1, n3Dtracers)
 #endif
 
 #if defined binwrite
@@ -174,22 +203,26 @@ CONTAINS
     IMPLICIT NONE
 
     REAL                                 :: vort
-    INTEGER                              :: sel ,xf ,yf ,zf ,n
-    INTEGER*8, SAVE                      :: recPosIn=0  ,recPosOut=0
-    INTEGER*8, SAVE                      :: recPosRun=0 ,recPosErr=0
-    INTEGER*8, SAVE                      :: recPosKll=0
-    INTEGER*4                            :: ntrac4
+    INTEGER                              :: sel ,xf ,yf ,zf ,n, jt
+    INTEGER(DP), SAVE                      :: recPosIn=0  ,recPosOut=0
+    INTEGER(DP), SAVE                      :: recPosRun=0 ,recPosErr=0
+    INTEGER(DP), SAVE                      :: recPosKll=0
+    INTEGER(PP)                            :: ntrac4
     INTEGER                              :: ziter
     REAL(DP)                             :: zx1,zy1,zz1,ztt,zt0,zvol
-    REAL*4                               :: x14 ,y14 ,z14, tt14, t014
-    REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
+    REAL(PP)                               :: x14 ,y14 ,z14, tt14, t014
+    REAL(PP)                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
                                             dvort4, dhdiv4, upr4, vpr4
-    REAL(DP), DIMENSION(n3Dtracers)      :: trc3D
-    REAL*4, DIMENSION(n3Dtracers)        :: trc3D4 
-    REAL*8                               :: twrite
+    real(PP), dimension(n2Dtracers)        :: trc2D
+    REAL(PP), DIMENSION(n3Dtracers)        :: trc3D
+    REAL(PP), DIMENSION(n3Dtracers)        :: trc3D4 
+    REAL(DP)                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
     REAL                                       :: temp2, salt2, dens2
+    character(len=200)                     :: fmt565, fmt566  ! string for textwrite format
+    character(len=10)                      :: ctrc3D(n3Dtracers) 
+
 #if defined  tes 
 566 format(i8,i7,f8.3,f8.3,f7.3,2f10.2 &
          ,f10.0,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -202,6 +235,14 @@ CONTAINS
     !566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
     !         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
+
+   ! From now on we will use one format for writing
+   ! (unless we have a very good reason to do otherwise)
+   ! Here we write the format to a string, fmt566
+   ! which allows us to use the variables n2Dtracers and n3Dtracers in the format    
+   !write (fmt565, '( "(a8,1x,a7,1x,3a9,1x,2a14,1x,a15,1x," i4 "(a10),1x," i4 "(a10) )" )' )  n2Dtracers,n3Dtracers
+   write (fmt566, '( "(i8,1x, i7,1x, 3f9.3,1x, 2f14.2,1x, f15.0,1x, ", i4, "(f10.2),1x," i4 "(f10.2))" )' ) n2Dtracers,n3Dtracers
+   !write (fmt566, '( "(i8, i7, 3f9.3, 2f14.2, f15.0, ", i4, "(f8.2))" )' )  3
     
     xf   = floor(x1)
     yf   = floor(y1)
@@ -214,23 +255,21 @@ CONTAINS
     !end if
     
 #if defined tempsalt
-    call interp2(ib,jb,kb,temp,salt,dens)
-#endif
+    call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='nearest')
+    call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')
+    temp = trc3D(1)
+    salt = trc3D(2)
+    dens = trc3D(3)
 
-#ifdef newtracers
-    call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')
-#else
-    !trc3D(1) = temp
-    !trc3D(2) = salt
-    !trc3D(3) = dens
+    !call interp2(ib,jb,kb,temp,salt,dens)
 #endif
 
 #if defined textwrite 
     select case (sel)
     case (10)
-       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-       !write(58,566) ntrac,ziter,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
-!       if(temp==0.) stop 4867
+       write(58,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+       !write(58,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+
     case (11)
        !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
        !     (kriva == 2 .AND. scrivi                    ) .or. &
@@ -251,57 +290,67 @@ CONTAINS
 !           call interp2(ib,jb,kb,temp,salt,dens)
 !#endif
 #if defined biol
-          write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
+          write(56,fmt566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
+
 #if defined tempsalt
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
-          !write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
+          write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+          !write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 #else
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
-          !write(56,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol
+          write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
 #endif        
+
 #endif        
        endif
     case (13)
        ! === write sed pos ===
-       write(57,566) ntrac,niter,x1,y1,z1, &
-            tt/tday,t0/tday,subvol,temp,salt,dens 
+       write(57,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+       !write(57,fmt566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens 
+       
     case (14)
-       write(56,566) ntrac,ints,x1,y1,z1, &
-            tt/60.,t0/3600.,subvol,temp,salt,dens
+       ! write run file
+       write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+       !write(56,fmt566) ntrac,ints,x1,y1,z1,tt/60.,t0/3600.,subvol,temp,salt,dens
+
     case (15)
-       write(57,566) ntrac,ints,x1,y1,z1, &
-            tt/tday,t0/tday,subvol,temp,salt,dens
+      write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+      !write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+      
     case (16)
        if(kriva.ne.0 ) then
-#if defined tempsalt
-           !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
-           call interp2(ib,jb,kb,temp,salt,dens)
+#ifdef tempsalt
+           call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='nearest')
+           call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')
+           temp = trc3D(1)
+           salt = trc3D(2)
+           dens = trc3D(3)
+           !call interp2(ib,jb,kb,temp,salt,dens)
 #endif
-#ifdef newtracers
-           call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')
-#endif           
-          write(56,566) ntrac,ints,x1,y1,z1, &
-               tt/tday,t0/tday,subvol,temp,salt,dens
+           write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+           !write(56,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+
        end if
     case (17)
-       write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens  
+       write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+       !write(57,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol, temp,salt,dens  
+       
     case (19)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
        do n=1,ntracmax
         !if(nrj(1,n).ne.0) then
         if(trajectories(n)%ib /= 0) then
-         !write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
-         write(34,566) n,trajectories(n)%niter,trajectories(n)%x1,trajectories(n)%y1,trajectories(n)%z1, &
+         !write(34,fmt566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
+         write(34,fmt566) n,trajectories(n)%niter,trajectories(n)%x1,trajectories(n)%y1,trajectories(n)%z1, &
                      & trajectories(n)%tt/tday,trajectories(n)%t0/tday
       endif
        enddo
        close(34)
     case (40)
-       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
-       !write(59,566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
+       write(59,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,(trc2D(jt),jt=1,n2Dtracers),(trc3D(jt),jt=1,n3Dtracers)
+       !write(59,fmt566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens  
+       !write(59,fmt566) ntrac,ints,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
+       
     case (99) !switch
        
     end select
@@ -327,15 +376,12 @@ CONTAINS
     upr4   = real(upr(1,1),kind=4)!Joakim edit
     vpr4   = real(upr(3,1),kind=4)!Joakim edit
     
-#ifdef newtracers
     !
     ! Experimental new tracer interpolation scheme
     !
-    call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,trc3D,2,method='nearest')     
-    trc3D4 = real(trc3D,kind=4)
-#else
-    trc3D4(:) = 0.
-#endif
+    call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='nearest')
+    call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')     
+    !trc3D4(:) = 0.
     
     if (twritetype==1) then
        twrite = tt
@@ -368,13 +414,16 @@ CONTAINS
             (kriva == 5 .and. abs(dmod(tt-t0,9.d0)) < 1e-5 ) .or. &
             (kriva == 6 .and. .not.scrivi                  ) ) then
 #if defined tempsalt
-          call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
+          call interp_gen2D(ib,jb,   x1,y1,   2,trc2D,method='linear')
+          call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='linear')
+          temp = trc3D(1)
+          salt = trc3D(2)
+          dens = trc3D(3)
+          !call interp(ib,jb,kb,x1,y1,z1,temp, salt,  dens,1)
  !         call interp(ib,jb,kb,x1,y1,z1,temp2,salt2, dens2,2)
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
-#endif
-#ifdef newtracers
-          call interp_gen3D(ib,jb,kb,x1,y1,z1,n3Dtracers,tracers3D,2,method='linear')
-#endif
+#endif 
+
           recPosRun = recPosRun+1
           if (binwritetype == 0) then
              write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14

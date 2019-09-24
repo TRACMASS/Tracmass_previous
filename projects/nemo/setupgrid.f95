@@ -58,6 +58,10 @@ SUBROUTINE setupgrid
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: tmp4d
    CHARACTER (len=200)                          :: gridFile 
    
+   if (log_level >= 5) then
+      print*,' Entering setupgrid '
+   end if
+      
    !
    ! Print some settings
    !
@@ -79,6 +83,9 @@ SUBROUTINE setupgrid
    !
    ! --- Read dx, dy at T points --- 
    !
+   if (log_level >= 10) then
+      print*,' read dx, dy at T points '
+   end if
    allocate ( e1t(imt,jmt) , e2t(imt,jmt) )
    e1t  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dx_name)
    e2t  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dy_name)
@@ -88,6 +95,9 @@ SUBROUTINE setupgrid
    !
    ! --- Read dy at U points and dx at V points --- 
    !
+   if (log_level >= 10) then 
+      print*,' read dx dy '
+   end if 
    dyu  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dyu_name)
    dxv  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dxv_name)
    dx   = dxv(imt/2, jmt/2)
@@ -97,24 +107,30 @@ SUBROUTINE setupgrid
    ! Read dz at T points without considering 
    ! bottom partial cells and variable volume  
    !
-   dz = get1DfieldNC(trim(topoDataDir)//trim(zgridFile), dz_1D_name)
-   if (gridIsUpsideDown) then
-      do k=1,km
-         kk=km+1-k
-         dz(kk)=zlev(k)
-         zlev(k)=zlev(k)+zlev(k-1)
-      end do
-   else
-      do k=1,km
-         dz(k)=zlev(k)
-         zlev(k)=zlev(k)+zlev(k-1)
-      end do
+   if (log_level >= 10) then 
+      print*,' read dz 1D '
    end if
+   dz = get1DfieldNC(trim(topoDataDir)//trim(zgridFile), dz_1D_name)
+   !if (gridIsUpsideDown) then
+   !   do k=1,km
+   !      kk=km+1-k
+   !      dz(kk)=zlev(k)
+   !      zlev(k)=zlev(k)+zlev(k-1)
+   !   end do
+   !else
+   !   do k=1,km
+   !      dz(k)=zlev(k)
+   !      zlev(k)=zlev(k)+zlev(k-1)
+   !   end do
+   !end if
    
    !
    ! Read number of valid levels at U, V, T points
    ! as 2D array
    !
+   if (log_level >= 10) then 
+      print*,' read number of valid levels '
+   end if 
    kmt = get2DfieldNC(trim(topoDataDir)//trim(bathyFile), kBathy_name)
    allocate ( kmu(imt,jmt), kmv(imt,jmt) )
    
@@ -203,12 +219,8 @@ SUBROUTINE setupgrid
       enddo 
    end do
    
-   !do k=1,km
-   !print*,'k, kk, kmu, dzu ',k,kk,kmu(i,j), dzu(i,j,k,1)
-   !end do
-   
-   !i = 844
-   !j = 1410
-   !print*,'dzu2 ',dzu(i,j,:,1)   
+   if (log_level >= 5) then
+      print*,' leaving setupgrid '
+   end if
    
 end SUBROUTINE setupgrid

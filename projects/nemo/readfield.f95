@@ -77,6 +77,8 @@ SUBROUTINE readfields
    USE mod_dens
    USE mod_stat
    
+   USE mod_tracer_functions, only: calculate_3Dtracer
+   
    IMPLICIT none
    
    ! -----------------------------------------------------------------------------
@@ -484,11 +486,14 @@ SUBROUTINE readfields
       tracers2D(jt)%data(:,:,nsp) = get2DfieldNC(trim(tFile), tracers2D(jt)%name)
    END DO
    DO jt=1,n3Dtracers
-      if (log_level >= 2) then
-         print*,'read 3D tracer: ',tracers3D(jt)%name
+      if (tracers3D(jt)%source == 'read') then
+         print*,' read tracer: ',tracers3D(jt)%name
+         xxx(:,:,:) = get3DfieldNC(trim(tFile), tracers3D(jt)%name)
+         tracers3D(jt)%data(:,:,:,nsp) = xxx(:,:,km:1:-1)
+      else if (tracers3D(jt)%source == 'calculate') then 
+         print*,' calculate tracer: ',tracers3D(jt)%name
+         call calculate_3Dtracer(jt)
       end if
-      xxx(:,:,:) = get3DfieldNC(trim(tFile), tracers3D(jt)%name)
-      tracers3D(jt)%data(:,:,:,nsp) = xxx(:,:,km:1:-1)
    END DO
    
    ! Read temperature 
@@ -509,9 +514,11 @@ SUBROUTINE readfields
             salzvec = sal(i,j,:,nsp)
             call statvd(tmpzvec, salzvec, rhozvec ,km ,depthzvec ,latvec)
             rho(i,j,:,nsp)=rhozvec - 1000.
+            !print*,' put density at tracers3D(3) '
+            !tracers3D(3)%data(i,j,:,nsp) = rhozvec - 1000.            
          end do
       end do
-   end if     
+   end if           
    
    !
    ! Read u, v

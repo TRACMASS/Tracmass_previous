@@ -8,9 +8,11 @@ module mod_pos
   USE mod_time, only: intrpb, intrpbg
   USE mod_streamfunctions
   USE mod_psi
+  USE mod_psi_new 
   USE mod_tempsalt
   USE mod_traj, only: ntrac
   USE mod_active_particles, only: upr
+  USE mod_interp, only: interp_gen2D, interp_gen3D 
   
   IMPLICIT none
   
@@ -20,11 +22,12 @@ contains
     
     INTEGER                                    :: mra,mta,msa
     INTEGER                                    :: mrb,mtb,msb
+    integer                                    :: mtrb(n3Dtracers), mtra(n3Dtracers)
     REAL                                       :: uu
-    INTEGER                                    :: ia, iam, ja, ka,k
+    INTEGER                                    :: ia, iam, ja, ka
     INTEGER                                    :: ib, jb, kb
     REAL                                       :: temp,salt,dens
-    REAL(DP)                                   :: dza,dzb, zz
+    REAL(DP)                                   :: dza,dzb
     REAL(DP), INTENT(IN)                       :: x0, y0, z0
     REAL(DP), INTENT(OUT)                      :: x1, y1, z1
       
@@ -49,7 +52,6 @@ contains
 #endif /*timeanalyt*/
 
 #if defined streamr 
-!       call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
        call interp2(ib,jb,kb,temp,salt,dens)
        mrb=int((dens-rmin)/dr)+1
        if(mrb.lt.1 ) mrb=1
@@ -63,6 +65,7 @@ contains
        if(msb.gt.MR) msb=MR
 #endif 
 #endif 
+       
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
@@ -73,14 +76,20 @@ contains
        if(msb.lt.1 ) msb=1
        if(msb.gt.MR) msb=MR
        call interp2(ia,ja,ka,temp,salt,dens)
-       mta=(temp-tmin)/dtemp+1
+       mta=int( (temp-tmin)/dtemp+1 )
        if(mta.lt.1 ) mta=1
        if(mta.gt.MR) mta=MR
-       msa=(salt-smin)/dsalt+1
+       msa=int( (salt-smin)/dsalt+1 )
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
-#endif 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))
+#endif     
+       call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+       ! Dont call bin_tracers again, just let mtra = mtrb
+       ! Thermohaline code does not work anyway for now. 
+       mtra = mtrb
+       !call savepsi(ia,ja,ka,mtrb, mrb,mta,mtb,msa,msb,1,1,real(subvol*ff))       
+       call savepsi_new(ia,ja,ka,mtra,mtrb,1,1,real(subvol*ff))
+       !stop
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
@@ -130,7 +139,10 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
+       !call savepsi(iam,ja,ka,mrb,mta,mtb,msa,msb,1,-1,real(subvol*ff))
+       call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+       mtra = mtrb
+       call savepsi_new(iam,ja,ka,mtra,mtrb,1,-1,real(subvol*ff))
 
     elseif(ds==dsn) then ! northward grid-cell exit
        scrivi=.false.
@@ -179,7 +191,10 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
+       !call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,2,1,real(subvol*ff))
+       call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+       mtra = mtrb
+       call savepsi_new(ia,ja,ka,mtra,mtrb,2,1,real(subvol*ff))
 
     elseif(ds==dss) then ! southward grid-cell exit
        scrivi=.false.
@@ -231,7 +246,10 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
+       !call savepsi(ia,ja-1,ka,mrb,mta,mtb,msa,msb,2,-1,real(subvol*ff))
+       call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+       mtra = mtrb
+       call savepsi_new(ia,ja-1,ka,mtra,mtrb,2,-1,real(subvol*ff))
        
     elseif(ds==dsu) then ! upward grid-cell exit
        scrivi=.false.
@@ -282,7 +300,10 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,real(subvol*ff))
+       !call savepsi(ia,ja,ka,mrb,mta,mtb,msa,msb,3,1,real(subvol*ff))
+       call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+       mtra = mtrb
+       call savepsi_new(ia,ja,ka,mtra,mtrb,3,1,real(subvol*ff))
 
     elseif(ds==dsd) then ! downward grid-cell exit
        scrivi=.false.
@@ -346,7 +367,10 @@ contains
        if(msa.lt.1 ) msa=1
        if(msa.gt.MR) msa=MR
 #endif 
-       call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
+       !call savepsi(ia,ja,ka-1,mrb,mta,mtb,msa,msb,3,-1,real(subvol*ff))
+       call bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+       mtra = mtrb
+       call savepsi_new(ia,ja,ka-1,mtra,mtrb,3,-1,real(subvol*ff))
 
     elseif( ds==dsc .or. ds==dsmin) then ! shortest time is the time-steping 
        scrivi=.true.
@@ -399,5 +423,49 @@ contains
     
   end subroutine pos
   
+
+  subroutine bin_tracers(ib,jb,kb,x1,y1,z1,mtrb)
+     
+     integer(PP),                        intent(in)   ::  ib,jb,kb
+     integer(PP), dimension(n3Dtracers), intent(out)  ::  mtrb
+     real(DP),                           intent(in)   ::  x1,y1,z1
+     integer(PP)                                      ::  jt 
+     real(PP)                                         ::  trc3D(n3Dtracers) 
+     real(PP)                                         ::  temp, salt, dens
+     integer(PP)                                      ::  mtb, msb, mrb
+          
+     ! Old method
+     call interp2(ib,jb,kb,temp,salt,dens)
+     mtb=int((temp-tmin)/dtemp)+1
+     if(mtb.lt.1 ) mtb=1
+     if(mtb.gt.MR) mtb=MR
+     msb=int((salt-smin)/dsalt)+1
+     if(msb.lt.1 ) msb=1
+     if(msb.gt.MR) msb=MR     
+     mrb=int((dens-rmin)/dr)+1
+     if(mrb.lt.1 ) mrb=1
+     if(mrb.gt.MR) mrb=MR
+     !print*,' Old: ',mtb,msb,mrb
+     
+     call interp_gen3D(ib,jb,kb,x1,y1,z1,2,trc3D,method='nearest')
+     
+     do jt = 1, n3Dtracers 
+        mtrb(jt) = int( (trc3D(jt)-tracers3D(jt)%minimum)/tracers3D(jt)%step ) + 1                
+        mtrb(jt) = min(mtrb(jt),MR)
+        mtrb(jt) = max(mtrb(jt), 1)                   
+     end do
+     !print*,'New: ',mtrb(:)     
+     
+     ! Check that we get same results with new scheme as old
+     if (mtrb(1) /= mtb .or. mtrb(2) /= msb .or. mtrb(3) /= mrb) then 
+        print*,' New scheme does not match the old '
+        print*,' Old: ',mtb,msb,mrb 
+        print*,'New: ',mtrb(:) 
+        stop        
+     end if
+     
+     return
+  
+  end subroutine bin_tracers
 
 end module mod_pos
