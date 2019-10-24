@@ -92,11 +92,11 @@ elseif(ijk.eq.2) then
 elseif(ijk.eq.3) then
  ii=ka
 #if defined  explicit_w || full_wflux
- uu=wflux(ia ,ja ,ka   ,nsm)*ff
- um=wflux(ia ,ja ,ka-1 ,nsm)*ff
+ uu=wflux(ia ,ja ,ka   ,nsm)!*ff
+ um=wflux(ia ,ja ,ka-1 ,nsm)!*ff
 #else
- uu=(intrpg*wflux(ka  ,nsp)+intrpr*wflux(ka  ,nsm))*ff
- um=(intrpg*wflux(ka-1,nsp)+intrpr*wflux(ka-1,nsm))*ff
+ uu=(intrpg*wflux(ka  ,nsp)+intrpr*wflux(ka  ,nsm))!*ff
+ um=(intrpg*wflux(ka-1,nsp)+intrpr*wflux(ka-1,nsm))!*ff
 #endif
 
 #ifndef twodim   

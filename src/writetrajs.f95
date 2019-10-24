@@ -228,6 +228,7 @@ CONTAINS
 #if defined textwrite 
     select case (sel)
     case (10)
+     t0=trajectories(ntrac)%t0
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
        !write(58,566) ntrac,ziter,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 !       if(temp==0.) stop 4867

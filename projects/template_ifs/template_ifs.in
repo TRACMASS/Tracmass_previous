@@ -81,7 +81,7 @@
 	startmin       = 0,
 	starthour      = 6,
 	startday       = 1,									! start date
-	startmon       = 1,
+	startmon       = 3,
 	startyear      = 2017,
 	noleap         = .false.,							! dont use leap years? 
 	startjd        = -1,								! first julianday for trmClock
@@ -92,9 +92,9 @@
 	loopYears      = .true.,							! make a time loop to run 
 														! e.g. 1000 years using only 100 years of data
 	loopStartYear  = 2017,								! year to start loop from
-	loopEndYear    = 2018,								! last year of loop
+	loopEndYear    = 2017,								! last year of loop
      
-	intspin        = 1,									! number of time steps for seeding
+	intspin        = 120,									! number of time steps for seeding
 	intrun         = 99999,		    					! number of time steps for run (always=2)
 	log_level      = 2,									! level of verbosity 
 														! = 0 minimal output to stdout
@@ -115,9 +115,9 @@
 														! 5 = write at chosen intervals
 														! 6 = write each spatial grid-crossing
 	outDataDir     = '/Users/doos/data/ifs/data_out/',	! directory for output
-!	outdatafile    = 'ifs_test_iter6000',		    	! fileprefix for output
+	outdatafile    = 'ifs_test_iter6',		    	! fileprefix for output
 !	outdatafile    = 'ifs_walker_air_anal_west',					! fileprefix for output
-	outdatafile    = 'ifs_walker_water_anal_west',					! fileprefix for output
+!	outdatafile    = 'ifs_walker_water_anal_west',					! fileprefix for output
 	outdircase     = .false. ,							! creates a new directory to store the data from the run      
 	intminInOutFile  =  0,								! 0 = ????
 														! 1 = ????
@@ -127,9 +127,9 @@
 	outdirdate     = .false. ,							! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
-	nff			   = 1,								! = 1 run forward trajectories
+	nff			   = -1,								! = 1 run forward trajectories
 														! = -1 run backwards
-	isec           = 1,									! = 1 start on zonal cell wall 
+	isec           = 3,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
 														! = 3 start on vertical wall
 														! = 4 start in center of cell
@@ -147,24 +147,24 @@
 	partQuant      = 1,									! particles/gridcell or m3s-1/particle or m3/particle
 	ntracmax       = 12345678,							! max number of trajectories (set as big as possible)
 	loneparticle   = 0,									! follow only this trajectory for debugging. If = 0 then all trajectories
-	seedtype       = 1,									! = 1 seed by using ist,jst,kst (below)
+	seedtype       = 3,									! = 1 seed by using ist,jst,kst (below)
 														! = 2 seed by using list file with start positions
 														! = 3 seed by using a 2-D mask file.
 							     
 	! Use the parameters below when seedtype = 1
-	ist1           = 1, !241,				     			! seed in box in range i = [ist1,ist2]
-	ist2           = 480, !241,				     			! 	       	      	   j = [jst1,jst2]
-	jst1           = 1, !81,	    		     			! 			           k = [kst1,kst2]
-	jst2           = 240, !161,			     
+	ist1           = 241, !1, !241,				     			! seed in box in range i = [ist1,ist2]
+	ist2           = 241, !480, !241,				     			! 	       	      	   j = [jst1,jst2]
+	jst1           = 81, !1, !81,	    		     			! 			           k = [kst1,kst2]
+	jst2           = 161, !240, !161,			     
 	kst1           = 60 !1,    
 	kst2           = 60,    
 	tst1           = -1,								! seed only between tst1 and tst2
 	tst2           = -1,								! given as 19800105 for 1980-01-05
      
 	! Use the parameters below when seedtype = 2
-	seeddir        = '',								! directory for seed files
-	seedfile       = '',								! name of seed file
-	varseedfile    = 0,									! = 1 read seedfile , = 0 use ist1,ist2,jst1,...
+	seeddir        = '/Users/doos/Dropbox/data_dropbox/ifs/topo/',								! directory for seed files
+	seedfile       = 'bobseed.bin',								! name of seed file
+	varseedfile    = 1,									! = 1 read seedfile , = 0 use ist1,ist2,jst1,...
 	seedtime       = 0,									! seed only for specific times
 	seedall        = 0,									! seed all particles or only one
 	seedpos        = 1,									! 
@@ -175,7 +175,7 @@
 	nend 		   = 2,									! number of ways to kill a trajectory (in this case time + one region)
 	ienw 		   = 0, !241,									! west indices of killzones
 	iene           = 0, !241, 								! east indices of killzones
-	jens           =  0, 								! south indices of killzones
+	jens           = 0, 								! south indices of killzones
 	jenn           = 0, !999,  								! north indices of killzones
 	timax          = 365.0, 							! time limit for traj [days]
 		

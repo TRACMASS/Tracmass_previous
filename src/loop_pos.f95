@@ -237,9 +237,9 @@ contains
        scrivi=.false.
        call vertvel(ia,iam,ja,ka)
 #if defined explicit_w || full_wflux
-       uu=wflux(ia,ja,ka,nsm)*ff
+       uu=wflux(ia,ja,ka,nsm)!*ff
 #else
-       uu=(intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm))*ff
+       uu=(intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm))!*ff
 #endif
        if(uu.gt.0.d0) then
           kb=ka+1
@@ -289,11 +289,11 @@ contains
        call vertvel(ia, iam, ja, ka)
      
 #if defined explicit_w || full_wflux
-       uu=wflux(ia,ja,ka-1,nsm)*ff
+       uu=wflux(ia,ja,ka-1,nsm)!*ff
 !       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
        if(uu.lt.0.d0) kb=ka-1
 #else
-       uu=(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm))*ff
+       uu=(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm))!*ff
 !        if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
         if(uu.lt.0.d0) kb=ka-1
 #endif              
