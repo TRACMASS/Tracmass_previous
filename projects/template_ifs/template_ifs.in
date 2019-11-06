@@ -19,8 +19,8 @@
 	! Describe filenames
 	topoDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',  ! directory of grid data
 	RunID       = 'era',								! name of GCM simulation
-!	physDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',   ! directory of physical data (u,v,T,S,MLD,etc)
-	physDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
+	physDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',   ! directory of physical data (u,v,T,S,MLD,etc)
+!	physDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
 	fileSuffix  = '.nc',								! suffix of files, e.g. ".nc"
 	! Logicals to control what to read etc.
 	useTrmClock = .false.,								! use sophisticated clock (otherwise simple clock)
@@ -82,7 +82,7 @@
 	starthour      = 6,
 	startday       = 1,									! start date
 	startmon       = 1,
-	startyear      = 2017,
+	startyear      = 2018,
 	noleap         = .false.,							! dont use leap years? 
 	startjd        = -1,								! first julianday for trmClock
 	intmin         = 1,									!
@@ -128,7 +128,7 @@
 &INIT_SEEDING
 	nff			   = 1,								! = 1 run forward trajectories
 														! = -1 run backwards
-	isec           = 1,									! = 1 start on zonal cell wall 
+	isec           = 3,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
 														! = 3 start on vertical wall
 														! = 4 start in center of cell
@@ -155,8 +155,8 @@
 	ist2           = 241,				     			! 	       	      	   j = [jst1,jst2]
 	jst1           = 81,	    		     			! 			           k = [kst1,kst2]
 	jst2           = 161,			     
-	kst1           =  1,    
-	kst2           = 60,    
+	kst1           = 59,    
+	kst2           = 59,    
 	tst1           = -1,								! seed only between tst1 and tst2
 	tst2           = -1,								! given as 19800105 for 1980-01-05
      
@@ -201,10 +201,12 @@
 	rmaxe          =  9999.0,
 /
 &INIT_TRACERS
-     n2Dtracers           = 0                           ! number of 2D tracers to read
-     names2Dtracers(1)    = ''                          ! names of 2D tracers
-     n3Dtracers           = 0                           ! number of 3D tracers to read
-     names3Dtracers(1:2)  = '',''                       ! names of 3D tracers
+     n2Dtracers           = 0                                ! number of 2D tracers to read
+     names2Dtracers(1)    = ''                               ! names of 2D tracers
+     n3Dtracers           = 3                                ! number of 3D tracers to read
+     names3Dtracers(1:2)  = '',''                            ! names of 3D tracers
+     src3Dtracers(1:3)    = 'read',    'read', 'calculate'   ! source of 3D tracers
+     desc3Dtracers(1:3)   = 'atm_temperature','specific_humidity','atm_pressure' 
 /
 &INIT_DIFFUSION
 	ah             = 2000.0,							! sub-grid parametersiation horizontal diffusion

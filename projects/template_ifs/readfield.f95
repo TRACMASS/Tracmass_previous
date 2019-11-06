@@ -463,10 +463,18 @@ sal(:,:,:,2) = tw * eunit ![kJ/kg]
 
 #else
 
-tem(:,:,:,2) = tem(:,:,:,2)-celsius0 ![C]
-rho(:,:,:,2) = 0.5/cp * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![C]
+tem(:,:,:,2) = tem(:,:,:,2)!-celsius0 ![C]
+rho(:,:,:,2) = rho(:,:,:,2)*0.01 ![hPa]
+!rho(:,:,:,2) = 0.5/cp * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![C]
+
+print *,'hej',tmin,tmax
 
 #endif
+
+
+tracers3D(1)%data(:,:,:,nsp) = tem(:,:,:,nsp)
+tracers3D(2)%data(:,:,:,nsp) = sal(:,:,:,nsp)
+tracers3D(3)%data(:,:,:,nsp) = rho(:,:,:,nsp)
 
 
 RETURN

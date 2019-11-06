@@ -460,6 +460,7 @@ contains
      if (mtrb(1) /= mtb .or. mtrb(2) /= msb .or. mtrb(3) /= mrb) then 
         print*,' New scheme does not match the old '
         print*,' Old: ',mtb,msb,mrb 
+        print*,'temp,salt,dens',temp,salt,dens,trc3D(:)
         print*,'New: ',mtrb(:) 
         stop        
      end if

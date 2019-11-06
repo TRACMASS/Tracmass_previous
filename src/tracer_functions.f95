@@ -32,11 +32,11 @@ contains
          if (tracers3D(jt)%desc == 'temperature' ) then         
             tracers3D(jt)%minimum = -3.
             tracers3D(jt)%maximum = 33.
-         
+            
          elseif (tracers3D(jt)%desc == 'pr_salinity' ) then
             tracers3D(jt)%minimum = 33.
             tracers3D(jt)%maximum = 38.
-         
+
          elseif (tracers3D(jt)%desc == 'sigma' ) then
             tracers3D(jt)%minimum = 19.
             tracers3D(jt)%maximum = 28.5
@@ -44,6 +44,20 @@ contains
          elseif (tracers3D(jt)%desc == 'po_temperature' ) then
             tracers3D(jt)%minimum = 25.
             tracers3D(jt)%maximum = 40.
+         
+         elseif (tracers3D(jt)%desc == 'atm_temperature' ) then
+            tracers3D(jt)%minimum = 173.   ![K]
+            tracers3D(jt)%maximum = 323.   ![K]
+         print *,tracers3D(jt)%desc,tracers3D(jt)%minimum,tracers3D(jt)%maximum
+         elseif (tracers3D(jt)%desc == 'specific_humidity' ) then
+            tracers3D(jt)%minimum =  0.    ![g/kg]
+            tracers3D(jt)%maximum = 25.    ![g/kg]
+         print *,tracers3D(jt)%desc,tracers3D(jt)%minimum,tracers3D(jt)%maximum
+         
+         elseif (tracers3D(jt)%desc == 'atm_pressure' ) then
+            tracers3D(jt)%minimum =    0.  ![hPa]
+            tracers3D(jt)%maximum = 1100.  ![hPa]
+         print *,tracers3D(jt)%desc,tracers3D(jt)%minimum,tracers3D(jt)%maximum
          
          end if
          !if (log_level >= 2) then 
