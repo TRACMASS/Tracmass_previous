@@ -19,8 +19,8 @@
 	! Describe filenames
 	topoDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',  ! directory of grid data
 	RunID       = 'era',								! name of GCM simulation
-	physDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',   ! directory of physical data (u,v,T,S,MLD,etc)
-!	physDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
+!	physDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',   ! directory of physical data (u,v,T,S,MLD,etc)
+	physDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
 	fileSuffix  = '.nc',								! suffix of files, e.g. ".nc"
 	! Logicals to control what to read etc.
 	useTrmClock = .false.,								! use sophisticated clock (otherwise simple clock)
@@ -82,7 +82,7 @@
 	starthour      = 6,
 	startday       = 1,									! start date
 	startmon       = 1,
-	startyear      = 2018,
+	startyear      = 2017,
 	noleap         = .false.,							! dont use leap years? 
 	startjd        = -1,								! first julianday for trmClock
 	intmin         = 1,									!
@@ -94,9 +94,9 @@
 	loopStartYear  = 2017,								! year to start loop from
 	loopEndYear    = 2018,								! last year of loop
      
-	intspin        = 1,									! number of time steps for seeding
+	intspin        = 10,									! number of time steps for seeding
 	intrun         = 99999,		    					! number of time steps for run (always=2)
-	log_level      = 2,									! level of verbosity 
+	log_level      = 0,									! level of verbosity 
 														! = 0 minimal output to stdout
 														! = 1 low verbosity
 														! = 2 medium verbosity
@@ -152,11 +152,11 @@
 							     
 	! Use the parameters below when seedtype = 1
 	ist1           = 241,				     			! seed in box in range i = [ist1,ist2]
-	ist2           = 241,				     			! 	       	      	   j = [jst1,jst2]
+	ist2           = 250,				     			! 	       	      	   j = [jst1,jst2]
 	jst1           = 81,	    		     			! 			           k = [kst1,kst2]
 	jst2           = 161,			     
-	kst1           = 59,    
-	kst2           = 59,    
+	kst1           = 60,    
+	kst2           = 60,    
 	tst1           = -1,								! seed only between tst1 and tst2
 	tst2           = -1,								! given as 19800105 for 1980-01-05
      

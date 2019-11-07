@@ -63,6 +63,8 @@ endif
 
 !if(ints/=intstart) call update_calendar
 
+!print *,'hej'
+
 
 !! Update the time counter
 ihour = ihour + nff * ngcm  
@@ -129,14 +131,15 @@ ncTpos=4*(iday-1)+ (ihour)/6 +1
 !ncTpos=4*(currDay-1)+ (currHour)/6 +1
 
 !! Swap data sets
-   uflux(:,:,:,1) = uflux(:,:,:,2)
-   vflux(:,:,:,1) = vflux(:,:,:,2)
-     dzt(:,:,:,1)   = dzt(:,:,:,2)
-#ifdef tempsalt 
-   tem(:,:,:,1)   = tem(:,:,:,2)
-   sal(:,:,:,1)   = sal(:,:,:,2)
-   rho(:,:,:,1)   = rho(:,:,:,2)
-#endif
+!   uflux(:,:,:,1) = uflux(:,:,:,2)
+!   vflux(:,:,:,1) = vflux(:,:,:,2)
+!     dzt(:,:,:,1)   = dzt(:,:,:,2)
+!#ifdef tempsalt 
+!   tem(:,:,:,1)   = tem(:,:,:,2)
+!   sal(:,:,:,1)   = sal(:,:,:,2)
+!   rho(:,:,:,1)   = rho(:,:,:,2)
+!#endif
+   call datasetswap ! Swap between current and previous step
 
 
 !!
@@ -152,7 +155,7 @@ else
  WRITE (prefix(13:14),'(i2)') imon
 endif
 fieldFile = TRIM(physDataDir)//TRIM(prefix)//trim(fileSuffix)
-
+!print *,'fieldFile', fieldFile
 start1D  = [ 1]
 count1D  = [NY]
 start2D  = [  1,  1,   1, ncTpos ]
@@ -168,6 +171,8 @@ if (ierr /= 0) then
  PRINT*,NF90_STRERROR (ierr)
  STOP
 endif   
+
+!print *,'ff' 
 
 !__________________________ Read surface pressure
    ierr=NF90_INQ_VARID(ncid,'lnsp',varid)
@@ -363,9 +368,9 @@ DO k=1,KM
 !         &     ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(im,jj)) )*punit *0.001
 
 ! Use the A-grid as much as possible
-         uflux(i,j,k,2)=0.5*( uh(i ,jj)*qh(i ,jj)*dpgh(i ,jj) + &
+         uflux(i,j,k,2)=ff*0.5*( uh(i ,jj)*qh(i ,jj)*dpgh(i ,jj) + &
         &                     uh(i ,jm)*qh(i ,jm)*dpgh(i ,jm)    ) *dydeg       *0.001
-         vflux(i,j,k,2)=0.5*( vh(i ,jj)*qh(i ,jj)*dpgh(i ,jj) + &
+         vflux(i,j,k,2)=ff*0.5*( vh(i ,jj)*qh(i ,jj)*dpgh(i ,jj) + &
         &                     vh(im,jj)*qh(im,jj)*dpgh(im,jj)    ) *dxdeg*csu(j)*0.001
 
 ! First the variables on a C-grid then compute the fluxes
@@ -378,9 +383,9 @@ DO k=1,KM
 !         vflux(i,j,k,2)=0.25* ( vh(i,jj)+vh(im,jj) ) * ( qh(i,jj)*qh(im,jj) ) * dxdeg*csu(j) / grav * &
 !         &     ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(im,jj)) )*punit *0.001
 #else
-         uflux(i,j,k,2)=0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg / grav * &
+         uflux(i,j,k,2)=ff*0.5*( uh(i,jj)+uh(i ,jm) ) * dydeg / grav * &
          &     ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(i,jm)) )*punit
-         vflux(i,j,k,2)=0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j) / grav * &
+         vflux(i,j,k,2)=ff*0.5*( vh(i,jj)+vh(im,jj) ) * dxdeg*csu(j) / grav * &
          &     ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*0.5*(ph(i,jj)+ph(im,jj)) )*punit
 #endif
       END DO
@@ -467,7 +472,6 @@ tem(:,:,:,2) = tem(:,:,:,2)!-celsius0 ![C]
 rho(:,:,:,2) = rho(:,:,:,2)*0.01 ![hPa]
 !rho(:,:,:,2) = 0.5/cp * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![C]
 
-print *,'hej',tmin,tmax
 
 #endif
 
@@ -476,6 +480,7 @@ tracers3D(1)%data(:,:,:,nsp) = tem(:,:,:,nsp)
 tracers3D(2)%data(:,:,:,nsp) = sal(:,:,:,nsp)
 tracers3D(3)%data(:,:,:,nsp) = rho(:,:,:,nsp)
 
+!print *,'hejdu'
 
 RETURN
 

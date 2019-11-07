@@ -14,11 +14,11 @@
 #  fl07   = -Dbinwrite       # Write results to binaryfile
 #  fl08   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
-   fl09  = -Dstreamxy       # Calculates the barotropic stream function.
-   fl10  = -Dstreamr        #    vertical stream function, z=density
-   fl11  = -Dstreamts        #    vertical stream function, z=density
-   fl12  = -Dstream_thermohaline  #    thermohaline stream function
-   fl13  = -Dstreamv        #    vertical stream function, z=depth
+#   fl09  = -Dstreamxy       # Calculates the barotropic stream function.
+#   fl10  = -Dstreamr        #    vertical stream function, z=density
+#   fl11  = -Dstreamts        #    vertical stream function, z=density
+#   fl12  = -Dstream_thermohaline  #    thermohaline stream function
+#   fl13  = -Dstreamv        #    vertical stream function, z=depth
 #  fl14  = -Drerun          # Stores the Lagrangian stream functions as a
                             # function of the end positions that has been
                             # calculated in an identical previous run.    

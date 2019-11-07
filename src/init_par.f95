@@ -451,13 +451,13 @@ SUBROUTINE init_params
       stxz=0.
       styz=0.
 #endif
-#if defined streamr || streamts
+!#if defined streamr || streamts
       !ALLOCATE ( stxr(imt,mr,nend,lov), styr(jmt,mr,nend,lov), stzr(km,mr,nend,lov) )
       ALLOCATE ( stxr(imt,mr,nend,n3Dtracers), styr(jmt,mr,nend,n3Dtracers), stzr(km,mr,nend,n3Dtracers) )
       stxr=0.
       styr=0.
       stzr=0.
-#endif
+!#endif
 #ifdef stream_thermohaline
       ALLOCATE ( psi_ts(MR,MR,2,nend) )
       psi_ts=0.

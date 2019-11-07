@@ -457,13 +457,14 @@ contains
      !print*,'New: ',mtrb(:)     
      
      ! Check that we get same results with new scheme as old
-     if (mtrb(1) /= mtb .or. mtrb(2) /= msb .or. mtrb(3) /= mrb) then 
-        print*,' New scheme does not match the old '
-        print*,' Old: ',mtb,msb,mrb 
-        print*,'temp,salt,dens',temp,salt,dens,trc3D(:)
-        print*,'New: ',mtrb(:) 
-        stop        
-     end if
+!     if (mtrb(1) /= mtb .or. mtrb(2) /= msb .or. mtrb(3) /= mrb) then 
+!        print*,' New scheme does not match the old '
+!        print*,' Old: ',mtb,msb,mrb, mtrb
+!        print*,'temp,salt,dens',temp,salt,dens,trc3D(:)
+!        print *,'ds',ds,dsw,dse,dsn,dss,dsu,dsd,dsmin
+!        print *,tracers3D(1)%data(ib,jb,kb,2) 
+!        stop        
+!     end if
      
      return
   
