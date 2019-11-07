@@ -21,7 +21,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   
   USE mod_precdef
   USE mod_grid, only: imt, jmt, nsm, nsp, nst
-  USE mod_vel, only: uflux, vflux, wflux, ff
+  USE mod_vel, only: uflux, vflux, wflux!, ff
   USE mod_active_particles, only: upr
   USE mod_time, only: intrpr, intrpg
   USE mod_traj, only: ntrac !!joakim edit
@@ -42,8 +42,8 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      ii=ia
      im=ia-1
      if(im.eq.0) im=IMT
-     uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
-     um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
+     uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))!*ff
+     um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))!*ff
 #ifdef turb    
      if(r0.ne.dble(ii)) then
         uu=uu+upr(1,2)
@@ -61,8 +61,8 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
 
   elseif(ijk.eq.2) then
      ii=ja
-     uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
-     um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
+     uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))!*ff
+     um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))!*ff
 #ifdef turb    
      if(r0.ne.dble(ja  )) then
         uu=uu+upr(3,2)   
@@ -80,11 +80,11 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   elseif(ijk.eq.3) then
      ii = ka
 #if defined explicit_w || full_wflux
-     uu = (intrpg * wflux(ia ,ja, ka  , nsp) + intrpr * wflux(ia, ja, ka  , nsm))*ff
-     um = (intrpg * wflux(ia, ja, ka-1, nsp) + intrpr * wflux(ia, ja, ka-1, nsm))*ff
+     uu = (intrpg * wflux(ia ,ja, ka  , nsp) + intrpr * wflux(ia, ja, ka  , nsm))!*ff
+     um = (intrpg * wflux(ia, ja, ka-1, nsp) + intrpr * wflux(ia, ja, ka-1, nsm))!*ff
 #else
-     uu = (intrpg * wflux(ka  ,nsp) + intrpr * wflux(ka  ,nsm))*ff
-     um = (intrpg * wflux(ka-1,nsp) + intrpr * wflux(ka-1,nsm))*ff
+     uu = (intrpg * wflux(ka  ,nsp) + intrpr * wflux(ka  ,nsm))!*ff
+     um = (intrpg * wflux(ka-1,nsp) + intrpr * wflux(ka-1,nsm))!*ff
 #endif
 #ifdef turb    
      if(r0.ne.dble(ka  )) then

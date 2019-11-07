@@ -36,7 +36,7 @@ contains
     scrivi=.false.
     if(ds==dse) then ! eastward grid-cell exit 
        scrivi=.false.
-       uu=(intrpbg*uflux(ia,ja,ka,nsp)+intrpb*uflux(ia ,ja,ka,nsm))*ff
+       uu=(intrpbg*uflux(ia,ja,ka,nsp)+intrpb*uflux(ia ,ja,ka,nsm))!*ff
        if(uu.gt.0.d0) then
        !if (uu+upr(1,1) > 0.d0) then
           ib=ia+1
@@ -93,7 +93,7 @@ contains
         
     elseif(ds==dsw) then ! westward grid-cell exit
        scrivi=.false.
-       uu=(intrpbg*uflux(iam,ja,ka,nsp)+intrpb*uflux(iam,ja,ka,nsm))*ff
+       uu=(intrpbg*uflux(iam,ja,ka,nsp)+intrpb*uflux(iam,ja,ka,nsm))!*ff
        if(uu.lt.0.d0) then
        !if(uu+upr(1,1) < 0.d0) then
           ib=iam
@@ -146,7 +146,7 @@ contains
 
     elseif(ds==dsn) then ! northward grid-cell exit
        scrivi=.false.
-       uu=(intrpbg*vflux(ia,ja,ka,nsp)+intrpb*vflux(ia,ja,ka,nsm))*ff
+       uu=(intrpbg*vflux(ia,ja,ka,nsp)+intrpb*vflux(ia,ja,ka,nsm))!*ff
        if(uu.gt.0.d0) then
        !if (uu+upr(3,1) > 0.d0) then
           jb=ja+1
@@ -198,7 +198,7 @@ contains
 
     elseif(ds==dss) then ! southward grid-cell exit
        scrivi=.false.
-       uu=(intrpbg*vflux(ia,ja-1,ka,nsp)+intrpb*vflux(ia,ja-1,ka,nsm))*ff
+       uu=(intrpbg*vflux(ia,ja-1,ka,nsp)+intrpb*vflux(ia,ja-1,ka,nsm))!*ff
        if(uu.lt.0.d0) then
        !if (uu+upr(3,1) < 0.d0) then
           jb=ja-1
@@ -255,9 +255,9 @@ contains
        scrivi=.false.
        call vertvel(ia,iam,ja,ka)
 #if defined explicit_w || full_wflux
-       uu=wflux(ia,ja,ka,nsm)*ff
+       uu=wflux(ia,ja,ka,nsm)!*ff
 #else
-       uu=(intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm))*ff
+       uu=(intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm))!*ff
 #endif
        if(uu.gt.0.d0) then
           kb=ka+1
@@ -310,11 +310,11 @@ contains
        call vertvel(ia, iam, ja, ka)
      
 #if defined explicit_w || full_wflux
-       uu=wflux(ia,ja,ka-1,nsm)*ff
+       uu=wflux(ia,ja,ka-1,nsm)!*ff
 !       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
        if(uu.lt.0.d0) kb=ka-1
 #else
-       uu=(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm))*ff
+       uu=(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm))!*ff
 !        if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
         if(uu.lt.0.d0) kb=ka-1
 #endif              

@@ -619,13 +619,13 @@ return
 
                 print '(A,F7.0,A,F7.0,A,F7.0,A,F7.0)',            &
                      ' ufl(ia) : ',(intrpbg*uflux(ia ,ja,ka,nsp) +    &
-                                    intrpb*uflux(ia ,ja,ka,nsm))*ff,  &
+                                    intrpb*uflux(ia ,ja,ka,nsm)),  &
                      ' ufl(ib) : ', (intrpbg*uflux(iam,ja,ka,nsp) +   & 
-                                    intrpb*uflux(iam,ja,ka,nsm))*ff,  &
+                                    intrpb*uflux(iam,ja,ka,nsm)),  &
                      ' vfl(ja) : ', (intrpbg*vflux(ia,ja  ,ka,nsp) +  & 
-                                    intrpb*vflux(ia,ja  ,ka,nsm))*ff, &
+                                    intrpb*vflux(ia,ja  ,ka,nsm)), &
                      ' vfl(jb) : ', (intrpbg*vflux(ia,ja-1,ka,nsp) +  & 
-                                    intrpb*vflux(ia,ja-1,ka,nsm))*ff 
+                                    intrpb*vflux(ia,ja-1,ka,nsm)) 
                 print *, thinline !-----------------------------------------
              end if
 !             z1=dble(kb)-0.5d0

@@ -81,7 +81,7 @@
 	startmin       = 0,
 	starthour      = 6,
 	startday       = 1,									! start date
-	startmon       = 1,
+	startmon       = 12,
 	startyear      = 2017,
 	noleap         = .false.,							! dont use leap years? 
 	startjd        = -1,								! first julianday for trmClock
@@ -126,7 +126,7 @@
 	outdirdate     = .false. ,							! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
-	nff			   = 1,								! = 1 run forward trajectories
+	nff			   = -1,								! = 1 run forward trajectories
 														! = -1 run backwards
 	isec           = 3,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
