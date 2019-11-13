@@ -4,6 +4,11 @@ The code is written in FORTRAN 95 with modules and runs on UNIX platforms such a
 
 TRACMASS has been set up to run with velocities integrated with models such as NEMO, ORCA, ROMS, POM, MICOM, IFS-ECMWF and EC-Earth.
 
+WARNING
+=======
+
+This TRACMASS version is an alpha version. 
+It is still in development. 
 
 Quickstart
 ==========
