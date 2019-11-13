@@ -22,10 +22,23 @@ sudo port install git-core
 sudo port install git-extras
 ```
 
+Download test data
+------------------
+
+You can find some input data for testing the code on 
+
+```bash
+https://www.dropbox.com/sh/b6leim7tb99i3hm/AAA7M0mxuYTwJLKjqmLnoJuca?dl=0
+```
+
+Before doing any analysis we recommend to download some of the test data and make sure TRACMASS is working properly. 
 
 Compile the code
 ----------------
-Copy Makefile_tmpl to Makefile. Choose a change PROJECT and CASE in Makefile to your projectname.
+
+Copy Makefile_tmpl to Makefile. 
+Choose a change PROJECT and CASE in Makefile to your projectname.
+If you are using netCDF version >4.4 you can set NETCDFLIBS to "automatic-44", in which case netCDF paths will be taken from nc-config and nf-config. 
 
 run:
 
