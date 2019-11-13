@@ -58,3 +58,4 @@ Change log
 
 
 6.0.0 First public release
+7.0.0_alpha New features for parametrising sub-grid scale motions, tracing water in the atmosphere, simplified set-up for users + code clean–up + bug-fixes.  

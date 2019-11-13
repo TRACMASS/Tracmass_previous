@@ -155,7 +155,11 @@ else
  WRITE (prefix(13:14),'(i2)') imon
 endif
 fieldFile = TRIM(physDataDir)//TRIM(prefix)//trim(fileSuffix)
-!print *,'fieldFile', fieldFile
+
+if (log_level >= 1) then 
+   print *,'     Read fieldFile: ', fieldFile
+end if 
+
 start1D  = [ 1]
 count1D  = [NY]
 start2D  = [  1,  1,   1, ncTpos ]

@@ -80,15 +80,14 @@ objects := $(addprefix $(OBJDIR)/,modules.o interp_general.o $(ACTVEL) calendar.
                     sw_stat.o tracer_functions.o \
 	            seed.o init_seed.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
-                    interp.o interp2.o pos.o \
-                    sw_seck.o sw_pres.o sw_dens0.o \
+                    pos.o interp2.o sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o printinfo.o loop.o main.o \
 		    setupgrid.o readfield.o diffusion.o)
 
 runfile : $(objects)
 	$(FF) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)
 
-$(OBJDIR)/%.o : %.f95
+$(OBJDIR)/%.o : %.F90 
 	$(FF) $(TT_FLAGS) $(FF_FLAGS) $(ORM_FLAGS) $(PROJECT_FLAG) $(CASE_FLAG) $(ARG_FLAGS)  $< -o $@
 
 
