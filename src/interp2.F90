@@ -1,4 +1,3 @@
-#ifdef tempsalt
 subroutine interp2(i,j,k,temp,salt,dens)
 
   ! === NO interpolation of the temperature, salinity, and density===
@@ -28,5 +27,5 @@ subroutine interp2(i,j,k,temp,salt,dens)
 
   return
 end subroutine interp2
-#endif
+
 

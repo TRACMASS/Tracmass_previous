@@ -16,7 +16,7 @@ ARG_FLAGS         = -DARG_INT1=$(INPUT_INT1) -DARG_INT2=$(INPUT_INT2)
 OBJDIR           := build
 
 ifeq ($(strip $(FF)),)
-	FF = $(F95COMPILER)
+	FF = $(F90COMPILER)
 endif
 
 ifeq ($(NETCDFLIBS),"none")
@@ -32,39 +32,35 @@ ifeq ($(NETCDFLIBS),"automatic-44")
 	INC_DIR = $(shell nf-config --cflags)
 	LIB_DIR = $(shell nf-config --flibs)
 endif 
-ifeq ($(NETCDFLIBS),"macports")
-	LIB_DIR          = -L/opt/local/lib
-	INC_DIR          = -I/opt/local/include/
+ifeq ($(NETCDFLIBS),"generic")
+	LIB_DIR          = -L/usr/local/lib
+	INC_DIR          = -I/usr/local/include/
 	LNK_FLAGS        = -lnetcdf -lnetcdff 
 endif
-ifeq ($(NETCDFLIBS),"fink")
-        LIB_DIR          = -L/sw/lib # -L/sw/lib/netcdf-gfortran/lib
-        INC_DIR          = -I/sw/include  #-I/sw/lib/netcdf-gfortran/include
-        LNK_FLAGS        = -lnetcdf -lnetcdff -lsz 
-endif
 
-ifeq ($(F95COMPILER),"gfortran")
-	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check 
-#	FF_FLAGS         = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check -ffpe-trap=denormal -static -Wall -pedantic
-  	#FF_FLAGS         = -O3 -c -x f95-cpp-input 	
+ifeq ($(ARCH),"macports")
+        F90COMPILER      = gfortran-mp-8 
+	PROD_FF_FLAGS    = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check 
+	DEV_FF_FLAGS     = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check -ffpe-trap=denormal -static -Wall -pedantic
         F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR) 
 endif
-ifeq ($(F95COMPILER),"g95")
-	FF_FLAGS         = -c -cpp -fendian=big
-	F90_FLAGS        = -O3 -C  -g  -fno-underscoring
-	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
-endif
 
-ifeq ($(F95COMPILER),"ifort")
-        FF_FLAGS         = -O3 -cpp -convert big_endian -xcore-avx512
+ifeq ($(ARCH),"tetralith")
+        F90COMPILER      = ifort
+        PROD_FF_FLAGS    = -O3 -cpp -convert big_endian -xcore-avx512
+        DEV_FF_FLAGS     = -O3 -cpp -convert big_endian -xcore-avx512 -g -traceback 
         F90_FLAGS        = -free 
         ARG_FLAGS       += -Tf
         FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 	TT_FLAGS         = -c 
 endif
 
-
+ifeq ($(OPT),"opt")
+        FF_FLAGS         = $(PROD_FF_FLAGS)
+else
+        FF_FLAGS         = $(DEV_FF_FLAGS) 
+endif
 
 
 CC                = gcc -O  $(INC_DIR)
@@ -75,12 +71,12 @@ VPATH = src:projects/$(PROJECT):src/active_particles
 
 all: runfile
 
-objects := $(addprefix $(OBJDIR)/,modules.o interp_general.o $(ACTVEL) calendar.o \
+objects := $(addprefix $(OBJDIR)/,modules.o interp_general.o interp2.o $(ACTVEL) calendar.o \
 	   	    laplacian.o savepsi.o savepsi_new.o loop_pos.o writetrajs.o \
                     sw_stat.o tracer_functions.o \
 	            seed.o init_seed.o getfile.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
-                    pos.o interp2.o sw_seck.o sw_pres.o sw_dens0.o \
+                    pos.o sw_seck.o sw_pres.o sw_dens0.o \
                     writepsi.o writetracer.o printinfo.o loop.o main.o \
 		    setupgrid.o readfield.o diffusion.o)
 
