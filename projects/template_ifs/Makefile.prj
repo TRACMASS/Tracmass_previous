@@ -10,7 +10,7 @@
    fl04   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
    fl05   = -Dtempsalt       # Include temp and salt
-#   fl06   = -Dtextwrite      # Write results to textfile
+   fl06   = -Dtextwrite      # Write results to textfile
 #  fl07   = -Dbinwrite       # Write results to binaryfile
 #  fl08   = -Dmysqlwrite     # Write results to mysql
 #------------------------------------------------------------------------
@@ -42,7 +42,7 @@
 #  fl29  = -Dcoarse         # Adds a diffusion on trajectory
 #   fl30  = -Denergy
 #------------------------------------------------------------------------
-   fl31  = -Dhydro          # Tracks water mass in the amtopsphere instead of air
+#   fl31  = -Dhydro          # Tracks water mass in the amtopsphere instead of air
 #------------------------------------------------------------------------
    fl32  = -Dtempus          # Dataset time count
 #========================================================================

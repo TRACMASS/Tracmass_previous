@@ -17,9 +17,10 @@
 	gridsource     = 'https://www.ecmwf.int/',			! website for grid
 	griddesc       = '',								! short description of grid
 	! Describe filenames
-	topoDataDir = '/Users/jkjellsson/data/tracmass_data/ifs/',  ! directory of grid data
+	topoDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',  ! directory of grid data
 	RunID       = 'era',								! name of GCM simulation
-	physDataDir = '/Users/jkjellsson/data/tracmass_data/ifs/',   ! directory of physical data (u,v,T,S,MLD,etc)
+!	physDataDir = '/Users/doos/Dropbox/Public/tracmass_data/ifs/',   ! directory of physical data (u,v,T,S,MLD,etc)
+	physDataDir = '/Users/doos/Dropbox/data_dropbox/ifs/eranc/',   ! directory of physical data (u,v,T,S,MLD,etc)
 	fileSuffix  = '.nc',								! suffix of files, e.g. ".nc"
 	! Logicals to control what to read etc.
 	useTrmClock = .false.,								! use sophisticated clock (otherwise simple clock)
@@ -80,8 +81,8 @@
 	startmin       = 0,
 	starthour      = 6,
 	startday       = 1,									! start date
-	startmon       = 1,
-	startyear      = 2018,
+	startmon       = 6,
+	startyear      = 2017,
 	noleap         = .false.,							! dont use leap years? 
 	startjd        = -1,								! first julianday for trmClock
 	intmin         = 1,									!
@@ -93,9 +94,9 @@
 	loopStartYear  = 2017,								! year to start loop from
 	loopEndYear    = 2018,								! last year of loop
      
-	intspin        = 10,									! number of time steps for seeding
+	intspin        = 1,									! number of time steps for seeding
 	intrun         = 99999,		    					! number of time steps for run (always=2)
-	log_level      = 5,									! level of verbosity 
+	log_level      = 0,									! level of verbosity 
 														! = 0 minimal output to stdout
 														! = 1 low verbosity
 														! = 2 medium verbosity
@@ -113,9 +114,10 @@
 														! 4 = write only start and end positions
 														! 5 = write at chosen intervals
 														! 6 = write each spatial grid-crossing
-	outDataDir     = '/Users/jkjellsson/Downloads/tracmass_out/',	! directory for output
-!	outdatafile    = 'ifs_test_iter6000',		    	! fileprefix for output
-	outdatafile    = 'ifs_walker_air_anal_west',					! fileprefix for output
+	outDataDir     = '/Users/doos/data/ifs/data_out/',	! directory for output
+!	outdatafile    = 'ifs_walker_air_back_iter',					! fileprefix for output
+!	outdatafile    = 'ifs_walker_air_back_anal',					! fileprefix for output
+	outdatafile    = 'ifs_walker_air_forw_iter',					! fileprefix for output
 	outdircase     = .false. ,							! creates a new directory to store the data from the run      
 	intminInOutFile  =  0,								! 0 = ????
 														! 1 = ????
@@ -125,7 +127,7 @@
 	outdirdate     = .false. ,							! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
-	nff	       = 1,								! = 1 run forward trajectories
+	nff			   = 1,								! = 1 run forward trajectories
 														! = -1 run backwards
 	isec           = 3,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
@@ -150,12 +152,12 @@
 														! = 3 seed by using a 2-D mask file.
 							     
 	! Use the parameters below when seedtype = 1
-	ist1           = 241,				     			! seed in box in range i = [ist1,ist2]
-	ist2           = 250,				     			! 	       	      	   j = [jst1,jst2]
-	jst1           = 81,	    		     			! 			           k = [kst1,kst2]
-	jst2           = 161,			     
-	kst1           = 60,    
-	kst2           = 60,    
+	ist1           = 240,				     			! seed in box in range i = [ist1,ist2]
+	ist2           = 240,				     			! 	       	      	   j = [jst1,jst2]
+	jst1           = 110,	    		     			! 			           k = [kst1,kst2]
+	jst2           = 130,			     
+	kst1           = 59,    
+	kst2           = 59,    
 	tst1           = -1,								! seed only between tst1 and tst2
 	tst2           = -1,								! given as 19800105 for 1980-01-05
      
@@ -171,11 +173,11 @@
 /
 &INIT_KILLZONES
 	nend 		   = 2,									! number of ways to kill a trajectory (in this case time + one region)
-	ienw 		   = 241,									! west indices of killzones
-	iene           = 241, 								! east indices of killzones
+	ienw 		   = 0,!241,									! west indices of killzones
+	iene           = 0,!241, 								! east indices of killzones
 	jens           =  0, 								! south indices of killzones
-	jenn           = 999,  								! north indices of killzones
-	timax          = 365.0, 							! time limit for traj [days]
+	jenn           = 0,!999,  								! north indices of killzones
+	timax          = 120.0, 							! time limit for traj [days]
 		
 !	nend           =  5,                                ! Exasmples with 4 spatial killing zones  + one time
 !	ienw           = -1, 2402,   -1,   -1,				! west indices of killzones
@@ -200,7 +202,7 @@
 	rmaxe          =  9999.0,
 /
 &INIT_TRACERS
-     n2Dtracers           = 0                                ! number of 2D tracers to read
+     n2Dtracers           = 1                                ! number of 2D tracers to read
      names2Dtracers(1)    = ''                               ! names of 2D tracers
      n3Dtracers           = 3                                ! number of 3D tracers to read
      names3Dtracers(1:2)  = '',''                            ! names of 3D tracers

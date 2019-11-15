@@ -155,6 +155,7 @@ else
  WRITE (prefix(13:14),'(i2)') imon
 endif
 fieldFile = TRIM(physDataDir)//TRIM(prefix)//trim(fileSuffix)
+!print *,'fieldFile ', fieldFile
 
 if (log_level >= 1) then 
    print *,'     Read fieldFile: ', fieldFile
@@ -169,6 +170,7 @@ start3D  = [   1,  1,  1, ncTpos ]
 count3D  = [ imt, NY, KM,      1 ]
 map3D    = [  1 , 2 ,  3,      4 ] 
 
+
 ierr=NF90_CLOSE(ncid)
 ierr = NF90_OPEN (trim(fieldFile),NF90_NOWRITE,ncid)
 if (ierr /= 0) then
@@ -176,7 +178,6 @@ if (ierr /= 0) then
  STOP
 endif   
 
-!print *,'ff' 
 
 !__________________________ Read surface pressure
    ierr=NF90_INQ_VARID(ncid,'lnsp',varid)
