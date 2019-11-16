@@ -410,14 +410,12 @@ SUBROUTINE init_params
          seedsubints(1) = 0
       end if
 
-#ifdef tempsalt
       ALLOCATE ( tem(imt,jmt,km,nst) ) 
       ALLOCATE ( sal(imt,jmt,km,nst) )
       ALLOCATE ( rho(imt,jmt,km,nst) )
       tem = 0.
       sal = 0.
       rho = 0.
-#endif
       
       ALLOCATE ( tracers2D(n2Dtracers), tracers3D(n3Dtracers) )
       DO jt=1,n2Dtracers

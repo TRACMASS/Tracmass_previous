@@ -14,7 +14,7 @@ ARCH = "macports"
 # automatic-44 (set by nf-config, for netCDF version >4.4)
 # generic (set by yourself in Makefile.global)
 # none (no netCDF)
-NETCDFLIBS = "automatic-44" 
+NETCDFLIBS = "automatic-44"
 
 # Opt = optimise, i.e. dont use so many error checks
 # Else TRACMASS will compile with lots of error check which might slowdown the code

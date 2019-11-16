@@ -30,15 +30,15 @@ else ifeq ($(NETCDFLIBS),"automatic-44")
 	INC_DIR = $(shell nf-config --cflags)
 	LIB_DIR = $(shell nf-config --flibs)
 else 
-	LIB_DIR          = -L/usr/local/lib
-	INC_DIR          = -I/usr/local/include/
-	LNK_FLAGS        = -lnetcdf -lnetcdff 
+	LIB_DIR = -L/usr/local/lib
+	INC_DIR = -I/usr/local/include/
+	LNK_FLAGS = -lnetcdf -lnetcdff 
 endif
 
 ifeq ($(ARCH),"macports")
         F90COMPILER      = gfortran-mp-8 
 	PROD_FF_FLAGS    = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check 
-	DEV_FF_FLAGS     = -O3 -c -x f95-cpp-input -g -fbacktrace -fbounds-check -ffpe-trap=denormal -static -Wall -pedantic
+	DEV_FF_FLAGS     = -O1 -c -x f95-cpp-input -g -fbacktrace -fbounds-check -ffpe-trap=denormal -static -Wall -pedantic
         F90_FLAGS        = -fno-underscoring 
 	FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS) -J$(OBJDIR) 
 endif
@@ -46,7 +46,7 @@ endif
 ifeq ($(ARCH),"tetralith")
         F90COMPILER      = ifort
         PROD_FF_FLAGS    = -O3 -cpp -convert big_endian -xcore-avx512
-        DEV_FF_FLAGS     = -O3 -cpp -convert big_endian -xcore-avx512 -g -traceback 
+        DEV_FF_FLAGS     = -O1 -cpp -convert big_endian -xcore-avx512 -g -traceback -fpe0 
         F90_FLAGS        = -free 
         ARG_FLAGS       += -Tf
         FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)

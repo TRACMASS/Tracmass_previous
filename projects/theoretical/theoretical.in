@@ -37,7 +37,8 @@
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
-            ngcm =      1,
+       ngcm_step =      1,
+       ngcm_unit =      4,
             iter =      1,
           intmax = 146000,
         minveljd =     -1,
@@ -67,7 +68,7 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
              kriva =      6,
-      outdatadir =   '/proj/bolinc/users/x_sarbe/TRACMASS/projects/theoretical/',
+      outdatadir =   'data_out'
      outdatafile =     'test_k6',
 !     outdatafile =     'analyt_k1',
     ! outdatafile =     'dt1_k1',
@@ -168,4 +169,6 @@
            cwamp =   20.0,
            twave =    8.0,
          critvel =    0.1,
+/
+&INIT_TRACERS
 /
