@@ -23,16 +23,13 @@ ifeq ($(NETCDFLIBS),"none")
 	LIB_DIR =
 	INC_DIR =
 	ORM_FLAGS += -Dno_netcdf
-endif
-ifeq ($(NETCDFLIBS),"automatic")
+else ifeq ($(NETCDFLIBS),"automatic")
 	LIB_DIR = $(shell nc-config --flibs)
 	INC_DIR = -I$(shell nc-config --includedir)
-endif
-ifeq ($(NETCDFLIBS),"automatic-44")
+else ifeq ($(NETCDFLIBS),"automatic-44")
 	INC_DIR = $(shell nf-config --cflags)
 	LIB_DIR = $(shell nf-config --flibs)
-endif 
-ifeq ($(NETCDFLIBS),"generic")
+else 
 	LIB_DIR          = -L/usr/local/lib
 	INC_DIR          = -I/usr/local/include/
 	LNK_FLAGS        = -lnetcdf -lnetcdff 
