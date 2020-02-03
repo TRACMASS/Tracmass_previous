@@ -38,10 +38,10 @@ SUBROUTINE readfields
 
  REAL(DP), SAVE                            ::  punit, eunit,  pps, tv, pc, pm, pref, Rd, cp, Lv
  REAL*4, SAVE                              ::  celsius0, qmin
- REAL*4, ALLOCATABLE, DIMENSION(:,:)       ::  pxy,  th, zh, uh, vh, qh, ph, dpgh
+ REAL*4, ALLOCATABLE, DIMENSION(:,:)       ::  pxy,  sst, th, zh, uh, vh, qh, ph, dpgh
  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     ::  td, tw, zg, qxyz,txyz,zxyz,uxyz,vxyz
   
- CHARACTER (LEN=200)                       ::  gridFile, fieldFile, prefix
+ CHARACTER (LEN=200)                       ::  gridFile, fieldFile, fieldFileSST, prefix
  LOGICAL around
  
  REAL(DP)    :: scale_factor, add_offset, vertsummam, vertsummap,emp(IMT,JMT)
@@ -55,7 +55,7 @@ SUBROUTINE readfields
 
 if ( .NOT. ALLOCATED(txyz) ) then
    ALLOCATE ( zxyz(IMT,NY,KM), uxyz(IMT,NY,KM), vxyz(IMT,NY,KM), qxyz(IMT,NY,KM), txyz(IMT,NY,KM), &
-   &          pxy(IMT,NY), th(IMT,NY), zh(IMT,NY), uh(IMT,NY), vh(IMT,NY),     &
+   &          pxy(IMT,NY), sst(IMT,NY), th(IMT,NY), zh(IMT,NY), uh(IMT,NY), vh(IMT,NY),     &
    &          qh(IMT,NY), ph(IMT,NY),  dpgh(IMT,NY), ishort(IMT,NY), ishortxyz(IMT,NY,KM) )
 endif
 
@@ -155,6 +155,16 @@ else
  WRITE (prefix(13:14),'(i2)') imon
 endif
 fieldFile = TRIM(physDataDir)//TRIM(prefix)//trim(fileSuffix)
+
+prefix = '0000/sst000000'
+WRITE (prefix(1:4),'(i4)') iyear
+WRITE (prefix(9:12),'(i4)') iyear
+if (imon < 10) then
+ WRITE (prefix(14:14),'(i1)') imon
+else
+ WRITE (prefix(13:14),'(i2)') imon
+endif
+fieldFileSST = TRIM(physDataDir)//TRIM(prefix)//trim(fileSuffix)
 !print *,'fieldFile ', fieldFile
 
 if (log_level >= 1) then 
@@ -169,6 +179,56 @@ map2D    = [ 1 , 2 ,   3 ,     4 ]
 start3D  = [   1,  1,  1, ncTpos ]
 count3D  = [ imt, NY, KM,      1 ]
 map3D    = [  1 , 2 ,  3,      4 ] 
+
+
+
+ierr=NF90_CLOSE(ncid)
+ierr = NF90_OPEN (trim(fieldFileSST),NF90_NOWRITE,ncid)
+if (ierr /= 0) then
+ PRINT*,NF90_STRERROR (ierr)
+ STOP
+endif   
+
+
+!__________________________ Read SST
+   ierr=NF90_INQ_VARID(ncid,'sst',varid)
+   if (ierr /= 0) then
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   endif
+   ierr=NF90_GET_VAR(ncid,varid, ishort,start2d,count2d)
+   if (ierr /= 0) then
+      PRINT*,NF90_STRERROR (ierr)
+      STOP
+   endif
+   
+! asking if there are the scale_factor and add_offset attributes
+ ierr = nf90_get_att(ncid, varid,"scale_factor", scale_factor)
+ if (ierr == -43) scale_factor =1.0
+ ierr = nf90_get_att(ncid, varid,"add_offset", add_offset)
+ if (ierr == -43) add_offset = 0.0
+   
+! pxy=float(ishort)* scale_factor+ add_offset
+ th=float(ishort)* scale_factor+ add_offset
+
+! land values
+do j=1,NY 
+ do i=1,IMT
+ if(ishort(i,j)==-32767) th(i,j)=0.
+ enddo
+enddo
+
+
+do j=1,NY
+ sst(:,j)=th(:,NY+1-j) 
+enddo
+
+
+!print *,sst(1,1),th(1,NY),ishort(1,NY)
+!print *,sst(1,:)
+
+!stop 48956
+
 
 
 ierr=NF90_CLOSE(ncid)
@@ -341,6 +401,8 @@ DO k=1,KM
       vh(:,j) = vxyz(:,jj,k)
    END DO
    
+   if(k==KM) th=sst
+   
    uh(:,1)=0. ; vh(:,1)=0.
    
    dpgh (:,:) = ( aa(k)-aa(k-1) + (bb(k)-bb(k-1))*ph(:,:) ) / grav
@@ -357,6 +419,12 @@ DO k=1,KM
          
    ! A-grid -> middle of grid cells for temperature humidity, layer thickness and pressure
          tem  (i,j,k,2) = 0.25*(th(i,jj)+th(im,jj)+th(i,jm)+th(im,jm)) ![K]
+         if(min(th(i,jj),th(im,jj),th(i,jm),th(im,jm))==0.) then
+          tem  (i,j,k,2)=max(th(i,jj),th(im,jj),th(i,jm),th(im,jm))
+          tem  (i,j,k,2)=min(tem(i,j,k,2),celsius0+27.)
+         endif
+          
+          
          sal  (i,j,k,2) = 0.25*(qh(i,jj)+qh(im,jj)+qh(i,jm)+qh(im,jm)) ![g/kg]
          
          pps = 0.25*(ph(i,jj)+ph(im,jj)+ph(i,jm)+ph(im,jm)) ![Pa]
@@ -473,9 +541,9 @@ sal(:,:,:,2) = tw * eunit ![kJ/kg]
 
 #else
 
-tem(:,:,:,2) = tem(:,:,:,2)!-celsius0 ![C]
-rho(:,:,:,2) = rho(:,:,:,2)*0.01 ![hPa]
-!rho(:,:,:,2) = 0.5/cp * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![C]
+tem(:,:,:,2) = tem(:,:,:,2)-celsius0 ![C]
+!rho(:,:,:,2) = rho(:,:,:,2)*0.01 ![hPa]
+rho(:,:,:,2) = 0.5/cp * (zg(:,:,1:KM) + zg(:,:,0:KM-1)) ![C]
 
 
 #endif

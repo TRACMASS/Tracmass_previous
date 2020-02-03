@@ -204,6 +204,9 @@ CONTAINS
             num=1
          END IF
          ijt    = NINT (SQRT (FLOAT(num)) ) 
+#if defined twodim
+         ijt    = num
+#endif
          ikt    = NINT (FLOAT (num) / FLOAT (ijt))
          subvol = vol / DBLE (ijt*ikt)
 

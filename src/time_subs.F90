@@ -184,11 +184,13 @@ elseif(ijk==3) then
 endif
 
  alfa = -(fnmi0-fnmim-fn0i0+fn0im)
+ !print *,'alfa=',alfa
  if (alfa>0.) then
   call apos
  elseif (alfa<0.) then
   call amin 
  else
+ !print *,'jaaaaaaaa'
   call anil 
  endif
 
@@ -259,7 +261,7 @@ REAL (QP)  :: alfa,beta,dzs,dzu1,dzu2,ssmss0
 
 #ifdef twodim  
 if(ijk==3) then
-r1=r0
+r1=rr0
 return
 endif
 #endif 

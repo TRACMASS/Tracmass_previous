@@ -390,7 +390,8 @@ contains
          y1=y0  
        endif
        if(dble(int(z0))/=z0 .and. abs(int(z0)-int(z1))>=1.) then
-        print *,'pangz=',ntrac,z0,z1
+        print *,'pangz=',ntrac,z0,z1,x0,x1,y0,y1
+        print *,'ds',dse,dsw,dsn,dss,dsu,dsd,dsc,dsmin
          z1=z0
         stop 3854
        endif

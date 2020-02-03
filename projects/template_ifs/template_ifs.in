@@ -80,8 +80,8 @@
 	startsec       = 0,									! start time
 	startmin       = 0,
 	starthour      = 6,
-	startday       = 1,									! start date
-	startmon       = 6,
+	startday       = 30,									! start date
+	startmon       = 12,
 	startyear      = 2017,
 	noleap         = .false.,							! dont use leap years? 
 	startjd        = -1,								! first julianday for trmClock
@@ -94,7 +94,7 @@
 	loopStartYear  = 2017,								! year to start loop from
 	loopEndYear    = 2018,								! last year of loop
      
-	intspin        = 1,									! number of time steps for seeding
+	intspin        = 1460, !120, !1460,									! number of time steps for seeding
 	intrun         = 99999,		    					! number of time steps for run (always=2)
 	log_level      = 0,									! level of verbosity 
 														! = 0 minimal output to stdout
@@ -117,7 +117,7 @@
 	outDataDir     = '/Users/doos/data/ifs/data_out/',	! directory for output
 !	outdatafile    = 'ifs_walker_air_back_iter',					! fileprefix for output
 !	outdatafile    = 'ifs_walker_air_back_anal',					! fileprefix for output
-	outdatafile    = 'ifs_walker_air_forw_iter',					! fileprefix for output
+	outdatafile    = 'ifs_walker_water_back_2017_sst28_iter',					! fileprefix for output
 	outdircase     = .false. ,							! creates a new directory to store the data from the run      
 	intminInOutFile  =  0,								! 0 = ????
 														! 1 = ????
@@ -127,7 +127,7 @@
 	outdirdate     = .false. ,							! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
-	nff			   = 1,								! = 1 run forward trajectories
+	nff			   = -1,								! = 1 run forward trajectories
 														! = -1 run backwards
 	isec           = 3,									! = 1 start on zonal cell wall 
 														! = 2 start on meridional cell wall
@@ -152,12 +152,12 @@
 														! = 3 seed by using a 2-D mask file.
 							     
 	! Use the parameters below when seedtype = 1
-	ist1           = 240,				     			! seed in box in range i = [ist1,ist2]
-	ist2           = 240,				     			! 	       	      	   j = [jst1,jst2]
-	jst1           = 110,	    		     			! 			           k = [kst1,kst2]
-	jst2           = 130,			     
-	kst1           = 59,    
-	kst2           = 59,    
+	ist1           = 110,				     			! seed in box in range i = [ist1,ist2]
+	ist2           = 250,				     			! 	       	      	   j = [jst1,jst2]
+	jst1           = 70,	    		     			! 			           k = [kst1,kst2]
+	jst2           = 170,			     
+	kst1           = 60,    
+	kst2           = 60,    
 	tst1           = -1,								! seed only between tst1 and tst2
 	tst2           = -1,								! given as 19800105 for 1980-01-05
      
@@ -175,9 +175,9 @@
 	nend 		   = 2,									! number of ways to kill a trajectory (in this case time + one region)
 	ienw 		   = 0,!241,									! west indices of killzones
 	iene           = 0,!241, 								! east indices of killzones
-	jens           =  0, 								! south indices of killzones
+	jens           = 0, 								! south indices of killzones
 	jenn           = 0,!999,  								! north indices of killzones
-	timax          = 120.0, 							! time limit for traj [days]
+	timax          = 365.0, 							! time limit for traj [days]
 		
 !	nend           =  5,                                ! Exasmples with 4 spatial killing zones  + one time
 !	ienw           = -1, 2402,   -1,   -1,				! west indices of killzones
@@ -188,9 +188,9 @@
 /
 &INIT_TEMP_SALT
      ! Start or end trajectories in tracer intervals; T stands for Dry static energy and S for Latent heat
-	tmin0 		   = -9999.0,							! start only if T >= tmin0
+	tmin0 		   =    28.,							! start only if T >= tmin0
 	tmax0   	   =  9999.0,							! ---- " ----   T <= tmax0   
-	smin0          = -9999.0,							! ---- " ----   S >= smin0
+	smin0          =    19.0,							! ---- " ----   S >= smin0
 	smax0          =  9999.0,							!               S <= smax0
 	rmin0          = -9999.0,							! 		   rho >= rmin0
 	rmax0          =  9999.0,							!  	   rho <= rmax0

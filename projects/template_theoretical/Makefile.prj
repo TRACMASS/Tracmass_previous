@@ -5,11 +5,11 @@
 #------------------------------------------------------------------------
 #   fl01   = -Datmospheric    # This should always be activated for ifs
 #   fl02   = -Dfixedtimestep  # Mimics Ariane's lack of time interpolation of the velocity fields
-   fl03   = -Dtimestep       # Analytical time scheme used to solve the differential Eqs.
-#  fl03   = -Dtimeanalyt    # Time steps with analytical stationary scheme 
+   fl03   = -Dtimestep       # Time steps with analytical stationary scheme.
+#  fl03   = -Dtimeanalyt    #  Analytical time scheme used to solve the differential Eqs
    fl04   = -Dregulardt      # Regular time steps to be used with -Dtimestep
 #------------------------------------------------------------------------
-#   fl05   = -Dtempsalt       # Include temp and salt
+   fl05   = -Dtempsalt       # Include temp and salt
    fl06   = -Dtextwrite      # Write results to textfile
 #  fl07   = -Dbinwrite       # Write results to binaryfile
 #  fl08   = -Dmysqlwrite     # Write results to mysql
@@ -24,11 +24,13 @@
                             # calculated in an identical previous run.    
 #   fl15  = -Dinitxyt        # Start trajectories at given positions and times
 #------------------------------------------------------------------------
-#  fl16  = -Dtwodim         # Turn off vertical velocities.
+  fl16  = -Dtwodim         # Turn off vertical velocities.
 #  fl17  = -Dfull_wflux     # Use a full 3D wflux field.
 #  fl18  = -Dexplicit_w     # Use a given vertical velocity.
 #------------------------------------------------------------------------
   fl21  = -Dzgrid3D         # Cell depths defined as 3D grid 
+#  fl22  = -Dnewtracers      # Any number of GCM tracers (not only temp, salt, rho)
+  fl23  = -Dnewinterp 
 #------------------------------------------------------------------------
 #  fl23  = -Dselect         # Select only one trajectory (for debugging)
 #  fl24  = -Dtracer         # Stores a simulated tracer

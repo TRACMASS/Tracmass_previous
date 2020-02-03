@@ -22,7 +22,7 @@ subroutine vertvel(ia,iam,ja,ka)
   REAL                                       :: kin 
   
 #if defined twodim || explicit_w
-  ! Note that w must be multiplied by ff  in resdfileds for "explicit_w"
+  ! Note that w must be multiplied by ff  in readfileds for "explicit_w"
   return
 #else
    

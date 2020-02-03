@@ -8,6 +8,7 @@ subroutine readfields
   USE mod_vel
   !  USE mod_dens
   USE mod_stat
+  USE mod_tempsalt
   
   IMPLICIT none
     
@@ -39,9 +40,14 @@ subroutine readfields
   gamma  = 1./(2.89*24.*3600.)
   gammag = 1./(28.9*24.*3600.)
   omtime = dble(ints-intstart) * dble(ngcm*3600)
+  
+  ug=1. +0.1*dsin(omtime)
+!  vg=1. +0.1*dsin(omtime)
 
 
 !C-grid & store in matrixes
+
+dzt(:,:,:,2)=10.-9.5*mod(ints,2)
 
 do k=1,KM
    do j=1,JMT
@@ -84,15 +90,49 @@ do k=1,KM
 
 ! Nicoletta Fabboni velocities, which have analytical solutions
 ! -------------------------------------------------------------
-         uflux(i,j,k,2) = dyu(i,j) * dzt(i,j,k,2) * ( ug*dexp(-gammag*omtime) + &
-                                               (u0-ug) * dexp(-gamma*omtime) * cos(fcor*omtime+pi/2.d0) )
-         vflux(i,j,k,2) = dxv(i,j) * dzt(i,j,k,2) * ( -(u0-ug) * dexp(-gamma*omtime) * sin(fcor*omtime+pi/2.d0) )
+!         uflux(i,j,k,2) = dyu(i,j) * dzt(i,j,k,2) * ( ug*dexp(-gammag*omtime) + &
+!                                               (u0-ug) * dexp(-gamma*omtime) * cos(fcor*omtime+pi/2.d0) )
+!         vflux(i,j,k,2) = dxv(i,j) * dzt(i,j,k,2) * ( -(u0-ug) * dexp(-gamma*omtime) * sin(fcor*omtime+pi/2.d0) )
 
-if(j==1 .or. j==JMT) vflux(i,j,k,2)=0.
+! One single grid cell
+! -------------------------------------------------------------
+    if(   i== 2 .and. j==3 ) then
+     uflux(i,j,k,2) = -0.3 * dyu(i,j) * dzt(i,j,k,2) 
+    elseif(i==3 .and. j==3 ) then
+     uflux(i,j,k,2) =  0.1 * dyu(i,j) * dzt(i,j,k,2) 
+    else
+     uflux(i,j,k,2) = 0.
+    endif
+    
+    if(    i== 3 .and. j==2 ) then
+     vflux(i,j,k,2) = 1. * dxv(i,j) * dzt(i,j,k,2) 
+    elseif(i==3 .and. j==3 ) then
+     vflux(i,j,k,2) =  0.4 * dxv(i,j) * dzt(i,j,k,2)
+    else
+     vflux(i,j,k,2) = 0.
+    endif
+    
+    print *,i,j,uflux(i,j,k,2),vflux(i,j,k,2)
+
+
+    !if(j==1 .or. j==JMT) vflux(i,j,k,2)=0.
 
       end do
    end do
 end do ! enddo k-loop
+
+
+!uflux(:,:,:,2)=uflux(:,:,:,2)*ug
+!vflux(:,:,:,2)=vflux(:,:,:,2)/ug
+
+
+! set velocity on one grid box wall to ensure no divergence
+ vflux(3,3,:,:) = vflux(3,2,:,:) + uflux(2,3,:,:) - uflux(3,3,:,:)
+ print *,'vflux(3,3,:,:)',vflux(3,3,1,:),dzt(1,1,1,2)
+
+tracers3D(1)%data(:,:,:,nsp) = tem(:,:,:,nsp)
+tracers3D(2)%data(:,:,:,nsp) = sal(:,:,:,nsp)
+tracers3D(3)%data(:,:,:,nsp) = rho(:,:,:,nsp)
 
 ! zero at north and south boundaries 
 !vflux(:,0  ,:,:)=0.
