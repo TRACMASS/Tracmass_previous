@@ -1,9 +1,0 @@
-name=../../sed/run/ne.fw.a0
-rm $name
-
-/sw/bin/g95 -o $name main.f95 -O3 -cpp  -Drco -Dmean -Dtempsalt -Dfrsurf -Dstreamxy -Dstreamr -Dstreamv -Dstreamts -Dtime -Dsediment
-
-#$name
-
-time $name > $name.run &
-#tail -f $name.run
