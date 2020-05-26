@@ -1,4 +1,11 @@
-1;95;0c&INIT_NAMELIST_VERSION
+&INIT_NAMELIST_VERSION
+=======
+! This is a template to run TRACMASS with NEMO.
+! 1.) Copy the entire folder projects/nemo and rename it as you wish. 
+! 2.) Set PROJECT = to this new name in the Makfile in the directory highest up in this unix tree
+! 3.) Download test data to run with from https://www.dropbox.com/sh/b6leim7tb99i3hm/AAA7M0mxuYTwJLKjqmLnoJuca?dl=0
+! 4.) Set "topoDataDir" to the directory where you store this model level file
+! 5.) Set "outDataDir" to where you want to store your data from the TRACMASS run
       gridvernum    =      6,                                ! grid version number, used to distinguish grids in setupgrid 
 /
 &INIT_GRID_DESCRIPTION 
@@ -42,8 +49,9 @@
 /
 &INIT_GRID_SIZE
      ! Size of global grid
-     imt            = 4322,                                   ! number of global i points
-     jmt            = 3059,                                   ! number of global j points
+     imt            = 360,                                   ! number of global i points 
+                                                             ! should not include the two extra points for the ORCA grids
+     jmt            = 292,                                   ! number of global j points
      km             = 75,                                    ! number of global k points
      nst            = 2,                                     ! number of time levels to use (should be = 2)
      ! Only read subregion of the global data
@@ -57,8 +65,7 @@
      
      nperio         = 0,                                     ! control periodic boundary conditions
                                                              ! > 0 periodic in x
-                                                             ! = 4 North fold for ORCA2, 025, 0083
-                                                             ! = 6 North fold for ORCA1
+                                                             ! = 4 North fold for ORCA grids
      coordFile      = 'mesh_hgr.nc'                          ! file with lons,lats
      hgridFile      = 'mesh_hgr.nc'                          ! file with dx, dy etc
      zgridFile      = 'mesh_zgr.nc'                          ! file with dz etc.
@@ -141,8 +148,10 @@
   							     ! 6 = write each spatial grid-crossing
      outdatadir     = '/gws/nopw/j04/aopp/joakim/tracmass_out/',        ! directory for output
      outdatafile    = 'orca12_overflow-backward',			     ! fileprefix for output
+      outdircase     = .false. ,							! creates a new directory to store the data from the run      
      intmininoutfile= 0,				     !
      intpsi         = 10, 									! frequency of writing the stream functions
+	 outdirdate     = .false. ,							! creates a new directory to store the data from the run
 /
 &INIT_SEEDING
      nff            = -1,                                     ! = 1 run forward trajectories

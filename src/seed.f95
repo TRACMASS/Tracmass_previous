@@ -15,7 +15,7 @@ MODULE mod_seed
 !!------------------------------------------------------------------------------
    
    USE mod_log, only      : log_level
-   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart,nff
+   USE mod_time,  only    : ints, ntime, tseas, tt, ts, partQuant, intstart, nff
    USE mod_grid,  only    : imt, jmt, km, kmt, nsm, mask, dz, dzt
    USE mod_vel,   only    : uflux, vflux, wflux, ff
    USE mod_traj!,  only    : ntractot, ntrac, ib, jb, kb, x1, y1, z1, trj, nrj
@@ -161,11 +161,11 @@ CONTAINS
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (ib,ibm,jb,kb)
 #if defined explicit_w || full_wflux
-               vol = wflux(ib,jb,kb,nsm)*ff
+               vol = wflux(ib,jb,kb,nsm)
 #elif twodim
                vol = 1.
 #else 
-               vol=wflux(kb,nsm)*ff
+               vol=wflux(kb,nsm)
 #endif
          
             CASE (4 ,5)   ! Total volume/mass of a grid box
@@ -180,7 +180,7 @@ CONTAINS
          
             END SELECT
          ! If the particle is forced to move in positive/negative direction
-         IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0 ) .OR. (vol == 0.) ) THEN
+         IF ( (idir*vol <= 0.d0 .AND. idir /= 0 ) .OR. (vol == 0.) ) THEN
             CYCLE startLoop
          ENDIF
       
@@ -253,43 +253,26 @@ CONTAINS
                      x1 = DBLE (ib) 
                      y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
-                     !IF (idir*nff == 1) THEN
-                     !if (startdir == 1) then
-                     if (idir == 1) then                    
+                     
+                     IF (idir == 1) THEN
                         ib = iist+1
                      end if
-                     !ELSE IF (idir == -1) THEN
-                     !   ib=iist 
-                     !END IF
 
                   CASE (2)   ! Zonal-vertical section
                      x1 = DBLE (ib-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb)
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
-                     !IF (idir*nff == 1) THEN
-                     !   jb = ijst+1
-                     !ELSE IF (idir == -1) THEN
-                     !   jb = ijst
-                     !END IF
-                     !if (startdir == 1) then
+                     
                      if (idir == 1) then
                          jb = ijst+1
                      end if
-                     !IF (ib == 237 .and. jb == 42 .and. kb == 30) THEN
-                     !   PRINT*,'seed (237,42,30): ',x1,y1,z1,idir,nff
-                     !ENDIF
 
                   CASE (3)   ! Horizontal section                  
                      x1 = DBLE (ib-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                      z1 = DBLE (kb)
-                     !IF (idir*nff == 1) THEN
-                     !   kb = ikst+1
-                     !ELSE IF (idir == -1) THEN
-                     !   kb = ikst
-                     !END IF
-                     !if (startdir == 1) then
-                     if (idir == 1) then
+
+                     IF (idir == 1) THEN
                         kb = ikst+1
                      end if
 

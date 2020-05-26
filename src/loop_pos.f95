@@ -237,9 +237,9 @@ contains
        scrivi=.false.
        call vertvel(ia,iam,ja,ka)
 #if defined explicit_w || full_wflux
-       uu=wflux(ia,ja,ka,nsm)
+       uu=wflux(ia,ja,ka,nsm)!*ff
 #else
-       uu=intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm)
+       uu=(intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm))!*ff
 #endif
        if(uu.gt.0.d0) then
           kb=ka+1
@@ -289,9 +289,13 @@ contains
        call vertvel(ia, iam, ja, ka)
      
 #if defined explicit_w || full_wflux
-       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
+       uu=wflux(ia,ja,ka-1,nsm)!*ff
+!       if(wflux(ia,ja,ka-1,nsm).lt.0.d0) kb=ka-1
+       if(uu.lt.0.d0) kb=ka-1
 #else
-       if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
+       uu=(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm))!*ff
+!        if(intrpbg*wflux(ka-1,nsp)+intrpb*wflux(ka-1,nsm).lt.0.d0) kb=ka-1
+        if(uu.lt.0.d0) kb=ka-1
 #endif              
        z1=dble(ka-1)
 #if defined timeanalyt
@@ -375,15 +379,23 @@ contains
        call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
        call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
        call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
-       if (nperio /= 0) then !  East-west cyclic
-        if(x1 <  0.d0    ) then
-         x1=x1+dble(IMT)       
-        elseif(x1 > dble(IMT)) then
-         x1=x1-dble(IMT)   
-        end if
-       end if
+!       if (nperio /= 0) then !  East-west cyclic
+!        if(x1 <  0.d0    ) then
+!         x1=x1+dble(IMT)       
+!        elseif(x1 > dble(IMT)) then
+!         x1=x1-dble(IMT)   
+!        end if
+!       end if
 #endif
     endif
+    
+     if (nperio /= 0) then !  East-west cyclic
+      if(x1 <  0.d0    ) then
+       x1=x1+dble(IMT)       
+      elseif(x1 > dble(IMT)) then
+       x1=x1-dble(IMT)   
+      end if
+     end if
     
   end subroutine pos
   

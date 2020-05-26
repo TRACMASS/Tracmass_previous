@@ -196,11 +196,6 @@ CONTAINS
 #elif defined atmospheric 
 566 format(i8,i7,f7.2,f7.2,f7.2,f10.2,f10.2 &
          ,f15.0,f8.2,f8.2,f8.2,f6.0,8e8.1 )
-#elif defined orc
-    !566 format(i8,i7,2f8.2,f6.2,2f10.2 &
-    !         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
-566 format(i8,i7,2f9.3,f9.2,2f14.2 &
-         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i8,i7,2f9.3,f9.2,2f14.2 &
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
@@ -233,6 +228,7 @@ CONTAINS
 #if defined textwrite 
     select case (sel)
     case (10)
+     t0=trajectories(ntrac)%t0
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
        !write(58,566) ntrac,ziter,zx1,zy1,zz1,ztt/tday,zt0/tday,zvol,temp,salt,dens
 !       if(temp==0.) stop 4867

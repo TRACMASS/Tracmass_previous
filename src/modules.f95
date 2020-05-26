@@ -149,7 +149,7 @@ MODULE mod_grid
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu, ang, depth
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: dz
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: dxdy
   REAL(DP)                                  :: dxyz

@@ -26,13 +26,13 @@ subroutine interp2(i,j,k,temp,salt,dens)
   
   intrpbg=dmod(ts,1.d0) 
   intrpb =1.d0-intrpbg
-
-!  print *,i,j,k,nsm,nsp, intrpb, intrpbg
+  
 
   temp=intrpbg*tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm)
   salt=intrpbg*sal(i,j,k,nsp)+intrpb*sal(i,j,k,nsm)
   dens=intrpbg*rho(i,j,k,nsp)+intrpb*rho(i,j,k,nsm)
   
+!  print *,i,j,k,nsm,nsp, intrpb, intrpbg,temp,salt,dens
   if (log_level >= 10) then
      print*,' leaving interp2 '
   end if
@@ -40,4 +40,3 @@ subroutine interp2(i,j,k,temp,salt,dens)
   return
 end subroutine interp2
 #endif
-
