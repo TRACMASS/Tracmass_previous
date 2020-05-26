@@ -366,10 +366,22 @@ SUBROUTINE loop
            call vertvel(ia,iam,ja,ka)
 #ifdef timeanalyt
 !           ss0=dble(int(ts,8))*tseas/dxyz or should ssp be in the call cross_time?
+           if (log_level >= 10) then
+              print*,' Calling cross_time '
+              print*,' ia,ja,ka,x0,y0,z0: ',ia,ja,ka,x0,y0,z0
+           end if 
            call cross_time(1,ia,ja,ka,x0,dse,dsw) ! zonal
            call cross_time(2,ia,ja,ka,y0,dsn,dss) ! merid
            call cross_time(3,ia,ja,ka,z0,dsu,dsd) ! vert
 #else
+           if (log_level >= 10) then
+              print*,' Calling cross_stat '
+              print*,' ia,ja,ka,x0,y0,z0: ',ia,ja,ka,x0,y0,z0
+           end if
+           if (log_level >= 10) then 
+              print*,' Zonal flux ',uflux(ia,ja,ka,nsm),uflux(iam,ja,ka,nsm)
+              print*,' Merid flux ',vflux(ia,ja,ka,nsm),vflux(ia,ja-1,ka,nsm)
+           end if
            call cross_stat(1,ia,ja,ka,x0,dse,dsw) ! zonal
            call cross_stat(2,ia,ja,ka,y0,dsn,dss) ! meridional
            call cross_stat(3,ia,ja,ka,z0,dsu,dsd) ! vertical
@@ -382,6 +394,10 @@ SUBROUTINE loop
                       
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
+           if (log_level >= 10) then
+              print*,' After calling pos '
+              call print_pos
+           end if
            !call errorCheck('longjump', errCode)
 
            if (nperio == 6) then

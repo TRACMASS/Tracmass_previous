@@ -23,6 +23,7 @@ subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
   !              (in units of s/m3)
 
 USE mod_precdef   
+USE mod_log, only: log_level 
 USE mod_grid, only: undef, imt, jmt, nsm, nsp
 USE mod_vel, only: uflux, vflux, wflux, ff
 USE mod_active_particles, only: upr
@@ -39,8 +40,8 @@ if(ijk.eq.1) then
  if(im.eq.0) im=IMT
  uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
  um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
- frac1 = min( abs(upr(1,1)), abs(0.99*uu/upr(1,1)) )
- frac2 = min( abs(upr(2,1)), abs(0.99*um/upr(2,1)) )
+ !frac1 = min( abs(upr(1,1)), abs(0.99*uu/upr(1,1)) )
+ !frac2 = min( abs(upr(2,1)), abs(0.99*um/upr(2,1)) )
  !print*,'cross x',uu,um,upr(1,1),upr(2,1)
 #ifdef turb   
  if(r0.ne.dble(ii)) then
@@ -62,12 +63,13 @@ if(ijk.eq.1) then
   !end if
  endif
 #endif
+  
 elseif(ijk.eq.2) then
  ii=ja
  uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
  um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
- frac1 = min( abs(upr(3,1)), abs(0.99*uu/upr(3,1)) )
- frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )
+ !frac1 = min( abs(upr(3,1)), abs(0.99*uu/upr(3,1)) )
+ !frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )
  !print*,'cross y',uu,um,upr(3,1),upr(4,1)
 #ifdef turb    
  if(r0.ne.dble(ja  )) then
@@ -89,6 +91,7 @@ elseif(ijk.eq.2) then
   !end if
  endif
 #endif
+ 
 elseif(ijk.eq.3) then
  ii=ka
 #if defined  explicit_w || full_wflux
@@ -113,42 +116,83 @@ elseif(ijk.eq.3) then
  endif
 #endif
 #endif
+ 
 endif
+
+if (log_level >= 10) then
+   print*,'cross: ijk,uu,um,ff: ',ijk,uu,um,ff
+end if
 
 ! east, north or upward crossing
 if(uu.gt.0.d0 .and. r0.ne.dble(ii)) then
- if(um.ne.uu) then
-  ba=(r0+dble(-ii+1)) * (uu-um) + um
-  if(ba.gt.0.d0) then
+   if (log_level >= 15) then
+      print*,'positive crossing: uu, r0, ii:',uu,r0,ii
+   end if 
+   
+   if(um.ne.uu) then
+      ba=(r0+dble(-ii+1)) * (uu-um) + um
+      if (log_level >= 20) then
+         print*,'r0,-ii+1,(r0+(-ii+1)) * (uu-um),ba:',r0,-ii+1,(r0+dble(-ii+1)) * (uu-um),ba
+      end if
+      
+      if(ba.gt.0.d0) then
 !   sp=-1.d0/(um-uu)*( dlog(uu) - dlog(ba) )
-   sp=( dlog(ba) - dlog(uu) )/(um-uu)
-  else
-   sp=UNDEF
-  endif
- else
-  sp=(dble(ii)-r0)/uu
- endif
+         sp=( dlog(ba) - dlog(uu) )/(um-uu)
+         if (log_level >= 20) then
+            print*,' valid crossing ',ba
+         end if
+      else
+         if (log_level >= 20) then
+            print*,' invalid crossing ba < 0',ba
+         end if
+         sp=UNDEF
+      endif
+   else
+      sp=(dble(ii)-r0)/uu
+      if (log_level >= 20) then
+         print*,'linear crossing',sp
+      end if
+   endif
+
 else
- sp=UNDEF
+   if (log_level >= 20) then
+      print*,' invalid crossing uu < 0 or r0 = ii. uu, r0, ii: ',uu,r0,ii
+   end if 
+   sp=UNDEF
 endif
 
 if(sp.le.0.d0) sp=UNDEF
 
 ! west, south or downward crossing
 if(um.lt.0.d0 .and. r0.ne.dble(ii-1)) then
- if(um.ne.uu)then
-  ba=-((r0-dble(ii))*(uu-um)+uu) 
-  if(ba.gt.0.d0) then
-!   sn=-1.d0/(um-uu)*( dlog(-um) - dlog(ba)  )
-   sn=( dlog(ba) - dlog(-um)  )/(um-uu)
-  else
-   sn=UNDEF
-  endif
- else
-  sn=(dble(ii-1)-r0)/uu
- endif
+   if (log_level >= 10) then
+      print*,'negative crossing: uu, r0, ii:',um,r0,ii-1
+   end if
+   
+   if(um.ne.uu)then
+      ba=-((r0-dble(ii))*(uu-um)+uu) 
+      if (log_level >= 20) then
+         print*,'r0,ii,(r0-ii) * (uu-um),ba:',r0,ii,(r0+dble(ii)) * (uu-um),ba
+      end if
+      if(ba.gt.0.d0) then
+      !   sn=-1.d0/(um-uu)*( dlog(-um) - dlog(ba)  )
+         sn=( dlog(ba) - dlog(-um)  )/(um-uu)
+         if (log_level >= 10) then
+            print*,'valid crossing: ',ba,sn
+         end if
+      else
+         sn=UNDEF
+      endif
+   
+   else
+      sn=(dble(ii-1)-r0)/uu
+   endif
+
 else
- sn=UNDEF
+   if (log_level >= 20) then
+      print*,' invalid crossing um > 0 or r0 = ii-1. um, r0, ii-1: ',um,r0,ii-1
+   end if
+   sn=UNDEF
 endif
 
 if(sn.le.0.d0) sn=UNDEF

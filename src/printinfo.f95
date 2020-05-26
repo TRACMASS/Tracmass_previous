@@ -206,6 +206,7 @@ CONTAINS
        call updateClock
     end if
     if (loneparticle>0) then
+       print*,'wallmin, wallsec',wallmin,wallsec
        print 798 ,ints-intstart ,trajectories(loneparticle)%x1 ,trajectories(loneparticle)%y1, &
             trajectories(loneparticle)%z1, trajectories(loneparticle)%active, wallmin, wallsec, loopYear, &
             loopMon, loopDay, loopHour, loopMin 
@@ -218,7 +219,7 @@ CONTAINS
                wallmin, wallsec, currYear, currMon, currDay, currHour, currMin
        end if
     end if
-798    format(i7, '|', F8.2,  '|', F8.2,  '|', F8.2,  '|', i10, ' | ',  &
+798    format(i7, '|', F8.2,  '|', F8.2,  '|', F8.2,  '|', L5, ' | ',  &
             i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
             i2.2, ':', i2.2)    
 799    format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &

@@ -221,7 +221,7 @@ MODULE mod_calendar
            IF (currHour < 0) THEN
               currHour = currHour + 24
               currDay  = currDay - 1
-              IF (currDay < 0) THEN
+              IF (currDay <= 0) THEN
                  currMon = currMon - 1
                  IF (currMon <= 0) THEN
                     currMon = currMon + 12

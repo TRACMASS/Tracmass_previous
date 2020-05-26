@@ -1,4 +1,4 @@
-&INIT_NAMELIST_VERSION
+1;95;0c&INIT_NAMELIST_VERSION
       gridvernum    =      6,                                ! grid version number, used to distinguish grids in setupgrid 
 /
 &INIT_GRID_DESCRIPTION 
@@ -8,54 +8,54 @@
      gridsource     = 'http://www.nemo-ocean.eu/',           ! website for grid
      griddesc       = 'Global 1 deg run',                    ! short description of grid
      ! Describe filenames
-     topoDataDir    = '/Users/jkjellsson/Downloads/ORCA1-N406/',  ! directory of grid data
-     RunID          = 'ORCA1-N406',                          ! name of GCM simulation
-     physDataDir    = '/Users/jkjellsson/Downloads/ORCA1-N406/',  ! directory of physical data (u,v,T,S,MLD,etc)
-     physPrefixForm = 'RUNID_YYYYGRIDX'                      ! format of filenames for physical data
+     topoDataDir    = '/gws/nopw/j04/nemo_vol1/ORCA0083-N006/domain/',  ! directory of grid data
+     RunID          = 'ORCA0083-N06',                          ! name of GCM simulation
+     physDataDir    = '/gws/nopw/j04/nemo_vol1/ORCA0083-N006/means/',  ! directory of physical data (u,v,T,S,MLD,etc)
+     physPrefixForm = 'YYYY/RUNID_YYYYMMDDGRIDX'                      ! format of filenames for physical data
      bioDataDir     = '',                                    ! directory of biogeochemistry data 
      bioPrefixForm  = '',                                    ! format of filenames for BGC data
-     tGridName      = 'T',                                   ! name of Tgrid, e.g. grid_T
-     uGridName      = 'U',                                   ! name of Ugrid
-     vGridName      = 'V',                                   ! name of Vgrid
-     fileSuffix     = '.nc4',                                ! suffix of files, e.g. ".nc"
+     tGridName      = 'd05T',                                   ! name of Tgrid, e.g. grid_T
+     uGridName      = 'd05U',                                   ! name of Ugrid
+     vGridName      = 'd05V',                                   ! name of Vgrid
+     fileSuffix     = '.nc',                                ! suffix of files, e.g. ".nc"
      ! Describe variable names
-     ssh_name       = 'sossheig',                            ! name of SSH
-     ueul_name      = 'vozocrtx',                            ! name of resolved zonal velocity
-     veul_name      = 'vomecrty',                            ! ---- " -------   meridional 
+     ssh_name       = 'ssh',                            ! name of SSH
+     ueul_name      = 'uo',                            ! name of resolved zonal velocity
+     veul_name      = 'vo',                            ! ---- " -------   meridional 
      usgs_name      = 'vozoeivu',                            ! name of sub-grid zonal velocity, e.g. GM for ORCA1
      vsgs_name      = 'vomeeivv',                            ! ---- " -------   meridional 
-     temp_name      = 'votemper',                            ! name of temperature
-     salt_name      = 'vosaline',                            ! name of salinity
+     temp_name      = 'potemp',                            ! name of temperature
+     salt_name      = 'salin',                            ! name of salinity
      ! Logicals to control what to read etc.
-     oneStepPerFile = .false.,                               ! only one time level per file?
+     oneStepPerFile = .true.,                               ! only one time level per file?
      readMean       = .false.,                               ! read stored time mean velocities
      readTS         = .true.,                                ! read temperature and salinity
      vvl            = .true.,                                ! variable volume layer?
      readBio        = .false.,                               ! read biogeochemistry fields
      readSSH        = .true.,                                ! read SSH (necessary for vvl)
-     sgsUV          = .true.,                                ! read sub-grid velocities, e.g GM. for ORCA1
+     sgsUV          = .false.,                                ! read sub-grid velocities, e.g GM. for ORCA1
      useTrmClock    = .false.,                               ! use sophisticated clock (otherwise simple clock)
 /
 &INIT_CASE_DESCRIPTION
-     casename       = 'ORCA1',                               ! short name of the TRACMASS run
+     casename       = 'ORCA12',                               ! short name of the TRACMASS run
      casedesc       = 'Test',                                ! short description of the TRACMASS run
 /
 &INIT_GRID_SIZE
      ! Size of global grid
-     imt            = 362,                                   ! number of global i points
-     jmt            = 292,                                   ! number of global j points
+     imt            = 4322,                                   ! number of global i points
+     jmt            = 3059,                                   ! number of global j points
      km             = 75,                                    ! number of global k points
      nst            = 2,                                     ! number of time levels to use (should be = 2)
      ! Only read subregion of the global data
-     subgrid        = 0,                                     ! only read part of the grid if > 0
-     subgridimin    = 3529,                                  ! i start point of region
-     subgridimax    = 3725,                                  ! i end point of region
-     subgridjmin    = 2279,                                  ! j start point of region
-     subgridjmax    = 2634,                                  ! j end point of region
+     subgrid        = 1,                                     ! only read part of the grid if > 0
+     subgridimin    = 3113,                                  ! i start point of region
+     subgridimax    = 3492,                                  ! i end point of region
+     subgridjmin    = 2361,                                  ! j start point of region
+     subgridjmax    = 2796,                                  ! j end point of region
      subgridfile    = 'templ.asc',                           ! or read region indices from file
      subgridid      = 0,                                     ! number for this region
      
-     nperio         = 4,                                     ! control periodic boundary conditions
+     nperio         = 0,                                     ! control periodic boundary conditions
                                                              ! > 0 periodic in x
                                                              ! = 4 North fold for ORCA2, 025, 0083
                                                              ! = 6 North fold for ORCA1
@@ -67,10 +67,10 @@
      dy_name        = 'e2t'                                  !         dy at T point
      dxv_name       = 'e1v'                                  !         dx at V point
      dyu_name       = 'e2u'                                  !         dy at U point
-     dz_1D_name     = 'e3t_0'                                ! name of 1D dz array at T point
-     dzt_3D_name    = 'e3t'                                  ! name of 3D dz at T point
-     dzu_3D_name    = 'e3u'                                  ! --- " ---  dz at U point
-     dzv_3D_name    = 'e3v'                                  ! --- " ---  dz at V point
+     dz_1D_name     = 'e3t_1d'                                ! name of 1D dz array at T point
+     dzt_3D_name    = 'e3t_0'                                  ! name of 3D dz at T point
+     dzu_3D_name    = 'e3u_0'                                  ! --- " ---  dz at U point
+     dzv_3D_name    = 'e3v_0'                                  ! --- " ---  dz at V point
      kBathy_name    = 'Bathy_level'                          ! name of bathymetry in model levels
      gridIsUpsideDown = .true.                               ! flip vertical grid?
      read3Ddz       = .true.                                 ! read 3D dz for T,U,V points?
@@ -85,10 +85,10 @@
      jdoffset       = 4,                                     ! trmClock offset in juliandays
 /
 &INIT_GRID_TIME
-     fieldsperfile  = 12,
-     ngcm_step      = 1,                                     ! time between two time levels
+     fieldsperfile  = 1,
+     ngcm_step      = 5,                                     ! time between two time levels
                                                              ! if ncgcm_unit = 5, then ngcm = 3 means 3 months
-     ngcm_unit      = 5,                                     ! units of ngcm 
+     ngcm_unit      = 4,                                     ! units of ngcm 
                                                              ! 1 = seconds
                                                              ! 2 = minutes
                     					     ! 3 = hours
@@ -96,7 +96,7 @@
 							     ! 5 = months
 							     ! 6 = years
      
-     iter           = 10,                                    ! number of time steps between two GCM time levels
+     iter           = 1,                                    ! number of time steps between two GCM time levels
      intmax         = 15330,                                 ! max iterations before trajectory is 
                                                              ! stopped with infiniteError
      minveljd       = 1,                                     !
@@ -106,22 +106,22 @@
      startsec       = 0,                                     ! start time
      startmin       = 0,
      starthour      = 0,
-     startday       = 1,                                     ! start date
+     startday       = 5,                                     ! start date
      startmon       = 1,
-     startyear      = 2000,
+     startyear      = 1992,
      noleap         = .true.,                                ! dont use leap years? 
      startjd        = -1,                                    ! first julianday for trmClock
      intmin         = 1,                                     !
 /
 &INIT_RUN_TIME
      ! Loop run 
-     loopYears      = .true.,				     ! make a time loop to run 
+     loopYears      = .false.,				     ! make a time loop to run 
      		      					     ! e.g. 1000 years using only 100 years of data
      loopStartYear  = 2000,				     ! year to start loop from
      loopEndYear    = 2001,				     ! last year of loop
      
-     intspin        = 12,                                    ! number of time steps for seeding
-     intrun         = 120,                                   ! number of time steps for run
+     intspin        = 73,                                    ! number of time steps for seeding
+     intrun         = 146,                                   ! number of time steps for run
      log_level      = 5,				     ! level of verbosity 
      		      					     ! = 0 minimal output to stdout
 							     ! = 1 low verbosity
@@ -139,19 +139,19 @@
   							     ! 4 = write only start and end positions
   							     ! 5 = write at chosen intervals
   							     ! 6 = write each spatial grid-crossing
-     outdatadir     = '/Users/jkjellsson/Downloads/',        ! directory for output
-     outdatafile    = 'orca1_bicay',			     ! fileprefix for output
+     outdatadir     = '/gws/nopw/j04/aopp/joakim/tracmass_out/',        ! directory for output
+     outdatafile    = 'orca12_overflow-backward',			     ! fileprefix for output
      intmininoutfile= 0,				     !
      intpsi         = 10, 									! frequency of writing the stream functions
 /
 &INIT_SEEDING
-     nff            = 1,                                     ! = 1 run forward trajectories
+     nff            = -1,                                     ! = 1 run forward trajectories
      		      					     ! = -1 run backwards
      isec           = 2,				     ! = 1 start on zonal cell wall 
      		      					     ! = 2 start on meridional cell wall
 							     ! = 3 start on vertical wall
 							     ! = 4 start in center of cell
-     idir           = 0,				     ! = 1 start only when flux > 0
+     idir           = 1,				     ! = 1 start only when flux > 0
      		      					     ! = -1      only when flux < 0 
 							     ! = 0 start at flux < 0 or > 0 but this option is not working
 	nqua           = 1,									! number of trajectories can be set by     
@@ -169,10 +169,10 @@
      		      					     ! = 2 seed using file with start positions
 							     
 							     ! when seedtype = 1
-     ist1           = 280,				     ! seed in box in range i = [ist1,ist2]
-     ist2           = 284,				     ! 	       	      	    j = [jst1,jst2]
-     jst1           = 213,				     ! 			    k = [kst1,kst2]
-     jst2           = 213,				     
+     ist1           = 226,				     ! seed in box in range i = [ist1,ist2]
+     ist2           = 268,				     ! 	       	      	    j = [jst1,jst2]
+     jst1           = 42,				     ! 			    k = [kst1,kst2]
+     jst2           = 42,				     
      kst1           = 1,
      kst2           = 75,
      tst1           = -1,				     ! seed only between tst1 and tst2
@@ -200,11 +200,11 @@
      ! the other i = [500,1000], j = [450,470]
 
      nend           = 5,                                     ! number of ways to kill a traj
-     ienw           =   -1, 2402,   -1,   -1,		     ! west indices of killzones
-     iene           =    2, 3000, 3000, 3000,		     ! east indices of killzones
-     jens           =    1,    1,    1, 1481,		     ! south indices of killzones
-     jenn           = 2000, 2000,    2, 2000,		     ! north indices of killzones
-     timax          = 3650000.0,     			     ! time limit for traj [days]
+     ienw           =   -1,  378,   -1,   -1,		     ! west indices of killzones
+     iene           =    2, 1000, 1000, 1000,		     ! east indices of killzones
+     jens           =    1,    1,    1,  434,		     ! south indices of killzones
+     jenn           =  400, 1000,    1, 1000,		     ! north indices of killzones
+     timax          = 3650.0,     			     ! time limit for traj [days]
 /
 &INIT_TEMP_SALT
      ! Start or end trajectories in tracer intervals
@@ -223,9 +223,9 @@
 /
 &INIT_TRACERS
      n2Dtracers           = 1                                ! number of 2D tracers to read
-     names2Dtracers(1)    = 'sossheig'                       ! names of 2D tracers
+     names2Dtracers(1)    = 'ssh'                       ! names of 2D tracers
      n3Dtracers           = 2                                ! number of 3D tracers to read
-     names3Dtracers(1:2)  = 'votemper','vosaline'            ! names of 3D tracers
+     names3Dtracers(1:2)  = 'potemp','salin'            ! names of 3D tracers
 /
 &INIT_DIFFUSION
      ! Add diffusion (random walk) to trajectories

@@ -5,6 +5,7 @@
 # Depends on:
 #   * numpy
 #   * matplotlib 
+#   * cython
 #
 # Author : Joakim Kjellsson, 2019 (at 35000 feet over the Indian Ocean)
 #
@@ -15,8 +16,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib as mpl
+import pyximport
+pyximport.install(setup_args={"include_dirs":np.get_include()},
+                  reload_support=True)
+import tracmass_functions
 
-def read_bin(filename,undef=-999.,mode='old'):   
+def read_bin(filename,undef=-999.,mode='old',cython=True):   
    if mode == 'new':
       dtype = np.dtype([('ntrac','i4'), ('ints','f8'), 
                         ('x','f4'), ('y','f4'), ('z','f4'),
@@ -27,25 +32,48 @@ def read_bin(filename,undef=-999.,mode='old'):
    data = np.fromfile(open(filename), dtype)
    
    ntracmax = data['ntrac'].max() + 1    
-   nsteps = 0
-   for ntrac in range(1,ntracmax+1):
-      steps = np.where( data['ntrac'] == ntrac )[0]
-      nsteps = max(nsteps,steps.shape[0])
    
-   # array to store trajectories in
-   traj = np.ma.ones((ntracmax,nsteps,10)) * undef
+   if not cython:
+      nsteps = 0
+      for ntrac in xrange(1,ntracmax+1):
+         steps = np.where( data['ntrac'] == ntrac )[0]
+         nsteps = max(nsteps,steps.shape[0])
+      
+      # array to store trajectories in
+      traj = np.ma.ones((ntracmax,nsteps,10)) * undef
+      
+      for ntrac in xrange(1,ntracmax+1):
+         steps = np.where( data['ntrac'] == ntrac )[0]
+         steps = steps[:]
+         traj[ntrac-1,0:steps.shape[0],0] = data['x'][steps]
+         traj[ntrac-1,0:steps.shape[0],1] = data['y'][steps]
+         traj[ntrac-1,0:steps.shape[0],2] = data['z'][steps]
+         traj[ntrac-1,0:steps.shape[0],3] = np.arange(0,steps.shape[0])
+         if np.mod(ntrac,100) == 0: 
+            print('Processing : ',ntrac)
+         if mode == 'new':
+            traj[ntrac-1,0:steps.shape[0],4] = data['tem'][steps]
+            traj[ntrac-1,0:steps.shape[0],5] = data['sal'][steps]
    
-   for ntrac in range(1,ntracmax+1):
-      steps = np.where( data['ntrac'] == ntrac )[0]
-      steps = steps[:]
-      traj[ntrac-1,0:steps.shape[0],0] = data['x'][steps]
-      traj[ntrac-1,0:steps.shape[0],1] = data['y'][steps]
-      traj[ntrac-1,0:steps.shape[0],2] = data['z'][steps]
-      traj[ntrac-1,0:steps.shape[0],3] = np.arange(0,steps.shape[0])
+   elif cython:
+      rawdata = np.ones((data['ntrac'].shape[0],7)) * undef
+      rawdata[:,0] = data['ntrac'][:]
+      print('x min max ',data['x'][:].min(),data['x'][:].max())
+      rawdata[:,1] = data['ints'][:]
+      rawdata[:,2] = data['x'][:]
+      rawdata[:,3] = data['y'][:]
+      rawdata[:,4] = data['z'][:]
       if mode == 'new':
-         traj[ntrac-1,0:steps.shape[0],4] = data['tem'][steps]
-         traj[ntrac-1,0:steps.shape[0],5] = data['sal'][steps]
-
+         rawdata[:,5] = data['tem'][:]
+         rawdata[:,6] = data['sal'][:]
+         print(rawdata[:,5].min(),rawdata[:,5].max())
+      
+      rawdata = np.array(rawdata,dtype='float32')      
+      nsteps = tracmass_functions.find_numsteps(rawdata,ntracmax=ntracmax)
+      print(nsteps)
+      nstepsmax = nsteps.max()
+      traj   = tracmass_functions.sort_particles(rawdata,ntracmax=ntracmax,nsteps=nstepsmax)
+   
    # mask all invalid data points
    traj = np.ma.masked_where(traj == -999.,traj)
    
@@ -57,7 +85,7 @@ def read_lagrpsi(filename,mode='stxy'):
    
    data = np.fromfile(open(filename), dtype)
    
-   print data.shape
+   print(data.shape)
    stxyy = data[:,:,:]
    #stxyx = data[5:10,:,:]
    return stxyy#,stxyx
@@ -66,8 +94,8 @@ def read_lagrpsi(filename,mode='stxy'):
 # Directories etc.
 #
 
-tracmass_dir = '/Users/jkjellsson/Downloads/nemo/20000101-0000/'
-trm_run      = 'orca1_test'
+tracmass_dir = '/gws/nopw/j04/aopp/joakim/tracmass_out/nemo/19920105-0000/' #'/Users/jkjellsson/Downloads/nemo/20000101-0000/'
+trm_run      = 'orca12_overflow-backward'
 
 runfile = '%s/%s_run.bin' % (tracmass_dir,trm_run) 
 infile  = '%s/%s_in.bin'  % (tracmass_dir,trm_run) 
@@ -110,6 +138,7 @@ if 1:
          z1 = traj[ntrac,:,3].compressed()
          z2 = np.array(z,dtype='float32')         
          if x.shape[0]>0:
+            print('Plot ntrac ',ntrac)
             points = np.array([x, y]).T.reshape(-1, 1, 2)
             segments = np.concatenate([points[:-1], points[1:]], axis=1)
             lc = LineCollection(segments, cmap=cmap2,norm=plt.Normalize(vmin2, vmax2),linewidth=0.2)

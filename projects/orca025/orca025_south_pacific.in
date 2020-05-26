@@ -1,0 +1,126 @@
+&INIT_NAMELIST_VERSION
+      gridvernum =      6,
+/
+&INIT_GRID_DESCRIPTION
+         gcmname = 'NEMO',
+       gcmsource = 'http://www.locean-ipsl.upmc.fr/opa/',
+        gridname = 'ORCA025',
+      gridsource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
+        griddesc = '1/4 deg run for the global Ocean.',
+       indatadir = '/group_workspaces/jasmin2/nemo/vol1/ORCA025-N401/',
+/
+&INIT_CASE_DESCRIPTION
+        casename = 'ORCA025-N401',
+        casedesc = 'Global Ocean trajectories',
+/
+&INIT_GRID_SIZE
+             imt =   1440,
+             jmt =   1021,
+              km =     75,
+             nst =      2,
+         subgrid =      1,
+     subgridimin =    821,
+     subgridimax =   1150,
+     subgridjmin =    612,
+     subgridjmax =    770,
+     subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
+       subgridid =      1,
+/
+&INIT_BASE_TIME
+         basesec =      0,
+         basemin =      0,
+        basehour =      0,
+         baseday =      1,
+         basemon =      1,
+        baseyear =      1,
+        jdoffset =      4,
+/
+&INIT_GRID_TIME
+   fieldsperfile =      1,
+            ngcm =    120,
+            iter =    1,
+          intmax = 250000000,
+        minveljd =     -1,
+        maxveljd =     -1,
+/
+&INIT_START_DATE
+        startsec =      0,
+        startmin =      0,
+       starthour =     12,
+        startday =      5,
+        startmon =      1,
+       startyear =   1980,
+        !jdoffset =      3,
+          noleap =  .true.,
+         startjd =      -1,
+          intmin =      1,
+/
+&INIT_RUN_TIME
+         intspin =      1,
+          intrun =   1460,
+/
+&INIT_WRITE_TRAJS
+      twritetype =     11,
+           kriva =      1,
+      outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/',
+     outdatafile = 'orca025_into_subpolar',
+/
+&INIT_SEEDING
+             nff =      1,
+            isec =      2,
+            idir =      1,
+            nqua =      1,
+       partquant =      1,
+        ntracmax = 400000,
+    loneparticle =     -1,
+        seedtype =      1, !2, !! seedType=1 use ist,jst. seedType=2 use seedfile
+            ist1 =      2, !subgridimin=821
+            ist2 =    283, 
+            jst1 =      2, !subgridjmin=612
+            jst2 =      2,
+            kst1 =      1,
+            kst2 =     75,
+            tst1 =     -1,
+            tst2 =     -1,
+         seeddir =    '/group_workspaces/jasmin2/aopp/joakim/tracmass_in/',
+        seedfile =    'start_south_pacific_2_lev64_orca025_close.txt',
+     varseedfile =      0,
+        seedtime =      0,
+         seedall =      0,
+         seedpos =      1,
+       seedparts =      0,
+     seedpart_id =      0,
+/
+&INIT_KILLZONES
+            nend =      4,
+            ienw =      1,   283,    1,    1,
+            iene =      2,  1440, 1440, 1400,
+            jens =      1,     1,  156,    1,
+            jenn =   1000,  1500, 1200,    2,
+            timax = 365000.0, ! days
+/
+&INIT_TEMP_SALT
+           tmin0 = -500.0,
+           tmax0 =  500.0,
+           smin0 = -500.0,
+           smax0 =  500.0,
+           rmin0 = -500.0,
+           rmax0 =  500.0,
+           tmine = -500.0,
+           tmaxe =  500.0,
+           smine = -500.0,
+           smaxe =  500.0,
+           rmine = -500.0,
+           rmaxe =  500.0,
+/
+&INIT_DIFFUSION
+              ah =    0.0,
+              av =    0.0,
+/
+&INIT_SEDIMENT
+        partdiam =  0.001,
+            rhos = 2620.0,
+           cwamp =   20.0,
+           twave =    8.0,
+         critvel =    0.1,
+/

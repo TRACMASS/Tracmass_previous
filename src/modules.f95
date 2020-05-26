@@ -1,9 +1,10 @@
 
 
-MODULE mod_precdef		! Precision definitions
+MODULE mod_precdef ! Precision definitions
    integer, parameter                       :: PP = selected_real_kind(6 ,  37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
-   integer, parameter                       :: QP = selected_real_kind(33, 4931)
+   !integer, parameter                       :: QP = selected_real_kind(33, 4931)
+integer, parameter :: QP = selected_real_kind(15,307)
 ENDMODULE mod_precdef
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

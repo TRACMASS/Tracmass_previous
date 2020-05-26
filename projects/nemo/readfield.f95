@@ -320,7 +320,7 @@ SUBROUTINE readfields
       end if
       itime = 1
       fieldStep = 1
-      
+      ncTpos = 1
       timestamp = ''
       
    else if (RunID == '2_INALT60.L120-KRS0020_4h') then

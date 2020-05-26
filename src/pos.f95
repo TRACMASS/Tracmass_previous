@@ -25,6 +25,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
   USE mod_active_particles, only: upr
   USE mod_time, only: intrpr, intrpg
   USE mod_traj, only: ntrac !!joakim edit
+  USE mod_log, only: log_level 
   IMPLICIT none
 
   real(DP)                                   :: r0, r1, ds, uu, um, vv, vm, en
@@ -70,13 +71,13 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
-
+     
   elseif(ijk.eq.2) then
      ii=ja
      uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
      um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
      !frac1 = min( abs(upr(3,1)), abs(0.99*uu/upr(3,1)) )
-     !frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )
+     !frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )     
 #ifdef turb    
      !print*,'merid fracs',(uu+upr(3,1))/uu,(um+upr(4,1))/um
      if(r0.ne.dble(ja  )) then
@@ -100,6 +101,7 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
         ! add u' from previous iterative time step if on box wall
      endif
 #endif
+   
   elseif(ijk.eq.3) then
      ii = ka
 #if defined explicit_w || full_wflux
@@ -121,14 +123,22 @@ subroutine pos_orgn(ijk,ia,ja,ka,r0,r1,ds)
      else
         uu=uu+upr(6,1)  
         ! add u' from previous iterative time step if on box wall
-     endif
+     endif    
 #endif
+     
   endif
+
+if (log_level >= 10) then
+   print*,'pos: ijk, uu, um: ',ijk,uu,um
+end if
 
   !
   ! note: consider in future to improve the code below for accuracy 
   ! in case of um-uu = small; also see subroutine cross
   if(um.ne.uu) then
+     if (log_level >= 15) then
+        print*,'pos: ',ijk,r0,(-dble(ii-1) + um/(uu-um)),uu-um,ds,dexp( (uu-um)*ds )
+     end if
      r1= (r0+(-dble(ii-1) + um/(uu-um))) * & 
           dexp( (uu-um)*ds ) + dble(ii-1) - um/(uu-um)
   else

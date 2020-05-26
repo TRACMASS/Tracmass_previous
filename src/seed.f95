@@ -27,7 +27,7 @@ MODULE mod_seed
    
    IMPLICIT NONE
   
-   INTEGER                                    :: isec,  idir
+   INTEGER                                    :: isec,  idir, startdir
    INTEGER                                    :: nqua, num, nsdMax
    INTEGER                                    :: nsdTim
    INTEGER                                    :: seedtstep=1   
@@ -104,6 +104,28 @@ CONTAINS
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
+         
+         ! Seeding direction
+         if (idir == 1 .and. nff == 1) then
+            ! start east/north/up, forward in time
+            startdir = 1
+         else if (idir == -1 .and. nff == 1) then 
+            ! start west/south/down, forward in time
+            startdir = -1 
+         else if (idir == 1 .and. nff == -1) then
+            ! start east/north/up, backward in time
+            startdir = 1
+         else if (idir == -1 .and. nff == -1) then
+            ! start west/south/down, backward in time
+            startdir = -1
+         else if (idir == 0) then
+            ! start in any direction
+            startdir = 0
+         else
+            print*,' unrecognised values of idir, nff ',idir,nff
+            print*,' idir and nff must be -1 or 1 '
+            stop 
+         end if
          
 #if defined baltix || defined rco
          ! -------------------------------------------------
@@ -231,31 +253,45 @@ CONTAINS
                      x1 = DBLE (ib) 
                      y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
-                     IF (idir*nff == 1) THEN
+                     !IF (idir*nff == 1) THEN
+                     !if (startdir == 1) then
+                     if (idir == 1) then                    
                         ib = iist+1
-                     ELSE IF (idir == -1) THEN
-                        ib=iist 
-                     END IF
+                     end if
+                     !ELSE IF (idir == -1) THEN
+                     !   ib=iist 
+                     !END IF
 
                   CASE (2)   ! Zonal-vertical section
                      x1 = DBLE (ib-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb)
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
-                     IF (idir*nff == 1) THEN
-                        jb = ijst+1
-                     ELSE IF (idir == -1) THEN
-                        jb = ijst
-                     END IF
+                     !IF (idir*nff == 1) THEN
+                     !   jb = ijst+1
+                     !ELSE IF (idir == -1) THEN
+                     !   jb = ijst
+                     !END IF
+                     !if (startdir == 1) then
+                     if (idir == 1) then
+                         jb = ijst+1
+                     end if
+                     !IF (ib == 237 .and. jb == 42 .and. kb == 30) THEN
+                     !   PRINT*,'seed (237,42,30): ',x1,y1,z1,idir,nff
+                     !ENDIF
 
                   CASE (3)   ! Horizontal section                  
                      x1 = DBLE (ib-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
                      z1 = DBLE (kb)
-                     IF (idir*nff == 1) THEN
+                     !IF (idir*nff == 1) THEN
+                     !   kb = ikst+1
+                     !ELSE IF (idir == -1) THEN
+                     !   kb = ikst
+                     !END IF
+                     !if (startdir == 1) then
+                     if (idir == 1) then
                         kb = ikst+1
-                     ELSE IF (idir == -1) THEN
-                        kb = ikst
-                     END IF
+                     end if
 
                   CASE (4)   ! Spread evenly inside box                  
 !                     x1 = DBLE (ib-1) + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
@@ -305,7 +341,7 @@ CONTAINS
                   ! Update trajectory numbers
                   ntractot = ntractot+1
                   ntrac = ntractot
-
+                  
                   ! Only one particle for diagnistics purposes
                   if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
                      trajectories(ntrac)%active = .false.
@@ -342,7 +378,7 @@ CONTAINS
                   trajectories(ntrac)%lapv2 = lapv(ib,jb,kb,2)
 
                   !Save initial particle position                  
-                  if(log_level >= 3) THEN
+                  if(log_level >= 10) THEN
                      print*,' write initial trajectory position '
                   end if
                   call writedata(10) !ini
