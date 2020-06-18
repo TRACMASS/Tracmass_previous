@@ -44,14 +44,14 @@ SUBROUTINE setupgrid
   integer, dimension(2) :: dim2d
   integer, dimension(3) :: dim3d
   real, allocatable, dimension(:,:) :: lon, lat
-  real, allocatable, dimension(:) :: depth
+  real, allocatable, dimension(:) :: depth_1d
   logical :: lwrite_nc, lread_nc
 
 lwrite_nc = .true.
 lread_nc  = .true.
 
 allocate( lon(imt,jmt), lat(imt,jmt) )
-allocate( depth(km) )
+allocate( depth_1d(km) )
 
 kmt=KM ! flat bottom
 
@@ -74,9 +74,9 @@ do j = 1, jmt
    end do 
 end do
 
-depth(1) = dz(1)/2.
+depth_1d(1) = dz(1)/2.
 do k = 2, km
-   depth(k) = SUM(dz(1:k-1)) + dz(k)/2.
+   depth_1d(k) = SUM(dz(1:k-1)) + dz(k)/2.
 end do
 
 if (lwrite_nc) then 
@@ -98,7 +98,7 @@ if (lwrite_nc) then
    
    call check( nf90_put_var(ncid, idlon, lon) )
    call check( nf90_put_var(ncid, idlat, lat) )
-   call check( nf90_put_var(ncid, iddep, depth) )
+   call check( nf90_put_var(ncid, iddep, depth_1d) )
    call check( nf90_put_var(ncid, iddx, dxv(1:jmt,1:imt)) )
    call check( nf90_put_var(ncid, iddy, dyu(1:jmt,1:imt)) )
    call check( nf90_put_var(ncid, iddz, dzt(1:imt,1:jmt,1:km,2)) )
@@ -112,12 +112,15 @@ if (lread_nc) then
    map3d = [2, 3, 4, 1]
    lon = get2DfieldNC('mesh.nc', 'lon')
    lat = get2DfieldNC('mesh.nc', 'lat')
-   depth = get1DfieldNC('mesh.nc', 'depth')
+   depth_1d = get1DfieldNC('mesh.nc', 'depth')
    dxv(1:imt,1:jmt) = get2DfieldNC('mesh.nc', 'dx')
    dyu(1:imt,1:jmt) = get2DfieldNC('mesh.nc', 'dy')
    dzt(1:imt,1:jmt,1:km,2) = get3DfieldNC('mesh.nc', 'dz')
    dzt(:,:,:,1) = dzt(:,:,:,2)
 end if
+
+depth(:,:) = depth_1d(km)
+
 
 
 ! ===

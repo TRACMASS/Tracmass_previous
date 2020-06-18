@@ -6,7 +6,8 @@ subroutine readfields
   USE mod_grid
   USE mod_name
   USE mod_vel
-  !  USE mod_dens
+  USE mod_dens
+  USE mod_tempsalt
   USE mod_stat
   
   IMPLICIT none
@@ -47,11 +48,9 @@ do k=1,KM
       do i=1,IMT
          im=i-1
          if(im.eq.0) im=IMT
-#ifdef tempsalt 
          tem  (i,j,k,2)=20.*float(k)/float(km)
          sal  (i,j,k,2)=30.
          rho  (i,j,k,2)=(28.-20.)*float(km-k)/float(km) +20.
-#endif
 
 ! time evolving oscilating field
 ! ------------------------------

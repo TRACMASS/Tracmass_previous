@@ -39,8 +39,6 @@ if(ijk.eq.1) then
  if(im.eq.0) im=IMT
  uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))!*ff
  um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))!*ff
- frac1 = min( abs(upr(1,1)), abs(0.99*uu/upr(1,1)) )
- frac2 = min( abs(upr(2,1)), abs(0.99*um/upr(2,1)) )
  !print*,'cross x',uu,um,upr(1,1),upr(2,1)
 #ifdef turb   
  if(r0.ne.dble(ii)) then
@@ -66,8 +64,6 @@ elseif(ijk.eq.2) then
  ii=ja
  uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))!*ff
  um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))!*ff
- frac1 = min( abs(upr(3,1)), abs(0.99*uu/upr(3,1)) )
- frac2 = min( abs(upr(4,1)), abs(0.99*um/upr(4,1)) )
  !print*,'cross y',uu,um,upr(3,1),upr(4,1)
 #ifdef turb    
  if(r0.ne.dble(ja  )) then

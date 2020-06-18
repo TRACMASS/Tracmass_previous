@@ -2,17 +2,23 @@ PROJECT	          = theoretical
 CASE              = theoretical
 RUNFILE 	  = runtracmass
 
-#F95COMPILER        = "g95"
-F95COMPILER        = "gfortran"
-#F95COMPILER        = "ifort"
-#FF                 = "/sw/bin/gfortran-fsf-4.9" #Alt. compiler location
+# Possible architectures: 
+# tetralith (Swedish HPC with intel)
+# macports (MacPorts for Mac OS)
+# generic (copy this to make your own arch)
+ARCH = "macports"
+#FF = "/sw/bin/gfortran-fsf-4.9" #Alt. compiler location
 
-NETCDFLIBS	   = "none"
-#NETCDFLIBS        = "automatic"  # set using nc-config
-#NETCDFLIBS        = "automatic-44"  # set using nf-config
-#NETCDFLIBS        = "macports"
-#NETCDFLIBS        = "fink"
-#NETCDFLIBS        = "source"
+# Possible netCDF settings
+# automatic (set by nc-config)
+# automatic-44 (set by nf-config, for netCDF version >4.4)
+# generic (set by yourself in Makefile.global)
+# none (no netCDF)
+NETCDFLIBS = "automatic-44"
+
+# Opt = optimise, i.e. dont use so many error checks
+# Else TRACMASS will compile with lots of error check which might slowdown the code
+OPT = "opt"
 
 #================================================================
 
